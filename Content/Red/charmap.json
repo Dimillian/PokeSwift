@@ -1,0 +1,1670 @@
+{
+  "entries" : [
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<NULL>",
+      "value" : 0
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PAGE>",
+      "value" : 73
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PKMN>",
+      "value" : 74
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<_CONT>",
+      "value" : 75
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<SCROLL>",
+      "value" : 76
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<NEXT>",
+      "value" : 78
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<LINE>",
+      "value" : 79
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "@",
+      "value" : 80
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PARA>",
+      "value" : 81
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PLAYER>",
+      "value" : 82
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<RIVAL>",
+      "value" : 83
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "#",
+      "value" : 84
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<CONT>",
+      "value" : 85
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<……>",
+      "value" : 86
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<DONE>",
+      "value" : 87
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PROMPT>",
+      "value" : 88
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<TARGET>",
+      "value" : 89
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<USER>",
+      "value" : 90
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<PC>",
+      "value" : 91
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<TM>",
+      "value" : 92
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<TRAINER>",
+      "value" : 93
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<ROCKET>",
+      "value" : 94
+    },
+    {
+      "sourceSection" : "; Control characters (see home/text.asm)",
+      "token" : "<DEXEND>",
+      "value" : 95
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_A>",
+      "value" : 96
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_B>",
+      "value" : 97
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_C>",
+      "value" : 98
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_D>",
+      "value" : 99
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_E>",
+      "value" : 100
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_F>",
+      "value" : 101
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_G>",
+      "value" : 102
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_H>",
+      "value" : 103
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_I>",
+      "value" : 104
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_V>",
+      "value" : 105
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_S>",
+      "value" : 106
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_L>",
+      "value" : 107
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<BOLD_M>",
+      "value" : 108
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "<COLON>",
+      "value" : 109
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "ぃ",
+      "value" : 110
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "ぅ",
+      "value" : 111
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "‘",
+      "value" : 112
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "’",
+      "value" : 113
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "“",
+      "value" : 114
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "”",
+      "value" : 115
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "·",
+      "value" : 116
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "…",
+      "value" : 117
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "ぁ",
+      "value" : 118
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "ぇ",
+      "value" : 119
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "ぉ",
+      "value" : 120
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "┌",
+      "value" : 121
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "─",
+      "value" : 122
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "┐",
+      "value" : 123
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "│",
+      "value" : 124
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "└",
+      "value" : 125
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : "┘",
+      "value" : 126
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_extra.png)",
+      "token" : " ",
+      "value" : 127
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_battle_extra.png)",
+      "token" : "<LV>",
+      "value" : 110
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_battle_extra.png)",
+      "token" : "<to>",
+      "value" : 112
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_battle_extra.png)",
+      "token" : "『",
+      "value" : 114
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_battle_extra.png)",
+      "token" : "<ID>",
+      "value" : 115
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font_battle_extra.png)",
+      "token" : "№",
+      "value" : 116
+    },
+    {
+      "sourceSection" : "; needed for ShowPokedexDataInternal (see engine/menus/pokedex.asm)",
+      "token" : "′",
+      "value" : 96
+    },
+    {
+      "sourceSection" : "; needed for ShowPokedexDataInternal (see engine/menus/pokedex.asm)",
+      "token" : "″",
+      "value" : 97
+    },
+    {
+      "sourceSection" : "; needed for StatusScreen (see engine/pokemon/status_screen.asm)",
+      "token" : "<BOLD_P>",
+      "value" : 114
+    },
+    {
+      "sourceSection" : "; needed for LoadTownMap_Fly (see engine/items/town_map.asm)",
+      "token" : "▲",
+      "value" : 237
+    },
+    {
+      "sourceSection" : "; needed for PrintAlphabet (see engine/menus/naming_screen.asm)",
+      "token" : "<ED>",
+      "value" : 240
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "A",
+      "value" : 128
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "B",
+      "value" : 129
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "C",
+      "value" : 130
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "D",
+      "value" : 131
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "E",
+      "value" : 132
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "F",
+      "value" : 133
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "G",
+      "value" : 134
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "H",
+      "value" : 135
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "I",
+      "value" : 136
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "J",
+      "value" : 137
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "K",
+      "value" : 138
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "L",
+      "value" : 139
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "M",
+      "value" : 140
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "N",
+      "value" : 141
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "O",
+      "value" : 142
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "P",
+      "value" : 143
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "Q",
+      "value" : 144
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "R",
+      "value" : 145
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "S",
+      "value" : 146
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "T",
+      "value" : 147
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "U",
+      "value" : 148
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "V",
+      "value" : 149
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "W",
+      "value" : 150
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "X",
+      "value" : 151
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "Y",
+      "value" : 152
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "Z",
+      "value" : 153
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "(",
+      "value" : 154
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : ")",
+      "value" : 155
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : ":",
+      "value" : 156
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : ";",
+      "value" : 157
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "[",
+      "value" : 158
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "]",
+      "value" : 159
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "a",
+      "value" : 160
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "b",
+      "value" : 161
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "c",
+      "value" : 162
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "d",
+      "value" : 163
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "e",
+      "value" : 164
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "f",
+      "value" : 165
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "g",
+      "value" : 166
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "h",
+      "value" : 167
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "i",
+      "value" : 168
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "j",
+      "value" : 169
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "k",
+      "value" : 170
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "l",
+      "value" : 171
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "m",
+      "value" : 172
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "n",
+      "value" : 173
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "o",
+      "value" : 174
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "p",
+      "value" : 175
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "q",
+      "value" : 176
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "r",
+      "value" : 177
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "s",
+      "value" : 178
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "t",
+      "value" : 179
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "u",
+      "value" : 180
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "v",
+      "value" : 181
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "w",
+      "value" : 182
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "x",
+      "value" : 183
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "y",
+      "value" : 184
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "z",
+      "value" : 185
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "é",
+      "value" : 186
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'d",
+      "value" : 187
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'l",
+      "value" : 188
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'s",
+      "value" : 189
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'t",
+      "value" : 190
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'v",
+      "value" : 191
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'",
+      "value" : 224
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "<PK>",
+      "value" : 225
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "<MN>",
+      "value" : 226
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "-",
+      "value" : 227
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'r",
+      "value" : 228
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "'m",
+      "value" : 229
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "?",
+      "value" : 230
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "!",
+      "value" : 231
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : ".",
+      "value" : 232
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "ァ",
+      "value" : 233
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "ゥ",
+      "value" : 234
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "ェ",
+      "value" : 235
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "▷",
+      "value" : 236
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "▶",
+      "value" : 237
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "▼",
+      "value" : 238
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "♂",
+      "value" : 239
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "¥",
+      "value" : 240
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "×",
+      "value" : 241
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "<DOT>",
+      "value" : 242
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "/",
+      "value" : 243
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : ",",
+      "value" : 244
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "♀",
+      "value" : 245
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "0",
+      "value" : 246
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "1",
+      "value" : 247
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "2",
+      "value" : 248
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "3",
+      "value" : 249
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "4",
+      "value" : 250
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "5",
+      "value" : 251
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "6",
+      "value" : 252
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "7",
+      "value" : 253
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "8",
+      "value" : 254
+    },
+    {
+      "sourceSection" : "; Actual characters (from gfx/font/font.png)",
+      "token" : "9",
+      "value" : 255
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ガ",
+      "value" : 5
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ギ",
+      "value" : 6
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "グ",
+      "value" : 7
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゲ",
+      "value" : 8
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゴ",
+      "value" : 9
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ザ",
+      "value" : 10
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ジ",
+      "value" : 11
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ズ",
+      "value" : 12
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゼ",
+      "value" : 13
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゾ",
+      "value" : 14
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ダ",
+      "value" : 15
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヂ",
+      "value" : 16
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヅ",
+      "value" : 17
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "デ",
+      "value" : 18
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ド",
+      "value" : 19
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "バ",
+      "value" : 25
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ビ",
+      "value" : 26
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ブ",
+      "value" : 27
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ボ",
+      "value" : 28
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "が",
+      "value" : 38
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぎ",
+      "value" : 39
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぐ",
+      "value" : 40
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "げ",
+      "value" : 41
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ご",
+      "value" : 42
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ざ",
+      "value" : 43
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "じ",
+      "value" : 44
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ず",
+      "value" : 45
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぜ",
+      "value" : 46
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぞ",
+      "value" : 47
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "だ",
+      "value" : 48
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぢ",
+      "value" : 49
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "づ",
+      "value" : 50
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "で",
+      "value" : 51
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ど",
+      "value" : 52
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ば",
+      "value" : 58
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "び",
+      "value" : 59
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぶ",
+      "value" : 60
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "べ",
+      "value" : 61
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぼ",
+      "value" : 62
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "パ",
+      "value" : 64
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ピ",
+      "value" : 65
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "プ",
+      "value" : 66
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ポ",
+      "value" : 67
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぱ",
+      "value" : 68
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぴ",
+      "value" : 69
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぷ",
+      "value" : 70
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぺ",
+      "value" : 71
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぽ",
+      "value" : 72
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "「",
+      "value" : 112
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "」",
+      "value" : 113
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "』",
+      "value" : 115
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "⋯",
+      "value" : 117
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "　",
+      "value" : 127
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ア",
+      "value" : 128
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "イ",
+      "value" : 129
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ウ",
+      "value" : 130
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "エ",
+      "value" : 131
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "オ",
+      "value" : 132
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "カ",
+      "value" : 133
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "キ",
+      "value" : 134
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ク",
+      "value" : 135
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ケ",
+      "value" : 136
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "コ",
+      "value" : 137
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "サ",
+      "value" : 138
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "シ",
+      "value" : 139
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ス",
+      "value" : 140
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "セ",
+      "value" : 141
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ソ",
+      "value" : 142
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "タ",
+      "value" : 143
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "チ",
+      "value" : 144
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ツ",
+      "value" : 145
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "テ",
+      "value" : 146
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ト",
+      "value" : 147
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ナ",
+      "value" : 148
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ニ",
+      "value" : 149
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヌ",
+      "value" : 150
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ネ",
+      "value" : 151
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ノ",
+      "value" : 152
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ハ",
+      "value" : 153
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヒ",
+      "value" : 154
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "フ",
+      "value" : 155
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ホ",
+      "value" : 156
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "マ",
+      "value" : 157
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ミ",
+      "value" : 158
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ム",
+      "value" : 159
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "メ",
+      "value" : 160
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "モ",
+      "value" : 161
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヤ",
+      "value" : 162
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ユ",
+      "value" : 163
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヨ",
+      "value" : 164
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ラ",
+      "value" : 165
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ル",
+      "value" : 166
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "レ",
+      "value" : 167
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ロ",
+      "value" : 168
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ワ",
+      "value" : 169
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ヲ",
+      "value" : 170
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ン",
+      "value" : 171
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ッ",
+      "value" : 172
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ャ",
+      "value" : 173
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ュ",
+      "value" : 174
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ョ",
+      "value" : 175
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ィ",
+      "value" : 176
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "あ",
+      "value" : 177
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "い",
+      "value" : 178
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "う",
+      "value" : 179
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "え",
+      "value" : 180
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "お",
+      "value" : 181
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "か",
+      "value" : 182
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "き",
+      "value" : 183
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "く",
+      "value" : 184
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "け",
+      "value" : 185
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "こ",
+      "value" : 186
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "さ",
+      "value" : 187
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "し",
+      "value" : 188
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "す",
+      "value" : 189
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "せ",
+      "value" : 190
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "そ",
+      "value" : 191
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "た",
+      "value" : 192
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ち",
+      "value" : 193
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "つ",
+      "value" : 194
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "て",
+      "value" : 195
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "と",
+      "value" : 196
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "な",
+      "value" : 197
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "に",
+      "value" : 198
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ぬ",
+      "value" : 199
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ね",
+      "value" : 200
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "の",
+      "value" : 201
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "は",
+      "value" : 202
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ひ",
+      "value" : 203
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ふ",
+      "value" : 204
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "へ",
+      "value" : 205
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ほ",
+      "value" : 206
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ま",
+      "value" : 207
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "み",
+      "value" : 208
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "む",
+      "value" : 209
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "め",
+      "value" : 210
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "も",
+      "value" : 211
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "や",
+      "value" : 212
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゆ",
+      "value" : 213
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "よ",
+      "value" : 214
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ら",
+      "value" : 215
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "り",
+      "value" : 216
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "る",
+      "value" : 217
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "れ",
+      "value" : 218
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ろ",
+      "value" : 219
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "わ",
+      "value" : 220
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "を",
+      "value" : 221
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ん",
+      "value" : 222
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "っ",
+      "value" : 223
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゃ",
+      "value" : 224
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ゅ",
+      "value" : 225
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ょ",
+      "value" : 226
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ー",
+      "value" : 227
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ﾟ",
+      "value" : 228
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ﾞ",
+      "value" : 229
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "？",
+      "value" : 230
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "！",
+      "value" : 231
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "。",
+      "value" : 232
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "円",
+      "value" : 240
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "．",
+      "value" : 242
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "／",
+      "value" : 243
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "ォ",
+      "value" : 244
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "０",
+      "value" : 246
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "１",
+      "value" : 247
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "２",
+      "value" : 248
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "３",
+      "value" : 249
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "４",
+      "value" : 250
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "５",
+      "value" : 251
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "６",
+      "value" : 252
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "７",
+      "value" : 253
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "８",
+      "value" : 254
+    },
+    {
+      "sourceSection" : "; Japanese kana, for those bits of text that were not translated to English",
+      "token" : "９",
+      "value" : 255
+    }
+  ],
+  "variant" : "red"
+}

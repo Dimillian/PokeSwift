@@ -1,0 +1,20 @@
+{
+  "musicTrack" : "MUSIC_TITLE_SCREEN",
+  "sourceFiles" : [
+    {
+      "path" : "engine/movie/title.asm",
+      "purpose" : "title music and title-mon selection"
+    },
+    {
+      "path" : "engine/menus/main_menu.asm",
+      "purpose" : "menu key handling"
+    }
+  ],
+  "titleMonSelectionConstant" : "STARTER1",
+  "variant" : "red",
+  "watchedKeys" : [
+    "PAD_A",
+    "PAD_B",
+    "PAD_START"
+  ]
+}

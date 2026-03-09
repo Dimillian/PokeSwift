@@ -29,3 +29,14 @@
 *.sn*
 *.sa*
 *.sg1
+
+# swift / tuist
+.build/
+Derived/
+DerivedData/
+.codex/
+PokeSwift.xcodeproj/
+PokeSwift.xcworkspace/
+
+# runtime traces
+.runtime-traces/

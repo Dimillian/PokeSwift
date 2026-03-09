@@ -1,0 +1,40 @@
+{
+  "contentVersion" : "m1-m2-red-title-v1",
+  "extractorVersion" : "0.1.0",
+  "sourceCommit" : "fbcf7d0e19a3",
+  "sourceFiles" : [
+    {
+      "path" : "constants/charmap.asm",
+      "purpose" : "font/text token mapping"
+    },
+    {
+      "path" : "engine/movie/title.asm",
+      "purpose" : "title timing and bounce sequence"
+    },
+    {
+      "path" : "engine/movie/title2.asm",
+      "purpose" : "title-screen secondary routines"
+    },
+    {
+      "path" : "engine/movie/splash.asm",
+      "purpose" : "splash source reference"
+    },
+    {
+      "path" : "engine/menus/main_menu.asm",
+      "purpose" : "menu key handling"
+    },
+    {
+      "path" : "gfx/title",
+      "purpose" : "title raster assets"
+    },
+    {
+      "path" : "gfx/splash",
+      "purpose" : "splash raster assets"
+    },
+    {
+      "path" : "gfx/font",
+      "purpose" : "font raster assets"
+    }
+  ],
+  "variant" : "red"
+}

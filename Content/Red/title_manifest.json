@@ -1,0 +1,132 @@
+{
+  "assets" : [
+    {
+      "id" : "pokemon_logo",
+      "kind" : "titleLogo",
+      "relativePath" : "Assets/title/pokemon_logo.png"
+    },
+    {
+      "id" : "red_version",
+      "kind" : "version",
+      "relativePath" : "Assets/title/red_version.png"
+    },
+    {
+      "id" : "player",
+      "kind" : "titleCharacter",
+      "relativePath" : "Assets/title/player.png"
+    },
+    {
+      "id" : "gamefreak_inc",
+      "kind" : "titleWordmark",
+      "relativePath" : "Assets/title/gamefreak_inc.png"
+    },
+    {
+      "id" : "splash_logo",
+      "kind" : "splashLogo",
+      "relativePath" : "Assets/splash/gamefreak_logo.png"
+    },
+    {
+      "id" : "splash_presents",
+      "kind" : "splashText",
+      "relativePath" : "Assets/splash/gamefreak_presents.png"
+    },
+    {
+      "id" : "splash_copyright",
+      "kind" : "copyright",
+      "relativePath" : "Assets/splash/copyright.png"
+    },
+    {
+      "id" : "falling_star",
+      "kind" : "splashAccent",
+      "relativePath" : "Assets/splash/falling_star.png"
+    }
+  ],
+  "logoBounceSequence" : [
+    {
+      "frames" : 16,
+      "yDelta" : -4
+    },
+    {
+      "frames" : 4,
+      "yDelta" : 3
+    },
+    {
+      "frames" : 4,
+      "yDelta" : -3
+    },
+    {
+      "frames" : 2,
+      "yDelta" : 2
+    },
+    {
+      "frames" : 2,
+      "yDelta" : -2
+    },
+    {
+      "frames" : 2,
+      "yDelta" : 1
+    },
+    {
+      "frames" : 2,
+      "yDelta" : -1
+    }
+  ],
+  "menuEntries" : [
+    {
+      "enabledByDefault" : true,
+      "id" : "newGame",
+      "label" : "New Game"
+    },
+    {
+      "enabledByDefault" : false,
+      "id" : "continue",
+      "label" : "Continue"
+    },
+    {
+      "enabledByDefault" : true,
+      "id" : "options",
+      "label" : "Options"
+    }
+  ],
+  "sourceFiles" : [
+    {
+      "path" : "constants/charmap.asm",
+      "purpose" : "font/text token mapping"
+    },
+    {
+      "path" : "engine/movie/title.asm",
+      "purpose" : "title timing and bounce sequence"
+    },
+    {
+      "path" : "engine/movie/title2.asm",
+      "purpose" : "title-screen secondary routines"
+    },
+    {
+      "path" : "engine/movie/splash.asm",
+      "purpose" : "splash source reference"
+    },
+    {
+      "path" : "engine/menus/main_menu.asm",
+      "purpose" : "menu key handling"
+    },
+    {
+      "path" : "gfx/title",
+      "purpose" : "title raster assets"
+    },
+    {
+      "path" : "gfx/splash",
+      "purpose" : "splash raster assets"
+    },
+    {
+      "path" : "gfx/font",
+      "purpose" : "font raster assets"
+    }
+  ],
+  "timings" : {
+    "attractPromptDelaySeconds" : 0.8,
+    "launchFadeSeconds" : 0.4,
+    "splashDurationSeconds" : 1.2
+  },
+  "titleMonSpecies" : "STARTER1",
+  "variant" : "red"
+}

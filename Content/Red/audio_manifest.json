@@ -1,0 +1,13 @@
+{
+  "tracks" : [
+    {
+      "id" : "music_title_screen",
+      "sourceFile" : "audio/music/titlescreen.asm"
+    },
+    {
+      "id" : "sfx_intro_whoosh",
+      "sourceFile" : "audio/sfx/intro_whoosh.asm"
+    }
+  ],
+  "variant" : "red"
+}
