@@ -120,6 +120,18 @@
     {
       "path" : "gfx/font",
       "purpose" : "font raster assets"
+    },
+    {
+      "path" : "gfx/tilesets",
+      "purpose" : "field tileset raster assets"
+    },
+    {
+      "path" : "gfx/sprites",
+      "purpose" : "overworld sprite raster assets"
+    },
+    {
+      "path" : "gfx/blocksets",
+      "purpose" : "field blockset binaries"
     }
   ],
   "timings" : {

@@ -42,6 +42,24 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(snapshot.scene, .field)
         XCTAssertEqual(snapshot.field?.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(snapshot.field?.playerPosition, TilePoint(x: 4, y: 4))
+        XCTAssertEqual(snapshot.field?.renderMode, "placeholder")
+    }
+
+    func testRepoGeneratedContentPublishesRealAssetFieldTelemetry() async throws {
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil)
+
+        runtime.start()
+        try? await Task.sleep(for: .milliseconds(1700))
+        runtime.handle(button: .start)
+        runtime.handle(button: .confirm)
+
+        let snapshot = runtime.currentSnapshot()
+        XCTAssertEqual(snapshot.scene, .field)
+        XCTAssertEqual(snapshot.field?.mapID, "REDS_HOUSE_2F")
+        XCTAssertEqual(snapshot.field?.renderMode, "realAssets")
+        XCTAssertEqual(snapshot.assetLoadingFailures, [])
     }
 
     private func fixtureContent() -> LoadedContent {
@@ -69,10 +87,11 @@ final class PokeCoreTests: XCTestCase {
                     .init(
                         id: "REDS_HOUSE_2F",
                         displayName: "Red's House 2F",
+                        borderBlockID: 0x0A,
                         blockWidth: 4,
                         blockHeight: 4,
-                        tileWidth: 8,
-                        tileHeight: 8,
+                        stepWidth: 8,
+                        stepHeight: 8,
                         tileset: "REDS_HOUSE_2",
                         collisionBlockIDs: [],
                         blockIDs: Array(repeating: 0x05, count: 16),
@@ -80,6 +99,30 @@ final class PokeCoreTests: XCTestCase {
                         backgroundEvents: [],
                         objects: [],
                         triggerRegions: []
+                    ),
+                ],
+                tilesets: [
+                    .init(
+                        id: "REDS_HOUSE_2",
+                        imagePath: "Assets/field/tilesets/reds_house.png",
+                        blocksetPath: "Assets/field/blocksets/reds_house.bst",
+                        sourceTileSize: 8,
+                        blockTileWidth: 4,
+                        blockTileHeight: 4
+                    ),
+                ],
+                overworldSprites: [
+                    .init(
+                        id: "SPRITE_RED",
+                        imagePath: "Assets/field/sprites/red.png",
+                        frameWidth: 16,
+                        frameHeight: 16,
+                        facingFrames: .init(
+                            down: .init(x: 0, y: 0, width: 16, height: 16),
+                            up: .init(x: 0, y: 16, width: 16, height: 16),
+                            left: .init(x: 0, y: 32, width: 16, height: 16),
+                            right: .init(x: 0, y: 32, width: 16, height: 16, flippedHorizontally: true)
+                        )
                     ),
                 ],
                 dialogues: [],
@@ -91,5 +134,12 @@ final class PokeCoreTests: XCTestCase {
                 playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
             )
         )
+    }
+
+    private func repoRoot() -> URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
     }
 }

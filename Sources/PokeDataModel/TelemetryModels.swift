@@ -62,6 +62,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
     public let facing: FacingDirection
     public let activeScriptID: String?
     public let activeScriptStep: Int?
+    public let renderMode: String
 
     public init(
         mapID: String,
@@ -69,7 +70,8 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         playerPosition: TilePoint,
         facing: FacingDirection,
         activeScriptID: String?,
-        activeScriptStep: Int?
+        activeScriptStep: Int?,
+        renderMode: String
     ) {
         self.mapID = mapID
         self.mapName = mapName
@@ -77,6 +79,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         self.facing = facing
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
+        self.renderMode = renderMode
     }
 }
 

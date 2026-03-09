@@ -27,6 +27,22 @@ public struct TileSize: Codable, Equatable, Hashable, Sendable {
     }
 }
 
+public struct PixelRect: Codable, Equatable, Hashable, Sendable {
+    public let x: Int
+    public let y: Int
+    public let width: Int
+    public let height: Int
+    public let flippedHorizontally: Bool
+
+    public init(x: Int, y: Int, width: Int, height: Int, flippedHorizontally: Bool = false) {
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.flippedHorizontally = flippedHorizontally
+    }
+}
+
 public struct WarpManifest: Codable, Equatable, Sendable {
     public let id: String
     public let origin: TilePoint
@@ -112,10 +128,11 @@ public struct TriggerRegionManifest: Codable, Equatable, Sendable {
 public struct MapManifest: Codable, Equatable, Sendable {
     public let id: String
     public let displayName: String
+    public let borderBlockID: Int
     public let blockWidth: Int
     public let blockHeight: Int
-    public let tileWidth: Int
-    public let tileHeight: Int
+    public let stepWidth: Int
+    public let stepHeight: Int
     public let tileset: String
     public let collisionBlockIDs: [Int]
     public let blockIDs: [Int]
@@ -127,10 +144,11 @@ public struct MapManifest: Codable, Equatable, Sendable {
     public init(
         id: String,
         displayName: String,
+        borderBlockID: Int,
         blockWidth: Int,
         blockHeight: Int,
-        tileWidth: Int,
-        tileHeight: Int,
+        stepWidth: Int,
+        stepHeight: Int,
         tileset: String,
         collisionBlockIDs: [Int],
         blockIDs: [Int],
@@ -141,10 +159,11 @@ public struct MapManifest: Codable, Equatable, Sendable {
     ) {
         self.id = id
         self.displayName = displayName
+        self.borderBlockID = borderBlockID
         self.blockWidth = blockWidth
         self.blockHeight = blockHeight
-        self.tileWidth = tileWidth
-        self.tileHeight = tileHeight
+        self.stepWidth = stepWidth
+        self.stepHeight = stepHeight
         self.tileset = tileset
         self.collisionBlockIDs = collisionBlockIDs
         self.blockIDs = blockIDs
@@ -152,6 +171,67 @@ public struct MapManifest: Codable, Equatable, Sendable {
         self.backgroundEvents = backgroundEvents
         self.objects = objects
         self.triggerRegions = triggerRegions
+    }
+}
+
+public struct TilesetManifest: Codable, Equatable, Sendable {
+    public let id: String
+    public let imagePath: String
+    public let blocksetPath: String
+    public let sourceTileSize: Int
+    public let blockTileWidth: Int
+    public let blockTileHeight: Int
+
+    public init(
+        id: String,
+        imagePath: String,
+        blocksetPath: String,
+        sourceTileSize: Int,
+        blockTileWidth: Int,
+        blockTileHeight: Int
+    ) {
+        self.id = id
+        self.imagePath = imagePath
+        self.blocksetPath = blocksetPath
+        self.sourceTileSize = sourceTileSize
+        self.blockTileWidth = blockTileWidth
+        self.blockTileHeight = blockTileHeight
+    }
+}
+
+public struct FacingFrameManifest: Codable, Equatable, Sendable {
+    public let down: PixelRect
+    public let up: PixelRect
+    public let left: PixelRect
+    public let right: PixelRect
+
+    public init(down: PixelRect, up: PixelRect, left: PixelRect, right: PixelRect) {
+        self.down = down
+        self.up = up
+        self.left = left
+        self.right = right
+    }
+}
+
+public struct OverworldSpriteManifest: Codable, Equatable, Sendable {
+    public let id: String
+    public let imagePath: String
+    public let frameWidth: Int
+    public let frameHeight: Int
+    public let facingFrames: FacingFrameManifest
+
+    public init(
+        id: String,
+        imagePath: String,
+        frameWidth: Int,
+        frameHeight: Int,
+        facingFrames: FacingFrameManifest
+    ) {
+        self.id = id
+        self.imagePath = imagePath
+        self.frameWidth = frameWidth
+        self.frameHeight = frameHeight
+        self.facingFrames = facingFrames
     }
 }
 
@@ -351,6 +431,8 @@ public struct PlayerStartManifest: Codable, Equatable, Sendable {
 
 public struct GameplayManifest: Codable, Equatable, Sendable {
     public let maps: [MapManifest]
+    public let tilesets: [TilesetManifest]
+    public let overworldSprites: [OverworldSpriteManifest]
     public let dialogues: [DialogueManifest]
     public let eventFlags: EventFlagManifest
     public let scripts: [ScriptManifest]
@@ -361,6 +443,8 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
 
     public init(
         maps: [MapManifest],
+        tilesets: [TilesetManifest],
+        overworldSprites: [OverworldSpriteManifest],
         dialogues: [DialogueManifest],
         eventFlags: EventFlagManifest,
         scripts: [ScriptManifest],
@@ -370,6 +454,8 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         playerStart: PlayerStartManifest
     ) {
         self.maps = maps
+        self.tilesets = tilesets
+        self.overworldSprites = overworldSprites
         self.dialogues = dialogues
         self.eventFlags = eventFlags
         self.scripts = scripts

@@ -58,6 +58,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
 
     return GameplayManifest(
         maps: maps,
+        tilesets: buildTilesets(),
+        overworldSprites: buildOverworldSprites(),
         dialogues: try buildDialogues(repoRoot: source.repoRoot),
         eventFlags: EventFlagManifest(flags: eventFlags),
         scripts: buildScripts(),
@@ -182,14 +184,16 @@ private func makeMapManifest(
     let objectURL = repoRoot.appendingPathComponent(objectFile)
     let contents = try String(contentsOf: objectURL)
     let blockData = try Data(contentsOf: repoRoot.appendingPathComponent(blockFile))
+    let borderBlockID = try parseBorderBlockID(contents: contents)
 
     return MapManifest(
         id: mapID,
         displayName: displayName,
+        borderBlockID: borderBlockID,
         blockWidth: size.width,
         blockHeight: size.height,
-        tileWidth: size.width * 2,
-        tileHeight: size.height * 2,
+        stepWidth: size.width * 2,
+        stepHeight: size.height * 2,
         tileset: tileset,
         collisionBlockIDs: collisionBlockIDs,
         blockIDs: blockData.map(Int.init),
@@ -197,6 +201,106 @@ private func makeMapManifest(
         backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents),
         objects: parseObjects(mapID: mapID, contents: contents),
         triggerRegions: triggerRegions
+    )
+}
+
+private func parseBorderBlockID(contents: String) throws -> Int {
+    guard let match = contents.firstMatch(of: /db\s+\$([0-9A-Fa-f]+)/) else {
+        throw ExtractorError.invalidArguments("missing border block in map object data")
+    }
+    guard let value = Int(match.output.1, radix: 16) else {
+        throw ExtractorError.invalidArguments("invalid border block value \(match.output.1)")
+    }
+    return value
+}
+
+private func buildTilesets() -> [TilesetManifest] {
+    [
+        .init(
+            id: "REDS_HOUSE_1",
+            imagePath: "Assets/field/tilesets/reds_house.png",
+            blocksetPath: "Assets/field/blocksets/reds_house.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4
+        ),
+        .init(
+            id: "REDS_HOUSE_2",
+            imagePath: "Assets/field/tilesets/reds_house.png",
+            blocksetPath: "Assets/field/blocksets/reds_house.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4
+        ),
+        .init(
+            id: "OVERWORLD",
+            imagePath: "Assets/field/tilesets/overworld.png",
+            blocksetPath: "Assets/field/blocksets/overworld.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4
+        ),
+        .init(
+            id: "DOJO",
+            imagePath: "Assets/field/tilesets/gym.png",
+            blocksetPath: "Assets/field/blocksets/gym.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4
+        ),
+    ]
+}
+
+private func buildOverworldSprites() -> [OverworldSpriteManifest] {
+    [
+        buildCharacterSprite(id: "SPRITE_RED", imagePath: "Assets/field/sprites/red.png", includesRightFrame: true),
+        buildCharacterSprite(id: "SPRITE_OAK", imagePath: "Assets/field/sprites/oak.png", includesRightFrame: true),
+        buildCharacterSprite(id: "SPRITE_BLUE", imagePath: "Assets/field/sprites/blue.png", includesRightFrame: true),
+        buildCharacterSprite(id: "SPRITE_MOM", imagePath: "Assets/field/sprites/mom.png", includesRightFrame: false),
+        buildCharacterSprite(id: "SPRITE_GIRL", imagePath: "Assets/field/sprites/girl.png", includesRightFrame: true),
+        buildCharacterSprite(id: "SPRITE_FISHER", imagePath: "Assets/field/sprites/fisher.png", includesRightFrame: true),
+        buildCharacterSprite(id: "SPRITE_SCIENTIST", imagePath: "Assets/field/sprites/scientist.png", includesRightFrame: true),
+        .init(
+            id: "SPRITE_POKE_BALL",
+            imagePath: "Assets/field/sprites/poke_ball.png",
+            frameWidth: 16,
+            frameHeight: 16,
+            facingFrames: .init(
+                down: .init(x: 0, y: 0, width: 16, height: 16),
+                up: .init(x: 0, y: 0, width: 16, height: 16),
+                left: .init(x: 0, y: 0, width: 16, height: 16),
+                right: .init(x: 0, y: 0, width: 16, height: 16)
+            )
+        ),
+        .init(
+            id: "SPRITE_POKEDEX",
+            imagePath: "Assets/field/sprites/pokedex.png",
+            frameWidth: 16,
+            frameHeight: 16,
+            facingFrames: .init(
+                down: .init(x: 0, y: 0, width: 16, height: 16),
+                up: .init(x: 0, y: 0, width: 16, height: 16),
+                left: .init(x: 0, y: 0, width: 16, height: 16),
+                right: .init(x: 0, y: 0, width: 16, height: 16)
+            )
+        ),
+    ]
+}
+
+private func buildCharacterSprite(id: String, imagePath: String, includesRightFrame: Bool) -> OverworldSpriteManifest {
+    _ = includesRightFrame
+    let leftFrame = PixelRect(x: 0, y: 32, width: 16, height: 16)
+    return OverworldSpriteManifest(
+        id: id,
+        imagePath: imagePath,
+        frameWidth: 16,
+        frameHeight: 16,
+        facingFrames: .init(
+            down: .init(x: 0, y: 0, width: 16, height: 16),
+            up: .init(x: 0, y: 16, width: 16, height: 16),
+            left: leftFrame,
+            right: .init(x: leftFrame.x, y: leftFrame.y, width: leftFrame.width, height: leftFrame.height, flippedHorizontally: true)
+        )
     )
 }
 

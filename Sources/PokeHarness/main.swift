@@ -166,19 +166,23 @@ private struct HarnessCLI {
         _ = try poll(until: { $0.scene == .titleMenu && $0.titleMenu?.focusedIndex == 0 }, timeout: 4)
         try postInput("confirm")
         var snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_2F" }, timeout: 4)
+        try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_2F")
 
         snapshot = try walk(to: TilePoint(x: 6, y: 1), on: "REDS_HOUSE_2F", startingFrom: snapshot)
         try postInput("right")
         snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_1F" }, timeout: 4)
+        try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_1F")
         snapshot = try walk(to: TilePoint(x: 3, y: 6), on: "REDS_HOUSE_1F", startingFrom: snapshot, yFirst: true)
         try postInput("down")
         snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "PALLET_TOWN" }, timeout: 4)
+        try assertRealFieldRendering(snapshot, expectedMapID: "PALLET_TOWN")
         snapshot = try walk(to: TilePoint(x: 8, y: 2), on: "PALLET_TOWN", startingFrom: snapshot)
         try postInput("up")
 
         snapshot = try poll(until: { $0.scene == .dialogue && ($0.dialogue?.dialogueID.contains("oak") ?? false) }, timeout: 4)
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
         snapshot = try poll(until: { $0.field?.mapID == "OAKS_LAB" && ($0.eventFlags?.activeFlags.contains("EVENT_OAK_ASKED_TO_CHOOSE_MON") ?? false) }, timeout: 6)
+        try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
 
         snapshot = try walk(to: TilePoint(x: 7, y: 4), on: "OAKS_LAB", startingFrom: snapshot)
         try postInput("confirm")
@@ -193,6 +197,7 @@ private struct HarnessCLI {
         snapshot = try poll(until: { $0.scene == .dialogue }, timeout: 4)
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
         snapshot = try poll(until: { $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_STARTER") ?? false) }, timeout: 4)
+        try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
 
         snapshot = try walk(to: TilePoint(x: 4, y: 10), on: "OAKS_LAB", startingFrom: snapshot)
         try postInput("down")
@@ -216,13 +221,29 @@ private struct HarnessCLI {
             $0.field?.mapID == "OAKS_LAB" &&
             ($0.eventFlags?.activeFlags.contains("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") ?? false)
         }, timeout: 4)
+        try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
 
         guard snapshot.party?.pokemon.count == 1 else {
             throw HarnessError.validationFailed("expected one starter in party after rival battle")
         }
+        guard snapshot.assetLoadingFailures.isEmpty else {
+            throw HarnessError.validationFailed("expected zero asset-loading failures, got: \(snapshot.assetLoadingFailures.joined(separator: ", "))")
+        }
 
         try post(path: "/quit", body: [:])
-        print("milestone 3 validation passed")
+        print("milestone validation passed")
+    }
+
+    private func assertRealFieldRendering(_ snapshot: RuntimeTelemetrySnapshot, expectedMapID: String) throws {
+        guard snapshot.field?.mapID == expectedMapID else {
+            throw HarnessError.validationFailed("expected field telemetry for \(expectedMapID), got \(snapshot.field?.mapID ?? "none")")
+        }
+        guard snapshot.field?.renderMode == "realAssets" else {
+            throw HarnessError.validationFailed("expected renderMode=realAssets on \(expectedMapID), got \(snapshot.field?.renderMode ?? "none")")
+        }
+        guard snapshot.assetLoadingFailures.isEmpty else {
+            throw HarnessError.validationFailed("asset-loading failures present on \(expectedMapID): \(snapshot.assetLoadingFailures.joined(separator: ", "))")
+        }
     }
 
     private func latestSnapshot() throws -> RuntimeTelemetrySnapshot {
@@ -278,33 +299,48 @@ private struct HarnessCLI {
         guard let url = URL(string: "http://127.0.0.1:\(port)\(path)") else {
             throw HarnessError.requestFailed("invalid url")
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        if method == "POST" {
-            request.httpBody = try JSONEncoder().encode(body)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        }
+        let retryDeadline = Date().addingTimeInterval(2.5)
+        var lastError: Error?
 
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: Result<Data, Error>?
-        URLSession.shared.dataTask(with: request) { data, _, error in
-            if let error {
-                result = .failure(error)
-            } else {
-                result = .success(data ?? Data())
+        while true {
+            var request = URLRequest(url: url)
+            request.httpMethod = method
+            if method == "POST" {
+                request.httpBody = try JSONEncoder().encode(body)
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             }
-            semaphore.signal()
-        }.resume()
-        semaphore.wait()
 
-        switch result {
-        case let .success(data):
-            return data
-        case let .failure(error):
-            throw HarnessError.requestFailed(String(describing: error))
-        case .none:
-            throw HarnessError.requestFailed("empty request result")
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: Result<Data, Error>?
+            URLSession.shared.dataTask(with: request) { data, _, error in
+                if let error {
+                    result = .failure(error)
+                } else {
+                    result = .success(data ?? Data())
+                }
+                semaphore.signal()
+            }.resume()
+            semaphore.wait()
+
+            switch result {
+            case let .success(data):
+                return data
+            case let .failure(error):
+                lastError = error
+                guard Date() < retryDeadline else {
+                    throw HarnessError.requestFailed(String(describing: error))
+                }
+                Thread.sleep(forTimeInterval: 0.1)
+            case .none:
+                lastError = HarnessError.requestFailed("empty request result")
+                guard Date() < retryDeadline else {
+                    throw HarnessError.requestFailed("empty request result")
+                }
+                Thread.sleep(forTimeInterval: 0.1)
+            }
         }
+
+        throw HarnessError.requestFailed(String(describing: lastError ?? HarnessError.requestFailed("unknown request failure")))
     }
 
     private func run(_ arguments: [String]) throws {

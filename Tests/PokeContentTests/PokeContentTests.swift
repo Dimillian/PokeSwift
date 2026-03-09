@@ -18,6 +18,27 @@ final class PokeContentTests: XCTestCase {
         XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.startingMoves, ["TACKLE", "TAIL_WHIP"])
         XCTAssertEqual(loaded.move(id: "TACKLE")?.power, 35)
         XCTAssertEqual(loaded.trainerBattle(id: "rival_lab_bulbasaur")?.enemySpeciesID, "BULBASAUR")
+        XCTAssertEqual(loaded.tileset(id: "REDS_HOUSE_2")?.imagePath, "Assets/field/tilesets/reds_house.png")
+        XCTAssertEqual(loaded.overworldSprite(id: "SPRITE_RED")?.frameHeight, 16)
+    }
+
+    func testLoaderResolvesRepoGeneratedFieldAssets() throws {
+        let root = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let loaded = try FileSystemContentLoader(rootURL: root).load()
+
+        let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
+        let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
+        let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
+        XCTAssertTrue(
+            loaded.fieldRenderIssues(
+                map: oaksLab,
+                spriteIDs: ["SPRITE_RED", "SPRITE_OAK", "SPRITE_BLUE", "SPRITE_SCIENTIST", "SPRITE_POKE_BALL", "SPRITE_POKEDEX"]
+            ).isEmpty
+        )
     }
 
     private func makeFixtureRoot() throws -> URL {
@@ -50,6 +71,15 @@ final class PokeContentTests: XCTestCase {
         let assetRoot = root.appendingPathComponent("Assets", isDirectory: true)
         try FileManager.default.createDirectory(at: assetRoot, withIntermediateDirectories: true, attributes: nil)
         FileManager.default.createFile(atPath: assetRoot.appendingPathComponent("logo.png").path, contents: Data())
+        let fieldTilesetRoot = assetRoot.appendingPathComponent("field/tilesets", isDirectory: true)
+        let fieldBlocksetRoot = assetRoot.appendingPathComponent("field/blocksets", isDirectory: true)
+        let fieldSpriteRoot = assetRoot.appendingPathComponent("field/sprites", isDirectory: true)
+        try FileManager.default.createDirectory(at: fieldTilesetRoot, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(at: fieldBlocksetRoot, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(at: fieldSpriteRoot, withIntermediateDirectories: true, attributes: nil)
+        FileManager.default.createFile(atPath: fieldTilesetRoot.appendingPathComponent("reds_house.png").path, contents: Data())
+        FileManager.default.createFile(atPath: fieldBlocksetRoot.appendingPathComponent("reds_house.bst").path, contents: Data(repeating: 0, count: 16))
+        FileManager.default.createFile(atPath: fieldSpriteRoot.appendingPathComponent("red.png").path, contents: Data())
         return root
     }
 
@@ -59,10 +89,11 @@ final class PokeContentTests: XCTestCase {
                 .init(
                     id: "REDS_HOUSE_2F",
                     displayName: "Red's House 2F",
+                    borderBlockID: 0x0A,
                     blockWidth: 4,
                     blockHeight: 4,
-                    tileWidth: 8,
-                    tileHeight: 8,
+                    stepWidth: 8,
+                    stepHeight: 8,
                     tileset: "REDS_HOUSE_2",
                     collisionBlockIDs: [0x10],
                     blockIDs: Array(repeating: 0x05, count: 16),
@@ -70,6 +101,30 @@ final class PokeContentTests: XCTestCase {
                     backgroundEvents: [],
                     objects: [],
                     triggerRegions: []
+                ),
+            ],
+            tilesets: [
+                .init(
+                    id: "REDS_HOUSE_2",
+                    imagePath: "Assets/field/tilesets/reds_house.png",
+                    blocksetPath: "Assets/field/blocksets/reds_house.bst",
+                    sourceTileSize: 8,
+                    blockTileWidth: 4,
+                    blockTileHeight: 4
+                ),
+            ],
+            overworldSprites: [
+                .init(
+                    id: "SPRITE_RED",
+                    imagePath: "Assets/field/sprites/red.png",
+                    frameWidth: 16,
+                    frameHeight: 16,
+                    facingFrames: .init(
+                        down: .init(x: 0, y: 0, width: 16, height: 16),
+                        up: .init(x: 0, y: 16, width: 16, height: 16),
+                        left: .init(x: 0, y: 32, width: 16, height: 16),
+                        right: .init(x: 0, y: 32, width: 16, height: 16, flippedHorizontally: true)
+                    )
                 ),
             ],
             dialogues: [.init(id: "hello", pages: [.init(lines: ["Hi"], waitsForPrompt: true)])],
@@ -115,5 +170,12 @@ final class PokeContentTests: XCTestCase {
             ],
             playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 2, y: 2), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
         )
+    }
+
+    private func repoRoot() -> URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
     }
 }

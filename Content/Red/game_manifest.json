@@ -1,7 +1,7 @@
 {
   "contentVersion" : "m3-red-first-slice-v1",
   "extractorVersion" : "0.1.0",
-  "sourceCommit" : "e106ac7b8e6d",
+  "sourceCommit" : "0b361291ddb7",
   "sourceFiles" : [
     {
       "path" : "constants/charmap.asm",
@@ -34,6 +34,18 @@
     {
       "path" : "gfx/font",
       "purpose" : "font raster assets"
+    },
+    {
+      "path" : "gfx/tilesets",
+      "purpose" : "field tileset raster assets"
+    },
+    {
+      "path" : "gfx/sprites",
+      "purpose" : "overworld sprite raster assets"
+    },
+    {
+      "path" : "gfx/blocksets",
+      "purpose" : "field blockset binaries"
     }
   ],
   "variant" : "red"

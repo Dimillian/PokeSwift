@@ -719,6 +719,7 @@
         18
       ],
       "blockWidth" : 4,
+      "borderBlockID" : 10,
       "collisionBlockIDs" : [
         1,
         2,
@@ -735,8 +736,8 @@
       "objects" : [
 
       ],
-      "tileHeight" : 8,
-      "tileWidth" : 8,
+      "stepHeight" : 8,
+      "stepWidth" : 8,
       "tileset" : "REDS_HOUSE_2",
       "triggerRegions" : [
 
@@ -788,6 +789,7 @@
         15
       ],
       "blockWidth" : 4,
+      "borderBlockID" : 10,
       "collisionBlockIDs" : [
         1,
         2,
@@ -816,8 +818,8 @@
           "visibleByDefault" : true
         }
       ],
-      "tileHeight" : 8,
-      "tileWidth" : 8,
+      "stepHeight" : 8,
+      "stepWidth" : 8,
       "tileset" : "REDS_HOUSE_1",
       "triggerRegions" : [
 
@@ -993,6 +995,7 @@
         79
       ],
       "blockWidth" : 10,
+      "borderBlockID" : 11,
       "collisionBlockIDs" : [
         0,
         16,
@@ -1057,8 +1060,8 @@
           "visibleByDefault" : true
         }
       ],
-      "tileHeight" : 18,
-      "tileWidth" : 20,
+      "stepHeight" : 18,
+      "stepWidth" : 20,
       "tileset" : "OVERWORLD",
       "triggerRegions" : [
         {
@@ -1154,6 +1157,7 @@
         5
       ],
       "blockWidth" : 5,
+      "borderBlockID" : 3,
       "collisionBlockIDs" : [
         17,
         22,
@@ -1315,8 +1319,8 @@
           "visibleByDefault" : true
         }
       ],
-      "tileHeight" : 12,
-      "tileWidth" : 10,
+      "stepHeight" : 12,
+      "stepWidth" : 10,
       "tileset" : "DOJO",
       "triggerRegions" : [
 
@@ -1387,6 +1391,332 @@
       "maxPP" : 40,
       "power" : 0,
       "type" : "NORMAL"
+    }
+  ],
+  "overworldSprites" : [
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_RED",
+      "imagePath" : "Assets/field/sprites/red.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_OAK",
+      "imagePath" : "Assets/field/sprites/oak.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_BLUE",
+      "imagePath" : "Assets/field/sprites/blue.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MOM",
+      "imagePath" : "Assets/field/sprites/mom.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GIRL",
+      "imagePath" : "Assets/field/sprites/girl.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_FISHER",
+      "imagePath" : "Assets/field/sprites/fisher.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_SCIENTIST",
+      "imagePath" : "Assets/field/sprites/scientist.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "right" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_POKE_BALL",
+      "imagePath" : "Assets/field/sprites/poke_ball.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "right" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_POKEDEX",
+      "imagePath" : "Assets/field/sprites/pokedex.png"
     }
   ],
   "playerStart" : {
@@ -1607,6 +1937,40 @@
         "TACKLE",
         "GROWL"
       ]
+    }
+  ],
+  "tilesets" : [
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/reds_house.bst",
+      "id" : "REDS_HOUSE_1",
+      "imagePath" : "Assets/field/tilesets/reds_house.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/reds_house.bst",
+      "id" : "REDS_HOUSE_2",
+      "imagePath" : "Assets/field/tilesets/reds_house.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/overworld.bst",
+      "id" : "OVERWORLD",
+      "imagePath" : "Assets/field/tilesets/overworld.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/gym.bst",
+      "id" : "DOJO",
+      "imagePath" : "Assets/field/tilesets/gym.png",
+      "sourceTileSize" : 8
     }
   ],
   "trainerBattles" : [

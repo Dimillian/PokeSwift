@@ -3,6 +3,23 @@ import PokeDataModel
 
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
+    private static let fieldAssetMap: [(source: String, destination: String)] = [
+        ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
+        ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
+        ("gfx/tilesets/gym.png", "Assets/field/tilesets/gym.png"),
+        ("gfx/sprites/red.png", "Assets/field/sprites/red.png"),
+        ("gfx/sprites/oak.png", "Assets/field/sprites/oak.png"),
+        ("gfx/sprites/blue.png", "Assets/field/sprites/blue.png"),
+        ("gfx/sprites/mom.png", "Assets/field/sprites/mom.png"),
+        ("gfx/sprites/girl.png", "Assets/field/sprites/girl.png"),
+        ("gfx/sprites/fisher.png", "Assets/field/sprites/fisher.png"),
+        ("gfx/sprites/scientist.png", "Assets/field/sprites/scientist.png"),
+        ("gfx/sprites/poke_ball.png", "Assets/field/sprites/poke_ball.png"),
+        ("gfx/sprites/pokedex.png", "Assets/field/sprites/pokedex.png"),
+        ("gfx/blocksets/reds_house.bst", "Assets/field/blocksets/reds_house.bst"),
+        ("gfx/blocksets/overworld.bst", "Assets/field/blocksets/overworld.bst"),
+        ("gfx/blocksets/gym.bst", "Assets/field/blocksets/gym.bst"),
+    ]
 
     public struct Configuration: Sendable {
         public let repoRoot: URL
@@ -39,9 +56,14 @@ public enum RedContentExtractor {
         try writeJSON(gameplayManifest, to: variantRoot.appendingPathComponent("gameplay_manifest.json"))
         try writeJSON(audioManifest, to: variantRoot.appendingPathComponent("audio_manifest.json"))
 
-        for (sourcePath, destination) in source.assetMap {
+        for (sourcePath, destination) in source.assetMap.sorted(by: { $0.key < $1.key }) {
             let sourceURL = configuration.repoRoot.appendingPathComponent(sourcePath)
             let destinationURL = variantRoot.appendingPathComponent(destination)
+            try copyAsset(from: sourceURL, to: destinationURL)
+        }
+        for fieldAsset in fieldAssetMap {
+            let sourceURL = configuration.repoRoot.appendingPathComponent(fieldAsset.source)
+            let destinationURL = variantRoot.appendingPathComponent(fieldAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
     }
@@ -59,6 +81,21 @@ public enum RedContentExtractor {
             "Assets/title/pokemon_logo.png",
             "Assets/title/player.png",
             "Assets/splash/gamefreak_logo.png",
+            "Assets/field/tilesets/reds_house.png",
+            "Assets/field/tilesets/overworld.png",
+            "Assets/field/tilesets/gym.png",
+            "Assets/field/sprites/red.png",
+            "Assets/field/sprites/oak.png",
+            "Assets/field/sprites/blue.png",
+            "Assets/field/sprites/mom.png",
+            "Assets/field/sprites/girl.png",
+            "Assets/field/sprites/fisher.png",
+            "Assets/field/sprites/scientist.png",
+            "Assets/field/sprites/poke_ball.png",
+            "Assets/field/sprites/pokedex.png",
+            "Assets/field/blocksets/reds_house.bst",
+            "Assets/field/blocksets/overworld.bst",
+            "Assets/field/blocksets/gym.bst",
         ]
 
         for relativePath in required {
@@ -174,6 +211,7 @@ public enum RedContentExtractor {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         try data.write(to: url, options: .atomic)
     }
+
 }
 
 public enum CharmapParser {
@@ -292,6 +330,9 @@ struct SourceTree {
             .init(path: "gfx/title", purpose: "title raster assets"),
             .init(path: "gfx/splash", purpose: "splash raster assets"),
             .init(path: "gfx/font", purpose: "font raster assets"),
+            .init(path: "gfx/tilesets", purpose: "field tileset raster assets"),
+            .init(path: "gfx/sprites", purpose: "overworld sprite raster assets"),
+            .init(path: "gfx/blocksets", purpose: "field blockset binaries"),
         ]
         gitCommit = Self.captureGitCommit(repoRoot: repoRoot)
     }

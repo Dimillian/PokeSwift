@@ -12,6 +12,24 @@ public struct FieldObjectRenderState: Equatable, Sendable {
     public let facing: FacingDirection
     public let interactionDialogueID: String?
     public let trainerBattleID: String?
+
+    public init(
+        id: String,
+        displayName: String,
+        sprite: String,
+        position: TilePoint,
+        facing: FacingDirection,
+        interactionDialogueID: String?,
+        trainerBattleID: String?
+    ) {
+        self.id = id
+        self.displayName = displayName
+        self.sprite = sprite
+        self.position = position
+        self.facing = facing
+        self.interactionDialogueID = interactionDialogueID
+        self.trainerBattleID = trainerBattleID
+    }
 }
 
 private struct RuntimeObjectState {
@@ -134,6 +152,23 @@ public final class GameRuntime {
         return content.map(id: gameplayState.mapID)
     }
 
+    public var playerSpriteID: String {
+        "SPRITE_RED"
+    }
+
+    public var currentTilesetManifest: TilesetManifest? {
+        guard let map = currentMapManifest else { return nil }
+        return content.tileset(id: map.tileset)
+    }
+
+    public var currentFieldSpriteIDs: [String] {
+        Array(Set(currentFieldObjects.map(\.sprite) + [playerSpriteID])).sorted()
+    }
+
+    public var currentFieldRenderMode: String {
+        currentFieldRenderIssues.isEmpty ? "realAssets" : "placeholder"
+    }
+
     public var playerPosition: TilePoint? {
         gameplayState?.playerPosition
     }
@@ -163,6 +198,11 @@ public final class GameRuntime {
     public var currentDialogueManifest: DialogueManifest? {
         guard let dialogueState else { return nil }
         return content.dialogue(id: dialogueState.dialogueID)
+    }
+
+    private var currentFieldRenderIssues: [String] {
+        guard let map = currentMapManifest else { return [] }
+        return content.fieldRenderIssues(map: map, spriteIDs: currentFieldSpriteIDs)
     }
 
     public var currentDialoguePage: DialoguePage? {
@@ -248,7 +288,7 @@ public final class GameRuntime {
             battle: makeBattleTelemetry(),
             eventFlags: makeFlagTelemetry(),
             recentInputEvents: recentInputEvents,
-            assetLoadingFailures: assetLoadingFailures,
+            assetLoadingFailures: Array(Set(assetLoadingFailures + currentFieldRenderIssues)).sorted(),
             window: .init(scale: windowScale, renderWidth: 160, renderHeight: 144)
         )
     }
@@ -944,7 +984,7 @@ public final class GameRuntime {
     }
 
     private func canMove(to point: TilePoint, in map: MapManifest, objectStates: [String: RuntimeObjectState]) -> Bool {
-        guard point.x >= 0, point.y >= 0, point.x < map.tileWidth, point.y < map.tileHeight else {
+        guard point.x >= 0, point.y >= 0, point.x < map.stepWidth, point.y < map.stepHeight else {
             return false
         }
 
@@ -1158,7 +1198,8 @@ public final class GameRuntime {
             playerPosition: gameplayState.playerPosition,
             facing: gameplayState.facing,
             activeScriptID: gameplayState.activeScriptID,
-            activeScriptStep: gameplayState.activeScriptStep
+            activeScriptStep: gameplayState.activeScriptStep,
+            renderMode: currentFieldRenderMode
         )
     }
 
@@ -1211,9 +1252,14 @@ public final class GameRuntime {
     }
 
     private static func missingAssets(in content: LoadedContent) -> [String] {
-        content.titleManifest.assets.compactMap { asset in
-            let url = content.rootURL.appendingPathComponent(asset.relativePath)
-            return FileManager.default.fileExists(atPath: url.path) ? nil : asset.relativePath
+        let requiredPaths =
+            content.titleManifest.assets.map(\.relativePath) +
+            content.gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
+            content.gameplayManifest.overworldSprites.map(\.imagePath)
+
+        return requiredPaths.compactMap { relativePath in
+            let url = content.rootURL.appendingPathComponent(relativePath)
+            return FileManager.default.fileExists(atPath: url.path) ? nil : relativePath
         }
     }
 }

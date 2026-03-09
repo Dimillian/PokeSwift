@@ -41,10 +41,11 @@ The port target is not "run the ROM." The target is:
 - `M1`: Red extraction foundation
 - `M2`: Native macOS boot, splash, title attract, title menu, telemetry, and validation harness
 - `M3`: First playable slice from `New Game` to the first rival battle in Oak's Lab
+- `M4A`: Real GB-style field rendering for the current M3 slice
 
 ### Current State Summary
 
-Milestones `M1`, `M2`, and `M3` are complete as of `2026-03-09`.
+Milestones `M1`, `M2`, `M3`, and `M4A` are complete as of `2026-03-09`.
 
 The repo now contains:
 
@@ -56,6 +57,8 @@ The repo now contains:
 - bounded M3 gameplay extraction for `REDS_HOUSE_2F`, `REDS_HOUSE_1F`, `PALLET_TOWN`, and `OAKS_LAB`
 - a playable field/dialogue/starter-choice/battle runtime slice from `New Game` through the first rival battle
 - a native overworld/dialogue/battle UI shell for the M3 slice
+- real extracted field tilesets, blocksets, and overworld sprite sheets for the M3 slice
+- a real GB-style field compositor for M3 maps and actors, with telemetry proving `renderMode == realAssets`
 - a passing workspace test run across the current module test targets
 - a macOS `26.0+` baseline for the Swift port so native Liquid Glass UI can be used without legacy fallback surfaces
 
@@ -128,7 +131,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Intro / splash / title flow | `done` | Native reproduction of title flow with required transitions and menu logic | `engine/movie/intro.asm`, `engine/movie/title.asm`, `engine/movie/title2.asm`, `gfx/title/**`, `gfx/splash/**` | `PokeExtractCLI`, `PokeCore`, `PokeUI`, `PokeMac` | scene state snapshots, menu focus traces, asset load failures | Extend from accepted title flow into gameplay scenes in M3 |
 | Save / load / persistence | `not started` | Usable save system for full-game progression and restart | save format references, WRAM/SRAM behaviors, menu flows | `PokeCore`, `PokeContent`, `PokeMac`, `PokeTelemetry` | save slot inventory, load failures, save/load timing traces | Decide save compatibility strategy before implementation |
 | Overworld map loading | `in progress` | All maps load with correct tilesets, warps, objects, metadata | `maps/**`, `data/maps/**`, tileset data | `PokeExtractCLI`, `PokeContent`, `PokeCore`, `PokeUI` | current map id/name, tileset id, warp traces, missing map asset reports | M3 covers four maps only; expand map coverage and edge rules next |
-| Overworld rendering | `in progress` | Native tile and sprite rendering with deterministic visual composition | map assets, sprite assets, tilesets | `PokeUI`, `PokeCore`, `PokeContent` | render surface dimensions, visible map region, sprite layer traces | Bounded field renderer is in place for M3; camera polish and full asset parity remain |
+| Overworld rendering | `in progress` | Native tile and sprite rendering with deterministic visual composition | map assets, sprite assets, tilesets | `PokeUI`, `PokeCore`, `PokeContent` | render surface dimensions, visible map region, sprite layer traces, render mode | Real extracted tile and sprite rendering is accepted for the M3 slice; camera polish and full asset parity remain |
 | Player movement and collisions | `in progress` | Correct grid movement, collision, ledges, doors, warps, cut/surf/bike gating | movement/collision logic in disassembly | `PokeCore`, `PokeTelemetry` | player position, heading, blocked movement reasons, warp transitions | M3 supports bounded movement, collisions, and warps; special movement rules remain |
 | NPC objects and trainer objects | `in progress` | Correct object spawning, movement, facing, trainer line-of-sight, interactions | object event data, scripts, map data | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | object states, interaction target ids, trainer trigger traces | M3 lab/Pallet objects are extracted and interactive; general NPC behavior remains |
 | Script engine and event flags | `in progress` | Full script execution and event flag parity | `scripts/**`, event tables, map scripts, flag constants | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | current script id, active flags, script transitions, blocking reasons | Bounded M3 IR and slice flags are live; do not generalize until next milestone needs it |
@@ -159,7 +162,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 - [x] constants extraction
 - [x] title and intro manifests
 - [x] map manifests
-- [ ] tileset and sprite manifests
+- [x] tileset and sprite manifests
 - [ ] item, move, species, trainer, and encounter catalogs
 - [x] event/script extraction
 - [ ] audio identifier extraction
@@ -181,7 +184,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 
 - [x] title/intro visuals
 - [x] overworld tile renderer
-- [ ] sprite renderer
+- [x] sprite renderer
 - [x] text box system
 - [x] battle UI
 - [ ] menu UI
@@ -205,6 +208,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | `M1` Extraction Foundation | `done` | Red-only title-scope extraction, loader schemas, deterministic content output | extraction and verify commands succeed; deterministic output is proven; runtime can load extracted content | Accepted on `2026-03-09` via extractor build, extract/verify, deterministic diff check, and loader-backed app boot |
 | `M2` Native Boot + Title | `done` | launch, splash, title attract, title menu, telemetry, harness validation loop | native app builds and launches; title flow works; telemetry and harness acceptance checks pass | Accepted on `2026-03-09` via `./scripts/validate_milestone.sh` and passing workspace tests |
 | `M3` First Playable Slice | `done` | intro to player room, Pallet Town, Oak trigger, lab, starter choice, first rival battle | one serious vertical slice is playable end to end | Accepted on `2026-03-09` via `./scripts/validate_milestone.sh`, deterministic extraction diff, and passing workspace tests |
+| `M4A` Real Field Rendering for M3 | `done` | render the current M3 maps and actors from extracted GB assets instead of placeholder geometry | real extracted tilesets, blocksets, sprite sheets, and zero field asset failures in validation | Accepted on `2026-03-09` via `./scripts/validate_milestone.sh`, passing workspace tests, and `renderMode == realAssets` telemetry in field scenes |
 | `M4` Early-Game Progression | `not started` | route and town progression through early-game loop | stable field loop, trainers, encounters, marts, healing, save/load | Scope to be refined after M3 |
 | `M5` Full Content Parity | `not started` | complete Red content coverage from start to credits | end-to-end playable game | Requires all subsystem rows to reach done or approved residual-gap state |
 
@@ -221,6 +225,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Font assets | yes | `done` | `gfx/font/**` | copied/normalized assets | `PokeExtractCLI` | Expand glyph/render validation with dialogue systems |
 | Audio ids stub | optional | `done` | title/intro track references | `audio_manifest.json` | `PokeExtractCLI` | Replace stub-only behavior with playback later |
 | Maps | no | `in progress` | `maps/**`, `data/maps/**` | `gameplay_manifest.json` map section | `PokeExtractCLI` | Expand beyond the four M3 maps |
+| Tilesets / blocksets / overworld sprites | no | `in progress` | `gfx/tilesets/**`, `gfx/blocksets/**`, `gfx/sprites/**` | `gameplay_manifest.json` tileset/sprite sections and copied field assets | `PokeExtractCLI` | M3 slice assets are extracted and rendered; expand coverage beyond the current slice |
 | Species / moves / items | no | `in progress` | `data/pokemon/**`, `data/moves/**`, `data/items/**` | `gameplay_manifest.json` species/moves sections | `PokeExtractCLI` | Add broader catalogs beyond M3 starter and battle scope |
 | Scripts / events / flags | no | `in progress` | `scripts/**`, event constants | `gameplay_manifest.json` script/event sections | `PokeExtractCLI` | Grow the bounded IR only as the next slice requires |
 | Battle data | no | `in progress` | battle engine data, trainer/move tables | `gameplay_manifest.json` trainer battle section | `PokeExtractCLI` | Add more battle cases after the first rival fight |
@@ -264,6 +269,7 @@ The M1/M2 contract requires telemetry that is stable enough for repeated build-l
 | Input event telemetry | recent synthetic and real inputs | `done` | runtime snapshot / trace | `PokeCore`, `PokeTelemetry` | confirmed during harness validation |
 | Content / asset failures | load failures are visible, not silent | `done` | runtime snapshot / trace | `PokeContent`, `PokeTelemetry` | surfaced in snapshot contract |
 | Render/window state | scale and render dimensions | `done` | runtime snapshot | `PokeMac`, `PokeTelemetry` | exposed in M2 telemetry contract |
+| Field render mode | field scenes prove placeholder vs real extracted assets | `done` | runtime snapshot / trace | `PokeCore`, `PokeTelemetry`, `PokeUI` | `renderMode == realAssets` is validated through the M3/M4A loop |
 | Build command | one stable app build command | `done` | repo script / harness command | `PokeHarness` | used in milestone automation |
 | Launch command | one stable app launch command | `done` | repo script / harness command | `PokeHarness` | used in milestone automation |
 | Synthetic input injection | up/down/confirm/cancel/start | `done` | harness to telemetry control surface | `PokeHarness`, `PokeTelemetry` | validated end to end |
@@ -400,9 +406,9 @@ When a blocker is discovered, add:
 
 ## Next Recommended Steps
 
-1. Scope `M4` around the next early-game progression slice beyond Oak's Lab.
+1. Scope `M4` around the next early-game progression slice beyond Oak's Lab now that M3 rendering is source-driven.
 2. Expand the bounded script and content coverage carefully instead of generalizing the runtime too early.
-3. Preserve the accepted M3 telemetry and harness contract while broadening field and battle coverage.
+3. Preserve the accepted M3/M4A telemetry and harness contract while broadening field and battle coverage.
 4. Add explicit manifest fixture snapshots as extraction coverage expands.
 5. Keep this ledger current as milestone scope and acceptance evidence change.
 
@@ -425,3 +431,6 @@ When a blocker is discovered, add:
 - Added `gameplay_manifest.json` and the bounded M3 extraction/runtime contracts for four maps, slice-specific scripts, dialogue, starter data, and the first rival battle.
 - Expanded the telemetry and harness loop to validate field, dialogue, starter-choice, battle, party, and event-flag state end to end.
 - Verified deterministic M3 extraction with two temporary output roots and a clean `diff -ru`.
+- Accepted `M4A` after replacing placeholder field rendering with a real GB-style compositor driven by extracted tilesets, blocksets, and overworld sprite sheets for the M3 slice.
+- Added tileset and overworld sprite manifests to `gameplay_manifest.json`, copied field assets into `Content/Red/Assets/field`, and validated that field scenes report `renderMode == realAssets` with zero asset-loading failures.
+- Verified M4A with `./scripts/validate_milestone.sh` and `xcodebuild -workspace PokeSwift.xcworkspace -scheme PokeSwift-Workspace -derivedDataPath .build/DerivedData test`.
