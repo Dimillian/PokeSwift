@@ -5,7 +5,7 @@ import PokeDataModel
 
 @MainActor
 final class PokeCoreTests: XCTestCase {
-    func testTitleFlowTransitionsFromAttractToMenuAndPlaceholder() async {
+    func testTitleFlowTransitionsFromAttractToMenuAndOptionsPlaceholder() async {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
         runtime.start()
         try? await Task.sleep(for: .milliseconds(1700))
@@ -13,6 +13,8 @@ final class PokeCoreTests: XCTestCase {
         runtime.handle(button: .start)
         XCTAssertEqual(runtime.scene, .titleMenu)
 
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
         runtime.handle(button: .confirm)
         runtime.updateWindowScale(5)
         XCTAssertEqual(runtime.currentSnapshot().window.scale, 5)
@@ -27,6 +29,19 @@ final class PokeCoreTests: XCTestCase {
         runtime.handle(button: .down)
         runtime.handle(button: .confirm)
         XCTAssertEqual(runtime.currentSnapshot().substate, "continue_disabled")
+    }
+
+    func testNewGameEntersFieldAndPublishesFieldTelemetry() async {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.start()
+        try? await Task.sleep(for: .milliseconds(1700))
+        runtime.handle(button: .start)
+        runtime.handle(button: .confirm)
+
+        let snapshot = runtime.currentSnapshot()
+        XCTAssertEqual(snapshot.scene, .field)
+        XCTAssertEqual(snapshot.field?.mapID, "REDS_HOUSE_2F")
+        XCTAssertEqual(snapshot.field?.playerPosition, TilePoint(x: 4, y: 4))
     }
 
     private func fixtureContent() -> LoadedContent {
@@ -48,7 +63,33 @@ final class PokeCoreTests: XCTestCase {
                 assets: [],
                 timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
             ),
-            audioManifest: .init(variant: .red, tracks: [])
+            audioManifest: .init(variant: .red, tracks: []),
+            gameplayManifest: .init(
+                maps: [
+                    .init(
+                        id: "REDS_HOUSE_2F",
+                        displayName: "Red's House 2F",
+                        blockWidth: 4,
+                        blockHeight: 4,
+                        tileWidth: 8,
+                        tileHeight: 8,
+                        tileset: "REDS_HOUSE_2",
+                        collisionBlockIDs: [],
+                        blockIDs: Array(repeating: 0x05, count: 16),
+                        warps: [],
+                        backgroundEvents: [],
+                        objects: [],
+                        triggerRegions: []
+                    ),
+                ],
+                dialogues: [],
+                eventFlags: .init(flags: []),
+                scripts: [],
+                species: [],
+                moves: [],
+                trainerBattles: [],
+                playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
+            )
         )
     }
 }

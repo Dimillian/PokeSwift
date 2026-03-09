@@ -40,10 +40,11 @@ The port target is not "run the ROM." The target is:
 
 - `M1`: Red extraction foundation
 - `M2`: Native macOS boot, splash, title attract, title menu, telemetry, and validation harness
+- `M3`: First playable slice from `New Game` to the first rival battle in Oak's Lab
 
 ### Current State Summary
 
-Milestones `M1` and `M2` are complete as of `2026-03-09`.
+Milestones `M1`, `M2`, and `M3` are complete as of `2026-03-09`.
 
 The repo now contains:
 
@@ -52,6 +53,9 @@ The repo now contains:
 - a working Red extraction CLI and committed `Content/Red` artifacts
 - a native macOS app that reaches `launch -> splash -> titleAttract -> titleMenu`
 - telemetry and harness targets with working build, launch, input, latest-snapshot, quit, and validate flows
+- bounded M3 gameplay extraction for `REDS_HOUSE_2F`, `REDS_HOUSE_1F`, `PALLET_TOWN`, and `OAKS_LAB`
+- a playable field/dialogue/starter-choice/battle runtime slice from `New Game` through the first rival battle
+- a native overworld/dialogue/battle UI shell for the M3 slice
 - a passing workspace test run across the current module test targets
 - a macOS `26.0+` baseline for the Swift port so native Liquid Glass UI can be used without legacy fallback surfaces
 
@@ -77,6 +81,17 @@ Acceptance was proven with the documented validation command, a deterministic ex
 - telemetry exposes scene state, menu focus, input events, asset failures, and render/window state
 - the harness can build, launch, poll telemetry, send synthetic input, and stop the app
 - the validation loop can be rerun until all acceptance checks pass
+
+### M3 Acceptance Criteria
+
+- `New Game` starts a fresh in-memory run in `REDS_HOUSE_2F`
+- the player can traverse `REDS_HOUSE_2F -> REDS_HOUSE_1F -> PALLET_TOWN -> OAKS_LAB`
+- Oak stops the north-exit attempt in Pallet Town and the lab sequence proceeds correctly
+- the player can choose a real starter and receive a party Pokemon in-memory
+- the rival receives the correct counter-starter
+- the first rival battle is playable and resolves into the correct post-battle lab state
+- telemetry exposes field, dialogue, starter-choice, battle, party, and event-flag state for the slice
+- the harness validator can drive the full path from the title menu through the post-battle lab state
 
 ## Repo Architecture
 
@@ -107,25 +122,25 @@ The following table is the top-level full-port checklist. Each row represents a 
 
 | Subsystem | Status | Parity Target | Source of Truth | Target Module(s) | Telemetry / Observability | Known Gaps / Next Step |
 | --- | --- | --- | --- | --- | --- | --- |
-| Content extraction pipeline | `in progress` | Deterministic Red extraction covering all runtime content categories | `constants/*.asm`, `data/**`, `engine/**`, `maps/**`, `gfx/**`, `audio/**`, `scripts/**`, `text/**` | `PokeExtractCLI`, `PokeDataModel` | extractor summaries, deterministic diff checks, verify command output | M1 title-scope extraction is accepted; expand coverage beyond title assets and manifests |
-| Runtime content loading | `in progress` | Decode all extracted manifests and fail fast on missing/invalid content | `Content/Red/**` | `PokeContent`, `PokeDataModel` | content load failures, manifest versions, asset lookup failures | Lock manifest schemas and loader validation rules |
-| Text / charmap / font pipeline | `in progress` | Native text rendering with original charmap semantics and full dialogue support | `constants/charmap.asm`, text sources, font assets | `PokeExtractCLI`, `PokeContent`, `PokeUI` | charmap coverage checks, missing glyph traces, rendered text snapshots | Complete title text now, then expand to full dialogue and naming screens |
+| Content extraction pipeline | `in progress` | Deterministic Red extraction covering all runtime content categories | `constants/*.asm`, `data/**`, `engine/**`, `maps/**`, `gfx/**`, `audio/**`, `scripts/**`, `text/**` | `PokeExtractCLI`, `PokeDataModel` | extractor summaries, deterministic diff checks, verify command output | Title plus bounded M3 gameplay extraction is accepted; expand beyond the first playable slice |
+| Runtime content loading | `in progress` | Decode all extracted manifests and fail fast on missing/invalid content | `Content/Red/**` | `PokeContent`, `PokeDataModel` | content load failures, manifest versions, asset lookup failures | Loader now covers gameplay manifests for M3; broaden validation as more content lands |
+| Text / charmap / font pipeline | `in progress` | Native text rendering with original charmap semantics and full dialogue support | `constants/charmap.asm`, text sources, font assets | `PokeExtractCLI`, `PokeContent`, `PokeUI` | charmap coverage checks, missing glyph traces, rendered text snapshots | Title text and bounded M3 dialogue are wired; naming/text edge cases remain |
 | Intro / splash / title flow | `done` | Native reproduction of title flow with required transitions and menu logic | `engine/movie/intro.asm`, `engine/movie/title.asm`, `engine/movie/title2.asm`, `gfx/title/**`, `gfx/splash/**` | `PokeExtractCLI`, `PokeCore`, `PokeUI`, `PokeMac` | scene state snapshots, menu focus traces, asset load failures | Extend from accepted title flow into gameplay scenes in M3 |
 | Save / load / persistence | `not started` | Usable save system for full-game progression and restart | save format references, WRAM/SRAM behaviors, menu flows | `PokeCore`, `PokeContent`, `PokeMac`, `PokeTelemetry` | save slot inventory, load failures, save/load timing traces | Decide save compatibility strategy before implementation |
-| Overworld map loading | `not started` | All maps load with correct tilesets, warps, objects, metadata | `maps/**`, `data/maps/**`, tileset data | `PokeExtractCLI`, `PokeContent`, `PokeCore`, `PokeUI` | current map id/name, tileset id, warp traces, missing map asset reports | Define extracted map manifest schema |
-| Overworld rendering | `not started` | Native tile and sprite rendering with deterministic visual composition | map assets, sprite assets, tilesets | `PokeUI`, `PokeCore`, `PokeContent` | render surface dimensions, visible map region, sprite layer traces | Decide camera/render abstraction after title renderer is stable |
-| Player movement and collisions | `not started` | Correct grid movement, collision, ledges, doors, warps, cut/surf/bike gating | movement/collision logic in disassembly | `PokeCore`, `PokeTelemetry` | player position, heading, blocked movement reasons, warp transitions | Build headless field simulation after M2 |
-| NPC objects and trainer objects | `not started` | Correct object spawning, movement, facing, trainer line-of-sight, interactions | object event data, scripts, map data | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | object states, interaction target ids, trainer trigger traces | Extract object/event schema with stable ids |
-| Script engine and event flags | `not started` | Full script execution and event flag parity | `scripts/**`, event tables, map scripts, flag constants | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | current script id, active flags, script transitions, blocking reasons | Define extracted script/event intermediate representation |
+| Overworld map loading | `in progress` | All maps load with correct tilesets, warps, objects, metadata | `maps/**`, `data/maps/**`, tileset data | `PokeExtractCLI`, `PokeContent`, `PokeCore`, `PokeUI` | current map id/name, tileset id, warp traces, missing map asset reports | M3 covers four maps only; expand map coverage and edge rules next |
+| Overworld rendering | `in progress` | Native tile and sprite rendering with deterministic visual composition | map assets, sprite assets, tilesets | `PokeUI`, `PokeCore`, `PokeContent` | render surface dimensions, visible map region, sprite layer traces | Bounded field renderer is in place for M3; camera polish and full asset parity remain |
+| Player movement and collisions | `in progress` | Correct grid movement, collision, ledges, doors, warps, cut/surf/bike gating | movement/collision logic in disassembly | `PokeCore`, `PokeTelemetry` | player position, heading, blocked movement reasons, warp transitions | M3 supports bounded movement, collisions, and warps; special movement rules remain |
+| NPC objects and trainer objects | `in progress` | Correct object spawning, movement, facing, trainer line-of-sight, interactions | object event data, scripts, map data | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | object states, interaction target ids, trainer trigger traces | M3 lab/Pallet objects are extracted and interactive; general NPC behavior remains |
+| Script engine and event flags | `in progress` | Full script execution and event flag parity | `scripts/**`, event tables, map scripts, flag constants | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | current script id, active flags, script transitions, blocking reasons | Bounded M3 IR and slice flags are live; do not generalize until next milestone needs it |
 | Inventory, items, shops, PC | `not started` | Functional bag, PC storage, marts, item use, hidden items | item data, shop tables, menu scripts | `PokeExtractCLI`, `PokeCore`, `PokeUI`, `PokeTelemetry` | bag contents, item actions, mart transactions, storage traces | Extract item catalogs and menu layouts |
-| Party, stats, moves, evolution | `not started` | Correct party state, stat growth, level up, learnsets, evolution rules | species/move data, evolution tables | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | party summary, move learn events, evolution triggers, stat deltas | Define extracted battle/trainer data contracts |
-| Battle engine | `not started` | Wild, trainer, scripted, and special battle parity | battle engine code, move data, trainer data, effects tables | `PokeExtractCLI`, `PokeCore`, `PokeUI`, `PokeTelemetry` | battle state snapshots, turn/action logs, HP/status deltas | Separate battle domain model before UI work |
-| Battle UI | `not started` | Native battle presentation, menus, animations, text, outcomes | battle assets, menu text, move/item strings | `PokeUI`, `PokeMac`, `PokeCore` | active combatants, current menu, damage/result events | Build after battle core produces stable state snapshots |
+| Party, stats, moves, evolution | `in progress` | Correct party state, stat growth, level up, learnsets, evolution rules | species/move data, evolution tables | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | party summary, move learn events, evolution triggers, stat deltas | Starter acquisition and bounded battle stats/moves are implemented for M3 |
+| Battle engine | `in progress` | Wild, trainer, scripted, and special battle parity | battle engine code, move data, trainer data, effects tables | `PokeExtractCLI`, `PokeCore`, `PokeUI`, `PokeTelemetry` | battle state snapshots, turn/action logs, HP/status deltas | First rival battle is live with deterministic AI; full battle system remains |
+| Battle UI | `in progress` | Native battle presentation, menus, animations, text, outcomes | battle assets, menu text, move/item strings | `PokeUI`, `PokeMac`, `PokeCore` | active combatants, current menu, damage/result events | Minimal native battle UI exists for M3; expand to full menu stack and outcomes later |
 | Encounters, fishing, gifts, trades, fossils, legendaries | `not started` | Full world content progression parity | encounter tables, map scripts, NPC scripts, gift/trade data | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | encounter source, gift/trade state, one-off content completion flags | Expand extraction beyond core loop data |
 | Menus, naming, Pokedex, party UI | `not started` | Full native menu/navigation stack with gameplay parity | menu scripts, text resources, species data | `PokeCore`, `PokeUI`, `PokeMac`, `PokeTelemetry` | current menu stack, selection state, naming input events | Build generic menu framework after title menu is stable |
 | Audio / music / SFX | `not started` | Native playback matching timing and event hooks closely enough for parity | `audio/**`, music/sfx data, track references | `PokeExtractCLI`, `PokeCore`, `PokeMac` | current track/sfx ids, audio load failures, playback state | Keep identifier extraction early; playback comes later |
 | Native macOS shell and UX | `in progress` | Native menus, settings, scaling, input mapping, window behavior, accessibility basics | app-level design decisions and extracted content constraints | `PokeMac`, `PokeUI`, `PokeTelemetry` | window scale, focused scene, input bindings, command usage | Title-shell scope is accepted; expand settings and accessibility with later gameplay milestones |
-| Telemetry, debug tooling, parity harnesses | `in progress` | Stable state snapshots, control hooks, regression harnesses, parity/debug surfaces | runtime state plus extracted content metadata | `PokeTelemetry`, `PokeHarness`, `PokeCore` | JSONL traces, latest snapshot endpoint, smoke validators, debug overlay | M2 telemetry and harness contract is accepted; grow telemetry with overworld, scripts, and battle systems |
+| Telemetry, debug tooling, parity harnesses | `in progress` | Stable state snapshots, control hooks, regression harnesses, parity/debug surfaces | runtime state plus extracted content metadata | `PokeTelemetry`, `PokeHarness`, `PokeCore` | JSONL traces, latest snapshot endpoint, smoke validators, debug overlay | M3 telemetry now covers field/dialogue/starter-choice/battle/flags; parity tooling still needs expansion |
 
 ## End-to-End Delivery Checklist
 
@@ -140,47 +155,47 @@ The following table is the top-level full-port checklist. Each row represents a 
 ### Extraction and Content
 
 - [ ] charmap extraction
-- [ ] text extraction and normalization
-- [ ] constants extraction
-- [ ] title and intro manifests
-- [ ] map manifests
+- [x] text extraction and normalization
+- [x] constants extraction
+- [x] title and intro manifests
+- [x] map manifests
 - [ ] tileset and sprite manifests
 - [ ] item, move, species, trainer, and encounter catalogs
-- [ ] event/script extraction
+- [x] event/script extraction
 - [ ] audio identifier extraction
-- [ ] extraction verification and determinism tests
+- [x] extraction verification and determinism tests
 
 ### Core Runtime
 
-- [ ] launch/title scene state machine
-- [ ] overworld simulation
-- [ ] event flag system
-- [ ] script runner
+- [x] launch/title scene state machine
+- [x] overworld simulation
+- [x] event flag system
+- [x] script runner
 - [ ] save/load state management
-- [ ] party and trainer state
-- [ ] battle simulation
+- [x] party and trainer state
+- [x] battle simulation
 - [ ] menu stack and naming input
 - [ ] economy/progression systems
 
 ### Presentation
 
-- [ ] title/intro visuals
-- [ ] overworld tile renderer
+- [x] title/intro visuals
+- [x] overworld tile renderer
 - [ ] sprite renderer
-- [ ] text box system
-- [ ] battle UI
+- [x] text box system
+- [x] battle UI
 - [ ] menu UI
 - [ ] Pokedex / PC / shop UI
 - [ ] accessibility and scaling pass
 
 ### Validation
 
-- [ ] unit tests for extractors and content decoders
-- [ ] scene/state tests for runtime transitions
-- [ ] automation harness for build/launch/input/quit
-- [ ] telemetry schema tests
+- [x] unit tests for extractors and content decoders
+- [x] scene/state tests for runtime transitions
+- [x] automation harness for build/launch/input/quit
+- [x] telemetry schema tests
 - [ ] golden fixture validation for extracted content
-- [ ] milestone smoke tests
+- [x] milestone smoke tests
 - [ ] future parity comparison harness against original behavior
 
 ## Milestone Board
@@ -189,7 +204,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | --- | --- | --- | --- | --- |
 | `M1` Extraction Foundation | `done` | Red-only title-scope extraction, loader schemas, deterministic content output | extraction and verify commands succeed; deterministic output is proven; runtime can load extracted content | Accepted on `2026-03-09` via extractor build, extract/verify, deterministic diff check, and loader-backed app boot |
 | `M2` Native Boot + Title | `done` | launch, splash, title attract, title menu, telemetry, harness validation loop | native app builds and launches; title flow works; telemetry and harness acceptance checks pass | Accepted on `2026-03-09` via `./scripts/validate_milestone.sh` and passing workspace tests |
-| `M3` First Playable Slice | `not started` | intro to player room, Pallet Town, Oak trigger, lab, starter choice, first rival battle | one serious vertical slice is playable end to end | Depends on overworld, scripts, menus, and initial battle support |
+| `M3` First Playable Slice | `done` | intro to player room, Pallet Town, Oak trigger, lab, starter choice, first rival battle | one serious vertical slice is playable end to end | Accepted on `2026-03-09` via `./scripts/validate_milestone.sh`, deterministic extraction diff, and passing workspace tests |
 | `M4` Early-Game Progression | `not started` | route and town progression through early-game loop | stable field loop, trainers, encounters, marts, healing, save/load | Scope to be refined after M3 |
 | `M5` Full Content Parity | `not started` | complete Red content coverage from start to credits | end-to-end playable game | Requires all subsystem rows to reach done or approved residual-gap state |
 
@@ -205,10 +220,10 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Title assets | yes | `done` | `gfx/title/**` | copied/normalized assets | `PokeExtractCLI` | Maintain stable runtime paths as extraction expands |
 | Font assets | yes | `done` | `gfx/font/**` | copied/normalized assets | `PokeExtractCLI` | Expand glyph/render validation with dialogue systems |
 | Audio ids stub | optional | `done` | title/intro track references | `audio_manifest.json` | `PokeExtractCLI` | Replace stub-only behavior with playback later |
-| Maps | no | `not started` | `maps/**`, `data/maps/**` | future map manifests | `PokeExtractCLI` | Define map manifest schema after M2 |
-| Species / moves / items | no | `not started` | `data/pokemon/**`, `data/moves/**`, `data/items/**` | future catalogs | `PokeExtractCLI` | Plan extraction after title milestone |
-| Scripts / events / flags | no | `not started` | `scripts/**`, event constants | future script/event manifests | `PokeExtractCLI` | Define IR for script execution and flag references |
-| Battle data | no | `not started` | battle engine data, trainer/move tables | future battle manifests | `PokeExtractCLI` | Defer until M3 planning |
+| Maps | no | `in progress` | `maps/**`, `data/maps/**` | `gameplay_manifest.json` map section | `PokeExtractCLI` | Expand beyond the four M3 maps |
+| Species / moves / items | no | `in progress` | `data/pokemon/**`, `data/moves/**`, `data/items/**` | `gameplay_manifest.json` species/moves sections | `PokeExtractCLI` | Add broader catalogs beyond M3 starter and battle scope |
+| Scripts / events / flags | no | `in progress` | `scripts/**`, event constants | `gameplay_manifest.json` script/event sections | `PokeExtractCLI` | Grow the bounded IR only as the next slice requires |
+| Battle data | no | `in progress` | battle engine data, trainer/move tables | `gameplay_manifest.json` trainer battle section | `PokeExtractCLI` | Add more battle cases after the first rival fight |
 
 ## Gameplay Parity Matrix
 
@@ -217,10 +232,10 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Boot and scene progression | Native app reaches title menu reliably | `done` | content loader, title assets, runtime state machine | current scene, scene timestamps, failures | Accepted in harness and validation script |
 | Title menu input | Directional navigation and confirm/cancel/start | `done` | runtime input mapping, app key routing | recent input events, focused entry, disabled states | `Continue` is disabled and validated in M2 |
 | Placeholder routing | Explicit non-silent routing for unavailable paths | `done` | scene state machine, placeholder view | active placeholder id/reason | `New Game` and `Options` route to placeholders in M2 |
-| Overworld movement | Full field control and collisions | `not started` | maps, object data, collision rules, renderer | map id, position, heading, blocked reasons | M3+ |
-| NPC interaction | Correct interaction and script triggering | `not started` | objects, scripts, text engine | target object id, script id, dialogue state | M3+ |
-| Story progression | Event flag and scripted sequence parity | `not started` | event flags, script runner, map triggers | active flags, story milestones, last trigger | M3+ |
-| Battles | Correct outcomes and flow | `not started` | species/move/trainer data, battle engine, UI | battle snapshots, turn logs, HP/status, rewards | M3+ |
+| Overworld movement | Full field control and collisions | `in progress` | maps, object data, collision rules, renderer | map id, position, heading, blocked reasons | Bounded four-map slice is live in M3 |
+| NPC interaction | Correct interaction and script triggering | `in progress` | objects, scripts, text engine | target object id, script id, dialogue state | Oak, Mom, starter balls, and rival flow are wired for M3 |
+| Story progression | Event flag and scripted sequence parity | `in progress` | event flags, script runner, map triggers | active flags, story milestones, last trigger | First playable story slice is accepted in M3 |
+| Battles | Correct outcomes and flow | `in progress` | species/move/trainer data, battle engine, UI | battle snapshots, turn logs, HP/status, rewards | First rival battle is accepted in M3 |
 | Save/load | Persistent progression | `not started` | save schema, runtime serialization, UI | slot metadata, save result, load result | M3+ |
 | End-to-end full game | Start to credits fully playable | `not started` | every major subsystem | milestone dashboard plus parity checkpoints | Final target |
 
@@ -253,7 +268,7 @@ The M1/M2 contract requires telemetry that is stable enough for repeated build-l
 | Launch command | one stable app launch command | `done` | repo script / harness command | `PokeHarness` | used in milestone automation |
 | Synthetic input injection | up/down/confirm/cancel/start | `done` | harness to telemetry control surface | `PokeHarness`, `PokeTelemetry` | validated end to end |
 | Clean shutdown | deterministic stop path | `done` | harness command | `PokeHarness` | quit handshake fixed and validated |
-| Smoke validator | end-to-end M2 acceptance script | `done` | harness validate command | `PokeHarness` | `./scripts/validate_milestone.sh` passes |
+| Smoke validator | end-to-end milestone acceptance script | `done` | harness validate command | `PokeHarness` | `./scripts/validate_milestone.sh` now passes for M3 |
 
 ### Telemetry Contract for M2
 
@@ -385,11 +400,11 @@ When a blocker is discovered, add:
 
 ## Next Recommended Steps
 
-1. Start M3 planning around the first playable overworld slice.
-2. Define the extracted map, object, and script manifest schemas before runtime work expands.
-3. Preserve the accepted M2 telemetry and harness contract while growing gameplay coverage.
+1. Scope `M4` around the next early-game progression slice beyond Oak's Lab.
+2. Expand the bounded script and content coverage carefully instead of generalizing the runtime too early.
+3. Preserve the accepted M3 telemetry and harness contract while broadening field and battle coverage.
 4. Add explicit manifest fixture snapshots as extraction coverage expands.
-5. Keep this ledger current as M3 scope is frozen.
+5. Keep this ledger current as milestone scope and acceptance evidence change.
 
 ## Progress Log
 
@@ -406,3 +421,7 @@ When a blocker is discovered, add:
 - Ran `xcodebuild -workspace PokeSwift.xcworkspace -scheme PokeSwift-Workspace -derivedDataPath .build/DerivedData test` successfully to verify the current workspace test suite.
 - Raised the Swift port deployment target from macOS `15.0` to macOS `26.0` so title/menu surfaces can use native Liquid Glass directly.
 - Reworked the title menu and placeholder surfaces around native Liquid Glass panels and rows to fix low-contrast white-on-white menu presentation.
+- Accepted `M3` after the real app validator completed the slice from `New Game` through the first rival battle and returned to the post-battle lab state.
+- Added `gameplay_manifest.json` and the bounded M3 extraction/runtime contracts for four maps, slice-specific scripts, dialogue, starter data, and the first rival battle.
+- Expanded the telemetry and harness loop to validate field, dialogue, starter-choice, battle, party, and event-flag state end to end.
+- Verified deterministic M3 extraction with two temporary output roots and a clean `diff -ru`.

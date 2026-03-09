@@ -8,6 +8,7 @@ public struct LoadedContent: Sendable {
     public let charmapManifest: CharmapManifest
     public let titleManifest: TitleSceneManifest
     public let audioManifest: AudioManifest
+    public let gameplayManifest: GameplayManifest
 
     public init(
         rootURL: URL,
@@ -15,7 +16,8 @@ public struct LoadedContent: Sendable {
         constantsManifest: ConstantsManifest,
         charmapManifest: CharmapManifest,
         titleManifest: TitleSceneManifest,
-        audioManifest: AudioManifest
+        audioManifest: AudioManifest,
+        gameplayManifest: GameplayManifest
     ) {
         self.rootURL = rootURL
         self.gameManifest = gameManifest
@@ -23,6 +25,7 @@ public struct LoadedContent: Sendable {
         self.charmapManifest = charmapManifest
         self.titleManifest = titleManifest
         self.audioManifest = audioManifest
+        self.gameplayManifest = gameplayManifest
     }
 
     public var contentRoot: URL {
@@ -31,6 +34,30 @@ public struct LoadedContent: Sendable {
 
     public var titleSceneManifest: TitleSceneManifest {
         titleManifest
+    }
+
+    public func map(id: String) -> MapManifest? {
+        gameplayManifest.maps.first { $0.id == id }
+    }
+
+    public func dialogue(id: String) -> DialogueManifest? {
+        gameplayManifest.dialogues.first { $0.id == id }
+    }
+
+    public func script(id: String) -> ScriptManifest? {
+        gameplayManifest.scripts.first { $0.id == id }
+    }
+
+    public func species(id: String) -> SpeciesManifest? {
+        gameplayManifest.species.first { $0.id == id }
+    }
+
+    public func move(id: String) -> MoveManifest? {
+        gameplayManifest.moves.first { $0.id == id }
+    }
+
+    public func trainerBattle(id: String) -> TrainerBattleManifest? {
+        gameplayManifest.trainerBattles.first { $0.id == id }
     }
 }
 
@@ -75,6 +102,7 @@ public final class FileSystemContentLoader: ContentLoader {
         let charmapManifest: CharmapManifest = try decode("charmap.json", at: variantRoot)
         let titleManifest: TitleSceneManifest = try decode("title_manifest.json", at: variantRoot)
         let audioManifest: AudioManifest = try decode("audio_manifest.json", at: variantRoot)
+        let gameplayManifest: GameplayManifest = try decode("gameplay_manifest.json", at: variantRoot)
 
         for asset in titleManifest.assets {
             let assetURL = variantRoot.appendingPathComponent(asset.relativePath)
@@ -89,7 +117,8 @@ public final class FileSystemContentLoader: ContentLoader {
             constantsManifest: constantsManifest,
             charmapManifest: charmapManifest,
             titleManifest: titleManifest,
-            audioManifest: audioManifest
+            audioManifest: audioManifest,
+            gameplayManifest: gameplayManifest
         )
     }
 

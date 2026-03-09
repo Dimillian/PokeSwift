@@ -195,6 +195,10 @@ private struct RuntimeView: View {
             TitleAttractView(rootURL: runtime.content.rootURL)
         case .titleMenu:
             TitleMenuScene(runtime: runtime)
+        case .field, .dialogue, .scriptedSequence, .starterChoice:
+            GameplayFieldScene(runtime: runtime)
+        case .battle:
+            BattleScene(runtime: runtime)
         case .placeholder:
             PlaceholderScene(runtime: runtime)
         }
@@ -285,6 +289,68 @@ private struct TitleMenuScene: View {
     }
 }
 
+private struct GameplayFieldScene: View {
+    @Bindable var runtime: GameRuntime
+
+    var body: some View {
+        GameBoyScreen {
+            ZStack {
+                if let map = runtime.currentMapManifest,
+                   let playerPosition = runtime.playerPosition {
+                    PokeUI.FieldMapView(
+                        map: map,
+                        playerPosition: playerPosition,
+                        playerFacing: runtime.playerFacing,
+                        objects: runtime.currentFieldObjects
+                    )
+                    .padding(36)
+                }
+
+                VStack {
+                    HStack {
+                        FieldStatusHUD(runtime: runtime)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(28)
+
+                if let dialogue = runtime.currentDialoguePage {
+                    VStack {
+                        Spacer()
+                        DialogueBoxView(lines: dialogue.lines)
+                            .frame(maxWidth: 760)
+                    }
+                    .padding(28)
+                } else if runtime.scene == .starterChoice {
+                    StarterChoicePanel(options: runtime.starterChoiceOptions, focusedIndex: runtime.starterChoiceFocusedIndex)
+                        .frame(width: 420)
+                }
+            }
+        }
+    }
+}
+
+private struct BattleScene: View {
+    @Bindable var runtime: GameRuntime
+
+    var body: some View {
+        GameBoyScreen {
+            if let battle = runtime.currentSnapshot().battle {
+                BattlePanel(
+                    trainerName: battle.trainerName,
+                    message: battle.battleMessage,
+                    playerPokemon: battle.playerPokemon,
+                    enemyPokemon: battle.enemyPokemon,
+                    moveNames: runtime.currentBattleMoves.map(\.displayName),
+                    focusedMoveIndex: battle.focusedMoveIndex
+                )
+                .padding(36)
+            }
+        }
+    }
+}
+
 private struct PlaceholderScene: View {
     @Bindable var runtime: GameRuntime
 
@@ -312,25 +378,74 @@ private struct DebugPanel: View {
     let snapshot: RuntimeTelemetrySnapshot
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Telemetry")
-                .font(.title2.bold())
-            Text("Scene: \(snapshot.scene.rawValue)")
-            Text("Substate: \(snapshot.substate)")
-            Text("Content: \(snapshot.contentVersion)")
-            Text("Scale: \(snapshot.window.scale)x")
-            if let titleMenu = snapshot.titleMenu {
-                let safeIndex = max(0, min(titleMenu.focusedIndex, titleMenu.entries.count - 1))
-                Text("Focused Entry: \(titleMenu.entries[safeIndex].label)")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Telemetry")
+                    .font(.title2.bold())
+                Text("Scene: \(snapshot.scene.rawValue)")
+                Text("Substate: \(snapshot.substate)")
+                Text("Content: \(snapshot.contentVersion)")
+                Text("Scale: \(snapshot.window.scale)x")
+                if let titleMenu = snapshot.titleMenu, titleMenu.entries.isEmpty == false {
+                    let safeIndex = max(0, min(titleMenu.focusedIndex, titleMenu.entries.count - 1))
+                    Text("Focused Entry: \(titleMenu.entries[safeIndex].label)")
+                }
+                if let field = snapshot.field {
+                    Text("Map: \(field.mapName) [\(field.mapID)]")
+                    Text("Player: (\(field.playerPosition.x), \(field.playerPosition.y)) facing \(field.facing.rawValue)")
+                    Text("Active Script: \(field.activeScriptID ?? "none")")
+                }
+                if let dialogue = snapshot.dialogue {
+                    Text("Dialogue: \(dialogue.dialogueID) page \(dialogue.pageIndex + 1)/\(dialogue.pageCount)")
+                }
+                if let battle = snapshot.battle {
+                    Text("Battle: \(battle.trainerName)")
+                    Text("Player HP: \(battle.playerPokemon.currentHP)/\(battle.playerPokemon.maxHP)")
+                    Text("Enemy HP: \(battle.enemyPokemon.currentHP)/\(battle.enemyPokemon.maxHP)")
+                }
+                if let flags = snapshot.eventFlags {
+                    Text("Flags: \(flags.activeFlags.joined(separator: ", "))")
+                        .font(.system(.body, design: .monospaced))
+                }
+                Text("Recent Inputs")
+                    .font(.headline)
+                ForEach(Array(snapshot.recentInputEvents.enumerated()), id: \.offset) { _, event in
+                    Text("\(event.timestamp)  \(event.button.rawValue)")
+                        .font(.system(.body, design: .monospaced))
+                }
+                Spacer()
             }
-            Text("Recent Inputs")
-                .font(.headline)
-            ForEach(Array(snapshot.recentInputEvents.enumerated()), id: \.offset) { _, event in
-                Text("\(event.timestamp)  \(event.button.rawValue)")
-                    .font(.system(.body, design: .monospaced))
-            }
-            Spacer()
         }
+    }
+}
+
+private struct FieldStatusHUD: View {
+    @Bindable var runtime: GameRuntime
+
+    var body: some View {
+        let snapshot = runtime.currentSnapshot()
+        PlainWhitePanel {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(runtime.currentMapManifest?.displayName ?? "Unknown Map")
+                    .font(.system(size: 18, weight: .bold, design: .monospaced))
+                Text(positionLine)
+                    .font(.system(size: 13, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.black.opacity(0.66))
+                if let flags = snapshot.eventFlags, flags.activeFlags.isEmpty == false {
+                    Text(flags.activeFlags.joined(separator: " • "))
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.black.opacity(0.5))
+                }
+            }
+        }
+        .frame(width: 400, alignment: .leading)
+    }
+
+    private var positionLine: String {
+        guard let point = runtime.playerPosition else {
+            return "No field position"
+        }
+        return "Pos \(point.x), \(point.y) • \(runtime.playerFacing.rawValue)"
     }
 }
 

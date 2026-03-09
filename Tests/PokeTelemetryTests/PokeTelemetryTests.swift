@@ -13,6 +13,12 @@ final class PokeTelemetryTests: XCTestCase {
             scene: .titleMenu,
             substate: "selection",
             titleMenu: .init(entries: [.init(id: "newGame", label: "New Game", enabledByDefault: true)], focusedIndex: 0),
+            field: nil,
+            dialogue: nil,
+            starterChoice: nil,
+            party: nil,
+            battle: nil,
+            eventFlags: nil,
             recentInputEvents: [],
             assetLoadingFailures: [],
             window: .init(scale: 4, renderWidth: 160, renderHeight: 144)

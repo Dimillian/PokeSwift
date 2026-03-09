@@ -23,6 +23,7 @@ public enum RedContentExtractor {
         let constants = try parseConstants(source: source)
         let titleManifest = try parseTitleManifest(source: source)
         let gameManifest = makeGameManifest(source: source)
+        let gameplayManifest = try extractGameplayManifest(source: source)
         let audioManifest = AudioManifest(
             variant: .red,
             tracks: [
@@ -35,6 +36,7 @@ public enum RedContentExtractor {
         try writeJSON(constants, to: variantRoot.appendingPathComponent("constants.json"))
         try writeJSON(charmap, to: variantRoot.appendingPathComponent("charmap.json"))
         try writeJSON(titleManifest, to: variantRoot.appendingPathComponent("title_manifest.json"))
+        try writeJSON(gameplayManifest, to: variantRoot.appendingPathComponent("gameplay_manifest.json"))
         try writeJSON(audioManifest, to: variantRoot.appendingPathComponent("audio_manifest.json"))
 
         for (sourcePath, destination) in source.assetMap {
@@ -52,6 +54,7 @@ public enum RedContentExtractor {
             "constants.json",
             "charmap.json",
             "title_manifest.json",
+            "gameplay_manifest.json",
             "audio_manifest.json",
             "Assets/title/pokemon_logo.png",
             "Assets/title/player.png",
@@ -69,6 +72,7 @@ public enum RedContentExtractor {
         _ = try decoder.decode(ConstantsManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("constants.json")))
         _ = try decoder.decode(CharmapManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("charmap.json")))
         _ = try decoder.decode(TitleSceneManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("title_manifest.json")))
+        _ = try decoder.decode(GameplayManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("gameplay_manifest.json")))
         _ = try decoder.decode(AudioManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("audio_manifest.json")))
     }
 
@@ -78,7 +82,7 @@ public enum RedContentExtractor {
 
     private static func makeGameManifest(source: SourceTree) -> GameManifest {
         GameManifest(
-            contentVersion: "m1-m2-red-title-v1",
+            contentVersion: "m3-red-first-slice-v1",
             variant: .red,
             sourceCommit: source.gitCommit,
             extractorVersion: extractorVersion,
@@ -247,7 +251,7 @@ public enum ExtractorError: Error, CustomStringConvertible {
     }
 }
 
-private struct SourceTree {
+struct SourceTree {
     let repoRoot: URL
     let charmapURL: URL
     let titleURL: URL

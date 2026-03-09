@@ -5,6 +5,11 @@ public enum RuntimeScene: String, Codable, Sendable {
     case splash
     case titleAttract
     case titleMenu
+    case field
+    case dialogue
+    case scriptedSequence
+    case starterChoice
+    case battle
     case placeholder
 }
 
@@ -50,12 +55,126 @@ public struct WindowTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public struct FieldTelemetry: Codable, Equatable, Sendable {
+    public let mapID: String
+    public let mapName: String
+    public let playerPosition: TilePoint
+    public let facing: FacingDirection
+    public let activeScriptID: String?
+    public let activeScriptStep: Int?
+
+    public init(
+        mapID: String,
+        mapName: String,
+        playerPosition: TilePoint,
+        facing: FacingDirection,
+        activeScriptID: String?,
+        activeScriptStep: Int?
+    ) {
+        self.mapID = mapID
+        self.mapName = mapName
+        self.playerPosition = playerPosition
+        self.facing = facing
+        self.activeScriptID = activeScriptID
+        self.activeScriptStep = activeScriptStep
+    }
+}
+
+public struct DialogueTelemetry: Codable, Equatable, Sendable {
+    public let dialogueID: String
+    public let pageIndex: Int
+    public let pageCount: Int
+    public let lines: [String]
+
+    public init(dialogueID: String, pageIndex: Int, pageCount: Int, lines: [String]) {
+        self.dialogueID = dialogueID
+        self.pageIndex = pageIndex
+        self.pageCount = pageCount
+        self.lines = lines
+    }
+}
+
+public struct PartyPokemonTelemetry: Codable, Equatable, Sendable {
+    public let speciesID: String
+    public let displayName: String
+    public let level: Int
+    public let currentHP: Int
+    public let maxHP: Int
+    public let moves: [String]
+
+    public init(speciesID: String, displayName: String, level: Int, currentHP: Int, maxHP: Int, moves: [String]) {
+        self.speciesID = speciesID
+        self.displayName = displayName
+        self.level = level
+        self.currentHP = currentHP
+        self.maxHP = maxHP
+        self.moves = moves
+    }
+}
+
+public struct PartyTelemetry: Codable, Equatable, Sendable {
+    public let pokemon: [PartyPokemonTelemetry]
+
+    public init(pokemon: [PartyPokemonTelemetry]) {
+        self.pokemon = pokemon
+    }
+}
+
+public struct BattleTelemetry: Codable, Equatable, Sendable {
+    public let battleID: String
+    public let trainerName: String
+    public let playerPokemon: PartyPokemonTelemetry
+    public let enemyPokemon: PartyPokemonTelemetry
+    public let focusedMoveIndex: Int
+    public let battleMessage: String
+
+    public init(
+        battleID: String,
+        trainerName: String,
+        playerPokemon: PartyPokemonTelemetry,
+        enemyPokemon: PartyPokemonTelemetry,
+        focusedMoveIndex: Int,
+        battleMessage: String
+    ) {
+        self.battleID = battleID
+        self.trainerName = trainerName
+        self.playerPokemon = playerPokemon
+        self.enemyPokemon = enemyPokemon
+        self.focusedMoveIndex = focusedMoveIndex
+        self.battleMessage = battleMessage
+    }
+}
+
+public struct StarterChoiceTelemetry: Codable, Equatable, Sendable {
+    public let options: [String]
+    public let focusedIndex: Int
+
+    public init(options: [String], focusedIndex: Int) {
+        self.options = options
+        self.focusedIndex = focusedIndex
+    }
+}
+
+public struct EventFlagTelemetry: Codable, Equatable, Sendable {
+    public let activeFlags: [String]
+
+    public init(activeFlags: [String]) {
+        self.activeFlags = activeFlags
+    }
+}
+
 public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let appVersion: String
     public let contentVersion: String
     public let scene: RuntimeScene
     public let substate: String
     public let titleMenu: TitleMenuTelemetry?
+    public let field: FieldTelemetry?
+    public let dialogue: DialogueTelemetry?
+    public let starterChoice: StarterChoiceTelemetry?
+    public let party: PartyTelemetry?
+    public let battle: BattleTelemetry?
+    public let eventFlags: EventFlagTelemetry?
     public let recentInputEvents: [InputEventTelemetry]
     public let assetLoadingFailures: [String]
     public let window: WindowTelemetry
@@ -66,6 +185,12 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         scene: RuntimeScene,
         substate: String,
         titleMenu: TitleMenuTelemetry?,
+        field: FieldTelemetry?,
+        dialogue: DialogueTelemetry?,
+        starterChoice: StarterChoiceTelemetry?,
+        party: PartyTelemetry?,
+        battle: BattleTelemetry?,
+        eventFlags: EventFlagTelemetry?,
         recentInputEvents: [InputEventTelemetry],
         assetLoadingFailures: [String],
         window: WindowTelemetry
@@ -75,6 +200,12 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.scene = scene
         self.substate = substate
         self.titleMenu = titleMenu
+        self.field = field
+        self.dialogue = dialogue
+        self.starterChoice = starterChoice
+        self.party = party
+        self.battle = battle
+        self.eventFlags = eventFlags
         self.recentInputEvents = recentInputEvents
         self.assetLoadingFailures = assetLoadingFailures
         self.window = window

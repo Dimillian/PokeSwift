@@ -1,0 +1,1653 @@
+{
+  "dialogues" : [
+    {
+      "id" : "pallet_town_oak_hey_wait",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: Hey! Wait!",
+            "Don't go out!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_oak_its_unsafe",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: It's unsafe!",
+            "Wild POKéMON live",
+            "in tall grass!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "You need your own",
+            "POKéMON for your",
+            "protection.",
+            "I know!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Here, come with",
+            "me!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_girl",
+      "pages" : [
+        {
+          "lines" : [
+            "I'm raising",
+            "POKéMON too!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "When they get",
+            "strong, they can",
+            "protect me!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_fisher",
+      "pages" : [
+        {
+          "lines" : [
+            "Technology is",
+            "incredible!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "You can now store",
+            "and recall items",
+            "and POKéMON as",
+            "data via PC!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_oaks_lab_sign",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK POKéMON",
+            "RESEARCH LAB"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_sign",
+      "pages" : [
+        {
+          "lines" : [
+            "PALLET TOWN",
+            "Shades of your",
+            "journey await!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_players_house_sign",
+      "pages" : [
+        {
+          "lines" : [
+            "<PLAYER>'s house"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pallet_town_rivals_house_sign",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>'s house"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "reds_house_1f_mom_wakeup",
+      "pages" : [
+        {
+          "lines" : [
+            "MOM: Right.",
+            "All boys leave",
+            "home some day.",
+            "It said so on TV."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "PROF.OAK, next",
+            "door, is looking",
+            "for you."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "reds_house_1f_mom_rest",
+      "pages" : [
+        {
+          "lines" : [
+            "MOM: <PLAYER>!",
+            "You should take a",
+            "quick rest."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "reds_house_1f_mom_looking_great",
+      "pages" : [
+        {
+          "lines" : [
+            "MOM: Oh good!",
+            "You and your",
+            "POKéMON are",
+            "looking great!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Take care now!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "reds_house_1f_tv",
+      "pages" : [
+        {
+          "lines" : [
+            "There's a movie",
+            "on TV. Four boys",
+            "are walking on",
+            "railroad tracks."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "I better go too."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_gramps_isnt_around",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Yo",
+            "<PLAYER>! Gramps",
+            "isn't around!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_go_ahead_and_choose",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Heh, I",
+            "don't need to be",
+            "greedy like you!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Go ahead and",
+            "choose, <PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_my_pokemon_looks_stronger",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: My",
+            "POKéMON looks a",
+            "lot stronger."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_those_are_pokeballs",
+      "pages" : [
+        {
+          "lines" : [
+            "Those are POKé",
+            "BALLs. They",
+            "contain POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_you_want_charmander",
+      "pages" : [
+        {
+          "lines" : [
+            "So! You want the",
+            "fire POKéMON,",
+            "CHARMANDER?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_you_want_squirtle",
+      "pages" : [
+        {
+          "lines" : [
+            "So! You want the",
+            "water POKéMON,",
+            "SQUIRTLE?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_you_want_bulbasaur",
+      "pages" : [
+        {
+          "lines" : [
+            "So! You want the",
+            "plant POKéMON,",
+            "BULBASAUR?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_mon_energetic",
+      "pages" : [
+        {
+          "lines" : [
+            "This POKéMON is",
+            "really energetic!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_last_mon",
+      "pages" : [
+        {
+          "lines" : [
+            "That's PROF.OAK's",
+            "last POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_oak_which_pokemon_do_you_want",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: Now, <PLAYER>,",
+            "which POKéMON do",
+            "you want?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_oak_raise_your_young_pokemon",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: <PLAYER>,",
+            "raise your young",
+            "POKéMON by making",
+            "it fight!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_pokedex",
+      "pages" : [
+        {
+          "lines" : [
+            "It's encyclopedia-",
+            "like, but the",
+            "pages are blank!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_girl",
+      "pages" : [
+        {
+          "lines" : [
+            "PROF.OAK is the",
+            "authority on",
+            "POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Many POKéMON",
+            "trainers hold him",
+            "in high regard!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_fed_up_with_waiting",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Gramps!",
+            "I'm fed up with",
+            "waiting!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_oak_choose_mon",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: <RIVAL>?",
+            "Let me think..."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Oh, that's right,",
+            "I told you to",
+            "come! Just wait!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Here, <PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "There are 3",
+            "POKéMON here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Haha!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "They are inside",
+            "the POKé BALLs."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "When I was young,",
+            "I was a serious",
+            "POKéMON trainer!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "In my old age, I",
+            "have only 3 left,",
+            "but you can have",
+            "one! Choose!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_what_about_me",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Hey!",
+            "Gramps! What",
+            "about me?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_oak_be_patient",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: Be patient!",
+            "<RIVAL>, you can",
+            "have one too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_oak_dont_go_away_yet",
+      "pages" : [
+        {
+          "lines" : [
+            "OAK: Hey! Don't go",
+            "away yet!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_ill_take_this_one",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: I'll take",
+            "this one, then!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_received_mon_charmander",
+      "pages" : [
+        {
+          "lines" : [
+            "<PLAYER> received",
+            "CHARMANDER!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_received_mon_squirtle",
+      "pages" : [
+        {
+          "lines" : [
+            "<PLAYER> received",
+            "SQUIRTLE!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_received_mon_bulbasaur",
+      "pages" : [
+        {
+          "lines" : [
+            "<PLAYER> received",
+            "BULBASAUR!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_received_mon_charmander",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL> received",
+            "CHARMANDER!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_received_mon_squirtle",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL> received",
+            "SQUIRTLE!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_received_mon_bulbasaur",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL> received",
+            "BULBASAUR!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_ill_take_you_on",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Wait",
+            "<PLAYER>!",
+            "Let's check out",
+            "our POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Come on, I'll take",
+            "you on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
+      "pages" : [
+        {
+          "lines" : [
+            "WHAT?",
+            "Unbelievable!",
+            "I picked the",
+            "wrong POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_am_i_great_or_what",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Yeah! Am",
+            "I great or what?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_smell_you_later",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Okay!",
+            "I'll make my",
+            "POKéMON fight to",
+            "toughen it up!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "<PLAYER>! Gramps!",
+            "Smell you later!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "rival_1_win_text",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Yeah! Am",
+            "I great or what?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    }
+  ],
+  "eventFlags" : {
+    "flags" : [
+      {
+        "id" : "EVENT_FOLLOWED_OAK_INTO_LAB",
+        "sourceConstant" : "EVENT_FOLLOWED_OAK_INTO_LAB"
+      },
+      {
+        "id" : "EVENT_FOLLOWED_OAK_INTO_LAB_2",
+        "sourceConstant" : "EVENT_FOLLOWED_OAK_INTO_LAB_2"
+      },
+      {
+        "id" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+        "sourceConstant" : "EVENT_OAK_ASKED_TO_CHOOSE_MON"
+      },
+      {
+        "id" : "EVENT_GOT_STARTER",
+        "sourceConstant" : "EVENT_GOT_STARTER"
+      },
+      {
+        "id" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+        "sourceConstant" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
+      },
+      {
+        "id" : "EVENT_OAK_APPEARED_IN_PALLET",
+        "sourceConstant" : "EVENT_OAK_APPEARED_IN_PALLET"
+      }
+    ]
+  },
+  "maps" : [
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        16,
+        17,
+        5,
+        8,
+        15,
+        15,
+        15,
+        15,
+        15,
+        13,
+        15,
+        15,
+        12,
+        15,
+        15,
+        18
+      ],
+      "blockWidth" : 4,
+      "collisionBlockIDs" : [
+        1,
+        2,
+        3,
+        17,
+        18,
+        19,
+        20,
+        28,
+        26
+      ],
+      "displayName" : "Red's House 2F",
+      "id" : "REDS_HOUSE_2F",
+      "objects" : [
+
+      ],
+      "tileHeight" : 8,
+      "tileWidth" : 8,
+      "tileset" : "REDS_HOUSE_2",
+      "triggerRegions" : [
+
+      ],
+      "warps" : [
+        {
+          "id" : "reds_house_2f_warp_0",
+          "origin" : {
+            "x" : 7,
+            "y" : 1
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "REDS_HOUSE_1F",
+          "targetPosition" : {
+            "x" : 6,
+            "y" : 2
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+        {
+          "dialogueID" : "reds_house_1f_tv",
+          "id" : "reds_house_1f_bg_0",
+          "position" : {
+            "x" : 3,
+            "y" : 1
+          }
+        }
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        4,
+        9,
+        5,
+        7,
+        15,
+        15,
+        15,
+        15,
+        15,
+        1,
+        2,
+        15,
+        15,
+        11,
+        15,
+        15
+      ],
+      "blockWidth" : 4,
+      "collisionBlockIDs" : [
+        1,
+        2,
+        3,
+        17,
+        18,
+        19,
+        20,
+        28,
+        26
+      ],
+      "displayName" : "Red's House 1F",
+      "id" : "REDS_HOUSE_1F",
+      "objects" : [
+        {
+          "displayName" : "Mom",
+          "facing" : "left",
+          "id" : "reds_house_1f_mom",
+          "interactionDialogueID" : "reds_house_1f_mom_wakeup",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 5,
+            "y" : 4
+          },
+          "sprite" : "SPRITE_MOM",
+          "visibleByDefault" : true
+        }
+      ],
+      "tileHeight" : 8,
+      "tileWidth" : 8,
+      "tileset" : "REDS_HOUSE_1",
+      "triggerRegions" : [
+
+      ],
+      "warps" : [
+        {
+          "id" : "reds_house_1f_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "PALLET_TOWN",
+          "targetPosition" : {
+            "x" : 5,
+            "y" : 6
+          }
+        },
+        {
+          "id" : "reds_house_1f_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "PALLET_TOWN",
+          "targetPosition" : {
+            "x" : 5,
+            "y" : 6
+          }
+        },
+        {
+          "id" : "reds_house_1f_warp_2",
+          "origin" : {
+            "x" : 7,
+            "y" : 1
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "REDS_HOUSE_2F",
+          "targetPosition" : {
+            "x" : 6,
+            "y" : 2
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+        {
+          "dialogueID" : "pallet_town_oaks_lab_sign",
+          "id" : "pallet_town_bg_0",
+          "position" : {
+            "x" : 13,
+            "y" : 13
+          }
+        },
+        {
+          "dialogueID" : "pallet_town_sign",
+          "id" : "pallet_town_bg_1",
+          "position" : {
+            "x" : 7,
+            "y" : 9
+          }
+        },
+        {
+          "dialogueID" : "pallet_town_players_house_sign",
+          "id" : "pallet_town_bg_2",
+          "position" : {
+            "x" : 3,
+            "y" : 5
+          }
+        },
+        {
+          "dialogueID" : "pallet_town_rivals_house_sign",
+          "id" : "pallet_town_bg_3",
+          "position" : {
+            "x" : 11,
+            "y" : 5
+          }
+        }
+      ],
+      "blockHeight" : 9,
+      "blockIDs" : [
+        82,
+        79,
+        82,
+        82,
+        79,
+        11,
+        80,
+        82,
+        82,
+        80,
+        78,
+        1,
+        56,
+        57,
+        1,
+        1,
+        56,
+        57,
+        1,
+        77,
+        78,
+        8,
+        60,
+        61,
+        1,
+        8,
+        60,
+        61,
+        1,
+        77,
+        78,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        77,
+        78,
+        1,
+        119,
+        86,
+        1,
+        12,
+        13,
+        14,
+        1,
+        77,
+        78,
+        1,
+        116,
+        116,
+        1,
+        16,
+        58,
+        0,
+        1,
+        77,
+        78,
+        1,
+        1,
+        1,
+        1,
+        119,
+        86,
+        119,
+        49,
+        77,
+        78,
+        10,
+        29,
+        30,
+        49,
+        116,
+        116,
+        10,
+        49,
+        77,
+        80,
+        10,
+        101,
+        100,
+        97,
+        97,
+        97,
+        97,
+        97,
+        79
+      ],
+      "blockWidth" : 10,
+      "collisionBlockIDs" : [
+        0,
+        16,
+        27,
+        32,
+        33,
+        35,
+        44,
+        45,
+        46,
+        48,
+        49,
+        51,
+        57,
+        60,
+        62,
+        82,
+        84,
+        88,
+        91
+      ],
+      "displayName" : "Pallet Town",
+      "id" : "PALLET_TOWN",
+      "objects" : [
+        {
+          "displayName" : "Oak",
+          "facing" : "down",
+          "id" : "pallet_town_oak",
+          "interactionDialogueID" : "pallet_town_oak_its_unsafe",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 8,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_OAK",
+          "visibleByDefault" : false
+        },
+        {
+          "displayName" : "Girl",
+          "facing" : "down",
+          "id" : "pallet_town_girl",
+          "interactionDialogueID" : "pallet_town_girl",
+          "movementType" : "WALK",
+          "position" : {
+            "x" : 3,
+            "y" : 8
+          },
+          "sprite" : "SPRITE_GIRL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Fisher",
+          "facing" : "down",
+          "id" : "pallet_town_fisher",
+          "interactionDialogueID" : "pallet_town_fisher",
+          "movementType" : "WALK",
+          "position" : {
+            "x" : 11,
+            "y" : 14
+          },
+          "sprite" : "SPRITE_FISHER",
+          "visibleByDefault" : true
+        }
+      ],
+      "tileHeight" : 18,
+      "tileWidth" : 20,
+      "tileset" : "OVERWORLD",
+      "triggerRegions" : [
+        {
+          "id" : "north_exit",
+          "origin" : {
+            "x" : 0,
+            "y" : 1
+          },
+          "scriptID" : "pallet_town_oak_intro",
+          "size" : {
+            "height" : 1,
+            "width" : 20
+          }
+        }
+      ],
+      "warps" : [
+        {
+          "id" : "pallet_town_warp_0",
+          "origin" : {
+            "x" : 5,
+            "y" : 5
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "REDS_HOUSE_1F",
+          "targetPosition" : {
+            "x" : 2,
+            "y" : 6
+          }
+        },
+        {
+          "id" : "pallet_town_warp_1",
+          "origin" : {
+            "x" : 13,
+            "y" : 5
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "BLUES_HOUSE",
+          "targetPosition" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "id" : "pallet_town_warp_2",
+          "origin" : {
+            "x" : 12,
+            "y" : 11
+          },
+          "targetFacing" : "up",
+          "targetMapID" : "OAKS_LAB",
+          "targetPosition" : {
+            "x" : 4,
+            "y" : 10
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 6,
+      "blockIDs" : [
+        101,
+        102,
+        103,
+        104,
+        104,
+        107,
+        107,
+        5,
+        105,
+        106,
+        5,
+        5,
+        5,
+        109,
+        110,
+        104,
+        104,
+        5,
+        104,
+        104,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        4,
+        5,
+        5
+      ],
+      "blockWidth" : 5,
+      "collisionBlockIDs" : [
+        17,
+        22,
+        25,
+        43,
+        60,
+        61,
+        63,
+        74,
+        76,
+        77,
+        3
+      ],
+      "displayName" : "Oak's Lab",
+      "id" : "OAKS_LAB",
+      "objects" : [
+        {
+          "displayName" : "Blue",
+          "facing" : "down",
+          "id" : "oaks_lab_rival",
+          "interactionDialogueID" : "oaks_lab_rival_gramps_isnt_around",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 4,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_BLUE",
+          "trainerBattleID" : "AUTO",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Charmander",
+          "facing" : "down",
+          "id" : "oaks_lab_poke_ball_charmander",
+          "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 6,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_POKE_BALL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Squirtle",
+          "facing" : "down",
+          "id" : "oaks_lab_poke_ball_squirtle",
+          "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 7,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_POKE_BALL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Bulbasaur",
+          "facing" : "down",
+          "id" : "oaks_lab_poke_ball_bulbasaur",
+          "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 8,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_POKE_BALL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Oak",
+          "facing" : "down",
+          "id" : "oaks_lab_oak_1",
+          "interactionDialogueID" : "oaks_lab_oak_which_pokemon_do_you_want",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 5,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_OAK",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Pokedex",
+          "facing" : "down",
+          "id" : "oaks_lab_pokedex_1",
+          "interactionDialogueID" : "oaks_lab_pokedex",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 2,
+            "y" : 1
+          },
+          "sprite" : "SPRITE_POKEDEX",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Pokedex",
+          "facing" : "down",
+          "id" : "oaks_lab_pokedex_2",
+          "interactionDialogueID" : "oaks_lab_pokedex",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 3,
+            "y" : 1
+          },
+          "sprite" : "SPRITE_POKEDEX",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Oak",
+          "facing" : "up",
+          "id" : "oaks_lab_oak_2",
+          "interactionDialogueID" : "oaks_lab_oak_choose_mon",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 5,
+            "y" : 10
+          },
+          "sprite" : "SPRITE_OAK",
+          "visibleByDefault" : false
+        },
+        {
+          "displayName" : "TEXT_OAKSLAB_GIRL",
+          "facing" : "down",
+          "id" : "oaks_lab_object_8",
+          "interactionDialogueID" : "oaks_lab_girl",
+          "movementType" : "WALK",
+          "position" : {
+            "x" : 1,
+            "y" : 9
+          },
+          "sprite" : "SPRITE_GIRL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "TEXT_OAKSLAB_SCIENTIST1",
+          "facing" : "down",
+          "id" : "oaks_lab_object_9",
+          "interactionDialogueID" : "oaks_lab_girl",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 2,
+            "y" : 10
+          },
+          "sprite" : "SPRITE_SCIENTIST",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "TEXT_OAKSLAB_SCIENTIST2",
+          "facing" : "down",
+          "id" : "oaks_lab_object_10",
+          "interactionDialogueID" : "oaks_lab_girl",
+          "movementType" : "STAY",
+          "position" : {
+            "x" : 8,
+            "y" : 10
+          },
+          "sprite" : "SPRITE_SCIENTIST",
+          "visibleByDefault" : true
+        }
+      ],
+      "tileHeight" : 12,
+      "tileWidth" : 10,
+      "tileset" : "DOJO",
+      "triggerRegions" : [
+
+      ],
+      "warps" : [
+        {
+          "id" : "oaks_lab_warp_0",
+          "origin" : {
+            "x" : 4,
+            "y" : 11
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "PALLET_TOWN",
+          "targetPosition" : {
+            "x" : 12,
+            "y" : 12
+          }
+        },
+        {
+          "id" : "oaks_lab_warp_1",
+          "origin" : {
+            "x" : 5,
+            "y" : 11
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "PALLET_TOWN",
+          "targetPosition" : {
+            "x" : 12,
+            "y" : 12
+          }
+        }
+      ]
+    }
+  ],
+  "moves" : [
+    {
+      "accuracy" : 100,
+      "displayName" : "SCRATCH",
+      "effect" : "NO_ADDITIONAL_EFFECT",
+      "id" : "SCRATCH",
+      "maxPP" : 35,
+      "power" : 40,
+      "type" : "NORMAL"
+    },
+    {
+      "accuracy" : 95,
+      "displayName" : "TACKLE",
+      "effect" : "NO_ADDITIONAL_EFFECT",
+      "id" : "TACKLE",
+      "maxPP" : 35,
+      "power" : 35,
+      "type" : "NORMAL"
+    },
+    {
+      "accuracy" : 100,
+      "displayName" : "TAIL WHIP",
+      "effect" : "DEFENSE_DOWN1_EFFECT",
+      "id" : "TAIL_WHIP",
+      "maxPP" : 30,
+      "power" : 0,
+      "type" : "NORMAL"
+    },
+    {
+      "accuracy" : 100,
+      "displayName" : "GROWL",
+      "effect" : "ATTACK_DOWN1_EFFECT",
+      "id" : "GROWL",
+      "maxPP" : 40,
+      "power" : 0,
+      "type" : "NORMAL"
+    }
+  ],
+  "playerStart" : {
+    "facing" : "down",
+    "initialFlags" : [
+
+    ],
+    "mapID" : "REDS_HOUSE_2F",
+    "playerName" : "RED",
+    "position" : {
+      "x" : 4,
+      "y" : 4
+    },
+    "rivalName" : "BLUE"
+  },
+  "scripts" : [
+    {
+      "id" : "pallet_town_oak_intro",
+      "steps" : [
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_OAK_APPEARED_IN_PALLET",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "pallet_town_oak",
+          "path" : [
+
+          ],
+          "visible" : true
+        },
+        {
+          "action" : "setObjectPosition",
+          "objectID" : "pallet_town_oak",
+          "path" : [
+
+          ],
+          "point" : {
+            "x" : 8,
+            "y" : 3
+          }
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "pallet_town_oak",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pallet_town_oak_hey_wait",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pallet_town_oak_its_unsafe",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setMap",
+          "path" : [
+
+          ],
+          "point" : {
+            "x" : 5,
+            "y" : 10
+          },
+          "stringValue" : "OAKS_LAB"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_FOLLOWED_OAK_INTO_LAB",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_FOLLOWED_OAK_INTO_LAB_2",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_rival_fed_up_with_waiting",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_oak_choose_mon",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_rival_what_about_me",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_oak_be_patient",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_dont_go_away",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_oak_dont_go_away_yet",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "movePlayer",
+          "path" : [
+            "up"
+          ]
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_rival_challenge",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_rival_ill_take_you_on",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "AUTO",
+          "path" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "species" : [
+    {
+      "baseAttack" : 52,
+      "baseDefense" : 43,
+      "baseHP" : 39,
+      "baseSpecial" : 50,
+      "baseSpeed" : 65,
+      "displayName" : "Charmander",
+      "id" : "CHARMANDER",
+      "startingMoves" : [
+        "SCRATCH",
+        "GROWL"
+      ]
+    },
+    {
+      "baseAttack" : 48,
+      "baseDefense" : 65,
+      "baseHP" : 44,
+      "baseSpecial" : 50,
+      "baseSpeed" : 43,
+      "displayName" : "Squirtle",
+      "id" : "SQUIRTLE",
+      "startingMoves" : [
+        "TACKLE",
+        "TAIL_WHIP"
+      ]
+    },
+    {
+      "baseAttack" : 49,
+      "baseDefense" : 49,
+      "baseHP" : 45,
+      "baseSpecial" : 65,
+      "baseSpeed" : 45,
+      "displayName" : "Bulbasaur",
+      "id" : "BULBASAUR",
+      "startingMoves" : [
+        "TACKLE",
+        "GROWL"
+      ]
+    }
+  ],
+  "trainerBattles" : [
+    {
+      "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+      "displayName" : "BLUE",
+      "enemyLevel" : 5,
+      "enemySpeciesID" : "SQUIRTLE",
+      "healsPartyAfterBattle" : true,
+      "id" : "rival_lab_squirtle",
+      "loseDialogueID" : "oaks_lab_rival_am_i_great_or_what",
+      "preventsBlackoutOnLoss" : true,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 1,
+      "winDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon"
+    },
+    {
+      "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+      "displayName" : "BLUE",
+      "enemyLevel" : 5,
+      "enemySpeciesID" : "BULBASAUR",
+      "healsPartyAfterBattle" : true,
+      "id" : "rival_lab_bulbasaur",
+      "loseDialogueID" : "oaks_lab_rival_am_i_great_or_what",
+      "preventsBlackoutOnLoss" : true,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 2,
+      "winDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon"
+    },
+    {
+      "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+      "displayName" : "BLUE",
+      "enemyLevel" : 5,
+      "enemySpeciesID" : "CHARMANDER",
+      "healsPartyAfterBattle" : true,
+      "id" : "rival_lab_charmander",
+      "loseDialogueID" : "oaks_lab_rival_am_i_great_or_what",
+      "preventsBlackoutOnLoss" : true,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 3,
+      "winDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon"
+    }
+  ]
+}

@@ -64,7 +64,7 @@ private struct HarnessCLI {
     }
 
     private func runBuild() throws {
-        try run(["tuist", "generate"])
+        try run(["tuist", "generate", "--no-open"])
         try run([
             "xcodebuild",
             "-workspace", "PokeSwift.xcworkspace",
@@ -91,7 +91,7 @@ private struct HarnessCLI {
         ])
     }
 
-    private func launchApp() throws {
+    private func launchApp(validationMode: Bool = false) throws {
         let appBinary = derivedData
             .appendingPathComponent("Build/Products/Debug/PokeMac.app/Contents/MacOS/PokeMac")
 
@@ -109,6 +109,9 @@ private struct HarnessCLI {
         environment["POKESWIFT_CONTENT_ROOT"] = repoRoot.appendingPathComponent("Content/Red", isDirectory: true).path
         environment["POKESWIFT_TRACE_DIR"] = traceDirectory.path
         environment["POKESWIFT_TELEMETRY_PORT"] = String(port)
+        if validationMode {
+            environment["POKESWIFT_VALIDATION_MODE"] = "1"
+        }
         process.environment = environment
 
         let outputURL = traceDirectory.appendingPathComponent("app.log")
@@ -127,7 +130,7 @@ private struct HarnessCLI {
     private func validate() throws {
         try? post(path: "/quit", body: [:])
         Thread.sleep(forTimeInterval: 0.5)
-        try launchApp()
+        try launchApp(validationMode: true)
         _ = try poll(until: { $0.scene == .titleAttract }, timeout: 6)
 
         try postInput("start")
@@ -137,7 +140,7 @@ private struct HarnessCLI {
             throw HarnessError.validationFailed("title menu did not expose the expected entries")
         }
         guard menu.entries[1].enabledByDefault == false else {
-            throw HarnessError.validationFailed("continue should be disabled in milestone 2")
+            throw HarnessError.validationFailed("continue should be disabled")
         }
 
         try postInput("down")
@@ -159,26 +162,67 @@ private struct HarnessCLI {
             throw HarnessError.validationFailed("disabled continue did not surface a blocked substate")
         }
 
+        try postInput("up")
+        _ = try poll(until: { $0.scene == .titleMenu && $0.titleMenu?.focusedIndex == 0 }, timeout: 4)
+        try postInput("confirm")
+        var snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_2F" }, timeout: 4)
+
+        snapshot = try walk(to: TilePoint(x: 6, y: 1), on: "REDS_HOUSE_2F", startingFrom: snapshot)
+        try postInput("right")
+        snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_1F" }, timeout: 4)
+        snapshot = try walk(to: TilePoint(x: 3, y: 6), on: "REDS_HOUSE_1F", startingFrom: snapshot, yFirst: true)
         try postInput("down")
-        let optionsFocus = try poll(until: { snapshot in
-            snapshot.scene == .titleMenu && snapshot.titleMenu?.focusedIndex == 2
-        }, timeout: 4)
-        guard optionsFocus.titleMenu?.focusedIndex == 2 else {
-            throw HarnessError.validationFailed("failed to move focus to Options")
+        snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "PALLET_TOWN" }, timeout: 4)
+        snapshot = try walk(to: TilePoint(x: 8, y: 2), on: "PALLET_TOWN", startingFrom: snapshot)
+        try postInput("up")
+
+        snapshot = try poll(until: { $0.scene == .dialogue && ($0.dialogue?.dialogueID.contains("oak") ?? false) }, timeout: 4)
+        snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
+        snapshot = try poll(until: { $0.field?.mapID == "OAKS_LAB" && ($0.eventFlags?.activeFlags.contains("EVENT_OAK_ASKED_TO_CHOOSE_MON") ?? false) }, timeout: 6)
+
+        snapshot = try walk(to: TilePoint(x: 7, y: 4), on: "OAKS_LAB", startingFrom: snapshot)
+        try postInput("confirm")
+        snapshot = try poll(until: { $0.scene == .dialogue && $0.dialogue?.dialogueID == "oaks_lab_you_want_squirtle" }, timeout: 4)
+        snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 4)
+        snapshot = try poll(until: { $0.scene == .starterChoice }, timeout: 4)
+        while snapshot.starterChoice?.focusedIndex != 1 {
+            try postInput("right")
+            snapshot = try poll(until: { $0.scene == .starterChoice }, timeout: 2)
         }
         try postInput("confirm")
-        let placeholder = try poll(until: { $0.scene == .placeholder && $0.substate == "options" }, timeout: 4)
-        guard placeholder.scene == .placeholder, placeholder.substate == "options" else {
-            throw HarnessError.validationFailed("options did not route to placeholder")
+        snapshot = try poll(until: { $0.scene == .dialogue }, timeout: 4)
+        snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
+        snapshot = try poll(until: { $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_STARTER") ?? false) }, timeout: 4)
+
+        snapshot = try walk(to: TilePoint(x: 4, y: 10), on: "OAKS_LAB", startingFrom: snapshot)
+        try postInput("down")
+        snapshot = try poll(until: { $0.scene == .dialogue && $0.dialogue?.dialogueID == "oaks_lab_rival_ill_take_you_on" }, timeout: 4)
+        snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 6)
+        snapshot = try poll(until: { $0.scene == .battle }, timeout: 4)
+
+        var battleTurns = 0
+        while snapshot.scene == .battle {
+            try postInput("confirm")
+            snapshot = try poll(until: { $0.scene == .battle || $0.scene == .dialogue }, timeout: 4)
+            battleTurns += 1
+            if battleTurns > 12 {
+                throw HarnessError.validationFailed("battle did not resolve within 12 turns")
+            }
         }
-        try postInput("cancel")
-        let returned = try poll(until: { $0.scene == .titleMenu }, timeout: 4)
-        guard returned.scene == .titleMenu else {
-            throw HarnessError.validationFailed("cancel did not return to the title menu")
+
+        snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 12)
+        snapshot = try poll(until: {
+            $0.scene == .field &&
+            $0.field?.mapID == "OAKS_LAB" &&
+            ($0.eventFlags?.activeFlags.contains("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") ?? false)
+        }, timeout: 4)
+
+        guard snapshot.party?.pokemon.count == 1 else {
+            throw HarnessError.validationFailed("expected one starter in party after rival battle")
         }
 
         try post(path: "/quit", body: [:])
-        print("milestone 2 validation passed")
+        print("milestone 3 validation passed")
     }
 
     private func latestSnapshot() throws -> RuntimeTelemetrySnapshot {
@@ -275,6 +319,77 @@ private struct HarnessCLI {
         if process.terminationStatus != 0 {
             throw HarnessError.requestFailed("command failed: \(arguments.joined(separator: " "))")
         }
+    }
+
+    private func walk(
+        to target: TilePoint,
+        on mapID: String,
+        startingFrom initialSnapshot: RuntimeTelemetrySnapshot,
+        yFirst: Bool = false
+    ) throws -> RuntimeTelemetrySnapshot {
+        var snapshot = initialSnapshot
+        var steps = 0
+        while steps < 64 {
+            guard let field = snapshot.field, field.mapID == mapID else {
+                return snapshot
+            }
+            if field.playerPosition == target {
+                return snapshot
+            }
+
+            let nextButton: String
+            if yFirst {
+                if field.playerPosition.y < target.y {
+                    nextButton = "down"
+                } else if field.playerPosition.y > target.y {
+                    nextButton = "up"
+                } else if field.playerPosition.x < target.x {
+                    nextButton = "right"
+                } else {
+                    nextButton = "left"
+                }
+            } else {
+                if field.playerPosition.x < target.x {
+                    nextButton = "right"
+                } else if field.playerPosition.x > target.x {
+                    nextButton = "left"
+                } else if field.playerPosition.y < target.y {
+                    nextButton = "down"
+                } else {
+                    nextButton = "up"
+                }
+            }
+
+            try postInput(nextButton)
+            let previousPosition = field.playerPosition
+            snapshot = try poll(until: {
+                $0.scene != .field ||
+                $0.field?.mapID != mapID ||
+                $0.field?.playerPosition != previousPosition
+            }, timeout: 3)
+            steps += 1
+        }
+        throw HarnessError.validationFailed("failed to reach \(target.x),\(target.y) on \(mapID)")
+    }
+
+    private func drainDialogues(startingFrom initialSnapshot: RuntimeTelemetrySnapshot, maxInteractions: Int) throws -> RuntimeTelemetrySnapshot {
+        var snapshot = initialSnapshot
+        var interactions = 0
+        while snapshot.scene == .dialogue {
+            guard interactions < maxInteractions else {
+                throw HarnessError.validationFailed("dialogue did not drain within \(maxInteractions) confirms")
+            }
+            let currentDialogueID = snapshot.dialogue?.dialogueID
+            let currentPageIndex = snapshot.dialogue?.pageIndex
+            try postInput("confirm")
+            snapshot = try poll(until: {
+                $0.scene != .dialogue ||
+                $0.dialogue?.pageIndex != currentPageIndex ||
+                $0.dialogue?.dialogueID != currentDialogueID
+            }, timeout: 3)
+            interactions += 1
+        }
+        return snapshot
     }
 }
 

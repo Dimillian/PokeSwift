@@ -9,6 +9,15 @@ final class PokeContentTests: XCTestCase {
         let loaded = try FileSystemContentLoader(rootURL: root).load()
         XCTAssertEqual(loaded.gameManifest.variant, .red)
         XCTAssertEqual(loaded.titleManifest.menuEntries.count, 3)
+        XCTAssertEqual(loaded.gameplayManifest.maps.count, 1)
+        XCTAssertEqual(loaded.gameplayManifest.dialogues.count, 1)
+        XCTAssertEqual(loaded.gameplayManifest.playerStart.mapID, "REDS_HOUSE_2F")
+        XCTAssertEqual(loaded.map(id: "REDS_HOUSE_2F")?.displayName, "Red's House 2F")
+        XCTAssertEqual(loaded.dialogue(id: "hello")?.pages.first?.lines, ["Hi"])
+        XCTAssertEqual(loaded.script(id: "oak_intro")?.steps.map(\.action), ["showDialogue"])
+        XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.startingMoves, ["TACKLE", "TAIL_WHIP"])
+        XCTAssertEqual(loaded.move(id: "TACKLE")?.power, 35)
+        XCTAssertEqual(loaded.trainerBattle(id: "rival_lab_bulbasaur")?.enemySpeciesID, "BULBASAUR")
     }
 
     private func makeFixtureRoot() throws -> URL {
@@ -35,11 +44,76 @@ final class PokeContentTests: XCTestCase {
                 timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
             )
         ).write(to: root.appendingPathComponent("title_manifest.json"))
+        try encoder.encode(testGameplayManifest()).write(to: root.appendingPathComponent("gameplay_manifest.json"))
         try encoder.encode(AudioManifest(variant: .red, tracks: [.init(id: "title", sourceFile: "audio/music/titlescreen.asm")])).write(to: root.appendingPathComponent("audio_manifest.json"))
 
         let assetRoot = root.appendingPathComponent("Assets", isDirectory: true)
         try FileManager.default.createDirectory(at: assetRoot, withIntermediateDirectories: true, attributes: nil)
         FileManager.default.createFile(atPath: assetRoot.appendingPathComponent("logo.png").path, contents: Data())
         return root
+    }
+
+    private func testGameplayManifest() -> GameplayManifest {
+        GameplayManifest(
+            maps: [
+                .init(
+                    id: "REDS_HOUSE_2F",
+                    displayName: "Red's House 2F",
+                    blockWidth: 4,
+                    blockHeight: 4,
+                    tileWidth: 8,
+                    tileHeight: 8,
+                    tileset: "REDS_HOUSE_2",
+                    collisionBlockIDs: [0x10],
+                    blockIDs: Array(repeating: 0x05, count: 16),
+                    warps: [],
+                    backgroundEvents: [],
+                    objects: [],
+                    triggerRegions: []
+                ),
+            ],
+            dialogues: [.init(id: "hello", pages: [.init(lines: ["Hi"], waitsForPrompt: true)])],
+            eventFlags: .init(flags: [.init(id: "EVENT_GOT_STARTER", sourceConstant: "EVENT_GOT_STARTER")]),
+            scripts: [.init(id: "oak_intro", steps: [.init(action: "showDialogue", dialogueID: "hello")])],
+            species: [
+                .init(
+                    id: "SQUIRTLE",
+                    displayName: "Squirtle",
+                    baseHP: 44,
+                    baseAttack: 48,
+                    baseDefense: 65,
+                    baseSpeed: 43,
+                    baseSpecial: 50,
+                    startingMoves: ["TACKLE", "TAIL_WHIP"]
+                ),
+            ],
+            moves: [
+                .init(
+                    id: "TACKLE",
+                    displayName: "TACKLE",
+                    power: 35,
+                    accuracy: 95,
+                    maxPP: 35,
+                    effect: "NO_ADDITIONAL_EFFECT",
+                    type: "NORMAL"
+                ),
+            ],
+            trainerBattles: [
+                .init(
+                    id: "rival_lab_bulbasaur",
+                    trainerClass: "OPP_RIVAL1",
+                    trainerNumber: 2,
+                    displayName: "BLUE",
+                    enemySpeciesID: "BULBASAUR",
+                    enemyLevel: 5,
+                    winDialogueID: "hello",
+                    loseDialogueID: "hello",
+                    healsPartyAfterBattle: true,
+                    preventsBlackoutOnLoss: true,
+                    completionFlagID: "EVENT_GOT_STARTER"
+                ),
+            ],
+            playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 2, y: 2), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
+        )
     }
 }

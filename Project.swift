@@ -118,7 +118,7 @@ let project = Project(
             deploymentTargets: .macOS("26.0"),
             sources: [
                 "Tests/PokeExtractCLITests/**",
-                "Sources/PokeExtractCLI/RedContentExtractor.swift",
+                "Sources/PokeExtractCLI/**",
             ],
             dependencies: [
                 .target(name: "PokeDataModel"),
