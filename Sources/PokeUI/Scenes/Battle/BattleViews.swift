@@ -163,7 +163,7 @@ private struct BattleViewportLayout {
     }
 
     var playerCardCenter: CGPoint {
-        CGPoint(x: size.width * 0.7, y: size.height * 0.66)
+        CGPoint(x: size.width * 0.7, y: size.height * 0.6)
     }
 
     var enemySpriteSize: CGSize {
@@ -179,7 +179,7 @@ private struct BattleViewportLayout {
     }
 
     var playerSpriteCenter: CGPoint {
-        CGPoint(x: size.width * 0.25, y: size.height * 0.7)
+        CGPoint(x: size.width * 0.25, y: size.height * 0.62)
     }
 
     var platformWidth: CGFloat {
@@ -203,7 +203,7 @@ private struct BattleViewportLayout {
     }
 
     var playerPlatformCenter: CGPoint {
-        CGPoint(x: size.width * 0.33, y: size.height * 0.86)
+        CGPoint(x: size.width * 0.33, y: size.height * 0.74)
     }
 }
 
