@@ -1,6 +1,8 @@
 import Foundation
 
 enum AppPaths {
+    static let validationMode: Bool = ProcessInfo.processInfo.environment["POKESWIFT_VALIDATION_MODE"] == "1"
+
     static let telemetryPort: UInt16 = {
         if let raw = ProcessInfo.processInfo.environment["POKESWIFT_TELEMETRY_PORT"],
            let port = UInt16(raw) {

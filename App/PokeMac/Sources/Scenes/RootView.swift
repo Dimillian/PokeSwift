@@ -42,6 +42,9 @@ struct RootView: View {
                     .frame(minWidth: 520, minHeight: 320)
             }
         }
+        .onAppear {
+            coordinator.requestForegroundActivationIfNeeded()
+        }
         .onDisappear {
             coordinator.shutdown()
         }

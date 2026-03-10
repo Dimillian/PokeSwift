@@ -15,6 +15,7 @@ final class AppCoordinator {
     private var telemetryServer: TelemetryControlServer?
     private var audioService: PokeAudioService?
     private let keyInputBridge = RuntimeKeyInputBridge()
+    private var hasRequestedForegroundActivation = false
 
     init() {
         bootstrap()
@@ -69,5 +70,14 @@ final class AppCoordinator {
 
     func toggleDebugPanel() {
         showDebugPanel.toggle()
+    }
+
+    func requestForegroundActivationIfNeeded() {
+        guard AppPaths.validationMode == false, hasRequestedForegroundActivation == false else { return }
+
+        hasRequestedForegroundActivation = true
+        _ = NSRunningApplication.current.activate(options: [.activateAllWindows])
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.windows.first(where: \.canBecomeKey)?.makeKeyAndOrderFront(nil)
     }
 }
