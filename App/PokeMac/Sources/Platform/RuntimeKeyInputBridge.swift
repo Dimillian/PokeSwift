@@ -65,20 +65,21 @@ final class RuntimeKeyInputBridge {
         repeatingDirectionalTask = Task { [weak self] in
             while Task.isCancelled == false {
                 guard let self else { return }
-                let stepDuration = await MainActor.run {
-                    runtimeProvider()?.fieldAnimationStepDuration ?? (16.0 / 60.0)
-                }
-                try? await Task.sleep(nanoseconds: UInt64(stepDuration * 1_000_000_000))
-                guard Task.isCancelled == false else { return }
-                await MainActor.run {
+                let pollInterval = await MainActor.run { () -> TimeInterval in
                     guard self.repeatingDirectionalKeyCode == keyCode,
                           let runtime = runtimeProvider(),
                           runtime.scene == .field else {
                         self.stopDirectionalRepeat()
-                        return
+                        return 0
                     }
-                    runtime.handle(button: button)
+
+                    if runtime.canAcceptFieldDirectionalInput {
+                        runtime.handle(button: button)
+                    }
+                    return max(1.0 / 240.0, runtime.fieldAnimationStepDuration / 8.0)
                 }
+                guard pollInterval > 0 else { return }
+                try? await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
             }
         }
     }

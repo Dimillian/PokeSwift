@@ -152,6 +152,21 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(runtime.gameplayState?.playerPosition, TilePoint(x: 6, y: 4))
     }
 
+    func testFieldDirectionalInputAvailabilityClearsAsSoonAsStepSettles() async {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+
+        XCTAssertTrue(runtime.canAcceptFieldDirectionalInput)
+
+        runtime.movePlayer(in: .right)
+        XCTAssertFalse(runtime.canAcceptFieldDirectionalInput)
+
+        try? await Task.sleep(nanoseconds: UInt64((runtime.fieldAnimationStepDuration * 1.1) * 1_000_000_000))
+        XCTAssertTrue(runtime.canAcceptFieldDirectionalInput)
+    }
+
     func testRepoGeneratedPalletNorthExitStartsOakIntroFromSourceScript() async throws {
         let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
         let content = try FileSystemContentLoader(rootURL: contentRoot).load()

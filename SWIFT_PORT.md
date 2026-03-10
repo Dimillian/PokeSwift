@@ -447,6 +447,7 @@ When a blocker is discovered, add:
 - Replaced the last hand-authored M3 warp offset table with source-driven destination-warp resolution, so doors now place the player on the actual destination doorway tile and stairs land directly on their stair tile.
 - Added extracted player walking frames for compatible `16x96` overworld sprite sheets and wired the native field view to use the source-style four-phase `stand, walk, stand, walk` cadence during manual movement, scripted movement, and automatic door step-out, including the mirrored second walking pose for vertical steps.
 - Normal field movement now paces both repeated key input and the visible walk cycle to the step cadence instead of accepting macOS key-repeat bursts mid-step, removing the acceleration feel during sustained directional movement.
+- The macOS field input bridge now watches when the runtime can accept the next directional step instead of sleeping a whole extra repeat interval, so held movement and direction changes chain without the added standing pause between steps.
 - Added runtime-owned field transition sequencing with a field-local DMG-style black fade-out/fade-in for both door and stair warps, while keeping automatic step-out limited to destination door tiles, plus explicit field transition telemetry for harnesses and tests.
 - Revalidated the accepted M3/M4A baseline with `./scripts/extract_red.sh`, `./scripts/validate_milestone.sh`, and `xcodebuild -workspace PokeSwift.xcworkspace -scheme PokeSwift-Workspace -derivedDataPath .build/DerivedData test`.
 

@@ -149,6 +149,10 @@ public final class GameRuntime {
         validationMode ? 0.03 : (16.0 / 60.0)
     }
 
+    public var canAcceptFieldDirectionalInput: Bool {
+        scene == .field && isFieldInputLocked == false
+    }
+
     public func start() {
         guard hasStarted == false else { return }
         hasStarted = true
