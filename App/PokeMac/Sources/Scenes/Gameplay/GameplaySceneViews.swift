@@ -13,7 +13,6 @@ struct GameplayFieldSceneProps {
     let dialogueLines: [String]?
     let starterChoiceOptions: [SpeciesManifest]
     let starterChoiceFocusedIndex: Int
-    let hud: FieldStatusHUDProps
 }
 
 struct BattleSceneProps {
@@ -47,15 +46,6 @@ struct GameplayFieldScene: View {
                     )
                     .padding(36)
                 }
-
-                VStack {
-                    HStack {
-                        FieldStatusHUD(props: props.hud)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .padding(28)
 
                 if let dialogueLines = props.dialogueLines {
                     VStack {

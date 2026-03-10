@@ -35,7 +35,6 @@ struct RuntimeSceneRouter: View {
     }
 
     private var gameplayFieldSceneProps: GameplayFieldSceneProps {
-        let snapshot = runtime.currentSnapshot()
         return GameplayFieldSceneProps(
             map: runtime.currentMapManifest,
             playerPosition: runtime.playerPosition,
@@ -45,12 +44,7 @@ struct RuntimeSceneRouter: View {
             renderAssets: makeFieldRenderAssets(runtime: runtime),
             dialogueLines: runtime.currentDialoguePage?.lines,
             starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
-            starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
-            hud: .init(
-                mapName: runtime.currentMapManifest?.displayName ?? "Unknown Map",
-                positionLine: positionLine,
-                activeFlags: snapshot.eventFlags?.activeFlags ?? []
-            )
+            starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex
         )
     }
 
@@ -66,12 +60,6 @@ struct RuntimeSceneRouter: View {
         )
     }
 
-    private var positionLine: String {
-        guard let point = runtime.playerPosition else {
-            return "No field position"
-        }
-        return "Pos \(point.x), \(point.y) • \(runtime.playerFacing.rawValue)"
-    }
 }
 
 private struct LaunchScene: View {
