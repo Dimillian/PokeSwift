@@ -24,6 +24,15 @@ final class PokeUITests: XCTestCase {
         XCTAssertNotNil(view)
     }
 
+    func testDialogueBoxCanBeConstructedWithPixelText() {
+        let view = DialogueBoxView(
+            title: "Oak",
+            lines: ["Hello there!", "Welcome to the world of Pokemon!"]
+        )
+
+        XCTAssertNotNil(view)
+    }
+
     func testGameplayFieldShellCanBeConstructed() {
         let view = GameplayFieldShell(
             profile: .init(

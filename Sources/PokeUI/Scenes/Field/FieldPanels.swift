@@ -14,15 +14,21 @@ public struct DialogueBoxView: View {
         PlainWhitePanel {
             VStack(alignment: .leading, spacing: 10) {
                 if let title {
-                    Text(title)
-                        .font(.system(size: 12, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.black.opacity(0.55))
+                    GameBoyPixelText(
+                        title.uppercased(),
+                        scale: 1,
+                        color: .black.opacity(0.55),
+                        fallbackFont: .system(size: 12, weight: .bold, design: .monospaced)
+                    )
                 }
 
                 ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
-                    Text(line)
-                        .font(.system(size: 22, weight: .medium, design: .monospaced))
-                        .foregroundStyle(.black)
+                    GameBoyPixelText(
+                        line,
+                        scale: 1.5,
+                        color: .black,
+                        fallbackFont: .system(size: 22, weight: .medium, design: .monospaced)
+                    )
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
