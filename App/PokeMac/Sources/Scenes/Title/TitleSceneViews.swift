@@ -54,7 +54,7 @@ struct TitleAttractContent: View {
                     .frame(width: 200, height: 200)
                 PlainWhitePanel {
                     VStack(spacing: 18) {
-                        PixelAssetView(url: assetURL("Assets/title/red_version.png"), label: "Red Version")
+                        GameBoyPixelText("Swift Version", scale: 2, color: .black)
                             .frame(width: 220, height: 90)
                         Text("Press Return or Space to Start")
                             .font(.system(.title3, design: .monospaced))
