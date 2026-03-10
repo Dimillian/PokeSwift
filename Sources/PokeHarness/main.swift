@@ -218,11 +218,31 @@ private struct HarnessCLI {
 
         var battleTurns = 0
         while snapshot.scene == .battle {
+            guard let battle = snapshot.battle else {
+                throw HarnessError.validationFailed("battle scene is active without battle telemetry")
+            }
+            if battle.phase == "moveSelection" && battle.moveSlots.isEmpty {
+                throw HarnessError.validationFailed("battle move selection is missing move slot telemetry")
+            }
+            if (battle.phase == "introText" || battle.phase == "turnText") && battle.textLines.isEmpty {
+                throw HarnessError.validationFailed("battle text phase is missing queued text telemetry")
+            }
+
+            let previousPhase = battle.phase
+            let previousText = battle.textLines
+            let previousEnemyIndex = battle.enemyActiveIndex
             try postInput("confirm")
-            snapshot = try poll(until: { $0.scene == .battle || $0.scene == .dialogue }, timeout: 4)
-            battleTurns += 1
-            if battleTurns > 12 {
-                throw HarnessError.validationFailed("battle did not resolve within 12 turns")
+            snapshot = try poll(until: { next in
+                next.scene != .battle ||
+                next.battle?.phase != previousPhase ||
+                next.battle?.textLines != previousText ||
+                next.battle?.enemyActiveIndex != previousEnemyIndex
+            }, timeout: 4)
+            if battle.phase == "moveSelection" {
+                battleTurns += 1
+                if battleTurns > 12 {
+                    throw HarnessError.validationFailed("battle did not resolve within 12 turns")
+                }
             }
         }
 

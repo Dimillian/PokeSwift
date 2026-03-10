@@ -2614,8 +2614,13 @@
       "baseHP" : 39,
       "baseSpecial" : 50,
       "baseSpeed" : 65,
+      "battleSprite" : {
+        "backImagePath" : "Assets/battle/pokemon/back/charmander.png",
+        "frontImagePath" : "Assets/battle/pokemon/front/charmander.png"
+      },
       "displayName" : "Charmander",
       "id" : "CHARMANDER",
+      "primaryType" : "FIRE",
       "startingMoves" : [
         "SCRATCH",
         "GROWL"
@@ -2627,8 +2632,13 @@
       "baseHP" : 44,
       "baseSpecial" : 50,
       "baseSpeed" : 43,
+      "battleSprite" : {
+        "backImagePath" : "Assets/battle/pokemon/back/squirtle.png",
+        "frontImagePath" : "Assets/battle/pokemon/front/squirtle.png"
+      },
       "displayName" : "Squirtle",
       "id" : "SQUIRTLE",
+      "primaryType" : "WATER",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP"
@@ -2640,8 +2650,14 @@
       "baseHP" : 45,
       "baseSpecial" : 65,
       "baseSpeed" : 45,
+      "battleSprite" : {
+        "backImagePath" : "Assets/battle/pokemon/back/bulbasaur.png",
+        "frontImagePath" : "Assets/battle/pokemon/front/bulbasaur.png"
+      },
       "displayName" : "Bulbasaur",
       "id" : "BULBASAUR",
+      "primaryType" : "GRASS",
+      "secondaryType" : "POISON",
       "startingMoves" : [
         "TACKLE",
         "GROWL"
@@ -3005,6 +3021,418 @@
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 3,
       "winDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon"
+    }
+  ],
+  "typeEffectiveness" : [
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "FIRE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "GRASS",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "ICE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "WATER",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "WATER",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "ROCK",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "FLYING",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "WATER",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "FIRE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "ELECTRIC",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "ICE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "GRASS",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "PSYCHIC_TYPE",
+      "defendingType" : "PSYCHIC_TYPE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "WATER",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "FIRE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "GRASS",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "GRASS",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "NORMAL",
+      "defendingType" : "ROCK",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "NORMAL",
+      "defendingType" : "GHOST",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "GHOST",
+      "defendingType" : "GHOST",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "BUG",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "ROCK",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "GROUND",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "GROUND",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "FLYING",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "GROUND",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "BUG",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "POISON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "ROCK",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "FLYING",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "WATER",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "GRASS",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "GROUND",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "FLYING",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "NORMAL",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "POISON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "FLYING",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "PSYCHIC_TYPE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "BUG",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "ROCK",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "ICE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FIGHTING",
+      "defendingType" : "GHOST",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "GRASS",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "POISON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "GROUND",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "BUG",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "ROCK",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "POISON",
+      "defendingType" : "GHOST",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "FIRE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "ELECTRIC",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "GRASS",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "BUG",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "ROCK",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GROUND",
+      "defendingType" : "POISON",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FLYING",
+      "defendingType" : "ELECTRIC",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "FLYING",
+      "defendingType" : "FIGHTING",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FLYING",
+      "defendingType" : "BUG",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FLYING",
+      "defendingType" : "GRASS",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "FLYING",
+      "defendingType" : "ROCK",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "PSYCHIC_TYPE",
+      "defendingType" : "FIGHTING",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "PSYCHIC_TYPE",
+      "defendingType" : "POISON",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "FIRE",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "GRASS",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "FIGHTING",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "FLYING",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "PSYCHIC_TYPE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "GHOST",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "BUG",
+      "defendingType" : "POISON",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "FIRE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "FIGHTING",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "GROUND",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "FLYING",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "BUG",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "ROCK",
+      "defendingType" : "ICE",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "GHOST",
+      "defendingType" : "NORMAL",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "GHOST",
+      "defendingType" : "PSYCHIC_TYPE",
+      "multiplier" : 0
+    },
+    {
+      "attackingType" : "FIRE",
+      "defendingType" : "DRAGON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "WATER",
+      "defendingType" : "DRAGON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ELECTRIC",
+      "defendingType" : "DRAGON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "GRASS",
+      "defendingType" : "DRAGON",
+      "multiplier" : 5
+    },
+    {
+      "attackingType" : "ICE",
+      "defendingType" : "DRAGON",
+      "multiplier" : 20
+    },
+    {
+      "attackingType" : "DRAGON",
+      "defendingType" : "DRAGON",
+      "multiplier" : 20
     }
   ]
 }

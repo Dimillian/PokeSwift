@@ -70,6 +70,18 @@ extension GameRuntime {
             enemyPartyCount: battle.enemyParty.count,
             enemyActiveIndex: battle.enemyActiveIndex,
             focusedMoveIndex: battle.focusedMoveIndex,
+            phase: battle.phase.rawValue,
+            textLines: battle.message.isEmpty ? [] : [battle.message],
+            moveSlots: battle.playerPokemon.moves.compactMap { runtimeMove in
+                guard let move = content.move(id: runtimeMove.id) else { return nil }
+                return BattleMoveSlotTelemetry(
+                    moveID: move.id,
+                    displayName: move.displayName,
+                    currentPP: runtimeMove.currentPP,
+                    maxPP: move.maxPP,
+                    isSelectable: runtimeMove.currentPP > 0
+                )
+            },
             battleMessage: battle.message
         )
     }

@@ -52,7 +52,22 @@ struct RuntimePokemonState {
     let special: Int
     var attackStage: Int
     var defenseStage: Int
+    var accuracyStage: Int
+    var evasionStage: Int
     var moves: [RuntimeMoveState]
+}
+
+enum RuntimeBattlePhase: String {
+    case introText
+    case moveSelection
+    case resolvingTurn
+    case turnText
+    case battleComplete
+}
+
+enum RuntimeBattlePendingAction {
+    case moveSelection
+    case finish(won: Bool)
 }
 
 struct RuntimeBattleState {
@@ -66,8 +81,11 @@ struct RuntimeBattleState {
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
+    var phase: RuntimeBattlePhase
     var focusedMoveIndex: Int
     var message: String
+    var queuedMessages: [String]
+    var pendingAction: RuntimeBattlePendingAction?
 
     var enemyPokemon: RuntimePokemonState {
         get { enemyParty[enemyActiveIndex] }

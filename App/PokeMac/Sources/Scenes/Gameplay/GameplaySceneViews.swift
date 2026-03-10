@@ -17,11 +17,14 @@ struct GameplayFieldSceneProps {
 
 struct BattleSceneProps {
     let trainerName: String
-    let message: String
+    let phase: String
+    let textLines: [String]
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
-    let moveNames: [String]
+    let moveSlots: [BattleMoveSlotTelemetry]
     let focusedMoveIndex: Int
+    let playerSpriteURL: URL?
+    let enemySpriteURL: URL?
 }
 
 struct PlaceholderSceneProps {
@@ -73,11 +76,14 @@ struct BattleScene: View {
         GameBoyScreen {
             BattlePanel(
                 trainerName: props.trainerName,
-                message: props.message,
+                phase: props.phase,
+                textLines: props.textLines,
                 playerPokemon: props.playerPokemon,
                 enemyPokemon: props.enemyPokemon,
-                moveNames: props.moveNames,
-                focusedMoveIndex: props.focusedMoveIndex
+                moveSlots: props.moveSlots,
+                focusedMoveIndex: props.focusedMoveIndex,
+                playerSpriteURL: props.playerSpriteURL,
+                enemySpriteURL: props.enemySpriteURL
             )
             .padding(36)
         }

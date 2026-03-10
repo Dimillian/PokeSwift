@@ -50,16 +50,24 @@ struct RuntimeSceneRouter: View {
 
     private var battleSceneProps: BattleSceneProps? {
         guard let battle = runtime.currentSnapshot().battle else { return nil }
+        let playerSpriteURL = runtime.content.species(id: battle.playerPokemon.speciesID)?
+            .battleSprite
+            .map { runtime.content.rootURL.appendingPathComponent($0.backImagePath) }
+        let enemySpriteURL = runtime.content.species(id: battle.enemyPokemon.speciesID)?
+            .battleSprite
+            .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
         return BattleSceneProps(
             trainerName: battle.trainerName,
-            message: battle.battleMessage,
+            phase: battle.phase,
+            textLines: battle.textLines,
             playerPokemon: battle.playerPokemon,
             enemyPokemon: battle.enemyPokemon,
-            moveNames: runtime.currentBattleMoves.map(\.displayName),
-            focusedMoveIndex: battle.focusedMoveIndex
+            moveSlots: battle.moveSlots,
+            focusedMoveIndex: battle.focusedMoveIndex,
+            playerSpriteURL: playerSpriteURL,
+            enemySpriteURL: enemySpriteURL
         )
     }
-
 }
 
 private struct LaunchScene: View {

@@ -3,6 +3,7 @@ import PokeDataModel
 
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
+    private static let starterBattleSpeciesIDs: Set<String> = ["CHARMANDER", "SQUIRTLE", "BULBASAUR"]
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
@@ -66,6 +67,11 @@ public enum RedContentExtractor {
             let destinationURL = variantRoot.appendingPathComponent(fieldAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
+        for battleAsset in battleAssetMap(from: gameplayManifest) {
+            let sourceURL = configuration.repoRoot.appendingPathComponent(battleAsset.source)
+            let destinationURL = variantRoot.appendingPathComponent(battleAsset.destination)
+            try copyAsset(from: sourceURL, to: destinationURL)
+        }
     }
 
     public static func verify(configuration: Configuration) throws {
@@ -109,8 +115,15 @@ public enum RedContentExtractor {
         _ = try decoder.decode(ConstantsManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("constants.json")))
         _ = try decoder.decode(CharmapManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("charmap.json")))
         _ = try decoder.decode(TitleSceneManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("title_manifest.json")))
-        _ = try decoder.decode(GameplayManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("gameplay_manifest.json")))
+        let gameplayManifest = try decoder.decode(GameplayManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("gameplay_manifest.json")))
         _ = try decoder.decode(AudioManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("audio_manifest.json")))
+
+        for battleAsset in battleAssetMap(from: gameplayManifest) {
+            let url = variantRoot.appendingPathComponent(battleAsset.destination)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                throw ExtractorError.missingOutput(url.path)
+            }
+        }
     }
 
     public static func parseCharmap(at url: URL) throws -> CharmapManifest {
@@ -210,6 +223,20 @@ public enum RedContentExtractor {
         }
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         try data.write(to: url, options: .atomic)
+    }
+
+    private static func battleAssetMap(from gameplayManifest: GameplayManifest) -> [(source: String, destination: String)] {
+        gameplayManifest.species
+            .filter { starterBattleSpeciesIDs.contains($0.id) }
+            .flatMap { species -> [(source: String, destination: String)] in
+                guard let battleSprite = species.battleSprite else { return [] }
+                let stem = species.id.lowercased()
+                return [
+                    ("gfx/pokemon/front/\(stem).png", battleSprite.frontImagePath),
+                    ("gfx/pokemon/back/\(stem)b.png", battleSprite.backImagePath),
+                ]
+            }
+            .sorted { lhs, rhs in lhs.destination < rhs.destination }
     }
 
 }

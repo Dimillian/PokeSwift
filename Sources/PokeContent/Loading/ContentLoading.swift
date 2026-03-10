@@ -47,7 +47,11 @@ public final class FileSystemContentLoader: ContentLoader {
         let requiredAssetPaths =
             titleManifest.assets.map(\.relativePath) +
             gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
-            gameplayManifest.overworldSprites.map(\.imagePath)
+            gameplayManifest.overworldSprites.map(\.imagePath) +
+            gameplayManifest.species.flatMap { species -> [String] in
+                guard let battleSprite = species.battleSprite else { return [] }
+                return [battleSprite.frontImagePath, battleSprite.backImagePath]
+            }
 
         for relativePath in requiredAssetPaths {
             let assetURL = variantRoot.appendingPathComponent(relativePath)

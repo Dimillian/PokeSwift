@@ -100,7 +100,32 @@ final class PokeExtractCLITests: XCTestCase {
             "oaks_lab_rival_challenge_vs_charmander",
         ])
         XCTAssertEqual(manifest.species.map(\.id), ["CHARMANDER", "SQUIRTLE", "BULBASAUR"])
+        let charmander = try XCTUnwrap(manifest.species.first { $0.id == "CHARMANDER" })
+        XCTAssertEqual(charmander.primaryType, "FIRE")
+        XCTAssertNil(charmander.secondaryType)
+        XCTAssertEqual(
+            charmander.battleSprite,
+            .init(
+                frontImagePath: "Assets/battle/pokemon/front/charmander.png",
+                backImagePath: "Assets/battle/pokemon/back/charmander.png"
+            )
+        )
+        let squirtle = try XCTUnwrap(manifest.species.first { $0.id == "SQUIRTLE" })
+        XCTAssertEqual(squirtle.primaryType, "WATER")
+        XCTAssertNil(squirtle.secondaryType)
+        let bulbasaur = try XCTUnwrap(manifest.species.first { $0.id == "BULBASAUR" })
+        XCTAssertEqual(bulbasaur.primaryType, "GRASS")
+        XCTAssertEqual(bulbasaur.secondaryType, "POISON")
         XCTAssertEqual(manifest.moves.map(\.id), ["SCRATCH", "TACKLE", "TAIL_WHIP", "GROWL"])
+        XCTAssertFalse(manifest.typeEffectiveness.isEmpty)
+        XCTAssertEqual(
+            manifest.typeEffectiveness.first { $0.attackingType == "FIRE" && $0.defendingType == "GRASS" }?.multiplier,
+            20
+        )
+        XCTAssertEqual(
+            manifest.typeEffectiveness.first { $0.attackingType == "NORMAL" && $0.defendingType == "GHOST" }?.multiplier,
+            0
+        )
         XCTAssertEqual(manifest.trainerBattles.map(\.id), [
             "opp_rival1_1",
             "opp_rival1_2",
@@ -141,12 +166,17 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "OAKS_LAB" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })
+        XCTAssertGreaterThan(decoded.typeEffectiveness.count, 0)
         XCTAssertEqual(decoded.tilesets.first?.imagePath, "Assets/field/tilesets/reds_house.png")
         XCTAssertEqual(decoded.tilesets.first?.blocksetPath, "Assets/field/blocksets/reds_house.bst")
         XCTAssertEqual(decoded.overworldSprites.first?.facingFrames.down, .init(x: 0, y: 0, width: 16, height: 16))
+        XCTAssertEqual(
+            decoded.species.first { $0.id == "CHARMANDER" }?.battleSprite?.frontImagePath,
+            "Assets/battle/pokemon/front/charmander.png"
+        )
     }
 
-    func testExtractorCopiesFieldAssetsForM3Slice() throws {
+    func testExtractorCopiesFieldAndStarterBattleAssetsForM3Slice() throws {
         let outputRoot = try temporaryDirectory()
 
         try RedContentExtractor.extract(
@@ -170,6 +200,12 @@ final class PokeExtractCLITests: XCTestCase {
             "Assets/field/blocksets/reds_house.bst",
             "Assets/field/blocksets/overworld.bst",
             "Assets/field/blocksets/gym.bst",
+            "Assets/battle/pokemon/front/charmander.png",
+            "Assets/battle/pokemon/front/squirtle.png",
+            "Assets/battle/pokemon/front/bulbasaur.png",
+            "Assets/battle/pokemon/back/charmander.png",
+            "Assets/battle/pokemon/back/squirtle.png",
+            "Assets/battle/pokemon/back/bulbasaur.png",
         ]
 
         for relativePath in expectedFieldAssets {

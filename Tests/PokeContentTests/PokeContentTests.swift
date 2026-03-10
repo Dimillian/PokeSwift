@@ -17,7 +17,16 @@ final class PokeContentTests: XCTestCase {
         XCTAssertEqual(loaded.script(id: "oak_intro")?.steps.map(\.action), ["showDialogue"])
         XCTAssertEqual(loaded.mapScript(for: "REDS_HOUSE_2F")?.triggers.first?.scriptID, "oak_intro")
         XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.startingMoves, ["TACKLE", "TAIL_WHIP"])
+        XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.primaryType, "WATER")
+        XCTAssertEqual(
+            loaded.species(id: "SQUIRTLE")?.battleSprite,
+            .init(
+                frontImagePath: "Assets/battle/pokemon/front/squirtle.png",
+                backImagePath: "Assets/battle/pokemon/back/squirtle.png"
+            )
+        )
         XCTAssertEqual(loaded.move(id: "TACKLE")?.power, 35)
+        XCTAssertEqual(loaded.typeEffectiveness(attackingType: "WATER", defendingType: "FIRE")?.multiplier, 20)
         XCTAssertEqual(loaded.trainerBattle(id: "opp_rival1_2")?.party.first?.speciesID, "BULBASAUR")
         XCTAssertEqual(loaded.tileset(id: "REDS_HOUSE_2")?.imagePath, "Assets/field/tilesets/reds_house.png")
         XCTAssertEqual(loaded.tileset(id: "REDS_HOUSE_2")?.collision.passableTileIDs, [0x01, 0x02])
@@ -76,12 +85,18 @@ final class PokeContentTests: XCTestCase {
         let fieldTilesetRoot = assetRoot.appendingPathComponent("field/tilesets", isDirectory: true)
         let fieldBlocksetRoot = assetRoot.appendingPathComponent("field/blocksets", isDirectory: true)
         let fieldSpriteRoot = assetRoot.appendingPathComponent("field/sprites", isDirectory: true)
+        let battleFrontRoot = assetRoot.appendingPathComponent("battle/pokemon/front", isDirectory: true)
+        let battleBackRoot = assetRoot.appendingPathComponent("battle/pokemon/back", isDirectory: true)
         try FileManager.default.createDirectory(at: fieldTilesetRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: fieldBlocksetRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: fieldSpriteRoot, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(at: battleFrontRoot, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(at: battleBackRoot, withIntermediateDirectories: true, attributes: nil)
         FileManager.default.createFile(atPath: fieldTilesetRoot.appendingPathComponent("reds_house.png").path, contents: Data())
         FileManager.default.createFile(atPath: fieldBlocksetRoot.appendingPathComponent("reds_house.bst").path, contents: Data(repeating: 0, count: 16))
         FileManager.default.createFile(atPath: fieldSpriteRoot.appendingPathComponent("red.png").path, contents: Data())
+        FileManager.default.createFile(atPath: battleFrontRoot.appendingPathComponent("squirtle.png").path, contents: Data())
+        FileManager.default.createFile(atPath: battleBackRoot.appendingPathComponent("squirtle.png").path, contents: Data())
         return root
     }
 
@@ -143,6 +158,11 @@ final class PokeContentTests: XCTestCase {
                 .init(
                     id: "SQUIRTLE",
                     displayName: "Squirtle",
+                    primaryType: "WATER",
+                    battleSprite: .init(
+                        frontImagePath: "Assets/battle/pokemon/front/squirtle.png",
+                        backImagePath: "Assets/battle/pokemon/back/squirtle.png"
+                    ),
                     baseHP: 44,
                     baseAttack: 48,
                     baseDefense: 65,
@@ -161,6 +181,10 @@ final class PokeContentTests: XCTestCase {
                     effect: "NO_ADDITIONAL_EFFECT",
                     type: "NORMAL"
                 ),
+            ],
+            typeEffectiveness: [
+                .init(attackingType: "WATER", defendingType: "FIRE", multiplier: 20),
+                .init(attackingType: "NORMAL", defendingType: "GHOST", multiplier: 0),
             ],
             trainerBattles: [
                 .init(

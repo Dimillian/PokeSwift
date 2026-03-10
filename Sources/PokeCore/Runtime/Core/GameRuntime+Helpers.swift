@@ -3,6 +3,22 @@ import PokeContent
 import PokeDataModel
 
 extension GameRuntime {
+    static let battleStageRatios: [(Int, Int)] = [
+        (25, 100),
+        (28, 100),
+        (33, 100),
+        (40, 100),
+        (50, 100),
+        (66, 100),
+        (1, 1),
+        (15, 10),
+        (2, 1),
+        (25, 10),
+        (3, 1),
+        (35, 10),
+        (4, 1),
+    ]
+
     func translated(_ point: TilePoint, by direction: FacingDirection) -> TilePoint {
         switch direction {
         case .up:
@@ -17,24 +33,22 @@ extension GameRuntime {
     }
 
     func scaledStat(_ stat: Int, stage: Int) -> Int {
-        let multipliers: [(Int, Int)] = [
-            (2, 8),
-            (2, 7),
-            (2, 6),
-            (2, 5),
-            (2, 4),
-            (2, 3),
-            (2, 2),
-            (3, 2),
-            (4, 2),
-            (5, 2),
-            (6, 2),
-            (7, 2),
-            (8, 2),
-        ]
-        let index = max(0, min(multipliers.count - 1, stage + 6))
-        let (numerator, denominator) = multipliers[index]
+        let (numerator, denominator) = stageRatio(for: stage)
         return max(1, (stat * numerator) / denominator)
+    }
+
+    func scaledAccuracy(baseAccuracyPercent: Int, accuracyStage: Int, evasionStage: Int) -> Int {
+        let baseAccuracy = max(1, min(255, (baseAccuracyPercent * 255) / 100))
+        let reflectedEvasionStage = max(-6, min(6, -evasionStage))
+        let (accuracyNumerator, accuracyDenominator) = stageRatio(for: accuracyStage)
+        let (evasionNumerator, evasionDenominator) = stageRatio(for: reflectedEvasionStage)
+        let scaled = (((baseAccuracy * accuracyNumerator) / accuracyDenominator) * evasionNumerator) / evasionDenominator
+        return max(1, min(255, scaled))
+    }
+
+    func stageRatio(for stage: Int) -> (Int, Int) {
+        let index = max(0, min(Self.battleStageRatios.count - 1, stage + 6))
+        return Self.battleStageRatios[index]
     }
 
     func hasFlag(_ flagID: String) -> Bool {

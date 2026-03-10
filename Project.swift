@@ -101,7 +101,9 @@ let project = Project(
                 "LSMinimumSystemVersion": "26.0",
             ]),
             sources: ["App/PokeMac/Sources/**"],
-            resources: ["Content/**"],
+            resources: [
+                .folderReference(path: "Content"),
+            ],
             dependencies: [
                 .target(name: "PokeCore"),
                 .target(name: "PokeUI"),

@@ -134,6 +134,9 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let enemyPartyCount: Int
     public let enemyActiveIndex: Int
     public let focusedMoveIndex: Int
+    public let phase: String
+    public let textLines: [String]
+    public let moveSlots: [BattleMoveSlotTelemetry]
     public let battleMessage: String
 
     public init(
@@ -144,6 +147,9 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         enemyPartyCount: Int,
         enemyActiveIndex: Int,
         focusedMoveIndex: Int,
+        phase: String = "moveSelection",
+        textLines: [String] = [],
+        moveSlots: [BattleMoveSlotTelemetry] = [],
         battleMessage: String
     ) {
         self.battleID = battleID
@@ -153,7 +159,61 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         self.enemyPartyCount = enemyPartyCount
         self.enemyActiveIndex = enemyActiveIndex
         self.focusedMoveIndex = focusedMoveIndex
+        self.phase = phase
+        self.textLines = textLines
+        self.moveSlots = moveSlots
         self.battleMessage = battleMessage
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case battleID
+        case trainerName
+        case playerPokemon
+        case enemyPokemon
+        case enemyPartyCount
+        case enemyActiveIndex
+        case focusedMoveIndex
+        case phase
+        case textLines
+        case moveSlots
+        case battleMessage
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        battleID = try container.decode(String.self, forKey: .battleID)
+        trainerName = try container.decode(String.self, forKey: .trainerName)
+        playerPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .playerPokemon)
+        enemyPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .enemyPokemon)
+        enemyPartyCount = try container.decodeIfPresent(Int.self, forKey: .enemyPartyCount) ?? 1
+        enemyActiveIndex = try container.decodeIfPresent(Int.self, forKey: .enemyActiveIndex) ?? 0
+        focusedMoveIndex = try container.decode(Int.self, forKey: .focusedMoveIndex)
+        phase = try container.decodeIfPresent(String.self, forKey: .phase) ?? "moveSelection"
+        textLines = try container.decodeIfPresent([String].self, forKey: .textLines) ?? []
+        moveSlots = try container.decodeIfPresent([BattleMoveSlotTelemetry].self, forKey: .moveSlots) ?? []
+        battleMessage = try container.decode(String.self, forKey: .battleMessage)
+    }
+}
+
+public struct BattleMoveSlotTelemetry: Codable, Equatable, Sendable {
+    public let moveID: String
+    public let displayName: String
+    public let currentPP: Int
+    public let maxPP: Int
+    public let isSelectable: Bool
+
+    public init(
+        moveID: String,
+        displayName: String,
+        currentPP: Int,
+        maxPP: Int,
+        isSelectable: Bool = true
+    ) {
+        self.moveID = moveID
+        self.displayName = displayName
+        self.currentPP = currentPP
+        self.maxPP = maxPP
+        self.isSelectable = isSelectable
     }
 }
 

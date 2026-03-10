@@ -413,6 +413,9 @@ public struct MoveManifest: Codable, Equatable, Sendable {
 }
 
 public struct SpeciesManifest: Codable, Equatable, Sendable {
+    public let primaryType: String
+    public let secondaryType: String?
+    public let battleSprite: BattleSpriteManifest?
     public let id: String
     public let displayName: String
     public let baseHP: Int
@@ -425,6 +428,9 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public init(
         id: String,
         displayName: String,
+        primaryType: String = "NORMAL",
+        secondaryType: String? = nil,
+        battleSprite: BattleSpriteManifest? = nil,
         baseHP: Int,
         baseAttack: Int,
         baseDefense: Int,
@@ -434,12 +440,66 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     ) {
         self.id = id
         self.displayName = displayName
+        self.primaryType = primaryType
+        self.secondaryType = secondaryType
+        self.battleSprite = battleSprite
         self.baseHP = baseHP
         self.baseAttack = baseAttack
         self.baseDefense = baseDefense
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
         self.startingMoves = startingMoves
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case primaryType
+        case secondaryType
+        case battleSprite
+        case id
+        case displayName
+        case baseHP
+        case baseAttack
+        case baseDefense
+        case baseSpeed
+        case baseSpecial
+        case startingMoves
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        primaryType = try container.decodeIfPresent(String.self, forKey: .primaryType) ?? "NORMAL"
+        secondaryType = try container.decodeIfPresent(String.self, forKey: .secondaryType)
+        battleSprite = try container.decodeIfPresent(BattleSpriteManifest.self, forKey: .battleSprite)
+        baseHP = try container.decode(Int.self, forKey: .baseHP)
+        baseAttack = try container.decode(Int.self, forKey: .baseAttack)
+        baseDefense = try container.decode(Int.self, forKey: .baseDefense)
+        baseSpeed = try container.decode(Int.self, forKey: .baseSpeed)
+        baseSpecial = try container.decode(Int.self, forKey: .baseSpecial)
+        startingMoves = try container.decode([String].self, forKey: .startingMoves)
+    }
+}
+
+public struct BattleSpriteManifest: Codable, Equatable, Sendable {
+    public let frontImagePath: String
+    public let backImagePath: String
+
+    public init(frontImagePath: String, backImagePath: String) {
+        self.frontImagePath = frontImagePath
+        self.backImagePath = backImagePath
+    }
+}
+
+public struct TypeEffectivenessManifest: Codable, Equatable, Sendable {
+    public let attackingType: String
+    public let defendingType: String
+    public let multiplier: Int
+
+    public init(attackingType: String, defendingType: String, multiplier: Int) {
+        self.attackingType = attackingType
+        self.defendingType = defendingType
+        self.multiplier = multiplier
     }
 }
 
@@ -518,6 +578,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public let scripts: [ScriptManifest]
     public let species: [SpeciesManifest]
     public let moves: [MoveManifest]
+    public let typeEffectiveness: [TypeEffectivenessManifest]
     public let trainerBattles: [TrainerBattleManifest]
     public let playerStart: PlayerStartManifest
 
@@ -531,6 +592,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         scripts: [ScriptManifest],
         species: [SpeciesManifest],
         moves: [MoveManifest],
+        typeEffectiveness: [TypeEffectivenessManifest] = [],
         trainerBattles: [TrainerBattleManifest],
         playerStart: PlayerStartManifest
     ) {
@@ -543,7 +605,39 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         self.scripts = scripts
         self.species = species
         self.moves = moves
+        self.typeEffectiveness = typeEffectiveness
         self.trainerBattles = trainerBattles
         self.playerStart = playerStart
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case maps
+        case tilesets
+        case overworldSprites
+        case dialogues
+        case eventFlags
+        case mapScripts
+        case scripts
+        case species
+        case moves
+        case typeEffectiveness
+        case trainerBattles
+        case playerStart
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        maps = try container.decode([MapManifest].self, forKey: .maps)
+        tilesets = try container.decode([TilesetManifest].self, forKey: .tilesets)
+        overworldSprites = try container.decode([OverworldSpriteManifest].self, forKey: .overworldSprites)
+        dialogues = try container.decode([DialogueManifest].self, forKey: .dialogues)
+        eventFlags = try container.decode(EventFlagManifest.self, forKey: .eventFlags)
+        mapScripts = try container.decode([MapScriptManifest].self, forKey: .mapScripts)
+        scripts = try container.decode([ScriptManifest].self, forKey: .scripts)
+        species = try container.decode([SpeciesManifest].self, forKey: .species)
+        moves = try container.decode([MoveManifest].self, forKey: .moves)
+        typeEffectiveness = try container.decodeIfPresent([TypeEffectivenessManifest].self, forKey: .typeEffectiveness) ?? []
+        trainerBattles = try container.decode([TrainerBattleManifest].self, forKey: .trainerBattles)
+        playerStart = try container.decode(PlayerStartManifest.self, forKey: .playerStart)
     }
 }

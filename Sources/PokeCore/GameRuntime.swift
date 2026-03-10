@@ -24,6 +24,8 @@ public final class GameRuntime {
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
     var deferredActions: [DeferredAction] = []
+    var battleRNGState: UInt64 = 0x504f4b4553574946
+    var battleRandomOverrides: [Int] = []
 
     public init(content: LoadedContent, telemetryPublisher: (any TelemetryPublisher)?) {
         self.content = content

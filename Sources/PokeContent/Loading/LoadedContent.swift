@@ -68,6 +68,10 @@ public struct LoadedContent: Sendable {
         gameplayManifest.moves.first { $0.id == id }
     }
 
+    public func typeEffectiveness(attackingType: String, defendingType: String) -> TypeEffectivenessManifest? {
+        gameplayManifest.typeEffectiveness.first { $0.attackingType == attackingType && $0.defendingType == defendingType }
+    }
+
     public func trainerBattle(id: String) -> TrainerBattleManifest? {
         gameplayManifest.trainerBattles.first { $0.id == id }
     }

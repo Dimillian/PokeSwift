@@ -60,6 +60,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         scripts: buildScripts(),
         species: try buildSpecies(repoRoot: source.repoRoot),
         moves: try buildMoves(repoRoot: source.repoRoot),
+        typeEffectiveness: try buildTypeEffectiveness(repoRoot: source.repoRoot),
         trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot),
         playerStart: .init(
             mapID: "REDS_HOUSE_2F",
@@ -920,6 +921,8 @@ private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
 private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: String) throws -> SpeciesManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(file))
     guard let statsMatch = contents.firstMatch(of: /db\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+)\s*\n\s*;\s*hp\s+atk\s+def\s+spd\s+spc/),
+          let typeMatch = contents.firstMatch(of: /db\s+([A-Z_]+),\s+([A-Z_]+)\s*;\s*type/),
+          let spriteMatch = contents.firstMatch(of: /dw\s+([A-Za-z0-9_]+),\s+([A-Za-z0-9_]+)/),
           let moveMatch = contents.firstMatch(of: /db\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z_]+)\s*; level 1 learnset/)
     else {
         throw ExtractorError.invalidArguments("missing species data for \(id)")
@@ -938,10 +941,20 @@ private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: 
         String(moveMatch.output.3),
         String(moveMatch.output.4),
     ]
+    let primaryType = String(typeMatch.output.1)
+    let rawSecondaryType = String(typeMatch.output.2)
+    let battleSprite = try battleSpriteManifest(
+        speciesID: id,
+        frontSymbol: String(spriteMatch.output.1),
+        backSymbol: String(spriteMatch.output.2)
+    )
 
     return SpeciesManifest(
         id: id,
         displayName: displayName,
+        primaryType: primaryType,
+        secondaryType: primaryType == rawSecondaryType ? nil : rawSecondaryType,
+        battleSprite: battleSprite,
         baseHP: statsValues[safe: 0] ?? 0,
         baseAttack: statsValues[safe: 1] ?? 0,
         baseDefense: statsValues[safe: 2] ?? 0,
@@ -949,6 +962,76 @@ private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: 
         baseSpecial: statsValues[safe: 4] ?? 0,
         startingMoves: moveValues.filter { $0 != "NO_MOVE" }
     )
+}
+
+private func battleSpriteManifest(speciesID: String, frontSymbol: String, backSymbol: String) throws -> BattleSpriteManifest {
+    guard
+        let frontStem = spriteStem(from: frontSymbol, suffix: "PicFront"),
+        let backStem = spriteStem(from: backSymbol, suffix: "PicBack"),
+        frontStem == backStem
+    else {
+        throw ExtractorError.invalidArguments("missing battle sprite symbols for \(speciesID)")
+    }
+
+    return BattleSpriteManifest(
+        frontImagePath: "Assets/battle/pokemon/front/\(frontStem).png",
+        backImagePath: "Assets/battle/pokemon/back/\(backStem).png"
+    )
+}
+
+private func spriteStem(from symbol: String, suffix: String) -> String? {
+    guard symbol.hasSuffix(suffix) else { return nil }
+    return String(symbol.dropLast(suffix.count)).lowercased()
+}
+
+private func buildTypeEffectiveness(repoRoot: URL) throws -> [TypeEffectivenessManifest] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/types/type_matchups.asm"))
+    var entries: [TypeEffectivenessManifest] = []
+    var didEnterTable = false
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        if line == "TypeEffects:" {
+            didEnterTable = true
+            continue
+        }
+        guard didEnterTable else { continue }
+        if line.hasPrefix("db -1") {
+            break
+        }
+        guard let match = line.firstMatch(of: /db\s+([A-Z0-9_]+),\s+([A-Z0-9_]+),\s+([A-Z0-9_]+)/) else {
+            continue
+        }
+        entries.append(
+            TypeEffectivenessManifest(
+                attackingType: String(match.output.1),
+                defendingType: String(match.output.2),
+                multiplier: try resolveTypeEffectivenessMultiplier(String(match.output.3))
+            )
+        )
+    }
+
+    guard entries.isEmpty == false else {
+        throw ExtractorError.invalidArguments("missing type effectiveness table")
+    }
+    return entries
+}
+
+private func resolveTypeEffectivenessMultiplier(_ token: String) throws -> Int {
+    switch token {
+    case "NO_EFFECT":
+        return 0
+    case "NOT_VERY_EFFECTIVE":
+        return 5
+    case "EFFECTIVE":
+        return 10
+    case "MORE_EFFECTIVE":
+        return 15
+    case "SUPER_EFFECTIVE":
+        return 20
+    default:
+        throw ExtractorError.invalidArguments("unknown type effectiveness multiplier \(token)")
+    }
 }
 
 private func buildMoves(repoRoot: URL) throws -> [MoveManifest] {
