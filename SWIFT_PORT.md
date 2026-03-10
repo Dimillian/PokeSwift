@@ -65,7 +65,9 @@ The repo now contains:
 - Oak Lab rival battle hardening for the accepted M3 slice: battle sprites, queued battle text phases, accuracy/evasion, STAB, type effectiveness, critical hits, bounded move-effect handling, and deterministic trainer AI better than first-PP selection
 - Oak Lab battle presentation polish for the accepted M3 slice: GBC-style left/right battler composition and native HP bars with on-bar numeric readouts on battle status cards
 - a real GB-style field compositor for M3 maps and actors, with telemetry proving `renderMode == realAssets`
+- bounded native M3 music playback driven from extracted ASM-backed audio manifests, including title, map-default, scripted override, battle, rival-exit, and Mom-heal routing
 - battle telemetry that now exposes phase, queued/current text, and move-slot state so the UI and harness can consume turn sequencing directly
+- audio telemetry that now exposes current track, entry, playback reason, and revision so the harness can validate music transitions during the slice
 - a passing workspace test run across the current module test targets
 - a macOS `26.0+` baseline for the Swift port so native Liquid Glass UI can be used without legacy fallback surfaces
 
@@ -152,7 +154,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Battle UI | `in progress` | Native battle presentation, menus, animations, text, outcomes | battle assets, menu text, move/item strings | `PokeUI`, `PokeMac`, `PokeCore` | active combatants, current menu, damage/result events | Oak Lab now shows extracted starter front/back sprites, GBC-style battler side placement, native HP bars with on-bar numeric readouts, and phase-aware battle text/move-slot state; full command menus, switch/item/run flows, animations, and broad presentation parity remain |
 | Encounters, fishing, gifts, trades, fossils, legendaries | `not started` | Full world content progression parity | encounter tables, map scripts, NPC scripts, gift/trade data | `PokeExtractCLI`, `PokeCore`, `PokeTelemetry` | encounter source, gift/trade state, one-off content completion flags | Expand extraction beyond core loop data |
 | Menus, naming, Pokedex, party UI | `not started` | Full native menu/navigation stack with gameplay parity | menu scripts, text resources, species data | `PokeCore`, `PokeUI`, `PokeMac`, `PokeTelemetry` | current menu stack, selection state, naming input events | Build generic menu framework after title menu is stable |
-| Audio / music / SFX | `not started` | Native playback matching timing and event hooks closely enough for parity | `audio/**`, music/sfx data, track references | `PokeExtractCLI`, `PokeCore`, `PokeMac` | current track/sfx ids, audio load failures, playback state | Keep identifier extraction early; playback comes later |
+| Audio / music / SFX | `in progress` | Native playback matching timing and event hooks closely enough for parity | `audio/**`, music/sfx data, track references | `PokeExtractCLI`, `PokeCore`, `PokeMac`, `PokeTelemetry` | current track ids, entry ids, playback reasons, audio load failures, playback state | Bounded M3 music extraction, routing, telemetry, and native playback are live for title, map-default, scripted, battle, rival-exit, and heal cues; fidelity and broader SFX/music parity still remain |
 | Native macOS shell and UX | `in progress` | Native menus, settings, scaling, input mapping, window behavior, accessibility basics | app-level design decisions and extracted content constraints | `PokeMac`, `PokeUI`, `PokeTelemetry` | window scale, focused scene, input bindings, command usage | Title-shell scope is accepted; expand settings and accessibility with later gameplay milestones |
 | Telemetry, debug tooling, parity harnesses | `in progress` | Stable state snapshots, control hooks, regression harnesses, parity/debug surfaces | runtime state plus extracted content metadata | `PokeTelemetry`, `PokeHarness`, `PokeCore` | JSONL traces, latest snapshot endpoint, smoke validators, debug overlay | Battle telemetry and harness flow now use explicit battle phase, queued text, and move-slot state for the Oak Lab slice; parity tooling still needs expansion beyond M3 |
 
@@ -168,7 +170,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 
 ### Extraction and Content
 
-- [ ] charmap extraction
+- [x] charmap extraction
 - [x] text extraction and normalization
 - [x] constants extraction
 - [x] title and intro manifests
@@ -176,7 +178,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 - [x] tileset and sprite manifests
 - [ ] item, move, species, trainer, and encounter catalogs
 - [x] event/script extraction
-- [ ] audio identifier extraction
+- [x] audio identifier extraction
 - [x] extraction verification and determinism tests
 
 ### Core Runtime
@@ -234,7 +236,7 @@ The following table is the top-level full-port checklist. Each row represents a 
 | Splash assets | yes | `done` | `gfx/splash/**` | copied/normalized assets | `PokeExtractCLI` | Maintain stable runtime paths as extraction expands |
 | Title assets | yes | `done` | `gfx/title/**` | copied/normalized assets | `PokeExtractCLI` | Maintain stable runtime paths as extraction expands |
 | Font assets | yes | `done` | `gfx/font/**` | copied/normalized assets | `PokeExtractCLI` | Expand glyph/render validation with dialogue systems |
-| Audio ids stub | optional | `done` | title/intro track references | `audio_manifest.json` | `PokeExtractCLI` | Replace stub-only behavior with playback later |
+| Bounded M3 audio manifest | optional | `in progress` | `constants/music_constants.asm`, `audio/headers/musicheaders*.asm`, `data/maps/songs.asm`, selected `audio/music/*.asm`, `audio/wave_samples.asm` | `audio_manifest.json` | `PokeExtractCLI` | M3 now extracts tracks, cues, map music routes, channel event IR, and alternate rival entrypoints; expand coverage and fidelity beyond the bounded slice |
 | Maps | no | `in progress` | `maps/**`, `data/maps/**` | `gameplay_manifest.json` map section | `PokeExtractCLI` | Expand beyond the four M3 maps |
 | Tilesets / blocksets / overworld sprites | no | `in progress` | `gfx/tilesets/**`, `gfx/blocksets/**`, `gfx/sprites/**` | `gameplay_manifest.json` tileset/sprite sections, collision metadata, and copied field assets | `PokeExtractCLI` | M3 slice assets and collision metadata are extracted and consumed; expand coverage beyond the current slice |
 | Species / moves / items | no | `in progress` | `data/pokemon/**`, `data/moves/**`, `data/items/**` | `gameplay_manifest.json` species/moves sections | `PokeExtractCLI` | M3 now extracts starter typings, starter battle sprite paths, and the bounded move catalog needed for Oak Lab hardening; add broader catalogs beyond the current slice |
@@ -410,7 +412,7 @@ When a blocker is discovered, add:
 ## Deferred Decisions
 
 - Whether save data should be ROM-compatible, app-native, or dual-format
-- Exact audio playback implementation strategy
+- Remaining audio fidelity/parity strategy beyond the bounded native M3 playback implementation
 - How much title/intro timing should be driven directly by extracted manifests versus native reinterpretation layers
 - When to introduce Blue support after Red reaches stable parity milestones
 - Long-term parity strategy against original runtime behavior beyond milestone-local smoke tests
@@ -431,6 +433,10 @@ When a blocker is discovered, add:
 - Replaced hardcoded blocked-tile logic with extracted tileset collision metadata and per-map resolved step collision grids consumed by `PokeContent` and `PokeCore`.
 - Replaced fallback Pallet Town and Oak's Lab script paths with extracted map-script triggers and script manifests, including the Pallet north-exit Oak intro and Oak's Lab starter/rival flow.
 - Expanded trainer battle extraction/runtime contracts from single-enemy assumptions to source-driven trainer parties and starter-dependent rival resolution.
+- Replaced the stub audio contract with bounded ASM-driven M3 music extraction, including track metadata, map music routing, scripted cues, and the rival alternate-start entrypoint.
+- Added native runtime music ownership and playback for the M3 slice, with title, map-default, scripted override, battle, rival-exit, and Mom-heal transitions driven from extracted content.
+- Extended telemetry and harness validation to assert audio track, reason, and entry transitions during the M3 end-to-end flow.
+- Tightened extractor timing fidelity for the bounded music slice by matching the engine's carried note-delay behavior more closely.
 - Extended telemetry to surface active map-script triggers and enemy party progress so harnesses and tests can validate the source-driven runtime path directly.
 - Revalidated the accepted M3/M4A baseline with `./scripts/extract_red.sh`, `./scripts/validate_milestone.sh`, and `xcodebuild -workspace PokeSwift.xcworkspace -scheme PokeSwift-Workspace -derivedDataPath .build/DerivedData test`.
 

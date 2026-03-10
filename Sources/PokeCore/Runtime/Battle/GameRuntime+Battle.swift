@@ -437,8 +437,9 @@ extension GameRuntime {
         gameplayState.objectStates["oaks_lab_rival"]?.facing = .down
         self.gameplayState = gameplayState
         let _ = won
+        requestRivalExitMusic()
         showDialogue(id: "oaks_lab_rival_smell_you_later", completion: .returnToField)
-        queueDeferredActions([.hideObject("oaks_lab_rival")])
+        queueDeferredActions([.hideObject("oaks_lab_rival"), .restoreMapMusic])
     }
 
     func startBattle(id: String) {
@@ -491,6 +492,7 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         scene = .battle
         substate = "battle"
+        requestTrainerBattleMusic()
     }
 
     func healParty() {

@@ -15,6 +15,7 @@ extension GameRuntime {
             party: makePartyTelemetry(),
             battle: makeBattleTelemetry(),
             eventFlags: makeFlagTelemetry(),
+            audio: makeAudioTelemetry(),
             recentInputEvents: recentInputEvents,
             assetLoadingFailures: Array(Set(assetLoadingFailures + currentFieldRenderIssues)).sorted(),
             window: .init(scale: windowScale, renderWidth: 160, renderHeight: 144)
@@ -89,6 +90,16 @@ extension GameRuntime {
     func makeFlagTelemetry() -> EventFlagTelemetry? {
         guard let gameplayState else { return nil }
         return EventFlagTelemetry(activeFlags: gameplayState.activeFlags.sorted())
+    }
+
+    func makeAudioTelemetry() -> AudioTelemetry? {
+        guard let currentAudioState else { return nil }
+        return AudioTelemetry(
+            trackID: currentAudioState.trackID,
+            entryID: currentAudioState.entryID,
+            reason: currentAudioState.reason,
+            playbackRevision: currentAudioState.playbackRevision
+        )
     }
 
     func makePartyPokemonTelemetry(from pokemon: RuntimePokemonState) -> PartyPokemonTelemetry {

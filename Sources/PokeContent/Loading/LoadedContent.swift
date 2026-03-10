@@ -79,4 +79,16 @@ public struct LoadedContent: Sendable {
     public func trainerBattle(trainerClass: String, trainerNumber: Int) -> TrainerBattleManifest? {
         gameplayManifest.trainerBattles.first { $0.trainerClass == trainerClass && $0.trainerNumber == trainerNumber }
     }
+
+    public func audioTrack(id: String) -> AudioManifest.Track? {
+        audioManifest.tracks.first { $0.id == id }
+    }
+
+    public func audioEntry(trackID: String, entryID: String = "default") -> AudioManifest.Entry? {
+        audioTrack(id: trackID)?.entries.first { $0.id == entryID }
+    }
+
+    public func audioCue(id: String) -> AudioManifest.Cue? {
+        audioManifest.cues.first { $0.id == id }
+    }
 }

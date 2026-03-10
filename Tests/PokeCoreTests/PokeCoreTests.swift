@@ -83,6 +83,122 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pallet_town_oak_hey_wait")
     }
 
+    func testTitleAudioStartsOnceAndDoesNotRestartInMenu() async {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, audioPlayer: audioPlayer)
+
+        runtime.start()
+        try? await Task.sleep(for: .milliseconds(1700))
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "title")
+        XCTAssertEqual(audioPlayer.requests, [.init(trackID: "MUSIC_TITLE_SCREEN", entryID: "default")])
+
+        runtime.handle(button: .start)
+
+        XCTAssertEqual(runtime.scene, .titleMenu)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "title")
+        XCTAssertEqual(audioPlayer.requests.count, 1)
+    }
+
+    func testRepoGeneratedOakIntroAndLabArrivalUpdateAudioTelemetry() throws {
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "PALLET_TOWN"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 10, y: 2)
+        runtime.gameplayState?.facing = .up
+        runtime.requestDefaultMapMusic()
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_PROF_OAK")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "scriptOverride")
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field && $0.field?.mapID == "OAKS_LAB"
+        })
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+    }
+
+    func testRepoGeneratedRivalBattleAudioTransitionsFromIntroToBattleToExitAndBack() throws {
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 4, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
+        runtime.requestDefaultMapMusic()
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
+
+        runtime.beginScript(id: "oaks_lab_rival_challenge_vs_bulbasaur")
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_RIVAL")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "scriptOverride")
+
+        runtime.startBattle(id: "opp_rival1_2")
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "battle")
+
+        runtime.runPostBattleSequence(won: true)
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_RIVAL")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.entryID, "alternateStart")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "scriptOverride")
+
+        runtime.dialogueState = nil
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.advanceDeferredQueueIfNeeded()
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+    }
+
+    func testMomHealJingleRestoresMapDefaultAfterCompletion() throws {
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_1F"
+        runtime.requestDefaultMapMusic()
+        runtime.showDialogue(id: "reds_house_1f_mom_rest", completion: .healAndShow(dialogueID: "reds_house_1f_mom_looking_great"))
+
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PKMN_HEALED")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "jingle")
+        XCTAssertEqual(audioPlayer.pendingCompletionCount, 1)
+
+        audioPlayer.completePendingPlayback()
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "reds_house_1f_mom_looking_great")
+    }
+
     func testBattleAdvancesAcrossExtractedEnemyParty() async {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -317,7 +433,10 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(snapshot.phase, "moveSelection")
     }
 
-    private func fixtureContent(gameplayManifest: GameplayManifest? = nil) -> LoadedContent {
+    private func fixtureContent(
+        gameplayManifest: GameplayManifest? = nil,
+        audioManifest: AudioManifest? = nil
+    ) -> LoadedContent {
         LoadedContent(
             rootURL: URL(fileURLWithPath: "/tmp", isDirectory: true),
             gameManifest: .init(contentVersion: "test", variant: .red, sourceCommit: "abc", extractorVersion: "1", sourceFiles: []),
@@ -336,7 +455,7 @@ final class PokeCoreTests: XCTestCase {
                 assets: [],
                 timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
             ),
-            audioManifest: .init(variant: .red, tracks: []),
+            audioManifest: audioManifest ?? fixtureAudioManifest(),
             gameplayManifest: gameplayManifest ?? fixtureGameplayManifest()
         )
     }
@@ -353,6 +472,7 @@ final class PokeCoreTests: XCTestCase {
                 .init(
                     id: "REDS_HOUSE_2F",
                     displayName: "Red's House 2F",
+                    defaultMusicID: "MUSIC_PALLET_TOWN",
                     borderBlockID: 0x0A,
                     blockWidth: 4,
                     blockHeight: 4,
@@ -409,6 +529,45 @@ final class PokeCoreTests: XCTestCase {
         )
     }
 
+    private func fixtureAudioManifest() -> AudioManifest {
+        AudioManifest(
+            variant: .red,
+            titleTrackID: "MUSIC_TITLE_SCREEN",
+            mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
+            cues: [
+                .init(id: "title_default", trackID: "MUSIC_TITLE_SCREEN"),
+                .init(id: "trainer_battle", trackID: "MUSIC_TRAINER_BATTLE"),
+                .init(id: "mom_heal", trackID: "MUSIC_PKMN_HEALED"),
+            ],
+            tracks: [
+                .init(
+                    id: "MUSIC_TITLE_SCREEN",
+                    sourceLabel: "Music_TitleScreen",
+                    sourceFile: "audio/music/titlescreen.asm",
+                    entries: [.init(id: "default", sourceLabel: "Music_TitleScreen_Ch1", playbackMode: .looping, channels: [])]
+                ),
+                .init(
+                    id: "MUSIC_PALLET_TOWN",
+                    sourceLabel: "Music_PalletTown",
+                    sourceFile: "audio/music/pallettown.asm",
+                    entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
+                ),
+                .init(
+                    id: "MUSIC_TRAINER_BATTLE",
+                    sourceLabel: "Music_TrainerBattle",
+                    sourceFile: "audio/music/trainerbattle.asm",
+                    entries: [.init(id: "default", sourceLabel: "Music_TrainerBattle_Ch1", playbackMode: .looping, channels: [])]
+                ),
+                .init(
+                    id: "MUSIC_PKMN_HEALED",
+                    sourceLabel: "Music_PkmnHealed",
+                    sourceFile: "audio/music/pkmnhealed.asm",
+                    entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
+                ),
+            ]
+        )
+    }
+
     private func drainBattleText(_ runtime: GameRuntime, maxInteractions: Int = 16) {
         var remaining = maxInteractions
         while let battle = runtime.currentSnapshot().battle, battle.phase != "moveSelection" {
@@ -418,10 +577,66 @@ final class PokeCoreTests: XCTestCase {
         }
     }
 
+    private func advanceDialogueUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 8) {
+        var remaining = maxInteractions
+        while runtime.dialogueState != nil {
+            XCTAssertGreaterThan(remaining, 0, "dialogue did not complete")
+            remaining -= 1
+            runtime.handle(button: .confirm)
+        }
+    }
+
+    private func drainDialogueAndScripts(
+        _ runtime: GameRuntime,
+        until predicate: (RuntimeTelemetrySnapshot) -> Bool,
+        maxInteractions: Int = 24
+    ) {
+        var remaining = maxInteractions
+        while predicate(runtime.currentSnapshot()) == false {
+            XCTAssertGreaterThan(remaining, 0, "dialogue/script sequence did not reach expected state")
+            remaining -= 1
+            switch runtime.scene {
+            case .dialogue:
+                runtime.handle(button: .confirm)
+            case .field, .scriptedSequence:
+                runtime.advanceDeferredQueueIfNeeded()
+                runtime.runActiveScript()
+            default:
+                XCTFail("unexpected scene while draining dialogue/script sequence: \(runtime.scene)")
+                return
+            }
+        }
+    }
+
     private func repoRoot() -> URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
+    }
+}
+
+@MainActor
+private final class RecordingAudioPlayer: RuntimeAudioPlaying {
+    private(set) var requests: [AudioPlaybackRequest] = []
+    private var pendingCompletions: [() -> Void] = []
+
+    var pendingCompletionCount: Int {
+        pendingCompletions.count
+    }
+
+    func play(request: AudioPlaybackRequest, completion: (@MainActor () -> Void)?) {
+        requests.append(request)
+        if let completion {
+            pendingCompletions.append(completion)
+        }
+    }
+
+    func stopAllMusic() {}
+
+    func completePendingPlayback() {
+        guard pendingCompletions.isEmpty == false else { return }
+        let completion = pendingCompletions.removeFirst()
+        completion()
     }
 }

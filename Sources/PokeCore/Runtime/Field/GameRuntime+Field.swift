@@ -129,6 +129,7 @@ extension GameRuntime {
 
         scene = .field
         substate = "field"
+        requestDefaultMapMusic()
         evaluateMapScriptsIfNeeded()
         return true
     }

@@ -4,6 +4,7 @@ import PokeDataModel
 func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let mapSizes = try parseMapSizes(repoRoot: source.repoRoot)
     let mapHeaders = try parseMapHeaders(repoRoot: source.repoRoot)
+    let mapMusic = try parseMapMusic(repoRoot: source.repoRoot)
     let eventFlags = try parseEventFlags(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
 
@@ -15,6 +16,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             objectFile: "data/maps/objects/RedsHouse2F.asm",
             blockFile: "maps/RedsHouse2F.blk",
             size: mapSizes["REDS_HOUSE_2F"] ?? TileSize(width: 4, height: 4),
+            defaultMusicID: mapMusic["REDS_HOUSE_2F"] ?? "MUSIC_PALLET_TOWN",
             tileset: mapHeaders["REDS_HOUSE_2F"] ?? "REDS_HOUSE_2",
             tilesets: tilesets
         ),
@@ -25,6 +27,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             objectFile: "data/maps/objects/RedsHouse1F.asm",
             blockFile: "maps/RedsHouse1F.blk",
             size: mapSizes["REDS_HOUSE_1F"] ?? TileSize(width: 4, height: 4),
+            defaultMusicID: mapMusic["REDS_HOUSE_1F"] ?? "MUSIC_PALLET_TOWN",
             tileset: mapHeaders["REDS_HOUSE_1F"] ?? "REDS_HOUSE_1",
             tilesets: tilesets
         ),
@@ -35,6 +38,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             objectFile: "data/maps/objects/PalletTown.asm",
             blockFile: "maps/PalletTown.blk",
             size: mapSizes["PALLET_TOWN"] ?? TileSize(width: 10, height: 9),
+            defaultMusicID: mapMusic["PALLET_TOWN"] ?? "MUSIC_PALLET_TOWN",
             tileset: mapHeaders["PALLET_TOWN"] ?? "OVERWORLD",
             tilesets: tilesets
         ),
@@ -45,6 +49,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             objectFile: "data/maps/objects/OaksLab.asm",
             blockFile: "maps/OaksLab.blk",
             size: mapSizes["OAKS_LAB"] ?? TileSize(width: 5, height: 6),
+            defaultMusicID: mapMusic["OAKS_LAB"] ?? "MUSIC_OAKS_LAB",
             tileset: mapHeaders["OAKS_LAB"] ?? "DOJO",
             tilesets: tilesets
         ),
@@ -134,6 +139,25 @@ private func parseMapHeaders(repoRoot: URL) throws -> [String: String] {
     }
 }
 
+private func parseMapMusic(repoRoot: URL) throws -> [String: String] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/songs.asm"))
+    let regex = try NSRegularExpression(pattern: #"db\s+(MUSIC_[A-Z0-9_]+),\s+BANK\([A-Za-z0-9_]+\)\s*;\s*([A-Z0-9_]+)"#)
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    var result: [String: String] = [:]
+
+    for match in regex.matches(in: contents, range: nsRange) {
+        guard
+            let musicRange = Range(match.range(at: 1), in: contents),
+            let mapRange = Range(match.range(at: 2), in: contents)
+        else {
+            continue
+        }
+        result[String(contents[mapRange])] = String(contents[musicRange])
+    }
+
+    return result
+}
+
 private func parseCollisionSets(repoRoot: URL) throws -> [String: [Int]] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/tilesets/collision_tile_ids.asm"))
     let lines = contents.split(separator: "\n", omittingEmptySubsequences: false)
@@ -201,6 +225,7 @@ private func makeMapManifest(
     objectFile: String,
     blockFile: String,
     size: TileSize,
+    defaultMusicID: String,
     tileset: String,
     tilesets: [TilesetManifest]
 ) throws -> MapManifest {
@@ -223,6 +248,7 @@ private func makeMapManifest(
     return MapManifest(
         id: mapID,
         displayName: displayName,
+        defaultMusicID: defaultMusicID,
         borderBlockID: borderBlockID,
         blockWidth: size.width,
         blockHeight: size.height,
@@ -860,6 +886,7 @@ private func buildScripts() -> [ScriptManifest] {
             id: "pallet_town_oak_intro",
             steps: [
                 .init(action: "setFlag", flagID: "EVENT_OAK_APPEARED_IN_PALLET"),
+                .init(action: "playMusicCue", stringValue: "oak_intro"),
                 .init(action: "setObjectVisibility", objectID: "pallet_town_oak", visible: true),
                 .init(action: "setObjectPosition", point: .init(x: 8, y: 5), objectID: "pallet_town_oak"),
                 .init(action: "faceObject", stringValue: "down", objectID: "pallet_town_oak"),
@@ -867,6 +894,7 @@ private func buildScripts() -> [ScriptManifest] {
                 .init(action: "moveObject", path: [.up, .up, .up], objectID: "pallet_town_oak"),
                 .init(action: "showDialogue", dialogueID: "pallet_town_oak_its_unsafe"),
                 .init(action: "setMap", stringValue: "OAKS_LAB", point: .init(x: 5, y: 10)),
+                .init(action: "restoreMapMusic"),
                 .init(action: "movePlayer", path: [.up, .up, .up, .up, .up, .up, .up, .up]),
                 .init(action: "setFlag", flagID: "EVENT_FOLLOWED_OAK_INTO_LAB"),
                 .init(action: "setFlag", flagID: "EVENT_FOLLOWED_OAK_INTO_LAB_2"),
@@ -889,6 +917,7 @@ private func buildScripts() -> [ScriptManifest] {
         ScriptManifest(
             id: "oaks_lab_rival_challenge_vs_squirtle",
             steps: [
+                .init(action: "playMusicCue", stringValue: "rival_intro"),
                 .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
                 .init(action: "startBattle", battleID: "opp_rival1_1"),
             ]
@@ -896,6 +925,7 @@ private func buildScripts() -> [ScriptManifest] {
         ScriptManifest(
             id: "oaks_lab_rival_challenge_vs_bulbasaur",
             steps: [
+                .init(action: "playMusicCue", stringValue: "rival_intro"),
                 .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
                 .init(action: "startBattle", battleID: "opp_rival1_2"),
             ]
@@ -903,6 +933,7 @@ private func buildScripts() -> [ScriptManifest] {
         ScriptManifest(
             id: "oaks_lab_rival_challenge_vs_charmander",
             steps: [
+                .init(action: "playMusicCue", stringValue: "rival_intro"),
                 .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
                 .init(action: "startBattle", battleID: "opp_rival1_3"),
             ]

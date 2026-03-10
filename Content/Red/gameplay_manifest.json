@@ -830,6 +830,7 @@
       ],
       "blockWidth" : 4,
       "borderBlockID" : 10,
+      "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 2F",
       "id" : "REDS_HOUSE_2F",
       "objects" : [
@@ -952,6 +953,7 @@
       ],
       "blockWidth" : 4,
       "borderBlockID" : 10,
+      "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 1F",
       "id" : "REDS_HOUSE_1F",
       "objects" : [
@@ -1210,6 +1212,7 @@
       ],
       "blockWidth" : 10,
       "borderBlockID" : 11,
+      "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Pallet Town",
       "id" : "PALLET_TOWN",
       "objects" : [
@@ -1699,6 +1702,7 @@
       ],
       "blockWidth" : 5,
       "borderBlockID" : 3,
+      "defaultMusicID" : "MUSIC_OAKS_LAB",
       "displayName" : "Oak's Lab",
       "id" : "OAKS_LAB",
       "objects" : [
@@ -2393,6 +2397,13 @@
           ]
         },
         {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "oak_intro"
+        },
+        {
           "action" : "setObjectVisibility",
           "objectID" : "pallet_town_oak",
           "path" : [
@@ -2452,6 +2463,12 @@
             "y" : 10
           },
           "stringValue" : "OAKS_LAB"
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
         },
         {
           "action" : "movePlayer",
@@ -2553,6 +2570,13 @@
       "id" : "oaks_lab_rival_challenge_vs_squirtle",
       "steps" : [
         {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
           "action" : "showDialogue",
           "dialogueID" : "oaks_lab_rival_ill_take_you_on",
           "path" : [
@@ -2572,6 +2596,13 @@
       "id" : "oaks_lab_rival_challenge_vs_bulbasaur",
       "steps" : [
         {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
           "action" : "showDialogue",
           "dialogueID" : "oaks_lab_rival_ill_take_you_on",
           "path" : [
@@ -2590,6 +2621,13 @@
     {
       "id" : "oaks_lab_rival_challenge_vs_charmander",
       "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
         {
           "action" : "showDialogue",
           "dialogueID" : "oaks_lab_rival_ill_take_you_on",

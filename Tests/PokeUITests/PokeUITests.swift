@@ -70,6 +70,7 @@ final class PokeUITests: XCTestCase {
         let map = MapManifest(
             id: "PALLET_TOWN",
             displayName: "Pallet Town",
+            defaultMusicID: "MUSIC_PALLET_TOWN",
             borderBlockID: 0x0B,
             blockWidth: 2,
             blockHeight: 2,

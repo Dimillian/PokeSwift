@@ -52,6 +52,28 @@ final class PokeContentTests: XCTestCase {
         )
     }
 
+    func testLoaderReadsRepoGeneratedAudioContract() throws {
+        let root = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let loaded = try FileSystemContentLoader(rootURL: root).load()
+
+        XCTAssertEqual(loaded.audioManifest.titleTrackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(loaded.map(id: "REDS_HOUSE_2F")?.defaultMusicID, "MUSIC_PALLET_TOWN")
+        XCTAssertEqual(loaded.map(id: "OAKS_LAB")?.defaultMusicID, "MUSIC_OAKS_LAB")
+        XCTAssertEqual(loaded.audioCue(id: "oak_intro")?.trackID, "MUSIC_MEET_PROF_OAK")
+        XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
+        XCTAssertNotNil(loaded.audioTrack(id: "MUSIC_TITLE_SCREEN"))
+        XCTAssertNotNil(loaded.audioEntry(trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"))
+        XCTAssertEqual(
+            loaded.audioManifest.mapRoutes,
+            [
+                .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
+                .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
+            ]
+        )
+    }
+
     private func makeFixtureRoot() throws -> URL {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: nil)
@@ -77,7 +99,37 @@ final class PokeContentTests: XCTestCase {
             )
         ).write(to: root.appendingPathComponent("title_manifest.json"))
         try encoder.encode(testGameplayManifest()).write(to: root.appendingPathComponent("gameplay_manifest.json"))
-        try encoder.encode(AudioManifest(variant: .red, tracks: [.init(id: "title", sourceFile: "audio/music/titlescreen.asm")])).write(to: root.appendingPathComponent("audio_manifest.json"))
+        try encoder.encode(
+            AudioManifest(
+                variant: .red,
+                titleTrackID: "MUSIC_TITLE_SCREEN",
+                mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
+                cues: [
+                    .init(id: "title_default", trackID: "MUSIC_TITLE_SCREEN"),
+                    .init(id: "mom_heal", trackID: "MUSIC_PKMN_HEALED"),
+                ],
+                tracks: [
+                    .init(
+                        id: "MUSIC_TITLE_SCREEN",
+                        sourceLabel: "Music_TitleScreen",
+                        sourceFile: "audio/music/titlescreen.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_TitleScreen_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
+                        id: "MUSIC_PALLET_TOWN",
+                        sourceLabel: "Music_PalletTown",
+                        sourceFile: "audio/music/pallettown.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
+                        id: "MUSIC_PKMN_HEALED",
+                        sourceLabel: "Music_PkmnHealed",
+                        sourceFile: "audio/music/pkmnhealed.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
+                    ),
+                ]
+            )
+        ).write(to: root.appendingPathComponent("audio_manifest.json"))
 
         let assetRoot = root.appendingPathComponent("Assets", isDirectory: true)
         try FileManager.default.createDirectory(at: assetRoot, withIntermediateDirectories: true, attributes: nil)
@@ -106,6 +158,7 @@ final class PokeContentTests: XCTestCase {
                 .init(
                     id: "REDS_HOUSE_2F",
                     displayName: "Red's House 2F",
+                    defaultMusicID: "MUSIC_PALLET_TOWN",
                     borderBlockID: 0x0A,
                     blockWidth: 4,
                     blockHeight: 4,

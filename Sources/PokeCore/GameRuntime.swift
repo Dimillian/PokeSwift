@@ -14,6 +14,7 @@ public final class GameRuntime {
     public internal(set) var starterChoiceFocusedIndex = 0
 
     let telemetryPublisher: (any TelemetryPublisher)?
+    let audioPlayer: (any RuntimeAudioPlaying)?
     let validationMode: Bool
     var substate = "launching"
     var recentInputEvents: [InputEventTelemetry] = []
@@ -24,12 +25,18 @@ public final class GameRuntime {
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
     var deferredActions: [DeferredAction] = []
+    var currentAudioState: RuntimeAudioState?
     var battleRNGState: UInt64 = 0x504f4b4553574946
     var battleRandomOverrides: [Int] = []
 
-    public init(content: LoadedContent, telemetryPublisher: (any TelemetryPublisher)?) {
+    public init(
+        content: LoadedContent,
+        telemetryPublisher: (any TelemetryPublisher)?,
+        audioPlayer: (any RuntimeAudioPlaying)? = nil
+    ) {
         self.content = content
         self.telemetryPublisher = telemetryPublisher
+        self.audioPlayer = audioPlayer
         self.assetLoadingFailures = Self.missingAssets(in: content)
         self.validationMode = ProcessInfo.processInfo.environment["POKESWIFT_VALIDATION_MODE"] == "1"
     }
@@ -136,6 +143,7 @@ public final class GameRuntime {
                 substate = "title_menu"
                 focusedIndex = 0
                 placeholderTitle = nil
+                requestTitleMusic()
             }
         case .titleMenu:
             handleTitleMenu(button: button)
@@ -154,6 +162,7 @@ public final class GameRuntime {
                 scene = .titleMenu
                 substate = "title_menu"
                 placeholderTitle = nil
+                requestTitleMusic()
             }
         }
 

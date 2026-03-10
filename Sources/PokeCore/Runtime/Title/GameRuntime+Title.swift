@@ -27,6 +27,7 @@ extension GameRuntime {
         case .cancel:
             scene = .titleAttract
             substate = "attract"
+            requestTitleMusic()
         case .left, .right:
             break
         }
@@ -40,6 +41,7 @@ extension GameRuntime {
         starterChoiceFocusedIndex = 0
         scene = .field
         substate = "field"
+        requestDefaultMapMusic()
     }
 
     func scheduleTitleFlow() {
@@ -64,6 +66,7 @@ extension GameRuntime {
                 guard let self else { return }
                 self.scene = .titleAttract
                 self.substate = "attract"
+                self.requestTitleMusic()
                 self.publishSnapshot()
             }
         }

@@ -26,7 +26,11 @@ extension GameRuntime {
             runActiveScript()
         case let .healAndShow(dialogueID):
             healParty()
-            showDialogue(id: dialogueID, completion: .returnToField)
+            playAudioCue(id: "mom_heal", reason: "jingle") { [weak self] in
+                guard let self else { return }
+                self.requestDefaultMapMusic()
+                self.showDialogue(id: dialogueID, completion: .returnToField)
+            }
         case let .openStarterChoice(preselectedSpeciesID):
             scene = .starterChoice
             substate = "starter_choice"
@@ -77,19 +81,24 @@ extension GameRuntime {
         guard dialogueState == nil, scene == .field || scene == .scriptedSequence else {
             return
         }
-        guard deferredActions.isEmpty == false else { return }
-
-        let action = deferredActions.removeFirst()
-        switch action {
-        case let .dialogue(dialogueID):
-            showDialogue(id: dialogueID, completion: .returnToField)
-        case let .battle(battleID):
-            startBattle(id: battleID)
-        case let .hideObject(objectID):
-            gameplayState?.objectStates[objectID]?.visible = false
-            scene = .field
-            substate = "field"
-            return
+        while deferredActions.isEmpty == false, dialogueState == nil, scene == .field || scene == .scriptedSequence {
+            let action = deferredActions.removeFirst()
+            switch action {
+            case let .dialogue(dialogueID):
+                showDialogue(id: dialogueID, completion: .returnToField)
+                return
+            case let .battle(battleID):
+                startBattle(id: battleID)
+                return
+            case let .hideObject(objectID):
+                gameplayState?.objectStates[objectID]?.visible = false
+                scene = .field
+                substate = "field"
+            case .restoreMapMusic:
+                requestDefaultMapMusic()
+                scene = .field
+                substate = "field"
+            }
         }
     }
 }

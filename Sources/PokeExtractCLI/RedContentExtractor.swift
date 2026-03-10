@@ -42,13 +42,7 @@ public enum RedContentExtractor {
         let titleManifest = try parseTitleManifest(source: source)
         let gameManifest = makeGameManifest(source: source)
         let gameplayManifest = try extractGameplayManifest(source: source)
-        let audioManifest = AudioManifest(
-            variant: .red,
-            tracks: [
-                .init(id: "music_title_screen", sourceFile: "audio/music/titlescreen.asm"),
-                .init(id: "sfx_intro_whoosh", sourceFile: "audio/sfx/intro_whoosh.asm"),
-            ]
-        )
+        let audioManifest = try extractAudioManifest(source: source, titleTrackID: constants.musicTrack)
 
         try writeJSON(gameManifest, to: variantRoot.appendingPathComponent("game_manifest.json"))
         try writeJSON(constants, to: variantRoot.appendingPathComponent("constants.json"))

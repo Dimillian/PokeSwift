@@ -112,6 +112,14 @@ enum DeferredAction {
     case dialogue(String)
     case battle(String)
     case hideObject(String)
+    case restoreMapMusic
+}
+
+struct RuntimeAudioState: Equatable {
+    var trackID: String
+    var entryID: String
+    var reason: String
+    var playbackRevision: Int
 }
 
 struct GameplayState {

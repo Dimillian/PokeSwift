@@ -176,6 +176,110 @@ final class PokeExtractCLITests: XCTestCase {
         )
     }
 
+    func testAudioExtractorBuildsBoundedM3ManifestFromRepoSources() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        XCTAssertEqual(manifest.variant, .red)
+        XCTAssertEqual(manifest.titleTrackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(
+            manifest.mapRoutes,
+            [
+                .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
+                .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
+            ]
+        )
+
+        let cueByID = Dictionary(uniqueKeysWithValues: manifest.cues.map { ($0.id, $0) })
+        XCTAssertEqual(cueByID["title_default"]?.trackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(cueByID["oak_intro"]?.trackID, "MUSIC_MEET_PROF_OAK")
+        XCTAssertEqual(cueByID["rival_intro"]?.trackID, "MUSIC_MEET_RIVAL")
+        XCTAssertEqual(cueByID["rival_exit"]?.entryID, "alternateStart")
+        XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
+
+        let requiredTrackIDs: Set<String> = [
+            "MUSIC_TITLE_SCREEN",
+            "MUSIC_PALLET_TOWN",
+            "MUSIC_OAKS_LAB",
+            "MUSIC_MEET_PROF_OAK",
+            "MUSIC_MEET_RIVAL",
+            "MUSIC_TRAINER_BATTLE",
+            "MUSIC_PKMN_HEALED",
+        ]
+        XCTAssertTrue(requiredTrackIDs.isSubset(of: Set(manifest.tracks.map(\.id))))
+
+        let rivalTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_MEET_RIVAL" })
+        XCTAssertNotNil(rivalTrack.entries.first { $0.id == "default" })
+        XCTAssertNotNil(rivalTrack.entries.first { $0.id == "alternateStart" })
+        XCTAssertEqual(rivalTrack.entries.first { $0.id == "alternateStart" }?.playbackMode, .looping)
+    }
+
+    func testAudioExtractorQuantizesOakLabLeadToEngineFrameDurations() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let oakLabTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_OAKS_LAB" })
+        let channelOne = try XCTUnwrap(
+            oakLabTrack.entries.first { $0.id == "default" }?.channels.first { $0.channelNumber == 1 }
+        )
+        let opening = Array(channelOne.prelude.prefix(4))
+        XCTAssertEqual(opening.count, 4)
+
+        XCTAssertEqual(opening[0].duration, 6.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[1].duration, 7.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[2].duration, 6.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[3].duration, 7.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[1].startTime, 6.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[2].startTime, 13.0 / 60.0, accuracy: 0.000_001)
+        XCTAssertEqual(opening[3].startTime, 19.0 / 60.0, accuracy: 0.000_001)
+    }
+
+    func testAudioExtractorAppliesTrackTempoToSecondaryChannels() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let titleTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_TITLE_SCREEN" })
+        let channelTwo = try XCTUnwrap(
+            titleTrack.entries.first { $0.id == "default" }?.channels.first { $0.channelNumber == 2 }
+        )
+        let firstEvent = try XCTUnwrap(channelTwo.prelude.first)
+
+        XCTAssertEqual(firstEvent.duration, 6.0 / 60.0, accuracy: 0.000_001)
+    }
+
+    func testExtractorWritesDeterministicAudioManifestJSON() throws {
+        let repoRoot = repoRoot()
+        let firstOutputRoot = try temporaryDirectory()
+        let secondOutputRoot = try temporaryDirectory()
+
+        try RedContentExtractor.extract(
+            configuration: .init(repoRoot: repoRoot, outputRoot: firstOutputRoot)
+        )
+        try RedContentExtractor.extract(
+            configuration: .init(repoRoot: repoRoot, outputRoot: secondOutputRoot)
+        )
+
+        let first = try Data(contentsOf: firstOutputRoot.appendingPathComponent("Red/audio_manifest.json"))
+        let second = try Data(contentsOf: secondOutputRoot.appendingPathComponent("Red/audio_manifest.json"))
+        XCTAssertEqual(first, second)
+
+        let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
+        XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
+        XCTAssertEqual(decoded.mapRoutes.count, 4)
+        XCTAssertEqual(decoded.cues.count, 6)
+        XCTAssertEqual(decoded.tracks.count, 7)
+        XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
+    }
+
     func testExtractorCopiesFieldAndStarterBattleAssetsForM3Slice() throws {
         let outputRoot = try temporaryDirectory()
 

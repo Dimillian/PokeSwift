@@ -96,6 +96,13 @@ extension GameRuntime {
         case "healParty":
             healParty()
             return false
+        case "playMusicCue":
+            guard let cueID = step.stringValue else { return false }
+            requestAudioCue(id: cueID)
+            return false
+        case "restoreMapMusic":
+            requestDefaultMapMusic()
+            return false
         default:
             guard var gameplayState else { return false }
             switch step.action {

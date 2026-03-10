@@ -159,21 +159,139 @@ public struct TitleSceneManifest: Codable, Equatable, Sendable {
 }
 
 public struct AudioManifest: Codable, Equatable, Sendable {
+    public enum PlaybackMode: String, Codable, Equatable, Sendable {
+        case looping
+        case oneShot
+    }
+
+    public enum Waveform: String, Codable, Equatable, Sendable {
+        case square
+        case wave
+        case noise
+    }
+
+    public struct Event: Codable, Equatable, Sendable {
+        public let startTime: Double
+        public let duration: Double
+        public let frequencyHz: Double?
+        public let amplitude: Double
+        public let dutyCycle: Double?
+        public let envelopeStepDuration: Double?
+        public let envelopeDirection: Int
+        public let waveSamples: [Double]?
+        public let vibratoDelaySeconds: Double
+        public let vibratoDepthSemitones: Double
+        public let vibratoRateHz: Double
+        public let waveform: Waveform
+
+        public init(
+            startTime: Double,
+            duration: Double,
+            frequencyHz: Double?,
+            amplitude: Double,
+            dutyCycle: Double? = nil,
+            envelopeStepDuration: Double? = nil,
+            envelopeDirection: Int = 0,
+            waveSamples: [Double]? = nil,
+            vibratoDelaySeconds: Double = 0,
+            vibratoDepthSemitones: Double = 0,
+            vibratoRateHz: Double = 0,
+            waveform: Waveform
+        ) {
+            self.startTime = startTime
+            self.duration = duration
+            self.frequencyHz = frequencyHz
+            self.amplitude = amplitude
+            self.dutyCycle = dutyCycle
+            self.envelopeStepDuration = envelopeStepDuration
+            self.envelopeDirection = envelopeDirection
+            self.waveSamples = waveSamples
+            self.vibratoDelaySeconds = vibratoDelaySeconds
+            self.vibratoDepthSemitones = vibratoDepthSemitones
+            self.vibratoRateHz = vibratoRateHz
+            self.waveform = waveform
+        }
+    }
+
+    public struct ChannelProgram: Codable, Equatable, Sendable {
+        public let channelNumber: Int
+        public let prelude: [Event]
+        public let loop: [Event]
+
+        public init(channelNumber: Int, prelude: [Event], loop: [Event]) {
+            self.channelNumber = channelNumber
+            self.prelude = prelude
+            self.loop = loop
+        }
+    }
+
+    public struct Entry: Codable, Equatable, Sendable {
+        public let id: String
+        public let sourceLabel: String
+        public let playbackMode: PlaybackMode
+        public let channels: [ChannelProgram]
+
+        public init(id: String, sourceLabel: String, playbackMode: PlaybackMode, channels: [ChannelProgram]) {
+            self.id = id
+            self.sourceLabel = sourceLabel
+            self.playbackMode = playbackMode
+            self.channels = channels
+        }
+    }
+
     public struct Track: Codable, Equatable, Sendable {
         public let id: String
+        public let sourceLabel: String
         public let sourceFile: String
+        public let entries: [Entry]
 
-        public init(id: String, sourceFile: String) {
+        public init(id: String, sourceLabel: String, sourceFile: String, entries: [Entry]) {
             self.id = id
+            self.sourceLabel = sourceLabel
             self.sourceFile = sourceFile
+            self.entries = entries
+        }
+    }
+
+    public struct MapRoute: Codable, Equatable, Sendable {
+        public let mapID: String
+        public let musicID: String
+
+        public init(mapID: String, musicID: String) {
+            self.mapID = mapID
+            self.musicID = musicID
+        }
+    }
+
+    public struct Cue: Codable, Equatable, Sendable {
+        public let id: String
+        public let trackID: String
+        public let entryID: String
+
+        public init(id: String, trackID: String, entryID: String = "default") {
+            self.id = id
+            self.trackID = trackID
+            self.entryID = entryID
         }
     }
 
     public let variant: GameVariant
+    public let titleTrackID: String
+    public let mapRoutes: [MapRoute]
+    public let cues: [Cue]
     public let tracks: [Track]
 
-    public init(variant: GameVariant, tracks: [Track]) {
+    public init(
+        variant: GameVariant,
+        titleTrackID: String,
+        mapRoutes: [MapRoute],
+        cues: [Cue],
+        tracks: [Track]
+    ) {
         self.variant = variant
+        self.titleTrackID = titleTrackID
+        self.mapRoutes = mapRoutes
+        self.cues = cues
         self.tracks = tracks
     }
 }

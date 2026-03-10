@@ -235,6 +235,20 @@ public struct EventFlagTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public struct AudioTelemetry: Codable, Equatable, Sendable {
+    public let trackID: String
+    public let entryID: String
+    public let reason: String
+    public let playbackRevision: Int
+
+    public init(trackID: String, entryID: String, reason: String, playbackRevision: Int) {
+        self.trackID = trackID
+        self.entryID = entryID
+        self.reason = reason
+        self.playbackRevision = playbackRevision
+    }
+}
+
 public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let appVersion: String
     public let contentVersion: String
@@ -247,6 +261,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let party: PartyTelemetry?
     public let battle: BattleTelemetry?
     public let eventFlags: EventFlagTelemetry?
+    public let audio: AudioTelemetry?
     public let recentInputEvents: [InputEventTelemetry]
     public let assetLoadingFailures: [String]
     public let window: WindowTelemetry
@@ -263,6 +278,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         party: PartyTelemetry?,
         battle: BattleTelemetry?,
         eventFlags: EventFlagTelemetry?,
+        audio: AudioTelemetry?,
         recentInputEvents: [InputEventTelemetry],
         assetLoadingFailures: [String],
         window: WindowTelemetry
@@ -278,6 +294,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.party = party
         self.battle = battle
         self.eventFlags = eventFlags
+        self.audio = audio
         self.recentInputEvents = recentInputEvents
         self.assetLoadingFailures = assetLoadingFailures
         self.window = window

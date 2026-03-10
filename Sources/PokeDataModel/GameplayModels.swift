@@ -158,6 +158,7 @@ public struct TilesetCollisionManifest: Codable, Equatable, Sendable {
 public struct MapManifest: Codable, Equatable, Sendable {
     public let id: String
     public let displayName: String
+    public let defaultMusicID: String
     public let borderBlockID: Int
     public let blockWidth: Int
     public let blockHeight: Int
@@ -173,6 +174,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
     public init(
         id: String,
         displayName: String,
+        defaultMusicID: String,
         borderBlockID: Int,
         blockWidth: Int,
         blockHeight: Int,
@@ -187,6 +189,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
     ) {
         self.id = id
         self.displayName = displayName
+        self.defaultMusicID = defaultMusicID
         self.borderBlockID = borderBlockID
         self.blockWidth = blockWidth
         self.blockHeight = blockHeight

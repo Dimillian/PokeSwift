@@ -18,6 +18,24 @@ private struct BooleanResponse: Decodable {
     let accepted: Bool
 }
 
+private final class RequestResultBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storage: Result<Data, Error>?
+
+    func store(_ result: Result<Data, Error>) {
+        lock.lock()
+        storage = result
+        lock.unlock()
+    }
+
+    func load() -> Result<Data, Error>? {
+        lock.lock()
+        let result = storage
+        lock.unlock()
+        return result
+    }
+}
+
 private struct HarnessCLI {
     let repoRoot: URL
     let derivedData: URL
@@ -135,6 +153,7 @@ private struct HarnessCLI {
 
         try postInput("start")
         let titleMenu = try poll(until: { $0.scene == .titleMenu }, timeout: 4)
+        try assertAudio(titleMenu, trackID: "MUSIC_TITLE_SCREEN", reason: "title")
 
         guard let menu = titleMenu.titleMenu, menu.entries.count == 3 else {
             throw HarnessError.validationFailed("title menu did not expose the expected entries")
@@ -167,22 +186,27 @@ private struct HarnessCLI {
         try postInput("confirm")
         var snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_2F" }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_2F")
+        try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
 
         snapshot = try walk(to: TilePoint(x: 6, y: 1), on: "REDS_HOUSE_2F", startingFrom: snapshot)
         try postInput("right")
         snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_1F" }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_1F")
+        try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
         snapshot = try walk(to: TilePoint(x: 3, y: 6), on: "REDS_HOUSE_1F", startingFrom: snapshot, yFirst: true)
         try postInput("down")
         snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "PALLET_TOWN" }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "PALLET_TOWN")
+        try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
         snapshot = try walk(to: TilePoint(x: 10, y: 2), on: "PALLET_TOWN", startingFrom: snapshot)
         try postInput("up")
 
         snapshot = try poll(until: { $0.scene == .dialogue && ($0.dialogue?.dialogueID.contains("oak") ?? false) }, timeout: 4)
+        try assertAudio(snapshot, trackID: "MUSIC_MEET_PROF_OAK", reason: "scriptOverride")
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
         snapshot = try poll(until: { $0.field?.mapID == "OAKS_LAB" && ($0.eventFlags?.activeFlags.contains("EVENT_OAK_ASKED_TO_CHOOSE_MON") ?? false) }, timeout: 6)
         try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
+        try assertAudio(snapshot, trackID: "MUSIC_OAKS_LAB", reason: "mapDefault")
 
         snapshot = try walk(to: TilePoint(x: 7, y: 4), on: "OAKS_LAB", startingFrom: snapshot, yFirst: true)
         try postInput("up")
@@ -205,6 +229,7 @@ private struct HarnessCLI {
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 16)
         snapshot = try poll(until: { $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_STARTER") ?? false) }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
+        try assertAudio(snapshot, trackID: "MUSIC_OAKS_LAB", reason: "mapDefault")
 
         snapshot = try walk(to: TilePoint(x: 4, y: 6), on: "OAKS_LAB", startingFrom: snapshot)
         if snapshot.scene != .dialogue || snapshot.dialogue?.dialogueID != "oaks_lab_rival_ill_take_you_on" {
@@ -213,8 +238,10 @@ private struct HarnessCLI {
                 $0.dialogue?.dialogueID == "oaks_lab_rival_ill_take_you_on"
             }, timeout: 4)
         }
+        try assertAudio(snapshot, trackID: "MUSIC_MEET_RIVAL", reason: "scriptOverride")
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 6)
         snapshot = try poll(until: { $0.scene == .battle }, timeout: 4)
+        try assertAudio(snapshot, trackID: "MUSIC_TRAINER_BATTLE", reason: "battle")
 
         var battleTurns = 0
         while snapshot.scene == .battle {
@@ -246,6 +273,22 @@ private struct HarnessCLI {
             }
         }
 
+        snapshot = try poll(until: {
+            $0.scene == .dialogue &&
+            (
+                $0.dialogue?.dialogueID == "oaks_lab_rival_i_picked_the_wrong_pokemon" ||
+                $0.dialogue?.dialogueID == "oaks_lab_rival_am_i_great_or_what"
+            )
+        }, timeout: 4)
+        let resultDialogueID = snapshot.dialogue?.dialogueID
+        try postInput("confirm")
+        snapshot = try poll(until: {
+            $0.scene == .dialogue &&
+            $0.dialogue?.dialogueID == "oaks_lab_rival_smell_you_later" &&
+            $0.dialogue?.dialogueID != resultDialogueID
+        }, timeout: 4)
+        try assertAudio(snapshot, trackID: "MUSIC_MEET_RIVAL", reason: "scriptOverride", entryID: "alternateStart")
+
         snapshot = try drainDialogues(startingFrom: snapshot, maxInteractions: 12)
         snapshot = try poll(until: {
             $0.scene == .field &&
@@ -253,6 +296,7 @@ private struct HarnessCLI {
             ($0.eventFlags?.activeFlags.contains("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") ?? false)
         }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
+        try assertAudio(snapshot, trackID: "MUSIC_OAKS_LAB", reason: "mapDefault")
 
         guard snapshot.party?.pokemon.count == 1 else {
             throw HarnessError.validationFailed("expected one starter in party after rival battle")
@@ -274,6 +318,26 @@ private struct HarnessCLI {
         }
         guard snapshot.assetLoadingFailures.isEmpty else {
             throw HarnessError.validationFailed("asset-loading failures present on \(expectedMapID): \(snapshot.assetLoadingFailures.joined(separator: ", "))")
+        }
+    }
+
+    private func assertAudio(
+        _ snapshot: RuntimeTelemetrySnapshot,
+        trackID: String,
+        reason: String,
+        entryID: String? = nil
+    ) throws {
+        guard let audio = snapshot.audio else {
+            throw HarnessError.validationFailed("expected audio telemetry for \(trackID), but snapshot had none")
+        }
+        guard audio.trackID == trackID else {
+            throw HarnessError.validationFailed("expected audio track \(trackID), got \(audio.trackID)")
+        }
+        guard audio.reason == reason else {
+            throw HarnessError.validationFailed("expected audio reason \(reason) for \(trackID), got \(audio.reason)")
+        }
+        if let entryID, audio.entryID != entryID {
+            throw HarnessError.validationFailed("expected audio entry \(entryID) for \(trackID), got \(audio.entryID)")
         }
     }
 
@@ -342,18 +406,18 @@ private struct HarnessCLI {
             }
 
             let semaphore = DispatchSemaphore(value: 0)
-            var result: Result<Data, Error>?
+            let resultBox = RequestResultBox()
             URLSession.shared.dataTask(with: request) { data, _, error in
                 if let error {
-                    result = .failure(error)
+                    resultBox.store(.failure(error))
                 } else {
-                    result = .success(data ?? Data())
+                    resultBox.store(.success(data ?? Data()))
                 }
                 semaphore.signal()
             }.resume()
             semaphore.wait()
 
-            switch result {
+            switch resultBox.load() {
             case let .success(data):
                 return data
             case let .failure(error):

@@ -19,6 +19,7 @@ final class PokeTelemetryTests: XCTestCase {
             party: nil,
             battle: nil,
             eventFlags: nil,
+            audio: nil,
             recentInputEvents: [],
             assetLoadingFailures: [],
             window: .init(scale: 4, renderWidth: 160, renderHeight: 144)

@@ -13,6 +13,7 @@ final class AppCoordinator {
 
     private var telemetryCoordinator: TelemetryCoordinator?
     private var telemetryServer: TelemetryControlServer?
+    private var audioService: PokeAudioService?
     private let keyInputBridge = RuntimeKeyInputBridge()
 
     init() {
@@ -27,9 +28,11 @@ final class AppCoordinator {
                 let contentRoot = ContentLocator.defaultContentRoot()
                 let content = try FileSystemContentLoader(rootURL: contentRoot).load()
                 let telemetry = try TelemetryCoordinator(traceDirectoryURL: AppPaths.traceDirectory)
-                let runtime = GameRuntime(content: content, telemetryPublisher: telemetry)
+                let audioService = PokeAudioService(manifest: content.audioManifest)
+                let runtime = GameRuntime(content: content, telemetryPublisher: telemetry, audioPlayer: audioService)
                 self.runtime = runtime
                 self.telemetryCoordinator = telemetry
+                self.audioService = audioService
 
                 let server = try await telemetry.makeServer(
                     port: AppPaths.telemetryPort,
@@ -60,6 +63,7 @@ final class AppCoordinator {
 
     func shutdown() {
         telemetryServer?.stop()
+        audioService?.stopAllMusic()
         keyInputBridge.remove()
     }
 
