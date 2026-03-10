@@ -1,0 +1,70 @@
+import Foundation
+import PokeDataModel
+
+public struct LoadedContent: Sendable {
+    public let rootURL: URL
+    public let gameManifest: GameManifest
+    public let constantsManifest: ConstantsManifest
+    public let charmapManifest: CharmapManifest
+    public let titleManifest: TitleSceneManifest
+    public let audioManifest: AudioManifest
+    public let gameplayManifest: GameplayManifest
+
+    public init(
+        rootURL: URL,
+        gameManifest: GameManifest,
+        constantsManifest: ConstantsManifest,
+        charmapManifest: CharmapManifest,
+        titleManifest: TitleSceneManifest,
+        audioManifest: AudioManifest,
+        gameplayManifest: GameplayManifest
+    ) {
+        self.rootURL = rootURL
+        self.gameManifest = gameManifest
+        self.constantsManifest = constantsManifest
+        self.charmapManifest = charmapManifest
+        self.titleManifest = titleManifest
+        self.audioManifest = audioManifest
+        self.gameplayManifest = gameplayManifest
+    }
+
+    public var contentRoot: URL {
+        rootURL
+    }
+
+    public var titleSceneManifest: TitleSceneManifest {
+        titleManifest
+    }
+
+    public func map(id: String) -> MapManifest? {
+        gameplayManifest.maps.first { $0.id == id }
+    }
+
+    public func tileset(id: String) -> TilesetManifest? {
+        gameplayManifest.tilesets.first { $0.id == id }
+    }
+
+    public func overworldSprite(id: String) -> OverworldSpriteManifest? {
+        gameplayManifest.overworldSprites.first { $0.id == id }
+    }
+
+    public func dialogue(id: String) -> DialogueManifest? {
+        gameplayManifest.dialogues.first { $0.id == id }
+    }
+
+    public func script(id: String) -> ScriptManifest? {
+        gameplayManifest.scripts.first { $0.id == id }
+    }
+
+    public func species(id: String) -> SpeciesManifest? {
+        gameplayManifest.species.first { $0.id == id }
+    }
+
+    public func move(id: String) -> MoveManifest? {
+        gameplayManifest.moves.first { $0.id == id }
+    }
+
+    public func trainerBattle(id: String) -> TrainerBattleManifest? {
+        gameplayManifest.trainerBattles.first { $0.id == id }
+    }
+}
