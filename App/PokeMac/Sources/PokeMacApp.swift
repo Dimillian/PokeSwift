@@ -10,7 +10,7 @@ struct PokeMacApp: App {
             RootView(coordinator: coordinator)
         }
         .commands {
-            CommandMenu("PokeMac") {
+            CommandMenu("PokeSwift") {
                 Button("Toggle Debug Panel") {
                     coordinator.toggleDebugPanel()
                 }

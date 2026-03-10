@@ -96,7 +96,7 @@ let project = Project(
             bundleId: "com.dimillian.PokeSwift.PokeMac",
             deploymentTargets: .macOS("26.0"),
             infoPlist: .extendingDefault(with: [
-                "CFBundleDisplayName": "PokeMac",
+                "CFBundleDisplayName": "PokeSwift",
                 "NSPrincipalClass": "NSApplication",
                 "LSMinimumSystemVersion": "26.0",
             ]),
