@@ -2,7 +2,7 @@ import XCTest
 import PokeDataModel
 
 final class AssetCopyingTests: XCTestCase {
-    func testExtractorCopiesFieldAndStarterBattleAssetsForM3Slice() throws {
+    func testExtractorCopiesFieldAndRepresentativeBattleAssetsForCanonicalDex() throws {
         let outputRoot = try PokeExtractCLITestSupport.temporaryDirectory()
 
         try RedContentExtractor.extract(
@@ -29,9 +29,13 @@ final class AssetCopyingTests: XCTestCase {
             "Assets/battle/pokemon/front/charmander.png",
             "Assets/battle/pokemon/front/squirtle.png",
             "Assets/battle/pokemon/front/bulbasaur.png",
+            "Assets/battle/pokemon/front/mr.mime.png",
+            "Assets/battle/pokemon/front/farfetchd.png",
             "Assets/battle/pokemon/back/charmander.png",
             "Assets/battle/pokemon/back/squirtle.png",
             "Assets/battle/pokemon/back/bulbasaur.png",
+            "Assets/battle/pokemon/back/mr.mime.png",
+            "Assets/battle/pokemon/back/farfetchd.png",
         ]
 
         for relativePath in expectedFieldAssets {

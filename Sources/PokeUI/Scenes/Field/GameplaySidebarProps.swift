@@ -272,6 +272,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
     public let promptText: String
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
+    public let learnMovePrompt: BattleLearnMovePromptTelemetry?
     public let moveSlots: [BattleMoveSlotTelemetry]
     public let focusedMoveIndex: Int
     public let canRun: Bool
@@ -287,6 +288,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
         promptText: String,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
+        learnMovePrompt: BattleLearnMovePromptTelemetry? = nil,
         moveSlots: [BattleMoveSlotTelemetry],
         focusedMoveIndex: Int,
         canRun: Bool,
@@ -305,6 +307,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
         self.promptText = promptText
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
+        self.learnMovePrompt = learnMovePrompt
         self.moveSlots = moveSlots
         self.focusedMoveIndex = focusedMoveIndex
         self.canRun = canRun
@@ -315,7 +318,12 @@ public struct BattleSidebarProps: Equatable, Sendable {
     }
 
     public var shouldForceCombatSectionOpen: Bool {
-        showsInterface && (phase == "moveSelection" || phase == "bagSelection")
+        showsInterface && (
+            phase == "moveSelection" ||
+            phase == "bagSelection" ||
+            phase == "learnMoveDecision" ||
+            phase == "learnMoveSelection"
+        )
     }
 
     public var showsInterface: Bool {
@@ -326,6 +334,41 @@ public struct BattleSidebarProps: Equatable, Sendable {
         guard showsInterface else {
             return []
         }
+        if let learnMovePrompt {
+            switch learnMovePrompt.stage {
+            case .confirm:
+                return [
+                    BattleSidebarActionRowProps(
+                        id: "learn-move",
+                        title: "Learn \(learnMovePrompt.moveDisplayName)",
+                        detail: nil,
+                        isSelectable: true,
+                        isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 0,
+                        kind: .learn
+                    ),
+                    BattleSidebarActionRowProps(
+                        id: "skip-move",
+                        title: "Skip",
+                        detail: nil,
+                        isSelectable: true,
+                        isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 1,
+                        kind: .skip
+                    ),
+                ]
+            case .replace:
+                return moveSlots.enumerated().map { index, slot in
+                    BattleSidebarActionRowProps(
+                        id: "forget-\(index)",
+                        title: slot.displayName,
+                        detail: "\(slot.currentPP)/\(slot.maxPP)",
+                        isSelectable: slot.isSelectable,
+                        isFocused: shouldForceCombatSectionOpen && index == focusedMoveIndex,
+                        kind: .forget
+                    )
+                }
+            }
+        }
+
         let moveRows = moveSlots.enumerated().map { index, slot in
             BattleSidebarActionRowProps(
                 id: "move-\(index)",
@@ -374,6 +417,9 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
         case move
         case bag
         case run
+        case learn
+        case skip
+        case forget
     }
 
     public let id: String

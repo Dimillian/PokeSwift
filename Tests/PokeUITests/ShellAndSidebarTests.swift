@@ -229,6 +229,73 @@ extension PokeUITests {
     XCTAssertEqual(resolve.promptText, "Charmander used Scratch!")
     XCTAssertEqual(resolve.moveSlots.first?.displayName, "Tackle")
   }
+  func testBattleSidebarPropsBuildLearnMovePromptActions() {
+    let playerPokemon = PartyPokemonTelemetry(
+      speciesID: "CHARMANDER",
+      displayName: "Charmander",
+      level: 6,
+      currentHP: 20,
+      maxHP: 20,
+      attack: 12,
+      defense: 10,
+      speed: 11,
+      special: 11,
+      moves: ["SCRATCH", "CUT", "GROWL", "LEER"]
+    )
+    let enemyPokemon = PartyPokemonTelemetry(
+      speciesID: "BULBASAUR",
+      displayName: "Bulbasaur",
+      level: 5,
+      currentHP: 0,
+      maxHP: 21,
+      attack: 10,
+      defense: 10,
+      speed: 9,
+      special: 11,
+      moves: ["GROWL"]
+    )
+    let moveSlots = [
+      BattleMoveSlotTelemetry(moveID: "SCRATCH", displayName: "Scratch", currentPP: 35, maxPP: 35),
+      BattleMoveSlotTelemetry(moveID: "CUT", displayName: "Cut", currentPP: 30, maxPP: 30),
+      BattleMoveSlotTelemetry(moveID: "GROWL", displayName: "Growl", currentPP: 40, maxPP: 40),
+      BattleMoveSlotTelemetry(moveID: "LEER", displayName: "Leer", currentPP: 30, maxPP: 30),
+    ]
+
+    let confirmPrompt = BattleSidebarProps(
+      trainerName: "BLUE",
+      kind: .trainer,
+      phase: "learnMoveDecision",
+      promptText: "Teach EMBER to Charmander?",
+      playerPokemon: playerPokemon,
+      enemyPokemon: enemyPokemon,
+      learnMovePrompt: .init(pokemonName: "Charmander", moveID: "EMBER", moveDisplayName: "EMBER", stage: .confirm),
+      moveSlots: moveSlots,
+      focusedMoveIndex: 1,
+      canRun: false,
+      party: .init(pokemon: [])
+    )
+    let replacePrompt = BattleSidebarProps(
+      trainerName: "BLUE",
+      kind: .trainer,
+      phase: "learnMoveSelection",
+      promptText: "Choose a move to forget for EMBER.",
+      playerPokemon: playerPokemon,
+      enemyPokemon: enemyPokemon,
+      learnMovePrompt: .init(pokemonName: "Charmander", moveID: "EMBER", moveDisplayName: "EMBER", stage: .replace),
+      moveSlots: moveSlots,
+      focusedMoveIndex: 2,
+      canRun: false,
+      party: .init(pokemon: [])
+    )
+
+    XCTAssertEqual(confirmPrompt.actionRows.map(\.kind), [.learn, .skip])
+    XCTAssertEqual(confirmPrompt.actionRows.map(\.title), ["Learn EMBER", "Skip"])
+    XCTAssertTrue(confirmPrompt.actionRows[1].isFocused)
+
+    XCTAssertEqual(replacePrompt.actionRows.map(\.kind), [.forget, .forget, .forget, .forget])
+    XCTAssertEqual(replacePrompt.actionRows[2].title, "Growl")
+    XCTAssertTrue(replacePrompt.actionRows[2].isFocused)
+  }
   func testGameplaySidebarModeUsesBattleAccordionDefaults() {
     let battleMode = GameplaySidebarMode.battle(
       BattleSidebarProps(

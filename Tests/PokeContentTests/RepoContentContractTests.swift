@@ -58,6 +58,7 @@ final class RepoContentContractTests: XCTestCase {
         let mart = try XCTUnwrap(loaded.mart(id: "viridian_mart"))
         let pokeBall = try XCTUnwrap(loaded.item(id: "POKE_BALL"))
         let pidgey = try XCTUnwrap(loaded.species(id: "PIDGEY"))
+        let squirtle = try XCTUnwrap(loaded.species(id: "SQUIRTLE"))
 
         XCTAssertEqual(mart.mapID, "VIRIDIAN_MART")
         XCTAssertEqual(mart.clerkObjectID, "viridian_mart_clerk")
@@ -66,5 +67,9 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(pokeBall.price, 200)
         XCTAssertEqual(pokeBall.battleUse, .ball)
         XCTAssertEqual(pidgey.catchRate, 255)
+        XCTAssertEqual(
+            Array(squirtle.levelUpLearnset.prefix(2)),
+            [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
+        )
     }
 }

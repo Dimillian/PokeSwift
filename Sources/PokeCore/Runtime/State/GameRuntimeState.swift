@@ -97,6 +97,8 @@ enum RuntimeBattlePhase: String {
     case introText
     case moveSelection
     case bagSelection
+    case learnMoveDecision
+    case learnMoveSelection
     case resolvingTurn
     case turnText
     case battleComplete
@@ -107,6 +109,17 @@ enum RuntimeBattlePendingAction {
     case finish(won: Bool)
     case escape
     case captured
+    case continueLevelUpResolution
+}
+
+struct RuntimeBattleLearnMoveState {
+    let moveID: String
+    let remainingMoveIDs: [String]
+}
+
+enum RuntimeBattleRewardContinuation {
+    case sendNextEnemy(index: Int)
+    case finishWin
 }
 
 struct RuntimePokemonBoxState {
@@ -155,6 +168,8 @@ struct RuntimeBattlePresentationBeat {
     let message: String?
     let phase: RuntimeBattlePhase?
     let pendingAction: RuntimeBattlePendingAction?
+    let learnMoveState: RuntimeBattleLearnMoveState?
+    let rewardContinuation: RuntimeBattleRewardContinuation?
     let playerPokemon: RuntimePokemonState?
     let enemyPokemon: RuntimePokemonState?
     let enemyParty: [RuntimePokemonState]?
@@ -174,6 +189,8 @@ struct RuntimeBattlePresentationBeat {
         message: String? = nil,
         phase: RuntimeBattlePhase? = nil,
         pendingAction: RuntimeBattlePendingAction? = nil,
+        learnMoveState: RuntimeBattleLearnMoveState? = nil,
+        rewardContinuation: RuntimeBattleRewardContinuation? = nil,
         playerPokemon: RuntimePokemonState? = nil,
         enemyPokemon: RuntimePokemonState? = nil,
         enemyParty: [RuntimePokemonState]? = nil,
@@ -192,6 +209,8 @@ struct RuntimeBattlePresentationBeat {
         self.message = message
         self.phase = phase
         self.pendingAction = pendingAction
+        self.learnMoveState = learnMoveState
+        self.rewardContinuation = rewardContinuation
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.enemyParty = enemyParty
@@ -223,6 +242,8 @@ struct RuntimeBattleState {
     var queuedMessages: [String]
     var pendingAction: RuntimeBattlePendingAction?
     var pendingPresentationBatches: [[RuntimeBattlePresentationBeat]]
+    var learnMoveState: RuntimeBattleLearnMoveState?
+    var rewardContinuation: RuntimeBattleRewardContinuation?
     var presentation: RuntimeBattlePresentationState
 
     var enemyPokemon: RuntimePokemonState {

@@ -867,6 +867,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let baseSpeed: Int
     public let baseSpecial: Int
     public let startingMoves: [String]
+    public let levelUpLearnset: [LevelUpMoveManifest]
     public let crySoundEffectID: String?
     public let cryPitch: Int?
     public let cryLength: Int?
@@ -886,6 +887,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed: Int,
         baseSpecial: Int,
         startingMoves: [String],
+        levelUpLearnset: [LevelUpMoveManifest] = [],
         crySoundEffectID: String? = nil,
         cryPitch: Int? = nil,
         cryLength: Int? = nil
@@ -904,6 +906,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
         self.startingMoves = startingMoves
+        self.levelUpLearnset = levelUpLearnset
         self.crySoundEffectID = crySoundEffectID
         self.cryPitch = cryPitch
         self.cryLength = cryLength
@@ -924,6 +927,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case baseSpeed
         case baseSpecial
         case startingMoves
+        case levelUpLearnset
         case crySoundEffectID
         case cryPitch
         case cryLength
@@ -945,9 +949,20 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed = try container.decode(Int.self, forKey: .baseSpeed)
         baseSpecial = try container.decode(Int.self, forKey: .baseSpecial)
         startingMoves = try container.decode([String].self, forKey: .startingMoves)
+        levelUpLearnset = try container.decodeIfPresent([LevelUpMoveManifest].self, forKey: .levelUpLearnset) ?? []
         crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
         cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
         cryLength = try container.decodeIfPresent(Int.self, forKey: .cryLength)
+    }
+}
+
+public struct LevelUpMoveManifest: Codable, Equatable, Sendable {
+    public let level: Int
+    public let moveID: String
+
+    public init(level: Int, moveID: String) {
+        self.level = max(1, level)
+        self.moveID = moveID
     }
 }
 

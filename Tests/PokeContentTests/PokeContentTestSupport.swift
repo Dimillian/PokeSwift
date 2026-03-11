@@ -190,7 +190,11 @@ enum PokeContentTestSupport {
                     baseDefense: 65,
                     baseSpeed: 43,
                     baseSpecial: 50,
-                    startingMoves: ["TACKLE", "TAIL_WHIP"]
+                    startingMoves: ["TACKLE", "TAIL_WHIP"],
+                    levelUpLearnset: [
+                        .init(level: 8, moveID: "BUBBLE"),
+                        .init(level: 15, moveID: "WATER_GUN"),
+                    ]
                 ),
             ],
             moves: [
@@ -202,6 +206,15 @@ enum PokeContentTestSupport {
                     maxPP: 35,
                     effect: "NO_ADDITIONAL_EFFECT",
                     type: "NORMAL"
+                ),
+                .init(
+                    id: "BUBBLE",
+                    displayName: "BUBBLE",
+                    power: 20,
+                    accuracy: 100,
+                    maxPP: 30,
+                    effect: "SPEED_DOWN_SIDE_EFFECT",
+                    type: "WATER"
                 ),
             ],
             typeEffectiveness: [

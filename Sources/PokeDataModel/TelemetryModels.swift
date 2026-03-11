@@ -421,6 +421,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let canUseBag: Bool
     public let phase: String
     public let textLines: [String]
+    public let learnMovePrompt: BattleLearnMovePromptTelemetry?
     public let moveSlots: [BattleMoveSlotTelemetry]
     public let bagItems: [InventoryItemTelemetry]
     public let battleMessage: String
@@ -440,6 +441,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         canUseBag: Bool = false,
         phase: String = "moveSelection",
         textLines: [String] = [],
+        learnMovePrompt: BattleLearnMovePromptTelemetry? = nil,
         moveSlots: [BattleMoveSlotTelemetry] = [],
         bagItems: [InventoryItemTelemetry] = [],
         battleMessage: String,
@@ -462,6 +464,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         self.canUseBag = canUseBag
         self.phase = phase
         self.textLines = textLines
+        self.learnMovePrompt = learnMovePrompt
         self.moveSlots = moveSlots
         self.bagItems = bagItems
         self.battleMessage = battleMessage
@@ -482,6 +485,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         case canUseBag
         case phase
         case textLines
+        case learnMovePrompt
         case moveSlots
         case bagItems
         case battleMessage
@@ -503,6 +507,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         canUseBag = try container.decodeIfPresent(Bool.self, forKey: .canUseBag) ?? false
         phase = try container.decodeIfPresent(String.self, forKey: .phase) ?? "moveSelection"
         textLines = try container.decodeIfPresent([String].self, forKey: .textLines) ?? []
+        learnMovePrompt = try container.decodeIfPresent(BattleLearnMovePromptTelemetry.self, forKey: .learnMovePrompt)
         moveSlots = try container.decodeIfPresent([BattleMoveSlotTelemetry].self, forKey: .moveSlots) ?? []
         bagItems = try container.decodeIfPresent([InventoryItemTelemetry].self, forKey: .bagItems) ?? []
         battleMessage = try container.decode(String.self, forKey: .battleMessage)
@@ -511,6 +516,30 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
             revision: 0,
             uiVisibility: .visible
         )
+    }
+}
+
+public struct BattleLearnMovePromptTelemetry: Codable, Equatable, Sendable {
+    public enum Stage: String, Codable, Equatable, Sendable {
+        case confirm
+        case replace
+    }
+
+    public let pokemonName: String
+    public let moveID: String
+    public let moveDisplayName: String
+    public let stage: Stage
+
+    public init(
+        pokemonName: String,
+        moveID: String,
+        moveDisplayName: String,
+        stage: Stage
+    ) {
+        self.pokemonName = pokemonName
+        self.moveID = moveID
+        self.moveDisplayName = moveDisplayName
+        self.stage = stage
     }
 }
 

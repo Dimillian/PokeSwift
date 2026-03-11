@@ -164,12 +164,37 @@ final class GameplayExtractionTests: XCTestCase {
         let rivalExitScript = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_rival_exit_after_battle" })
         XCTAssertEqual(rivalExitScript.steps.compactMap(\.movement?.kind), [.fixedPath])
         XCTAssertEqual(rivalExitScript.steps.last?.action, "restoreMapMusic")
-        XCTAssertEqual(manifest.species.map(\.id), ["CHARMANDER", "SQUIRTLE", "BULBASAUR", "PIDGEY", "RATTATA"])
+        XCTAssertEqual(manifest.species.count, 151)
+        XCTAssertEqual(manifest.species.prefix(10).map(\.id), [
+            "BULBASAUR",
+            "IVYSAUR",
+            "VENUSAUR",
+            "CHARMANDER",
+            "CHARMELEON",
+            "CHARIZARD",
+            "SQUIRTLE",
+            "WARTORTLE",
+            "BLASTOISE",
+            "CATERPIE",
+        ])
+        XCTAssertNotNil(manifest.species.first { $0.id == "MEW" })
         let charmander = try XCTUnwrap(manifest.species.first { $0.id == "CHARMANDER" })
         XCTAssertEqual(charmander.primaryType, "FIRE")
         XCTAssertNil(charmander.secondaryType)
         XCTAssertEqual(charmander.baseExp, 65)
         XCTAssertEqual(charmander.growthRate, .mediumSlow)
+        XCTAssertEqual(charmander.startingMoves, ["SCRATCH", "GROWL"])
+        XCTAssertEqual(
+            charmander.levelUpLearnset,
+            [
+                .init(level: 9, moveID: "EMBER"),
+                .init(level: 15, moveID: "LEER"),
+                .init(level: 22, moveID: "RAGE"),
+                .init(level: 30, moveID: "SLASH"),
+                .init(level: 38, moveID: "FLAMETHROWER"),
+                .init(level: 46, moveID: "FIRE_SPIN"),
+            ]
+        )
         XCTAssertEqual(
             charmander.battleSprite,
             .init(
@@ -182,11 +207,19 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNil(squirtle.secondaryType)
         XCTAssertEqual(squirtle.baseExp, 66)
         XCTAssertEqual(squirtle.growthRate, .mediumSlow)
+        XCTAssertEqual(
+            Array(squirtle.levelUpLearnset.prefix(2)),
+            [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
+        )
         let bulbasaur = try XCTUnwrap(manifest.species.first { $0.id == "BULBASAUR" })
         XCTAssertEqual(bulbasaur.primaryType, "GRASS")
         XCTAssertEqual(bulbasaur.secondaryType, "POISON")
         XCTAssertEqual(bulbasaur.baseExp, 64)
         XCTAssertEqual(bulbasaur.growthRate, .mediumSlow)
+        XCTAssertEqual(
+            Array(bulbasaur.levelUpLearnset.prefix(2)),
+            [.init(level: 7, moveID: "LEECH_SEED"), .init(level: 13, moveID: "VINE_WHIP")]
+        )
         let pidgey = try XCTUnwrap(manifest.species.first { $0.id == "PIDGEY" })
         XCTAssertEqual(pidgey.primaryType, "NORMAL")
         XCTAssertEqual(pidgey.secondaryType, "FLYING")
@@ -203,7 +236,19 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNil(rattata.secondaryType)
         XCTAssertEqual(rattata.baseExp, 57)
         XCTAssertEqual(rattata.growthRate, .mediumFast)
-        XCTAssertEqual(manifest.moves.map(\.id), ["SCRATCH", "GUST", "TACKLE", "TAIL_WHIP", "GROWL"])
+        let mrMime = try XCTUnwrap(manifest.species.first { $0.id == "MR_MIME" })
+        XCTAssertEqual(mrMime.displayName, "Mr. Mime")
+        XCTAssertEqual(
+            mrMime.battleSprite,
+            .init(
+                frontImagePath: "Assets/battle/pokemon/front/mr.mime.png",
+                backImagePath: "Assets/battle/pokemon/back/mr.mime.png"
+            )
+        )
+        XCTAssertEqual(manifest.moves.count, 165)
+        XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
+        XCTAssertNotNil(manifest.moves.first { $0.id == "SURF" })
+        XCTAssertNotNil(manifest.moves.first { $0.id == "THUNDERBOLT" })
         XCTAssertEqual(manifest.items.map(\.id), ["POKE_BALL", "POTION", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL", "OAKS_PARCEL"])
         XCTAssertEqual(manifest.items.first?.displayName, "POKé BALL")
         XCTAssertEqual(manifest.items.first?.price, 200)

@@ -235,10 +235,7 @@ extension PokeCoreTests {
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
         advanceBattlePresentationBatch(runtime)
-        waitUntil(
-            runtime.currentSnapshot().battle?.enemyActiveIndex == 1,
-            message: "battle did not advance to the next enemy party member"
-        )
+        advanceBattleUntilPhase(runtime, phase: "moveSelection")
 
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyActiveIndex, 1)
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPartyCount, 2)
@@ -666,6 +663,111 @@ extension PokeCoreTests {
         RunLoop.current.run(until: Date().addingTimeInterval(0.3))
         XCTAssertNotEqual(runtime.currentSnapshot().battle?.presentation.activeSide, .enemy)
         XCTAssertNotEqual(runtime.currentSnapshot().battle?.presentation.stage, .attackWindup)
+    }
+
+    func testBattleLevelUpMovePromptBlocksHmReplacementAndFinishesAfterLearning() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 62,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 200,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH", "CUT", "GROWL", "LEER"],
+                            levelUpLearnset: [.init(level: 6, moveID: "EMBER")]
+                        ),
+                        .init(
+                            id: "BULBASAUR",
+                            displayName: "Bulbasaur",
+                            primaryType: "GRASS",
+                            secondaryType: "POISON",
+                            baseExp: 64,
+                            growthRate: .mediumSlow,
+                            baseHP: 45,
+                            baseAttack: 49,
+                            baseDefense: 49,
+                            baseSpeed: 35,
+                            baseSpecial: 65,
+                            startingMoves: ["GROWL"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 120, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "CUT", displayName: "CUT", power: 50, accuracy: 95, maxPP: 30, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "LEER", displayName: "LEER", power: 0, accuracy: 100, maxPP: 30, effect: "DEFENSE_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "BURN_SIDE_EFFECT1", type: "FIRE"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_rival1_1",
+                            trainerClass: "OPP_RIVAL1",
+                            trainerNumber: 1,
+                            displayName: "BLUE",
+                            party: [.init(speciesID: "BULBASAUR", level: 5)],
+                            winDialogueID: "win",
+                            loseDialogueID: "lose",
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: true,
+                            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
+
+        runtime.startBattle(id: "opp_rival1_1")
+        drainBattleText(runtime)
+
+        runtime.battleRandomOverrides = [0, 255]
+        runtime.handle(button: .confirm)
+        advanceBattlePresentationBatch(runtime)
+        advanceBattleUntilPhase(runtime, phase: "learnMoveDecision")
+
+        var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.learnMovePrompt?.stage, .confirm)
+        XCTAssertEqual(snapshot.learnMovePrompt?.moveID, "EMBER")
+        XCTAssertEqual(snapshot.battleMessage, "Teach EMBER to Charmander?")
+
+        runtime.handle(button: .confirm)
+
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.phase, "learnMoveSelection")
+        XCTAssertEqual(snapshot.learnMovePrompt?.stage, .replace)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.phase, "learnMoveSelection")
+        XCTAssertEqual(snapshot.battleMessage, "CUT can't be forgotten.")
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.level, 6)
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.moves.map(\.id), ["SCRATCH", "CUT", "EMBER", "LEER"])
     }
 
     func testBattleTelemetrySequencesQueuedTextAcrossIntroAndTurns() throws {

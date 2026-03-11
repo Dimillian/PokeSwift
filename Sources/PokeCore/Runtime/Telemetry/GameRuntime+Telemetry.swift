@@ -93,6 +93,7 @@ extension GameRuntime {
             canUseBag: battle.kind == .wild && currentBattleBagItems.isEmpty == false,
             phase: battle.phase.rawValue,
             textLines: battle.message.isEmpty ? [] : [battle.message],
+            learnMovePrompt: makeBattleLearnMovePromptTelemetry(from: battle),
             moveSlots: battle.playerPokemon.moves.compactMap { runtimeMove in
                 guard let move = content.move(id: runtimeMove.id) else { return nil }
                 return BattleMoveSlotTelemetry(
@@ -113,6 +114,30 @@ extension GameRuntime {
                 transitionStyle: battle.presentation.transitionStyle,
                 meterAnimation: battle.presentation.meterAnimation
             )
+        )
+    }
+
+    func makeBattleLearnMovePromptTelemetry(from battle: RuntimeBattleState) -> BattleLearnMovePromptTelemetry? {
+        guard let learnMoveState = battle.learnMoveState,
+              let move = content.move(id: learnMoveState.moveID) else {
+            return nil
+        }
+
+        let stage: BattleLearnMovePromptTelemetry.Stage
+        switch battle.phase {
+        case .learnMoveDecision:
+            stage = .confirm
+        case .learnMoveSelection:
+            stage = .replace
+        default:
+            return nil
+        }
+
+        return BattleLearnMovePromptTelemetry(
+            pokemonName: battle.playerPokemon.nickname,
+            moveID: move.id,
+            moveDisplayName: move.displayName,
+            stage: stage
         )
     }
 

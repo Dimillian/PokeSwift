@@ -2077,18 +2077,257 @@ private func directionToken(_ token: String) -> FacingDirection? {
 }
 
 private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
-    try [
-        parseSpecies(repoRoot: repoRoot, file: "data/pokemon/base_stats/charmander.asm", id: "CHARMANDER", displayName: "Charmander"),
-        parseSpecies(repoRoot: repoRoot, file: "data/pokemon/base_stats/squirtle.asm", id: "SQUIRTLE", displayName: "Squirtle"),
-        parseSpecies(repoRoot: repoRoot, file: "data/pokemon/base_stats/bulbasaur.asm", id: "BULBASAUR", displayName: "Bulbasaur"),
-        parseSpecies(repoRoot: repoRoot, file: "data/pokemon/base_stats/pidgey.asm", id: "PIDGEY", displayName: "Pidgey"),
-        parseSpecies(repoRoot: repoRoot, file: "data/pokemon/base_stats/rattata.asm", id: "RATTATA", displayName: "Rattata"),
-    ]
+    let speciesDefinitions = try parseCanonicalSpeciesDefinitions(repoRoot: repoRoot)
+    let levelUpLearnsetsByID = try parseLevelUpLearnsets(repoRoot: repoRoot)
+    return try speciesDefinitions.map { definition in
+        try parseSpecies(
+            repoRoot: repoRoot,
+            file: definition.file,
+            id: definition.id,
+            displayName: definition.displayName,
+            cryData: definition.cryData,
+            levelUpLearnset: levelUpLearnsetsByID[definition.id] ?? []
+        )
+    }
 }
 
-private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: String) throws -> SpeciesManifest {
+private struct CanonicalSpeciesDefinition {
+    let file: String
+    let id: String
+    let displayName: String
+    let cryData: (soundEffectID: String?, pitch: Int?, length: Int?)
+}
+
+private struct PokemonIndexMetadata {
+    let id: String
+    let displayName: String
+    let cryData: (soundEffectID: String?, pitch: Int?, length: Int?)
+}
+
+private func parseCanonicalSpeciesDefinitions(repoRoot: URL) throws -> [CanonicalSpeciesDefinition] {
+    let metadataByID = try parsePokemonIndexMetadata(repoRoot: repoRoot)
+    var files = try canonicalSpeciesBaseStatFiles(repoRoot: repoRoot)
+    files.append("data/pokemon/base_stats/mew.asm")
+    return try files.map { file in
+        let stem = repoRoot
+            .appendingPathComponent(file)
+            .deletingPathExtension()
+            .lastPathComponent
+        let id = try speciesID(forBaseStatStem: stem)
+        guard let metadata = metadataByID[id] else {
+            throw ExtractorError.invalidArguments("missing metadata for species \(id)")
+        }
+        return CanonicalSpeciesDefinition(
+            file: file,
+            id: id,
+            displayName: metadata.displayName,
+            cryData: metadata.cryData
+        )
+    }
+}
+
+private func canonicalSpeciesBaseStatFiles(repoRoot: URL) throws -> [String] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/base_stats.asm"))
+    return contents
+        .split(separator: "\n")
+        .compactMap { rawLine -> String? in
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            guard let match = line.firstMatch(of: /INCLUDE\s+"(data\/pokemon\/base_stats\/[a-z0-9]+\.asm)"/) else {
+                return nil
+            }
+            return String(match.output.1)
+        }
+}
+
+private func parsePokemonIndexMetadata(repoRoot: URL) throws -> [String: PokemonIndexMetadata] {
+    let ids = try parsePokemonIndexIDs(repoRoot: repoRoot)
+    let names = try parsePokemonIndexNames(repoRoot: repoRoot)
+    let cries = try parsePokemonIndexCries(repoRoot: repoRoot)
+
+    guard ids.count == names.count, names.count == cries.count else {
+        throw ExtractorError.invalidArguments("pokemon metadata tables are out of sync")
+    }
+
+    var metadataByID: [String: PokemonIndexMetadata] = [:]
+    for index in ids.indices {
+        guard let id = ids[index] else { continue }
+        metadataByID[id] = PokemonIndexMetadata(
+            id: id,
+            displayName: normalizedPokemonDisplayName(from: names[index]),
+            cryData: cries[index]
+        )
+    }
+    return metadataByID
+}
+
+private func parsePokemonIndexIDs(repoRoot: URL) throws -> [String?] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/pokemon_constants.asm"))
+    var ids: [String?] = []
+    var didEnterTable = false
+
+    for rawLine in contents.split(separator: "\n") {
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        if line.hasPrefix("const NO_MON") {
+            didEnterTable = true
+            continue
+        }
+        guard didEnterTable else { continue }
+        if line.hasPrefix("DEF NUM_POKEMON_INDEXES") {
+            break
+        }
+        if line.hasPrefix("const_skip") {
+            ids.append(nil)
+            continue
+        }
+        guard let match = line.firstMatch(of: /const\s+([A-Z0-9_]+)/) else {
+            continue
+        }
+        ids.append(String(match.output.1))
+    }
+
+    return ids
+}
+
+private func parsePokemonIndexNames(repoRoot: URL) throws -> [String] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/names.asm"))
+    return contents.split(separator: "\n").compactMap { rawLine in
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        guard let match = line.firstMatch(of: /dname\s+"([^"]+)"/) else {
+            return nil
+        }
+        return String(match.output.1)
+    }
+}
+
+private func parsePokemonIndexCries(repoRoot: URL) throws -> [(soundEffectID: String?, pitch: Int?, length: Int?)] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/cries.asm"))
+    let regex = try NSRegularExpression(
+        pattern: #"mon_cry\s+(SFX_[A-Z0-9_]+),\s+\$([0-9A-Fa-f]{2}),\s+\$([0-9A-Fa-f]{2})\s*;"#,
+        options: [.anchorsMatchLines]
+    )
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return regex.matches(in: contents, range: nsRange).compactMap { match in
+        guard
+            let idRange = Range(match.range(at: 1), in: contents),
+            let pitchRange = Range(match.range(at: 2), in: contents),
+            let lengthRange = Range(match.range(at: 3), in: contents)
+        else {
+            return nil
+        }
+        return (
+            soundEffectID: String(contents[idRange]),
+            pitch: Int(contents[pitchRange], radix: 16),
+            length: Int(contents[lengthRange], radix: 16)
+        )
+    }
+}
+
+private func normalizedPokemonDisplayName(from rawName: String) -> String {
+    switch rawName {
+    case "NIDORAN♂":
+        return "Nidoran M"
+    case "NIDORAN♀":
+        return "Nidoran F"
+    case "MR.MIME":
+        return "Mr. Mime"
+    case "FARFETCH'D":
+        return "Farfetch'd"
+    default:
+        return rawName
+            .lowercased()
+            .split(separator: " ")
+            .map { $0.capitalized }
+            .joined(separator: " ")
+    }
+}
+
+private func speciesID(forBaseStatStem stem: String) throws -> String {
+    switch stem {
+    case "nidoranf":
+        return "NIDORAN_F"
+    case "nidoranm":
+        return "NIDORAN_M"
+    case "mrmime":
+        return "MR_MIME"
+    default:
+        return stem.uppercased()
+    }
+}
+
+private func parseLevelUpLearnsets(repoRoot: URL) throws -> [String: [LevelUpMoveManifest]] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/evos_moves.asm"))
+    var learnsetsByLabel: [String: [LevelUpMoveManifest]] = [:]
+    var currentLabel: String?
+    var isParsingLearnset = false
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        if let match = line.firstMatch(of: /([A-Za-z0-9]+)EvosMoves:/) {
+            currentLabel = String(match.output.1)
+            learnsetsByLabel[currentLabel ?? ""] = []
+            isParsingLearnset = false
+            continue
+        }
+        guard let currentLabel else {
+            continue
+        }
+        if line == "; Learnset" {
+            isParsingLearnset = true
+            continue
+        }
+        guard isParsingLearnset else {
+            continue
+        }
+        if line == "db 0" {
+            isParsingLearnset = false
+            continue
+        }
+        guard let match = line.firstMatch(of: /db\s+(\d+),\s+([A-Z_]+)/) else {
+            continue
+        }
+        learnsetsByLabel[currentLabel, default: []].append(
+            LevelUpMoveManifest(
+                level: Int(match.output.1) ?? 1,
+                moveID: String(match.output.2)
+            )
+        )
+    }
+
+    return Dictionary(uniqueKeysWithValues: try learnsetsByLabel.map { label, learnset in
+        let speciesID = try speciesID(forEvosMovesLabel: label)
+        return (speciesID, learnset)
+    })
+}
+
+private func speciesID(forEvosMovesLabel label: String) throws -> String {
+    switch label {
+    case "NidoranF":
+        return "NIDORAN_F"
+    case "NidoranM":
+        return "NIDORAN_M"
+    case "MrMime":
+        return "MR_MIME"
+    default:
+        return label
+            .unicodeScalars
+            .reduce(into: "") { partialResult, scalar in
+                if CharacterSet.uppercaseLetters.contains(scalar), partialResult.isEmpty == false {
+                    partialResult.append("_")
+                }
+                partialResult.append(String(scalar).uppercased())
+            }
+    }
+}
+
+private func parseSpecies(
+    repoRoot: URL,
+    file: String,
+    id: String,
+    displayName: String,
+    cryData: (soundEffectID: String?, pitch: Int?, length: Int?),
+    levelUpLearnset: [LevelUpMoveManifest]
+) throws -> SpeciesManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(file))
-    let cryData = try parseCryData(repoRoot: repoRoot, displayName: displayName)
     guard let statsMatch = contents.firstMatch(of: /db\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+)\s*\n\s*;\s*hp\s+atk\s+def\s+spd\s+spc/),
           let typeMatch = contents.firstMatch(of: /db\s+([A-Z_]+),\s+([A-Z_]+)\s*;\s*type/),
           let catchRateMatch = contents.firstMatch(of: /db\s+(\d+)\s*;\s*catch rate/),
@@ -2142,37 +2381,11 @@ private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: 
         baseSpeed: statsValues[safe: 3] ?? 0,
         baseSpecial: statsValues[safe: 4] ?? 0,
         startingMoves: moveValues.filter { $0 != "NO_MOVE" },
+        levelUpLearnset: levelUpLearnset,
         crySoundEffectID: cryData.soundEffectID,
         cryPitch: cryData.pitch,
         cryLength: cryData.length
     )
-}
-
-private func parseCryData(repoRoot: URL, displayName: String) throws -> (soundEffectID: String?, pitch: Int?, length: Int?) {
-    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/cries.asm"))
-    let regex = try NSRegularExpression(
-        pattern: #"mon_cry\s+(SFX_[A-Z0-9_]+),\s+\$([0-9A-Fa-f]{2}),\s+\$([0-9A-Fa-f]{2})\s*;\s*(.+)$"#,
-        options: [.anchorsMatchLines]
-    )
-    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
-    for match in regex.matches(in: contents, range: nsRange) {
-        guard
-            let idRange = Range(match.range(at: 1), in: contents),
-            let pitchRange = Range(match.range(at: 2), in: contents),
-            let lengthRange = Range(match.range(at: 3), in: contents),
-            let nameRange = Range(match.range(at: 4), in: contents)
-        else {
-            continue
-        }
-        let name = String(contents[nameRange]).trimmingCharacters(in: .whitespaces)
-        guard name == displayName else { continue }
-        return (
-            soundEffectID: String(contents[idRange]),
-            pitch: Int(contents[pitchRange], radix: 16),
-            length: Int(contents[lengthRange], radix: 16)
-        )
-    }
-    return (nil, nil, nil)
 }
 
 private func battleSpriteManifest(speciesID: String, frontSymbol: String, backSymbol: String) throws -> BattleSpriteManifest {
@@ -2192,7 +2405,13 @@ private func battleSpriteManifest(speciesID: String, frontSymbol: String, backSy
 
 private func spriteStem(from symbol: String, suffix: String) -> String? {
     guard symbol.hasSuffix(suffix) else { return nil }
-    return String(symbol.dropLast(suffix.count)).lowercased()
+    let rawStem = String(symbol.dropLast(suffix.count)).lowercased()
+    switch rawStem {
+    case "mrmime":
+        return "mr.mime"
+    default:
+        return rawStem
+    }
 }
 
 private func buildTypeEffectiveness(repoRoot: URL) throws -> [TypeEffectivenessManifest] {
@@ -2248,12 +2467,11 @@ private func resolveTypeEffectivenessMultiplier(_ token: String) throws -> Int {
 private func buildMoves(repoRoot: URL) throws -> [MoveManifest] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/moves/moves.asm"))
     let battleAudioByMoveID = try parseMoveBattleAudio(repoRoot: repoRoot)
-    let needed = Set(["SCRATCH", "TACKLE", "GROWL", "TAIL_WHIP", "GUST"])
     return contents.split(separator: "\n").compactMap { rawLine in
         let line = rawLine.trimmingCharacters(in: .whitespaces)
         guard line.hasPrefix("move ") else { return nil }
         let parts = line.replacingOccurrences(of: "move", with: "").split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        guard parts.count >= 6, needed.contains(parts[0]) else { return nil }
+        guard parts.count >= 6 else { return nil }
         return MoveManifest(
             id: parts[0],
             displayName: parts[0].replacingOccurrences(of: "_", with: " "),

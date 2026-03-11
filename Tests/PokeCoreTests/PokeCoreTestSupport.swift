@@ -203,6 +203,30 @@ func advanceBattleTextUntilMoveSelection(_ runtime: GameRuntime, maxTicks: Int =
 }
 
 @MainActor
+func advanceBattleUntilPhase(
+    _ runtime: GameRuntime,
+    phase targetPhase: String,
+    maxTicks: Int = 240
+) {
+    let pollInterval = 0.01
+    let deadline = Date().addingTimeInterval(Double(maxTicks) * pollInterval)
+
+    while Date() < deadline {
+        guard let battle = runtime.currentSnapshot().battle else {
+            XCTFail("battle ended before reaching phase \(targetPhase)")
+            return
+        }
+        if battle.phase == targetPhase {
+            return
+        }
+        runtime.handle(button: .confirm)
+        RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
+    }
+
+    XCTAssertEqual(runtime.currentSnapshot().battle?.phase, targetPhase, "battle did not reach phase \(targetPhase)")
+}
+
+@MainActor
 func drainBattleUntilComplete(_ runtime: GameRuntime, maxTicks: Int = 240) {
     resolveBattleUntilComplete(runtime, maxTicks: maxTicks)
 }

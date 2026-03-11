@@ -147,7 +147,7 @@ extension PokeCoreTests {
         runtime.gameplayState = runtime.makeInitialGameplayState()
         var playerPokemon = runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
-        let messages = runtime.applyBattleExperienceReward(
+        let rewardResult = runtime.applyBattleExperienceReward(
             defeatedPokemon: defeatedPokemon,
             to: &playerPokemon,
             isTrainerBattle: true
@@ -161,8 +161,9 @@ extension PokeCoreTests {
         XCTAssertEqual(partyPokemon.experience.levelStart, 179)
         XCTAssertEqual(partyPokemon.experience.nextLevel, 236)
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.statExp, PokemonStatExp(hp: 45, attack: 49, defense: 49, speed: 45, special: 65))
-        XCTAssertTrue(messages.contains("Charmander gained 67 EXP!"))
-        XCTAssertTrue(messages.contains("Charmander grew to Lv6!"))
+        XCTAssertTrue(rewardResult.messages.contains("Charmander gained 67 EXP!"))
+        XCTAssertTrue(rewardResult.messages.contains("Charmander grew to Lv6!"))
+        XCTAssertNil(rewardResult.pendingLearnMove)
     }
     func testBattleRewardAccumulatesStatExpWithoutVisibleStatRecalc() {
         let runtime = GameRuntime(
@@ -197,7 +198,7 @@ extension PokeCoreTests {
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "PIDGEY", level: 1, nickname: "Pidgey")
         let previousVisibleStats = (playerPokemon.maxHP, playerPokemon.attack, playerPokemon.defense, playerPokemon.speed, playerPokemon.special)
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
+        let rewardResult = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 5)
         XCTAssertEqual(playerPokemon.experience, 145)
@@ -207,7 +208,8 @@ extension PokeCoreTests {
         XCTAssertEqual(playerPokemon.defense, previousVisibleStats.2)
         XCTAssertEqual(playerPokemon.speed, previousVisibleStats.3)
         XCTAssertEqual(playerPokemon.special, previousVisibleStats.4)
-        XCTAssertEqual(messages, ["Charmander gained 10 EXP!"])
+        XCTAssertEqual(rewardResult.messages, ["Charmander gained 10 EXP!"])
+        XCTAssertNil(rewardResult.pendingLearnMove)
     }
     func testExperienceRewardRaisesCurrentHPByLevelUpDelta() {
         let runtime = GameRuntime(
@@ -244,14 +246,15 @@ extension PokeCoreTests {
         let previousMaxHP = playerPokemon.maxHP
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
+        let rewardResult = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 6)
         XCTAssertGreaterThan(playerPokemon.currentHP, hpBefore)
         XCTAssertEqual(playerPokemon.currentHP, hpBefore + (playerPokemon.maxHP - previousMaxHP))
         XCTAssertEqual(playerPokemon.statExp, PokemonStatExp(hp: 45, attack: 49, defense: 49, speed: 45, special: 65))
-        XCTAssertTrue(messages.contains("Charmander gained 67 EXP!"))
-        XCTAssertTrue(messages.contains("Charmander grew to Lv6!"))
+        XCTAssertTrue(rewardResult.messages.contains("Charmander gained 67 EXP!"))
+        XCTAssertTrue(rewardResult.messages.contains("Charmander grew to Lv6!"))
+        XCTAssertNil(rewardResult.pendingLearnMove)
     }
     func testLevel100PokemonStillGainsStatExpWhileExperienceStaysCapped() {
         let runtime = GameRuntime(
@@ -285,12 +288,134 @@ extension PokeCoreTests {
         )
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
+        let rewardResult = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 100)
         XCTAssertEqual(playerPokemon.experience, runtime.maximumExperience(for: "CHARMANDER"))
         XCTAssertEqual(playerPokemon.statExp, PokemonStatExp(hp: 45, attack: 49, defense: 49, speed: 45, special: 65))
-        XCTAssertEqual(messages, ["Charmander gained 67 EXP!"])
+        XCTAssertEqual(rewardResult.messages, ["Charmander gained 67 EXP!"])
+        XCTAssertNil(rewardResult.pendingLearnMove)
+    }
+    func testBattleExperienceRewardLearnsLevelUpMoveWhenOpenSlot() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"],
+                            levelUpLearnset: [.init(level: 6, moveID: "EMBER")]
+                        ),
+                        .init(
+                            id: "BULBASAUR",
+                            displayName: "Bulbasaur",
+                            primaryType: "GRASS",
+                            secondaryType: "POISON",
+                            baseExp: 64,
+                            growthRate: .mediumSlow,
+                            baseHP: 45,
+                            baseAttack: 49,
+                            baseDefense: 49,
+                            baseSpeed: 45,
+                            baseSpecial: 65,
+                            startingMoves: ["GROWL"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "BURN_SIDE_EFFECT1", type: "FIRE"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var playerPokemon = runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")
+        let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
+
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: defeatedPokemon,
+            to: &playerPokemon,
+            isTrainerBattle: true
+        )
+
+        XCTAssertEqual(playerPokemon.level, 6)
+        XCTAssertEqual(playerPokemon.moves.map(\.id), ["SCRATCH", "EMBER"])
+        XCTAssertEqual(playerPokemon.moves.last?.currentPP, 25)
+        XCTAssertTrue(rewardResult.messages.contains("Charmander learned EMBER!"))
+        XCTAssertNil(rewardResult.pendingLearnMove)
+    }
+    func testBattleExperienceRewardQueuesLearnPromptWhenMoveSlotsAreFull() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH", "GROWL", "LEER", "CUT"],
+                            levelUpLearnset: [.init(level: 6, moveID: "EMBER")]
+                        ),
+                        .init(
+                            id: "BULBASAUR",
+                            displayName: "Bulbasaur",
+                            primaryType: "GRASS",
+                            secondaryType: "POISON",
+                            baseExp: 64,
+                            growthRate: .mediumSlow,
+                            baseHP: 45,
+                            baseAttack: 49,
+                            baseDefense: 49,
+                            baseSpeed: 45,
+                            baseSpecial: 65,
+                            startingMoves: ["GROWL"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "LEER", displayName: "LEER", power: 0, accuracy: 100, maxPP: 30, effect: "DEFENSE_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "CUT", displayName: "CUT", power: 50, accuracy: 95, maxPP: 30, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "BURN_SIDE_EFFECT1", type: "FIRE"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var playerPokemon = runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")
+        let originalMoves = playerPokemon.moves
+        let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
+
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: defeatedPokemon,
+            to: &playerPokemon,
+            isTrainerBattle: true
+        )
+
+        XCTAssertEqual(playerPokemon.level, 6)
+        XCTAssertEqual(playerPokemon.moves.map(\.id), originalMoves.map(\.id))
+        XCTAssertEqual(rewardResult.pendingLearnMove?.moveID, "EMBER")
+        XCTAssertTrue(rewardResult.messages.contains("Charmander is trying to learn EMBER!"))
+        XCTAssertTrue(rewardResult.messages.contains("But Charmander can't learn more than 4 moves."))
     }
     func testLosingBattleDoesNotGrantExperience() throws {
         let runtime = GameRuntime(

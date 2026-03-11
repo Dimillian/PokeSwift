@@ -100,6 +100,7 @@ enum GameplayScenePropsFactory {
                         promptText: promptText,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
+                        learnMovePrompt: battle.learnMovePrompt,
                         moveSlots: battle.moveSlots,
                         focusedMoveIndex: battle.focusedMoveIndex,
                         canRun: battle.canRun,

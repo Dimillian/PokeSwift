@@ -19,6 +19,16 @@ struct ResolvedBattleAction {
     let defenderHPAfter: Int
 }
 
+struct BattleExperienceRewardResult {
+    let messages: [String]
+    let pendingLearnMove: RuntimeBattleLearnMoveState?
+}
+
+struct LevelUpMoveProcessingResult {
+    let messages: [String]
+    let pendingLearnMove: RuntimeBattleLearnMoveState?
+}
+
 extension GameRuntime {
     func handleBattle(button: RuntimeButton) {
         guard var gameplayState, var battle = gameplayState.battle else { return }
@@ -30,6 +40,8 @@ extension GameRuntime {
                 battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
             case .bagSelection:
                 battle.focusedBagItemIndex = max(0, battle.focusedBagItemIndex - 1)
+            case .learnMoveDecision, .learnMoveSelection:
+                battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
             default:
                 break
             }
@@ -39,6 +51,10 @@ extension GameRuntime {
                 battle.focusedMoveIndex = min(maxBattleActionIndex(for: battle), battle.focusedMoveIndex + 1)
             case .bagSelection:
                 battle.focusedBagItemIndex = min(max(0, currentBattleBagItems.count - 1), battle.focusedBagItemIndex + 1)
+            case .learnMoveDecision:
+                battle.focusedMoveIndex = min(1, battle.focusedMoveIndex + 1)
+            case .learnMoveSelection:
+                battle.focusedMoveIndex = min(max(0, battle.playerPokemon.moves.count - 1), battle.focusedMoveIndex + 1)
             default:
                 break
             }
@@ -60,6 +76,9 @@ extension GameRuntime {
                 playUIConfirmSound()
                 battle.phase = .moveSelection
                 battle.message = "Pick the next move."
+            case .learnMoveSelection:
+                playUIConfirmSound()
+                enterLearnMoveDecisionPrompt(battle: &battle)
             default:
                 break
             }
@@ -81,6 +100,12 @@ extension GameRuntime {
             case .bagSelection:
                 playUIConfirmSound()
                 resolveBattleBagSelection(battle: &battle, gameplayState: &gameplayState)
+            case .learnMoveDecision:
+                playUIConfirmSound()
+                resolveLearnMoveDecision(battle: &battle)
+            case .learnMoveSelection:
+                playUIConfirmSound()
+                resolveLearnMoveSelection(battle: &battle)
             case .battleComplete:
                 playUIConfirmSound()
                 advanceBattleText(battle: &battle)
@@ -183,6 +208,12 @@ extension GameRuntime {
         }
         if let pendingAction = beat.pendingAction {
             battle.pendingAction = pendingAction
+        }
+        if let learnMoveState = beat.learnMoveState {
+            battle.learnMoveState = learnMoveState
+        }
+        if let rewardContinuation = beat.rewardContinuation {
+            battle.rewardContinuation = rewardContinuation
         }
         if let playerPokemon = beat.playerPokemon {
             battle.playerPokemon = playerPokemon
@@ -938,6 +969,8 @@ extension GameRuntime {
             finishWildBattleEscape()
         case .captured:
             finishWildBattleCapture(battle: battle)
+        case .continueLevelUpResolution:
+            continueLevelUpResolution(battle: &battle)
         }
     }
 
@@ -1200,6 +1233,8 @@ extension GameRuntime {
             queuedMessages: [],
             pendingAction: .moveSelection,
             pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
             presentation: .init(
                 stage: .introFlash1,
                 revision: 0,
@@ -1270,6 +1305,8 @@ extension GameRuntime {
             queuedMessages: [],
             pendingAction: .moveSelection,
             pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
             presentation: .init(
                 stage: .introFlash1,
                 revision: 0,
@@ -1443,7 +1480,7 @@ extension GameRuntime {
         defeatedPokemon: RuntimePokemonState,
         to pokemon: inout RuntimePokemonState,
         isTrainerBattle: Bool
-    ) -> [String] {
+    ) -> BattleExperienceRewardResult {
         let gainedExperience = battleExperienceAward(for: defeatedPokemon, isTrainerBattle: isTrainerBattle)
         let updatedStatExp = awardStatExp(from: defeatedPokemon, to: pokemon.statExp)
         let maximumExperience = maximumExperience(for: pokemon.speciesID)
@@ -1453,7 +1490,9 @@ extension GameRuntime {
             updatedExperience: updatedExperience,
             speciesID: pokemon.speciesID
         )
-        guard gainedExperience > 0 || updatedStatExp != pokemon.statExp else { return [] }
+        guard gainedExperience > 0 || updatedStatExp != pokemon.statExp else {
+            return BattleExperienceRewardResult(messages: [], pendingLearnMove: nil)
+        }
 
         var messages = ["\(pokemon.nickname) gained \(gainedExperience) EXP!"]
         let previousLevel = pokemon.level
@@ -1511,7 +1550,20 @@ extension GameRuntime {
             }
         }
 
-        return messages
+        let learnMoveResult = applyPendingLevelUpMoves(
+            to: &pokemon,
+            moveIDs: levelUpMoveIDsDue(
+                for: pokemon.speciesID,
+                from: previousLevel,
+                to: updatedLevel
+            )
+        )
+        messages.append(contentsOf: learnMoveResult.messages)
+
+        return BattleExperienceRewardResult(
+            messages: messages,
+            pendingLearnMove: learnMoveResult.pendingLearnMove
+        )
     }
 
     func makeEnemyDefeatResolution(
@@ -1521,11 +1573,12 @@ extension GameRuntime {
     ) -> (updatedPlayer: RuntimePokemonState, beats: [RuntimeBattlePresentationBeat]) {
         let previousPlayer = playerPokemon
         var updatedPlayer = playerPokemon
-        let experienceMessages = applyBattleExperienceReward(
+        let rewardResult = applyBattleExperienceReward(
             defeatedPokemon: defeatedEnemy,
             to: &updatedPlayer,
             isTrainerBattle: battle.kind == .trainer
         )
+        let experienceMessages = rewardResult.messages
 
         var beats: [RuntimeBattlePresentationBeat] = []
         if let experienceMessage = experienceMessages.first {
@@ -1554,45 +1607,224 @@ extension GameRuntime {
             }
         }
 
+        let rewardContinuation: RuntimeBattleRewardContinuation
         if battle.enemyActiveIndex + 1 < battle.enemyParty.count {
-            var updatedEnemyParty = battle.enemyParty
-            updatedEnemyParty[battle.enemyActiveIndex] = defeatedEnemy
-            let nextIndex = battle.enemyActiveIndex + 1
-            let nextEnemy = updatedEnemyParty[nextIndex]
-            beats.append(
+            rewardContinuation = .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+        } else {
+            rewardContinuation = .finishWin
+        }
+
+        beats.append(
+            .init(
+                delay: battlePresentationDelay(base: 0.18),
+                stage: rewardResult.pendingLearnMove == nil ? .turnSettle : .levelUp,
+                uiVisibility: .visible,
+                phase: .turnText,
+                pendingAction: .continueLevelUpResolution,
+                learnMoveState: rewardResult.pendingLearnMove,
+                rewardContinuation: rewardContinuation,
+                playerPokemon: updatedPlayer
+            )
+        )
+
+        return (updatedPlayer, beats)
+    }
+
+    func levelUpMoveIDsDue(for speciesID: String, from previousLevel: Int, to updatedLevel: Int) -> [String] {
+        guard updatedLevel > previousLevel,
+              let species = content.species(id: speciesID) else {
+            return []
+        }
+        return species.levelUpLearnset
+            .filter { $0.level > previousLevel && $0.level <= updatedLevel }
+            .map(\.moveID)
+    }
+
+    func applyPendingLevelUpMoves(
+        to pokemon: inout RuntimePokemonState,
+        moveIDs: [String]
+    ) -> LevelUpMoveProcessingResult {
+        var messages: [String] = []
+        var pendingMoveIDs = moveIDs
+
+        while pendingMoveIDs.isEmpty == false {
+            let moveID = pendingMoveIDs.removeFirst()
+            guard pokemon.moves.contains(where: { $0.id == moveID }) == false,
+                  let move = content.move(id: moveID) else {
+                continue
+            }
+
+            if pokemon.moves.count < 4 {
+                pokemon.moves.append(RuntimeMoveState(id: move.id, currentPP: move.maxPP))
+                messages.append("\(pokemon.nickname) learned \(move.displayName)!")
+                continue
+            }
+
+            messages.append("\(pokemon.nickname) is trying to learn \(move.displayName)!")
+            messages.append("But \(pokemon.nickname) can't learn more than 4 moves.")
+            return LevelUpMoveProcessingResult(
+                messages: messages,
+                pendingLearnMove: .init(moveID: move.id, remainingMoveIDs: pendingMoveIDs)
+            )
+        }
+
+        return LevelUpMoveProcessingResult(messages: messages, pendingLearnMove: nil)
+    }
+
+    func continueLevelUpResolution(battle: inout RuntimeBattleState) {
+        if battle.learnMoveState != nil {
+            enterLearnMoveDecisionPrompt(battle: &battle)
+            return
+        }
+        resumeRewardContinuation(battle: &battle)
+    }
+
+    func enterLearnMoveDecisionPrompt(battle: inout RuntimeBattleState) {
+        guard let learnMoveState = battle.learnMoveState,
+              let move = content.move(id: learnMoveState.moveID) else {
+            battle.learnMoveState = nil
+            resumeRewardContinuation(battle: &battle)
+            return
+        }
+        battle.phase = .learnMoveDecision
+        battle.focusedMoveIndex = 0
+        battle.pendingAction = nil
+        battle.queuedMessages = []
+        battle.message = "Teach \(move.displayName) to \(battle.playerPokemon.nickname)?"
+    }
+
+    func resolveLearnMoveDecision(battle: inout RuntimeBattleState) {
+        guard battle.phase == .learnMoveDecision,
+              let learnMoveState = battle.learnMoveState,
+              let move = content.move(id: learnMoveState.moveID) else {
+            return
+        }
+
+        if battle.focusedMoveIndex == 0 {
+            battle.phase = .learnMoveSelection
+            battle.focusedMoveIndex = 0
+            battle.pendingAction = nil
+            battle.queuedMessages = []
+            battle.message = "Choose a move to forget for \(move.displayName)."
+            return
+        }
+
+        battle.learnMoveState = nil
+        processPendingLevelUpMoves(
+            battle: &battle,
+            moveIDs: learnMoveState.remainingMoveIDs,
+            prefixMessages: ["\(battle.playerPokemon.nickname) did not learn \(move.displayName)."]
+        )
+    }
+
+    func resolveLearnMoveSelection(battle: inout RuntimeBattleState) {
+        guard battle.phase == .learnMoveSelection,
+              let learnMoveState = battle.learnMoveState,
+              battle.playerPokemon.moves.indices.contains(battle.focusedMoveIndex),
+              let newMove = content.move(id: learnMoveState.moveID) else {
+            return
+        }
+
+        let forgottenMoveID = battle.playerPokemon.moves[battle.focusedMoveIndex].id
+        guard hmMoveIDs.contains(forgottenMoveID) == false else {
+            let moveDisplayName = content.move(id: forgottenMoveID)?.displayName ?? forgottenMoveID
+            battle.message = "\(moveDisplayName) can't be forgotten."
+            return
+        }
+
+        let forgottenMoveName = content.move(id: forgottenMoveID)?.displayName ?? forgottenMoveID
+        battle.playerPokemon.moves[battle.focusedMoveIndex] = RuntimeMoveState(
+            id: newMove.id,
+            currentPP: newMove.maxPP
+        )
+        battle.learnMoveState = nil
+
+        processPendingLevelUpMoves(
+            battle: &battle,
+            moveIDs: learnMoveState.remainingMoveIDs,
+            prefixMessages: [
+                "\(battle.playerPokemon.nickname) forgot \(forgottenMoveName).",
+                "\(battle.playerPokemon.nickname) learned \(newMove.displayName)!",
+            ]
+        )
+    }
+
+    func processPendingLevelUpMoves(
+        battle: inout RuntimeBattleState,
+        moveIDs: [String],
+        prefixMessages: [String] = []
+    ) {
+        var playerPokemon = battle.playerPokemon
+        let learnMoveResult = applyPendingLevelUpMoves(to: &playerPokemon, moveIDs: moveIDs)
+        battle.playerPokemon = playerPokemon
+        battle.learnMoveState = learnMoveResult.pendingLearnMove
+
+        let messages = prefixMessages + learnMoveResult.messages
+        guard messages.isEmpty == false else {
+            continueLevelUpResolution(battle: &battle)
+            return
+        }
+
+        presentBattleMessages(messages, battle: &battle, pendingAction: .continueLevelUpResolution)
+    }
+
+    func resumeRewardContinuation(battle: inout RuntimeBattleState) {
+        guard let rewardContinuation = battle.rewardContinuation else {
+            battle.phase = .moveSelection
+            battle.message = "Pick the next move."
+            return
+        }
+
+        battle.rewardContinuation = nil
+        switch rewardContinuation {
+        case let .sendNextEnemy(index):
+            scheduleNextEnemySendOut(battle: &battle, nextIndex: index)
+        case .finishWin:
+            battle.phase = .battleComplete
+            finishBattle(battle: battle, won: true)
+        }
+    }
+
+    func scheduleNextEnemySendOut(battle: inout RuntimeBattleState, nextIndex: Int) {
+        guard battle.enemyParty.indices.contains(nextIndex) else {
+            battle.phase = .moveSelection
+            battle.message = "Pick the next move."
+            return
+        }
+
+        let nextEnemy = battle.enemyParty[nextIndex]
+        battle.phase = .resolvingTurn
+        battle.pendingAction = nil
+        battle.pendingPresentationBatches = []
+        battle.queuedMessages = []
+        battle.message = ""
+
+        scheduleBattlePresentation(
+            [
                 .init(
                     delay: battlePresentationDelay(base: 0.34),
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .enemy,
                     message: "\(battle.trainerName) sent out \(nextEnemy.nickname)!",
-                    enemyParty: updatedEnemyParty,
+                    enemyParty: battle.enemyParty,
                     enemyActiveIndex: nextIndex
-                )
-            )
-            beats.append(
+                ),
                 .init(
                     delay: battlePresentationDelay(base: 0.26),
                     stage: .commandReady,
                     uiVisibility: .visible,
                     message: "Pick the next move.",
                     phase: .moveSelection,
-                    playerPokemon: updatedPlayer
-                )
-            )
-        } else {
-            beats.append(
-                .init(
-                    delay: battlePresentationDelay(base: 0.3),
-                    stage: .battleComplete,
-                    uiVisibility: .visible,
-                    playerPokemon: updatedPlayer,
-                    finishBattleWon: true
-                )
-            )
-        }
+                    playerPokemon: battle.playerPokemon
+                ),
+            ],
+            battleID: battle.battleID
+        )
+    }
 
-        return (updatedPlayer, beats)
+    var hmMoveIDs: Set<String> {
+        ["CUT", "FLY", "SURF", "STRENGTH", "FLASH"]
     }
 
     func awardStatExp(from defeatedPokemon: RuntimePokemonState, to statExp: PokemonStatExp) -> PokemonStatExp {

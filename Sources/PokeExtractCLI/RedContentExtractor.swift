@@ -258,10 +258,14 @@ public enum RedContentExtractor {
         gameplayManifest.species
             .flatMap { species -> [(source: String, destination: String)] in
                 guard let battleSprite = species.battleSprite else { return [] }
-                let stem = species.id.lowercased()
+                let frontFilename = URL(fileURLWithPath: battleSprite.frontImagePath).lastPathComponent
+                let backStem = URL(fileURLWithPath: battleSprite.backImagePath)
+                    .deletingPathExtension()
+                    .lastPathComponent
+                let backFilename = "\(backStem)b.png"
                 return [
-                    ("gfx/pokemon/front/\(stem).png", battleSprite.frontImagePath),
-                    ("gfx/pokemon/back/\(stem)b.png", battleSprite.backImagePath),
+                    ("gfx/pokemon/front/\(frontFilename)", battleSprite.frontImagePath),
+                    ("gfx/pokemon/back/\(backFilename)", battleSprite.backImagePath),
                 ]
             }
             .sorted { lhs, rhs in lhs.destination < rhs.destination }

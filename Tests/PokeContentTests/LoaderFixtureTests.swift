@@ -20,6 +20,10 @@ final class LoaderFixtureTests: XCTestCase {
         XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.baseExp, 66)
         XCTAssertEqual(loaded.species(id: "SQUIRTLE")?.growthRate, .mediumSlow)
         XCTAssertEqual(
+            loaded.species(id: "SQUIRTLE")?.levelUpLearnset,
+            [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
+        )
+        XCTAssertEqual(
             loaded.species(id: "SQUIRTLE")?.battleSprite,
             .init(
                 frontImagePath: "Assets/battle/pokemon/front/squirtle.png",
@@ -27,6 +31,7 @@ final class LoaderFixtureTests: XCTestCase {
             )
         )
         XCTAssertEqual(loaded.move(id: "TACKLE")?.power, 35)
+        XCTAssertEqual(loaded.move(id: "BUBBLE")?.maxPP, 30)
         XCTAssertEqual(loaded.typeEffectiveness(attackingType: "WATER", defendingType: "FIRE")?.multiplier, 20)
         XCTAssertEqual(loaded.trainerBattle(id: "opp_rival1_2")?.party.first?.speciesID, "BULBASAUR")
         XCTAssertEqual(loaded.tileset(id: "REDS_HOUSE_2")?.imagePath, "Assets/field/tilesets/reds_house.png")
