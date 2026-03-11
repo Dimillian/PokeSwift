@@ -228,10 +228,12 @@ public struct ExperienceProgressTelemetry: Codable, Equatable, Sendable {
 
 public enum BattlePresentationStage: String, Codable, Equatable, Sendable {
     case idle
-    case introTransition
-    case introEnemySendOut
-    case introPlayerSendOut
-    case introSettle
+    case introFlash1
+    case introFlash2
+    case introFlash3
+    case introSpiral
+    case introCrossing
+    case introReveal
     case commandReady
     case attackWindup
     case attackImpact

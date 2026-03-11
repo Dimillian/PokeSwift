@@ -68,7 +68,6 @@ private struct BattleScreenEffectModifier: ViewModifier {
     let presentation: BattlePresentationTelemetry
     @State private var displayedIntroProgress: CGFloat = 1
     @State private var displayedIntroAmount: CGFloat = 0
-    @State private var hasAnimatedIntro = false
     @State private var seededIntroRevision: Int?
 
     func body(content: Content) -> some View {
@@ -115,6 +114,9 @@ private struct BattleScreenEffectModifier: ViewModifier {
     }
 
     private var introStyleValue: Float {
+        guard presentation.stage == .introSpiral else {
+            return 0
+        }
         switch presentation.transitionStyle {
         case .none:
             return 0
@@ -125,80 +127,40 @@ private struct BattleScreenEffectModifier: ViewModifier {
         }
     }
 
-    private var targetIntroProgress: CGFloat {
-        switch presentation.stage {
-        case .introTransition:
-            return 1
-        case .introEnemySendOut, .introPlayerSendOut, .introSettle:
-            return 1
-        case .commandReady, .attackWindup, .attackImpact, .hpDrain, .resultText, .faint, .experience, .levelUp, .enemySendOut, .turnSettle, .battleComplete, .idle:
-            return 1
-        }
-    }
-
-    private var targetIntroAmount: CGFloat {
-        switch presentation.stage {
-        case .introTransition:
-            return presentation.transitionStyle == .none ? 0 : 1
-        case .introEnemySendOut:
-            return presentation.transitionStyle == .none ? 0 : 0.08
-        case .introPlayerSendOut, .introSettle, .commandReady, .attackWindup, .attackImpact, .hpDrain, .resultText, .faint, .experience, .levelUp, .enemySendOut, .turnSettle, .battleComplete, .idle:
-            return 0
-        }
-    }
-
     private func syncIntroState(animated: Bool) {
-        guard presentation.transitionStyle != .none else {
+        if presentation.stage == .introFlash1 {
+            seededIntroRevision = nil
+        }
+
+        guard presentation.transitionStyle != .none, presentation.stage == .introSpiral else {
             displayedIntroProgress = 1
             displayedIntroAmount = 0
-            hasAnimatedIntro = false
-            seededIntroRevision = nil
             return
         }
 
-        if presentation.stage == .introTransition, seededIntroRevision != presentation.revision {
+        if seededIntroRevision != presentation.revision {
             seededIntroRevision = presentation.revision
-            hasAnimatedIntro = true
             displayedIntroProgress = 0.01
-            displayedIntroAmount = targetIntroAmount
+            displayedIntroAmount = 1
             DispatchQueue.main.async {
                 withAnimation(transitionAnimation) {
-                    displayedIntroProgress = targetIntroProgress
-                    displayedIntroAmount = targetIntroAmount
+                    displayedIntroProgress = 1
+                    displayedIntroAmount = 1
                 }
             }
             return
         }
 
-        if animated == false || hasAnimatedIntro == false {
-            hasAnimatedIntro = true
-            displayedIntroProgress = 0.01
-            displayedIntroAmount = targetIntroAmount
-            DispatchQueue.main.async {
-                withAnimation(transitionAnimation) {
-                    displayedIntroProgress = targetIntroProgress
-                    displayedIntroAmount = targetIntroAmount
-                }
-            }
-            return
-        }
-
-        withAnimation(transitionAnimation) {
-            displayedIntroProgress = targetIntroProgress
-            displayedIntroAmount = targetIntroAmount
+        if animated == false {
+            displayedIntroProgress = 1
+            displayedIntroAmount = 1
         }
     }
 
     private var transitionAnimation: Animation {
         switch presentation.stage {
-        case .introTransition:
-            return presentation.transitionStyle == .circle ? .easeOut(duration: 0.64) : .easeOut(duration: 0.62)
-        case .introEnemySendOut:
-            return .easeOut(duration: 0.18)
-        case .introPlayerSendOut:
-            return .easeOut(duration: 0.14)
-        case .introSettle:
-            return .easeOut(duration: 0.18)
+        case .introSpiral:
+            return .easeOut(duration: 0.62)
         default:
             return .easeInOut(duration: 0.2)
         }

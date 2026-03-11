@@ -26,6 +26,7 @@ struct BattleViewportCanvas: View {
                 .position(x: layout.enemyCardCenter.x, y: layout.enemyCardCenter.y)
                 .opacity(hudOpacity)
                 .offset(y: hudOffset)
+                .animation(hudAnimation, value: presentation.revision)
 
                 BattleStatusCard(
                     pokemon: playerPokemon,
@@ -37,6 +38,7 @@ struct BattleViewportCanvas: View {
                 .position(x: layout.playerCardCenter.x, y: layout.playerCardCenter.y)
                 .opacity(hudOpacity)
                 .offset(y: hudOffset)
+                .animation(hudAnimation, value: presentation.revision)
 
                 if let enemySpriteURL {
                     PixelAssetView(
@@ -47,6 +49,7 @@ struct BattleViewportCanvas: View {
                     .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
                     .position(enemySpriteCenter(in: layout))
                     .scaleEffect(enemySpriteScale)
+                    .animation(spriteAnimation, value: presentation.revision)
                 }
 
                 if let playerSpriteURL {
@@ -58,9 +61,9 @@ struct BattleViewportCanvas: View {
                     .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
                     .position(playerSpriteCenter(in: layout))
                     .scaleEffect(playerSpriteScale)
+                    .animation(spriteAnimation, value: presentation.revision)
                 }
             }
-            .animation(.easeInOut(duration: 0.24), value: presentation.revision)
         }
     }
 
@@ -93,12 +96,13 @@ struct BattleViewportCanvas: View {
     private func enemySpriteCenter(in layout: BattleViewportLayout) -> CGPoint {
         let settled = layout.enemySpriteCenter
         switch presentation.stage {
-        case .introTransition:
-            return CGPoint(x: layout.size.width * 1.22, y: settled.y - 14)
-        case .introEnemySendOut:
-            return CGPoint(x: settled.x - (layout.size.width * 0.12), y: settled.y - 2)
-        case .introPlayerSendOut:
-            return CGPoint(x: settled.x + (layout.size.width * 0.04), y: settled.y)
+        case .introFlash1, .introFlash2, .introFlash3, .introSpiral:
+            return CGPoint(
+                x: -(layout.enemySpriteSize.width / 2) - 8,
+                y: settled.y - 6
+            )
+        case .introCrossing, .introReveal:
+            return settled
         case .attackWindup where presentation.activeSide == .enemy:
             return CGPoint(x: settled.x - layout.size.width * 0.07, y: settled.y + 2)
         case .attackImpact where presentation.activeSide == .enemy:
@@ -113,12 +117,13 @@ struct BattleViewportCanvas: View {
     private func playerSpriteCenter(in layout: BattleViewportLayout) -> CGPoint {
         let settled = layout.playerSpriteCenter
         switch presentation.stage {
-        case .introTransition:
-            return CGPoint(x: -layout.size.width * 0.22, y: settled.y + 12)
-        case .introEnemySendOut:
-            return CGPoint(x: -layout.size.width * 0.12, y: settled.y + 10)
-        case .introPlayerSendOut:
-            return CGPoint(x: settled.x + (layout.size.width * 0.16), y: settled.y - 10)
+        case .introFlash1, .introFlash2, .introFlash3, .introSpiral:
+            return CGPoint(
+                x: layout.size.width + (layout.playerSpriteSize.width / 2) + 8,
+                y: settled.y + 6
+            )
+        case .introCrossing, .introReveal:
+            return settled
         case .attackWindup where presentation.activeSide == .player:
             return CGPoint(x: settled.x + layout.size.width * 0.09, y: settled.y - 4)
         case .attackImpact where presentation.activeSide == .player:
@@ -144,6 +149,24 @@ struct BattleViewportCanvas: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
+        }
+    }
+
+    private var spriteAnimation: Animation? {
+        switch presentation.stage {
+        case .introCrossing:
+            return .linear(duration: 0.55)
+        default:
+            return .easeInOut(duration: 0.24)
+        }
+    }
+
+    private var hudAnimation: Animation {
+        switch presentation.stage {
+        case .introReveal:
+            return .easeOut(duration: 0.18)
+        default:
+            return .easeInOut(duration: 0.24)
         }
     }
 }

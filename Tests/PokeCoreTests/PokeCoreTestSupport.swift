@@ -179,12 +179,7 @@ func fixtureAudioManifest() -> AudioManifest {
 
 @MainActor
 func drainBattleText(_ runtime: GameRuntime, maxTicks: Int = 240) {
-    guard runtime.currentSnapshot().battle != nil else { return }
-    waitUntil(
-        runtime.currentSnapshot().battle?.phase == "moveSelection",
-        message: "battle text did not drain to move selection",
-        maxTicks: maxTicks
-    )
+    advanceBattleTextUntilMoveSelection(runtime, maxTicks: maxTicks)
 }
 
 @MainActor

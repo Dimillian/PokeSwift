@@ -409,7 +409,7 @@ extension PokeUITests {
       canRun: false,
       party: .init(pokemon: []),
       presentation: .init(
-        stage: .introTransition,
+        stage: .introFlash1,
         revision: 1,
         uiVisibility: .hidden,
         activeSide: nil,
@@ -419,7 +419,7 @@ extension PokeUITests {
 
     XCTAssertFalse(props.showsInterface)
     XCTAssertFalse(props.shouldForceCombatSectionOpen)
-    XCTAssertEqual(props.actionRows, [])
+    XCTAssertTrue(props.actionRows.isEmpty)
   }
   func testBattleSidebarActionRowsFocusRunOnlyForWildBattles() {
     let wildProps = BattleSidebarProps(

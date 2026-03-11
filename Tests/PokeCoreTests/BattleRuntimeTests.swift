@@ -358,7 +358,7 @@ extension PokeCoreTests {
 
         let introSnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(introSnapshot.phase, "introText")
-        XCTAssertEqual(introSnapshot.presentation.stage, .introTransition)
+        XCTAssertEqual(introSnapshot.presentation.stage, .introFlash1)
         XCTAssertEqual(introSnapshot.presentation.uiVisibility, .hidden)
 
         waitUntil(
@@ -370,7 +370,7 @@ extension PokeCoreTests {
         XCTAssertEqual(readySnapshot.presentation.uiVisibility, .visible)
     }
 
-    func testWildBattleIntroRetainsCircleTransitionThroughSettle() throws {
+    func testWildBattleIntroUsesSharedFlashSpiralRevealSequence() throws {
         let runtime = try makeRepoRuntime()
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -385,30 +385,57 @@ extension PokeCoreTests {
         runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
 
         var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.presentation.stage, .introTransition)
-        XCTAssertEqual(snapshot.presentation.transitionStyle, .circle)
+        XCTAssertEqual(snapshot.presentation.stage, .introFlash1)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
         XCTAssertEqual(snapshot.textLines, [])
 
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .introPlayerSendOut,
-            message: "wild battle intro did not advance to the player send-out beat"
+            runtime.currentSnapshot().battle?.presentation.stage == .introFlash2,
+            message: "wild battle intro did not advance to the second flash"
         )
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.presentation.transitionStyle, .circle)
-
-        waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .introSettle,
-            message: "wild battle intro did not advance to the settle beat"
-        )
-        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.presentation.transitionStyle, .circle)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
         XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
-        XCTAssertEqual(snapshot.textLines, ["Wild Pidgey appeared!"])
+        XCTAssertEqual(snapshot.textLines, [])
 
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "moveSelection",
-            message: "wild battle intro did not settle into move selection"
+            runtime.currentSnapshot().battle?.presentation.stage == .introFlash3,
+            message: "wild battle intro did not advance to the third flash"
         )
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
+        XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
+        XCTAssertEqual(snapshot.textLines, [])
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .introSpiral,
+            message: "wild battle intro did not advance to the spiral beat"
+        )
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
+        XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
+        XCTAssertEqual(snapshot.textLines, [])
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .introCrossing,
+            message: "wild battle intro did not advance to the crossing beat"
+        )
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
+        XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
+        XCTAssertEqual(snapshot.textLines, [])
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .introReveal,
+            message: "wild battle intro did not advance to the reveal beat"
+        )
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.presentation.transitionStyle, .spiral)
+        XCTAssertEqual(snapshot.presentation.uiVisibility, .visible)
+        XCTAssertEqual(snapshot.textLines, ["Wild Pidgey appeared!"])
+        XCTAssertEqual(snapshot.phase, "turnText")
+
+        advanceBattleTextUntilMoveSelection(runtime)
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.presentation.stage, .commandReady)
         XCTAssertEqual(snapshot.presentation.transitionStyle, .none)
@@ -686,8 +713,8 @@ extension PokeCoreTests {
 
         var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.phase, "introText")
-        XCTAssertEqual(snapshot.textLines, ["BLUE challenges you!"])
-        XCTAssertEqual(snapshot.presentation.stage, .introTransition)
+        XCTAssertEqual(snapshot.textLines, [])
+        XCTAssertEqual(snapshot.presentation.stage, .introFlash1)
         XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
 
         drainBattleText(runtime)

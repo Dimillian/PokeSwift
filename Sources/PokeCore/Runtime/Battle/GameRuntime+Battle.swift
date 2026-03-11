@@ -225,83 +225,72 @@ extension GameRuntime {
     }
 
     func makeIntroPresentationBeats(
-        battle: RuntimeBattleState,
         openingMessage: String,
-        enemySendOutMessage: String?,
-        playerSendOutMessage: String,
         transitionStyle: BattleTransitionStyle,
-        openingMessageAfterSettle: Bool = false
+        requiresConfirmAfterReveal: Bool = false
     ) -> [RuntimeBattlePresentationBeat] {
-        let transitionLeadIn: TimeInterval
-        switch transitionStyle {
-        case .circle:
-            transitionLeadIn = 0.66
-        case .spiral:
-            transitionLeadIn = 0.62
-        case .none:
-            transitionLeadIn = 0.3
-        }
-
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
-                stage: .introTransition,
+                stage: .introFlash1,
                 uiVisibility: .hidden,
                 transitionStyle: transitionStyle,
-                message: openingMessageAfterSettle ? nil : openingMessage,
                 phase: .introText,
                 pendingAction: .moveSelection
             ),
+            .init(
+                delay: battlePresentationDelay(base: 0.18),
+                stage: .introFlash2,
+                uiVisibility: .hidden,
+                transitionStyle: transitionStyle,
+                phase: .introText
+            ),
+            .init(
+                delay: battlePresentationDelay(base: 0.18),
+                stage: .introFlash3,
+                uiVisibility: .hidden,
+                transitionStyle: transitionStyle,
+                phase: .introText
+            ),
+            .init(
+                delay: battlePresentationDelay(base: 0.16),
+                stage: .introSpiral,
+                uiVisibility: .hidden,
+                transitionStyle: transitionStyle,
+                phase: .introText
+            ),
+            .init(
+                delay: battlePresentationDelay(base: 0.92),
+                stage: .introCrossing,
+                uiVisibility: .hidden,
+                transitionStyle: transitionStyle,
+                phase: .introText
+            ),
+            .init(
+                delay: battlePresentationDelay(base: 0.55),
+                stage: .introReveal,
+                uiVisibility: .visible,
+                transitionStyle: transitionStyle,
+                message: openingMessage,
+                phase: requiresConfirmAfterReveal ? .turnText : .introText,
+                pendingAction: requiresConfirmAfterReveal ? .moveSelection : nil
+            ),
         ]
 
-        if let enemySendOutMessage {
+        if requiresConfirmAfterReveal == false {
             beats.append(
                 .init(
-                    delay: battlePresentationDelay(base: transitionLeadIn),
-                    stage: .introEnemySendOut,
-                    uiVisibility: .hidden,
-                    activeSide: .enemy,
-                    transitionStyle: transitionStyle,
-                    message: enemySendOutMessage,
-                    phase: .introText
+                    delay: battlePresentationDelay(base: 0.18),
+                    stage: .commandReady,
+                    uiVisibility: .visible,
+                    transitionStyle: .none,
+                    message: "Pick the next move.",
+                    phase: .moveSelection,
+                    pendingAction: nil
                 )
             )
         }
 
-        beats.append(
-            .init(
-                delay: battlePresentationDelay(base: enemySendOutMessage == nil ? transitionLeadIn : 0.56),
-                stage: .introPlayerSendOut,
-                uiVisibility: .hidden,
-                activeSide: .player,
-                transitionStyle: transitionStyle,
-                message: playerSendOutMessage,
-                phase: .introText
-            )
-        )
-        beats.append(
-            .init(
-                delay: battlePresentationDelay(base: 0.46),
-                stage: .introSettle,
-                uiVisibility: .hidden,
-                activeSide: nil,
-                transitionStyle: transitionStyle,
-                message: openingMessageAfterSettle ? openingMessage : nil,
-                phase: .introText
-            )
-        )
-        beats.append(
-            .init(
-                delay: battlePresentationDelay(base: 0.24),
-                stage: .commandReady,
-                uiVisibility: .visible,
-                activeSide: nil,
-                transitionStyle: .none,
-                message: "Pick the next move.",
-                phase: .moveSelection,
-                pendingAction: nil
-            )
-        )
         return beats
     }
 
@@ -936,6 +925,12 @@ extension GameRuntime {
         case .moveSelection:
             battle.phase = .moveSelection
             battle.message = "Pick the next move."
+            if battle.presentation.stage == .introReveal {
+                battle.presentation.stage = .commandReady
+                battle.presentation.revision += 1
+                battle.presentation.transitionStyle = .none
+                battle.presentation.uiVisibility = .visible
+            }
         case let .finish(won):
             battle.phase = .battleComplete
             finishBattle(battle: battle, won: won)
@@ -1185,9 +1180,6 @@ extension GameRuntime {
         guard enemyParty.isEmpty == false else { return }
 
         let openingMessage = "\(battleManifest.displayName) challenges you!"
-        let enemySendOutMessage = "\(battleManifest.displayName) sent out \(enemyParty[0].nickname)!"
-        let playerSendOutMessage = "Go! \(playerPokemon.nickname)!"
-
         let battle = RuntimeBattleState(
             battleID: battleManifest.id,
             kind: .trainer,
@@ -1204,12 +1196,12 @@ extension GameRuntime {
             phase: .introText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
-            message: openingMessage,
+            message: "",
             queuedMessages: [],
             pendingAction: .moveSelection,
             pendingPresentationBatches: [],
             presentation: .init(
-                stage: .introTransition,
+                stage: .introFlash1,
                 revision: 0,
                 uiVisibility: .hidden,
                 activeSide: nil,
@@ -1237,10 +1229,7 @@ extension GameRuntime {
         requestTrainerBattleMusic()
         scheduleBattlePresentation(
             makeIntroPresentationBeats(
-                battle: battle,
                 openingMessage: openingMessage,
-                enemySendOutMessage: enemySendOutMessage,
-                playerSendOutMessage: playerSendOutMessage,
                 transitionStyle: .spiral
             ),
             battleID: battle.battleID
@@ -1282,11 +1271,11 @@ extension GameRuntime {
             pendingAction: .moveSelection,
             pendingPresentationBatches: [],
             presentation: .init(
-                stage: .introTransition,
+                stage: .introFlash1,
                 revision: 0,
                 uiVisibility: .hidden,
                 activeSide: nil,
-                transitionStyle: .circle
+                transitionStyle: .spiral
             )
         )
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
@@ -1309,12 +1298,9 @@ extension GameRuntime {
         requestTrainerBattleMusic()
         scheduleBattlePresentation(
             makeIntroPresentationBeats(
-                battle: battle,
                 openingMessage: "Wild \(enemyPokemon.nickname) appeared!",
-                enemySendOutMessage: nil,
-                playerSendOutMessage: "Go! \(playerPokemon.nickname)!",
-                transitionStyle: .circle,
-                openingMessageAfterSettle: true
+                transitionStyle: .spiral,
+                requiresConfirmAfterReveal: true
             ),
             battleID: battle.battleID
         )

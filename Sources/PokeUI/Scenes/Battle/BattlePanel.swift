@@ -42,6 +42,9 @@ public struct BattlePanel: View {
             )
             .frame(width: viewportSize.width, height: viewportSize.height)
             .battleScreenEffect(displayScale: scale, presentation: presentation)
+            .overlay {
+                BattleIntroFlashOverlay(presentation: presentation)
+            }
             .clipShape(RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous)
@@ -63,5 +66,54 @@ public struct BattlePanel: View {
             return max(1, floor(rawScale))
         }
         return rawScale
+    }
+}
+
+private extension BattlePresentationStage {
+    var isFlashStage: Bool {
+        switch self {
+        case .introFlash1, .introFlash2, .introFlash3:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+private struct BattleIntroFlashOverlay: View {
+    let presentation: BattlePresentationTelemetry
+
+    @State private var opacity: Double = 0
+    @State private var seededRevision: Int?
+
+    var body: some View {
+        Rectangle()
+            .fill(.black)
+            .opacity(opacity)
+            .allowsHitTesting(false)
+            .onAppear {
+                syncFlashState()
+            }
+            .onChange(of: presentation.stage) { _, _ in
+                syncFlashState()
+            }
+            .onChange(of: presentation.revision) { _, _ in
+                syncFlashState()
+            }
+    }
+
+    private func syncFlashState() {
+        guard presentation.stage.isFlashStage else {
+            opacity = 0
+            seededRevision = nil
+            return
+        }
+        guard seededRevision != presentation.revision else { return }
+
+        seededRevision = presentation.revision
+        opacity = 1
+        withAnimation(.linear(duration: 0.10)) {
+            opacity = 0
+        }
     }
 }

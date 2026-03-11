@@ -42,16 +42,6 @@ struct BattleViewportProps {
     let bagItems: [InventoryItemTelemetry]
     let focusedBagItemIndex: Int
     let presentation: BattlePresentationTelemetry
-
-    var showsFooterTextDuringIntro: Bool {
-        guard textLines.isEmpty == false, presentation.uiVisibility == .hidden else { return false }
-        switch kind {
-        case .wild:
-            return presentation.stage == .introSettle
-        case .trainer:
-            return presentation.stage == .introTransition
-        }
-    }
 }
 
 struct PlaceholderSceneProps {
@@ -223,11 +213,8 @@ private struct BattleStageView: View {
             lines: props.textLines.isEmpty ? ["Pick the next move."] : props.textLines
         )
         .frame(maxWidth: 760)
-        .opacity(
-            props.presentation.uiVisibility == .visible || props.showsFooterTextDuringIntro
-                ? 1
-                : 0
-        )
+        .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)
+        .animation(.easeOut(duration: 0.18), value: props.presentation.revision)
     }
 
     @ViewBuilder
