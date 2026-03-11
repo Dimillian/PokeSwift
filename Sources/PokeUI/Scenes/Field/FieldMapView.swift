@@ -182,6 +182,11 @@ public struct FieldMapView: View {
         let transitionDirection = transitionDirection(to: nextIdentity, nextMap: map)
         let shouldAnimate = transitionDirection != nil
         let nextStepAnimation = makePlayerStepAnimation(to: nextIdentity, direction: transitionDirection)
+        let connectedStepOrigin = connectedStepOriginPosition(
+            to: nextIdentity,
+            nextMap: map,
+            direction: transitionDirection
+        )
         let nextObjectWorldPositions = Dictionary(uniqueKeysWithValues: objects.map { object in
             (
                 object.id,
@@ -216,6 +221,21 @@ public struct FieldMapView: View {
         if shouldAnimate || shouldAnimateObjects {
             playerStepAnimation = resolvedPlayerStepAnimation
             objectStepAnimations = nextObjectStepAnimations
+            if let connectedStepOrigin {
+                var transaction = Transaction()
+                transaction.animation = nil
+                withTransaction(transaction) {
+                    presentedPlayerWorldPosition = CGPoint(
+                        x: CGFloat(connectedStepOrigin.playerWorldPosition.x),
+                        y: CGFloat(connectedStepOrigin.playerWorldPosition.y)
+                    )
+                    presentedCameraOrigin = CGPoint(
+                        x: CGFloat(connectedStepOrigin.cameraOrigin.x),
+                        y: CGFloat(connectedStepOrigin.cameraOrigin.y)
+                    )
+                    presentedObjectWorldPositions = nextObjectWorldPositions
+                }
+            }
             withAnimation(.linear(duration: playerStepDuration)) {
                 applyState()
             }
@@ -274,6 +294,30 @@ public struct FieldMapView: View {
             to: nextMap,
             nextPosition: nextIdentity.playerPosition
         )
+    }
+
+    private func connectedStepOriginPosition(
+        to nextIdentity: FieldPresentationIdentity,
+        nextMap: MapManifest,
+        direction: FacingDirection?
+    ) -> (playerWorldPosition: FieldPixelPoint, cameraOrigin: FieldPixelPoint)? {
+        guard let previousIdentity = presentationIdentity,
+              previousIdentity.mapID != nextIdentity.mapID,
+              let direction,
+              let originPosition = Self.connectedStepOriginPosition(
+                  nextPosition: nextIdentity.playerPosition,
+                  direction: direction
+              ) else {
+            return nil
+        }
+
+        let metrics = FieldSceneRenderer.sceneMetrics(for: nextMap)
+        let originWorldPosition = FieldSceneRenderer.playerWorldPosition(for: originPosition, metrics: metrics)
+        let originCamera = FieldCameraState.target(
+            playerWorldPosition: originWorldPosition,
+            contentPixelSize: metrics.contentPixelSize
+        )
+        return (originWorldPosition, originCamera.origin)
     }
 
     private func makePlayerStepAnimation(to nextIdentity: FieldPresentationIdentity, direction: FacingDirection?) -> PlayerStepAnimationState? {
@@ -456,6 +500,22 @@ public struct FieldMapView: View {
         }
 
         return nil
+    }
+
+    static func connectedStepOriginPosition(
+        nextPosition: TilePoint,
+        direction: FacingDirection
+    ) -> TilePoint? {
+        switch direction {
+        case .up:
+            return .init(x: nextPosition.x, y: nextPosition.y + 1)
+        case .down:
+            return .init(x: nextPosition.x, y: nextPosition.y - 1)
+        case .left:
+            return .init(x: nextPosition.x + 1, y: nextPosition.y)
+        case .right:
+            return .init(x: nextPosition.x - 1, y: nextPosition.y)
+        }
     }
 
     private static func normalizedPhaseOffset(_ phaseOffset: Int) -> Int {

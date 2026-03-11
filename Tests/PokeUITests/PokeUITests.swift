@@ -750,6 +750,25 @@ final class PokeUITests: XCTestCase {
         )
     }
 
+    func testConnectedStepOriginPositionPlacesStartOneTileBehindDestination() {
+        XCTAssertEqual(
+            FieldMapView.connectedStepOriginPosition(nextPosition: .init(x: 4, y: 7), direction: .up),
+            .init(x: 4, y: 8)
+        )
+        XCTAssertEqual(
+            FieldMapView.connectedStepOriginPosition(nextPosition: .init(x: 4, y: 0), direction: .down),
+            .init(x: 4, y: -1)
+        )
+        XCTAssertEqual(
+            FieldMapView.connectedStepOriginPosition(nextPosition: .init(x: 9, y: 3), direction: .left),
+            .init(x: 10, y: 3)
+        )
+        XCTAssertEqual(
+            FieldMapView.connectedStepOriginPosition(nextPosition: .init(x: 0, y: 3), direction: .right),
+            .init(x: -1, y: 3)
+        )
+    }
+
     func testRendererCanCompositeRealFieldAssets() throws {
         let root = repoRoot()
         let assets = FieldRenderAssets(
