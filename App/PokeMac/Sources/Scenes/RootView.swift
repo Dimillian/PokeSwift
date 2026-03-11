@@ -6,6 +6,7 @@ import PokeUI
 struct RootView: View {
     private static let windowSize = CGSize(width: 1150, height: 800)
     @Bindable var coordinator: AppCoordinator
+    private let lightPalette = PokeThemePalette.lightPalette
 
     var body: some View {
         Group {
@@ -15,8 +16,14 @@ struct RootView: View {
                     systemImage: "exclamationmark.triangle",
                     description: Text(bootError)
                 )
+                .preferredColorScheme(.light)
+                .pokeAppearanceMode(.light)
             } else if let runtime = coordinator.runtime {
-                RuntimeSceneRouter(runtime: runtime)
+                RuntimeSceneRouter(
+                    runtime: runtime,
+                    appearanceMode: coordinator.appearanceMode,
+                    onCycleAppearanceMode: { coordinator.cycleAppearanceMode() }
+                )
             } else {
                 GameBoyScreen {
                     VStack(spacing: 16) {
@@ -24,11 +31,15 @@ struct RootView: View {
                         Text("Bootstrapping PokeMac")
                             .font(.headline)
                     }
-                    .foregroundStyle(.black)
+                    .foregroundStyle(lightPalette.primaryText.color)
                 }
+                .preferredColorScheme(.light)
+                .pokeAppearanceMode(.light)
             }
         }
         .frame(width: Self.windowSize.width, height: Self.windowSize.height)
+        .preferredColorScheme(coordinator.appearanceMode.preferredColorSchemeOverride)
+        .pokeAppearanceMode(coordinator.appearanceMode)
         .toolbar {
             ToolbarItem {
                 Button("Debug") {

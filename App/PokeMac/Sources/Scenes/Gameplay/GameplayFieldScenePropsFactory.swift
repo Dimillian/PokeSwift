@@ -7,7 +7,11 @@ import PokeUI
 enum GameplayScenePropsFactory {
     private static var sidebarManifestIndexCache: [String: GameplaySidebarManifestIndex] = [:]
 
-    static func make(runtime: GameRuntime) -> GameplaySceneProps? {
+    static func make(
+        runtime: GameRuntime,
+        appearanceMode: AppAppearanceMode,
+        onCycleAppearanceMode: @escaping @MainActor () -> Void
+    ) -> GameplaySceneProps? {
         let snapshot = runtime.currentSnapshot()
         let manifestIndex = cachedManifestIndex(for: runtime)
         let saveSidebar = makeSaveSidebar(runtime: runtime)
@@ -46,7 +50,10 @@ enum GameplayScenePropsFactory {
                         party: makeFieldPartySidebar(runtime: runtime, snapshot: snapshot, manifestIndex: manifestIndex),
                         inventory: sidebarInventory,
                         save: saveSidebar,
-                        options: GameplaySidebarPropsBuilder.makeOptionsSection(isMusicEnabled: runtime.isMusicEnabled)
+                        options: GameplaySidebarPropsBuilder.makeOptionsSection(
+                            isMusicEnabled: runtime.isMusicEnabled,
+                            appearanceMode: appearanceMode
+                        )
                     )
                 ),
                 onSidebarAction: { actionID in
@@ -57,6 +64,8 @@ enum GameplayScenePropsFactory {
                         _ = runtime.loadSavedGameFromSidebar()
                     case "music":
                         runtime.toggleMusicEnabled()
+                    case "appearanceMode":
+                        onCycleAppearanceMode()
                     default:
                         break
                     }

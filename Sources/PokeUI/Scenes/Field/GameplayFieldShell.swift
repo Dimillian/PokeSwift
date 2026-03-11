@@ -101,7 +101,7 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
                         .fill(
                             RadialGradient(
                                 colors: [
-                                    Color.white.opacity(0.5),
+                                    PokeThemePalette.appHighlightGlow.opacity(0.9),
                                     Color.clear,
                                 ],
                                 center: .topLeading,
@@ -233,13 +233,16 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
                     .font(.system(size: 30, weight: .light, design: .rounded))
                     .tracking(0.4)
             }
-            .foregroundStyle(Color(red: 0.17, green: 0.22, blue: 0.68))
+            .foregroundStyle(PokeThemePalette.gameBoyWordmark)
             .padding(.leading, 10)
         }
     }
 }
 
 private struct GameplayScreenWell<Content: View, Footer: View>: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.colorScheme) private var colorScheme
+
     private let content: Content
     private let footer: Footer
     private let footerPlacement: GameplayFooterPlacement
@@ -293,16 +296,36 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
             )
 
             ZStack(alignment: .topLeading) {
+                if appearanceMode.isDark(for: colorScheme) {
+                    RoundedRectangle(cornerRadius: max(14, lcdScale * 3), style: .continuous)
+                        .fill(PokeThemePalette.screenGlow)
+                        .frame(
+                            width: screenRect.width + max(36, lcdScale * 10),
+                            height: screenRect.height + max(32, lcdScale * 8)
+                        )
+                        .blur(radius: max(18, lcdScale * 4))
+                        .position(x: screenRect.midX, y: screenRect.midY)
+
+                    RoundedRectangle(cornerRadius: max(10, lcdScale * 2.4), style: .continuous)
+                        .fill(PokeThemePalette.screenGlowInner)
+                        .frame(
+                            width: screenRect.width + max(8, lcdScale * 2),
+                            height: screenRect.height + max(8, lcdScale * 2)
+                        )
+                        .blur(radius: max(8, lcdScale * 1.4))
+                        .position(x: screenRect.midX, y: screenRect.midY)
+                }
+
                 wellShape
-                    .fill(Color(red: 0.36, green: 0.37, blue: 0.43))
+                    .fill(PokeThemePalette.screenWellFill)
                     .overlay {
                         wellShape
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        Color.white.opacity(0.08),
+                                        PokeThemePalette.screenWellHighlight,
                                         Color.clear,
-                                        Color.black.opacity(0.12),
+                                        PokeThemePalette.screenWellDepth,
                                     ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
@@ -321,7 +344,7 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                                 design: .rounded)
                         )
                         .tracking(0.22)
-                        .foregroundStyle(Color.white.opacity(0.78))
+                        .foregroundStyle(PokeThemePalette.screenLabel)
                         .fixedSize()
 
                     DMGAccentBarStack()
@@ -333,22 +356,23 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
                 VStack(spacing: 6) {
                     Circle()
-                        .fill(Color(red: 0.96, green: 0.23, blue: 0.2))
+                        .fill(PokeThemePalette.batteryIndicator)
                         .frame(width: 10, height: 10)
-                        .shadow(color: Color.red.opacity(0.35), radius: 6)
+                        .shadow(color: PokeThemePalette.batteryIndicator.opacity(appearanceMode.isDark(for: colorScheme) ? 0.8 : 0.35), radius: 6)
                     Text("BATTERY")
                         .font(
                             .system(
                                 size: max(7, size.width * 0.013), weight: .bold, design: .rounded)
                         )
-                        .foregroundStyle(Color.white.opacity(0.74))
+                        .foregroundStyle(PokeThemePalette.screenLabel.opacity(0.95))
                 }
                 .position(x: size.width * 0.07, y: screenRect.midY)
 
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .stroke(Color(red: 0.18, green: 0.28, blue: 0.08), lineWidth: 1)
+                    .stroke(PokeThemePalette.screenRim, lineWidth: 1)
                     .frame(width: screenRect.width, height: screenRect.height)
                     .position(x: screenRect.midX, y: screenRect.midY)
+                    .shadow(color: appearanceMode.isDark(for: colorScheme) ? PokeThemePalette.screenGlow.opacity(0.85) : .clear, radius: appearanceMode.isDark(for: colorScheme) ? max(10, lcdScale * 2) : 0)
 
                 content
                     .frame(width: screenRect.width, height: screenRect.height)
@@ -387,8 +411,8 @@ private struct DMGAccentBar: View {
 private struct DMGAccentBarStack: View {
     var body: some View {
         VStack(spacing: 4) {
-            DMGAccentBar(color: Color(red: 0.42, green: 0.07, blue: 0.27))
-            DMGAccentBar(color: Color(red: 0.16, green: 0.17, blue: 0.55))
+            DMGAccentBar(color: PokeThemePalette.accentBarMagenta)
+            DMGAccentBar(color: PokeThemePalette.accentBarBlue)
         }
         .frame(minWidth: 56, maxWidth: .infinity)
     }

@@ -441,6 +441,8 @@ When a blocker is discovered, add:
 
 ### 2026-03-11
 
+- Added a persisted gameplay `Appearance` toggle backed by app settings, cycling `System`, `Dark`, and `Light` from the live sidebar `Options` section with `System` as the default, and re-themed the shared title/gameplay/battle chrome around semantic palette tokens so presentation can switch globally without touching save data or extracted content.
+- Added a retro-charcoal dark presentation pass for the shared Game Boy shell, including a restrained phosphor-style green LCD glow around the gameplay/battle screen well while keeping the existing field filter and screen shaders independent from the new appearance toggle.
 - Removed the full-screen pixel-grid overlay from `GameBoyScreen` so gameplay and title surfaces read cleaner while keeping the shared Game Boy shell layout intact.
 - Reworked the gameplay host/sidebar chrome toward native macOS 26 Liquid Glass, using shared sidebar card/inset/chip surface primitives with retro-tinted materials instead of repeated hardcoded fills.
 - Split the monolithic gameplay sidebar view into focused field, battle, trainer, party, inventory/save/options, and shared-primitives files so future native UI iterations can stay scoped without changing gameplay/sidebar behavior contracts.

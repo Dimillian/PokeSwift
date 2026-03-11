@@ -45,6 +45,7 @@ struct TitleAttractView: View {
 
 struct TitleAttractContent: View {
     let rootURL: URL
+    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         VStack(spacing: 18) {
@@ -55,14 +56,14 @@ struct TitleAttractContent: View {
                     .frame(width: 200, height: 200)
                 PlainWhitePanel {
                     VStack(spacing: 18) {
-                        GameBoyPixelText("Swift Version", scale: 2, color: .black)
+                        GameBoyPixelText("Swift Version", scale: 2, color: palette.primaryText.color)
                             .frame(width: 220, height: 90)
                         Text("Press Return or Space to Start")
                             .font(.system(.title3, design: .monospaced))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(palette.primaryText.color)
                         Text("Z confirms, X cancels, arrows navigate")
                             .font(.system(.caption, design: .monospaced))
-                            .foregroundStyle(.black.opacity(0.64))
+                            .foregroundStyle(palette.secondaryText.color)
                     }
                 }
             }
@@ -102,13 +103,14 @@ struct TitleMenuScene: View {
 
 private struct TitleSaveSummaryCard: View {
     let metadata: GameSaveMetadata
+    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         PlainWhitePanel {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Continue Save")
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.black.opacity(0.8))
+                    .foregroundStyle(palette.secondaryText.color)
 
                 titleRow(label: "Player", value: metadata.playerName)
                 titleRow(label: "Map", value: metadata.locationName)
@@ -117,7 +119,7 @@ private struct TitleSaveSummaryCard: View {
 
                 Text("Updated \(metadata.savedAt)")
                     .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(.black.opacity(0.52))
+                    .foregroundStyle(palette.tertiaryText.color)
                     .padding(.top, 4)
             }
             .padding(18)
@@ -128,11 +130,11 @@ private struct TitleSaveSummaryCard: View {
         HStack(alignment: .firstTextBaseline) {
             Text(label.uppercased())
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundStyle(.black.opacity(0.52))
+                .foregroundStyle(palette.tertiaryText.color)
             Spacer(minLength: 8)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundStyle(.black.opacity(0.84))
+                .foregroundStyle(palette.primaryText.color)
         }
     }
 

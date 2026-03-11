@@ -3,6 +3,7 @@ import Observation
 import PokeContent
 import PokeCore
 import PokeTelemetry
+import PokeUI
 
 @MainActor
 @Observable
@@ -10,14 +11,18 @@ final class AppCoordinator {
     private(set) var runtime: GameRuntime?
     private(set) var bootError: String?
     var showDebugPanel = false
+    var appearanceMode: AppAppearanceMode
 
     private var telemetryCoordinator: TelemetryCoordinator?
     private var telemetryServer: TelemetryControlServer?
     private var audioService: PokeAudioService?
     private let keyInputBridge = RuntimeKeyInputBridge()
     private var hasRequestedForegroundActivation = false
+    private let settingsStore: AppSettingsStore
 
-    init() {
+    init(settingsStore: AppSettingsStore = AppSettingsStore()) {
+        self.settingsStore = settingsStore
+        appearanceMode = settingsStore.appearanceMode
         bootstrap()
     }
 
@@ -87,6 +92,12 @@ final class AppCoordinator {
 
     func toggleDebugPanel() {
         showDebugPanel.toggle()
+    }
+
+    func cycleAppearanceMode() {
+        let nextMode = appearanceMode.nextOptionMode
+        appearanceMode = nextMode
+        settingsStore.appearanceMode = nextMode
     }
 
     func requestForegroundActivationIfNeeded() {

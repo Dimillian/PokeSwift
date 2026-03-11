@@ -161,7 +161,7 @@ private struct FieldStageView: View {
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
                     .multilineTextAlignment(.center)
             }
-            .foregroundStyle(.black.opacity(0.78))
+            .foregroundStyle(PokeThemePalette.secondaryText)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
@@ -358,6 +358,7 @@ private struct BattleBagOverlayPanel: View {
 
 struct PlaceholderScene: View {
     let props: PlaceholderSceneProps
+    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         GameBoyScreen {
@@ -365,12 +366,12 @@ struct PlaceholderScene: View {
                 VStack(spacing: 16) {
                     Text(props.title ?? "Placeholder")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(palette.primaryText.color)
                     Text("This route is intentionally reserved for Milestone 3 and beyond.")
-                        .foregroundStyle(.black.opacity(0.64))
+                        .foregroundStyle(palette.secondaryText.color)
                     Text("Press Escape or X to return to the title menu.")
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.black.opacity(0.85))
+                        .foregroundStyle(palette.primaryText.color)
                 }
                 .padding(22)
             }

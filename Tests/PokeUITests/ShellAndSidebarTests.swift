@@ -60,7 +60,10 @@ extension PokeUITests {
         ),
         inventory: GameplaySidebarPropsBuilder.makeInventory(),
         save: GameplaySidebarPropsBuilder.makeSaveSection(),
-        options: GameplaySidebarPropsBuilder.makeOptionsSection(isMusicEnabled: true)
+        options: GameplaySidebarPropsBuilder.makeOptionsSection(
+          isMusicEnabled: true,
+          appearanceMode: .light
+        )
       )
     )
     let view = GameplayShell(
@@ -916,14 +919,59 @@ extension PokeUITests {
   }
   func testSaveAndOptionsBuildersProduceDisabledRows() {
     let save = GameplaySidebarPropsBuilder.makeSaveSection()
-    let options = GameplaySidebarPropsBuilder.makeOptionsSection(isMusicEnabled: true)
+    let options = GameplaySidebarPropsBuilder.makeOptionsSection(
+      isMusicEnabled: true,
+      appearanceMode: .light
+    )
 
     XCTAssertEqual(save.actions.map(\.title), ["Save Game", "Load Save"])
     XCTAssertTrue(save.actions.allSatisfy { $0.isEnabled == false })
     XCTAssertEqual(
-      options.rows.map(\.title), ["Text Speed", "Battle Scene", "Battle Style", "Music"])
-    XCTAssertEqual(options.rows.map(\.isEnabled), [false, false, false, true])
+      options.rows.map(\.title), ["Appearance", "Text Speed", "Battle Scene", "Battle Style", "Music"])
+    XCTAssertEqual(options.rows.map(\.isEnabled), [true, false, false, false, true])
     XCTAssertEqual(options.rows.last?.detail, "On")
+    XCTAssertEqual(options.rows.first?.detail, "Light")
+  }
+  func testThemePaletteResolvesDistinctLightAndDarkValues() {
+    let light = PokeThemePalette.resolve(for: .light)
+    let dark = PokeThemePalette.resolve(for: .retroDark)
+
+    XCTAssertNotEqual(light.primaryText, dark.primaryText)
+    XCTAssertNotEqual(light.field.ink, dark.field.ink)
+    XCTAssertEqual(light.screenGlow.alpha, 0)
+    XCTAssertGreaterThan(dark.screenGlow.alpha, 0)
+  }
+  func testOptionsBuilderReflectsAppearanceWithoutChangingMusicState() {
+    let systemOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
+      isMusicEnabled: true,
+      appearanceMode: .system
+    )
+    let lightOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
+      isMusicEnabled: true,
+      appearanceMode: .light
+    )
+    let darkOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
+      isMusicEnabled: true,
+      appearanceMode: .retroDark
+    )
+
+    XCTAssertEqual(systemOptions.rows.first?.detail, "System")
+    XCTAssertEqual(lightOptions.rows.first?.detail, "Light")
+    XCTAssertEqual(darkOptions.rows.first?.detail, "Dark")
+    XCTAssertEqual(systemOptions.rows.last?.detail, "On")
+    XCTAssertEqual(lightOptions.rows.last?.detail, "On")
+    XCTAssertEqual(darkOptions.rows.last?.detail, "On")
+  }
+  func testAppearanceModeCyclesSystemDarkLight() {
+    XCTAssertEqual(AppAppearanceMode.system.nextOptionMode, .retroDark)
+    XCTAssertEqual(AppAppearanceMode.retroDark.nextOptionMode, .light)
+    XCTAssertEqual(AppAppearanceMode.light.nextOptionMode, .system)
+  }
+  func testSystemAppearanceResolvesUsingCurrentColorScheme() {
+    XCTAssertEqual(AppAppearanceMode.system.resolved(for: .light), .light)
+    XCTAssertEqual(AppAppearanceMode.system.resolved(for: .dark), .retroDark)
+    XCTAssertFalse(AppAppearanceMode.system.isDark(for: .light))
+    XCTAssertTrue(AppAppearanceMode.system.isDark(for: .dark))
   }
 
   private func measureFittingHeight<Content: View>(of view: Content, width: CGFloat) -> CGFloat {

@@ -4,6 +4,7 @@ import PokeDataModel
 public struct TitleMenuPanel: View {
     private let entries: [TitleMenuEntryState]
     private let focusedIndex: Int
+    private let palette = PokeThemePalette.lightPalette
 
     public init(entries: [TitleMenuEntryState], focusedIndex: Int) {
         self.entries = entries
@@ -16,7 +17,7 @@ public struct TitleMenuPanel: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Title Menu")
                         .font(.system(size: 15, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.black.opacity(0.72))
+                        .foregroundStyle(palette.secondaryText.color)
                         .padding(.horizontal, 6)
 
                     ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
@@ -33,19 +34,20 @@ private struct TitleMenuRow: View {
     let isFocused: Bool
 
     private let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         HStack(spacing: 10) {
             Text(isFocused ? "▶" : " ")
                 .frame(width: 16, alignment: .leading)
-                .foregroundStyle(.black.opacity(isFocused ? 0.92 : 0.64))
+                .foregroundStyle(isFocused ? palette.primaryText.color : palette.secondaryText.color)
             VStack(alignment: .leading, spacing: 3) {
                 Text(entry.label)
-                    .foregroundStyle(entry.isEnabled ? .black.opacity(0.92) : .black.opacity(0.46))
+                    .foregroundStyle(entry.isEnabled ? palette.primaryText.color : palette.disabledText.color)
                 if let detail = entry.detail, detail.isEmpty == false {
                     Text(detail)
                         .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.black.opacity(0.48))
+                        .foregroundStyle(palette.tertiaryText.color)
                         .lineLimit(1)
                 }
             }
@@ -53,10 +55,10 @@ private struct TitleMenuRow: View {
             if !entry.isEnabled {
                 Text("Disabled")
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(.black.opacity(0.62))
+                    .foregroundStyle(palette.secondaryText.color)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.black.opacity(0.05), in: Capsule())
+                    .background(palette.placeholderFill.color, in: Capsule())
             }
         }
         .font(.system(size: 18, weight: .medium, design: .monospaced))
@@ -64,18 +66,21 @@ private struct TitleMenuRow: View {
         .padding(.vertical, 10)
         .background(
             isFocused
-                ? Color(red: 0.80, green: 0.90, blue: 0.73).opacity(0.30)
-                : Color.white.opacity(0.12),
+                ? palette.menuFocusFill.color
+                : palette.menuIdleFill.color,
             in: shape
         )
         .overlay {
             shape
-                .stroke(isFocused ? .black.opacity(0.14) : .black.opacity(0.07), lineWidth: 1)
+                .stroke(
+                    isFocused ? palette.menuFocusStroke.color : palette.menuIdleStroke.color,
+                    lineWidth: 1
+                )
         }
         .glassEffect(
             isFocused
-                ? .regular.tint(Color(red: 0.77, green: 0.89, blue: 0.72).opacity(0.45))
-                : .regular.tint(Color.white.opacity(0.18)),
+                ? .regular.tint(palette.menuFocusGlass.color)
+                : .regular.tint(palette.menuIdleGlass.color),
             in: shape
         )
     }

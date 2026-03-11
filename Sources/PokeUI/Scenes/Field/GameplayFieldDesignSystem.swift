@@ -1,7 +1,7 @@
 import SwiftUI
 
 public enum GameplayFieldStyleTokens {
-    public static let ink = Color(red: 0.16, green: 0.18, blue: 0.12)
+    public static let ink = PokeThemePalette.fieldInk
 }
 
 enum GameplayFieldMetrics {
@@ -21,23 +21,23 @@ enum GameplayFieldMetrics {
 }
 
 enum FieldRetroPalette {
-    static let ink = Color(red: 0.16, green: 0.18, blue: 0.12)
-    static let outline = Color.black
-    static let cardFill = Color(red: 0.88, green: 0.9, blue: 0.78)
-    static let slotFill = Color(red: 0.8, green: 0.84, blue: 0.69)
-    static let leadSlotFill = Color(red: 0.74, green: 0.8, blue: 0.63)
-    static let track = Color(red: 0.55, green: 0.62, blue: 0.49)
-    static let portraitFill = Color(red: 0.76, green: 0.82, blue: 0.68)
-    static let stageOuter = Color(red: 0.68, green: 0.74, blue: 0.58)
-    static let stageMiddle = Color(red: 0.79, green: 0.84, blue: 0.68)
-    static let stageInner = Color(red: 0.92, green: 0.92, blue: 0.84)
-    static let glassTint = Color(red: 0.82, green: 0.9, blue: 0.77).opacity(0.42)
-    static let accentGlassTint = Color(red: 0.73, green: 0.84, blue: 0.74).opacity(0.48)
-    static let interactiveGlassTint = Color(red: 0.91, green: 0.94, blue: 0.86).opacity(0.4)
-    static let hoverCardGlassTint = Color(red: 0.74, green: 0.9, blue: 0.72).opacity(0.4)
-    static let hoverCardBackgroundTint = Color(red: 0.8, green: 0.9, blue: 0.76).opacity(0.2)
-    static let shellBackdrop = Color(red: 0.94, green: 0.94, blue: 0.89)
-    static let shellBackdropShadow = Color(red: 0.33, green: 0.39, blue: 0.26)
+    static let ink = PokeThemePalette.fieldInk
+    static let outline = PokeThemePalette.fieldOutline
+    static let cardFill = PokeThemePalette.fieldCardFill
+    static let slotFill = PokeThemePalette.fieldSlotFill
+    static let leadSlotFill = PokeThemePalette.fieldLeadSlotFill
+    static let track = PokeThemePalette.fieldTrack
+    static let portraitFill = PokeThemePalette.fieldPortraitFill
+    static let stageOuter = PokeThemePalette.fieldStageOuter
+    static let stageMiddle = PokeThemePalette.fieldStageMiddle
+    static let stageInner = PokeThemePalette.fieldStageInner
+    static let glassTint = PokeThemePalette.fieldGlassTint
+    static let accentGlassTint = PokeThemePalette.fieldAccentGlassTint
+    static let interactiveGlassTint = PokeThemePalette.fieldInteractiveGlassTint
+    static let hoverCardGlassTint = PokeThemePalette.fieldHoverCardGlassTint
+    static let hoverCardBackgroundTint = PokeThemePalette.fieldHoverCardBackgroundTint
+    static let shellBackdrop = PokeThemePalette.fieldShellBackdrop
+    static let shellBackdropShadow = PokeThemePalette.fieldShellBackdropShadow
 
     static func pokemonTypeGlassTint(for typeLabel: String) -> Color {
         switch typeLabel.uppercased() {

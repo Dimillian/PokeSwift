@@ -90,7 +90,7 @@ struct BattleStatusCard: View {
                     .padding(3)
             }
             .glassEffect(.regular.tint(chrome.tint), in: cardShape)
-            .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
+            .shadow(color: PokeThemePalette.dialogueShadow, radius: 16, y: 8)
         }
     }
 
@@ -121,18 +121,18 @@ extension BattleStatusCard {
         var tint: Color {
             switch self {
             case .enemy:
-                return Color(red: 0.92, green: 0.96, blue: 0.84).opacity(0.42)
+                return PokeThemePalette.battleEnemyTint
             case .player:
-                return Color(red: 0.78, green: 0.9, blue: 0.76).opacity(0.46)
+                return PokeThemePalette.battlePlayerTint
             }
         }
 
         var backgroundTint: Color {
             switch self {
             case .enemy:
-                return Color.white.opacity(0.18)
+                return PokeThemePalette.battleEnemyBackground
             case .player:
-                return Color(red: 0.86, green: 0.93, blue: 0.8).opacity(0.22)
+                return PokeThemePalette.battlePlayerBackground
             }
         }
 

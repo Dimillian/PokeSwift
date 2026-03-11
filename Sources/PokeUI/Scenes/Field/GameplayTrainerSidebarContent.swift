@@ -192,7 +192,7 @@ struct PixelSpriteFrameView: View {
                     .scaleEffect(x: frame.flippedHorizontally ? -1 : 1, y: 1)
             } else {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(.black.opacity(0.12))
+                    .fill(FieldRetroPalette.outline.opacity(0.12))
                     .overlay {
                         Text("??")
                             .font(.system(size: 15, weight: .black, design: .monospaced))

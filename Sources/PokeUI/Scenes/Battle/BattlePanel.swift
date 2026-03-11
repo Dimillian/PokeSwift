@@ -48,7 +48,7 @@ public struct BattlePanel: View {
             .clipShape(RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous)
-                    .stroke(Color.black.opacity(0.16), lineWidth: max(1, scale * 0.16))
+                    .stroke(FieldRetroPalette.outline.opacity(0.16), lineWidth: max(1, scale * 0.16))
             }
             .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
         }

@@ -25,6 +25,7 @@ public struct GameBoyScreen<Content: View>: View {
 public struct GameBoyPanel<Content: View>: View {
     private let content: Content
     private let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+    private let palette = PokeThemePalette.lightPalette
 
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -33,21 +34,22 @@ public struct GameBoyPanel<Content: View>: View {
     public var body: some View {
         content
             .padding(18)
-            .background(Color.white.opacity(0.18), in: shape)
+            .background(palette.panelBackground.color, in: shape)
             .overlay {
                 shape
-                    .stroke(.black.opacity(0.08), lineWidth: 1)
+                    .stroke(palette.panelOutline.color, lineWidth: 1)
             }
             .glassEffect(
-                .regular.tint(Color(red: 0.82, green: 0.91, blue: 0.78).opacity(0.38)),
+                .regular.tint(palette.panelGlassTint.color),
                 in: shape
             )
-            .shadow(color: .black.opacity(0.08), radius: 20, y: 10)
+            .shadow(color: palette.dialogueShadow.color, radius: 20, y: 10)
     }
 }
 
 public struct PlainWhitePanel<Content: View>: View {
     private let content: Content
+    private let palette = PokeThemePalette.lightPalette
 
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -56,24 +58,25 @@ public struct PlainWhitePanel<Content: View>: View {
     public var body: some View {
         content
             .padding(18)
-            .background(.white)
+            .background(palette.plainPanelFill.color)
     }
 }
 
 private struct GameBoyScreenBackground: View {
     let style: GameBoyScreenStyle
+    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         switch style {
         case .classic:
-            Color.white
+            palette.classicBackground.color
         case .fieldShell:
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.95, green: 0.96, blue: 0.9),
-                        Color(red: 0.84, green: 0.88, blue: 0.76),
-                        Color(red: 0.73, green: 0.79, blue: 0.64),
+                        PokeThemePalette.appBackgroundTop,
+                        PokeThemePalette.appBackgroundMiddle,
+                        PokeThemePalette.appBackgroundBottom,
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -81,7 +84,7 @@ private struct GameBoyScreenBackground: View {
 
                 RadialGradient(
                     colors: [
-                        Color.white.opacity(0.42),
+                        PokeThemePalette.appHighlightGlow,
                         Color.clear,
                     ],
                     center: .topLeading,
@@ -91,7 +94,7 @@ private struct GameBoyScreenBackground: View {
 
                 RadialGradient(
                     colors: [
-                        Color(red: 0.73, green: 0.84, blue: 0.74).opacity(0.22),
+                        PokeThemePalette.appAccentGlow,
                         Color.clear,
                     ],
                     center: .bottomTrailing,
@@ -101,9 +104,9 @@ private struct GameBoyScreenBackground: View {
 
                 LinearGradient(
                     colors: [
-                        Color(red: 0.98, green: 0.97, blue: 0.92).opacity(0.18),
+                        PokeThemePalette.appHighlightGlow.opacity(0.45),
                         Color.clear,
-                        Color(red: 0.34, green: 0.39, blue: 0.26).opacity(0.06),
+                        PokeThemePalette.appDepthShadow,
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing

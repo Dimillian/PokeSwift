@@ -17,7 +17,7 @@ public struct DialogueBoxView: View {
                     GameBoyPixelText(
                         title.uppercased(),
                         scale: 1,
-                        color: .black.opacity(0.48),
+                        color: PokeThemePalette.tertiaryText,
                         fallbackFont: .system(size: 11, weight: .bold, design: .monospaced)
                     )
                     .padding(.bottom, 2)
@@ -27,7 +27,7 @@ public struct DialogueBoxView: View {
                     GameBoyPixelText(
                         line,
                         scale: 2,
-                        color: .black,
+                        color: PokeThemePalette.primaryText,
                         fallbackFont: .system(size: 20, weight: .medium, design: .monospaced)
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -54,37 +54,37 @@ private struct GameBoyDialogueFrame<Content: View>: View {
             .background {
                 ZStack {
                     Rectangle()
-                        .fill(.black)
+                        .fill(PokeThemePalette.dialogueBorder)
 
                     Rectangle()
-                        .fill(Color(red: 0.95, green: 0.95, blue: 0.92))
+                        .fill(PokeThemePalette.dialoguePaper)
                         .padding(4)
 
                     Rectangle()
-                        .fill(.black)
+                        .fill(PokeThemePalette.dialogueInsetBorder)
                         .padding(8)
 
                     Rectangle()
-                        .fill(Color(red: 0.98, green: 0.98, blue: 0.95))
+                        .fill(PokeThemePalette.dialogueFill)
                         .padding(12)
                 }
             }
         .overlay(alignment: .bottomTrailing) {
             HStack(spacing: 4) {
                 Rectangle()
-                    .fill(.black.opacity(0.18))
+                    .fill(PokeThemePalette.dialogueDotSoft)
                     .frame(width: 6, height: 6)
                 Rectangle()
-                    .fill(.black.opacity(0.38))
+                    .fill(PokeThemePalette.dialogueDotMid)
                     .frame(width: 6, height: 6)
                 Rectangle()
-                    .fill(.black.opacity(0.72))
+                    .fill(PokeThemePalette.dialogueDotStrong)
                     .frame(width: 6, height: 6)
             }
             .padding(.trailing, 18)
             .padding(.bottom, 16)
         }
-        .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
+        .shadow(color: PokeThemePalette.dialogueShadow, radius: 18, y: 8)
     }
 }
 
@@ -102,7 +102,7 @@ public struct StarterChoicePanel: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Choose Your Starter")
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(PokeThemePalette.primaryText)
 
                 ForEach(Array(options.enumerated()), id: \.element.id) { index, species in
                     HStack(spacing: 12) {
@@ -120,10 +120,10 @@ public struct StarterChoicePanel: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
-                    .background(index == focusedIndex ? Color.white.opacity(0.3) : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(index == focusedIndex ? PokeThemePalette.menuFocusFill : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
-            .foregroundStyle(.black)
+            .foregroundStyle(PokeThemePalette.primaryText)
         }
     }
 }
