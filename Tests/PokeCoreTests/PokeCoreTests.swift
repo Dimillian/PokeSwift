@@ -392,6 +392,31 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_pokecenter_nurse_heal")
     }
 
+    func testRepoGeneratedViridianInteriorsLoadNpcDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+
+        runtime.gameplayState?.mapID = "VIRIDIAN_SCHOOL_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 6)
+        runtime.gameplayState?.facing = .up
+        let brunetteGirl = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_school_house_brunette_girl" })
+        runtime.interact(with: brunetteGirl)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_school_house_brunette_girl")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.mapID = "VIRIDIAN_NICKNAME_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 4)
+        runtime.gameplayState?.facing = .down
+        let spearow = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_nickname_house_spearow" })
+        runtime.interact(with: spearow)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_nickname_house_spearow")
+    }
+
     func testRepoGeneratedViridianParcelAndOakHandoffAdvanceFlagsAndInventory() throws {
         let runtime = try makeRepoRuntime()
 

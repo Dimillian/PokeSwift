@@ -645,6 +645,94 @@
       ]
     },
     {
+      "id" : "viridian_school_house_brunette_girl",
+      "pages" : [
+        {
+          "lines" : [
+            "Whew! I'm trying",
+            "to memorize all",
+            "my notes."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "viridian_school_house_cooltrainer_f",
+      "pages" : [
+        {
+          "lines" : [
+            "Okay!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Be sure to read",
+            "the blackboard",
+            "carefully!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "viridian_nickname_house_balding_guy",
+      "pages" : [
+        {
+          "lines" : [
+            "Coming up with",
+            "nicknames is fun,",
+            "but hard."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "lines" : [
+            "Simple names are",
+            "the easiest to",
+            "remember."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "viridian_nickname_house_little_girl",
+      "pages" : [
+        {
+          "lines" : [
+            "My Daddy loves",
+            "POKéMON too."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "viridian_nickname_house_spearow",
+      "pages" : [
+        {
+          "lines" : [
+            "SPEARY: Tetweet!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "viridian_nickname_house_speary_sign",
+      "pages" : [
+        {
+          "lines" : [
+            "SPEAROW",
+            "Name: SPEARY"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "viridian_mart_clerk_you_came_from_pallet_town",
       "pages" : [
         {
@@ -1947,6 +2035,18 @@
           "facing" : "left",
           "id" : "reds_house_1f_mom",
           "interactionDialogueID" : "reds_house_1f_mom_wakeup",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "scriptID" : "reds_house_1f_mom_heal"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -2864,6 +2964,10 @@
           "facing" : "down",
           "id" : "pallet_town_oak",
           "interactionDialogueID" : "pallet_town_oak_its_unsafe",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -2885,6 +2989,10 @@
           "facing" : "down",
           "id" : "pallet_town_girl",
           "interactionDialogueID" : "pallet_town_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "any",
             "home" : {
@@ -2906,6 +3014,10 @@
           "facing" : "down",
           "id" : "pallet_town_fisher",
           "interactionDialogueID" : "pallet_town_fisher",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "any",
             "home" : {
@@ -4005,6 +4117,24 @@
           "facing" : "down",
           "id" : "route_1_youngster_1",
           "interactionDialogueID" : "route_1_youngster_1_after_sample",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_POTION_SAMPLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_1_youngster_1_after_sample"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "route_1_potion_sample"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "upDown",
             "home" : {
@@ -4026,6 +4156,10 @@
           "facing" : "down",
           "id" : "route_1_youngster_2",
           "interactionDialogueID" : "route_1_youngster_2",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "leftRight",
             "home" : {
@@ -5946,6 +6080,10 @@
           "facing" : "down",
           "id" : "viridian_city_youngster_1",
           "interactionDialogueID" : "viridian_city_youngster_1",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "any",
             "home" : {
@@ -5967,6 +6105,10 @@
           "facing" : "down",
           "id" : "viridian_city_gambler",
           "interactionDialogueID" : "viridian_city_gambler",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -5988,6 +6130,10 @@
           "facing" : "down",
           "id" : "viridian_city_youngster_2",
           "interactionDialogueID" : "viridian_city_youngster_2_prompt",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "any",
             "home" : {
@@ -6009,6 +6155,18 @@
           "facing" : "right",
           "id" : "viridian_city_girl",
           "interactionDialogueID" : "viridian_city_girl_before_pokedex",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_POKEDEX",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "viridian_city_girl_after_pokedex"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -6030,6 +6188,10 @@
           "facing" : "down",
           "id" : "viridian_city_old_man_sleepy",
           "interactionDialogueID" : "viridian_city_old_man_private_property",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -6051,6 +6213,10 @@
           "facing" : "down",
           "id" : "viridian_city_fisher",
           "interactionDialogueID" : "viridian_city_fisher",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -6072,6 +6238,10 @@
           "facing" : "down",
           "id" : "viridian_city_old_man_awake",
           "interactionDialogueID" : "viridian_city_old_man_had_coffee",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "leftRight",
             "home" : {
@@ -7541,7 +7711,7 @@
             "x" : 23,
             "y" : 25
           },
-          "targetFacing" : "down",
+          "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_POKECENTER",
           "targetPosition" : {
             "x" : 3,
@@ -7554,7 +7724,7 @@
             "x" : 29,
             "y" : 19
           },
-          "targetFacing" : "down",
+          "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_MART",
           "targetPosition" : {
             "x" : 3,
@@ -7567,11 +7737,11 @@
             "x" : 21,
             "y" : 15
           },
-          "targetFacing" : "down",
+          "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_SCHOOL_HOUSE",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           }
         },
         {
@@ -7580,11 +7750,11 @@
             "x" : 21,
             "y" : 9
           },
-          "targetFacing" : "down",
+          "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_NICKNAME_HOUSE",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           }
         },
         {
@@ -7593,11 +7763,423 @@
             "x" : 32,
             "y" : 7
           },
-          "targetFacing" : "down",
+          "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_GYM",
           "targetPosition" : {
             "x" : 0,
             "y" : 0
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        5,
+        18,
+        19,
+        9,
+        15,
+        20,
+        21,
+        15,
+        15,
+        24,
+        25,
+        15,
+        6,
+        11,
+        15,
+        7
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES1",
+      "displayName" : "Viridian School House",
+      "id" : "VIRIDIAN_SCHOOL_HOUSE",
+      "objects" : [
+        {
+          "displayName" : "Brunette Girl",
+          "facing" : "up",
+          "id" : "viridian_school_house_brunette_girl",
+          "interactionDialogueID" : "viridian_school_house_brunette_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 3,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 3,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BRUNETTE_GIRL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Cooltrainer",
+          "facing" : "down",
+          "id" : "viridian_school_house_cooltrainer_f",
+          "interactionDialogueID" : "viridian_school_house_cooltrainer_f",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 4,
+              "y" : 1
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 4,
+            "y" : 1
+          },
+          "sprite" : "SPRITE_COOLTRAINER_F",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        0,
+        52,
+        0,
+        88,
+        90,
+        0,
+        0,
+        48,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        30,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        70,
+        47,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        60,
+        58,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        1,
+        1,
+        1,
+        1,
+        8,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        24,
+        1,
+        20,
+        20,
+        1,
+        1,
+        1,
+        24
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "HOUSE",
+      "warps" : [
+        {
+          "id" : "viridian_school_house_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "VIRIDIAN_CITY",
+          "targetPosition" : {
+            "x" : 21,
+            "y" : 15
+          }
+        },
+        {
+          "id" : "viridian_school_house_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "VIRIDIAN_CITY",
+          "targetPosition" : {
+            "x" : 21,
+            "y" : 15
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        4,
+        14,
+        5,
+        9,
+        15,
+        1,
+        2,
+        15,
+        15,
+        12,
+        13,
+        15,
+        6,
+        11,
+        15,
+        7
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES1",
+      "displayName" : "Viridian Nickname House",
+      "id" : "VIRIDIAN_NICKNAME_HOUSE",
+      "objects" : [
+        {
+          "displayName" : "Balding Guy",
+          "facing" : "down",
+          "id" : "viridian_nickname_house_balding_guy",
+          "interactionDialogueID" : "viridian_nickname_house_balding_guy",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 5,
+              "y" : 3
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_BALDING_GUY",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Little Girl",
+          "facing" : "down",
+          "id" : "viridian_nickname_house_little_girl",
+          "interactionDialogueID" : "viridian_nickname_house_little_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "upDown",
+            "home" : {
+              "x" : 1,
+              "y" : 4
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 1,
+            "y" : 4
+          },
+          "sprite" : "SPRITE_LITTLE_GIRL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Spearow",
+          "facing" : "down",
+          "id" : "viridian_nickname_house_spearow",
+          "interactionDialogueID" : "viridian_nickname_house_spearow",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "leftRight",
+            "home" : {
+              "x" : 5,
+              "y" : 5
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BIRD",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Speary Sign",
+          "facing" : "down",
+          "id" : "viridian_nickname_house_speary_sign",
+          "interactionDialogueID" : "viridian_nickname_house_speary_sign",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 4,
+              "y" : 0
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 4,
+            "y" : 0
+          },
+          "sprite" : "SPRITE_CLIPBOARD",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        14,
+        14,
+        0,
+        61,
+        0,
+        52,
+        0,
+        48,
+        30,
+        30,
+        1,
+        1,
+        1,
+        1,
+        1,
+        30,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        54,
+        47,
+        18,
+        1,
+        1,
+        1,
+        1,
+        18,
+        60,
+        58,
+        18,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        24,
+        1,
+        20,
+        20,
+        1,
+        1,
+        1,
+        24
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "HOUSE",
+      "warps" : [
+        {
+          "id" : "viridian_nickname_house_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "VIRIDIAN_CITY",
+          "targetPosition" : {
+            "x" : 21,
+            "y" : 9
+          }
+        },
+        {
+          "id" : "viridian_nickname_house_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "VIRIDIAN_CITY",
+          "targetPosition" : {
+            "x" : 21,
+            "y" : 9
           }
         }
       ]
@@ -7651,6 +8233,11 @@
           "facing" : "down",
           "id" : "viridian_pokecenter_nurse",
           "interactionDialogueID" : "viridian_pokecenter_text_viridianpokecenter_nurse",
+          "interactionReach" : "overCounter",
+          "interactionScriptID" : "viridian_pokecenter_nurse_heal",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -7672,6 +8259,10 @@
           "facing" : "down",
           "id" : "viridian_pokecenter_gentleman",
           "interactionDialogueID" : "viridian_pokecenter_gentleman",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "upDown",
             "home" : {
@@ -7693,6 +8284,10 @@
           "facing" : "down",
           "id" : "viridian_pokecenter_cooltrainer",
           "interactionDialogueID" : "viridian_pokecenter_cooltrainer",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -7714,6 +8309,10 @@
           "facing" : "down",
           "id" : "viridian_pokecenter_link_receptionist",
           "interactionDialogueID" : "viridian_pokecenter_link_receptionist",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -7914,6 +8513,18 @@
           "facing" : "right",
           "id" : "viridian_mart_clerk",
           "interactionDialogueID" : "viridian_mart_clerk_after_parcel",
+          "interactionReach" : "overCounter",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_OAKS_PARCEL",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "scriptID" : "viridian_mart_oaks_parcel"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -7935,6 +8546,10 @@
           "facing" : "down",
           "id" : "viridian_mart_youngster",
           "interactionDialogueID" : "viridian_mart_youngster",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "upDown",
             "home" : {
@@ -7956,6 +8571,10 @@
           "facing" : "down",
           "id" : "viridian_mart_cooltrainer",
           "interactionDialogueID" : "viridian_mart_cooltrainer",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8122,6 +8741,24 @@
           "facing" : "down",
           "id" : "oaks_lab_rival",
           "interactionDialogueID" : "oaks_lab_rival_gramps_isnt_around",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_rival_my_pokemon_looks_stronger"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "dialogueID" : "oaks_lab_rival_gramps_isnt_around"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8146,6 +8783,33 @@
           "facing" : "down",
           "id" : "oaks_lab_poke_ball_charmander",
           "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "dialogueID" : "oaks_lab_those_are_pokeballs"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_last_mon"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "oaks_lab_choose_charmander"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8167,6 +8831,33 @@
           "facing" : "down",
           "id" : "oaks_lab_poke_ball_squirtle",
           "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "dialogueID" : "oaks_lab_those_are_pokeballs"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_last_mon"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "oaks_lab_choose_squirtle"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8188,6 +8879,33 @@
           "facing" : "down",
           "id" : "oaks_lab_poke_ball_bulbasaur",
           "interactionDialogueID" : "oaks_lab_those_are_pokeballs",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "dialogueID" : "oaks_lab_those_are_pokeballs"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_last_mon"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "oaks_lab_choose_bulbasaur"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8209,6 +8927,68 @@
           "facing" : "down",
           "id" : "oaks_lab_oak_1",
           "interactionDialogueID" : "oaks_lab_oak_which_pokemon_do_you_want",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_POKEDEX",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_oak_how_is_your_pokedex_coming"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_OAKS_PARCEL",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_OAK_GOT_PARCEL",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "scriptID" : "oaks_lab_parcel_handoff"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_oak_raise_your_young_pokemon"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_STARTER",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_oak_raise_your_young_pokemon"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_OAK_ASKED_TO_CHOOSE_MON",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "oaks_lab_oak_which_pokemon_do_you_want"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "dialogueID" : "oaks_lab_oak_choose_mon"
+            }
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8230,6 +9010,10 @@
           "facing" : "down",
           "id" : "oaks_lab_pokedex_1",
           "interactionDialogueID" : "oaks_lab_pokedex",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8251,6 +9035,10 @@
           "facing" : "down",
           "id" : "oaks_lab_pokedex_2",
           "interactionDialogueID" : "oaks_lab_pokedex",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8272,6 +9060,10 @@
           "facing" : "up",
           "id" : "oaks_lab_oak_2",
           "interactionDialogueID" : "oaks_lab_oak_choose_mon",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8293,6 +9085,10 @@
           "facing" : "down",
           "id" : "oaks_lab_object_8",
           "interactionDialogueID" : "oaks_lab_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "upDown",
             "home" : {
@@ -8314,6 +9110,10 @@
           "facing" : "down",
           "id" : "oaks_lab_object_9",
           "interactionDialogueID" : "oaks_lab_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -8335,6 +9135,10 @@
           "facing" : "down",
           "id" : "oaks_lab_object_10",
           "interactionDialogueID" : "oaks_lab_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
           "movementBehavior" : {
             "axis" : "none",
             "home" : {
@@ -9188,6 +9992,282 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_BRUNETTE_GIRL",
+      "imagePath" : "Assets/field/sprites/brunette_girl.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_COOLTRAINER_F",
+      "imagePath" : "Assets/field/sprites/cooltrainer_f.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_BALDING_GUY",
+      "imagePath" : "Assets/field/sprites/balding_guy.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_LITTLE_GIRL",
+      "imagePath" : "Assets/field/sprites/little_girl.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_BIRD",
+      "imagePath" : "Assets/field/sprites/bird.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_CLIPBOARD",
+      "imagePath" : "Assets/field/sprites/clipboard.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_CLERK",
       "imagePath" : "Assets/field/sprites/clerk.png"
     },
@@ -9452,6 +10532,42 @@
     "rivalName" : "BLUE"
   },
   "scripts" : [
+    {
+      "id" : "reds_house_1f_mom_heal",
+      "steps" : [
+        {
+          "action" : "healParty",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "reds_house_1f_mom_looking_great",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "viridian_pokecenter_nurse_heal",
+      "steps" : [
+        {
+          "action" : "healParty",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "viridian_pokecenter_nurse_heal",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
     {
       "id" : "route_1_potion_sample",
       "steps" : [
@@ -9759,6 +10875,63 @@
           "path" : [
 
           ]
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_choose_charmander",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_you_want_charmander",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startStarterChoice",
+          "path" : [
+
+          ],
+          "stringValue" : "CHARMANDER"
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_choose_squirtle",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_you_want_squirtle",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startStarterChoice",
+          "path" : [
+
+          ],
+          "stringValue" : "SQUIRTLE"
+        }
+      ]
+    },
+    {
+      "id" : "oaks_lab_choose_bulbasaur",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "oaks_lab_you_want_bulbasaur",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startStarterChoice",
+          "path" : [
+
+          ],
+          "stringValue" : "BULBASAUR"
         }
       ]
     },
@@ -11146,6 +12319,80 @@
       },
       "id" : "DOJO",
       "imagePath" : "Assets/field/tilesets/gym.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/house.bst",
+      "collision" : {
+        "doorTileIDs" : [
+          84
+        ],
+        "ledges" : [
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 54,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 29,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 57
+          }
+        ],
+        "passableTileIDs" : [
+          1,
+          18,
+          20,
+          40,
+          50,
+          55,
+          68,
+          84,
+          92
+        ],
+        "tilePairCollisions" : [
+
+        ],
+        "warpTileIDs" : [
+          84,
+          92,
+          50
+        ]
+      },
+      "id" : "HOUSE",
+      "imagePath" : "Assets/field/tilesets/house.png",
       "sourceTileSize" : 8
     },
     {

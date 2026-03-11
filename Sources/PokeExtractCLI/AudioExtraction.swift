@@ -109,16 +109,7 @@ func parseMusicConstants(repoRoot: URL) throws -> [String: String] {
 }
 
 func parseCurrentSliceMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
-    let requiredMaps = Set([
-        "REDS_HOUSE_2F",
-        "REDS_HOUSE_1F",
-        "PALLET_TOWN",
-        "ROUTE_1",
-        "VIRIDIAN_CITY",
-        "VIRIDIAN_POKECENTER",
-        "VIRIDIAN_MART",
-        "OAKS_LAB",
-    ])
+    let requiredMaps = currentGameplaySliceMapIDs
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/songs.asm"))
     let regex = try NSRegularExpression(pattern: #"db\s+(MUSIC_[A-Z0-9_]+),\s+BANK\([A-Za-z0-9_]+\)\s*;\s*([A-Z0-9_]+)"#)
     let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)

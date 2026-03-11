@@ -89,88 +89,43 @@ extension GameRuntime {
     }
 
     func canInteractOverCounter(with object: FieldObjectRenderState, through tile: TilePoint, on map: MapManifest) -> Bool {
-        switch object.id {
-        case "viridian_mart_clerk", "viridian_pokecenter_nurse":
-            guard let tileID = collisionTileID(at: tile, in: map),
-                  let tileset = content.tileset(id: map.tileset) else {
-                return false
-            }
-            return tileset.collision.passableTileIDs.contains(tileID) == false
-        default:
+        guard currentMapObjectManifest(id: object.id)?.interactionReach == .overCounter,
+              let tileID = collisionTileID(at: tile, in: map),
+              let tileset = content.tileset(id: map.tileset) else {
             return false
         }
+        return tileset.collision.passableTileIDs.contains(tileID) == false
     }
 
     func interact(with object: FieldObjectRenderState) {
-        switch object.id {
-        case "reds_house_1f_mom":
-            if gameplayState?.gotStarterBit == true {
-                showDialogue(id: "reds_house_1f_mom_rest", completion: .healAndShow(dialogueID: "reds_house_1f_mom_looking_great"))
-            } else {
-                showDialogue(id: "reds_house_1f_mom_wakeup", completion: .returnToField)
-            }
-        case "oaks_lab_rival":
-            if gameplayState?.gotStarterBit == true {
-                showDialogue(id: "oaks_lab_rival_my_pokemon_looks_stronger", completion: .returnToField)
-            } else {
-                showDialogue(id: "oaks_lab_rival_gramps_isnt_around", completion: .returnToField)
-            }
-        case "oaks_lab_oak_1":
-            if hasFlag("EVENT_GOT_POKEDEX") {
-                showDialogue(id: "oaks_lab_oak_how_is_your_pokedex_coming", completion: .returnToField)
-            } else if hasFlag("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") {
-                if hasItem("OAKS_PARCEL") {
-                    beginScript(id: "oaks_lab_parcel_handoff")
-                } else {
-                    showDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", completion: .returnToField)
-                }
-            } else if gameplayState?.gotStarterBit == true {
-                showDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", completion: .returnToField)
-            } else if hasFlag("EVENT_OAK_ASKED_TO_CHOOSE_MON") {
-                showDialogue(id: "oaks_lab_oak_which_pokemon_do_you_want", completion: .returnToField)
-            } else {
-                showDialogue(id: "oaks_lab_oak_choose_mon", completion: .returnToField)
-            }
-        case "route_1_youngster_1":
-            if hasFlag("EVENT_GOT_POTION_SAMPLE") {
-                showDialogue(id: "route_1_youngster_1_after_sample", completion: .returnToField)
-            } else {
-                beginScript(id: "route_1_potion_sample")
-            }
-        case "viridian_mart_clerk":
-            if hasFlag("EVENT_GOT_OAKS_PARCEL") == false {
-                beginScript(id: "viridian_mart_oaks_parcel")
-            } else {
-                showDialogue(id: "viridian_mart_clerk_after_parcel", completion: .returnToField)
-            }
-        case "viridian_pokecenter_nurse":
-            healParty()
-            showDialogue(id: "viridian_pokecenter_nurse_heal", completion: .returnToField)
-        case "oaks_lab_poke_ball_charmander":
-            interactWithStarterBall(speciesID: "CHARMANDER", promptDialogueID: "oaks_lab_you_want_charmander")
-        case "oaks_lab_poke_ball_squirtle":
-            interactWithStarterBall(speciesID: "SQUIRTLE", promptDialogueID: "oaks_lab_you_want_squirtle")
-        case "oaks_lab_poke_ball_bulbasaur":
-            interactWithStarterBall(speciesID: "BULBASAUR", promptDialogueID: "oaks_lab_you_want_bulbasaur")
-        default:
+        guard let objectManifest = currentMapObjectManifest(id: object.id) else {
             if let dialogueID = object.interactionDialogueID {
                 showDialogue(id: dialogueID, completion: .returnToField)
             }
-        }
-    }
-
-    func interactWithStarterBall(speciesID: String, promptDialogueID: String) {
-        guard hasFlag("EVENT_OAK_ASKED_TO_CHOOSE_MON") else {
-            showDialogue(id: "oaks_lab_those_are_pokeballs", completion: .returnToField)
-            return
-        }
-        guard gameplayState?.gotStarterBit == false else {
-            showDialogue(id: "oaks_lab_last_mon", completion: .returnToField)
             return
         }
 
-        gameplayState?.pendingStarterSpeciesID = speciesID
-        showDialogue(id: promptDialogueID, completion: .openStarterChoice(preselectedSpeciesID: speciesID))
+        if let trigger = objectManifest.interactionTriggers.first(where: { trigger in
+            trigger.conditions.allSatisfy { conditionMatches($0, blockedMoveFacing: nil) }
+        }) {
+            if let scriptID = trigger.scriptID {
+                beginScript(id: scriptID)
+                return
+            }
+            if let dialogueID = trigger.dialogueID {
+                showDialogue(id: dialogueID, completion: .returnToField)
+                return
+            }
+        }
+
+        if let scriptID = objectManifest.interactionScriptID {
+            beginScript(id: scriptID)
+            return
+        }
+
+        if let dialogueID = objectManifest.interactionDialogueID {
+            showDialogue(id: dialogueID, completion: .returnToField)
+        }
     }
 
     func chooseStarter(speciesID: String) {
@@ -178,6 +133,10 @@ extension GameRuntime {
         substate = "field"
         gameplayState?.pendingStarterSpeciesID = speciesID
         showDialogue(id: "oaks_lab_mon_energetic", completion: .beginPostChoiceSequence)
+    }
+
+    func currentMapObjectManifest(id: String) -> MapObjectManifest? {
+        currentMapManifest?.objects.first { $0.id == id }
     }
 
     func handleWarpIfNeeded() -> Bool {

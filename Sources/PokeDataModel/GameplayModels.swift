@@ -120,12 +120,35 @@ public struct ObjectMovementBehavior: Codable, Equatable, Sendable {
     }
 }
 
+public enum ObjectInteractionReach: String, Codable, Equatable, Sendable {
+    case adjacent
+    case overCounter
+}
+
+public struct ObjectInteractionTriggerManifest: Codable, Equatable, Sendable {
+    public let conditions: [ScriptConditionManifest]
+    public let dialogueID: String?
+    public let scriptID: String?
+
+    public init(
+        conditions: [ScriptConditionManifest] = [],
+        dialogueID: String? = nil,
+        scriptID: String? = nil
+    ) {
+        self.conditions = conditions
+        self.dialogueID = dialogueID
+        self.scriptID = scriptID
+    }
+}
+
 public struct MapObjectManifest: Codable, Equatable, Sendable {
     public let id: String
     public let displayName: String
     public let sprite: String
     public let position: TilePoint
     public let facing: FacingDirection
+    public let interactionReach: ObjectInteractionReach
+    public let interactionTriggers: [ObjectInteractionTriggerManifest]
     public let interactionDialogueID: String?
     public let interactionScriptID: String?
     public let movementBehavior: ObjectMovementBehavior
@@ -140,6 +163,8 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         sprite: String,
         position: TilePoint,
         facing: FacingDirection,
+        interactionReach: ObjectInteractionReach = .adjacent,
+        interactionTriggers: [ObjectInteractionTriggerManifest] = [],
         interactionDialogueID: String?,
         interactionScriptID: String? = nil,
         movementBehavior: ObjectMovementBehavior,
@@ -153,6 +178,8 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         self.sprite = sprite
         self.position = position
         self.facing = facing
+        self.interactionReach = interactionReach
+        self.interactionTriggers = interactionTriggers
         self.interactionDialogueID = interactionDialogueID
         self.interactionScriptID = interactionScriptID
         self.movementBehavior = movementBehavior
@@ -177,6 +204,8 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         case sprite
         case position
         case facing
+        case interactionReach
+        case interactionTriggers
         case interactionDialogueID
         case interactionScriptID
         case movementBehavior
@@ -194,6 +223,8 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         sprite = try container.decode(String.self, forKey: .sprite)
         position = try container.decode(TilePoint.self, forKey: .position)
         facing = try container.decode(FacingDirection.self, forKey: .facing)
+        interactionReach = try container.decodeIfPresent(ObjectInteractionReach.self, forKey: .interactionReach) ?? .adjacent
+        interactionTriggers = try container.decodeIfPresent([ObjectInteractionTriggerManifest].self, forKey: .interactionTriggers) ?? []
         interactionDialogueID = try container.decodeIfPresent(String.self, forKey: .interactionDialogueID)
         interactionScriptID = try container.decodeIfPresent(String.self, forKey: .interactionScriptID)
         if let movementBehavior = try container.decodeIfPresent(ObjectMovementBehavior.self, forKey: .movementBehavior) {
@@ -219,6 +250,8 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         try container.encode(sprite, forKey: .sprite)
         try container.encode(position, forKey: .position)
         try container.encode(facing, forKey: .facing)
+        try container.encode(interactionReach, forKey: .interactionReach)
+        try container.encode(interactionTriggers, forKey: .interactionTriggers)
         try container.encodeIfPresent(interactionDialogueID, forKey: .interactionDialogueID)
         try container.encodeIfPresent(interactionScriptID, forKey: .interactionScriptID)
         try container.encode(movementBehavior, forKey: .movementBehavior)

@@ -650,7 +650,15 @@ private struct HarnessCLI {
                 return snapshot
             }
             if field.playerPosition == target {
-                return snapshot
+                guard snapshot.scene == .field else {
+                    return snapshot
+                }
+                return try poll(until: {
+                    $0.scene == .field &&
+                    $0.field?.mapID == mapID &&
+                    $0.field?.playerPosition == target &&
+                    $0.field?.transition == nil
+                }, timeout: 3)
             }
 
             let nextButton: String
@@ -679,9 +687,13 @@ private struct HarnessCLI {
             try postInput(nextButton)
             let previousPosition = field.playerPosition
             snapshot = try poll(until: {
-                $0.scene != .field ||
-                $0.field?.mapID != mapID ||
-                $0.field?.playerPosition != previousPosition
+                guard $0.scene == .field, let nextField = $0.field else {
+                    return true
+                }
+                if nextField.mapID != mapID {
+                    return true
+                }
+                return nextField.playerPosition != previousPosition && nextField.transition == nil
             }, timeout: 3)
             steps += 1
         }
@@ -695,14 +707,7 @@ private struct HarnessCLI {
             guard interactions < maxInteractions else {
                 throw HarnessError.validationFailed("dialogue did not drain within \(maxInteractions) confirms")
             }
-            let currentDialogueID = snapshot.dialogue?.dialogueID
-            let currentPageIndex = snapshot.dialogue?.pageIndex
-            try postInput("confirm")
-            snapshot = try poll(until: {
-                $0.scene != .dialogue ||
-                $0.dialogue?.pageIndex != currentPageIndex ||
-                $0.dialogue?.dialogueID != currentDialogueID
-            }, timeout: 3)
+            snapshot = try confirmDialogueAdvance(startingFrom: snapshot, timeout: 1.5)
             interactions += 1
         }
         return snapshot
@@ -711,7 +716,7 @@ private struct HarnessCLI {
     private func advanceNarrative(
         startingFrom initialSnapshot: RuntimeTelemetrySnapshot,
         maxInteractions: Int,
-        until predicate: (RuntimeTelemetrySnapshot) -> Bool
+        until predicate: @escaping (RuntimeTelemetrySnapshot) -> Bool
     ) throws -> RuntimeTelemetrySnapshot {
         var snapshot = initialSnapshot
         var interactions = 0
@@ -726,15 +731,7 @@ private struct HarnessCLI {
                 guard interactions < maxInteractions else {
                     throw HarnessError.validationFailed("narrative did not reach expected state within \(maxInteractions) confirms")
                 }
-                let currentDialogueID = snapshot.dialogue?.dialogueID
-                let currentPageIndex = snapshot.dialogue?.pageIndex
-                try postInput("confirm")
-                snapshot = try poll(until: {
-                    predicate($0) ||
-                    $0.scene != .dialogue ||
-                    $0.dialogue?.pageIndex != currentPageIndex ||
-                    $0.dialogue?.dialogueID != currentDialogueID
-                }, timeout: 3)
+                snapshot = try confirmDialogueAdvance(startingFrom: snapshot, timeout: 1.5, until: predicate)
                 interactions += 1
 
             case .scriptedSequence:
@@ -772,6 +769,31 @@ private struct HarnessCLI {
                 throw HarnessError.validationFailed("narrative stalled before reaching expected state; scene=\(snapshot.scene.rawValue) substate=\(snapshot.substate)")
             }
         }
+    }
+
+    private func confirmDialogueAdvance(
+        startingFrom snapshot: RuntimeTelemetrySnapshot,
+        timeout: TimeInterval,
+        until predicate: ((RuntimeTelemetrySnapshot) -> Bool)? = nil
+    ) throws -> RuntimeTelemetrySnapshot {
+        let currentDialogueID = snapshot.dialogue?.dialogueID
+        let currentPageIndex = snapshot.dialogue?.pageIndex
+
+        for _ in 0..<3 {
+            try postInput("confirm")
+            if let advanced = try? poll(until: {
+                (predicate?($0) ?? false) ||
+                $0.scene != .dialogue ||
+                $0.dialogue?.pageIndex != currentPageIndex ||
+                $0.dialogue?.dialogueID != currentDialogueID
+            }, timeout: timeout) {
+                return advanced
+            }
+        }
+
+        throw HarnessError.validationFailed(
+            "dialogue did not advance from \(currentDialogueID ?? "unknown") page \(currentPageIndex.map(String.init) ?? "unknown")"
+        )
     }
 }
 

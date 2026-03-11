@@ -8,104 +8,17 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let eventFlags = try parseEventFlags(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
 
-    let mapDrafts = try [
-        makeMapManifestDraft(
+    let mapDrafts = try currentGameplaySliceMaps.map { definition in
+        try makeMapManifestDraft(
             repoRoot: source.repoRoot,
-            mapID: "REDS_HOUSE_2F",
-            displayName: "Red's House 2F",
-            objectFile: "data/maps/objects/RedsHouse2F.asm",
-            blockFile: "maps/RedsHouse2F.blk",
-            size: mapSizes["REDS_HOUSE_2F"] ?? TileSize(width: 4, height: 4),
-            defaultMusicID: mapMusic["REDS_HOUSE_2F"] ?? "MUSIC_PALLET_TOWN",
+            definition: definition,
+            size: mapSizes[definition.mapID] ?? fallbackMapSize(for: definition.mapID),
+            defaultMusicID: mapMusic[definition.mapID] ?? fallbackMusicID(for: definition.mapID),
             mapSizes: mapSizes,
             mapHeadersByID: mapHeadersByID,
             tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "REDS_HOUSE_1F",
-            displayName: "Red's House 1F",
-            objectFile: "data/maps/objects/RedsHouse1F.asm",
-            blockFile: "maps/RedsHouse1F.blk",
-            size: mapSizes["REDS_HOUSE_1F"] ?? TileSize(width: 4, height: 4),
-            defaultMusicID: mapMusic["REDS_HOUSE_1F"] ?? "MUSIC_PALLET_TOWN",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "PALLET_TOWN",
-            displayName: "Pallet Town",
-            objectFile: "data/maps/objects/PalletTown.asm",
-            blockFile: "maps/PalletTown.blk",
-            size: mapSizes["PALLET_TOWN"] ?? TileSize(width: 10, height: 9),
-            defaultMusicID: mapMusic["PALLET_TOWN"] ?? "MUSIC_PALLET_TOWN",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "ROUTE_1",
-            displayName: "Route 1",
-            objectFile: "data/maps/objects/Route1.asm",
-            blockFile: "maps/Route1.blk",
-            size: mapSizes["ROUTE_1"] ?? TileSize(width: 10, height: 18),
-            defaultMusicID: mapMusic["ROUTE_1"] ?? "MUSIC_ROUTES1",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "VIRIDIAN_CITY",
-            displayName: "Viridian City",
-            objectFile: "data/maps/objects/ViridianCity.asm",
-            blockFile: "maps/ViridianCity.blk",
-            size: mapSizes["VIRIDIAN_CITY"] ?? TileSize(width: 20, height: 18),
-            defaultMusicID: mapMusic["VIRIDIAN_CITY"] ?? "MUSIC_CITIES1",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "VIRIDIAN_POKECENTER",
-            displayName: "Viridian Pokecenter",
-            objectFile: "data/maps/objects/ViridianPokecenter.asm",
-            blockFile: "maps/ViridianPokecenter.blk",
-            size: mapSizes["VIRIDIAN_POKECENTER"] ?? TileSize(width: 7, height: 4),
-            defaultMusicID: mapMusic["VIRIDIAN_POKECENTER"] ?? "MUSIC_POKECENTER",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "VIRIDIAN_MART",
-            displayName: "Viridian Mart",
-            objectFile: "data/maps/objects/ViridianMart.asm",
-            blockFile: "maps/ViridianMart.blk",
-            size: mapSizes["VIRIDIAN_MART"] ?? TileSize(width: 4, height: 4),
-            defaultMusicID: mapMusic["VIRIDIAN_MART"] ?? "MUSIC_POKECENTER",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-        makeMapManifestDraft(
-            repoRoot: source.repoRoot,
-            mapID: "OAKS_LAB",
-            displayName: "Oak's Lab",
-            objectFile: "data/maps/objects/OaksLab.asm",
-            blockFile: "maps/OaksLab.blk",
-            size: mapSizes["OAKS_LAB"] ?? TileSize(width: 5, height: 6),
-            defaultMusicID: mapMusic["OAKS_LAB"] ?? "MUSIC_OAKS_LAB",
-            mapSizes: mapSizes,
-            mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
-        ),
-    ]
+        )
+    }
     let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
 
     return GameplayManifest(
@@ -161,9 +74,49 @@ private struct RawMapConnection {
     let offset: Int
 }
 
+private func fallbackMapSize(for mapID: String) -> TileSize {
+    switch mapID {
+    case "REDS_HOUSE_2F", "REDS_HOUSE_1F", "VIRIDIAN_MART":
+        return .init(width: 4, height: 4)
+    case "PALLET_TOWN":
+        return .init(width: 10, height: 9)
+    case "ROUTE_1":
+        return .init(width: 10, height: 18)
+    case "VIRIDIAN_CITY":
+        return .init(width: 20, height: 18)
+    case "VIRIDIAN_POKECENTER":
+        return .init(width: 7, height: 4)
+    case "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
+        return .init(width: 4, height: 4)
+    case "OAKS_LAB":
+        return .init(width: 5, height: 6)
+    default:
+        return .init(width: 4, height: 4)
+    }
+}
+
+private func fallbackMusicID(for mapID: String) -> String {
+    switch mapID {
+    case "PALLET_TOWN", "REDS_HOUSE_1F", "REDS_HOUSE_2F":
+        return "MUSIC_PALLET_TOWN"
+    case "ROUTE_1":
+        return "MUSIC_ROUTES1"
+    case "VIRIDIAN_CITY", "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
+        return "MUSIC_CITIES1"
+    case "VIRIDIAN_POKECENTER", "VIRIDIAN_MART":
+        return "MUSIC_POKECENTER"
+    case "OAKS_LAB":
+        return "MUSIC_OAKS_LAB"
+    default:
+        return "MUSIC_PALLET_TOWN"
+    }
+}
+
 private struct MapManifestDraft {
     let id: String
     let displayName: String
+    let parentMapID: String?
+    let isOutdoor: Bool
     let defaultMusicID: String
     let borderBlockID: Int
     let blockWidth: Int
@@ -327,6 +280,7 @@ private func collisionKey(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1_Coll"
     case "REDS_HOUSE_2": return "RedsHouse2_Coll"
     case "DOJO": return "Dojo_Coll"
+    case "HOUSE": return "House_Coll"
     case "MART": return "Mart_Coll"
     case "POKECENTER": return "Pokecenter_Coll"
     default: return "Overworld_Coll"
@@ -339,6 +293,7 @@ private func tilesetLabel(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1"
     case "REDS_HOUSE_2": return "RedsHouse2"
     case "DOJO": return "Dojo"
+    case "HOUSE": return "House"
     case "MART": return "Mart"
     case "POKECENTER": return "Pokecenter"
     default: return "Overworld"
@@ -379,25 +334,23 @@ private func parseGrassTiles(repoRoot: URL) throws -> [String: Int?] {
 
 private func makeMapManifestDraft(
     repoRoot: URL,
-    mapID: String,
-    displayName: String,
-    objectFile: String,
-    blockFile: String,
+    definition: CurrentGameplaySliceMapDefinition,
     size: TileSize,
     defaultMusicID: String,
     mapSizes: [String: TileSize],
     mapHeadersByID: [String: ParsedMapHeader],
     tilesets: [TilesetManifest]
  ) throws -> MapManifestDraft {
+    let mapID = definition.mapID
     guard let mapHeader = mapHeadersByID[mapID] else {
         throw ExtractorError.invalidArguments("missing map header for \(mapID)")
     }
 
-    let objectURL = repoRoot.appendingPathComponent(objectFile)
+    let objectURL = repoRoot.appendingPathComponent(definition.objectFile)
     let contents = try String(contentsOf: objectURL)
     let blockIDs = try loadBlockIDs(
         repoRoot: repoRoot,
-        blockFile: blockFile,
+        blockFile: definition.blockFile,
         expectedSize: size
     )
     let borderBlockID = try parseBorderBlockID(contents: contents)
@@ -421,7 +374,9 @@ private func makeMapManifestDraft(
 
     return MapManifestDraft(
         id: mapID,
-        displayName: displayName,
+        displayName: definition.displayName,
+        parentMapID: definition.parentMapID,
+        isOutdoor: definition.isOutdoor,
         defaultMusicID: defaultMusicID,
         borderBlockID: borderBlockID,
         blockWidth: size.width,
@@ -447,7 +402,7 @@ private func resolveMapWarps(
 
     return try drafts.map { draft in
         let warps = try draft.rawWarps.enumerated().map { index, rawWarp in
-            let targetMapID = resolveTargetMapID(from: draft.id, rawTargetMapID: rawWarp.rawTargetMapID)
+            let targetMapID = resolveTargetMapID(from: draft, rawTargetMapID: rawWarp.rawTargetMapID)
             let targetPosition = try resolveTargetWarpPosition(
                 currentMapID: draft.id,
                 targetMapID: targetMapID,
@@ -455,7 +410,7 @@ private func resolveMapWarps(
                 draftsByID: draftsByID
             )
             let targetFacing = resolveTargetFacing(
-                sourceMapID: draft.id,
+                sourceDraft: draft,
                 targetPosition: targetPosition,
                 targetMapID: targetMapID,
                 draftsByID: draftsByID,
@@ -536,23 +491,12 @@ private func buildMapConnections(
     }
 }
 
-private func resolveTargetMapID(from currentMapID: String, rawTargetMapID: String) -> String {
+private func resolveTargetMapID(from currentMap: MapManifestDraft, rawTargetMapID: String) -> String {
     guard rawTargetMapID == "LAST_MAP" else {
         return rawTargetMapID
     }
 
-    switch currentMapID {
-    case "REDS_HOUSE_1F":
-        return "PALLET_TOWN"
-    case "OAKS_LAB":
-        return "PALLET_TOWN"
-    case "VIRIDIAN_POKECENTER":
-        return "VIRIDIAN_CITY"
-    case "VIRIDIAN_MART":
-        return "VIRIDIAN_CITY"
-    default:
-        return rawTargetMapID
-    }
+    return currentMap.parentMapID ?? rawTargetMapID
 }
 
 private func resolveTargetWarpPosition(
@@ -572,7 +516,7 @@ private func resolveTargetWarpPosition(
 }
 
 private func resolveTargetFacing(
-    sourceMapID: String,
+    sourceDraft: MapManifestDraft,
     targetPosition: TilePoint,
     targetMapID: String,
     draftsByID: [String: MapManifestDraft],
@@ -582,14 +526,10 @@ private func resolveTargetFacing(
           let targetTileset = tilesetsByID[targetMap.tileset],
           let targetTileID = collisionTileID(at: targetPosition, in: targetMap),
           targetTileset.collision.doorTileIDs.contains(targetTileID) else {
-        return isOutsideMapID(sourceMapID) ? .up : .down
+        return sourceDraft.isOutdoor ? .up : .down
     }
 
     return .down
-}
-
-private func isOutsideMapID(_ mapID: String) -> Bool {
-    mapID == "PALLET_TOWN"
 }
 
 private func collisionTileID(at point: TilePoint, in map: MapManifestDraft) -> Int? {
@@ -651,6 +591,15 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             blockTileWidth: 4,
             blockTileHeight: 4,
             collision: tilesetCollisionManifest(for: "DOJO", parsed: collisionData)
+        ),
+        .init(
+            id: "HOUSE",
+            imagePath: "Assets/field/tilesets/house.png",
+            blocksetPath: "Assets/field/blocksets/house.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "HOUSE", parsed: collisionData)
         ),
         .init(
             id: "MART",
@@ -813,6 +762,7 @@ private func blocksetSourcePath(for tileset: String) -> String {
     switch tileset {
     case "OVERWORLD": return "gfx/blocksets/overworld.bst"
     case "DOJO": return "gfx/blocksets/gym.bst"
+    case "HOUSE": return "gfx/blocksets/house.bst"
     case "MART", "POKECENTER": return "gfx/blocksets/pokecenter.bst"
     default: return "gfx/blocksets/reds_house.bst"
     }
@@ -830,6 +780,12 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_YOUNGSTER", imagePath: "Assets/field/sprites/youngster.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER", imagePath: "Assets/field/sprites/gambler.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_BRUNETTE_GIRL", imagePath: "Assets/field/sprites/brunette_girl.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_COOLTRAINER_F", imagePath: "Assets/field/sprites/cooltrainer_f.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_BALDING_GUY", imagePath: "Assets/field/sprites/balding_guy.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_LITTLE_GIRL", imagePath: "Assets/field/sprites/little_girl.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_BIRD", imagePath: "Assets/field/sprites/bird.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_CLIPBOARD", imagePath: "Assets/field/sprites/clipboard.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_CLERK", imagePath: "Assets/field/sprites/clerk.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_M", imagePath: "Assets/field/sprites/cooltrainer_m.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_NURSE", imagePath: "Assets/field/sprites/nurse.png", hasWalkingFrames: false),
@@ -963,7 +919,10 @@ private func parseObjects(mapID: String, contents: String) -> [MapObjectManifest
             sprite: sprite,
             position: position,
             facing: facing,
+            interactionReach: interactionReach(for: objectID),
+            interactionTriggers: interactionTriggers(for: objectID),
             interactionDialogueID: dialogueID(for: mapID, textID: textID),
+            interactionScriptID: interactionScriptID(for: objectID),
             movementBehavior: movementBehavior(
                 movementToken: movement,
                 facingToken: String(contents[facingRange]),
@@ -1016,6 +975,12 @@ private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_YOUNGSTER2"): return "viridian_city_youngster_2"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_GAMBLER1"): return "viridian_city_gambler"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_FISHER"): return "viridian_city_fisher"
+    case ("VIRIDIAN_SCHOOL_HOUSE", "TEXT_VIRIDIANSCHOOLHOUSE_BRUNETTE_GIRL"): return "viridian_school_house_brunette_girl"
+    case ("VIRIDIAN_SCHOOL_HOUSE", "TEXT_VIRIDIANSCHOOLHOUSE_COOLTRAINER_F"): return "viridian_school_house_cooltrainer_f"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_BALDING_GUY"): return "viridian_nickname_house_balding_guy"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_LITTLE_GIRL"): return "viridian_nickname_house_little_girl"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_SPEAROW"): return "viridian_nickname_house_spearow"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_SPEARY_SIGN"): return "viridian_nickname_house_speary_sign"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_CLERK"): return "viridian_mart_clerk"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_YOUNGSTER"): return "viridian_mart_youngster"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_COOLTRAINER_M"): return "viridian_mart_cooltrainer"
@@ -1035,6 +1000,116 @@ private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
     }
 }
 
+private func interactionReach(for objectID: String) -> ObjectInteractionReach {
+    switch objectID {
+    case "viridian_mart_clerk", "viridian_pokecenter_nurse":
+        return .overCounter
+    default:
+        return .adjacent
+    }
+}
+
+private func interactionScriptID(for objectID: String) -> String? {
+    switch objectID {
+    case "viridian_pokecenter_nurse":
+        return "viridian_pokecenter_nurse_heal"
+    default:
+        return nil
+    }
+}
+
+private func interactionTriggers(for objectID: String) -> [ObjectInteractionTriggerManifest] {
+    switch objectID {
+    case "reds_house_1f_mom":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_STARTER")],
+                scriptID: "reds_house_1f_mom_heal"
+            ),
+        ]
+    case "oaks_lab_rival":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_STARTER")],
+                dialogueID: "oaks_lab_rival_my_pokemon_looks_stronger"
+            ),
+            .init(dialogueID: "oaks_lab_rival_gramps_isnt_around"),
+        ]
+    case "oaks_lab_oak_1":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_POKEDEX")],
+                dialogueID: "oaks_lab_oak_how_is_your_pokedex_coming"
+            ),
+            .init(
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"),
+                    .init(kind: "flagSet", flagID: "EVENT_GOT_OAKS_PARCEL"),
+                    .init(kind: "flagUnset", flagID: "EVENT_OAK_GOT_PARCEL"),
+                ],
+                scriptID: "oaks_lab_parcel_handoff"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB")],
+                dialogueID: "oaks_lab_oak_raise_your_young_pokemon"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_STARTER")],
+                dialogueID: "oaks_lab_oak_raise_your_young_pokemon"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_OAK_ASKED_TO_CHOOSE_MON")],
+                dialogueID: "oaks_lab_oak_which_pokemon_do_you_want"
+            ),
+            .init(dialogueID: "oaks_lab_oak_choose_mon"),
+        ]
+    case "route_1_youngster_1":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_POTION_SAMPLE")],
+                dialogueID: "route_1_youngster_1_after_sample"
+            ),
+            .init(scriptID: "route_1_potion_sample"),
+        ]
+    case "viridian_city_girl":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_POKEDEX")],
+                dialogueID: "viridian_city_girl_after_pokedex"
+            ),
+        ]
+    case "viridian_mart_clerk":
+        return [
+            .init(
+                conditions: [.init(kind: "flagUnset", flagID: "EVENT_GOT_OAKS_PARCEL")],
+                scriptID: "viridian_mart_oaks_parcel"
+            ),
+        ]
+    case "oaks_lab_poke_ball_charmander":
+        return starterBallInteractionTriggers(speciesID: "CHARMANDER", scriptID: "oaks_lab_choose_charmander")
+    case "oaks_lab_poke_ball_squirtle":
+        return starterBallInteractionTriggers(speciesID: "SQUIRTLE", scriptID: "oaks_lab_choose_squirtle")
+    case "oaks_lab_poke_ball_bulbasaur":
+        return starterBallInteractionTriggers(speciesID: "BULBASAUR", scriptID: "oaks_lab_choose_bulbasaur")
+    default:
+        return []
+    }
+}
+
+private func starterBallInteractionTriggers(speciesID _: String, scriptID: String) -> [ObjectInteractionTriggerManifest] {
+    return [
+        .init(
+            conditions: [.init(kind: "flagUnset", flagID: "EVENT_OAK_ASKED_TO_CHOOSE_MON")],
+            dialogueID: "oaks_lab_those_are_pokeballs"
+        ),
+        .init(
+            conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_STARTER")],
+            dialogueID: "oaks_lab_last_mon"
+        ),
+        .init(scriptID: scriptID),
+    ]
+}
+
 private func displayNameForObject(objectID: String, textID: String) -> String {
     switch objectID {
     case "pallet_town_oak": return "Oak"
@@ -1047,6 +1122,12 @@ private func displayNameForObject(objectID: String, textID: String) -> String {
     case "viridian_city_youngster_1", "viridian_city_youngster_2": return "Youngster"
     case "viridian_city_gambler": return "Gambler"
     case "viridian_city_fisher": return "Fisher"
+    case "viridian_school_house_brunette_girl": return "Brunette Girl"
+    case "viridian_school_house_cooltrainer_f": return "Cooltrainer"
+    case "viridian_nickname_house_balding_guy": return "Balding Guy"
+    case "viridian_nickname_house_little_girl": return "Little Girl"
+    case "viridian_nickname_house_spearow": return "Spearow"
+    case "viridian_nickname_house_speary_sign": return "Speary Sign"
     case "viridian_mart_clerk": return "Clerk"
     case "viridian_mart_youngster": return "Youngster"
     case "viridian_mart_cooltrainer": return "Cooltrainer"
@@ -1107,6 +1188,12 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_GYM_SIGN"): return "viridian_city_gym_sign"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_GYM_LOCKED"): return "viridian_city_gym_locked"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_OLD_MAN_YOU_NEED_TO_WEAKEN_THE_TARGET"): return "viridian_city_old_man_weaken_target"
+    case ("VIRIDIAN_SCHOOL_HOUSE", "TEXT_VIRIDIANSCHOOLHOUSE_BRUNETTE_GIRL"): return "viridian_school_house_brunette_girl"
+    case ("VIRIDIAN_SCHOOL_HOUSE", "TEXT_VIRIDIANSCHOOLHOUSE_COOLTRAINER_F"): return "viridian_school_house_cooltrainer_f"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_BALDING_GUY"): return "viridian_nickname_house_balding_guy"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_LITTLE_GIRL"): return "viridian_nickname_house_little_girl"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_SPEAROW"): return "viridian_nickname_house_spearow"
+    case ("VIRIDIAN_NICKNAME_HOUSE", "TEXT_VIRIDIANNICKNAMEHOUSE_SPEARY_SIGN"): return "viridian_nickname_house_speary_sign"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_CLERK"): return "viridian_mart_clerk_after_parcel"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_YOUNGSTER"): return "viridian_mart_youngster"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_COOLTRAINER_M"): return "viridian_mart_cooltrainer"
@@ -1137,6 +1224,8 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
     let route1 = try String(contentsOf: repoRoot.appendingPathComponent("text/Route1.asm"))
     let viridianCity = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianCity.asm"))
+    let viridianSchoolHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianSchoolHouse.asm"))
+    let viridianNicknameHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianNicknameHouse.asm"))
     let viridianMart = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianMart.asm"))
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
@@ -1178,6 +1267,12 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "viridian_city_gym_locked", label: "_ViridianCityGymLockedText", from: viridianCity),
         DialogueManifest(id: "viridian_city_mart_sign", pages: [.init(lines: ["#MON MART"], waitsForPrompt: true)]),
         DialogueManifest(id: "viridian_city_pokecenter_sign", pages: [.init(lines: ["#MON CENTER"], waitsForPrompt: true)]),
+        try extractDialogue(id: "viridian_school_house_brunette_girl", label: "_ViridianSchoolHouseBrunetteGirlText", from: viridianSchoolHouse),
+        try extractDialogue(id: "viridian_school_house_cooltrainer_f", label: "_ViridianSchoolHouseCooltrainerFText", from: viridianSchoolHouse),
+        try extractDialogue(id: "viridian_nickname_house_balding_guy", label: "_ViridianNicknameHouseBaldingGuyText", from: viridianNicknameHouse),
+        try extractDialogue(id: "viridian_nickname_house_little_girl", label: "_ViridianNicknameHouseLittleGirlText", from: viridianNicknameHouse),
+        try extractDialogue(id: "viridian_nickname_house_spearow", label: "_ViridianNicknameHouseSpearowText", from: viridianNicknameHouse),
+        try extractDialogue(id: "viridian_nickname_house_speary_sign", label: "_ViridianNicknameHouseSpearySignText", from: viridianNicknameHouse),
         try extractDialogue(id: "viridian_mart_clerk_you_came_from_pallet_town", label: "_ViridianMartClerkYouCameFromPalletTownText", from: viridianMart),
         try extractDialogue(id: "viridian_mart_clerk_parcel_quest", label: "_ViridianMartClerkParcelQuestText", from: viridianMart),
         try extractDialogue(id: "viridian_mart_clerk_after_parcel", label: "_ViridianMartClerkSayHiToOakText", from: viridianMart),
@@ -1421,6 +1516,20 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
 
     return [
         ScriptManifest(
+            id: "reds_house_1f_mom_heal",
+            steps: [
+                .init(action: "healParty"),
+                .init(action: "showDialogue", dialogueID: "reds_house_1f_mom_looking_great"),
+            ]
+        ),
+        ScriptManifest(
+            id: "viridian_pokecenter_nurse_heal",
+            steps: [
+                .init(action: "healParty"),
+                .init(action: "showDialogue", dialogueID: "viridian_pokecenter_nurse_heal"),
+            ]
+        ),
+        ScriptManifest(
             id: "route_1_potion_sample",
             steps: [
                 .init(action: "showDialogue", dialogueID: "route_1_youngster_1_mart_sample"),
@@ -1486,6 +1595,27 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
                 .init(action: "clearFlag", flagID: "EVENT_2ND_ROUTE22_RIVAL_BATTLE"),
                 .init(action: "setFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
                 .init(action: "restoreMapMusic"),
+            ]
+        ),
+        ScriptManifest(
+            id: "oaks_lab_choose_charmander",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "oaks_lab_you_want_charmander"),
+                .init(action: "startStarterChoice", stringValue: "CHARMANDER"),
+            ]
+        ),
+        ScriptManifest(
+            id: "oaks_lab_choose_squirtle",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "oaks_lab_you_want_squirtle"),
+                .init(action: "startStarterChoice", stringValue: "SQUIRTLE"),
+            ]
+        ),
+        ScriptManifest(
+            id: "oaks_lab_choose_bulbasaur",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "oaks_lab_you_want_bulbasaur"),
+                .init(action: "startStarterChoice", stringValue: "BULBASAUR"),
             ]
         ),
         ScriptManifest(
@@ -2012,18 +2142,13 @@ private func buildItems(repoRoot: URL) throws -> [ItemManifest] {
     let namesByID = try parseItemNames(repoRoot: repoRoot)
     let keyItemIDs = try parseKeyItemIDs(repoRoot: repoRoot)
 
-    return [
+    return currentGameplaySliceItemIDs.map { itemID in
         ItemManifest(
-            id: "POTION",
-            displayName: namesByID["POTION"] ?? "POTION",
-            isKeyItem: keyItemIDs.contains("POTION")
-        ),
-        ItemManifest(
-            id: "OAKS_PARCEL",
-            displayName: namesByID["OAKS_PARCEL"] ?? "OAK's PARCEL",
-            isKeyItem: keyItemIDs.contains("OAKS_PARCEL")
-        ),
-    ]
+            id: itemID,
+            displayName: namesByID[itemID] ?? itemID,
+            isKeyItem: keyItemIDs.contains(itemID)
+        )
+    }
 }
 
 private func parseItemNames(repoRoot: URL) throws -> [String: String] {
@@ -2080,13 +2205,13 @@ private func parseKeyItemIDs(repoRoot: URL) throws -> Set<String> {
 }
 
 private func buildWildEncounterTables(repoRoot: URL) throws -> [WildEncounterTableManifest] {
-    [
+    try currentGameplaySliceWildEncounterMaps.map { definition in
         try parseWildEncounterTable(
             repoRoot: repoRoot,
-            mapID: "ROUTE_1",
-            path: "data/wild/maps/Route1.asm"
-        ),
-    ]
+            mapID: definition.mapID,
+            path: definition.path
+        )
+    }
 }
 
 private func parseWildEncounterTable(repoRoot: URL, mapID: String, path: String) throws -> WildEncounterTableManifest {

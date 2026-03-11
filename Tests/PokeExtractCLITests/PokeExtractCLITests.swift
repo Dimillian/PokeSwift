@@ -34,6 +34,8 @@ final class PokeExtractCLITests: XCTestCase {
             "PALLET_TOWN",
             "ROUTE_1",
             "VIRIDIAN_CITY",
+            "VIRIDIAN_SCHOOL_HOUSE",
+            "VIRIDIAN_NICKNAME_HOUSE",
             "VIRIDIAN_POKECENTER",
             "VIRIDIAN_MART",
             "OAKS_LAB",
@@ -42,9 +44,9 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(manifest.playerStart.position, .init(x: 4, y: 4))
         XCTAssertEqual(manifest.playerStart.playerName, "RED")
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
-        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "MART", "POKECENTER"])
-        XCTAssertEqual(manifest.tilesets.last?.imagePath, "Assets/field/tilesets/pokecenter.png")
-        XCTAssertEqual(manifest.tilesets.last?.blocksetPath, "Assets/field/blocksets/pokecenter.bst")
+        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "HOUSE", "MART", "POKECENTER"])
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.imagePath, "Assets/field/tilesets/house.png")
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.overworldSprites.map(\.id), [
             "SPRITE_RED",
             "SPRITE_OAK",
@@ -56,6 +58,12 @@ final class PokeExtractCLITests: XCTestCase {
             "SPRITE_YOUNGSTER",
             "SPRITE_GAMBLER",
             "SPRITE_GAMBLER_ASLEEP",
+            "SPRITE_BRUNETTE_GIRL",
+            "SPRITE_COOLTRAINER_F",
+            "SPRITE_BALDING_GUY",
+            "SPRITE_LITTLE_GIRL",
+            "SPRITE_BIRD",
+            "SPRITE_CLIPBOARD",
             "SPRITE_CLERK",
             "SPRITE_COOLTRAINER_M",
             "SPRITE_NURSE",
@@ -138,11 +146,16 @@ final class PokeExtractCLITests: XCTestCase {
             ]
         )
         XCTAssertEqual(manifest.scripts.map(\.id), [
+            "reds_house_1f_mom_heal",
+            "viridian_pokecenter_nurse_heal",
             "route_1_potion_sample",
             "viridian_city_old_man_blocks_north_exit",
             "viridian_city_gym_locked_pushback",
             "viridian_mart_oaks_parcel",
             "oaks_lab_parcel_handoff",
+            "oaks_lab_choose_charmander",
+            "oaks_lab_choose_squirtle",
+            "oaks_lab_choose_bulbasaur",
             "pallet_town_oak_intro",
             "oaks_lab_dont_go_away",
             "oaks_lab_rival_picks_after_charmander",
@@ -255,6 +268,8 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(viridianCity.defaultMusicID, "MUSIC_CITIES1")
         XCTAssertEqual(viridianCity.warps[0].targetMapID, "VIRIDIAN_POKECENTER")
         XCTAssertEqual(viridianCity.warps[1].targetMapID, "VIRIDIAN_MART")
+        XCTAssertEqual(viridianCity.warps[2].targetMapID, "VIRIDIAN_SCHOOL_HOUSE")
+        XCTAssertEqual(viridianCity.warps[3].targetMapID, "VIRIDIAN_NICKNAME_HOUSE")
         XCTAssertEqual(viridianCity.backgroundEvents.map(\.dialogueID), [
             "viridian_city_sign",
             "viridian_city_trainer_tips_1",
@@ -266,6 +281,8 @@ final class PokeExtractCLITests: XCTestCase {
 
         let viridianPokecenter = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_POKECENTER" })
         XCTAssertEqual(viridianPokecenter.tileset, "POKECENTER")
+        XCTAssertEqual(viridianPokecenter.objects.first { $0.id == "viridian_pokecenter_nurse" }?.interactionReach, .overCounter)
+        XCTAssertEqual(viridianPokecenter.objects.first { $0.id == "viridian_pokecenter_nurse" }?.interactionScriptID, "viridian_pokecenter_nurse_heal")
         XCTAssertEqual(viridianPokecenter.objects.map(\.id), [
             "viridian_pokecenter_nurse",
             "viridian_pokecenter_gentleman",
@@ -273,8 +290,25 @@ final class PokeExtractCLITests: XCTestCase {
             "viridian_pokecenter_link_receptionist",
         ])
 
+        let viridianSchoolHouse = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_SCHOOL_HOUSE" })
+        XCTAssertEqual(viridianSchoolHouse.tileset, "HOUSE")
+        XCTAssertEqual(viridianSchoolHouse.objects.map(\.id), [
+            "viridian_school_house_brunette_girl",
+            "viridian_school_house_cooltrainer_f",
+        ])
+
+        let viridianNicknameHouse = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_NICKNAME_HOUSE" })
+        XCTAssertEqual(viridianNicknameHouse.tileset, "HOUSE")
+        XCTAssertEqual(viridianNicknameHouse.objects.map(\.id), [
+            "viridian_nickname_house_balding_guy",
+            "viridian_nickname_house_little_girl",
+            "viridian_nickname_house_spearow",
+            "viridian_nickname_house_speary_sign",
+        ])
+
         let viridianMart = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_MART" })
         XCTAssertEqual(viridianMart.tileset, "MART")
+        XCTAssertEqual(viridianMart.objects.first { $0.id == "viridian_mart_clerk" }?.interactionReach, .overCounter)
         XCTAssertEqual(viridianMart.objects.map(\.id), [
             "viridian_mart_clerk",
             "viridian_mart_youngster",
@@ -328,12 +362,12 @@ final class PokeExtractCLITests: XCTestCase {
             GameplayManifest.self,
             from: first
         )
-        XCTAssertEqual(decoded.maps.count, 8)
-        XCTAssertEqual(decoded.tilesets.count, 6)
-        XCTAssertEqual(decoded.overworldSprites.count, 17)
+        XCTAssertEqual(decoded.maps.count, 10)
+        XCTAssertEqual(decoded.tilesets.count, 7)
+        XCTAssertEqual(decoded.overworldSprites.count, 23)
         XCTAssertEqual(decoded.items.count, 2)
         XCTAssertEqual(decoded.wildEncounterTables.count, 1)
-        XCTAssertGreaterThan(decoded.dialogues.count, 80)
+        XCTAssertGreaterThan(decoded.dialogues.count, 85)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_pokecenter_nurse_heal" })
@@ -373,7 +407,9 @@ final class PokeExtractCLITests: XCTestCase {
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "VIRIDIAN_SCHOOL_HOUSE", musicID: "MUSIC_CITIES1"),
             ]
         )
 
@@ -536,7 +572,7 @@ final class PokeExtractCLITests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 8)
+        XCTAssertEqual(decoded.mapRoutes.count, 10)
         XCTAssertEqual(decoded.cues.count, 6)
         XCTAssertEqual(decoded.tracks.count, 10)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })

@@ -61,8 +61,16 @@
       "musicID" : "MUSIC_POKECENTER"
     },
     {
+      "mapID" : "VIRIDIAN_NICKNAME_HOUSE",
+      "musicID" : "MUSIC_CITIES1"
+    },
+    {
       "mapID" : "VIRIDIAN_POKECENTER",
       "musicID" : "MUSIC_POKECENTER"
+    },
+    {
+      "mapID" : "VIRIDIAN_SCHOOL_HOUSE",
+      "musicID" : "MUSIC_CITIES1"
     }
   ],
   "titleTrackID" : "MUSIC_TITLE_SCREEN",

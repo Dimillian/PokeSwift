@@ -72,6 +72,12 @@ final class PokeContentTests: XCTestCase {
                 .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "VIRIDIAN_SCHOOL_HOUSE", musicID: "MUSIC_CITIES1"),
             ]
         )
     }
