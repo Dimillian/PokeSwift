@@ -6,7 +6,7 @@ import PokeDataModel
 @MainActor
 @Observable
 public final class GameRuntime {
-    nonisolated public static let saveSchemaVersion = 4
+    nonisolated public static let saveSchemaVersion = 5
 
     public let content: LoadedContent
 
@@ -18,6 +18,7 @@ public final class GameRuntime {
     let telemetryPublisher: (any TelemetryPublisher)?
     let audioPlayer: (any RuntimeAudioPlaying)?
     let saveStore: (any SaveStore)?
+    let runtimeRNGSeedSource: @Sendable () -> UInt64
     let validationMode: Bool
     let isTestEnvironment: Bool
     var substate = "launching"
@@ -40,9 +41,8 @@ public final class GameRuntime {
     var dialogueAudioRevision = 0
     var isDialogueAudioBlockingInput = false
     var collisionSoundInFlight = false
-    var battleRNGState: UInt64 = 0x504f4b4553574946
+    var runtimeRNGState: UInt64 = 0x504f4b4553574946
     var battleRandomOverrides: [Int] = []
-    var acquisitionRNGState: UInt64 = 0x4456535354415445
     var acquisitionRandomOverrides: [Int] = []
     var saveMetadata: GameSaveMetadata?
     var saveErrorMessage: String?
@@ -54,12 +54,14 @@ public final class GameRuntime {
         content: LoadedContent,
         telemetryPublisher: (any TelemetryPublisher)?,
         audioPlayer: (any RuntimeAudioPlaying)? = nil,
-        saveStore: (any SaveStore)? = nil
+        saveStore: (any SaveStore)? = nil,
+        runtimeRNGSeedSource: @escaping @Sendable () -> UInt64 = { UInt64.random(in: UInt64.min...UInt64.max) }
     ) {
         self.content = content
         self.telemetryPublisher = telemetryPublisher
         self.audioPlayer = audioPlayer
         self.saveStore = saveStore
+        self.runtimeRNGSeedSource = runtimeRNGSeedSource
         self.assetLoadingFailures = Self.missingAssets(in: content)
         self.validationMode = ProcessInfo.processInfo.environment["POKESWIFT_VALIDATION_MODE"] == "1"
         self.isTestEnvironment = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
@@ -308,4 +310,5 @@ public final class GameRuntime {
             saveErrorMessage = error.localizedDescription
         }
     }
+
 }

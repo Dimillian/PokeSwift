@@ -286,6 +286,82 @@ extension PokeCoreTests {
         XCTAssertEqual(snapshot.presentation.uiVisibility, .visible)
     }
 
+    func testWildBattleRNGDoesNotResetFromEncounterIdentity() {
+        let content = fixtureContent(
+            gameplayManifest: fixtureGameplayManifest(
+                species: [
+                    .init(id: "SQUIRTLE", displayName: "Squirtle", primaryType: "WATER", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                    .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                ],
+                moves: [
+                    .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                ]
+            )
+        )
+        let sharedSeed: UInt64 = 0x0123_4567_89ab_cdef
+
+        let first = GameRuntime(
+            content: content,
+            telemetryPublisher: nil,
+            runtimeRNGSeedSource: { sharedSeed }
+        )
+        first.gameplayState = first.makeInitialGameplayState()
+        first.scene = .field
+        first.substate = "field"
+        first.gameplayState?.mapID = "ROUTE_1"
+        first.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        first.gameplayState?.playerParty = [
+            first.makeConfiguredPokemon(
+                speciesID: "SQUIRTLE",
+                nickname: "Squirtle",
+                level: 5,
+                experience: 135,
+                dvs: .zero,
+                statExp: .zero,
+                currentHP: nil,
+                attackStage: 0,
+                defenseStage: 0,
+                accuracyStage: 0,
+                evasionStage: 0,
+                moves: nil
+            )
+        ]
+        first.startWildBattle(speciesID: "PIDGEY", level: 3)
+        let firstBattleRoll = first.nextBattleRandomByte()
+
+        let second = GameRuntime(
+            content: content,
+            telemetryPublisher: nil,
+            runtimeRNGSeedSource: { sharedSeed }
+        )
+        second.gameplayState = second.makeInitialGameplayState()
+        second.scene = .field
+        second.substate = "field"
+        second.gameplayState?.mapID = "ROUTE_1"
+        second.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        second.gameplayState?.playerParty = [
+            second.makeConfiguredPokemon(
+                speciesID: "SQUIRTLE",
+                nickname: "Squirtle",
+                level: 5,
+                experience: 135,
+                dvs: .zero,
+                statExp: .zero,
+                currentHP: nil,
+                attackStage: 0,
+                defenseStage: 0,
+                accuracyStage: 0,
+                evasionStage: 0,
+                moves: nil
+            )
+        ]
+        _ = second.nextAcquisitionRandomByte()
+        second.startWildBattle(speciesID: "PIDGEY", level: 3)
+        let secondBattleRoll = second.nextBattleRandomByte()
+
+        XCTAssertNotEqual(firstBattleRoll, secondBattleRoll)
+    }
+
     func testBattleTurnPresentationStagesPlayerThenEnemy() {
         let runtime = GameRuntime(
             content: fixtureContent(

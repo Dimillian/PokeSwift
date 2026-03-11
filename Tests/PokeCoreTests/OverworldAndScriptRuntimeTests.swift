@@ -43,7 +43,7 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_1")
         XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_1")
     }
-    func testRepoGeneratedRoute1GrassCanTriggerDeterministicWildEncounterAndEscape() throws {
+    func testRepoGeneratedRoute1GrassCanTriggerWildEncounterAndEscapeForFixedRandomBytes() throws {
         let runtime = try makeRepoRuntime()
         let grassTile = try findGrassTile(in: runtime, mapID: "ROUTE_1")
 
@@ -71,6 +71,21 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.scene, .field)
         XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_1")
         XCTAssertEqual(runtime.gameplayState?.playerPosition, grassTile)
+    }
+    func testWildEncounterSlotThresholdsMatchGBTableForFixedRolls() {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        let slots = (0..<10).map { index in
+            WildEncounterSlotManifest(speciesID: "SPECIES_\(index)", level: index + 2)
+        }
+        let thresholdRolls = [0, 50, 51, 101, 102, 140, 141, 165, 166, 190, 191, 215, 216, 228, 229, 241, 242, 252, 253, 255]
+        let expectedSlots = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9]
+
+        for (roll, expectedSlot) in zip(thresholdRolls, expectedSlots) {
+            runtime.setAcquisitionRandomOverrides([roll])
+            let encounter = runtime.selectWildEncounter(from: slots)
+            XCTAssertEqual(encounter?.speciesID, "SPECIES_\(expectedSlot)", "roll \(roll) should resolve to slot \(expectedSlot)")
+            XCTAssertEqual(encounter?.level, expectedSlot + 2, "roll \(roll) should preserve the slot level")
+        }
     }
     func testRepoGeneratedViridianPokecenterNurseHealsParty() throws {
         let runtime = try makeRepoRuntime()

@@ -59,7 +59,6 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let activeMapScriptTriggerID: String?
     public let activeScriptID: String?
     public let activeScriptStep: Int?
-    public let acquisitionRNGState: UInt64
     public let encounterStepCounter: Int
     public let playTimeSeconds: Int
 
@@ -81,7 +80,6 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         activeMapScriptTriggerID: String?,
         activeScriptID: String?,
         activeScriptStep: Int?,
-        acquisitionRNGState: UInt64,
         encounterStepCounter: Int,
         playTimeSeconds: Int
     ) {
@@ -102,7 +100,6 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.activeMapScriptTriggerID = activeMapScriptTriggerID
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
-        self.acquisitionRNGState = acquisitionRNGState
         self.encounterStepCounter = encounterStepCounter
         self.playTimeSeconds = playTimeSeconds
     }
@@ -125,7 +122,6 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         case activeMapScriptTriggerID
         case activeScriptID
         case activeScriptStep
-        case acquisitionRNGState
         case encounterStepCounter
         case playTimeSeconds
     }
@@ -149,7 +145,6 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         activeMapScriptTriggerID = try container.decodeIfPresent(String.self, forKey: .activeMapScriptTriggerID)
         activeScriptID = try container.decodeIfPresent(String.self, forKey: .activeScriptID)
         activeScriptStep = try container.decodeIfPresent(Int.self, forKey: .activeScriptStep)
-        acquisitionRNGState = try container.decodeIfPresent(UInt64.self, forKey: .acquisitionRNGState) ?? 0
         encounterStepCounter = try container.decodeIfPresent(Int.self, forKey: .encounterStepCounter) ?? 0
         playTimeSeconds = try container.decode(Int.self, forKey: .playTimeSeconds)
     }

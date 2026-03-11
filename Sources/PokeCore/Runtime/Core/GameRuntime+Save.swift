@@ -159,7 +159,6 @@ extension GameRuntime {
             activeMapScriptTriggerID: nil,
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
-            acquisitionRNGState: acquisitionRNGState,
             encounterStepCounter: gameplayState.encounterStepCounter,
             playTimeSeconds: gameplayState.playTimeSeconds
         )
@@ -233,11 +232,7 @@ extension GameRuntime {
             encounterStepCounter: envelope.snapshot.encounterStepCounter,
             playTimeSeconds: envelope.snapshot.playTimeSeconds
         )
-        if envelope.snapshot.acquisitionRNGState == 0 {
-            reseedAcquisitionRNG(for: playthroughID)
-        } else {
-            acquisitionRNGState = envelope.snapshot.acquisitionRNGState
-        }
+        reseedRuntimeRNG()
         dialogueState = nil
         deferredActions.removeAll()
         currentAudioState = nil

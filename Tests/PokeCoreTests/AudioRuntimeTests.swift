@@ -292,12 +292,13 @@ extension PokeCoreTests {
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
 
-        XCTAssertTrue(
+        waitUntil(
             audioPlayer.soundEffectRequests.contains {
                 $0.soundEffectID == "SFX_DAMAGE" &&
                     $0.frequencyModifier == 0 &&
                     $0.tempoModifier == 128
-            }
+            },
+            message: "battle move did not request the extracted damage sound effect"
         )
     }
     func testBattleFinishStopsTrainerMusicBeforePostBattleDialogue() throws {

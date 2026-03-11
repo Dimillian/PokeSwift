@@ -982,7 +982,6 @@ extension GameRuntime {
         }
         guard enemyParty.isEmpty == false else { return }
 
-        reseedBattleRNG(for: battleManifest.id)
         let openingMessage = "\(battleManifest.displayName) challenges you!"
         let enemySendOutMessage = "\(battleManifest.displayName) sent out \(enemyParty[0].nickname)!"
         let playerSendOutMessage = "Go! \(playerPokemon.nickname)!"
@@ -1058,7 +1057,6 @@ extension GameRuntime {
             nickname: content.species(id: speciesID)?.displayName ?? speciesID.capitalized
         )
         let battleID = "wild_\(gameplayState.mapID.lowercased())_\(speciesID.lowercased())_\(level)"
-        reseedBattleRNG(for: battleID)
 
         let battle = RuntimeBattleState(
             battleID: battleID,
@@ -1146,7 +1144,7 @@ extension GameRuntime {
     }
 
     func makePokemon(speciesID: String, level: Int, nickname: String) -> RuntimePokemonState {
-        let dvs = nextAcquisitionDVs()
+        let dvs = nextRuntimeDVs()
         return makeConfiguredPokemon(
             speciesID: speciesID,
             nickname: nickname,
@@ -1464,13 +1462,8 @@ extension GameRuntime {
         return candidate
     }
 
-    func reseedAcquisitionRNG(for value: String) {
-        var seed: UInt64 = 0x9e3779b97f4a7c15
-        for byte in value.utf8 {
-            seed ^= UInt64(byte)
-            seed &*= 0xbf58476d1ce4e5b9
-        }
-        acquisitionRNGState = seed
+    func reseedRuntimeRNG() {
+        runtimeRNGState = runtimeRNGSeedSource()
     }
 
     func nextAcquisitionRandomByte() -> Int {
@@ -1478,11 +1471,10 @@ extension GameRuntime {
             return min(255, max(0, acquisitionRandomOverrides.removeFirst()))
         }
 
-        acquisitionRNGState = acquisitionRNGState &* 6364136223846793005 &+ 1
-        return Int((acquisitionRNGState >> 32) & 0xFF)
+        return nextRuntimeRandomByte()
     }
 
-    func nextAcquisitionDVs() -> PokemonDVs {
+    func nextRuntimeDVs() -> PokemonDVs {
         let attackDefenseByte = nextAcquisitionRandomByte()
         let speedSpecialByte = nextAcquisitionRandomByte()
         return PokemonDVs(
@@ -1564,21 +1556,16 @@ extension GameRuntime {
         return party
     }
 
-    func reseedBattleRNG(for battleID: String) {
-        var seed: UInt64 = 0xcbf29ce484222325
-        for byte in battleID.utf8 {
-            seed ^= UInt64(byte)
-            seed &*= 0x100000001b3
-        }
-        battleRNGState = seed
-    }
-
     func nextBattleRandomByte() -> Int {
         if battleRandomOverrides.isEmpty == false {
             return min(255, max(0, battleRandomOverrides.removeFirst()))
         }
 
-        battleRNGState = battleRNGState &* 6364136223846793005 &+ 1
-        return Int((battleRNGState >> 32) & 0xFF)
+        return nextRuntimeRandomByte()
+    }
+
+    func nextRuntimeRandomByte() -> Int {
+        runtimeRNGState = runtimeRNGState &* 6364136223846793005 &+ 1
+        return Int((runtimeRNGState >> 32) & 0xFF)
     }
 }

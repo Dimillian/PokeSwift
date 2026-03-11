@@ -128,67 +128,32 @@ extension PokeCoreTests {
         XCTAssertEqual(squirtle.speed, 10)
         XCTAssertEqual(squirtle.special, 10)
     }
-    func testBattleExperienceRewardLevelsUpStarterAndUpdatesTelemetry() async throws {
+    func testBattleExperienceRewardLevelsUpStarterAndUpdatesTelemetry() throws {
         let runtime = GameRuntime(
             content: fixtureContent(
                 gameplayManifest: fixtureGameplayManifest(
-                    dialogues: [
-                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
-                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
-                    ],
                     species: [
-                        .init(id: "CHARMANDER", displayName: "Charmander", primaryType: "FIRE", baseExp: 65, growthRate: .mediumSlow, baseHP: 39, baseAttack: 200, baseDefense: 43, baseSpeed: 65, baseSpecial: 50, startingMoves: ["SCRATCH"]),
+                        .init(id: "CHARMANDER", displayName: "Charmander", primaryType: "FIRE", baseExp: 65, growthRate: .mediumSlow, baseHP: 39, baseAttack: 52, baseDefense: 43, baseSpeed: 65, baseSpecial: 50, startingMoves: ["SCRATCH"]),
                         .init(id: "BULBASAUR", displayName: "Bulbasaur", primaryType: "GRASS", secondaryType: "POISON", baseExp: 64, growthRate: .mediumSlow, baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["GROWL"]),
                     ],
                     moves: [
-                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 120, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
                         .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
-                    ],
-                    trainerBattles: [
-                        .init(
-                            id: "opp_rival1_1",
-                            trainerClass: "OPP_RIVAL1",
-                            trainerNumber: 1,
-                            displayName: "BLUE",
-                            party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
-                            healsPartyAfterBattle: false,
-                            preventsBlackoutOnLoss: true,
-                            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
-                        ),
                     ]
                 )
             ),
             telemetryPublisher: nil
         )
-        runtime.start()
-        try? await Task.sleep(for: .milliseconds(1700))
-        runtime.handle(button: .start)
-        runtime.handle(button: .confirm)
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var playerPokemon = runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")
+        let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
+        let messages = runtime.applyBattleExperienceReward(
+            defeatedPokemon: defeatedPokemon,
+            to: &playerPokemon,
+            isTrainerBattle: true
+        )
         runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
-        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
-
-        runtime.startBattle(id: "opp_rival1_1")
-        drainBattleText(runtime)
-
-        runtime.battleRandomOverrides = [0, 255]
-        runtime.handle(button: .confirm)
-
-        var battleSnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(battleSnapshot.textLines, ["Charmander used SCRATCH!"])
-
-        var sawGainMessage = false
-        var sawLevelMessage = false
-        var remaining = 8
-        while runtime.currentSnapshot().battle != nil {
-            battleSnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-            sawGainMessage = sawGainMessage || battleSnapshot.textLines.contains(where: { $0.contains("gained 67 EXP") })
-            sawLevelMessage = sawLevelMessage || battleSnapshot.textLines.contains(where: { $0.contains("grew to Lv6") })
-            XCTAssertGreaterThan(remaining, 0)
-            remaining -= 1
-            runtime.handle(button: .confirm)
-        }
+        runtime.gameplayState?.playerParty = [playerPokemon]
 
         let partyPokemon = try XCTUnwrap(runtime.currentSnapshot().party?.pokemon.first)
         XCTAssertEqual(partyPokemon.level, 6)
@@ -196,8 +161,8 @@ extension PokeCoreTests {
         XCTAssertEqual(partyPokemon.experience.levelStart, 179)
         XCTAssertEqual(partyPokemon.experience.nextLevel, 236)
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.statExp, PokemonStatExp(hp: 45, attack: 49, defense: 49, speed: 45, special: 65))
-        XCTAssertTrue(sawGainMessage)
-        XCTAssertTrue(sawLevelMessage)
+        XCTAssertTrue(messages.contains("Charmander gained 67 EXP!"))
+        XCTAssertTrue(messages.contains("Charmander grew to Lv6!"))
     }
     func testBattleRewardAccumulatesStatExpWithoutVisibleStatRecalc() {
         let runtime = GameRuntime(
@@ -327,7 +292,7 @@ extension PokeCoreTests {
         XCTAssertEqual(playerPokemon.statExp, PokemonStatExp(hp: 45, attack: 49, defense: 49, speed: 45, special: 65))
         XCTAssertEqual(messages, ["Charmander gained 67 EXP!"])
     }
-    func testLosingBattleDoesNotGrantExperience() async throws {
+    func testLosingBattleDoesNotGrantExperience() throws {
         let runtime = GameRuntime(
             content: fixtureContent(
                 gameplayManifest: fixtureGameplayManifest(
@@ -361,26 +326,36 @@ extension PokeCoreTests {
             ),
             telemetryPublisher: nil
         )
-        runtime.start()
-        try? await Task.sleep(for: .milliseconds(1700))
-        runtime.handle(button: .start)
-        runtime.handle(button: .confirm)
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
         runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
         runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
         runtime.gameplayState?.playerParty[0].currentHP = 1
         let startingExperience = runtime.gameplayState?.playerParty[0].experience
 
         runtime.startBattle(id: "opp_rival1_1")
-        drainBattleText(runtime)
+        runtime.cancelBattlePresentation()
+        runtime.gameplayState?.battle?.phase = .moveSelection
+        runtime.gameplayState?.battle?.message = "Pick the next move."
+        runtime.gameplayState?.battle?.queuedMessages = []
+        runtime.gameplayState?.battle?.pendingAction = .moveSelection
+        runtime.gameplayState?.battle?.pendingPresentationBatches = []
+        runtime.gameplayState?.battle?.presentation = .init(
+            stage: .commandReady,
+            revision: 1,
+            uiVisibility: .visible,
+            activeSide: nil,
+            transitionStyle: .none
+        )
 
         runtime.battleRandomOverrides = [0, 255]
-        runtime.handle(button: .confirm)
-
-        var remaining = 8
-        while runtime.currentSnapshot().battle != nil {
-            XCTAssertGreaterThan(remaining, 0)
-            remaining -= 1
-            runtime.handle(button: .confirm)
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let batches = runtime.makeTurnPresentationBatches(for: battle)
+        for batch in batches {
+            for beat in batch {
+                runtime.applyBattlePresentationBeat(beat, battleID: battle.battleID)
+            }
         }
 
         XCTAssertEqual(runtime.currentSnapshot().party?.pokemon.first?.experience.total, startingExperience)

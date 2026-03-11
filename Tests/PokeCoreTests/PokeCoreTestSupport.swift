@@ -38,10 +38,13 @@ func fixtureGameplayManifest(
     species: [SpeciesManifest] = [],
     moves: [MoveManifest] = [],
     typeEffectiveness: [TypeEffectivenessManifest] = [],
+    wildEncounterTables: [WildEncounterTableManifest] = [],
+    maps: [MapManifest]? = nil,
+    tilesets: [TilesetManifest]? = nil,
     trainerBattles: [TrainerBattleManifest] = []
 ) -> GameplayManifest {
     GameplayManifest(
-        maps: [
+        maps: maps ?? [
             .init(
                 id: "REDS_HOUSE_2F",
                 displayName: "Red's House 2F",
@@ -59,7 +62,7 @@ func fixtureGameplayManifest(
                 objects: []
             ),
         ],
-        tilesets: [
+        tilesets: tilesets ?? [
             .init(
                 id: "REDS_HOUSE_2",
                 imagePath: "Assets/field/tilesets/reds_house.png",
@@ -97,6 +100,7 @@ func fixtureGameplayManifest(
         species: species,
         moves: moves,
         typeEffectiveness: typeEffectiveness,
+        wildEncounterTables: wildEncounterTables,
         trainerBattles: trainerBattles,
         playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
     )
@@ -170,7 +174,7 @@ func fixtureAudioManifest() -> AudioManifest {
 }
 
 @MainActor
-func drainBattleText(_ runtime: GameRuntime, maxTicks: Int = 160) {
+func drainBattleText(_ runtime: GameRuntime, maxTicks: Int = 240) {
     guard runtime.currentSnapshot().battle != nil else { return }
     waitUntil(
         runtime.currentSnapshot().battle?.phase == "moveSelection",
@@ -181,12 +185,21 @@ func drainBattleText(_ runtime: GameRuntime, maxTicks: Int = 160) {
 
 @MainActor
 func drainBattleUntilComplete(_ runtime: GameRuntime, maxTicks: Int = 240) {
+    resolveBattleUntilComplete(runtime, maxTicks: maxTicks)
+}
+
+@MainActor
+func resolveBattleUntilComplete(
+    _ runtime: GameRuntime,
+    maxTicks: Int = 240,
+    observe: ((BattleTelemetry) -> Void)? = nil
+) {
     let pollInterval = 0.01
     let deadline = Date().addingTimeInterval(Double(maxTicks) * pollInterval)
 
     while runtime.scene == .battle, Date() < deadline {
-        if let battle = runtime.currentSnapshot().battle,
-           battle.phase != "moveSelection" {
+        if let battle = runtime.currentSnapshot().battle {
+            observe?(battle)
             runtime.handle(button: .confirm)
         }
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
