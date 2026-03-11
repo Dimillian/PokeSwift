@@ -56,7 +56,7 @@ struct BattleSummaryContent: View {
                 showsExperience: true
             )
 
-            Text(props.promptText)
+            Text(props.promptText.uppercased())
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(FieldRetroPalette.ink.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
@@ -70,7 +70,7 @@ struct BattleActionContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if props.actionRows.isEmpty {
-                Text("No move choices available in this phase.")
+                Text("NO MOVE CHOICES AVAILABLE IN THIS PHASE.")
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
                     .fixedSize(horizontal: false, vertical: true)
@@ -109,7 +109,7 @@ struct BattleCombatantStatusRow: View {
                         .font(.system(size: 15, weight: .bold, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink)
                     Spacer(minLength: 8)
-                    Text("Lv\(pokemon.level)")
+                    Text("LV\(pokemon.level)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink.opacity(0.68))
                 }

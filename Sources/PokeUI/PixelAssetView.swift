@@ -57,7 +57,7 @@ public struct PixelAssetView: View {
     static func applyWhiteTransparencyMask(to image: CGImage) -> CGImage? {
         let width = image.width
         let height = image.height
-        let bytesPerRow = width
+        let grayscaleBytesPerRow = width
         var grayscaleBytes = [UInt8](repeating: 0, count: width * height)
 
         guard let grayscaleContext = CGContext(
@@ -65,7 +65,7 @@ public struct PixelAssetView: View {
             width: width,
             height: height,
             bitsPerComponent: 8,
-            bytesPerRow: bytesPerRow,
+            bytesPerRow: grayscaleBytesPerRow,
             space: CGColorSpaceCreateDeviceGray(),
             bitmapInfo: CGImageAlphaInfo.none.rawValue
         ) else {
@@ -114,22 +114,37 @@ public struct PixelAssetView: View {
             enqueueIfNeeded(x: x, y: y + 1)
         }
 
-        let maskData = Data(maskBytes) as CFData
+        let rgbaBytesPerRow = width * 4
+        var rgbaBytes = [UInt8](repeating: 0, count: width * height * 4)
 
-        guard let provider = CGDataProvider(data: maskData),
-              let mask = CGImage(
-                maskWidth: width,
-                height: height,
-                bitsPerComponent: 8,
-                bitsPerPixel: 8,
-                bytesPerRow: width,
-                provider: provider,
-                decode: nil,
-                shouldInterpolate: false
-              ) else {
+        for index in 0..<(width * height) {
+            let alpha: UInt8 = maskBytes[index] == 255 ? 0 : 255
+            let value = grayscaleBytes[index]
+            let rgbaIndex = index * 4
+            rgbaBytes[rgbaIndex] = value
+            rgbaBytes[rgbaIndex + 1] = value
+            rgbaBytes[rgbaIndex + 2] = value
+            rgbaBytes[rgbaIndex + 3] = alpha
+        }
+
+        let rgbaData = Data(rgbaBytes) as CFData
+
+        guard let provider = CGDataProvider(data: rgbaData) else {
             return nil
         }
 
-        return image.masking(mask)
+        return CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: rgbaBytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+        )
     }
 }

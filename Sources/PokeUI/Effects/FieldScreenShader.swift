@@ -7,9 +7,20 @@ private enum FieldScreenShader {
     )
 }
 
+private enum BattleScreenShader {
+    static let function = ShaderFunction(
+        library: .bundle(PokeUIResources.bundle),
+        name: "battleScreenEffect"
+    )
+}
+
 extension View {
     func fieldScreenEffect(displayStyle: FieldDisplayStyle, displayScale: CGFloat) -> some View {
         modifier(FieldScreenEffectModifier(displayStyle: displayStyle, displayScale: displayScale))
+    }
+
+    func battleScreenEffect(displayScale: CGFloat) -> some View {
+        modifier(BattleScreenEffectModifier(displayScale: displayScale))
     }
 }
 
@@ -45,6 +56,22 @@ private struct FieldScreenEffectModifier: ViewModifier {
 
     private var shaderViewportHeight: Float {
         Float(CGFloat(FieldSceneRenderer.viewportPixelSize.height) * displayScale)
+    }
+}
+
+private struct BattleScreenEffectModifier: ViewModifier {
+    let displayScale: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .colorEffect(
+                Shader(
+                    function: BattleScreenShader.function,
+                    arguments: [
+                        .float(Float(max(1, displayScale))),
+                    ]
+                )
+            )
     }
 }
 

@@ -105,3 +105,25 @@ float3 applyTintedReflection(float3 baseColor, float2 uv) {
 
     return half4(half3(clamp(shaded, 0.0, 1.0)), currentColor.a);
 }
+
+[[ stitchable ]] half4 battleScreenEffect(
+    float2 position,
+    half4 currentColor,
+    float pixelScale
+) {
+    if (currentColor.a <= 0.0h) {
+        return currentColor;
+    }
+
+    float safeScale = max(pixelScale, 1.0);
+    float2 cellFraction = fract(position / safeScale) - 0.5;
+    float aperture = cellInteriorMask(cellFraction);
+    float interior = gapMask(cellFraction);
+
+    float3 sourceColor = float3(currentColor.rgb);
+    float3 shaded = sourceColor;
+    shaded *= mix(0.9, 0.985, interior);
+    shaded *= mix(0.96, 1.0, aperture);
+
+    return half4(half3(clamp(shaded, 0.0, 1.0)), currentColor.a);
+}

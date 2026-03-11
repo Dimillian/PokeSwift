@@ -34,13 +34,13 @@ public struct BattlePanel: View {
             )
 
             BattleViewportCanvas(
-                trainerName: trainerName,
                 playerPokemon: playerPokemon,
                 enemyPokemon: enemyPokemon,
                 playerSpriteURL: playerSpriteURL,
                 enemySpriteURL: enemySpriteURL
             )
             .frame(width: viewportSize.width, height: viewportSize.height)
+            .battleScreenEffect(displayScale: scale)
             .clipShape(RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: max(6, scale * 2.5), style: .continuous)
@@ -66,7 +66,6 @@ public struct BattlePanel: View {
 }
 
 private struct BattleViewportCanvas: View {
-    let trainerName: String
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
     let playerSpriteURL: URL?
@@ -80,19 +79,9 @@ private struct BattleViewportCanvas: View {
             ZStack(alignment: .topLeading) {
                 battleBackground
 
-                BattleSpritePlatform(curveHeight: layout.platformCurveHeight)
-                    .stroke(FieldRetroPalette.ink.opacity(0.22), lineWidth: layout.platformStrokeWidth)
-                    .frame(width: layout.platformWidth, height: layout.platformHeight)
-                    .position(x: layout.enemyPlatformCenter.x, y: layout.enemyPlatformCenter.y)
-
-                BattleSpritePlatform(curveHeight: layout.platformCurveHeight)
-                    .stroke(FieldRetroPalette.ink.opacity(0.18), lineWidth: layout.platformStrokeWidth)
-                    .frame(width: layout.platformWidth, height: layout.platformHeight)
-                    .position(x: layout.playerPlatformCenter.x, y: layout.playerPlatformCenter.y)
-
                 BattleStatusCard(
-                    title: trainerName,
                     pokemon: enemyPokemon,
+                    chrome: .enemy,
                     alignment: .leading,
                     showsExperience: false
                 )
@@ -100,8 +89,8 @@ private struct BattleViewportCanvas: View {
                 .position(x: layout.enemyCardCenter.x, y: layout.enemyCardCenter.y)
 
                 BattleStatusCard(
-                    title: "RED",
                     pokemon: playerPokemon,
+                    chrome: .player,
                     alignment: .leading,
                     showsExperience: true
                 )
@@ -138,12 +127,12 @@ private struct BattleViewportCanvas: View {
 
             LinearGradient(
                 colors: [
-                    Color.white.opacity(0.08),
+                    Color.white.opacity(0.03),
                     Color.clear,
-                    Color.black.opacity(0.1),
+                    Color.black.opacity(0.04),
                 ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                startPoint: .top,
+                endPoint: .bottom
             )
         }
     }
@@ -153,15 +142,15 @@ private struct BattleViewportLayout {
     let size: CGSize
 
     var enemyCardSize: CGSize {
-        CGSize(width: size.width * 0.38, height: size.height * 0.18)
+        CGSize(width: size.width * 0.38, height: size.height * 0.105)
     }
 
     var playerCardSize: CGSize {
-        CGSize(width: size.width * 0.41, height: size.height * 0.18)
+        CGSize(width: size.width * 0.41, height: size.height * 0.135)
     }
 
     var enemyCardCenter: CGPoint {
-        CGPoint(x: size.width * 0.26, y: size.height * 0.17)
+        CGPoint(x: size.width * 0.26, y: size.height * 0.135)
     }
 
     var playerCardCenter: CGPoint {
@@ -181,87 +170,81 @@ private struct BattleViewportLayout {
     }
 
     var playerSpriteCenter: CGPoint {
-        CGPoint(x: size.width * 0.25, y: size.height * 0.62)
-    }
-
-    var platformWidth: CGFloat {
-        size.width * 0.34
-    }
-
-    var platformHeight: CGFloat {
-        size.height * 0.06
-    }
-
-    var platformCurveHeight: CGFloat {
-        size.height * 0.018
-    }
-
-    var platformStrokeWidth: CGFloat {
-        max(2, size.height * 0.008)
-    }
-
-    var enemyPlatformCenter: CGPoint {
-        CGPoint(x: size.width * 0.73, y: size.height * 0.43)
-    }
-
-    var playerPlatformCenter: CGPoint {
-        CGPoint(x: size.width * 0.33, y: size.height * 0.74)
-    }
-}
-
-private struct BattleSpritePlatform: Shape {
-    let curveHeight: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.addQuadCurve(
-            to: CGPoint(x: rect.maxX, y: rect.midY),
-            control: CGPoint(x: rect.midX, y: rect.midY + curveHeight)
-        )
-        return path
+        CGPoint(x: size.width * 0.25, y: size.height * 0.69)
     }
 }
 
 private struct BattleStatusCard: View {
-    let title: String
+    enum Chrome {
+        case enemy
+        case player
+
+        var tint: Color {
+            switch self {
+            case .enemy:
+                return Color(red: 0.92, green: 0.96, blue: 0.84).opacity(0.42)
+            case .player:
+                return Color(red: 0.78, green: 0.9, blue: 0.76).opacity(0.46)
+            }
+        }
+
+        var backgroundTint: Color {
+            switch self {
+            case .enemy:
+                return Color.white.opacity(0.18)
+            case .player:
+                return Color(red: 0.86, green: 0.93, blue: 0.8).opacity(0.22)
+            }
+        }
+    }
+
     let pokemon: PartyPokemonTelemetry
+    let chrome: Chrome
     let alignment: HorizontalAlignment
     let showsExperience: Bool
 
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
-            let contentPadding = max(10, size.height * 0.16)
-            let nameFont = max(14, size.height * 0.28)
-            let metaFont = max(11, size.height * 0.18)
-            let hpLabelFont = max(10, size.height * 0.17)
-            let hpValueFont = max(12, size.height * 0.2)
+            let horizontalPadding = max(8, size.width * 0.035)
+            let topPadding = max(4, size.height * 0.05)
+            let bottomPadding = max(4, size.height * 0.05)
+            let topInset = max(5, size.height * 0.12)
+            let pixelNameScale: CGFloat = 0.9
+            let pixelMetaScale: CGFloat = 0.9
+            let cardShape = RoundedRectangle(cornerRadius: 16, style: .continuous)
 
-            VStack(alignment: alignment, spacing: size.height * 0.06) {
+            VStack(alignment: alignment, spacing: max(4, size.height * 0.045)) {
+                Color.clear
+                    .frame(height: topInset)
+
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(title.uppercased())
-                        .font(.system(size: metaFont, weight: .bold, design: .monospaced))
-                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.58))
+                    CombatPixelText(
+                        pokemon.displayName.uppercased(),
+                        color: FieldRetroPalette.ink,
+                        primaryScale: pixelNameScale,
+                        minimumScale: pixelNameScale,
+                        fallbackFont: .system(size: max(14, size.height * 0.28), weight: .bold, design: .monospaced)
+                    )
 
                     Spacer(minLength: 8)
 
-                    Text("Lv\(pokemon.level)")
-                        .font(.system(size: hpValueFont, weight: .bold, design: .monospaced))
-                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.74))
+                    CombatPixelText(
+                        "LV\(pokemon.level)",
+                        color: FieldRetroPalette.ink.opacity(0.74),
+                        primaryScale: pixelMetaScale,
+                        alignment: .trailing,
+                        fallbackFont: .system(size: max(12, size.height * 0.2), weight: .bold, design: .monospaced)
+                    )
                 }
 
-                Text(pokemon.displayName.uppercased())
-                    .font(.system(size: nameFont, weight: .bold, design: .monospaced))
-                    .foregroundStyle(FieldRetroPalette.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
                 HStack(alignment: .center, spacing: 10) {
-                    Text("HP")
-                        .font(.system(size: hpLabelFont, weight: .bold, design: .monospaced))
-                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.74))
+                    CombatPixelText(
+                        "HP",
+                        color: FieldRetroPalette.ink.opacity(0.74),
+                        primaryScale: pixelMetaScale,
+                        fallbackFont: .system(size: max(10, size.height * 0.17), weight: .bold, design: .monospaced)
+                    )
 
                     BattleHPBar(currentHP: pokemon.currentHP, maxHP: pokemon.maxHP)
                         .frame(maxWidth: .infinity)
@@ -270,32 +253,31 @@ private struct BattleStatusCard: View {
 
                 if showsExperience {
                     HStack(alignment: .center, spacing: 10) {
-                        Text("EXP")
-                            .font(.system(size: hpLabelFont, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.74))
+                        CombatPixelText(
+                            "EXP",
+                            color: FieldRetroPalette.ink.opacity(0.74),
+                            primaryScale: pixelMetaScale,
+                            fallbackFont: .system(size: max(10, size.height * 0.17), weight: .bold, design: .monospaced)
+                        )
 
                         BattleExperienceBar(experience: pokemon.experience)
                             .frame(maxWidth: .infinity)
-                            .frame(height: max(8, size.height * 0.11))
+                        .frame(height: max(8, size.height * 0.11))
                     }
                 }
             }
-            .padding(contentPadding)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.top, topPadding)
+            .padding(.bottom, bottomPadding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(FieldRetroPalette.cardFill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(chrome.backgroundTint, in: cardShape)
             .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(FieldRetroPalette.outline.opacity(0.16), lineWidth: 1)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                            .stroke(.white.opacity(0.22), lineWidth: 1)
-                            .padding(3)
-                    }
+                cardShape
+                    .stroke(.white.opacity(0.2), lineWidth: 1)
+                    .padding(3)
             }
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(FieldRetroPalette.outline.opacity(0.06), lineWidth: 1)
+            .glassEffect(.regular.tint(chrome.tint), in: cardShape)
+            .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
         }
     }
 }
