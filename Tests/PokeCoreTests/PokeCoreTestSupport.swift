@@ -1,0 +1,392 @@
+import XCTest
+@testable import PokeCore
+import PokeContent
+import PokeDataModel
+
+@MainActor
+func fixtureContent(
+    gameplayManifest: GameplayManifest? = nil,
+    audioManifest: AudioManifest? = nil
+) -> LoadedContent {
+    LoadedContent(
+        rootURL: URL(fileURLWithPath: "/tmp", isDirectory: true),
+        gameManifest: .init(contentVersion: "test", variant: .red, sourceCommit: "abc", extractorVersion: "1", sourceFiles: []),
+        constantsManifest: .init(variant: .red, sourceFiles: [], watchedKeys: ["PAD_A", "PAD_B", "PAD_START"], musicTrack: "MUSIC_TITLE_SCREEN", titleMonSelectionConstant: "STARTER1"),
+        charmapManifest: .init(variant: .red, entries: [.init(token: "A", value: 0x80, sourceSection: "test")]),
+        titleManifest: .init(
+            variant: .red,
+            sourceFiles: [],
+            titleMonSpecies: "STARTER1",
+            menuEntries: [
+                .init(id: "newGame", label: "New Game", enabledByDefault: true),
+                .init(id: "continue", label: "Continue", enabledByDefault: false),
+                .init(id: "options", label: "Options", enabledByDefault: true),
+            ],
+            logoBounceSequence: [],
+            assets: [],
+            timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
+        ),
+        audioManifest: audioManifest ?? fixtureAudioManifest(),
+        gameplayManifest: gameplayManifest ?? fixtureGameplayManifest()
+    )
+}
+
+@MainActor
+func fixtureGameplayManifest(
+    dialogues: [DialogueManifest] = [],
+    scripts: [ScriptManifest] = [],
+    species: [SpeciesManifest] = [],
+    moves: [MoveManifest] = [],
+    typeEffectiveness: [TypeEffectivenessManifest] = [],
+    trainerBattles: [TrainerBattleManifest] = []
+) -> GameplayManifest {
+    GameplayManifest(
+        maps: [
+            .init(
+                id: "REDS_HOUSE_2F",
+                displayName: "Red's House 2F",
+                defaultMusicID: "MUSIC_PALLET_TOWN",
+                borderBlockID: 0x0A,
+                blockWidth: 4,
+                blockHeight: 4,
+                stepWidth: 8,
+                stepHeight: 8,
+                tileset: "REDS_HOUSE_2",
+                blockIDs: Array(repeating: 0x05, count: 16),
+                stepCollisionTileIDs: Array(repeating: 0x01, count: 64),
+                warps: [],
+                backgroundEvents: [],
+                objects: []
+            ),
+        ],
+        tilesets: [
+            .init(
+                id: "REDS_HOUSE_2",
+                imagePath: "Assets/field/tilesets/reds_house.png",
+                blocksetPath: "Assets/field/blocksets/reds_house.bst",
+                sourceTileSize: 8,
+                blockTileWidth: 4,
+                blockTileHeight: 4,
+                collision: .init(
+                    passableTileIDs: [0x01, 0x02],
+                    warpTileIDs: [],
+                    doorTileIDs: [],
+                    tilePairCollisions: [],
+                    ledges: []
+                )
+            ),
+        ],
+        overworldSprites: [
+            .init(
+                id: "SPRITE_RED",
+                imagePath: "Assets/field/sprites/red.png",
+                frameWidth: 16,
+                frameHeight: 16,
+                facingFrames: .init(
+                    down: .init(x: 0, y: 0, width: 16, height: 16),
+                    up: .init(x: 0, y: 16, width: 16, height: 16),
+                    left: .init(x: 0, y: 32, width: 16, height: 16),
+                    right: .init(x: 0, y: 32, width: 16, height: 16, flippedHorizontally: true)
+                )
+            ),
+        ],
+        dialogues: dialogues,
+        eventFlags: .init(flags: []),
+        mapScripts: [],
+        scripts: scripts,
+        species: species,
+        moves: moves,
+        typeEffectiveness: typeEffectiveness,
+        trainerBattles: trainerBattles,
+        playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
+    )
+}
+
+@MainActor
+func fixtureAudioManifest() -> AudioManifest {
+    AudioManifest(
+        variant: .red,
+        titleTrackID: "MUSIC_TITLE_SCREEN",
+        mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
+        cues: [
+            .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+            .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+            .init(
+                id: "mom_heal",
+                assetID: "MUSIC_PKMN_HEALED",
+                waitForCompletion: true,
+                resumeMusicAfterCompletion: true
+            ),
+        ],
+        tracks: [
+            .init(
+                id: "MUSIC_TITLE_SCREEN",
+                sourceLabel: "Music_TitleScreen",
+                sourceFile: "audio/music/titlescreen.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_TitleScreen_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_PALLET_TOWN",
+                sourceLabel: "Music_PalletTown",
+                sourceFile: "audio/music/pallettown.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_TRAINER_BATTLE",
+                sourceLabel: "Music_TrainerBattle",
+                sourceFile: "audio/music/trainerbattle.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_TrainerBattle_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_PKMN_HEALED",
+                sourceLabel: "Music_PkmnHealed",
+                sourceFile: "audio/music/pkmnhealed.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
+            ),
+        ],
+        soundEffects: [
+            .init(
+                id: "SFX_PRESS_AB",
+                sourceLabel: "SFX_Press_AB",
+                sourceFile: "audio/sfx/press_ab.asm",
+                bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_COLLISION",
+                sourceLabel: "SFX_Collision",
+                sourceFile: "audio/sfx/collision.asm",
+                bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+        ]
+    )
+}
+
+@MainActor
+func drainBattleText(_ runtime: GameRuntime, maxInteractions: Int = 16) {
+    var remaining = maxInteractions
+    while let battle = runtime.currentSnapshot().battle, battle.phase != "moveSelection" {
+        XCTAssertGreaterThan(remaining, 0, "battle text did not drain to move selection")
+        remaining -= 1
+        runtime.handle(button: .confirm)
+    }
+}
+
+@MainActor
+func drainBattleUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 16) {
+    var remaining = maxInteractions
+    while runtime.scene == .battle {
+        XCTAssertGreaterThan(remaining, 0, "battle did not resolve")
+        remaining -= 1
+        runtime.handle(button: .confirm)
+    }
+}
+
+@MainActor
+func advanceDialogueUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 8) {
+    var remaining = maxInteractions
+    while runtime.dialogueState != nil {
+        XCTAssertGreaterThan(remaining, 0, "dialogue did not complete")
+        remaining -= 1
+        runtime.handle(button: .confirm)
+    }
+}
+
+@MainActor
+func drainDialogueAndScripts(
+    _ runtime: GameRuntime,
+    until predicate: (RuntimeTelemetrySnapshot) -> Bool,
+    maxInteractions: Int = 64
+) {
+    var remaining = maxInteractions
+    while predicate(runtime.currentSnapshot()) == false {
+        XCTAssertGreaterThan(remaining, 0, "dialogue/script sequence did not reach expected state")
+        remaining -= 1
+        switch runtime.scene {
+        case .dialogue:
+            runtime.handle(button: .confirm)
+        case .field, .scriptedSequence:
+            runtime.advanceDeferredQueueIfNeeded()
+            runtime.runActiveScript()
+        default:
+            XCTFail("unexpected scene while draining dialogue/script sequence: \(runtime.scene)")
+            return
+        }
+    }
+}
+
+actor RecordingTelemetryPublisher: TelemetryPublisher {
+    private(set) var events: [RuntimeSessionEvent] = []
+
+    func publish(snapshot: RuntimeTelemetrySnapshot) async {}
+
+    func publish(event: RuntimeSessionEvent) async {
+        events.append(event)
+    }
+
+    func waitForEventCount(_ expectedCount: Int, attempts: Int = 40) async {
+        for _ in 0..<attempts where events.count < expectedCount {
+            try? await Task.sleep(nanoseconds: 5_000_000)
+        }
+    }
+}
+
+@MainActor
+func repoRoot() -> URL {
+    URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+}
+
+@MainActor
+func makeRepoRuntime(audioPlayer: RuntimeAudioPlaying? = nil) throws -> GameRuntime {
+    let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+    let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+    return GameRuntime(content: content, telemetryPublisher: nil, audioPlayer: audioPlayer)
+}
+
+@MainActor
+func findConnectionStart(
+    from sourceMapID: String,
+    moving direction: FacingDirection,
+    expecting targetMapID: String,
+    requiredFlags: [String] = []
+) throws -> TilePoint {
+    let probe = try makeRepoRuntime()
+    let map = try XCTUnwrap(probe.content.map(id: sourceMapID))
+
+    for y in 0..<map.stepHeight {
+        for x in 0..<map.stepWidth {
+            probe.gameplayState = probe.makeInitialGameplayState()
+            probe.scene = .field
+            probe.substate = "field"
+            probe.gameplayState?.mapID = sourceMapID
+            probe.gameplayState?.playerPosition = .init(x: x, y: y)
+            probe.gameplayState?.facing = direction
+            probe.gameplayState?.activeFlags.formUnion(requiredFlags)
+            probe.movePlayer(in: direction)
+            if probe.gameplayState?.mapID == targetMapID {
+                return .init(x: x, y: y)
+            }
+        }
+    }
+
+    XCTFail("failed to find a \(direction.rawValue) connection from \(sourceMapID) to \(targetMapID)")
+    return .init(x: 0, y: 0)
+}
+
+@MainActor
+func findGrassTile(in runtime: GameRuntime, mapID: String) throws -> TilePoint {
+    let map = try XCTUnwrap(runtime.content.map(id: mapID))
+    for y in 0..<map.stepHeight {
+        for x in 0..<map.stepWidth {
+            let point = TilePoint(x: x, y: y)
+            if runtime.isStandingOnGrass(in: map, position: point) {
+                return point
+            }
+        }
+    }
+
+    XCTFail("failed to find grass in \(mapID)")
+    return .init(x: 0, y: 0)
+}
+
+@MainActor
+func waitForSnapshot(
+    _ runtime: GameRuntime,
+    timeout: TimeInterval = 1.5,
+    matching predicate: (RuntimeTelemetrySnapshot) -> Bool
+) async throws -> RuntimeTelemetrySnapshot {
+    let deadline = Date().addingTimeInterval(timeout)
+    while Date() < deadline {
+        let snapshot = runtime.currentSnapshot()
+        if predicate(snapshot) {
+            return snapshot
+        }
+        try await Task.sleep(for: .milliseconds(10))
+    }
+    throw XCTSkip("timed out waiting for expected runtime snapshot")
+}
+@MainActor
+final class RecordingAudioPlayer: RuntimeAudioPlaying {
+    private(set) var musicRequests: [MusicPlaybackRequest] = []
+    private(set) var soundEffectRequests: [SoundEffectPlaybackRequest] = []
+    private(set) var stopAllMusicCount = 0
+    private var pendingCompletions: [() -> Void] = []
+
+    var pendingCompletionCount: Int {
+        pendingCompletions.count
+    }
+
+    func playMusic(request: MusicPlaybackRequest, completion: (@MainActor @Sendable () -> Void)?) {
+        musicRequests.append(request)
+        if let completion {
+            pendingCompletions.append(completion)
+        }
+    }
+
+    func playSFX(
+        request: SoundEffectPlaybackRequest,
+        completion: (@MainActor @Sendable () -> Void)?
+    ) -> SoundEffectPlaybackResult {
+        soundEffectRequests.append(request)
+        if let completion {
+            pendingCompletions.append(completion)
+        }
+        return .init(soundEffectID: request.soundEffectID, status: .started)
+    }
+
+    func stopAllMusic() {
+        stopAllMusicCount += 1
+    }
+
+    func completePendingPlayback() {
+        guard pendingCompletions.isEmpty == false else { return }
+        let completion = pendingCompletions.removeFirst()
+        completion()
+    }
+}
+
+enum InMemorySaveStoreError: Error {
+    case corrupt
+}
+
+final class InMemorySaveStore: @unchecked Sendable, SaveStore {
+    var envelope: GameSaveEnvelope?
+    var metadataError: Error?
+
+    func hasSaveFile() -> Bool {
+        envelope != nil || metadataError != nil
+    }
+
+    func loadMetadata() throws -> GameSaveMetadata? {
+        if let metadataError {
+            throw metadataError
+        }
+        return envelope?.metadata
+    }
+
+    func loadSave() throws -> GameSaveEnvelope? {
+        if let metadataError {
+            throw metadataError
+        }
+        return envelope
+    }
+
+    func save(_ envelope: GameSaveEnvelope) throws {
+        self.envelope = envelope
+        metadataError = nil
+    }
+
+    func deleteSave() throws {
+        envelope = nil
+    }
+}
