@@ -548,6 +548,98 @@ final class PokeUITests: XCTestCase {
         XCTAssertTrue(FieldMapView.playerUsesWalkingFrame(phase: 3))
     }
 
+    func testChainedWalkPhaseOffsetStartsHeldStrideOnVisibleWalkFrame() {
+        let stepDuration = 16.0 / 60.0
+        let now = Date()
+        let previousStartedAt = now.addingTimeInterval(-stepDuration)
+
+        let phaseOffset = FieldMapView.chainedWalkPhaseOffset(
+            previousDirection: .right,
+            nextDirection: .right,
+            previousStartedAt: previousStartedAt,
+            now: now,
+            stepDuration: stepDuration
+        )
+
+        XCTAssertEqual(phaseOffset, 1)
+        XCTAssertEqual(
+            FieldMapView.playerWalkAnimationPhase(
+                elapsed: 0,
+                stepDuration: stepDuration,
+                phaseOffset: phaseOffset
+            ),
+            1
+        )
+        XCTAssertTrue(FieldMapView.playerUsesWalkingFrame(phase: 1))
+    }
+
+    func testChainedWalkPhaseOffsetDoesNotCarryAcrossTurnsOrDelayedSteps() {
+        let stepDuration = 16.0 / 60.0
+        let now = Date()
+
+        XCTAssertEqual(
+            FieldMapView.chainedWalkPhaseOffset(
+                previousDirection: .right,
+                nextDirection: .up,
+                previousStartedAt: now.addingTimeInterval(-stepDuration),
+                now: now,
+                stepDuration: stepDuration
+            ),
+            0
+        )
+
+        XCTAssertEqual(
+            FieldMapView.chainedWalkPhaseOffset(
+                previousDirection: .right,
+                nextDirection: .right,
+                previousStartedAt: now.addingTimeInterval(-(stepDuration * 2)),
+                now: now,
+                stepDuration: stepDuration
+            ),
+            0
+        )
+    }
+
+    func testPlayerStepAnimationIsRetainedDuringNpcOnlyUpdatesWhileStepIsActive() {
+        let stepDuration = 16.0 / 60.0
+        let now = Date()
+
+        XCTAssertTrue(
+            FieldMapView.shouldRetainPlayerStepAnimation(
+                currentDestinationPosition: .init(x: 10, y: 7),
+                startedAt: now.addingTimeInterval(-(stepDuration * 0.5)),
+                nextPlayerPosition: .init(x: 10, y: 7),
+                now: now,
+                stepDuration: stepDuration
+            )
+        )
+    }
+
+    func testPlayerStepAnimationIsNotRetainedAfterStepFinishesOrPlayerChangesTile() {
+        let stepDuration = 16.0 / 60.0
+        let now = Date()
+
+        XCTAssertFalse(
+            FieldMapView.shouldRetainPlayerStepAnimation(
+                currentDestinationPosition: .init(x: 10, y: 7),
+                startedAt: now.addingTimeInterval(-(stepDuration * 1.1)),
+                nextPlayerPosition: .init(x: 10, y: 7),
+                now: now,
+                stepDuration: stepDuration
+            )
+        )
+
+        XCTAssertFalse(
+            FieldMapView.shouldRetainPlayerStepAnimation(
+                currentDestinationPosition: .init(x: 10, y: 7),
+                startedAt: now.addingTimeInterval(-(stepDuration * 0.5)),
+                nextPlayerPosition: .init(x: 11, y: 7),
+                now: now,
+                stepDuration: stepDuration
+            )
+        )
+    }
+
     func testPlayerWalkFrameMirrorsSecondStepForVerticalMovement() {
         XCTAssertFalse(FieldMapView.playerUsesMirroredWalkingFrame(facing: .left, phase: 3))
         XCTAssertFalse(FieldMapView.playerUsesMirroredWalkingFrame(facing: .right, phase: 3))
