@@ -9,7 +9,7 @@ This repository still contains the `pret/pokered` disassembly and original asset
 - a native Swift engine
 - a native macOS app shell and UI
 - deterministic content extracted from the disassembly
-- telemetry and harness tooling that support full agentic validation loops
+- telemetry and runtime traces that support debugging and validation
 
 ## Current Status
 
@@ -21,7 +21,7 @@ Today the repo includes:
 - a deterministic Red content extraction pipeline
 - committed extracted runtime content under `Content/Red/`
 - a native macOS app that reaches `launch -> splash -> titleAttract -> titleMenu`
-- telemetry, control, and harness tooling for automated validation
+- telemetry and runtime traces for automated debugging and validation
 
 The Swift app now targets macOS `26.0` and later.
 
@@ -33,7 +33,6 @@ Primary commands:
 ./scripts/build_app.sh
 ./scripts/extract_red.sh
 ./scripts/launch_app.sh
-./scripts/validate_milestone.sh
 ```
 
 These scripts:
@@ -42,7 +41,6 @@ These scripts:
 - build the Swift targets
 - extract and verify Red runtime content
 - launch the native app
-- run telemetry-driven milestone validation
 
 For normal app usage, `./scripts/launch_app.sh` is enough.
 
@@ -54,7 +52,6 @@ For normal app usage, `./scripts/launch_app.sh` is enough.
 - `Sources/PokeContent/` runtime content loading and validation
 - `Sources/PokeExtractCLI/` deterministic extraction from the disassembly
 - `Sources/PokeTelemetry/` runtime snapshots and control surfaces
-- `Sources/PokeHarness/` build/launch/input/validation automation
 - `Content/Red/` extracted runtime artifacts used by the app
 - `SWIFT_PORT.md` living port ledger for full-game scope and milestone tracking
 

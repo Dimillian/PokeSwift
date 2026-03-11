@@ -79,17 +79,6 @@ let project = Project(
             ]
         ),
         .target(
-            name: "PokeHarness",
-            destinations: .macOS,
-            product: .commandLineTool,
-            bundleId: "com.dimillian.PokeSwift.PokeHarness",
-            deploymentTargets: .macOS("26.0"),
-            sources: ["Sources/PokeHarness/**"],
-            dependencies: [
-                .target(name: "PokeDataModel"),
-            ]
-        ),
-        .target(
             name: "PokeMac",
             destinations: .macOS,
             product: .app,

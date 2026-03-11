@@ -19,7 +19,7 @@
 - `PokeExtractCLI` is the only place that should parse `.asm`, map data, or other source assets directly.
 - The runtime app must consume extracted artifacts from `Content/Red/`, not ad hoc repository parsing.
 - Do not hand-edit generated `Content/Red/**` files as a shortcut for extractor changes. Change the extractor, regenerate, and commit the resulting artifacts.
-- Do not treat ROM or disassembly build success as proof that the Swift port is correct. Milestone acceptance is driven by the native app, telemetry, and harness validation.
+- Do not treat ROM or disassembly build success as proof that the Swift port is correct. Milestone acceptance is driven by the native app, telemetry, focused tests, and real runtime behavior.
 
 ## Module Ownership
 
@@ -30,7 +30,6 @@
 - `Sources/PokeUI/`: reusable SwiftUI rendering, scenes, and shared presentation primitives.
 - `App/PokeMac/`: native macOS host shell, lifecycle, input routing, app commands.
 - `Sources/PokeTelemetry/`: snapshots, traces, control endpoints, observable runtime state.
-- `Sources/PokeHarness/`: build, launch, input, validation, and app-process automation.
 
 ## Project Constraints
 
@@ -51,7 +50,6 @@
 - Use `./scripts/build_app.sh` for the standard Tuist generate + main scheme build flow.
 - Use `./scripts/extract_red.sh` whenever extractor logic or generated runtime content changes.
 - Use `./scripts/launch_app.sh` for manual native app runs.
-- Use `./scripts/validate_milestone.sh` before closing milestone, parity, telemetry, or harness-sensitive work.
 - For a full Swift workspace test sweep, run:
   - `xcodebuild -workspace PokeSwift.xcworkspace -scheme PokeSwift-Workspace -derivedDataPath .build/DerivedData test`
 - Prefer the smallest relevant `xcodebuild` build/test invocation for the touched target while iterating, then run the broader validation needed for the change class before finalizing.
@@ -60,7 +58,7 @@
 
 - Extraction changes: regenerate `Content/Red/`, verify deterministic output, and update ledger notes if coverage or scope changed.
 - Runtime/parity changes: validate through the native app and telemetry, not just unit tests.
-- Telemetry changes: keep snapshots and control surfaces stable enough for harness-driven validation.
+- Telemetry changes: keep snapshots and control surfaces stable enough for focused tests and live runtime debugging.
 - UI changes: preserve the existing native macOS direction and verify they still work with the current scene/runtime state instead of mocking around it.
 
 ## Avoid

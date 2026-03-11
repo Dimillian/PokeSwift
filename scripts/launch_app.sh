@@ -5,12 +5,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DERIVED_DATA="$ROOT/.build/DerivedData"
 PRODUCTS_DIR="$DERIVED_DATA/Build/Products/Debug"
 EXTRACTOR="$PRODUCTS_DIR/PokeExtractCLI"
-HARNESS="$PRODUCTS_DIR/PokeHarness"
 APP_BUNDLE="$PRODUCTS_DIR/PokeMac.app"
 CONTENT_ROOT="$ROOT/Content"
 CONTENT_VARIANT_ROOT="$CONTENT_ROOT/Red"
 CONTENT_MANIFEST="$CONTENT_VARIANT_ROOT/game_manifest.json"
-TRACE_DIR="$ROOT/.runtime-traces/pokemac"
 
 timestamp() {
   date '+%H:%M:%S'
@@ -82,14 +80,16 @@ detail "Repo root: $ROOT"
 detail "Derived data: $DERIVED_DATA"
 detail "App bundle: $APP_BUNDLE"
 detail "Content root: $CONTENT_VARIANT_ROOT"
-detail "Trace directory: $TRACE_DIR"
 
 section "1/4 Generate workspace and build debug targets"
-detail "Building schemes: PokeExtractCLI, PokeHarness, PokeMac"
+detail "Building schemes: PokeExtractCLI, PokeMac"
 ./scripts/build_app.sh
 
 require_executable "$EXTRACTOR" "PokeExtractCLI"
-require_executable "$HARNESS" "PokeHarness"
+if [[ ! -d "$APP_BUNDLE" ]]; then
+  printf '[%s] Missing PokeMac.app at %s\n' "$(timestamp)" "$APP_BUNDLE" >&2
+  exit 1
+fi
 
 section "2/4 Extract Red content"
 if should_refresh_content; then
@@ -104,10 +104,8 @@ detail "Checking extracted manifests and asset availability"
 "$EXTRACTOR" verify --game red --repo-root "$ROOT" --output-root "$CONTENT_ROOT"
 
 section "4/4 Launch macOS app"
-detail "Launching via PokeHarness so telemetry/input automation remains available"
-"$HARNESS" launch
+detail "Launching PokeMac.app directly"
+open "$APP_BUNDLE"
 
 section "Launch request sent"
-detail "App logs: $TRACE_DIR/app.log"
-detail "Telemetry trace: $TRACE_DIR/telemetry.jsonl"
-detail "Session event trace: $TRACE_DIR/session_events.jsonl"
+detail "App bundle: $APP_BUNDLE"

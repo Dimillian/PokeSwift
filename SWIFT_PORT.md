@@ -8,7 +8,7 @@ The port target is not "run the ROM." The target is:
 - a native macOS app with a Swift engine and native UI shell
 - deterministic content extracted from the disassembly into tracked runtime artifacts
 - a headless, testable simulation core that can be validated independently of rendering
-- a telemetry and automation surface that supports stable smoke validation plus high-signal manual-session debugging
+- a telemetry surface that supports focused validation plus high-signal manual-session debugging
 
 ## Non-Goals
 
@@ -39,7 +39,7 @@ The port target is not "run the ROM." The target is:
 ### Active Scope
 
 - `M1`: Red extraction foundation
-- `M2`: Native macOS boot, splash, title attract, title menu, telemetry, and validation harness
+- `M2`: Native macOS boot, splash, title attract, title menu, and telemetry
 - `M3`: First playable slice from `New Game` to the first rival battle in Oak's Lab
 - `M4A`: Real GB-style field rendering for the current M3 slice
 
@@ -53,8 +53,7 @@ The repo now contains:
 - the planned Swift module layout
 - a working Red extraction CLI and committed `Content/Red` artifacts
 - a native macOS app that reaches `launch -> splash -> titleAttract -> titleMenu`
-- telemetry and harness targets with working build, launch, input, latest-snapshot, quit, and validate flows
-- the harness intentionally scoped to a stable intro/M3 smoke path, with broader early-M4 work validated through focused tests plus live telemetry/session traces
+- telemetry-backed traces and focused tests for validation and debugging
 - a bounded early-M4 progression loop that now reaches `Route 1 -> Viridian City -> Viridian Pokecenter -> Viridian Mart -> Oak parcel return -> Pokedex handoff` through focused extractor/runtime coverage, with live-session manual validation still required before calling the slice broadly stable
 - a centralized current-slice extraction configuration that now expands gameplay/audio/item/encounter coverage together for `REDS_HOUSE_2F`, `REDS_HOUSE_1F`, `PALLET_TOWN`, `ROUTE_1`, `VIRIDIAN_CITY`, `VIRIDIAN_SCHOOL_HOUSE`, `VIRIDIAN_NICKNAME_HOUSE`, `VIRIDIAN_POKECENTER`, `VIRIDIAN_MART`, and `OAKS_LAB`
 - a playable field/dialogue/starter-choice/battle runtime slice from `New Game` through the first rival battle
@@ -75,9 +74,8 @@ The repo now contains:
 - bounded native M3 music playback driven from extracted ASM-backed audio manifests, including title, map-default, scripted override, battle, rival-exit, and Mom-heal routing
 - extractor-first native M3 SFX playback driven from the Red disassembly, including source-carried SFX manifests, cue wait/resume policy, current-slice dialogue command extraction from map scripts, move-to-SFX mappings for early battles, and GB-style per-channel music/SFX arbitration so map and battle music can coexist with one-shot effects
 - hardened native M3 audio startup/transition behavior so title music is primed before first attract playback, trainer battle music no longer bleeds into the immediate post-battle result dialogue, and extracted pitch slides now carry frame-count timing metadata instead of gliding across the entire note
-- audio telemetry that now exposes recent sound-effect ids, playback reasons, revisions, and rejection/preemption outcomes alongside the active music track so harness/manual sessions can verify both music transitions and SFX arbitration during the slice
-- a native-first single-slot save/load foundation using schema-versioned JSON save envelopes, title-menu `Continue` gating from readable save metadata, in-session sidebar save/load actions, XP-preserving party snapshots with hidden-growth persistence in save schema `4`, and save telemetry/control endpoints for the harness
-- isolated validation save storage under `.runtime-traces/pokemac/validation-saves` so milestone harness resets never delete the user-facing Application Support save slot
+- audio telemetry that now exposes recent sound-effect ids, playback reasons, revisions, and rejection/preemption outcomes alongside the active music track so focused tests and manual sessions can verify both music transitions and SFX arbitration during the slice
+- a native-first single-slot save/load foundation using schema-versioned JSON save envelopes, title-menu `Continue` gating from readable save metadata, in-session sidebar save/load actions, XP-preserving party snapshots with hidden-growth persistence in save schema `4`, and save telemetry/control endpoints for debugging and focused tests
 - battle telemetry that now exposes phase, queued/current text, and move-slot state so the UI, focused tests, and manual sessions can consume turn sequencing directly
 - field telemetry that now exposes visible object id, tile position, facing, and idle-vs-scripted movement mode so tests and manual sessions can assert NPC choreography and no-overlap behavior directly
 - audio telemetry that now exposes current track, entry, playback reason, and revision so smoke validation and manual sessions can validate music transitions during the slice

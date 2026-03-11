@@ -57,8 +57,7 @@ section "Generate workspace"
 tuist generate --no-open
 
 run_xcodebuild "PokeExtractCLI"
-run_xcodebuild "PokeHarness"
 run_xcodebuild "PokeMac"
 
 section "Build pipeline complete"
-detail "Built schemes: PokeExtractCLI, PokeHarness, PokeMac"
+detail "Built schemes: PokeExtractCLI, PokeMac"
