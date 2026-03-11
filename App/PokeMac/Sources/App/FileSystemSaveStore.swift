@@ -14,6 +14,7 @@ enum FileSystemSaveStoreError: LocalizedError {
 }
 
 final class FileSystemSaveStore: SaveStore {
+    private static let minimumSupportedSchemaVersion = 3
     private static let supportedSchemaVersion = GameRuntime.saveSchemaVersion
     private let saveURL: URL
     private let encoder: JSONEncoder
@@ -39,7 +40,7 @@ final class FileSystemSaveStore: SaveStore {
         guard hasSaveFile() else { return nil }
         let data = try Data(contentsOf: saveURL)
         let envelope = try decoder.decode(GameSaveEnvelope.self, from: data)
-        guard envelope.metadata.schemaVersion == Self.supportedSchemaVersion else {
+        guard (Self.minimumSupportedSchemaVersion...Self.supportedSchemaVersion).contains(envelope.metadata.schemaVersion) else {
             throw FileSystemSaveStoreError.schemaMismatch(envelope.metadata.schemaVersion)
         }
         return envelope

@@ -8,6 +8,11 @@ private struct ResolvedScriptMovementActor {
     let startPoint: TilePoint?
 }
 
+private struct ResolvedFieldStep {
+    let map: MapManifest
+    let point: TilePoint
+}
+
 extension GameRuntime {
     func handleField(button: RuntimeButton) {
         guard isFieldInputLocked == false else { return }
@@ -33,7 +38,7 @@ extension GameRuntime {
         gameplayState.facing = direction
         let currentPoint = gameplayState.playerPosition
         let nextPoint = translated(currentPoint, by: direction)
-        guard canMove(from: currentPoint, to: nextPoint, in: map, facing: direction) else {
+        guard let destination = resolveFieldStep(from: currentPoint, to: nextPoint, in: map, gameplayState: gameplayState, facing: direction) else {
             self.gameplayState = gameplayState
             evaluateMapScriptsIfNeeded(blockedMoveFacing: direction)
             guard scene == .field, dialogueState == nil, self.gameplayState?.activeScriptID == nil else {
@@ -43,14 +48,23 @@ extension GameRuntime {
             return
         }
 
-        gameplayState.playerPosition = nextPoint
+        let mapChanged = gameplayState.mapID != destination.map.id
+        gameplayState.mapID = destination.map.id
+        gameplayState.playerPosition = destination.point
+        gameplayState.activeMapScriptTriggerID = nil
         self.gameplayState = gameplayState
+        if mapChanged {
+            requestDefaultMapMusic()
+        }
         if handleWarpIfNeeded() {
             return
         }
         beginFieldMovementCooldown()
         substate = "field"
         evaluateMapScriptsIfNeeded()
+        if scene == .field, dialogueState == nil, self.gameplayState?.activeScriptID == nil {
+            evaluateWildEncounterIfNeeded()
+        }
     }
 
     func interactAhead() {
@@ -62,8 +76,28 @@ extension GameRuntime {
             return
         }
 
+        let secondTarget = translated(target, by: gameplayState.facing)
+        if let object = currentFieldObjects.first(where: { $0.position == secondTarget }),
+           canInteractOverCounter(with: object, through: target, on: map) {
+            interact(with: object)
+            return
+        }
+
         if let backgroundEvent = map.backgroundEvents.first(where: { $0.position == target }) {
             showDialogue(id: backgroundEvent.dialogueID, completion: .returnToField)
+        }
+    }
+
+    func canInteractOverCounter(with object: FieldObjectRenderState, through tile: TilePoint, on map: MapManifest) -> Bool {
+        switch object.id {
+        case "viridian_mart_clerk", "viridian_pokecenter_nurse":
+            guard let tileID = collisionTileID(at: tile, in: map),
+                  let tileset = content.tileset(id: map.tileset) else {
+                return false
+            }
+            return tileset.collision.passableTileIDs.contains(tileID) == false
+        default:
+            return false
         }
     }
 
@@ -82,13 +116,36 @@ extension GameRuntime {
                 showDialogue(id: "oaks_lab_rival_gramps_isnt_around", completion: .returnToField)
             }
         case "oaks_lab_oak_1":
-            if gameplayState?.gotStarterBit == true {
+            if hasFlag("EVENT_GOT_POKEDEX") {
+                showDialogue(id: "oaks_lab_oak_how_is_your_pokedex_coming", completion: .returnToField)
+            } else if hasFlag("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") {
+                if hasItem("OAKS_PARCEL") {
+                    beginScript(id: "oaks_lab_parcel_handoff")
+                } else {
+                    showDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", completion: .returnToField)
+                }
+            } else if gameplayState?.gotStarterBit == true {
                 showDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", completion: .returnToField)
             } else if hasFlag("EVENT_OAK_ASKED_TO_CHOOSE_MON") {
                 showDialogue(id: "oaks_lab_oak_which_pokemon_do_you_want", completion: .returnToField)
             } else {
                 showDialogue(id: "oaks_lab_oak_choose_mon", completion: .returnToField)
             }
+        case "route_1_youngster_1":
+            if hasFlag("EVENT_GOT_POTION_SAMPLE") {
+                showDialogue(id: "route_1_youngster_1_after_sample", completion: .returnToField)
+            } else {
+                beginScript(id: "route_1_potion_sample")
+            }
+        case "viridian_mart_clerk":
+            if hasFlag("EVENT_GOT_OAKS_PARCEL") == false {
+                beginScript(id: "viridian_mart_oaks_parcel")
+            } else {
+                showDialogue(id: "viridian_mart_clerk_after_parcel", completion: .returnToField)
+            }
+        case "viridian_pokecenter_nurse":
+            healParty()
+            showDialogue(id: "viridian_pokecenter_nurse_heal", completion: .returnToField)
         case "oaks_lab_poke_ball_charmander":
             interactWithStarterBall(speciesID: "CHARMANDER", promptDialogueID: "oaks_lab_you_want_charmander")
         case "oaks_lab_poke_ball_squirtle":
@@ -192,6 +249,17 @@ extension GameRuntime {
         fieldTransitionState = nil
         substate = "field"
         publishSnapshot()
+        traceEvent(
+            .warpCompleted,
+            "Warped to \(targetMap.id).",
+            mapID: targetMap.id,
+            details: [
+                "warpID": warp.id,
+                "toMapID": targetMap.id,
+                "transitionKind": kind.rawValue,
+                "steppedOut": shouldStepOut ? "true" : "false",
+            ]
+        )
         evaluateMapScriptsIfNeeded()
     }
 
@@ -326,6 +394,28 @@ extension GameRuntime {
             let target = TilePoint(
                 x: gameplayState.playerPosition.x + (movement.targetPlayerOffset?.x ?? 0),
                 y: gameplayState.playerPosition.y + (movement.targetPlayerOffset?.y ?? 0)
+            )
+            guard let path = shortestPath(
+                from: objectState.position,
+                to: target,
+                in: map,
+                ignoringObjectID: actor.actorID
+            ) else {
+                return []
+            }
+            return [.init(actorID: actor.actorID, path: path, startPoint: startPoint)]
+        case .pathToObjectOffset:
+            guard let actor = actors.first,
+                  actor.actorID != "player",
+                  let objectState = gameplayState.objectStates[actor.actorID],
+                  let targetObjectID = movement.targetObjectID,
+                  let targetObject = gameplayState.objectStates[targetObjectID]
+            else {
+                return []
+            }
+            let target = TilePoint(
+                x: targetObject.position.x + (movement.targetObjectOffset?.x ?? 0),
+                y: targetObject.position.y + (movement.targetObjectOffset?.y ?? 0)
             )
             guard let path = shortestPath(
                 from: objectState.position,
@@ -478,7 +568,7 @@ extension GameRuntime {
             return false
         }
 
-        guard let tileset = currentTilesetManifest,
+        guard let tileset = content.tileset(id: map.tileset),
               let currentTileID = collisionTileID(at: currentPoint, in: map),
               let nextTileID = collisionTileID(at: nextPoint, in: map) else {
             return true
@@ -598,15 +688,71 @@ extension GameRuntime {
     }
 
     func canMove(from currentPoint: TilePoint, to nextPoint: TilePoint, in map: MapManifest, facing: FacingDirection) -> Bool {
+        resolveFieldStep(
+            from: currentPoint,
+            to: nextPoint,
+            in: map,
+            gameplayState: gameplayState,
+            facing: facing
+        ) != nil
+    }
+
+    func collisionTileID(at point: TilePoint, in map: MapManifest) -> Int? {
+        guard point.x >= 0, point.y >= 0, point.x < map.stepWidth, point.y < map.stepHeight else {
+            return nil
+        }
+        let index = (point.y * map.stepWidth) + point.x
+        guard map.stepCollisionTileIDs.indices.contains(index) else { return nil }
+        return map.stepCollisionTileIDs[index]
+    }
+
+    fileprivate func resolveFieldStep(
+        from currentPoint: TilePoint,
+        to nextPoint: TilePoint,
+        in map: MapManifest,
+        gameplayState: GameplayState?,
+        facing: FacingDirection
+    ) -> ResolvedFieldStep? {
+        if (0..<map.stepWidth).contains(nextPoint.x), (0..<map.stepHeight).contains(nextPoint.y) {
+            guard canOccupyFieldPoint(nextPoint, from: currentPoint, in: map, mapID: map.id, gameplayState: gameplayState, facing: facing) else {
+                return nil
+            }
+            return ResolvedFieldStep(map: map, point: nextPoint)
+        }
+
+        guard let connectionDestination = connectionDestination(for: nextPoint, from: map, facing: facing) else {
+            return nil
+        }
+        guard canOccupyFieldPoint(
+            connectionDestination.point,
+            from: connectionDestination.originPoint,
+            in: connectionDestination.map,
+            mapID: connectionDestination.map.id,
+            gameplayState: gameplayState,
+            facing: facing
+        ) else {
+            return nil
+        }
+        return ResolvedFieldStep(map: connectionDestination.map, point: connectionDestination.point)
+    }
+
+    func canOccupyFieldPoint(
+        _ nextPoint: TilePoint,
+        from currentPoint: TilePoint,
+        in map: MapManifest,
+        mapID: String,
+        gameplayState: GameplayState?,
+        facing: FacingDirection
+    ) -> Bool {
         guard nextPoint.x >= 0, nextPoint.y >= 0, nextPoint.x < map.stepWidth, nextPoint.y < map.stepHeight else {
             return false
         }
 
-        if currentFieldObjects.contains(where: { $0.position == nextPoint }) {
+        if visibleObjectPositions(on: mapID, gameplayState: gameplayState).contains(nextPoint) {
             return false
         }
 
-        guard let tileset = currentTilesetManifest,
+        guard let tileset = content.tileset(id: map.tileset),
               let currentTileID = collisionTileID(at: currentPoint, in: map),
               let nextTileID = collisionTileID(at: nextPoint, in: map) else {
             return true
@@ -631,12 +777,66 @@ extension GameRuntime {
         return true
     }
 
-    func collisionTileID(at point: TilePoint, in map: MapManifest) -> Int? {
-        guard point.x >= 0, point.y >= 0, point.x < map.stepWidth, point.y < map.stepHeight else {
+    func visibleObjectPositions(on mapID: String, gameplayState: GameplayState?) -> Set<TilePoint> {
+        guard let gameplayState, let map = content.map(id: mapID) else { return [] }
+        return Set(map.objects.compactMap { object in
+            guard gameplayState.objectStates[object.id]?.visible ?? object.visibleByDefault else { return nil }
+            return gameplayState.objectStates[object.id]?.position ?? object.position
+        })
+    }
+
+    func connectionDestination(
+        for attemptedPoint: TilePoint,
+        from map: MapManifest,
+        facing: FacingDirection
+    ) -> (map: MapManifest, point: TilePoint, originPoint: TilePoint)? {
+        guard let connection = map.connections.first(where: { $0.direction == mapConnectionDirection(for: facing) }),
+              let targetMap = content.map(id: connection.targetMapID) else {
             return nil
         }
-        let index = (point.y * map.stepWidth) + point.x
-        guard map.stepCollisionTileIDs.indices.contains(index) else { return nil }
-        return map.stepCollisionTileIDs[index]
+
+        switch facing {
+        case .up:
+            let targetX = attemptedPoint.x - (connection.offset * 2)
+            guard (0..<targetMap.stepWidth).contains(targetX) else { return nil }
+            return (
+                map: targetMap,
+                point: .init(x: targetX, y: targetMap.stepHeight - 1),
+                originPoint: .init(x: targetX, y: targetMap.stepHeight)
+            )
+        case .down:
+            let targetX = attemptedPoint.x - (connection.offset * 2)
+            guard (0..<targetMap.stepWidth).contains(targetX) else { return nil }
+            return (
+                map: targetMap,
+                point: .init(x: targetX, y: 0),
+                originPoint: .init(x: targetX, y: -1)
+            )
+        case .left:
+            let targetY = attemptedPoint.y - (connection.offset * 2)
+            guard (0..<targetMap.stepHeight).contains(targetY) else { return nil }
+            return (
+                map: targetMap,
+                point: .init(x: targetMap.stepWidth - 1, y: targetY),
+                originPoint: .init(x: targetMap.stepWidth, y: targetY)
+            )
+        case .right:
+            let targetY = attemptedPoint.y - (connection.offset * 2)
+            guard (0..<targetMap.stepHeight).contains(targetY) else { return nil }
+            return (
+                map: targetMap,
+                point: .init(x: 0, y: targetY),
+                originPoint: .init(x: -1, y: targetY)
+            )
+        }
+    }
+
+    func mapConnectionDirection(for facing: FacingDirection) -> MapConnectionDirection {
+        switch facing {
+        case .up: return .north
+        case .down: return .south
+        case .left: return .west
+        case .right: return .east
+        }
     }
 }

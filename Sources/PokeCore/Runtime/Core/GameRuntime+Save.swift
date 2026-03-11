@@ -128,6 +128,7 @@ extension GameRuntime {
             },
             activeFlags: gameplayState.activeFlags.sorted(),
             money: gameplayState.money,
+            inventory: gameplayState.inventory.map { .init(itemID: $0.itemID, quantity: $0.quantity) },
             earnedBadgeIDs: gameplayState.earnedBadgeIDs.sorted(),
             playerName: gameplayState.playerName,
             rivalName: gameplayState.rivalName,
@@ -155,9 +156,11 @@ extension GameRuntime {
             chosenStarterSpeciesID: gameplayState.chosenStarterSpeciesID,
             rivalStarterSpeciesID: gameplayState.rivalStarterSpeciesID,
             pendingStarterSpeciesID: gameplayState.pendingStarterSpeciesID,
-            activeMapScriptTriggerID: gameplayState.activeMapScriptTriggerID,
+            activeMapScriptTriggerID: nil,
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
+            acquisitionRNGState: acquisitionRNGState,
+            encounterStepCounter: gameplayState.encounterStepCounter,
             playTimeSeconds: gameplayState.playTimeSeconds
         )
 
@@ -165,7 +168,7 @@ extension GameRuntime {
     }
 
     func applySaveEnvelope(_ envelope: GameSaveEnvelope) throws {
-        guard envelope.metadata.schemaVersion == Self.saveSchemaVersion else {
+        guard (3...Self.saveSchemaVersion).contains(envelope.metadata.schemaVersion) else {
             throw GameSaveRuntimeError.unsupportedSchema(envelope.metadata.schemaVersion)
         }
         guard content.map(id: envelope.snapshot.mapID) != nil else {
@@ -194,6 +197,7 @@ extension GameRuntime {
             },
             activeFlags: Set(envelope.snapshot.activeFlags),
             money: envelope.snapshot.money,
+            inventory: envelope.snapshot.inventory.map { .init(itemID: $0.itemID, quantity: $0.quantity) },
             earnedBadgeIDs: Set(envelope.snapshot.earnedBadgeIDs),
             gotStarterBit: envelope.snapshot.chosenStarterSpeciesID != nil,
             playerName: envelope.snapshot.playerName,
@@ -222,13 +226,18 @@ extension GameRuntime {
             chosenStarterSpeciesID: envelope.snapshot.chosenStarterSpeciesID,
             rivalStarterSpeciesID: envelope.snapshot.rivalStarterSpeciesID,
             pendingStarterSpeciesID: envelope.snapshot.pendingStarterSpeciesID,
-            activeMapScriptTriggerID: envelope.snapshot.activeMapScriptTriggerID,
+            activeMapScriptTriggerID: nil,
             activeScriptID: envelope.snapshot.activeScriptID,
             activeScriptStep: envelope.snapshot.activeScriptStep,
             battle: nil,
+            encounterStepCounter: envelope.snapshot.encounterStepCounter,
             playTimeSeconds: envelope.snapshot.playTimeSeconds
         )
-        reseedAcquisitionRNG(for: playthroughID)
+        if envelope.snapshot.acquisitionRNGState == 0 {
+            reseedAcquisitionRNG(for: playthroughID)
+        } else {
+            acquisitionRNGState = envelope.snapshot.acquisitionRNGState
+        }
         dialogueState = nil
         deferredActions.removeAll()
         currentAudioState = nil
@@ -247,6 +256,15 @@ extension GameRuntime {
             succeeded: succeeded,
             message: message,
             timestamp: Self.timestampFormatter.string(from: Date())
+        )
+        traceEvent(
+            .saveResult,
+            message ?? "\(operation.capitalized) \(succeeded ? "succeeded" : "failed").",
+            mapID: gameplayState?.mapID,
+            details: [
+                "operation": operation,
+                "succeeded": succeeded ? "true" : "false",
+            ]
         )
     }
 

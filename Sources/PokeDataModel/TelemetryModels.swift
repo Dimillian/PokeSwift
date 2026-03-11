@@ -265,14 +265,36 @@ public struct PartyTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public struct InventoryItemTelemetry: Codable, Equatable, Sendable {
+    public let itemID: String
+    public let displayName: String
+    public let quantity: Int
+
+    public init(itemID: String, displayName: String, quantity: Int) {
+        self.itemID = itemID
+        self.displayName = displayName
+        self.quantity = quantity
+    }
+}
+
+public struct InventoryTelemetry: Codable, Equatable, Sendable {
+    public let items: [InventoryItemTelemetry]
+
+    public init(items: [InventoryItemTelemetry]) {
+        self.items = items
+    }
+}
+
 public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let battleID: String
+    public let kind: BattleKind
     public let trainerName: String
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
     public let enemyPartyCount: Int
     public let enemyActiveIndex: Int
     public let focusedMoveIndex: Int
+    public let canRun: Bool
     public let phase: String
     public let textLines: [String]
     public let moveSlots: [BattleMoveSlotTelemetry]
@@ -280,24 +302,28 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
 
     public init(
         battleID: String,
+        kind: BattleKind = .trainer,
         trainerName: String,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
         enemyPartyCount: Int,
         enemyActiveIndex: Int,
         focusedMoveIndex: Int,
+        canRun: Bool = false,
         phase: String = "moveSelection",
         textLines: [String] = [],
         moveSlots: [BattleMoveSlotTelemetry] = [],
         battleMessage: String
     ) {
         self.battleID = battleID
+        self.kind = kind
         self.trainerName = trainerName
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.enemyPartyCount = enemyPartyCount
         self.enemyActiveIndex = enemyActiveIndex
         self.focusedMoveIndex = focusedMoveIndex
+        self.canRun = canRun
         self.phase = phase
         self.textLines = textLines
         self.moveSlots = moveSlots
@@ -306,12 +332,14 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case battleID
+        case kind
         case trainerName
         case playerPokemon
         case enemyPokemon
         case enemyPartyCount
         case enemyActiveIndex
         case focusedMoveIndex
+        case canRun
         case phase
         case textLines
         case moveSlots
@@ -321,12 +349,14 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         battleID = try container.decode(String.self, forKey: .battleID)
+        kind = try container.decodeIfPresent(BattleKind.self, forKey: .kind) ?? .trainer
         trainerName = try container.decode(String.self, forKey: .trainerName)
         playerPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .playerPokemon)
         enemyPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .enemyPokemon)
         enemyPartyCount = try container.decodeIfPresent(Int.self, forKey: .enemyPartyCount) ?? 1
         enemyActiveIndex = try container.decodeIfPresent(Int.self, forKey: .enemyActiveIndex) ?? 0
         focusedMoveIndex = try container.decode(Int.self, forKey: .focusedMoveIndex)
+        canRun = try container.decodeIfPresent(Bool.self, forKey: .canRun) ?? false
         phase = try container.decodeIfPresent(String.self, forKey: .phase) ?? "moveSelection"
         textLines = try container.decodeIfPresent([String].self, forKey: .textLines) ?? []
         moveSlots = try container.decodeIfPresent([BattleMoveSlotTelemetry].self, forKey: .moveSlots) ?? []
@@ -420,6 +450,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let dialogue: DialogueTelemetry?
     public let starterChoice: StarterChoiceTelemetry?
     public let party: PartyTelemetry?
+    public let inventory: InventoryTelemetry?
     public let battle: BattleTelemetry?
     public let eventFlags: EventFlagTelemetry?
     public let audio: AudioTelemetry?
@@ -438,6 +469,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         dialogue: DialogueTelemetry?,
         starterChoice: StarterChoiceTelemetry?,
         party: PartyTelemetry?,
+        inventory: InventoryTelemetry?,
         battle: BattleTelemetry?,
         eventFlags: EventFlagTelemetry?,
         audio: AudioTelemetry?,
@@ -455,6 +487,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.dialogue = dialogue
         self.starterChoice = starterChoice
         self.party = party
+        self.inventory = inventory
         self.battle = battle
         self.eventFlags = eventFlags
         self.audio = audio
@@ -465,6 +498,62 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     }
 }
 
+public enum RuntimeSessionEventKind: String, Codable, Equatable, Sendable {
+    case sessionStarted
+    case scriptStarted
+    case scriptFinished
+    case dialogueStarted
+    case warpCompleted
+    case encounterTriggered
+    case battleStarted
+    case battleEnded
+    case inventoryChanged
+    case partyHealed
+    case saveResult
+}
+
+public struct RuntimeSessionEvent: Codable, Equatable, Sendable {
+    public let timestamp: String
+    public let kind: RuntimeSessionEventKind
+    public let message: String
+    public let scene: RuntimeScene
+    public let mapID: String?
+    public let scriptID: String?
+    public let dialogueID: String?
+    public let battleID: String?
+    public let battleKind: BattleKind?
+    public let details: [String: String]
+
+    public init(
+        timestamp: String,
+        kind: RuntimeSessionEventKind,
+        message: String,
+        scene: RuntimeScene,
+        mapID: String?,
+        scriptID: String? = nil,
+        dialogueID: String? = nil,
+        battleID: String? = nil,
+        battleKind: BattleKind? = nil,
+        details: [String: String] = [:]
+    ) {
+        self.timestamp = timestamp
+        self.kind = kind
+        self.message = message
+        self.scene = scene
+        self.mapID = mapID
+        self.scriptID = scriptID
+        self.dialogueID = dialogueID
+        self.battleID = battleID
+        self.battleKind = battleKind
+        self.details = details
+    }
+}
+
 public protocol TelemetryPublisher: Sendable {
     func publish(snapshot: RuntimeTelemetrySnapshot) async
+    func publish(event: RuntimeSessionEvent) async
+}
+
+public extension TelemetryPublisher {
+    func publish(event: RuntimeSessionEvent) async {}
 }

@@ -19,6 +19,7 @@ public struct FieldMapView: View {
     @State private var presentedPlayerWorldPosition: CGPoint = .zero
     @State private var presentedObjectWorldPositions: [String: CGPoint] = [:]
     @State private var presentationIdentity: FieldPresentationIdentity?
+    @State private var presentedMap: MapManifest?
     @State private var playerStepAnimation: PlayerStepAnimationState?
     @State private var objectStepAnimations: [String: ObjectStepAnimationState] = [:]
 
@@ -178,8 +179,9 @@ public struct FieldMapView: View {
                 .init(id: $0.id, position: $0.position, movementMode: $0.movementMode)
             }
         )
-        let shouldAnimate = shouldAnimateTransition(to: nextIdentity)
-        let nextStepAnimation = makePlayerStepAnimation(to: nextIdentity)
+        let transitionDirection = transitionDirection(to: nextIdentity, nextMap: map)
+        let shouldAnimate = transitionDirection != nil
+        let nextStepAnimation = makePlayerStepAnimation(to: nextIdentity, direction: transitionDirection)
         let nextObjectWorldPositions = Dictionary(uniqueKeysWithValues: objects.map { object in
             (
                 object.id,
@@ -208,6 +210,7 @@ public struct FieldMapView: View {
             )
             presentedObjectWorldPositions = nextObjectWorldPositions
             presentationIdentity = nextIdentity
+            presentedMap = map
         }
 
         if shouldAnimate || shouldAnimateObjects {
@@ -255,21 +258,27 @@ public struct FieldMapView: View {
         return currentAnimation
     }
 
-    private func shouldAnimateTransition(to nextIdentity: FieldPresentationIdentity) -> Bool {
+    private func transitionDirection(to nextIdentity: FieldPresentationIdentity, nextMap: MapManifest) -> FacingDirection? {
         guard let previousIdentity = presentationIdentity,
-              previousIdentity.mapID == nextIdentity.mapID else {
-            return false
+              let previousMap = presentedMap else {
+            return nil
         }
 
-        let deltaX = abs(previousIdentity.playerPosition.x - nextIdentity.playerPosition.x)
-        let deltaY = abs(previousIdentity.playerPosition.y - nextIdentity.playerPosition.y)
-        return (deltaX + deltaY) == 1
+        if previousIdentity.mapID == nextIdentity.mapID {
+            return Self.stepDirection(from: previousIdentity.playerPosition, to: nextIdentity.playerPosition)
+        }
+
+        return Self.connectedStepDirection(
+            from: previousMap,
+            previousPosition: previousIdentity.playerPosition,
+            to: nextMap,
+            nextPosition: nextIdentity.playerPosition
+        )
     }
 
-    private func makePlayerStepAnimation(to nextIdentity: FieldPresentationIdentity) -> PlayerStepAnimationState? {
-        guard shouldAnimateTransition(to: nextIdentity),
-              let previousIdentity = presentationIdentity,
-              let direction = Self.stepDirection(from: previousIdentity.playerPosition, to: nextIdentity.playerPosition) else {
+    private func makePlayerStepAnimation(to nextIdentity: FieldPresentationIdentity, direction: FacingDirection?) -> PlayerStepAnimationState? {
+        guard let previousIdentity = presentationIdentity,
+              let direction else {
             return nil
         }
 
@@ -404,6 +413,48 @@ public struct FieldMapView: View {
         if end.x == start.x, end.y == start.y - 1 {
             return .up
         }
+        return nil
+    }
+
+    static func connectedStepDirection(
+        from previousMap: MapManifest,
+        previousPosition: TilePoint,
+        to nextMap: MapManifest,
+        nextPosition: TilePoint
+    ) -> FacingDirection? {
+        for connection in previousMap.connections where connection.targetMapID == nextMap.id {
+            switch connection.direction {
+            case .north:
+                let expectedPreviousX = nextPosition.x + (connection.offset * 2)
+                guard previousPosition == .init(x: expectedPreviousX, y: 0),
+                      nextPosition.y == nextMap.stepHeight - 1 else {
+                    continue
+                }
+                return .up
+            case .south:
+                let expectedPreviousX = nextPosition.x + (connection.offset * 2)
+                guard previousPosition == .init(x: expectedPreviousX, y: previousMap.stepHeight - 1),
+                      nextPosition.y == 0 else {
+                    continue
+                }
+                return .down
+            case .west:
+                let expectedPreviousY = nextPosition.y + (connection.offset * 2)
+                guard previousPosition == .init(x: 0, y: expectedPreviousY),
+                      nextPosition.x == nextMap.stepWidth - 1 else {
+                    continue
+                }
+                return .left
+            case .east:
+                let expectedPreviousY = nextPosition.y + (connection.offset * 2)
+                guard previousPosition == .init(x: previousMap.stepWidth - 1, y: expectedPreviousY),
+                      nextPosition.x == 0 else {
+                    continue
+                }
+                return .right
+            }
+        }
+
         return nil
     }
 

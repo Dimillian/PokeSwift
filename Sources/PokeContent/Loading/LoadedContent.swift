@@ -64,12 +64,20 @@ public struct LoadedContent: Sendable {
         gameplayManifest.species.first { $0.id == id }
     }
 
+    public func item(id: String) -> ItemManifest? {
+        gameplayManifest.items.first { $0.id == id }
+    }
+
     public func move(id: String) -> MoveManifest? {
         gameplayManifest.moves.first { $0.id == id }
     }
 
     public func typeEffectiveness(attackingType: String, defendingType: String) -> TypeEffectivenessManifest? {
         gameplayManifest.typeEffectiveness.first { $0.attackingType == attackingType && $0.defendingType == defendingType }
+    }
+
+    public func wildEncounterTable(mapID: String) -> WildEncounterTableManifest? {
+        gameplayManifest.wildEncounterTables.first { $0.mapID == mapID }
     }
 
     public func trainerBattle(id: String) -> TrainerBattleManifest? {

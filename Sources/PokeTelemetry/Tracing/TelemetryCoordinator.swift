@@ -3,30 +3,26 @@ import PokeDataModel
 
 public actor TelemetryCoordinator: TelemetryPublisher {
     private let traceFileURL: URL
+    private let sessionEventFileURL: URL
     private let encoder = JSONEncoder()
     private var latest: RuntimeTelemetrySnapshot?
 
     public init(traceDirectoryURL: URL) throws {
         try FileManager.default.createDirectory(at: traceDirectoryURL, withIntermediateDirectories: true)
         self.traceFileURL = traceDirectoryURL.appendingPathComponent("telemetry.jsonl")
+        self.sessionEventFileURL = traceDirectoryURL.appendingPathComponent("session_events.jsonl")
         encoder.outputFormatting = [.sortedKeys]
-        if FileManager.default.fileExists(atPath: traceFileURL.path) == false {
-            FileManager.default.createFile(atPath: traceFileURL.path, contents: Data())
-        }
+        Self.createTraceFileIfNeeded(at: traceFileURL)
+        Self.createTraceFileIfNeeded(at: sessionEventFileURL)
     }
 
     public func publish(snapshot: RuntimeTelemetrySnapshot) async {
         latest = snapshot
-        guard let data = try? encoder.encode(snapshot) else { return }
-        do {
-            let handle = try FileHandle(forWritingTo: traceFileURL)
-            try handle.seekToEnd()
-            try handle.write(contentsOf: data)
-            try handle.write(contentsOf: Data("\n".utf8))
-            try handle.close()
-        } catch {
-            // Keep runtime alive if trace writing fails.
-        }
+        writeJSONLine(snapshot, to: traceFileURL)
+    }
+
+    public func publish(event: RuntimeSessionEvent) async {
+        writeJSONLine(event, to: sessionEventFileURL)
     }
 
     public func latestSnapshot() -> RuntimeTelemetrySnapshot? {
@@ -50,5 +46,24 @@ public actor TelemetryCoordinator: TelemetryPublisher {
             loadHandler: loadHandler,
             quitHandler: quitHandler
         )
+    }
+
+    private nonisolated static func createTraceFileIfNeeded(at url: URL) {
+        if FileManager.default.fileExists(atPath: url.path) == false {
+            FileManager.default.createFile(atPath: url.path, contents: Data())
+        }
+    }
+
+    private func writeJSONLine<T: Encodable>(_ value: T, to url: URL) {
+        guard let data = try? encoder.encode(value) else { return }
+        do {
+            let handle = try FileHandle(forWritingTo: url)
+            try handle.seekToEnd()
+            try handle.write(contentsOf: data)
+            try handle.write(contentsOf: Data("\n".utf8))
+            try handle.close()
+        } catch {
+            // Keep runtime alive if trace writing fails.
+        }
     }
 }

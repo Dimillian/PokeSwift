@@ -267,31 +267,37 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
 
 public struct BattleSidebarProps: Equatable, Sendable {
     public let trainerName: String
+    public let kind: BattleKind
     public let phase: String
     public let promptText: String
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
     public let moveSlots: [BattleMoveSlotTelemetry]
     public let focusedMoveIndex: Int
+    public let canRun: Bool
     public let party: PartySidebarProps
 
     public init(
         trainerName: String,
+        kind: BattleKind,
         phase: String,
         promptText: String,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
         moveSlots: [BattleMoveSlotTelemetry],
         focusedMoveIndex: Int,
+        canRun: Bool,
         party: PartySidebarProps
     ) {
         self.trainerName = trainerName
+        self.kind = kind
         self.phase = phase
         self.promptText = promptText
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.moveSlots = moveSlots
         self.focusedMoveIndex = focusedMoveIndex
+        self.canRun = canRun
         self.party = party
     }
 }
@@ -429,7 +435,7 @@ public enum GameplaySidebarPropsBuilder {
             title: "Bag",
             items: items,
             emptyStateTitle: "No items yet",
-            emptyStateDetail: "Inventory comes online with the bag systems in a later gameplay milestone."
+            emptyStateDetail: "No items collected in the current save."
         )
     }
 

@@ -48,6 +48,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let objectStates: [String: GameSaveObjectState]
     public let activeFlags: [String]
     public let money: Int
+    public let inventory: [GameSaveInventoryItem]
     public let earnedBadgeIDs: [String]
     public let playerName: String
     public let rivalName: String
@@ -58,6 +59,8 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let activeMapScriptTriggerID: String?
     public let activeScriptID: String?
     public let activeScriptStep: Int?
+    public let acquisitionRNGState: UInt64
+    public let encounterStepCounter: Int
     public let playTimeSeconds: Int
 
     public init(
@@ -67,6 +70,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         objectStates: [String: GameSaveObjectState],
         activeFlags: [String],
         money: Int,
+        inventory: [GameSaveInventoryItem],
         earnedBadgeIDs: [String],
         playerName: String,
         rivalName: String,
@@ -77,6 +81,8 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         activeMapScriptTriggerID: String?,
         activeScriptID: String?,
         activeScriptStep: Int?,
+        acquisitionRNGState: UInt64,
+        encounterStepCounter: Int,
         playTimeSeconds: Int
     ) {
         self.mapID = mapID
@@ -85,6 +91,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.objectStates = objectStates
         self.activeFlags = activeFlags
         self.money = money
+        self.inventory = inventory
         self.earnedBadgeIDs = earnedBadgeIDs
         self.playerName = playerName
         self.rivalName = rivalName
@@ -95,7 +102,66 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.activeMapScriptTriggerID = activeMapScriptTriggerID
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
+        self.acquisitionRNGState = acquisitionRNGState
+        self.encounterStepCounter = encounterStepCounter
         self.playTimeSeconds = playTimeSeconds
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mapID
+        case playerPosition
+        case facing
+        case objectStates
+        case activeFlags
+        case money
+        case inventory
+        case earnedBadgeIDs
+        case playerName
+        case rivalName
+        case playerParty
+        case chosenStarterSpeciesID
+        case rivalStarterSpeciesID
+        case pendingStarterSpeciesID
+        case activeMapScriptTriggerID
+        case activeScriptID
+        case activeScriptStep
+        case acquisitionRNGState
+        case encounterStepCounter
+        case playTimeSeconds
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        mapID = try container.decode(String.self, forKey: .mapID)
+        playerPosition = try container.decode(TilePoint.self, forKey: .playerPosition)
+        facing = try container.decode(FacingDirection.self, forKey: .facing)
+        objectStates = try container.decode([String: GameSaveObjectState].self, forKey: .objectStates)
+        activeFlags = try container.decode([String].self, forKey: .activeFlags)
+        money = try container.decode(Int.self, forKey: .money)
+        inventory = try container.decodeIfPresent([GameSaveInventoryItem].self, forKey: .inventory) ?? []
+        earnedBadgeIDs = try container.decode([String].self, forKey: .earnedBadgeIDs)
+        playerName = try container.decode(String.self, forKey: .playerName)
+        rivalName = try container.decode(String.self, forKey: .rivalName)
+        playerParty = try container.decode([GameSavePokemon].self, forKey: .playerParty)
+        chosenStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .chosenStarterSpeciesID)
+        rivalStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .rivalStarterSpeciesID)
+        pendingStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .pendingStarterSpeciesID)
+        activeMapScriptTriggerID = try container.decodeIfPresent(String.self, forKey: .activeMapScriptTriggerID)
+        activeScriptID = try container.decodeIfPresent(String.self, forKey: .activeScriptID)
+        activeScriptStep = try container.decodeIfPresent(Int.self, forKey: .activeScriptStep)
+        acquisitionRNGState = try container.decodeIfPresent(UInt64.self, forKey: .acquisitionRNGState) ?? 0
+        encounterStepCounter = try container.decodeIfPresent(Int.self, forKey: .encounterStepCounter) ?? 0
+        playTimeSeconds = try container.decode(Int.self, forKey: .playTimeSeconds)
+    }
+}
+
+public struct GameSaveInventoryItem: Codable, Equatable, Sendable {
+    public let itemID: String
+    public let quantity: Int
+
+    public init(itemID: String, quantity: Int) {
+        self.itemID = itemID
+        self.quantity = quantity
     }
 }
 

@@ -83,6 +83,7 @@ final class PokeUITests: XCTestCase {
         let sidebarMode = GameplaySidebarMode.battle(
             BattleSidebarProps(
                 trainerName: "BLUE",
+                kind: .trainer,
                 phase: "moveSelection",
                 promptText: "Pick the next move.",
                 playerPokemon: .init(
@@ -114,6 +115,7 @@ final class PokeUITests: XCTestCase {
                     .init(moveID: "GROWL", displayName: "Growl", currentPP: 40, maxPP: 40, isSelectable: true),
                 ],
                 focusedMoveIndex: 1,
+                canRun: false,
                 party: .init(
                     pokemon: [
                         .init(
@@ -270,6 +272,7 @@ final class PokeUITests: XCTestCase {
     func testBattleSidebarPropsPreservePhaseSpecificState() {
         let moveSelection = BattleSidebarProps(
             trainerName: "BLUE",
+            kind: .trainer,
             phase: "moveSelection",
             promptText: "Pick the next move.",
             playerPokemon: .init(
@@ -300,16 +303,19 @@ final class PokeUITests: XCTestCase {
                 .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true),
             ],
             focusedMoveIndex: 0,
+            canRun: false,
             party: .init(pokemon: [])
         )
         let resolve = BattleSidebarProps(
             trainerName: "BLUE",
+            kind: .trainer,
             phase: "turnText",
             promptText: "Charmander used Scratch!",
             playerPokemon: moveSelection.playerPokemon,
             enemyPokemon: moveSelection.enemyPokemon,
             moveSlots: moveSelection.moveSlots,
             focusedMoveIndex: moveSelection.focusedMoveIndex,
+            canRun: moveSelection.canRun,
             party: moveSelection.party
         )
 
@@ -324,6 +330,7 @@ final class PokeUITests: XCTestCase {
         let battleMode = GameplaySidebarMode.battle(
             BattleSidebarProps(
                 trainerName: "BLUE",
+                kind: .trainer,
                 phase: "moveSelection",
                 promptText: "Pick the next move.",
                 playerPokemon: .init(
@@ -354,11 +361,12 @@ final class PokeUITests: XCTestCase {
                     .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true),
                 ],
                 focusedMoveIndex: 0,
+                canRun: false,
                 party: .init(pokemon: [])
             )
         )
 
-        XCTAssertEqual(battleMode.defaultExpandedSection, .battleCombat)
+        XCTAssertEqual(battleMode.defaultExpandedSection, GameplaySidebarExpandedSection.battleCombat)
         XCTAssertTrue(battleMode.supports(GameplaySidebarExpandedSection.battleCombat))
         XCTAssertTrue(battleMode.supports(GameplaySidebarExpandedSection.party))
         XCTAssertFalse(battleMode.supports(GameplaySidebarExpandedSection.trainer))
@@ -646,6 +654,100 @@ final class PokeUITests: XCTestCase {
         XCTAssertFalse(FieldMapView.playerUsesMirroredWalkingFrame(facing: .down, phase: 1))
         XCTAssertTrue(FieldMapView.playerUsesMirroredWalkingFrame(facing: .down, phase: 3))
         XCTAssertTrue(FieldMapView.playerUsesMirroredWalkingFrame(facing: .up, phase: 3))
+    }
+
+    func testConnectedStepDirectionResolvesNorthBoundaryCrossing() {
+        let route1 = MapManifest(
+            id: "ROUTE_1",
+            displayName: "Route 1",
+            defaultMusicID: "MUSIC_ROUTES1",
+            borderBlockID: 0,
+            blockWidth: 5,
+            blockHeight: 4,
+            stepWidth: 10,
+            stepHeight: 8,
+            tileset: "TEST",
+            blockIDs: Array(repeating: 0, count: 20),
+            stepCollisionTileIDs: Array(repeating: 0x00, count: 80),
+            warps: [],
+            backgroundEvents: [],
+            objects: []
+        )
+        let palletTown = MapManifest(
+            id: "PALLET_TOWN",
+            displayName: "Pallet Town",
+            defaultMusicID: "MUSIC_PALLET_TOWN",
+            borderBlockID: 0,
+            blockWidth: 5,
+            blockHeight: 4,
+            stepWidth: 10,
+            stepHeight: 8,
+            tileset: "TEST",
+            blockIDs: Array(repeating: 0, count: 20),
+            stepCollisionTileIDs: Array(repeating: 0x00, count: 80),
+            warps: [],
+            backgroundEvents: [],
+            objects: [],
+            connections: [
+                .init(
+                    direction: .north,
+                    targetMapID: "ROUTE_1",
+                    offset: 1,
+                    targetBlockWidth: route1.blockWidth,
+                    targetBlockHeight: route1.blockHeight,
+                    targetBlockIDs: route1.blockIDs
+                ),
+            ]
+        )
+
+        XCTAssertEqual(
+            FieldMapView.connectedStepDirection(
+                from: palletTown,
+                previousPosition: .init(x: 6, y: 0),
+                to: route1,
+                nextPosition: .init(x: 4, y: 7)
+            ),
+            .up
+        )
+    }
+
+    func testConnectedStepDirectionRejectsNonMatchingBoundarySwap() {
+        let route1 = makePaletteMap(blockWidth: 5, blockHeight: 4)
+        let palletTown = MapManifest(
+            id: "PALLET_TOWN",
+            displayName: "Pallet Town",
+            defaultMusicID: "MUSIC_PALLET_TOWN",
+            borderBlockID: 0,
+            blockWidth: 5,
+            blockHeight: 4,
+            stepWidth: 10,
+            stepHeight: 8,
+            tileset: "TEST",
+            blockIDs: Array(repeating: 0, count: 20),
+            stepCollisionTileIDs: Array(repeating: 0x00, count: 80),
+            warps: [],
+            backgroundEvents: [],
+            objects: [],
+            connections: [
+                .init(
+                    direction: .north,
+                    targetMapID: route1.id,
+                    offset: 0,
+                    targetBlockWidth: route1.blockWidth,
+                    targetBlockHeight: route1.blockHeight,
+                    targetBlockIDs: route1.blockIDs
+                ),
+            ]
+        )
+
+        XCTAssertNil(
+            FieldMapView.connectedStepDirection(
+                from: palletTown,
+                previousPosition: .init(x: 4, y: 1),
+                to: route1,
+                nextPosition: .init(x: 4, y: route1.stepHeight - 1)
+            )
+        )
     }
 
     func testRendererCanCompositeRealFieldAssets() throws {

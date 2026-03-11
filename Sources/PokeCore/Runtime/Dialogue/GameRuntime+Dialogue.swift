@@ -70,6 +70,7 @@ extension GameRuntime {
         dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)
         scene = .dialogue
         substate = "dialogue_\(id)"
+        traceEvent(.dialogueStarted, "Started dialogue \(id).", mapID: gameplayState?.mapID, dialogueID: id)
     }
 
     func queueDeferredActions(_ actions: [DeferredAction]) {

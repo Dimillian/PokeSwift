@@ -167,6 +167,7 @@ final class PokeCoreTests: XCTestCase {
                 objectStates: [:],
                 activeFlags: [],
                 money: 3000,
+                inventory: [],
                 earnedBadgeIDs: [],
                 playerName: "RED",
                 rivalName: "BLUE",
@@ -197,6 +198,8 @@ final class PokeCoreTests: XCTestCase {
                 activeMapScriptTriggerID: nil,
                 activeScriptID: nil,
                 activeScriptStep: nil,
+                acquisitionRNGState: 1,
+                encounterStepCounter: 0,
                 playTimeSeconds: 12
             )
         )
@@ -229,6 +232,150 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(snapshot.field?.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(snapshot.field?.renderMode, "realAssets")
         XCTAssertEqual(snapshot.assetLoadingFailures, [])
+    }
+
+    func testRepoGeneratedPalletNorthConnectionCrossesIntoRoute1() throws {
+        let runtime = try makeRepoRuntime()
+        let start = try findConnectionStart(
+            from: "PALLET_TOWN",
+            moving: .up,
+            expecting: "ROUTE_1",
+            requiredFlags: ["EVENT_FOLLOWED_OAK_INTO_LAB"]
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "PALLET_TOWN"
+        runtime.gameplayState?.playerPosition = start
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.activeFlags.insert("EVENT_FOLLOWED_OAK_INTO_LAB")
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_1")
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_1")
+    }
+
+    func testRepoGeneratedRoute1GrassCanTriggerDeterministicWildEncounterAndEscape() throws {
+        let runtime = try makeRepoRuntime()
+        let grassTile = try findGrassTile(in: runtime, mapID: "ROUTE_1")
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = grassTile
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.setAcquisitionRandomOverrides([0, 0])
+
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .wild)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPokemon.speciesID, "PIDGEY")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPokemon.level, 3)
+
+        drainBattleText(runtime)
+        runtime.handle(button: .cancel)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_1")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, grassTile)
+    }
+
+    func testRepoGeneratedWildBattleExitRestoresRouteMusic() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.requestDefaultMapMusic()
+        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.finishWildBattle(battle: battle, won: true)
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_ROUTES1")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+
+        runtime.startWildBattle(speciesID: "RATTATA", level: 3)
+        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
+
+        runtime.finishWildBattleEscape()
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_ROUTES1")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+    }
+
+    func testRepoGeneratedViridianPokecenterNurseHealsParty() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_POKECENTER"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.playerParty[0].currentHP = 7
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, runtime.gameplayState?.playerParty.first?.maxHP)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_pokecenter_nurse_heal")
+    }
+
+    func testRepoGeneratedViridianParcelAndOakHandoffAdvanceFlagsAndInventory() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_MART"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 7)
+        runtime.gameplayState?.facing = .up
+        runtime.beginScript(id: "viridian_mart_oaks_parcel")
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_OAKS_PARCEL") ?? false)
+        })
+
+        XCTAssertEqual(runtime.itemQuantity("OAKS_PARCEL"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_OAKS_PARCEL"))
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.activeFlags.insert("EVENT_BATTLED_RIVAL_IN_OAKS_LAB")
+        runtime.beginScript(id: "oaks_lab_parcel_handoff")
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_POKEDEX") ?? false)
+        })
+
+        XCTAssertEqual(runtime.itemQuantity("OAKS_PARCEL"), 0)
+        XCTAssertTrue(runtime.hasFlag("EVENT_OAK_GOT_PARCEL"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_POKEDEX"))
     }
 
     func testRepoGeneratedDoorWarpIntoRedsHouseUsesExactDoorTileAndFadeTelemetry() async throws {
@@ -985,7 +1132,7 @@ final class PokeCoreTests: XCTestCase {
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "PIDGEY", level: 1, nickname: "Pidgey")
         let previousVisibleStats = (playerPokemon.maxHP, playerPokemon.attack, playerPokemon.defense, playerPokemon.speed, playerPokemon.special)
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon)
+        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 5)
         XCTAssertEqual(playerPokemon.experience, 145)
@@ -1033,7 +1180,7 @@ final class PokeCoreTests: XCTestCase {
         let previousMaxHP = playerPokemon.maxHP
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon)
+        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 6)
         XCTAssertGreaterThan(playerPokemon.currentHP, hpBefore)
@@ -1075,7 +1222,7 @@ final class PokeCoreTests: XCTestCase {
         )
         let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
 
-        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon)
+        let messages = runtime.applyBattleExperienceReward(defeatedPokemon: defeatedPokemon, to: &playerPokemon, isTrainerBattle: true)
 
         XCTAssertEqual(playerPokemon.level, 100)
         XCTAssertEqual(playerPokemon.experience, runtime.maximumExperience(for: "CHARMANDER"))
@@ -1287,6 +1434,15 @@ final class PokeCoreTests: XCTestCase {
         }
     }
 
+    private func drainBattleUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 16) {
+        var remaining = maxInteractions
+        while runtime.scene == .battle {
+            XCTAssertGreaterThan(remaining, 0, "battle did not resolve")
+            remaining -= 1
+            runtime.handle(button: .confirm)
+        }
+    }
+
     private func advanceDialogueUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 8) {
         var remaining = maxInteractions
         while runtime.dialogueState != nil {
@@ -1299,7 +1455,7 @@ final class PokeCoreTests: XCTestCase {
     private func drainDialogueAndScripts(
         _ runtime: GameRuntime,
         until predicate: (RuntimeTelemetrySnapshot) -> Bool,
-        maxInteractions: Int = 24
+        maxInteractions: Int = 64
     ) {
         var remaining = maxInteractions
         while predicate(runtime.currentSnapshot()) == false {
@@ -1325,10 +1481,54 @@ final class PokeCoreTests: XCTestCase {
             .deletingLastPathComponent()
     }
 
-    private func makeRepoRuntime() throws -> GameRuntime {
+    private func makeRepoRuntime(audioPlayer: RuntimeAudioPlaying? = nil) throws -> GameRuntime {
         let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
         let content = try FileSystemContentLoader(rootURL: contentRoot).load()
-        return GameRuntime(content: content, telemetryPublisher: nil)
+        return GameRuntime(content: content, telemetryPublisher: nil, audioPlayer: audioPlayer)
+    }
+
+    private func findConnectionStart(
+        from sourceMapID: String,
+        moving direction: FacingDirection,
+        expecting targetMapID: String,
+        requiredFlags: [String] = []
+    ) throws -> TilePoint {
+        let probe = try makeRepoRuntime()
+        let map = try XCTUnwrap(probe.content.map(id: sourceMapID))
+
+        for y in 0..<map.stepHeight {
+            for x in 0..<map.stepWidth {
+                probe.gameplayState = probe.makeInitialGameplayState()
+                probe.scene = .field
+                probe.substate = "field"
+                probe.gameplayState?.mapID = sourceMapID
+                probe.gameplayState?.playerPosition = .init(x: x, y: y)
+                probe.gameplayState?.facing = direction
+                probe.gameplayState?.activeFlags.formUnion(requiredFlags)
+                probe.movePlayer(in: direction)
+                if probe.gameplayState?.mapID == targetMapID {
+                    return .init(x: x, y: y)
+                }
+            }
+        }
+
+        XCTFail("failed to find a \(direction.rawValue) connection from \(sourceMapID) to \(targetMapID)")
+        return .init(x: 0, y: 0)
+    }
+
+    private func findGrassTile(in runtime: GameRuntime, mapID: String) throws -> TilePoint {
+        let map = try XCTUnwrap(runtime.content.map(id: mapID))
+        for y in 0..<map.stepHeight {
+            for x in 0..<map.stepWidth {
+                let point = TilePoint(x: x, y: y)
+                if runtime.isStandingOnGrass(in: map, position: point) {
+                    return point
+                }
+            }
+        }
+
+        XCTFail("failed to find grass in \(mapID)")
+        return .init(x: 0, y: 0)
     }
 
     private func waitForSnapshot(

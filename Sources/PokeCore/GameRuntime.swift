@@ -6,7 +6,7 @@ import PokeDataModel
 @MainActor
 @Observable
 public final class GameRuntime {
-    nonisolated public static let saveSchemaVersion = 3
+    nonisolated public static let saveSchemaVersion = 4
 
     public let content: LoadedContent
 
@@ -120,6 +120,10 @@ public final class GameRuntime {
         gameplayState?.earnedBadgeIDs ?? []
     }
 
+    var currentInventoryItems: [RuntimeInventoryItemState] {
+        gameplayState?.inventory.sorted { $0.itemID < $1.itemID } ?? []
+    }
+
     public var chosenStarterSpeciesID: String? {
         gameplayState?.chosenStarterSpeciesID
     }
@@ -219,12 +223,21 @@ public final class GameRuntime {
         isSaveableFieldGameplay && saveMetadata != nil
     }
 
+    public func setAcquisitionRandomOverrides(_ values: [Int]) {
+        acquisitionRandomOverrides = values
+    }
+
+    public func setBattleRandomOverrides(_ values: [Int]) {
+        battleRandomOverrides = values
+    }
+
     public func start() {
         guard hasStarted == false else { return }
         hasStarted = true
         focusedIndex = 0
         scene = .launch
         substate = "launching"
+        traceEvent(.sessionStarted, "Runtime session started.", mapID: gameplayState?.mapID)
         publishSnapshot()
         scheduleTitleFlow()
     }

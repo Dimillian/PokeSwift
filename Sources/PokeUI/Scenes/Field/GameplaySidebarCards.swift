@@ -188,7 +188,7 @@ private struct BattleSummaryContent: View {
                     Text(props.trainerName.uppercased())
                         .font(.system(size: 18, weight: .bold, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink)
-                    Text("OAK LAB ENCOUNTER")
+                    Text(props.kind == .wild ? "WILD ENCOUNTER" : "TRAINER BATTLE")
                         .font(.system(size: 11, weight: .bold, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
                 }
@@ -221,6 +221,12 @@ private struct BattleSummaryContent: View {
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(FieldRetroPalette.ink.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
+
+            if props.canRun {
+                Text("Press B to run.")
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
+            }
         }
     }
 }

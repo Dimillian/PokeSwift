@@ -127,6 +127,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
     public let position: TilePoint
     public let facing: FacingDirection
     public let interactionDialogueID: String?
+    public let interactionScriptID: String?
     public let movementBehavior: ObjectMovementBehavior
     public let trainerBattleID: String?
     public let trainerClass: String?
@@ -140,6 +141,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         position: TilePoint,
         facing: FacingDirection,
         interactionDialogueID: String?,
+        interactionScriptID: String? = nil,
         movementBehavior: ObjectMovementBehavior,
         trainerBattleID: String?,
         trainerClass: String? = nil,
@@ -152,6 +154,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         self.position = position
         self.facing = facing
         self.interactionDialogueID = interactionDialogueID
+        self.interactionScriptID = interactionScriptID
         self.movementBehavior = movementBehavior
         self.trainerBattleID = trainerBattleID
         self.trainerClass = trainerClass
@@ -175,6 +178,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         case position
         case facing
         case interactionDialogueID
+        case interactionScriptID
         case movementBehavior
         case movementType
         case trainerBattleID
@@ -191,6 +195,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         position = try container.decode(TilePoint.self, forKey: .position)
         facing = try container.decode(FacingDirection.self, forKey: .facing)
         interactionDialogueID = try container.decodeIfPresent(String.self, forKey: .interactionDialogueID)
+        interactionScriptID = try container.decodeIfPresent(String.self, forKey: .interactionScriptID)
         if let movementBehavior = try container.decodeIfPresent(ObjectMovementBehavior.self, forKey: .movementBehavior) {
             self.movementBehavior = movementBehavior
         } else {
@@ -215,6 +220,7 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         try container.encode(position, forKey: .position)
         try container.encode(facing, forKey: .facing)
         try container.encodeIfPresent(interactionDialogueID, forKey: .interactionDialogueID)
+        try container.encodeIfPresent(interactionScriptID, forKey: .interactionScriptID)
         try container.encode(movementBehavior, forKey: .movementBehavior)
         try container.encodeIfPresent(trainerBattleID, forKey: .trainerBattleID)
         try container.encodeIfPresent(trainerClass, forKey: .trainerClass)
@@ -279,6 +285,7 @@ public struct TilesetCollisionManifest: Codable, Equatable, Sendable {
     public let passableTileIDs: [Int]
     public let warpTileIDs: [Int]
     public let doorTileIDs: [Int]
+    public let grassTileID: Int?
     public let tilePairCollisions: [TilePairCollisionManifest]
     public let ledges: [LedgeCollisionManifest]
 
@@ -286,12 +293,14 @@ public struct TilesetCollisionManifest: Codable, Equatable, Sendable {
         passableTileIDs: [Int],
         warpTileIDs: [Int],
         doorTileIDs: [Int],
+        grassTileID: Int? = nil,
         tilePairCollisions: [TilePairCollisionManifest],
         ledges: [LedgeCollisionManifest]
     ) {
         self.passableTileIDs = passableTileIDs
         self.warpTileIDs = warpTileIDs
         self.doorTileIDs = doorTileIDs
+        self.grassTileID = grassTileID
         self.tilePairCollisions = tilePairCollisions
         self.ledges = ledges
     }
@@ -490,6 +499,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
     public let action: String
     public let stringValue: String?
     public let secondaryStringValue: String?
+    public let intValue: Int?
     public let point: TilePoint?
     public let path: [FacingDirection]
     public let movement: ScriptMovementManifest?
@@ -505,6 +515,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         action: String,
         stringValue: String? = nil,
         secondaryStringValue: String? = nil,
+        intValue: Int? = nil,
         point: TilePoint? = nil,
         path: [FacingDirection] = [],
         movement: ScriptMovementManifest? = nil,
@@ -519,6 +530,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         self.action = action
         self.stringValue = stringValue
         self.secondaryStringValue = secondaryStringValue
+        self.intValue = intValue
         self.point = point
         self.path = path
         self.movement = movement
@@ -535,6 +547,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
 public enum ScriptMovementKind: String, Codable, Equatable, Sendable {
     case fixedPath
     case pathToPlayerAdjacent
+    case pathToObjectOffset
     case palletEscort
     case rivalStarterPickup
 }
@@ -572,17 +585,23 @@ public struct ScriptMovementManifest: Codable, Equatable, Sendable {
     public let kind: ScriptMovementKind
     public let actors: [ScriptMovementActor]
     public let targetPlayerOffset: TilePoint?
+    public let targetObjectID: String?
+    public let targetObjectOffset: TilePoint?
     public let variants: [ScriptMovementVariant]
 
     public init(
         kind: ScriptMovementKind,
         actors: [ScriptMovementActor] = [],
         targetPlayerOffset: TilePoint? = nil,
+        targetObjectID: String? = nil,
+        targetObjectOffset: TilePoint? = nil,
         variants: [ScriptMovementVariant] = []
     ) {
         self.kind = kind
         self.actors = actors
         self.targetPlayerOffset = targetPlayerOffset
+        self.targetObjectID = targetObjectID
+        self.targetObjectOffset = targetObjectOffset
         self.variants = variants
     }
 }
@@ -801,6 +820,55 @@ public struct TypeEffectivenessManifest: Codable, Equatable, Sendable {
     }
 }
 
+public struct ItemManifest: Codable, Equatable, Sendable {
+    public let id: String
+    public let displayName: String
+    public let isKeyItem: Bool
+
+    public init(id: String, displayName: String, isKeyItem: Bool = false) {
+        self.id = id
+        self.displayName = displayName
+        self.isKeyItem = isKeyItem
+    }
+}
+
+public struct WildEncounterSlotManifest: Codable, Equatable, Sendable {
+    public let speciesID: String
+    public let level: Int
+
+    public init(speciesID: String, level: Int) {
+        self.speciesID = speciesID
+        self.level = level
+    }
+}
+
+public struct WildEncounterTableManifest: Codable, Equatable, Sendable {
+    public let mapID: String
+    public let grassEncounterRate: Int
+    public let waterEncounterRate: Int
+    public let grassSlots: [WildEncounterSlotManifest]
+    public let waterSlots: [WildEncounterSlotManifest]
+
+    public init(
+        mapID: String,
+        grassEncounterRate: Int,
+        waterEncounterRate: Int,
+        grassSlots: [WildEncounterSlotManifest],
+        waterSlots: [WildEncounterSlotManifest]
+    ) {
+        self.mapID = mapID
+        self.grassEncounterRate = grassEncounterRate
+        self.waterEncounterRate = waterEncounterRate
+        self.grassSlots = grassSlots
+        self.waterSlots = waterSlots
+    }
+}
+
+public enum BattleKind: String, Codable, Equatable, Sendable {
+    case trainer
+    case wild
+}
+
 public struct TrainerPokemonManifest: Codable, Equatable, Sendable {
     public let speciesID: String
     public let level: Int
@@ -874,9 +942,11 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public let eventFlags: EventFlagManifest
     public let mapScripts: [MapScriptManifest]
     public let scripts: [ScriptManifest]
+    public let items: [ItemManifest]
     public let species: [SpeciesManifest]
     public let moves: [MoveManifest]
     public let typeEffectiveness: [TypeEffectivenessManifest]
+    public let wildEncounterTables: [WildEncounterTableManifest]
     public let trainerBattles: [TrainerBattleManifest]
     public let playerStart: PlayerStartManifest
 
@@ -888,9 +958,11 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         eventFlags: EventFlagManifest,
         mapScripts: [MapScriptManifest],
         scripts: [ScriptManifest],
+        items: [ItemManifest] = [],
         species: [SpeciesManifest],
         moves: [MoveManifest],
         typeEffectiveness: [TypeEffectivenessManifest] = [],
+        wildEncounterTables: [WildEncounterTableManifest] = [],
         trainerBattles: [TrainerBattleManifest],
         playerStart: PlayerStartManifest
     ) {
@@ -901,9 +973,11 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         self.eventFlags = eventFlags
         self.mapScripts = mapScripts
         self.scripts = scripts
+        self.items = items
         self.species = species
         self.moves = moves
         self.typeEffectiveness = typeEffectiveness
+        self.wildEncounterTables = wildEncounterTables
         self.trainerBattles = trainerBattles
         self.playerStart = playerStart
     }
@@ -916,9 +990,11 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         case eventFlags
         case mapScripts
         case scripts
+        case items
         case species
         case moves
         case typeEffectiveness
+        case wildEncounterTables
         case trainerBattles
         case playerStart
     }
@@ -932,9 +1008,11 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         eventFlags = try container.decode(EventFlagManifest.self, forKey: .eventFlags)
         mapScripts = try container.decode([MapScriptManifest].self, forKey: .mapScripts)
         scripts = try container.decode([ScriptManifest].self, forKey: .scripts)
+        items = try container.decodeIfPresent([ItemManifest].self, forKey: .items) ?? []
         species = try container.decode([SpeciesManifest].self, forKey: .species)
         moves = try container.decode([MoveManifest].self, forKey: .moves)
         typeEffectiveness = try container.decodeIfPresent([TypeEffectivenessManifest].self, forKey: .typeEffectiveness) ?? []
+        wildEncounterTables = try container.decodeIfPresent([WildEncounterTableManifest].self, forKey: .wildEncounterTables) ?? []
         trainerBattles = try container.decode([TrainerBattleManifest].self, forKey: .trainerBattles)
         playerStart = try container.decode(PlayerStartManifest.self, forKey: .playerStart)
     }

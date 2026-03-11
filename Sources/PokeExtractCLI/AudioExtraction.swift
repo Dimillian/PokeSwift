@@ -3,7 +3,7 @@ import PokeDataModel
 
 func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> AudioManifest {
     let musicConstants = try parseMusicConstants(repoRoot: source.repoRoot)
-    let mapRoutes = try parseM3MapRoutes(repoRoot: source.repoRoot)
+    let mapRoutes = try parseCurrentSliceMapRoutes(repoRoot: source.repoRoot)
     let musicHeaders = try parseMusicHeaders(repoRoot: source.repoRoot)
     let labelIndex = try buildMusicLabelIndex(repoRoot: source.repoRoot)
     let waveTables = try parseWaveSampleTables(repoRoot: source.repoRoot)
@@ -108,8 +108,17 @@ func parseMusicConstants(repoRoot: URL) throws -> [String: String] {
     return result
 }
 
-func parseM3MapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
-    let requiredMaps = Set(["REDS_HOUSE_2F", "REDS_HOUSE_1F", "PALLET_TOWN", "OAKS_LAB"])
+func parseCurrentSliceMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
+    let requiredMaps = Set([
+        "REDS_HOUSE_2F",
+        "REDS_HOUSE_1F",
+        "PALLET_TOWN",
+        "ROUTE_1",
+        "VIRIDIAN_CITY",
+        "VIRIDIAN_POKECENTER",
+        "VIRIDIAN_MART",
+        "OAKS_LAB",
+    ])
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/songs.asm"))
     let regex = try NSRegularExpression(pattern: #"db\s+(MUSIC_[A-Z0-9_]+),\s+BANK\([A-Za-z0-9_]+\)\s*;\s*([A-Z0-9_]+)"#)
     let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
@@ -126,7 +135,7 @@ func parseM3MapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
         routes.append(.init(mapID: mapID, musicID: String(contents[musicRange])))
     }
     guard routes.count == requiredMaps.count else {
-        throw ExtractorError.invalidArguments("failed to resolve all M3 map music routes")
+        throw ExtractorError.invalidArguments("failed to resolve all current-slice map music routes")
     }
     return routes.sorted { $0.mapID < $1.mapID }
 }

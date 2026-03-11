@@ -55,6 +55,7 @@ extension GameRuntime {
         gameplayState?.activeScriptStep = 0
         scene = .scriptedSequence
         substate = "script_\(id)"
+        traceEvent(.scriptStarted, "Started script \(id).", mapID: gameplayState?.mapID, scriptID: id)
         runActiveScript()
     }
 
@@ -65,15 +66,25 @@ extension GameRuntime {
             return
         }
 
-        while let stepIndex = gameplayState?.activeScriptStep,
-              script.steps.indices.contains(stepIndex) {
-            let step = script.steps[stepIndex]
-            gameplayState?.activeScriptStep = stepIndex + 1
+        while let step = nextActiveScriptStep(in: script) {
             if execute(step: step) {
                 return
             }
         }
         finishScript()
+    }
+
+    private func nextActiveScriptStep(in script: ScriptManifest) -> ScriptStep? {
+        guard var gameplayState,
+              let stepIndex = gameplayState.activeScriptStep,
+              script.steps.indices.contains(stepIndex) else {
+            return nil
+        }
+
+        let step = script.steps[stepIndex]
+        gameplayState.activeScriptStep = stepIndex + 1
+        self.gameplayState = gameplayState
+        return step
     }
 
     func execute(step: ScriptStep) -> Bool {
@@ -107,6 +118,23 @@ extension GameRuntime {
             guard let movement = step.movement else { return false }
             beginScriptedMovement(movement)
             return true
+        case "moveObject":
+            guard let objectID = step.objectID else { return false }
+            beginScriptedMovement(
+                .init(
+                    kind: .fixedPath,
+                    actors: [.init(actorID: objectID, path: step.path)]
+                )
+            )
+            return true
+        case "movePlayer":
+            beginScriptedMovement(
+                .init(
+                    kind: .fixedPath,
+                    actors: [.init(actorID: "player", path: step.path)]
+                )
+            )
+            return true
         default:
             guard var gameplayState else { return false }
             switch step.action {
@@ -118,30 +146,42 @@ extension GameRuntime {
                 if let flagID = step.flagID {
                     gameplayState.activeFlags.remove(flagID)
                 }
+            case "addItem":
+                if let itemID = step.stringValue {
+                    addItem(itemID, quantity: step.intValue ?? 1, to: &gameplayState)
+                    traceEvent(
+                        .inventoryChanged,
+                        "Added \(step.intValue ?? 1)x \(itemID).",
+                        mapID: gameplayState.mapID,
+                        scriptID: gameplayState.activeScriptID,
+                        details: [
+                            "itemID": itemID,
+                            "quantity": String(step.intValue ?? 1),
+                            "operation": "add",
+                        ]
+                    )
+                }
+            case "removeItem":
+                if let itemID = step.stringValue {
+                    let removed = removeItem(itemID, quantity: step.intValue ?? 1, from: &gameplayState)
+                    if removed {
+                        traceEvent(
+                            .inventoryChanged,
+                            "Removed \(step.intValue ?? 1)x \(itemID).",
+                            mapID: gameplayState.mapID,
+                            scriptID: gameplayState.activeScriptID,
+                            details: [
+                                "itemID": itemID,
+                                "quantity": String(step.intValue ?? 1),
+                                "operation": "remove",
+                            ]
+                        )
+                    }
+                }
             case "setObjectVisibility":
                 if let objectID = step.objectID, let visible = step.visible {
                     gameplayState.objectStates[objectID]?.visible = visible
                 }
-            case "moveObject":
-                if let objectID = step.objectID {
-                    self.gameplayState = gameplayState
-                    beginScriptedMovement(
-                        .init(
-                            kind: .fixedPath,
-                            actors: [.init(actorID: objectID, path: step.path)]
-                        )
-                    )
-                    return true
-                }
-            case "movePlayer":
-                self.gameplayState = gameplayState
-                beginScriptedMovement(
-                    .init(
-                        kind: .fixedPath,
-                        actors: [.init(actorID: "player", path: step.path)]
-                    )
-                )
-                return true
             case "faceObject":
                 if let objectID = step.objectID, let raw = step.stringValue {
                     gameplayState.objectStates[objectID]?.facing = facingDirection(for: raw)
@@ -169,8 +209,12 @@ extension GameRuntime {
     }
 
     func finishScript() {
+        let completedScriptID = gameplayState?.activeScriptID
         gameplayState?.activeScriptID = nil
         gameplayState?.activeScriptStep = nil
+        if let completedScriptID {
+            traceEvent(.scriptFinished, "Finished script \(completedScriptID).", mapID: gameplayState?.mapID, scriptID: completedScriptID)
+        }
         if scene == .scriptedSequence {
             scene = .field
             substate = "field"
@@ -201,6 +245,7 @@ extension GameRuntime {
             objectStates: objectStates,
             activeFlags: Set(start.initialFlags),
             money: 3000,
+            inventory: [],
             earnedBadgeIDs: [],
             gotStarterBit: false,
             playerName: start.playerName,
@@ -213,6 +258,7 @@ extension GameRuntime {
             activeScriptID: nil,
             activeScriptStep: nil,
             battle: nil,
+            encounterStepCounter: 0,
             playTimeSeconds: 0
         )
     }

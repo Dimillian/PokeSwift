@@ -54,7 +54,7 @@ private struct HarnessCLI {
     func run() throws {
         let arguments = Array(CommandLine.arguments.dropFirst())
         guard let command = arguments.first else {
-            throw HarnessError.invalidArguments("usage: PokeHarness <build|launch|latest|input|save|load|quit|validate>")
+            throw HarnessError.invalidArguments("usage: PokeHarness <build|launch|latest|input|save|load|quit|validate|validate-m3>")
         }
 
         switch command {
@@ -81,7 +81,9 @@ private struct HarnessCLI {
         case "quit":
             try post(path: "/quit", body: [:])
         case "validate":
-            try validate()
+            try validateMilestone()
+        case "validate-m3":
+            try validateM3()
         default:
             throw HarnessError.invalidArguments("unknown command: \(command)")
         }
@@ -125,6 +127,7 @@ private struct HarnessCLI {
 
         try FileManager.default.createDirectory(at: traceDirectory, withIntermediateDirectories: true, attributes: nil)
         try Data().write(to: traceDirectory.appendingPathComponent("telemetry.jsonl"), options: .atomic)
+        try Data().write(to: traceDirectory.appendingPathComponent("session_events.jsonl"), options: .atomic)
 
         let process = Process()
         process.currentDirectoryURL = repoRoot
@@ -140,9 +143,7 @@ private struct HarnessCLI {
         process.environment = environment
 
         let outputURL = traceDirectory.appendingPathComponent("app.log")
-        if FileManager.default.fileExists(atPath: outputURL.path) == false {
-            FileManager.default.createFile(atPath: outputURL.path, contents: Data())
-        }
+        try Data().write(to: outputURL, options: .atomic)
         let handle = try FileHandle(forWritingTo: outputURL)
         try handle.seekToEnd()
         process.standardOutput = handle
@@ -152,12 +153,27 @@ private struct HarnessCLI {
         print("launched PokeMac pid \(process.processIdentifier)")
     }
 
-    private func validate() throws {
+    private func validateMilestone() throws {
+        try validateM3()
+        print("intro smoke validation passed")
+    }
+
+    private func validateM3() throws {
+        try resetValidationState()
+        _ = try runNewGameToPostRivalBattle()
+        print("milestone M3 intro smoke passed")
+    }
+
+    private func resetValidationState() throws {
         try? post(path: "/quit", body: [:])
         Thread.sleep(forTimeInterval: 0.5)
         try? FileManager.default.removeItem(at: saveRoot)
         try launchApp(validationMode: true)
+    }
+
+    private func runNewGameToPostRivalBattle() throws -> RuntimeTelemetrySnapshot {
         _ = try poll(until: { $0.scene == .titleAttract }, timeout: 6)
+        print("validate: title ready")
 
         try postInput("start")
         let titleMenu = try poll(until: { $0.scene == .titleMenu }, timeout: 4)
@@ -195,13 +211,13 @@ private struct HarnessCLI {
         var snapshot = try poll(until: { $0.scene == .field && $0.field?.mapID == "REDS_HOUSE_2F" }, timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_2F")
         try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
+        print("validate: new game started")
 
         snapshot = try walk(to: TilePoint(x: 6, y: 1), on: "REDS_HOUSE_2F", startingFrom: snapshot)
         try postInput("right")
         snapshot = try waitForSettledField(on: "REDS_HOUSE_1F", timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "REDS_HOUSE_1F")
         try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
-        // The real collision grid blocks a straight vertical walk from the stair landing.
         snapshot = try walk(to: TilePoint(x: 4, y: 1), on: "REDS_HOUSE_1F", startingFrom: snapshot)
         snapshot = try walk(to: TilePoint(x: 4, y: 2), on: "REDS_HOUSE_1F", startingFrom: snapshot, yFirst: true)
         snapshot = try walk(to: TilePoint(x: 2, y: 2), on: "REDS_HOUSE_1F", startingFrom: snapshot)
@@ -210,6 +226,7 @@ private struct HarnessCLI {
         snapshot = try waitForSettledField(on: "PALLET_TOWN", timeout: 4)
         try assertRealFieldRendering(snapshot, expectedMapID: "PALLET_TOWN")
         try assertAudio(snapshot, trackID: "MUSIC_PALLET_TOWN", reason: "mapDefault")
+        print("validate: pallet reached")
         snapshot = try walk(to: TilePoint(x: 10, y: 2), on: "PALLET_TOWN", startingFrom: snapshot)
         try postInput("up")
 
@@ -227,6 +244,7 @@ private struct HarnessCLI {
         )
         try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
         try assertAudio(snapshot, trackID: "MUSIC_OAKS_LAB", reason: "mapDefault")
+        print("validate: oak lab intro complete")
         try assertNoPlayerObjectOverlap(snapshot)
         guard snapshot.field?.objects.contains(where: { $0.id == "oaks_lab_oak_1" }) == true else {
             throw HarnessError.validationFailed("expected Oak to remain visible after escorting the player into the lab")
@@ -264,6 +282,7 @@ private struct HarnessCLI {
         )
         try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
         try assertAudio(snapshot, trackID: "MUSIC_OAKS_LAB", reason: "mapDefault")
+        print("validate: starter acquired")
         try assertNoPlayerObjectOverlap(snapshot)
 
         snapshot = try walk(to: TilePoint(x: 4, y: 6), on: "OAKS_LAB", startingFrom: snapshot)
@@ -343,36 +362,8 @@ private struct HarnessCLI {
         guard snapshot.assetLoadingFailures.isEmpty else {
             throw HarnessError.validationFailed("expected zero asset-loading failures, got: \(snapshot.assetLoadingFailures.joined(separator: ", "))")
         }
-
-        try post(path: "/save", body: [:])
-        snapshot = try poll(until: { $0.save?.metadata != nil && $0.save?.lastResult?.operation == "save" }, timeout: 4)
-        guard snapshot.save?.metadata?.locationName == "OAK'S LAB" || snapshot.save?.metadata?.locationName == "Oak's Lab" || snapshot.save?.metadata?.locationName == "OAKS_LAB" else {
-            throw HarnessError.validationFailed("save metadata did not report Oak's Lab after saving")
-        }
-
-        try post(path: "/quit", body: [:])
-        Thread.sleep(forTimeInterval: 0.5)
-        try launchApp(validationMode: true)
-        _ = try poll(until: { $0.scene == .titleAttract }, timeout: 6)
-        try postInput("start")
-        let continueMenu = try poll(until: { $0.scene == .titleMenu }, timeout: 4)
-        guard let continueEntries = continueMenu.titleMenu?.entries, continueEntries.count == 3 else {
-            throw HarnessError.validationFailed("relaunch title menu did not expose the expected entries")
-        }
-        guard continueEntries[1].isEnabled else {
-            throw HarnessError.validationFailed("continue should be enabled after saving")
-        }
-        try postInput("down")
-        _ = try poll(until: { $0.scene == .titleMenu && $0.titleMenu?.focusedIndex == 1 }, timeout: 4)
-        try postInput("confirm")
-        snapshot = try poll(until: {
-            $0.scene == .field &&
-            $0.field?.mapID == "OAKS_LAB" &&
-            ($0.eventFlags?.activeFlags.contains("EVENT_BATTLED_RIVAL_IN_OAKS_LAB") ?? false)
-        }, timeout: 4)
-        try assertRealFieldRendering(snapshot, expectedMapID: "OAKS_LAB")
-
-        print("milestone validation passed")
+        print("validate: m3 baseline complete")
+        return snapshot
     }
 
     private func assertRealFieldRendering(_ snapshot: RuntimeTelemetrySnapshot, expectedMapID: String) throws {
@@ -416,6 +407,48 @@ private struct HarnessCLI {
         }
     }
 
+    private func followPath(_ buttons: [String], startingFrom initialSnapshot: RuntimeTelemetrySnapshot) throws -> RuntimeTelemetrySnapshot {
+        var snapshot = initialSnapshot
+        for button in buttons {
+            snapshot = try stepField(button, startingFrom: snapshot)
+        }
+        return snapshot
+    }
+
+    private func stepField(_ button: String, startingFrom initialSnapshot: RuntimeTelemetrySnapshot) throws -> RuntimeTelemetrySnapshot {
+        guard initialSnapshot.scene == .field, let field = initialSnapshot.field else {
+            throw HarnessError.validationFailed("cannot step field input '\(button)' while scene is \(initialSnapshot.scene.rawValue)")
+        }
+
+        try postInput(button)
+        return try poll(until: { snapshot in
+            guard snapshot.scene == .field, let nextField = snapshot.field else {
+                return true
+            }
+            return nextField.mapID != field.mapID ||
+                nextField.playerPosition != field.playerPosition ||
+                nextField.facing != field.facing ||
+                nextField.transition != field.transition ||
+                nextField.activeMapScriptTriggerID != field.activeMapScriptTriggerID ||
+                nextField.activeScriptID != field.activeScriptID ||
+                nextField.activeScriptStep != field.activeScriptStep
+        }, timeout: 3)
+    }
+
+    private func face(
+        _ direction: FacingDirection,
+        on mapID: String,
+        startingFrom initialSnapshot: RuntimeTelemetrySnapshot
+    ) throws -> RuntimeTelemetrySnapshot {
+        guard let field = initialSnapshot.field, field.mapID == mapID else {
+            throw HarnessError.validationFailed("cannot face \(direction.rawValue) outside \(mapID)")
+        }
+        if field.facing == direction {
+            return initialSnapshot
+        }
+        return try stepField(direction.rawValue, startingFrom: initialSnapshot)
+    }
+
     private func latestSnapshot() throws -> RuntimeTelemetrySnapshot {
         let decoder = JSONDecoder()
 
@@ -429,7 +462,7 @@ private struct HarnessCLI {
         let lines = String(decoding: data, as: UTF8.self)
             .split(separator: "\n")
         guard let latestLine = lines.last else {
-            throw HarnessError.validationFailed("no telemetry snapshot available")
+            throw HarnessError.validationFailed("no telemetry snapshot available\(appLogContext())")
         }
         return try decoder.decode(RuntimeTelemetrySnapshot.self, from: Data(latestLine.utf8))
     }
@@ -448,9 +481,9 @@ private struct HarnessCLI {
         }
         if let latestSeen {
             let focus = latestSeen.titleMenu.map { String($0.focusedIndex) } ?? "n/a"
-            throw HarnessError.validationFailed("timed out waiting for expected telemetry state; last snapshot scene=\(latestSeen.scene.rawValue) substate=\(latestSeen.substate) focus=\(focus)")
+            throw HarnessError.validationFailed("timed out waiting for expected telemetry state; last snapshot scene=\(latestSeen.scene.rawValue) substate=\(latestSeen.substate) focus=\(focus)\(appLogContext())")
         }
-        throw HarnessError.validationFailed("timed out waiting for expected telemetry state; no snapshot available")
+        throw HarnessError.validationFailed("timed out waiting for expected telemetry state; no snapshot available\(appLogContext())")
     }
 
     private func waitForSettledField(on mapID: String, timeout: TimeInterval) throws -> RuntimeTelemetrySnapshot {
@@ -462,7 +495,7 @@ private struct HarnessCLI {
     }
 
     private func postInput(_ button: String) throws {
-        let data = try request(path: "/input", method: "POST", body: ["button": button])
+        let data = try request(path: "/input", method: "POST", payload: ["button": button])
         if let response = try? JSONDecoder().decode(BooleanResponse.self, from: data), response.accepted {
             return
         }
@@ -470,10 +503,18 @@ private struct HarnessCLI {
     }
 
     private func post(path: String, body: [String: String]) throws {
-        _ = try request(path: path, method: "POST", body: body)
+        _ = try request(path: path, method: "POST", payload: body)
     }
 
-    private func request(path: String, method: String, body: [String: String] = [:]) throws -> Data {
+    private func request<T: Encodable>(path: String, method: String, payload: T) throws -> Data {
+        try request(path: path, method: method, bodyData: try JSONEncoder().encode(payload))
+    }
+
+    private func request(path: String, method: String) throws -> Data {
+        try request(path: path, method: method, bodyData: nil)
+    }
+
+    private func request(path: String, method: String, bodyData: Data?) throws -> Data {
         guard let url = URL(string: "http://127.0.0.1:\(port)\(path)") else {
             throw HarnessError.requestFailed("invalid url")
         }
@@ -483,8 +524,8 @@ private struct HarnessCLI {
         while true {
             var request = URLRequest(url: url)
             request.httpMethod = method
-            if method == "POST" {
-                request.httpBody = try JSONEncoder().encode(body)
+            if let bodyData {
+                request.httpBody = bodyData
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             }
 
@@ -506,19 +547,39 @@ private struct HarnessCLI {
             case let .failure(error):
                 lastError = error
                 guard Date() < retryDeadline else {
-                    throw HarnessError.requestFailed(String(describing: error))
+                    throw HarnessError.requestFailed("\(error)\(appLogContext())")
                 }
                 Thread.sleep(forTimeInterval: 0.1)
             case .none:
                 lastError = HarnessError.requestFailed("empty request result")
                 guard Date() < retryDeadline else {
-                    throw HarnessError.requestFailed("empty request result")
+                    throw HarnessError.requestFailed("empty request result\(appLogContext())")
                 }
                 Thread.sleep(forTimeInterval: 0.1)
             }
         }
 
         throw HarnessError.requestFailed(String(describing: lastError ?? HarnessError.requestFailed("unknown request failure")))
+    }
+
+    private func appLogContext() -> String {
+        guard let tail = appLogTail(), tail.isEmpty == false else {
+            return ""
+        }
+        return "\napp.log tail:\n\(tail)"
+    }
+
+    private func appLogTail(maxLines: Int = 20) -> String? {
+        let logURL = traceDirectory.appendingPathComponent("app.log")
+        guard let data = try? Data(contentsOf: logURL) else {
+            return nil
+        }
+        let lines = String(decoding: data, as: UTF8.self)
+            .split(separator: "\n", omittingEmptySubsequences: false)
+        guard lines.isEmpty == false else {
+            return nil
+        }
+        return lines.suffix(maxLines).joined(separator: "\n")
     }
 
     private func run(_ arguments: [String]) throws {

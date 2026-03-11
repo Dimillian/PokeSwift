@@ -25,17 +25,26 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(steps, [.init(yDelta: -4, frames: 16), .init(yDelta: 3, frames: 4)])
     }
 
-    func testGameplayExtractorBuildsBoundedM3ManifestFromRepoSources() throws {
+    func testGameplayExtractorBuildsEarlyM4ManifestFromRepoSources() throws {
         let manifest = try extractGameplayManifest(source: SourceTree(repoRoot: repoRoot()))
 
-        XCTAssertEqual(manifest.maps.map(\.id), ["REDS_HOUSE_2F", "REDS_HOUSE_1F", "PALLET_TOWN", "OAKS_LAB"])
+        XCTAssertEqual(manifest.maps.map(\.id), [
+            "REDS_HOUSE_2F",
+            "REDS_HOUSE_1F",
+            "PALLET_TOWN",
+            "ROUTE_1",
+            "VIRIDIAN_CITY",
+            "VIRIDIAN_POKECENTER",
+            "VIRIDIAN_MART",
+            "OAKS_LAB",
+        ])
         XCTAssertEqual(manifest.playerStart.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(manifest.playerStart.position, .init(x: 4, y: 4))
         XCTAssertEqual(manifest.playerStart.playerName, "RED")
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
-        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO"])
-        XCTAssertEqual(manifest.tilesets.last?.imagePath, "Assets/field/tilesets/gym.png")
-        XCTAssertEqual(manifest.tilesets.last?.blocksetPath, "Assets/field/blocksets/gym.bst")
+        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "MART", "POKECENTER"])
+        XCTAssertEqual(manifest.tilesets.last?.imagePath, "Assets/field/tilesets/pokecenter.png")
+        XCTAssertEqual(manifest.tilesets.last?.blocksetPath, "Assets/field/blocksets/pokecenter.bst")
         XCTAssertEqual(manifest.overworldSprites.map(\.id), [
             "SPRITE_RED",
             "SPRITE_OAK",
@@ -44,6 +53,14 @@ final class PokeExtractCLITests: XCTestCase {
             "SPRITE_GIRL",
             "SPRITE_FISHER",
             "SPRITE_SCIENTIST",
+            "SPRITE_YOUNGSTER",
+            "SPRITE_GAMBLER",
+            "SPRITE_GAMBLER_ASLEEP",
+            "SPRITE_CLERK",
+            "SPRITE_COOLTRAINER_M",
+            "SPRITE_NURSE",
+            "SPRITE_GENTLEMAN",
+            "SPRITE_LINK_RECEPTIONIST",
             "SPRITE_POKE_BALL",
             "SPRITE_POKEDEX",
         ])
@@ -110,9 +127,22 @@ final class PokeExtractCLITests: XCTestCase {
                 "EVENT_GOT_STARTER",
                 "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
                 "EVENT_OAK_APPEARED_IN_PALLET",
+                "EVENT_GOT_POTION_SAMPLE",
+                "EVENT_GOT_OAKS_PARCEL",
+                "EVENT_OAK_GOT_PARCEL",
+                "EVENT_GOT_POKEDEX",
+                "EVENT_VIRIDIAN_GYM_OPEN",
+                "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+                "EVENT_2ND_ROUTE22_RIVAL_BATTLE",
+                "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
             ]
         )
         XCTAssertEqual(manifest.scripts.map(\.id), [
+            "route_1_potion_sample",
+            "viridian_city_old_man_blocks_north_exit",
+            "viridian_city_gym_locked_pushback",
+            "viridian_mart_oaks_parcel",
+            "oaks_lab_parcel_handoff",
             "pallet_town_oak_intro",
             "oaks_lab_dont_go_away",
             "oaks_lab_rival_picks_after_charmander",
@@ -144,7 +174,7 @@ final class PokeExtractCLITests: XCTestCase {
         let rivalExitScript = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_rival_exit_after_battle" })
         XCTAssertEqual(rivalExitScript.steps.compactMap(\.movement?.kind), [.fixedPath])
         XCTAssertEqual(rivalExitScript.steps.last?.action, "restoreMapMusic")
-        XCTAssertEqual(manifest.species.map(\.id), ["CHARMANDER", "SQUIRTLE", "BULBASAUR"])
+        XCTAssertEqual(manifest.species.map(\.id), ["CHARMANDER", "SQUIRTLE", "BULBASAUR", "PIDGEY", "RATTATA"])
         let charmander = try XCTUnwrap(manifest.species.first { $0.id == "CHARMANDER" })
         XCTAssertEqual(charmander.primaryType, "FIRE")
         XCTAssertNil(charmander.secondaryType)
@@ -167,7 +197,27 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(bulbasaur.secondaryType, "POISON")
         XCTAssertEqual(bulbasaur.baseExp, 64)
         XCTAssertEqual(bulbasaur.growthRate, .mediumSlow)
-        XCTAssertEqual(manifest.moves.map(\.id), ["SCRATCH", "TACKLE", "TAIL_WHIP", "GROWL"])
+        let pidgey = try XCTUnwrap(manifest.species.first { $0.id == "PIDGEY" })
+        XCTAssertEqual(pidgey.primaryType, "NORMAL")
+        XCTAssertEqual(pidgey.secondaryType, "FLYING")
+        XCTAssertEqual(pidgey.baseExp, 55)
+        XCTAssertEqual(
+            pidgey.battleSprite,
+            .init(
+                frontImagePath: "Assets/battle/pokemon/front/pidgey.png",
+                backImagePath: "Assets/battle/pokemon/back/pidgey.png"
+            )
+        )
+        let rattata = try XCTUnwrap(manifest.species.first { $0.id == "RATTATA" })
+        XCTAssertEqual(rattata.primaryType, "NORMAL")
+        XCTAssertNil(rattata.secondaryType)
+        XCTAssertEqual(rattata.baseExp, 57)
+        XCTAssertEqual(rattata.growthRate, .mediumFast)
+        XCTAssertEqual(manifest.moves.map(\.id), ["SCRATCH", "GUST", "TACKLE", "TAIL_WHIP", "GROWL"])
+        XCTAssertEqual(manifest.items.map(\.id), ["POTION", "OAKS_PARCEL"])
+        XCTAssertEqual(manifest.items.first?.displayName, "POTION")
+        XCTAssertEqual(manifest.items.last?.displayName, "OAK's PARCEL")
+        XCTAssertEqual(manifest.items.last?.isKeyItem, true)
         XCTAssertFalse(manifest.typeEffectiveness.isEmpty)
         XCTAssertEqual(
             manifest.typeEffectiveness.first { $0.attackingType == "FIRE" && $0.defendingType == "GRASS" }?.multiplier,
@@ -186,6 +236,57 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(manifest.tilesets.first?.collision.passableTileIDs, [0x01, 0x02, 0x03, 0x11, 0x12, 0x13, 0x14, 0x1c, 0x1a])
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_2F" }?.warps.first?.targetPosition, .init(x: 7, y: 1))
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_1F" }?.warps.first?.targetPosition, .init(x: 5, y: 5))
+        XCTAssertNil(manifest.mapScripts.first { $0.mapID == "ROUTE_1" })
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" }?.triggers.map(\.scriptID),
+            ["viridian_city_gym_locked_pushback", "viridian_city_old_man_blocks_north_exit"]
+        )
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "VIRIDIAN_MART" }?.triggers.map(\.scriptID),
+            ["viridian_mart_oaks_parcel"]
+        )
+
+        let route1 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_1" })
+        XCTAssertEqual(route1.defaultMusicID, "MUSIC_ROUTES1")
+        XCTAssertEqual(route1.connections.map(\.targetMapID), ["VIRIDIAN_CITY", "PALLET_TOWN"])
+        XCTAssertEqual(route1.objects.map(\.id), ["route_1_youngster_1", "route_1_youngster_2"])
+
+        let viridianCity = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_CITY" })
+        XCTAssertEqual(viridianCity.defaultMusicID, "MUSIC_CITIES1")
+        XCTAssertEqual(viridianCity.warps[0].targetMapID, "VIRIDIAN_POKECENTER")
+        XCTAssertEqual(viridianCity.warps[1].targetMapID, "VIRIDIAN_MART")
+        XCTAssertEqual(viridianCity.backgroundEvents.map(\.dialogueID), [
+            "viridian_city_sign",
+            "viridian_city_trainer_tips_1",
+            "viridian_city_trainer_tips_2",
+            "viridian_city_mart_sign",
+            "viridian_city_pokecenter_sign",
+            "viridian_city_gym_sign",
+        ])
+
+        let viridianPokecenter = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_POKECENTER" })
+        XCTAssertEqual(viridianPokecenter.tileset, "POKECENTER")
+        XCTAssertEqual(viridianPokecenter.objects.map(\.id), [
+            "viridian_pokecenter_nurse",
+            "viridian_pokecenter_gentleman",
+            "viridian_pokecenter_cooltrainer",
+            "viridian_pokecenter_link_receptionist",
+        ])
+
+        let viridianMart = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_MART" })
+        XCTAssertEqual(viridianMart.tileset, "MART")
+        XCTAssertEqual(viridianMart.objects.map(\.id), [
+            "viridian_mart_clerk",
+            "viridian_mart_youngster",
+            "viridian_mart_cooltrainer",
+        ])
+
+        let route1Encounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "ROUTE_1" })
+        XCTAssertEqual(route1Encounters.grassEncounterRate, 25)
+        XCTAssertEqual(route1Encounters.waterEncounterRate, 0)
+        XCTAssertEqual(route1Encounters.grassSlots.first, .init(speciesID: "PIDGEY", level: 3))
+        XCTAssertEqual(route1Encounters.grassSlots.last, .init(speciesID: "PIDGEY", level: 5))
+        XCTAssertEqual(Set(route1Encounters.grassSlots.map(\.speciesID)), Set(["PIDGEY", "RATTATA"]))
 
         let redSprite = try XCTUnwrap(manifest.overworldSprites.first { $0.id == "SPRITE_RED" })
         XCTAssertEqual(redSprite.walkingFrames?.down, .init(x: 0, y: 48, width: 16, height: 16))
@@ -219,12 +320,16 @@ final class PokeExtractCLITests: XCTestCase {
             GameplayManifest.self,
             from: first
         )
-        XCTAssertEqual(decoded.maps.count, 4)
-        XCTAssertEqual(decoded.tilesets.count, 4)
-        XCTAssertEqual(decoded.overworldSprites.count, 9)
-        XCTAssertGreaterThan(decoded.dialogues.count, 30)
+        XCTAssertEqual(decoded.maps.count, 8)
+        XCTAssertEqual(decoded.tilesets.count, 6)
+        XCTAssertEqual(decoded.overworldSprites.count, 17)
+        XCTAssertEqual(decoded.items.count, 2)
+        XCTAssertEqual(decoded.wildEncounterTables.count, 1)
+        XCTAssertGreaterThan(decoded.dialogues.count, 80)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_pokecenter_nurse_heal" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "OAKS_LAB" })
+        XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })
         XCTAssertGreaterThan(decoded.typeEffectiveness.count, 0)
         XCTAssertEqual(decoded.tilesets.first?.imagePath, "Assets/field/tilesets/reds_house.png")
@@ -235,9 +340,13 @@ final class PokeExtractCLITests: XCTestCase {
             decoded.species.first { $0.id == "CHARMANDER" }?.battleSprite?.frontImagePath,
             "Assets/battle/pokemon/front/charmander.png"
         )
+        XCTAssertEqual(
+            decoded.species.first { $0.id == "PIDGEY" }?.battleSprite?.frontImagePath,
+            "Assets/battle/pokemon/front/pidgey.png"
+        )
     }
 
-    func testAudioExtractorBuildsBoundedM3ManifestFromRepoSources() throws {
+    func testAudioExtractorBuildsEarlyM4ManifestFromRepoSources() throws {
         let manifest = try extractAudioManifest(
             source: SourceTree(repoRoot: repoRoot()),
             titleTrackID: "MUSIC_TITLE_SCREEN"
@@ -252,6 +361,10 @@ final class PokeExtractCLITests: XCTestCase {
                 .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
             ]
         )
 
@@ -267,6 +380,9 @@ final class PokeExtractCLITests: XCTestCase {
             "MUSIC_TITLE_SCREEN",
             "MUSIC_PALLET_TOWN",
             "MUSIC_OAKS_LAB",
+            "MUSIC_ROUTES1",
+            "MUSIC_CITIES1",
+            "MUSIC_POKECENTER",
             "MUSIC_MEET_PROF_OAK",
             "MUSIC_MEET_RIVAL",
             "MUSIC_TRAINER_BATTLE",
@@ -411,9 +527,9 @@ final class PokeExtractCLITests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 4)
+        XCTAssertEqual(decoded.mapRoutes.count, 8)
         XCTAssertEqual(decoded.cues.count, 6)
-        XCTAssertEqual(decoded.tracks.count, 7)
+        XCTAssertEqual(decoded.tracks.count, 10)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 

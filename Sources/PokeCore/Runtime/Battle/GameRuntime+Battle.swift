@@ -18,8 +18,11 @@ extension GameRuntime {
         case .down:
             guard battle.phase == .moveSelection else { break }
             battle.focusedMoveIndex = min(max(0, battle.playerPokemon.moves.count - 1), battle.focusedMoveIndex + 1)
-        case .left, .right, .cancel:
+        case .left, .right:
             break
+        case .cancel:
+            guard battle.phase == .moveSelection, battle.canRun else { break }
+            attemptBattleEscape(battle: &battle)
         case .confirm, .start:
             switch battle.phase {
             case .introText, .turnText:
@@ -104,7 +107,13 @@ extension GameRuntime {
         }
 
         if enemyPokemon.currentHP == 0 {
-            turnMessages.append(contentsOf: applyBattleExperienceReward(defeatedPokemon: enemyPokemon, to: &battle.playerPokemon))
+            turnMessages.append(
+                contentsOf: applyBattleExperienceReward(
+                    defeatedPokemon: enemyPokemon,
+                    to: &battle.playerPokemon,
+                    isTrainerBattle: battle.kind == .trainer
+                )
+            )
             if let switchMessages = advanceEnemyPartyIfNeeded(battle: &battle) {
                 turnMessages.append(contentsOf: switchMessages)
                 presentBattleMessages(
@@ -413,10 +422,17 @@ extension GameRuntime {
         case let .finish(won):
             battle.phase = .battleComplete
             finishBattle(battle: battle, won: won)
+        case .escape:
+            finishWildBattleEscape()
         }
     }
 
     func finishBattle(battle: RuntimeBattleState, won: Bool) {
+        if battle.kind == .wild {
+            finishWildBattle(battle: battle, won: won)
+            return
+        }
+
         guard var gameplayState else { return }
         gameplayState.activeFlags.insert(battle.completionFlagID)
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
@@ -425,6 +441,17 @@ extension GameRuntime {
         if battle.healsPartyAfterBattle {
             healParty()
         }
+        traceEvent(
+            .battleEnded,
+            "Finished trainer battle \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "outcome": won ? "won" : "lost",
+                "opponent": battle.trainerName,
+            ]
+        )
         // We do not have defeated-trainer music yet, but the trainer battle track
         // should not continue under the result dialogue.
         stopAllMusic()
@@ -434,6 +461,64 @@ extension GameRuntime {
     func runPostBattleSequence(won: Bool) {
         let _ = won
         beginScript(id: "oaks_lab_rival_exit_after_battle")
+    }
+
+    func attemptBattleEscape(battle: inout RuntimeBattleState) {
+        presentBattleMessages(
+            ["Got away safely!"],
+            battle: &battle,
+            pendingAction: .escape
+        )
+    }
+
+    func finishWildBattleEscape() {
+        guard var gameplayState else { return }
+        let battle = gameplayState.battle
+        if let battle = gameplayState.battle {
+            gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        }
+        gameplayState.battle = nil
+        self.gameplayState = gameplayState
+        scene = .field
+        substate = "field"
+        if let battle {
+            traceEvent(
+                .battleEnded,
+                "Escaped wild battle \(battle.battleID).",
+                mapID: gameplayState.mapID,
+                battleID: battle.battleID,
+                battleKind: battle.kind,
+                details: [
+                    "outcome": "escaped",
+                    "opponent": battle.trainerName,
+                ]
+            )
+        }
+        requestDefaultMapMusic()
+    }
+
+    func finishWildBattle(battle: RuntimeBattleState, won: Bool) {
+        guard var gameplayState else { return }
+        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.battle = nil
+        self.gameplayState = gameplayState
+        if won == false {
+            healParty()
+        }
+        scene = .field
+        substate = "field"
+        traceEvent(
+            .battleEnded,
+            "Finished wild battle \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "outcome": won ? "won" : "lost",
+                "opponent": battle.trainerName,
+            ]
+        )
+        requestDefaultMapMusic()
     }
 
     func startBattle(id: String) {
@@ -455,12 +540,14 @@ extension GameRuntime {
         reseedBattleRNG(for: battleManifest.id)
         var battle = RuntimeBattleState(
             battleID: battleManifest.id,
+            kind: .trainer,
             trainerName: battleManifest.displayName,
             completionFlagID: battleManifest.completionFlagID,
             healsPartyAfterBattle: battleManifest.healsPartyAfterBattle,
             preventsBlackoutOnLoss: battleManifest.preventsBlackoutOnLoss,
             winDialogueID: battleManifest.winDialogueID,
             loseDialogueID: battleManifest.loseDialogueID,
+            canRun: false,
             playerPokemon: playerPokemon,
             enemyParty: enemyParty,
             enemyActiveIndex: 0,
@@ -486,6 +573,82 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         scene = .battle
         substate = "battle"
+        traceEvent(
+            .battleStarted,
+            "Started trainer battle \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "opponent": battle.trainerName,
+                "enemySpecies": battle.enemyPokemon.speciesID,
+                "enemyLevel": String(battle.enemyPokemon.level),
+            ]
+        )
+        requestTrainerBattleMusic()
+    }
+
+    func startWildBattle(speciesID: String, level: Int) {
+        guard var gameplayState else { return }
+        let playerPokemon = gameplayState.playerParty.first ?? makePokemon(
+            speciesID: gameplayState.chosenStarterSpeciesID ?? "SQUIRTLE",
+            level: 5,
+            nickname: gameplayState.chosenStarterSpeciesID?.capitalized ?? "Squirtle"
+        )
+        let enemyPokemon = makePokemon(
+            speciesID: speciesID,
+            level: level,
+            nickname: content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+        )
+        let battleID = "wild_\(gameplayState.mapID.lowercased())_\(speciesID.lowercased())_\(level)"
+        reseedBattleRNG(for: battleID)
+
+        var battle = RuntimeBattleState(
+            battleID: battleID,
+            kind: .wild,
+            trainerName: "Wild \(enemyPokemon.nickname)",
+            completionFlagID: "",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            winDialogueID: "",
+            loseDialogueID: "",
+            canRun: true,
+            playerPokemon: playerPokemon,
+            enemyParty: [enemyPokemon],
+            enemyActiveIndex: 0,
+            phase: .introText,
+            focusedMoveIndex: 0,
+            message: "",
+            queuedMessages: [],
+            pendingAction: .moveSelection
+        )
+        presentBattleMessages(
+            [
+                "Wild \(enemyPokemon.nickname) appeared!",
+                "Go! \(playerPokemon.nickname)!",
+            ],
+            battle: &battle,
+            phase: .introText,
+            pendingAction: .moveSelection
+        )
+
+        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.battle = battle
+        self.gameplayState = gameplayState
+        scene = .battle
+        substate = "battle"
+        traceEvent(
+            .battleStarted,
+            "Started wild battle \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "opponent": battle.trainerName,
+                "enemySpecies": battle.enemyPokemon.speciesID,
+                "enemyLevel": String(battle.enemyPokemon.level),
+            ]
+        )
         requestTrainerBattleMusic()
     }
 
@@ -506,6 +669,14 @@ extension GameRuntime {
             return healed
         }
         self.gameplayState = gameplayState
+        traceEvent(
+            .partyHealed,
+            "Healed party.",
+            mapID: gameplayState.mapID,
+            details: [
+                "partyCount": String(gameplayState.playerParty.count),
+            ]
+        )
     }
 
     func makePokemon(speciesID: String, level: Int, nickname: String) -> RuntimePokemonState {
@@ -611,8 +782,12 @@ extension GameRuntime {
         )
     }
 
-    func applyBattleExperienceReward(defeatedPokemon: RuntimePokemonState, to pokemon: inout RuntimePokemonState) -> [String] {
-        let gainedExperience = battleExperienceAward(for: defeatedPokemon, isTrainerBattle: true)
+    func applyBattleExperienceReward(
+        defeatedPokemon: RuntimePokemonState,
+        to pokemon: inout RuntimePokemonState,
+        isTrainerBattle: Bool
+    ) -> [String] {
+        let gainedExperience = battleExperienceAward(for: defeatedPokemon, isTrainerBattle: isTrainerBattle)
         let updatedStatExp = awardStatExp(from: defeatedPokemon, to: pokemon.statExp)
         let maximumExperience = maximumExperience(for: pokemon.speciesID)
         let updatedExperience = min(maximumExperience, pokemon.experience + gainedExperience)

@@ -67,6 +67,11 @@ struct RuntimeMoveState {
     var currentPP: Int
 }
 
+struct RuntimeInventoryItemState {
+    let itemID: String
+    var quantity: Int
+}
+
 struct RuntimePokemonState {
     let speciesID: String
     let nickname: String
@@ -98,16 +103,19 @@ enum RuntimeBattlePhase: String {
 enum RuntimeBattlePendingAction {
     case moveSelection
     case finish(won: Bool)
+    case escape
 }
 
 struct RuntimeBattleState {
     let battleID: String
+    let kind: BattleKind
     let trainerName: String
     let completionFlagID: String
     let healsPartyAfterBattle: Bool
     let preventsBlackoutOnLoss: Bool
     let winDialogueID: String
     let loseDialogueID: String
+    let canRun: Bool
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
@@ -176,6 +184,7 @@ struct GameplayState {
     var objectStates: [String: RuntimeObjectState]
     var activeFlags: Set<String>
     var money: Int
+    var inventory: [RuntimeInventoryItemState]
     var earnedBadgeIDs: Set<String>
     var gotStarterBit: Bool
     var playerName: String
@@ -188,5 +197,6 @@ struct GameplayState {
     var activeScriptID: String?
     var activeScriptStep: Int?
     var battle: RuntimeBattleState?
+    var encounterStepCounter: Int
     var playTimeSeconds: Int
 }

@@ -13,6 +13,7 @@ extension GameRuntime {
             dialogue: makeDialogueTelemetry(),
             starterChoice: makeStarterChoiceTelemetry(),
             party: makePartyTelemetry(),
+            inventory: makeInventoryTelemetry(),
             battle: makeBattleTelemetry(),
             eventFlags: makeFlagTelemetry(),
             audio: makeAudioTelemetry(),
@@ -78,12 +79,14 @@ extension GameRuntime {
         guard let battle = gameplayState?.battle else { return nil }
         return BattleTelemetry(
             battleID: battle.battleID,
+            kind: battle.kind,
             trainerName: battle.trainerName,
             playerPokemon: makePartyPokemonTelemetry(from: battle.playerPokemon),
             enemyPokemon: makePartyPokemonTelemetry(from: battle.enemyPokemon),
             enemyPartyCount: battle.enemyParty.count,
             enemyActiveIndex: battle.enemyActiveIndex,
             focusedMoveIndex: battle.focusedMoveIndex,
+            canRun: battle.canRun,
             phase: battle.phase.rawValue,
             textLines: battle.message.isEmpty ? [] : [battle.message],
             moveSlots: battle.playerPokemon.moves.compactMap { runtimeMove in
@@ -97,6 +100,20 @@ extension GameRuntime {
                 )
             },
             battleMessage: battle.message
+        )
+    }
+
+    func makeInventoryTelemetry() -> InventoryTelemetry? {
+        guard gameplayState != nil else { return nil }
+        return InventoryTelemetry(
+            items: currentInventoryItems.compactMap { item in
+                guard let manifest = content.item(id: item.itemID) else { return nil }
+                return InventoryItemTelemetry(
+                    itemID: manifest.id,
+                    displayName: manifest.displayName,
+                    quantity: item.quantity
+                )
+            }
         )
     }
 

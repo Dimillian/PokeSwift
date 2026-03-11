@@ -3,11 +3,11 @@ import PokeDataModel
 
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
-    private static let starterBattleSpeciesIDs: Set<String> = ["CHARMANDER", "SQUIRTLE", "BULBASAUR"]
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
         ("gfx/tilesets/gym.png", "Assets/field/tilesets/gym.png"),
+        ("gfx/tilesets/pokecenter.png", "Assets/field/tilesets/pokecenter.png"),
         ("gfx/sprites/red.png", "Assets/field/sprites/red.png"),
         ("gfx/sprites/oak.png", "Assets/field/sprites/oak.png"),
         ("gfx/sprites/blue.png", "Assets/field/sprites/blue.png"),
@@ -15,11 +15,20 @@ public enum RedContentExtractor {
         ("gfx/sprites/girl.png", "Assets/field/sprites/girl.png"),
         ("gfx/sprites/fisher.png", "Assets/field/sprites/fisher.png"),
         ("gfx/sprites/scientist.png", "Assets/field/sprites/scientist.png"),
+        ("gfx/sprites/youngster.png", "Assets/field/sprites/youngster.png"),
+        ("gfx/sprites/gambler.png", "Assets/field/sprites/gambler.png"),
+        ("gfx/sprites/gambler_asleep.png", "Assets/field/sprites/gambler_asleep.png"),
+        ("gfx/sprites/clerk.png", "Assets/field/sprites/clerk.png"),
+        ("gfx/sprites/cooltrainer_m.png", "Assets/field/sprites/cooltrainer_m.png"),
+        ("gfx/sprites/nurse.png", "Assets/field/sprites/nurse.png"),
+        ("gfx/sprites/gentleman.png", "Assets/field/sprites/gentleman.png"),
+        ("gfx/sprites/link_receptionist.png", "Assets/field/sprites/link_receptionist.png"),
         ("gfx/sprites/poke_ball.png", "Assets/field/sprites/poke_ball.png"),
         ("gfx/sprites/pokedex.png", "Assets/field/sprites/pokedex.png"),
         ("gfx/blocksets/reds_house.bst", "Assets/field/blocksets/reds_house.bst"),
         ("gfx/blocksets/overworld.bst", "Assets/field/blocksets/overworld.bst"),
         ("gfx/blocksets/gym.bst", "Assets/field/blocksets/gym.bst"),
+        ("gfx/blocksets/pokecenter.bst", "Assets/field/blocksets/pokecenter.bst"),
     ]
 
     public struct Configuration: Sendable {
@@ -84,6 +93,7 @@ public enum RedContentExtractor {
             "Assets/field/tilesets/reds_house.png",
             "Assets/field/tilesets/overworld.png",
             "Assets/field/tilesets/gym.png",
+            "Assets/field/tilesets/pokecenter.png",
             "Assets/field/sprites/red.png",
             "Assets/field/sprites/oak.png",
             "Assets/field/sprites/blue.png",
@@ -91,11 +101,20 @@ public enum RedContentExtractor {
             "Assets/field/sprites/girl.png",
             "Assets/field/sprites/fisher.png",
             "Assets/field/sprites/scientist.png",
+            "Assets/field/sprites/youngster.png",
+            "Assets/field/sprites/gambler.png",
+            "Assets/field/sprites/gambler_asleep.png",
+            "Assets/field/sprites/clerk.png",
+            "Assets/field/sprites/cooltrainer_m.png",
+            "Assets/field/sprites/nurse.png",
+            "Assets/field/sprites/gentleman.png",
+            "Assets/field/sprites/link_receptionist.png",
             "Assets/field/sprites/poke_ball.png",
             "Assets/field/sprites/pokedex.png",
             "Assets/field/blocksets/reds_house.bst",
             "Assets/field/blocksets/overworld.bst",
             "Assets/field/blocksets/gym.bst",
+            "Assets/field/blocksets/pokecenter.bst",
         ]
 
         for relativePath in required {
@@ -221,7 +240,6 @@ public enum RedContentExtractor {
 
     private static func battleAssetMap(from gameplayManifest: GameplayManifest) -> [(source: String, destination: String)] {
         gameplayManifest.species
-            .filter { starterBattleSpeciesIDs.contains($0.id) }
             .flatMap { species -> [(source: String, destination: String)] in
                 guard let battleSprite = species.battleSprite else { return [] }
                 let stem = species.id.lowercased()

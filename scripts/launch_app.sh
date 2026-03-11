@@ -64,3 +64,4 @@ detail "Launching via PokeHarness so telemetry/input automation remains availabl
 section "Launch request sent"
 detail "App logs: $TRACE_DIR/app.log"
 detail "Telemetry trace: $TRACE_DIR/telemetry.jsonl"
+detail "Session event trace: $TRACE_DIR/session_events.jsonl"

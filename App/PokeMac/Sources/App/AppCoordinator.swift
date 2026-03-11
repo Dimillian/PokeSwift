@@ -73,6 +73,7 @@ final class AppCoordinator {
                 }
                 runtime.start()
             } catch {
+                fputs("boot error: \(error.localizedDescription)\n", stderr)
                 bootError = error.localizedDescription
             }
         }

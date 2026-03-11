@@ -13,6 +13,15 @@ enum GameplayScenePropsFactory {
             speciesDetailsByID: manifestIndex.speciesDetailsByID,
             moveDisplayNamesByID: manifestIndex.moveDisplayNamesByID
         )
+        let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
+            items: snapshot.inventory?.items.map {
+                InventorySidebarItemProps(
+                    id: $0.itemID,
+                    name: $0.displayName,
+                    quantityText: "x\($0.quantity)"
+                )
+            } ?? []
+        )
 
         switch GameplaySidebarKind.forScene(runtime.scene) {
         case .fieldLike:
@@ -36,7 +45,7 @@ enum GameplayScenePropsFactory {
                     GameplayFieldSidebarProps(
                         profile: makeTrainerProfile(runtime: runtime),
                         party: sidebarParty,
-                        inventory: GameplaySidebarPropsBuilder.makeInventory(),
+                        inventory: sidebarInventory,
                         save: saveSidebar,
                         options: GameplaySidebarPropsBuilder.makeOptionsSection()
                     )
@@ -78,12 +87,14 @@ enum GameplayScenePropsFactory {
                 sidebarMode: .battle(
                     BattleSidebarProps(
                         trainerName: battle.trainerName,
+                        kind: battle.kind,
                         phase: battle.phase,
                         promptText: promptText,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
                         moveSlots: battle.moveSlots,
                         focusedMoveIndex: battle.focusedMoveIndex,
+                        canRun: battle.canRun,
                         party: sidebarParty
                     )
                 ),
