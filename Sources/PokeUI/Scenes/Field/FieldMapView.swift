@@ -570,13 +570,7 @@ private struct FixedViewportPlaceholderField: View {
 
         let blockX = mapStepX / 2
         let blockY = mapStepY / 2
-        let blockID: Int
-        if (0..<map.blockWidth).contains(blockX), (0..<map.blockHeight).contains(blockY) {
-            let index = (blockY * map.blockWidth) + blockX
-            blockID = map.blockIDs.indices.contains(index) ? map.blockIDs[index] : map.borderBlockID
-        } else {
-            blockID = map.borderBlockID
-        }
+        let blockID = map.blockID(atBlockX: blockX, blockY: blockY)
 
         switch map.tileset {
         case "OVERWORLD":

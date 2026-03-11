@@ -3,7 +3,7 @@ import PokeDataModel
 
 func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let mapSizes = try parseMapSizes(repoRoot: source.repoRoot)
-    let mapHeaders = try parseMapHeaders(repoRoot: source.repoRoot)
+    let mapHeadersByID = try parseMapHeaders(repoRoot: source.repoRoot)
     let mapMusic = try parseMapMusic(repoRoot: source.repoRoot)
     let eventFlags = try parseEventFlags(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
@@ -17,7 +17,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             blockFile: "maps/RedsHouse2F.blk",
             size: mapSizes["REDS_HOUSE_2F"] ?? TileSize(width: 4, height: 4),
             defaultMusicID: mapMusic["REDS_HOUSE_2F"] ?? "MUSIC_PALLET_TOWN",
-            tileset: mapHeaders["REDS_HOUSE_2F"] ?? "REDS_HOUSE_2",
+            mapSizes: mapSizes,
+            mapHeadersByID: mapHeadersByID,
             tilesets: tilesets
         ),
         makeMapManifestDraft(
@@ -28,7 +29,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             blockFile: "maps/RedsHouse1F.blk",
             size: mapSizes["REDS_HOUSE_1F"] ?? TileSize(width: 4, height: 4),
             defaultMusicID: mapMusic["REDS_HOUSE_1F"] ?? "MUSIC_PALLET_TOWN",
-            tileset: mapHeaders["REDS_HOUSE_1F"] ?? "REDS_HOUSE_1",
+            mapSizes: mapSizes,
+            mapHeadersByID: mapHeadersByID,
             tilesets: tilesets
         ),
         makeMapManifestDraft(
@@ -39,7 +41,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             blockFile: "maps/PalletTown.blk",
             size: mapSizes["PALLET_TOWN"] ?? TileSize(width: 10, height: 9),
             defaultMusicID: mapMusic["PALLET_TOWN"] ?? "MUSIC_PALLET_TOWN",
-            tileset: mapHeaders["PALLET_TOWN"] ?? "OVERWORLD",
+            mapSizes: mapSizes,
+            mapHeadersByID: mapHeadersByID,
             tilesets: tilesets
         ),
         makeMapManifestDraft(
@@ -50,7 +53,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             blockFile: "maps/OaksLab.blk",
             size: mapSizes["OAKS_LAB"] ?? TileSize(width: 5, height: 6),
             defaultMusicID: mapMusic["OAKS_LAB"] ?? "MUSIC_OAKS_LAB",
-            tileset: mapHeaders["OAKS_LAB"] ?? "DOJO",
+            mapSizes: mapSizes,
+            mapHeadersByID: mapHeadersByID,
             tilesets: tilesets
         ),
     ]
@@ -93,6 +97,19 @@ private struct RawWarpEntry {
     let targetWarp: Int
 }
 
+private struct ParsedMapHeader {
+    let symbolName: String
+    let id: String
+    let tileset: String
+    let connections: [RawMapConnection]
+}
+
+private struct RawMapConnection {
+    let direction: MapConnectionDirection
+    let targetMapID: String
+    let offset: Int
+}
+
 private struct MapManifestDraft {
     let id: String
     let displayName: String
@@ -108,6 +125,7 @@ private struct MapManifestDraft {
     let rawWarps: [RawWarpEntry]
     let backgroundEvents: [BackgroundEventManifest]
     let objects: [MapObjectManifest]
+    let connections: [MapConnectionManifest]
 }
 
 private func parseMapSizes(repoRoot: URL) throws -> [String: TileSize] {
@@ -147,20 +165,52 @@ private func parseEventFlags(repoRoot: URL) throws -> [EventFlagDefinition] {
     }
 }
 
-private func parseMapHeaders(repoRoot: URL) throws -> [String: String] {
-    let pairs = [
-        ("REDS_HOUSE_2F", "data/maps/headers/RedsHouse2F.asm"),
-        ("REDS_HOUSE_1F", "data/maps/headers/RedsHouse1F.asm"),
-        ("PALLET_TOWN", "data/maps/headers/PalletTown.asm"),
-        ("OAKS_LAB", "data/maps/headers/OaksLab.asm"),
-    ]
+private func parseMapHeaders(repoRoot: URL) throws -> [String: ParsedMapHeader] {
+    let headersURL = repoRoot.appendingPathComponent("data/maps/headers", isDirectory: true)
+    let headerFiles = try FileManager.default.contentsOfDirectory(
+        at: headersURL,
+        includingPropertiesForKeys: nil
+    )
+    let connectionRegex = try NSRegularExpression(
+        pattern: #"connection\s+(north|south|west|east),\s+([A-Za-z0-9_]+),\s+([A-Z0-9_]+),\s+(-?\d+)"#
+    )
 
-    return try pairs.reduce(into: [:]) { result, pair in
-        let contents = try String(contentsOf: repoRoot.appendingPathComponent(pair.1))
-        if let match = contents.firstMatch(of: /map_header\s+\w+,\s+[A-Z0-9_]+,\s+([A-Z0-9_]+)/) {
-            result[pair.0] = String(match.output.1)
+    return try headerFiles
+        .filter { $0.pathExtension == "asm" }
+        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        .reduce(into: [:]) { result, headerURL in
+            let contents = try String(contentsOf: headerURL)
+            guard let match = contents.firstMatch(of: /map_header\s+([A-Za-z0-9_]+),\s+([A-Z0-9_]+),\s+([A-Z0-9_]+)/) else {
+                return
+            }
+
+            let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+            let connections: [RawMapConnection] = connectionRegex.matches(in: contents, range: nsRange).compactMap { match in
+                guard
+                    let directionRange = Range(match.range(at: 1), in: contents),
+                    let targetIDRange = Range(match.range(at: 3), in: contents),
+                    let offsetRange = Range(match.range(at: 4), in: contents),
+                    let direction = MapConnectionDirection(rawValue: String(contents[directionRange])),
+                    let offset = Int(contents[offsetRange])
+                else {
+                    return nil
+                }
+
+                return RawMapConnection(
+                    direction: direction,
+                    targetMapID: String(contents[targetIDRange]),
+                    offset: offset
+                )
+            }
+
+            let header = ParsedMapHeader(
+                symbolName: String(match.output.1),
+                id: String(match.output.2),
+                tileset: String(match.output.3),
+                connections: connections
+            )
+            result[header.id] = header
         }
-    }
 }
 
 private func parseMapMusic(repoRoot: URL) throws -> [String: String] {
@@ -250,15 +300,24 @@ private func makeMapManifestDraft(
     blockFile: String,
     size: TileSize,
     defaultMusicID: String,
-    tileset: String,
+    mapSizes: [String: TileSize],
+    mapHeadersByID: [String: ParsedMapHeader],
     tilesets: [TilesetManifest]
  ) throws -> MapManifestDraft {
+    guard let mapHeader = mapHeadersByID[mapID] else {
+        throw ExtractorError.invalidArguments("missing map header for \(mapID)")
+    }
+
     let objectURL = repoRoot.appendingPathComponent(objectFile)
     let contents = try String(contentsOf: objectURL)
-    let blockData = try Data(contentsOf: repoRoot.appendingPathComponent(blockFile))
+    let blockIDs = try loadBlockIDs(
+        repoRoot: repoRoot,
+        blockFile: blockFile,
+        expectedSize: size
+    )
     let borderBlockID = try parseBorderBlockID(contents: contents)
-    guard let tilesetManifest = tilesets.first(where: { $0.id == tileset }) else {
-        throw ExtractorError.invalidArguments("missing tileset manifest for \(tileset)")
+    guard let tilesetManifest = tilesets.first(where: { $0.id == mapHeader.tileset }) else {
+        throw ExtractorError.invalidArguments("missing tileset manifest for \(mapHeader.tileset)")
     }
     let resolvedStepCollisionTileIDs = try resolveStepCollisionTileIDs(
         repoRoot: repoRoot,
@@ -266,7 +325,13 @@ private func makeMapManifestDraft(
         borderBlockID: borderBlockID,
         blockWidth: size.width,
         blockHeight: size.height,
-        blockIDs: blockData.map(Int.init)
+        blockIDs: blockIDs
+    )
+    let connections = try buildMapConnections(
+        for: mapHeader,
+        repoRoot: repoRoot,
+        mapSizes: mapSizes,
+        mapHeadersByID: mapHeadersByID
     )
 
     return MapManifestDraft(
@@ -278,12 +343,13 @@ private func makeMapManifestDraft(
         blockHeight: size.height,
         stepWidth: size.width * 2,
         stepHeight: size.height * 2,
-        tileset: tileset,
-        blockIDs: blockData.map(Int.init),
+        tileset: mapHeader.tileset,
+        blockIDs: blockIDs,
         stepCollisionTileIDs: resolvedStepCollisionTileIDs,
         rawWarps: parseRawWarps(contents: contents),
         backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents),
-        objects: parseObjects(mapID: mapID, contents: contents)
+        objects: parseObjects(mapID: mapID, contents: contents),
+        connections: connections
     )
 }
 
@@ -334,7 +400,53 @@ private func resolveMapWarps(
             stepCollisionTileIDs: draft.stepCollisionTileIDs,
             warps: warps,
             backgroundEvents: draft.backgroundEvents,
-            objects: draft.objects
+            objects: draft.objects,
+            connections: draft.connections
+        )
+    }
+}
+
+private func loadBlockIDs(
+    repoRoot: URL,
+    blockFile: String,
+    expectedSize: TileSize
+) throws -> [Int] {
+    let blockData = try Data(contentsOf: repoRoot.appendingPathComponent(blockFile))
+    let blockIDs = blockData.map(Int.init)
+    let expectedCount = expectedSize.width * expectedSize.height
+    guard blockIDs.count == expectedCount else {
+        throw ExtractorError.invalidArguments(
+            "unexpected block count for \(blockFile): expected \(expectedCount), found \(blockIDs.count)"
+        )
+    }
+    return blockIDs
+}
+
+private func buildMapConnections(
+    for mapHeader: ParsedMapHeader,
+    repoRoot: URL,
+    mapSizes: [String: TileSize],
+    mapHeadersByID: [String: ParsedMapHeader]
+) throws -> [MapConnectionManifest] {
+    try mapHeader.connections.map { connection in
+        guard let targetHeader = mapHeadersByID[connection.targetMapID] else {
+            throw ExtractorError.invalidArguments("missing target header for map connection \(connection.targetMapID)")
+        }
+        guard let targetSize = mapSizes[connection.targetMapID] else {
+            throw ExtractorError.invalidArguments("missing size for map connection \(connection.targetMapID)")
+        }
+
+        return MapConnectionManifest(
+            direction: connection.direction,
+            targetMapID: connection.targetMapID,
+            offset: connection.offset,
+            targetBlockWidth: targetSize.width,
+            targetBlockHeight: targetSize.height,
+            targetBlockIDs: try loadBlockIDs(
+                repoRoot: repoRoot,
+                blockFile: "maps/\(targetHeader.symbolName).blk",
+                expectedSize: targetSize
+            )
         )
     }
 }

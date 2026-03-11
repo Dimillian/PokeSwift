@@ -684,6 +684,57 @@ final class PokeUITests: XCTestCase {
         XCTAssertEqual(grayscaleValues(in: scene.backgroundImage), Set([85]))
     }
 
+    func testRenderSceneOverlaysConnectedMapStripsInsideBorderPadding() throws {
+        let fixtureRoot = try makeSyntheticPaletteFixture(tileValues: [10, 80, 160])
+        defer { try? FileManager.default.removeItem(at: fixtureRoot) }
+
+        let assets = FieldRenderAssets(
+            tileset: .init(
+                id: "TEST",
+                imageURL: fixtureRoot.appendingPathComponent("tileset.png"),
+                blocksetURL: fixtureRoot.appendingPathComponent("test.bst")
+            ),
+            overworldSprites: [:]
+        )
+        let map = MapManifest(
+            id: "TEST_MAP",
+            displayName: "Test Map",
+            defaultMusicID: "MUSIC_PALLET_TOWN",
+            borderBlockID: 0,
+            blockWidth: 1,
+            blockHeight: 1,
+            stepWidth: 2,
+            stepHeight: 2,
+            tileset: "TEST",
+            blockIDs: [1],
+            stepCollisionTileIDs: Array(repeating: 0x00, count: 4),
+            warps: [],
+            backgroundEvents: [],
+            objects: [],
+            connections: [
+                .init(
+                    direction: .north,
+                    targetMapID: "TEST_ROUTE",
+                    offset: 0,
+                    targetBlockWidth: 1,
+                    targetBlockHeight: 3,
+                    targetBlockIDs: [2, 2, 2]
+                ),
+            ]
+        )
+
+        let scene = try FieldSceneRenderer.renderScene(
+            map: map,
+            playerPosition: .init(x: 0, y: 0),
+            playerFacing: .down,
+            playerSpriteID: "MISSING",
+            objects: [],
+            assets: assets
+        )
+
+        XCTAssertEqual(grayscaleValues(in: scene.backgroundImage), Set([10, 80, 160]))
+    }
+
     func testRendererProducesByteStableRawOutputAcrossRepeatedCalls() throws {
         let fixtureRoot = try makeSyntheticFieldFixture(tileValue: 85, spriteBodyValue: 170)
         defer { try? FileManager.default.removeItem(at: fixtureRoot) }

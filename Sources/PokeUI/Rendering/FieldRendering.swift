@@ -830,12 +830,7 @@ struct FieldSceneRenderer {
         for blockY in 0..<map.blockHeight {
             for blockX in 0..<map.blockWidth {
                 try drawBlock(
-                    blockID: blockID(
-                        in: map,
-                        blockX: blockX,
-                        blockY: blockY,
-                        useBorderForOutOfBounds: false
-                    ),
+                    blockID: map.blockID(atBlockX: blockX, blockY: blockY, includeConnections: false),
                     mapX: blockX,
                     mapY: blockY,
                     atlas: atlas,
@@ -862,14 +857,8 @@ struct FieldSceneRenderer {
             for paddedBlockX in 0..<totalBlocksX {
                 let mapBlockX = paddedBlockX - paddingBlocksX
                 let mapBlockY = paddedBlockY - paddingBlocksY
-                let blockID = blockID(
-                    in: map,
-                    blockX: mapBlockX,
-                    blockY: mapBlockY,
-                    useBorderForOutOfBounds: true
-                )
                 try drawBlock(
-                    blockID: blockID,
+                    blockID: map.blockID(atBlockX: mapBlockX, blockY: mapBlockY),
                     mapX: paddedBlockX,
                     mapY: paddedBlockY,
                     atlas: atlas,
@@ -878,22 +867,6 @@ struct FieldSceneRenderer {
                 )
             }
         }
-    }
-
-    private static func blockID(
-        in map: MapManifest,
-        blockX: Int,
-        blockY: Int,
-        useBorderForOutOfBounds: Bool
-    ) -> Int {
-        if (0..<map.blockWidth).contains(blockX), (0..<map.blockHeight).contains(blockY) {
-            let mapIndex = (blockY * map.blockWidth) + blockX
-            guard map.blockIDs.indices.contains(mapIndex) else {
-                return map.borderBlockID
-            }
-            return map.blockIDs[mapIndex]
-        }
-        return useBorderForOutOfBounds ? map.borderBlockID : 0
     }
 
     private static func drawBlock(

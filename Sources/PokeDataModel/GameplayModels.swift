@@ -297,6 +297,38 @@ public struct TilesetCollisionManifest: Codable, Equatable, Sendable {
     }
 }
 
+public enum MapConnectionDirection: String, Codable, Equatable, Sendable, CaseIterable {
+    case north
+    case south
+    case west
+    case east
+}
+
+public struct MapConnectionManifest: Codable, Equatable, Sendable {
+    public let direction: MapConnectionDirection
+    public let targetMapID: String
+    public let offset: Int
+    public let targetBlockWidth: Int
+    public let targetBlockHeight: Int
+    public let targetBlockIDs: [Int]
+
+    public init(
+        direction: MapConnectionDirection,
+        targetMapID: String,
+        offset: Int,
+        targetBlockWidth: Int,
+        targetBlockHeight: Int,
+        targetBlockIDs: [Int]
+    ) {
+        self.direction = direction
+        self.targetMapID = targetMapID
+        self.offset = offset
+        self.targetBlockWidth = targetBlockWidth
+        self.targetBlockHeight = targetBlockHeight
+        self.targetBlockIDs = targetBlockIDs
+    }
+}
+
 public struct MapManifest: Codable, Equatable, Sendable {
     public let id: String
     public let displayName: String
@@ -312,6 +344,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
     public let warps: [WarpManifest]
     public let backgroundEvents: [BackgroundEventManifest]
     public let objects: [MapObjectManifest]
+    public let connections: [MapConnectionManifest]
 
     public init(
         id: String,
@@ -327,7 +360,8 @@ public struct MapManifest: Codable, Equatable, Sendable {
         stepCollisionTileIDs: [Int],
         warps: [WarpManifest],
         backgroundEvents: [BackgroundEventManifest],
-        objects: [MapObjectManifest]
+        objects: [MapObjectManifest],
+        connections: [MapConnectionManifest] = []
     ) {
         self.id = id
         self.displayName = displayName
@@ -343,6 +377,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         self.warps = warps
         self.backgroundEvents = backgroundEvents
         self.objects = objects
+        self.connections = connections
     }
 }
 

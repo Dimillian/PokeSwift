@@ -436,6 +436,12 @@ When a blocker is discovered, add:
 
 ## Progress Log
 
+### 2026-03-11
+
+- Extended the extracted field map contract with source-driven connection strips so maps can render adjacent-map border data instead of repeating the local border block everywhere outside bounds.
+- Updated field background composition and the field debug map to resolve out-of-bounds blocks through GB-style north/south/west/east connection offsets before falling back to the map border block.
+- Added connection-focused extractor and renderer coverage so padded field rendering stays aligned with the original map-header semantics as the playable map set expands.
+
 ### 2026-03-10
 
 - Kept M3 coverage fixed to `REDS_HOUSE_2F`, `REDS_HOUSE_1F`, `PALLET_TOWN`, and `OAKS_LAB` while removing remaining manual runtime glue inside that slice.
