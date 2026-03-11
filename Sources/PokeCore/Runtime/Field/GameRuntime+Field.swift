@@ -361,28 +361,22 @@ extension GameRuntime {
 
         switch movement.kind {
         case .pathToPlayerAdjacent:
-            guard let actor = actors.first,
-                  actor.actorID != "player",
-                  let objectState = gameplayState.objectStates[actor.actorID] else {
+            guard let actorID = actors.first?.actorID else {
                 return []
             }
             let target = TilePoint(
                 x: gameplayState.playerPosition.x + (movement.targetPlayerOffset?.x ?? 0),
                 y: gameplayState.playerPosition.y + (movement.targetPlayerOffset?.y ?? 0)
             )
-            guard let path = shortestPath(
-                from: objectState.position,
-                to: target,
-                in: map,
-                ignoringObjectID: actor.actorID
-            ) else {
-                return []
-            }
-            return [.init(actorID: actor.actorID, path: path, startPoint: startPoint)]
+            return resolvedPathActor(
+                actorID: actorID,
+                target: target,
+                startPoint: startPoint,
+                gameplayState: gameplayState,
+                map: map
+            )
         case .pathToObjectOffset:
-            guard let actor = actors.first,
-                  actor.actorID != "player",
-                  let objectState = gameplayState.objectStates[actor.actorID],
+            guard let actorID = actors.first?.actorID,
                   let targetObjectID = movement.targetObjectID,
                   let targetObject = gameplayState.objectStates[targetObjectID]
             else {
@@ -392,18 +386,37 @@ extension GameRuntime {
                 x: targetObject.position.x + (movement.targetObjectOffset?.x ?? 0),
                 y: targetObject.position.y + (movement.targetObjectOffset?.y ?? 0)
             )
-            guard let path = shortestPath(
-                from: objectState.position,
-                to: target,
-                in: map,
-                ignoringObjectID: actor.actorID
-            ) else {
-                return []
-            }
-            return [.init(actorID: actor.actorID, path: path, startPoint: startPoint)]
+            return resolvedPathActor(
+                actorID: actorID,
+                target: target,
+                startPoint: startPoint,
+                gameplayState: gameplayState,
+                map: map
+            )
         case .fixedPath, .palletEscort, .rivalStarterPickup:
             return actors.map { ResolvedScriptMovementActor(actorID: $0.actorID, path: $0.path, startPoint: startPoint) }
         }
+    }
+
+    private func resolvedPathActor(
+        actorID: String,
+        target: TilePoint,
+        startPoint: TilePoint?,
+        gameplayState: GameplayState,
+        map: MapManifest
+    ) -> [ResolvedScriptMovementActor] {
+        guard actorID != "player",
+              let objectState = gameplayState.objectStates[actorID],
+              let path = shortestPath(
+                  from: objectState.position,
+                  to: target,
+                  in: map,
+                  ignoringObjectID: actorID
+              ) else {
+            return []
+        }
+
+        return [.init(actorID: actorID, path: path, startPoint: startPoint)]
     }
 
     private func applyMovementStartPointsIfNeeded(_ actors: [ResolvedScriptMovementActor]) {
@@ -536,35 +549,13 @@ extension GameRuntime {
         occupiedTiles: Set<TilePoint>,
         reservedTiles: Set<TilePoint>
     ) -> Bool {
-        guard nextPoint.x >= 0, nextPoint.y >= 0, nextPoint.x < map.stepWidth, nextPoint.y < map.stepHeight else {
+        guard isWithinFieldBounds(nextPoint, in: map) else {
             return false
         }
         guard occupiedTiles.contains(nextPoint) == false, reservedTiles.contains(nextPoint) == false else {
             return false
         }
-
-        guard let tileset = content.tileset(id: map.tileset),
-              let currentTileID = collisionTileID(at: currentPoint, in: map),
-              let nextTileID = collisionTileID(at: nextPoint, in: map) else {
-            return true
-        }
-
-        let passableTileIDs = Set(tileset.collision.passableTileIDs)
-        let ledgeAllowsStep = tileset.collision.ledges.contains {
-            $0.facing == facing && $0.standingTileID == currentTileID && $0.ledgeTileID == nextTileID
-        }
-        if passableTileIDs.contains(nextTileID) == false && ledgeAllowsStep == false {
-            return false
-        }
-
-        if tileset.collision.tilePairCollisions.contains(where: {
-            ($0.fromTileID == currentTileID && $0.toTileID == nextTileID) ||
-            ($0.fromTileID == nextTileID && $0.toTileID == currentTileID)
-        }) {
-            return false
-        }
-
-        return true
+        return tilesAllowFieldTraversal(from: currentPoint, to: nextPoint, in: map, facing: facing)
     }
 
     func shortestPath(
@@ -578,12 +569,14 @@ extension GameRuntime {
         }
 
         var queue: [TilePoint] = [start]
+        var queueIndex = 0
         var visited: Set<TilePoint> = [start]
         var previous: [TilePoint: (TilePoint, FacingDirection)] = [:]
         let occupied = occupiedTileSet(excludingObjectIDs: [ignoringObjectID], excludingPlayer: false)
 
-        while queue.isEmpty == false {
-            let current = queue.removeFirst()
+        while queueIndex < queue.count {
+            let current = queue[queueIndex]
+            queueIndex += 1
             for direction in FacingDirection.allCases {
                 let next = translated(current, by: direction)
                 guard visited.contains(next) == false else { continue }
@@ -657,6 +650,37 @@ extension GameRuntime {
         fieldAnimationStepDuration
     }
 
+    func isWithinFieldBounds(_ point: TilePoint, in map: MapManifest) -> Bool {
+        point.x >= 0 && point.y >= 0 && point.x < map.stepWidth && point.y < map.stepHeight
+    }
+
+    func tilesAllowFieldTraversal(
+        from currentPoint: TilePoint,
+        to nextPoint: TilePoint,
+        in map: MapManifest,
+        facing: FacingDirection
+    ) -> Bool {
+        guard let tileset = content.tileset(id: map.tileset),
+              let currentTileID = collisionTileID(at: currentPoint, in: map),
+              let nextTileID = collisionTileID(at: nextPoint, in: map) else {
+            return true
+        }
+
+        let passableTileIDs = Set(tileset.collision.passableTileIDs)
+        let ledgeAllowsStep = tileset.collision.ledges.contains {
+            $0.facing == facing && $0.standingTileID == currentTileID && $0.ledgeTileID == nextTileID
+        }
+
+        guard passableTileIDs.contains(nextTileID) || ledgeAllowsStep else {
+            return false
+        }
+
+        return tileset.collision.tilePairCollisions.contains(where: {
+            ($0.fromTileID == currentTileID && $0.toTileID == nextTileID) ||
+            ($0.fromTileID == nextTileID && $0.toTileID == currentTileID)
+        }) == false
+    }
+
     func sleep(seconds: TimeInterval) async {
         guard seconds > 0 else { return }
         try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
@@ -673,7 +697,7 @@ extension GameRuntime {
     }
 
     func collisionTileID(at point: TilePoint, in map: MapManifest) -> Int? {
-        guard point.x >= 0, point.y >= 0, point.x < map.stepWidth, point.y < map.stepHeight else {
+        guard isWithinFieldBounds(point, in: map) else {
             return nil
         }
         let index = (point.y * map.stepWidth) + point.x
@@ -719,37 +743,14 @@ extension GameRuntime {
         gameplayState: GameplayState?,
         facing: FacingDirection
     ) -> Bool {
-        guard nextPoint.x >= 0, nextPoint.y >= 0, nextPoint.x < map.stepWidth, nextPoint.y < map.stepHeight else {
+        guard isWithinFieldBounds(nextPoint, in: map) else {
             return false
         }
 
         if visibleObjectPositions(on: mapID, gameplayState: gameplayState).contains(nextPoint) {
             return false
         }
-
-        guard let tileset = content.tileset(id: map.tileset),
-              let currentTileID = collisionTileID(at: currentPoint, in: map),
-              let nextTileID = collisionTileID(at: nextPoint, in: map) else {
-            return true
-        }
-
-        let passableTileIDs = Set(tileset.collision.passableTileIDs)
-        let ledgeAllowsStep = tileset.collision.ledges.contains {
-            $0.facing == facing && $0.standingTileID == currentTileID && $0.ledgeTileID == nextTileID
-        }
-
-        if passableTileIDs.contains(nextTileID) == false && ledgeAllowsStep == false {
-            return false
-        }
-
-        if tileset.collision.tilePairCollisions.contains(where: {
-            ($0.fromTileID == currentTileID && $0.toTileID == nextTileID) ||
-            ($0.fromTileID == nextTileID && $0.toTileID == currentTileID)
-        }) {
-            return false
-        }
-
-        return true
+        return tilesAllowFieldTraversal(from: currentPoint, to: nextPoint, in: map, facing: facing)
     }
 
     func visibleObjectPositions(on mapID: String, gameplayState: GameplayState?) -> Set<TilePoint> {

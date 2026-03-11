@@ -96,16 +96,7 @@ extension GameRuntime {
             phase: battle.phase.rawValue,
             textLines: battle.message.isEmpty ? [] : [battle.message],
             learnMovePrompt: makeBattleLearnMovePromptTelemetry(from: battle),
-            moveSlots: battle.playerPokemon.moves.compactMap { runtimeMove in
-                guard let move = content.move(id: runtimeMove.id) else { return nil }
-                return BattleMoveSlotTelemetry(
-                    moveID: move.id,
-                    displayName: move.displayName,
-                    currentPP: runtimeMove.currentPP,
-                    maxPP: move.maxPP,
-                    isSelectable: runtimeMove.currentPP > 0
-                )
-            },
+            moveSlots: battle.playerPokemon.moves.compactMap { makeBattleMoveSlotTelemetry(from: $0) },
             bagItems: currentBattleBagItems.compactMap(makeInventoryItemTelemetry(from:)),
             battleMessage: battle.message,
             capture: makeBattleCaptureTelemetry(from: battle.lastCaptureResult),
@@ -159,11 +150,9 @@ extension GameRuntime {
 
         let buyItems = mart.stockItemIDs.compactMap { itemID -> ShopRowTelemetry? in
             guard let item = content.item(id: itemID) else { return nil }
-            return ShopRowTelemetry(
-                itemID: item.id,
-                displayName: item.displayName,
+            return makeShopRowTelemetry(
+                item: item,
                 ownedQuantity: itemQuantity(item.id),
-                unitPrice: item.price,
                 transactionPrice: item.price,
                 isSelectable: maxPurchasableQuantity(for: item) > 0
             )
@@ -171,11 +160,9 @@ extension GameRuntime {
 
         let sellItems = currentInventoryItems.compactMap { itemState -> ShopRowTelemetry? in
             guard let item = content.item(id: itemState.itemID) else { return nil }
-            return ShopRowTelemetry(
-                itemID: item.id,
-                displayName: item.displayName,
+            return makeShopRowTelemetry(
+                item: item,
                 ownedQuantity: itemState.quantity,
-                unitPrice: item.price,
                 transactionPrice: sellPrice(for: item),
                 isSelectable: canSell(item: item)
             )
@@ -194,6 +181,17 @@ extension GameRuntime {
             menuOptions: ["BUY", "SELL", "QUIT"],
             buyItems: buyItems,
             sellItems: sellItems
+        )
+    }
+
+    func makeBattleMoveSlotTelemetry(from runtimeMove: RuntimeMoveState) -> BattleMoveSlotTelemetry? {
+        guard let move = content.move(id: runtimeMove.id) else { return nil }
+        return BattleMoveSlotTelemetry(
+            moveID: move.id,
+            displayName: move.displayName,
+            currentPP: runtimeMove.currentPP,
+            maxPP: move.maxPP,
+            isSelectable: runtimeMove.currentPP > 0
         )
     }
 
@@ -281,6 +279,22 @@ extension GameRuntime {
             quantity: item.quantity,
             price: manifest.price,
             battleUse: manifest.battleUse
+        )
+    }
+
+    func makeShopRowTelemetry(
+        item: ItemManifest,
+        ownedQuantity: Int,
+        transactionPrice: Int,
+        isSelectable: Bool
+    ) -> ShopRowTelemetry {
+        ShopRowTelemetry(
+            itemID: item.id,
+            displayName: item.displayName,
+            ownedQuantity: ownedQuantity,
+            unitPrice: item.price,
+            transactionPrice: transactionPrice,
+            isSelectable: isSelectable
         )
     }
 

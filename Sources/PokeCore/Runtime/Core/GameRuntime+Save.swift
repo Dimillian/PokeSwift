@@ -123,9 +123,7 @@ extension GameRuntime {
             mapID: gameplayState.mapID,
             playerPosition: gameplayState.playerPosition,
             facing: gameplayState.facing,
-            objectStates: gameplayState.objectStates.mapValues {
-                GameSaveObjectState(position: $0.position, facing: $0.facing, visible: $0.visible)
-            },
+            objectStates: gameplayState.objectStates.mapValues { makeSaveObjectState(from: $0) },
             activeFlags: gameplayState.activeFlags.sorted(),
             money: gameplayState.money,
             inventory: gameplayState.inventory.map { .init(itemID: $0.itemID, quantity: $0.quantity) },
@@ -133,56 +131,14 @@ extension GameRuntime {
             boxedPokemon: gameplayState.boxedPokemon.map { box in
                 GameSavePokemonBox(
                     index: box.index,
-                    pokemon: box.pokemon.map { pokemon in
-                        GameSavePokemon(
-                            speciesID: pokemon.speciesID,
-                            nickname: pokemon.nickname,
-                            level: pokemon.level,
-                            experience: pokemon.experience,
-                            dvs: pokemon.dvs,
-                            statExp: pokemon.statExp,
-                            maxHP: pokemon.maxHP,
-                            currentHP: pokemon.currentHP,
-                            attack: pokemon.attack,
-                            defense: pokemon.defense,
-                            speed: pokemon.speed,
-                            special: pokemon.special,
-                            attackStage: pokemon.attackStage,
-                            defenseStage: pokemon.defenseStage,
-                            accuracyStage: pokemon.accuracyStage,
-                            evasionStage: pokemon.evasionStage,
-                            majorStatus: pokemon.majorStatus,
-                            moves: pokemon.moves.map { GameSaveMove(id: $0.id, currentPP: $0.currentPP) }
-                        )
-                    }
+                    pokemon: box.pokemon.map { makeSavePokemon(from: $0) }
                 )
             },
             ownedSpeciesIDs: gameplayState.ownedSpeciesIDs.sorted(),
             earnedBadgeIDs: gameplayState.earnedBadgeIDs.sorted(),
             playerName: gameplayState.playerName,
             rivalName: gameplayState.rivalName,
-            playerParty: gameplayState.playerParty.map { pokemon in
-                GameSavePokemon(
-                    speciesID: pokemon.speciesID,
-                    nickname: pokemon.nickname,
-                    level: pokemon.level,
-                    experience: pokemon.experience,
-                    dvs: pokemon.dvs,
-                    statExp: pokemon.statExp,
-                    maxHP: pokemon.maxHP,
-                    currentHP: pokemon.currentHP,
-                    attack: pokemon.attack,
-                    defense: pokemon.defense,
-                    speed: pokemon.speed,
-                    special: pokemon.special,
-                    attackStage: pokemon.attackStage,
-                    defenseStage: pokemon.defenseStage,
-                    accuracyStage: pokemon.accuracyStage,
-                    evasionStage: pokemon.evasionStage,
-                    majorStatus: pokemon.majorStatus,
-                    moves: pokemon.moves.map { GameSaveMove(id: $0.id, currentPP: $0.currentPP) }
-                )
-            },
+            playerParty: gameplayState.playerParty.map { makeSavePokemon(from: $0) },
             chosenStarterSpeciesID: gameplayState.chosenStarterSpeciesID,
             rivalStarterSpeciesID: gameplayState.rivalStarterSpeciesID,
             pendingStarterSpeciesID: gameplayState.pendingStarterSpeciesID,
@@ -215,15 +171,7 @@ extension GameRuntime {
             mapID: envelope.snapshot.mapID,
             playerPosition: envelope.snapshot.playerPosition,
             facing: envelope.snapshot.facing,
-            objectStates: envelope.snapshot.objectStates.mapValues {
-                RuntimeObjectState(
-                    position: $0.position,
-                    facing: $0.facing,
-                    visible: $0.visible,
-                    movementMode: nil,
-                    idleStepIndex: 0
-                )
-            },
+            objectStates: envelope.snapshot.objectStates.mapValues { makeRuntimeObjectState(from: $0) },
             activeFlags: Set(envelope.snapshot.activeFlags),
             money: envelope.snapshot.money,
             inventory: envelope.snapshot.inventory.map { .init(itemID: $0.itemID, quantity: $0.quantity) },
@@ -234,28 +182,7 @@ extension GameRuntime {
             gotStarterBit: envelope.snapshot.chosenStarterSpeciesID != nil,
             playerName: envelope.snapshot.playerName,
             rivalName: envelope.snapshot.rivalName,
-            playerParty: envelope.snapshot.playerParty.map { pokemon in
-                RuntimePokemonState(
-                    speciesID: pokemon.speciesID,
-                    nickname: pokemon.nickname,
-                    level: pokemon.level,
-                    experience: pokemon.experience,
-                    dvs: pokemon.dvs,
-                    statExp: pokemon.statExp,
-                    maxHP: pokemon.maxHP,
-                    currentHP: pokemon.currentHP,
-                    attack: pokemon.attack,
-                    defense: pokemon.defense,
-                    speed: pokemon.speed,
-                    special: pokemon.special,
-                    attackStage: pokemon.attackStage,
-                    defenseStage: pokemon.defenseStage,
-                    accuracyStage: pokemon.accuracyStage,
-                    evasionStage: pokemon.evasionStage,
-                    majorStatus: pokemon.majorStatus,
-                    moves: pokemon.moves.map { RuntimeMoveState(id: $0.id, currentPP: $0.currentPP) }
-                )
-            },
+            playerParty: envelope.snapshot.playerParty.map { makeRuntimePokemon(from: $0) },
             chosenStarterSpeciesID: envelope.snapshot.chosenStarterSpeciesID,
             rivalStarterSpeciesID: envelope.snapshot.rivalStarterSpeciesID,
             pendingStarterSpeciesID: envelope.snapshot.pendingStarterSpeciesID,
@@ -279,6 +206,70 @@ extension GameRuntime {
         substate = "field"
         restartGameplayClock()
         requestDefaultMapMusic()
+    }
+
+    func makeSaveObjectState(from objectState: RuntimeObjectState) -> GameSaveObjectState {
+        GameSaveObjectState(
+            position: objectState.position,
+            facing: objectState.facing,
+            visible: objectState.visible
+        )
+    }
+
+    func makeSavePokemon(from pokemon: RuntimePokemonState) -> GameSavePokemon {
+        GameSavePokemon(
+            speciesID: pokemon.speciesID,
+            nickname: pokemon.nickname,
+            level: pokemon.level,
+            experience: pokemon.experience,
+            dvs: pokemon.dvs,
+            statExp: pokemon.statExp,
+            maxHP: pokemon.maxHP,
+            currentHP: pokemon.currentHP,
+            attack: pokemon.attack,
+            defense: pokemon.defense,
+            speed: pokemon.speed,
+            special: pokemon.special,
+            attackStage: pokemon.attackStage,
+            defenseStage: pokemon.defenseStage,
+            accuracyStage: pokemon.accuracyStage,
+            evasionStage: pokemon.evasionStage,
+            majorStatus: pokemon.majorStatus,
+            moves: pokemon.moves.map { GameSaveMove(id: $0.id, currentPP: $0.currentPP) }
+        )
+    }
+
+    func makeRuntimeObjectState(from objectState: GameSaveObjectState) -> RuntimeObjectState {
+        RuntimeObjectState(
+            position: objectState.position,
+            facing: objectState.facing,
+            visible: objectState.visible,
+            movementMode: nil,
+            idleStepIndex: 0
+        )
+    }
+
+    func makeRuntimePokemon(from pokemon: GameSavePokemon) -> RuntimePokemonState {
+        RuntimePokemonState(
+            speciesID: pokemon.speciesID,
+            nickname: pokemon.nickname,
+            level: pokemon.level,
+            experience: pokemon.experience,
+            dvs: pokemon.dvs,
+            statExp: pokemon.statExp,
+            maxHP: pokemon.maxHP,
+            currentHP: pokemon.currentHP,
+            attack: pokemon.attack,
+            defense: pokemon.defense,
+            speed: pokemon.speed,
+            special: pokemon.special,
+            attackStage: pokemon.attackStage,
+            defenseStage: pokemon.defenseStage,
+            accuracyStage: pokemon.accuracyStage,
+            evasionStage: pokemon.evasionStage,
+            majorStatus: pokemon.majorStatus,
+            moves: pokemon.moves.map { RuntimeMoveState(id: $0.id, currentPP: $0.currentPP) }
+        )
     }
 
     func recordSaveResult(operation: String, succeeded: Bool, message: String?) {
@@ -315,28 +306,7 @@ extension GameRuntime {
             let saved = savedByIndex[index]
             return RuntimePokemonBoxState(
                 index: index,
-                pokemon: saved?.pokemon.map { pokemon in
-                    RuntimePokemonState(
-                        speciesID: pokemon.speciesID,
-                        nickname: pokemon.nickname,
-                        level: pokemon.level,
-                        experience: pokemon.experience,
-                        dvs: pokemon.dvs,
-                        statExp: pokemon.statExp,
-                        maxHP: pokemon.maxHP,
-                        currentHP: pokemon.currentHP,
-                        attack: pokemon.attack,
-                        defense: pokemon.defense,
-                        speed: pokemon.speed,
-                        special: pokemon.special,
-                        attackStage: pokemon.attackStage,
-                        defenseStage: pokemon.defenseStage,
-                        accuracyStage: pokemon.accuracyStage,
-                        evasionStage: pokemon.evasionStage,
-                        majorStatus: pokemon.majorStatus,
-                        moves: pokemon.moves.map { RuntimeMoveState(id: $0.id, currentPP: $0.currentPP) }
-                    )
-                } ?? []
+                pokemon: saved?.pokemon.map { makeRuntimePokemon(from: $0) } ?? []
             )
         }
     }

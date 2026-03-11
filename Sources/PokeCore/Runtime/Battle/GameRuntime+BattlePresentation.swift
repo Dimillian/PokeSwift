@@ -2,6 +2,88 @@ import Foundation
 import PokeDataModel
 
 extension GameRuntime {
+    func commandReadyBeat(
+        delay: TimeInterval,
+        playerPokemon: RuntimePokemonState? = nil,
+        enemyPokemon: RuntimePokemonState? = nil
+    ) -> RuntimeBattlePresentationBeat {
+        .init(
+            delay: delay,
+            stage: .commandReady,
+            uiVisibility: .visible,
+            transitionStyle: .none,
+            message: "Pick the next move.",
+            phase: .moveSelection,
+            pendingAction: nil,
+            playerPokemon: playerPokemon,
+            enemyPokemon: enemyPokemon
+        )
+    }
+
+    func losingBattleBatch() -> [RuntimeBattlePresentationBeat] {
+        [
+            .init(
+                delay: battlePresentationDelay(base: 0.28),
+                stage: .battleComplete,
+                uiVisibility: .visible,
+                finishBattleWon: false
+            ),
+        ]
+    }
+
+    func resolveActionMoveIndex(
+        for side: BattlePresentationSide,
+        battle: RuntimeBattleState,
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState
+    ) -> Int {
+        side == .player
+            ? battle.focusedMoveIndex
+            : selectEnemyMoveIndex(enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+    }
+
+    func applyResolvedBattleAction(
+        _ action: ResolvedBattleAction,
+        side: BattlePresentationSide,
+        simulatedPlayer: inout RuntimePokemonState,
+        simulatedEnemy: inout RuntimePokemonState
+    ) {
+        if side == .player {
+            simulatedPlayer = action.updatedAttacker
+            simulatedEnemy = action.updatedDefender
+        } else {
+            simulatedEnemy = action.updatedAttacker
+            simulatedPlayer = action.updatedDefender
+        }
+    }
+
+    func appendPostActionResolutionIfNeeded(
+        battle: RuntimeBattleState,
+        simulatedPlayer: inout RuntimePokemonState,
+        simulatedEnemy: RuntimePokemonState,
+        batches: inout [[RuntimeBattlePresentationBeat]]
+    ) -> Bool {
+        if simulatedPlayer.currentHP == 0 {
+            batches.append(losingBattleBatch())
+            return true
+        }
+
+        if simulatedEnemy.currentHP == 0 {
+            let resolution = makeEnemyDefeatResolution(
+                battle: battle,
+                defeatedEnemy: simulatedEnemy,
+                playerPokemon: simulatedPlayer
+            )
+            simulatedPlayer = resolution.updatedPlayer
+            if resolution.beats.isEmpty == false {
+                batches.append(resolution.beats)
+            }
+            return true
+        }
+
+        return false
+    }
+
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
         let scale: Double
         if validationMode || isTestEnvironment {
@@ -172,17 +254,7 @@ extension GameRuntime {
         ]
 
         if requiresConfirmAfterReveal == false {
-            beats.append(
-                .init(
-                    delay: battlePresentationDelay(base: 0.18),
-                    stage: .commandReady,
-                    uiVisibility: .visible,
-                    transitionStyle: .none,
-                    message: "Pick the next move.",
-                    phase: .moveSelection,
-                    pendingAction: nil
-                )
-            )
+            beats.append(commandReadyBeat(delay: battlePresentationDelay(base: 0.18)))
         }
 
         return beats
@@ -192,105 +264,44 @@ extension GameRuntime {
         var simulatedPlayer = battle.playerPokemon
         var simulatedEnemy = battle.enemyPokemon
         var batches: [[RuntimeBattlePresentationBeat]] = []
+        let actionSides: [BattlePresentationSide] = simulatedPlayer.speed >= simulatedEnemy.speed
+            ? [.player, .enemy]
+            : [.enemy, .player]
 
-        let playerActsFirst = simulatedPlayer.speed >= simulatedEnemy.speed
-        let firstSide: BattlePresentationSide = playerActsFirst ? .player : .enemy
-        let firstMoveIndex = playerActsFirst
-            ? battle.focusedMoveIndex
-            : selectEnemyMoveIndex(enemyPokemon: simulatedEnemy, playerPokemon: simulatedPlayer)
-        let firstAction = resolveBattleAction(
-            side: firstSide,
-            attacker: playerActsFirst ? simulatedPlayer : simulatedEnemy,
-            defender: playerActsFirst ? simulatedEnemy : simulatedPlayer,
-            moveIndex: firstMoveIndex
-        )
-        batches.append(makeBeats(for: firstAction))
-        if firstSide == .player {
-            simulatedPlayer = firstAction.updatedAttacker
-            simulatedEnemy = firstAction.updatedDefender
-        } else {
-            simulatedEnemy = firstAction.updatedAttacker
-            simulatedPlayer = firstAction.updatedDefender
-        }
-
-        if simulatedPlayer.currentHP == 0 {
-            batches.append([
-                .init(
-                    delay: battlePresentationDelay(base: 0.28),
-                    stage: .battleComplete,
-                    uiVisibility: .visible,
-                    finishBattleWon: false
-                ),
-            ])
-            return batches
-        }
-
-        if simulatedEnemy.currentHP == 0 {
-            let resolution = makeEnemyDefeatResolution(
+        for side in actionSides {
+            let moveIndex = resolveActionMoveIndex(
+                for: side,
                 battle: battle,
-                defeatedEnemy: simulatedEnemy,
-                playerPokemon: simulatedPlayer
+                playerPokemon: simulatedPlayer,
+                enemyPokemon: simulatedEnemy
             )
-            simulatedPlayer = resolution.updatedPlayer
-            let resolutionBatch = resolution.beats
-            if resolutionBatch.isEmpty == false {
-                batches.append(resolutionBatch)
-            }
-            return batches
-        }
+            let action = resolveBattleAction(
+                side: side,
+                attacker: side == .player ? simulatedPlayer : simulatedEnemy,
+                defender: side == .player ? simulatedEnemy : simulatedPlayer,
+                moveIndex: moveIndex
+            )
+            batches.append(makeBeats(for: action))
+            applyResolvedBattleAction(
+                action,
+                side: side,
+                simulatedPlayer: &simulatedPlayer,
+                simulatedEnemy: &simulatedEnemy
+            )
 
-        let secondSide: BattlePresentationSide = firstSide == .player ? .enemy : .player
-        let secondMoveIndex = secondSide == .player
-            ? battle.focusedMoveIndex
-            : selectEnemyMoveIndex(enemyPokemon: simulatedEnemy, playerPokemon: simulatedPlayer)
-        let secondAction = resolveBattleAction(
-            side: secondSide,
-            attacker: secondSide == .player ? simulatedPlayer : simulatedEnemy,
-            defender: secondSide == .player ? simulatedEnemy : simulatedPlayer,
-            moveIndex: secondMoveIndex
-        )
-        batches.append(makeBeats(for: secondAction))
-        if secondSide == .player {
-            simulatedPlayer = secondAction.updatedAttacker
-            simulatedEnemy = secondAction.updatedDefender
-        } else {
-            simulatedEnemy = secondAction.updatedAttacker
-            simulatedPlayer = secondAction.updatedDefender
-        }
-
-        if simulatedPlayer.currentHP == 0 {
-            batches.append([
-                .init(
-                    delay: battlePresentationDelay(base: 0.28),
-                    stage: .battleComplete,
-                    uiVisibility: .visible,
-                    finishBattleWon: false
-                ),
-            ])
-            return batches
-        }
-
-        if simulatedEnemy.currentHP == 0 {
-            let resolution = makeEnemyDefeatResolution(
+            if appendPostActionResolutionIfNeeded(
                 battle: battle,
-                defeatedEnemy: simulatedEnemy,
-                playerPokemon: simulatedPlayer
-            )
-            simulatedPlayer = resolution.updatedPlayer
-            let resolutionBatch = resolution.beats
-            if resolutionBatch.isEmpty == false {
-                batches.append(resolutionBatch)
+                simulatedPlayer: &simulatedPlayer,
+                simulatedEnemy: simulatedEnemy,
+                batches: &batches
+            ) {
+                return batches
             }
-            return batches
         }
 
         batches.append([
-            .init(
+            commandReadyBeat(
                 delay: battlePresentationDelay(base: 0.24),
-                stage: .commandReady,
-                uiVisibility: .visible,
-                message: "Pick the next move.",
-                phase: .moveSelection,
                 playerPokemon: simulatedPlayer,
                 enemyPokemon: simulatedEnemy
             ),
@@ -433,16 +444,14 @@ extension GameRuntime {
         }
 
         guard let pendingAction = battle.pendingAction else {
-            battle.phase = .moveSelection
-            battle.message = "Pick the next move."
+            returnToBattleMoveSelection(battle: &battle)
             return
         }
 
         battle.pendingAction = nil
         switch pendingAction {
         case .moveSelection:
-            battle.phase = .moveSelection
-            battle.message = "Pick the next move."
+            returnToBattleMoveSelection(battle: &battle)
             if battle.presentation.stage == .introReveal {
                 battle.presentation.stage = .commandReady
                 battle.presentation.revision += 1
@@ -465,10 +474,8 @@ extension GameRuntime {
                 finishBattle(battle: battle, won: false)
                 return
             }
-            battle.phase = .partySelection
-            battle.partySelectionMode = .forcedReplacement
             battle.focusedPartyIndex = firstSwitchableIndex
-            battle.message = "Bring out which #MON?"
+            enterForcedBattleSwitchSelection(battle: &battle, gameplayState: gameplayState)
         case .continueLevelUpResolution:
             continueLevelUpResolution(battle: &battle)
         }
@@ -506,8 +513,7 @@ extension GameRuntime {
 
     func scheduleNextEnemySendOut(battle: inout RuntimeBattleState, nextIndex: Int) {
         guard battle.enemyParty.indices.contains(nextIndex) else {
-            battle.phase = .moveSelection
-            battle.message = "Pick the next move."
+            returnToBattleMoveSelection(battle: &battle)
             return
         }
 
@@ -529,12 +535,8 @@ extension GameRuntime {
                     enemyParty: battle.enemyParty,
                     enemyActiveIndex: nextIndex
                 ),
-                .init(
+                commandReadyBeat(
                     delay: battlePresentationDelay(base: 0.26),
-                    stage: .commandReady,
-                    uiVisibility: .visible,
-                    message: "Pick the next move.",
-                    phase: .moveSelection,
                     playerPokemon: battle.playerPokemon
                 ),
             ],

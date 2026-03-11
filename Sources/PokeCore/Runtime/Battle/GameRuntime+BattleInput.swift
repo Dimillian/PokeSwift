@@ -16,8 +16,31 @@ extension GameRuntime {
         battle: inout RuntimeBattleState,
         gameplayState: GameplayState
     ) {
+        enterBattleSwitchSelection(
+            battle: &battle,
+            gameplayState: gameplayState,
+            mode: .optionalSwitch
+        )
+    }
+
+    func enterForcedBattleSwitchSelection(
+        battle: inout RuntimeBattleState,
+        gameplayState: GameplayState
+    ) {
+        enterBattleSwitchSelection(
+            battle: &battle,
+            gameplayState: gameplayState,
+            mode: .forcedReplacement
+        )
+    }
+
+    func enterBattleSwitchSelection(
+        battle: inout RuntimeBattleState,
+        gameplayState: GameplayState,
+        mode: RuntimeBattlePartySelectionMode
+    ) {
         battle.phase = .partySelection
-        battle.partySelectionMode = .optionalSwitch
+        battle.partySelectionMode = mode
         battle.focusedPartyIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) ?? 0
         battle.message = "Bring out which #MON?"
     }
