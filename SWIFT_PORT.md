@@ -448,6 +448,9 @@ When a blocker is discovered, add:
 
 ### 2026-03-11
 
+- Removed the full-screen pixel-grid overlay from `GameBoyScreen` so gameplay and title surfaces read cleaner while keeping the shared Game Boy shell layout intact.
+- Reworked the gameplay host/sidebar chrome toward native macOS 26 Liquid Glass, using shared sidebar card/inset/chip surface primitives with retro-tinted materials instead of repeated hardcoded fills.
+- Split the monolithic gameplay sidebar view into focused field, battle, trainer, party, inventory/save/options, and shared-primitives files so future native UI iterations can stay scoped without changing gameplay/sidebar behavior contracts.
 - Narrowed `PokeHarness validate` back to the accepted intro/M3 smoke path and removed the abandoned early-M4 scripted validator plus its external RNG debug endpoint.
 - Added runtime session-event tracing for scripts, dialogue, warps, encounters, battles, inventory changes, heals, and save/load outcomes, written to `.runtime-traces/pokemac/session_events.jsonl` for manual session debugging.
 - Added focused extractor/runtime/telemetry coverage for the early-M4 slice so Route 1, Viridian, encounters, healing, and parcel/Pokedex state can be validated without relying on a brittle long autoplay harness.

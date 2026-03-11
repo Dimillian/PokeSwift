@@ -81,15 +81,38 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(Color(red: 0.9, green: 0.9, blue: 0.86))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            FieldRetroPalette.shellBackdrop,
+                            FieldRetroPalette.stageInner,
+                            FieldRetroPalette.stageMiddle.opacity(0.86),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 34, style: .continuous)
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color.white.opacity(0.5),
+                                    Color.clear,
+                                ],
+                                center: .topLeading,
+                                startRadius: 20,
+                                endRadius: 280
+                            )
+                        )
+                }
                 .overlay {
                     RoundedRectangle(cornerRadius: 34, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    Color.white.opacity(0.46),
                                     Color.clear,
-                                    Color.black.opacity(0.05),
+                                    FieldRetroPalette.shellBackdropShadow.opacity(0.06),
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -97,16 +120,20 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
                         )
                 }
         )
+        .glassEffect(
+            .regular.tint(FieldRetroPalette.glassTint),
+            in: RoundedRectangle(cornerRadius: 34, style: .continuous)
+        )
         .overlay {
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .stroke(FieldRetroPalette.outline.opacity(0.38), lineWidth: 3)
+                .stroke(FieldRetroPalette.outline.opacity(0.16), lineWidth: 1)
                 .overlay {
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(.white.opacity(0.44), lineWidth: 1)
+                        .stroke(.white.opacity(0.3), lineWidth: 1)
                         .padding(8)
                 }
         }
-        .shadow(color: .black.opacity(0.14), radius: 24, y: 12)
+        .shadow(color: FieldRetroPalette.shellBackdropShadow.opacity(0.16), radius: 24, y: 12)
     }
 }
 
