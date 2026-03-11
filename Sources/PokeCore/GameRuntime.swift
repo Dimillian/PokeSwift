@@ -196,19 +196,27 @@ public final class GameRuntime {
         lastSaveResult
     }
 
-    public var canSaveGame: Bool {
+    var isSaveableFieldGameplay: Bool {
         gameplayState != nil &&
             scene == .field &&
             dialogueState == nil &&
             fieldTransitionState == nil &&
-            fieldMovementTask == nil &&
             scriptedMovementTask == nil &&
-            gameplayState?.objectStates.values.contains(where: { $0.movementMode != nil }) == false &&
             gameplayState?.battle == nil
     }
 
+    var isSettledFieldGameplay: Bool {
+        isSaveableFieldGameplay &&
+            fieldMovementTask == nil &&
+            gameplayState?.objectStates.values.contains(where: { $0.movementMode != nil }) == false
+    }
+
+    public var canSaveGame: Bool {
+        isSaveableFieldGameplay
+    }
+
     public var canLoadGame: Bool {
-        canSaveGame && saveMetadata != nil
+        isSaveableFieldGameplay && saveMetadata != nil
     }
 
     public func start() {

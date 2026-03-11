@@ -119,6 +119,34 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertNotNil(runtime.currentSaveErrorMessage)
     }
 
+    func testSaveRemainsAvailableDuringFieldMovementAndIdleNPCMotion() async throws {
+        let saveStore = InMemorySaveStore()
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
+        runtime.start()
+        try? await Task.sleep(for: .milliseconds(1700))
+        runtime.handle(button: .start)
+        runtime.handle(button: .confirm)
+
+        XCTAssertTrue(runtime.saveCurrentGame())
+
+        runtime.gameplayState?.objectStates["test_object"] = RuntimeObjectState(
+            position: .init(x: 1, y: 1),
+            facing: .left,
+            visible: true,
+            movementMode: .idle
+        )
+        runtime.fieldMovementTask = Task { }
+        defer {
+            runtime.fieldMovementTask?.cancel()
+            runtime.fieldMovementTask = nil
+        }
+
+        XCTAssertTrue(runtime.canSaveGame)
+        XCTAssertTrue(runtime.canLoadGame)
+        XCTAssertTrue(runtime.saveCurrentGame())
+        XCTAssertTrue(runtime.loadSavedGameFromSidebar())
+    }
+
     func testUnsupportedSaveSchemaFailsDuringContinue() async throws {
         let saveStore = InMemorySaveStore()
         saveStore.envelope = GameSaveEnvelope(
