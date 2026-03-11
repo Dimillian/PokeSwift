@@ -27,7 +27,7 @@ enum GameSaveRuntimeError: LocalizedError {
 extension GameRuntime {
     public func saveCurrentGame() -> Bool {
         guard canSaveGame else {
-            recordSaveResult(operation: "save", succeeded: false, message: "Saving is only available from settled field gameplay.")
+            recordSaveResult(operation: "save", succeeded: false, message: "Saving is only available while exploring the field.")
             publishSnapshot()
             return false
         }
