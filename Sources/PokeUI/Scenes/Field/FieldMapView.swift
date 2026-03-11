@@ -191,6 +191,11 @@ public struct FieldMapView: View {
         })
         let nextObjectStepAnimations = makeObjectStepAnimations(to: nextIdentity)
         let shouldAnimateObjects = nextObjectStepAnimations.isEmpty == false
+        let resolvedPlayerStepAnimation = resolvedPlayerStepAnimation(
+            nextIdentity: nextIdentity,
+            nextStepAnimation: nextStepAnimation,
+            shouldAnimateObjects: shouldAnimateObjects
+        )
 
         let applyState = {
             presentedPlayerWorldPosition = CGPoint(
@@ -206,7 +211,7 @@ public struct FieldMapView: View {
         }
 
         if shouldAnimate || shouldAnimateObjects {
-            playerStepAnimation = nextStepAnimation
+            playerStepAnimation = resolvedPlayerStepAnimation
             objectStepAnimations = nextObjectStepAnimations
             withAnimation(.linear(duration: playerStepDuration)) {
                 applyState()
@@ -222,6 +227,34 @@ public struct FieldMapView: View {
         }
     }
 
+    private func resolvedPlayerStepAnimation(
+        nextIdentity: FieldPresentationIdentity,
+        nextStepAnimation: PlayerStepAnimationState?,
+        shouldAnimateObjects: Bool,
+        now: Date = Date()
+    ) -> PlayerStepAnimationState? {
+        if let nextStepAnimation {
+            return nextStepAnimation
+        }
+
+        guard shouldAnimateObjects,
+              let currentAnimation = playerStepAnimation else {
+            return nil
+        }
+
+        guard Self.shouldRetainPlayerStepAnimation(
+            currentDestinationPosition: currentAnimation.destinationPosition,
+            startedAt: currentAnimation.startedAt,
+            nextPlayerPosition: nextIdentity.playerPosition,
+            now: now,
+            stepDuration: playerStepDuration
+        ) else {
+            return nil
+        }
+
+        return currentAnimation
+    }
+
     private func shouldAnimateTransition(to nextIdentity: FieldPresentationIdentity) -> Bool {
         guard let previousIdentity = presentationIdentity,
               previousIdentity.mapID == nextIdentity.mapID else {
@@ -234,14 +267,27 @@ public struct FieldMapView: View {
     }
 
     private func makePlayerStepAnimation(to nextIdentity: FieldPresentationIdentity) -> PlayerStepAnimationState? {
-        guard shouldAnimateTransition(to: nextIdentity) else {
+        guard shouldAnimateTransition(to: nextIdentity),
+              let previousIdentity = presentationIdentity,
+              let direction = Self.stepDirection(from: previousIdentity.playerPosition, to: nextIdentity.playerPosition) else {
             return nil
         }
+
+        let now = Date()
+        let phaseOffset = Self.chainedWalkPhaseOffset(
+            previousDirection: playerStepAnimation?.direction,
+            nextDirection: direction,
+            previousStartedAt: playerStepAnimation?.startedAt,
+            now: now,
+            stepDuration: playerStepDuration
+        )
 
         return PlayerStepAnimationState(
             mapID: nextIdentity.mapID,
             destinationPosition: nextIdentity.playerPosition,
-            startedAt: Date()
+            startedAt: now,
+            direction: direction,
+            phaseOffset: phaseOffset
         )
     }
 
@@ -283,14 +329,56 @@ public struct FieldMapView: View {
 
     static func playerWalkAnimationPhase(
         elapsed: TimeInterval,
-        stepDuration: TimeInterval = 16.0 / 60.0
+        stepDuration: TimeInterval = 16.0 / 60.0,
+        phaseOffset: Int = 0
     ) -> Int? {
         guard stepDuration > 0 else { return nil }
         let clampedElapsed = max(0, elapsed)
         guard clampedElapsed < stepDuration else { return nil }
         let phaseDuration = stepDuration / 4
         guard phaseDuration > 0 else { return nil }
-        return min(3, Int(clampedElapsed / phaseDuration))
+        let basePhase = min(3, Int(clampedElapsed / phaseDuration))
+        return (basePhase + normalizedPhaseOffset(phaseOffset)) % 4
+    }
+
+    static func chainedWalkPhaseOffset(
+        previousDirection: FacingDirection?,
+        nextDirection: FacingDirection,
+        previousStartedAt: Date?,
+        now: Date = Date(),
+        stepDuration: TimeInterval = 16.0 / 60.0
+    ) -> Int {
+        guard stepDuration > 0,
+              let previousDirection,
+              let previousStartedAt,
+              previousDirection == nextDirection else {
+            return 0
+        }
+
+        let elapsed = now.timeIntervalSince(previousStartedAt)
+        guard elapsed >= (stepDuration * 0.75),
+              elapsed <= (stepDuration * 1.5) else {
+            return 0
+        }
+
+        return 1
+    }
+
+    static func shouldRetainPlayerStepAnimation(
+        currentDestinationPosition: TilePoint?,
+        startedAt: Date?,
+        nextPlayerPosition: TilePoint,
+        now: Date = Date(),
+        stepDuration: TimeInterval = 16.0 / 60.0
+    ) -> Bool {
+        guard stepDuration > 0,
+              let currentDestinationPosition,
+              let startedAt,
+              currentDestinationPosition == nextPlayerPosition else {
+            return false
+        }
+
+        return now.timeIntervalSince(startedAt) < stepDuration
     }
 
     static func playerUsesWalkingFrame(phase: Int?) -> Bool {
@@ -301,6 +389,27 @@ public struct FieldMapView: View {
     static func playerUsesMirroredWalkingFrame(facing: FacingDirection, phase: Int?) -> Bool {
         guard phase == 3 else { return false }
         return facing == .up || facing == .down
+    }
+
+    private static func stepDirection(from start: TilePoint, to end: TilePoint) -> FacingDirection? {
+        if end.x == start.x + 1, end.y == start.y {
+            return .right
+        }
+        if end.x == start.x - 1, end.y == start.y {
+            return .left
+        }
+        if end.x == start.x, end.y == start.y + 1 {
+            return .down
+        }
+        if end.x == start.x, end.y == start.y - 1 {
+            return .up
+        }
+        return nil
+    }
+
+    private static func normalizedPhaseOffset(_ phaseOffset: Int) -> Int {
+        let normalized = phaseOffset % 4
+        return normalized >= 0 ? normalized : normalized + 4
     }
 }
 
@@ -326,6 +435,8 @@ private struct PlayerStepAnimationState: Equatable {
     let mapID: String
     let destinationPosition: TilePoint
     let startedAt: Date
+    let direction: FacingDirection
+    let phaseOffset: Int
 }
 
 private struct FieldObjectPresentationIdentity: Equatable {
@@ -356,8 +467,10 @@ private struct FixedViewportRenderedField: View {
 
     var body: some View {
         let cornerRadius = max(6, displayScale * 2.5)
+        let hasActiveStepAnimation = playerStepAnimation != nil || objectStepAnimations.isEmpty == false
+        let walkAnimationInterval = max(1.0 / 120.0, playerStepDuration / 8.0)
 
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: walkAnimationInterval, paused: hasActiveStepAnimation == false)) { timeline in
             let playerWalkPhase = playerWalkAnimationPhase(at: timeline.date)
 
             ZStack(alignment: .topLeading) {
@@ -433,7 +546,8 @@ private struct FixedViewportRenderedField: View {
         let elapsed = date.timeIntervalSince(playerStepAnimation.startedAt)
         return FieldMapView.playerWalkAnimationPhase(
             elapsed: elapsed,
-            stepDuration: playerStepDuration
+            stepDuration: playerStepDuration,
+            phaseOffset: playerStepAnimation.phaseOffset
         )
     }
 
