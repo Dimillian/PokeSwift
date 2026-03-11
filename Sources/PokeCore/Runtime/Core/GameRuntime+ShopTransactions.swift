@@ -1,14 +1,44 @@
 import PokeDataModel
 
+enum ShopTransactionFailure {
+    case emptyInventory
+    case unsellableItem
+    case notEnoughMoney
+    case bagFull
+}
+
 extension GameRuntime {
+    func shopFailureMessage(_ failure: ShopTransactionFailure) -> String {
+        switch failure {
+        case .emptyInventory:
+            return shopDialogueText(id: "pokemart_item_bag_empty", fallback: "You don't have anything to sell.")
+        case .unsellableItem:
+            return shopDialogueText(id: "pokemart_unsellable_item", fallback: "I can't put a price on that.")
+        case .notEnoughMoney:
+            return shopDialogueText(id: "pokemart_not_enough_money", fallback: "You don't have enough money.")
+        case .bagFull:
+            return shopDialogueText(id: "pokemart_item_bag_full", fallback: "You can't carry any more items.")
+        }
+    }
+
+    func showShopFailure(
+        _ failure: ShopTransactionFailure,
+        nextPhase: RuntimeShopPhase = .mainMenu,
+        state: inout RuntimeShopState
+    ) {
+        showShopResult(message: shopFailureMessage(failure), nextPhase: nextPhase, state: &state)
+    }
+
+    func purchaseFailure(for item: ItemManifest, quantity: Int) -> ShopTransactionFailure {
+        let requiredMoney = item.price * max(1, quantity)
+        let hasMoney = gameplayState.map { canAfford(requiredMoney, gameplayState: $0) } ?? false
+        return hasMoney ? .bagFull : .notEnoughMoney
+    }
+
     func confirmShopPurchase(item: ItemManifest, state: inout RuntimeShopState) {
         let quantity = min(state.selectedQuantity, maxPurchasableQuantity(for: item))
         guard quantity > 0 else {
-            let hasMoney = gameplayState.map { canAfford(item.price, gameplayState: $0) } ?? false
-            let message = hasMoney
-                ? shopDialogueText(id: "pokemart_item_bag_full", fallback: "You can't carry any more items.")
-                : shopDialogueText(id: "pokemart_not_enough_money", fallback: "You don't have enough money.")
-            showShopResult(message: message, nextPhase: .mainMenu, state: &state)
+            showShopFailure(purchaseFailure(for: item, quantity: 1), state: &state)
             return
         }
 
@@ -32,45 +62,26 @@ extension GameRuntime {
             return
         }
 
-        let failureMessage = (gameplayState.map { canAfford(item.price * quantity, gameplayState: $0) } ?? false)
-            ? shopDialogueText(id: "pokemart_item_bag_full", fallback: "You can't carry any more items.")
-            : shopDialogueText(id: "pokemart_not_enough_money", fallback: "You don't have enough money.")
-        showShopResult(message: failureMessage, nextPhase: .mainMenu, state: &state)
+        showShopFailure(purchaseFailure(for: item, quantity: quantity), state: &state)
     }
 
     func confirmShopSale(item: ItemManifest, state: inout RuntimeShopState) {
         guard var gameplayState else {
-            showShopResult(
-                message: shopDialogueText(id: "pokemart_item_bag_empty", fallback: "You don't have anything to sell."),
-                nextPhase: .mainMenu,
-                state: &state
-            )
+            showShopFailure(.emptyInventory, state: &state)
             return
         }
 
         let quantity = min(state.selectedQuantity, itemQuantity(item.id))
         guard quantity > 0 else {
-            showShopResult(
-                message: shopDialogueText(id: "pokemart_item_bag_empty", fallback: "You don't have anything to sell."),
-                nextPhase: .mainMenu,
-                state: &state
-            )
+            showShopFailure(.emptyInventory, state: &state)
             return
         }
         guard canSell(item: item) else {
-            showShopResult(
-                message: shopDialogueText(id: "pokemart_unsellable_item", fallback: "I can't put a price on that."),
-                nextPhase: .mainMenu,
-                state: &state
-            )
+            showShopFailure(.unsellableItem, state: &state)
             return
         }
         guard removeItem(item.id, quantity: quantity, from: &gameplayState) else {
-            showShopResult(
-                message: shopDialogueText(id: "pokemart_item_bag_empty", fallback: "You don't have anything to sell."),
-                nextPhase: .mainMenu,
-                state: &state
-            )
+            showShopFailure(.emptyInventory, state: &state)
             return
         }
 

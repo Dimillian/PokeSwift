@@ -63,10 +63,10 @@ extension GameplayScenePropsFactory {
         runtime: GameRuntime,
         snapshot: RuntimeTelemetrySnapshot
     ) -> FieldPartySidebarConfiguration {
-        let hasInteractiveParty = runtime.scene == .field && (snapshot.party?.pokemon.count ?? 0) > 1
         let reorderSelectionIndex = runtime.fieldPartyReorderSelectionIndex
+        let selectableIndices = fieldPartySelectableIndices(runtime: runtime, snapshot: snapshot)
 
-        if hasInteractiveParty == false {
+        if selectableIndices.isEmpty {
             return FieldPartySidebarConfiguration(
                 mode: .passive,
                 selectedIndex: nil,
@@ -76,14 +76,13 @@ extension GameplayScenePropsFactory {
             )
         }
 
-        let selectableIndices = Set(snapshot.party?.pokemon.indices.map { $0 } ?? [])
         guard let reorderSelectionIndex else {
             return FieldPartySidebarConfiguration(
                 mode: .fieldReorderSource,
                 selectedIndex: nil,
                 selectableIndices: selectableIndices,
                 annotationByIndex: [:],
-                promptText: "Choose a #MON."
+                promptText: fieldPartyPromptText(selectedIndex: nil)
             )
         }
 
@@ -92,7 +91,7 @@ extension GameplayScenePropsFactory {
             selectedIndex: reorderSelectionIndex,
             selectableIndices: selectableIndices,
             annotationByIndex: [reorderSelectionIndex: "MOVING"],
-            promptText: "Move #MON where?"
+            promptText: fieldPartyPromptText(selectedIndex: reorderSelectionIndex)
         )
     }
 
@@ -101,22 +100,47 @@ extension GameplayScenePropsFactory {
         battle: BattleTelemetry
     ) -> BattlePartySidebarConfiguration {
         let partyPokemon = snapshot.party?.pokemon ?? []
-        var annotationByIndex: [Int: String] = [0: "ACTIVE"]
-        for index in partyPokemon.indices where partyPokemon[index].currentHP == 0 {
-            annotationByIndex[index] = "FAINTED"
-        }
-
         let isSelecting = battle.phase == "partySelection"
         return BattlePartySidebarConfiguration(
             mode: isSelecting ? .battleSwitch : .passive,
             focusedIndex: isSelecting ? battle.focusedPartyIndex : nil,
-            selectableIndices: Set(
-                partyPokemon.indices.filter { index in
-                    index != 0 && partyPokemon[index].currentHP > 0
-                }
-            ),
-            annotationByIndex: annotationByIndex,
-            promptText: isSelecting ? "Bring out which #MON?" : nil
+            selectableIndices: battlePartySelectableIndices(partyPokemon: partyPokemon),
+            annotationByIndex: battlePartyAnnotations(partyPokemon: partyPokemon),
+            promptText: isSelecting ? GameplayBattlePrompts.defaultPrompt(for: battle.phase) : nil
         )
+    }
+
+    private static func fieldPartySelectableIndices(
+        runtime: GameRuntime,
+        snapshot: RuntimeTelemetrySnapshot
+    ) -> Set<Int> {
+        guard runtime.scene == .field, let partyPokemon = snapshot.party?.pokemon, partyPokemon.count > 1 else {
+            return []
+        }
+        return Set(partyPokemon.indices)
+    }
+
+    private static func fieldPartyPromptText(selectedIndex: Int?) -> String {
+        selectedIndex == nil ? "Choose a #MON." : "Move #MON where?"
+    }
+
+    private static func battlePartySelectableIndices(
+        partyPokemon: [PartyPokemonTelemetry]
+    ) -> Set<Int> {
+        Set(
+            partyPokemon.indices.filter { index in
+                index != 0 && partyPokemon[index].currentHP > 0
+            }
+        )
+    }
+
+    private static func battlePartyAnnotations(
+        partyPokemon: [PartyPokemonTelemetry]
+    ) -> [Int: String] {
+        var annotationByIndex: [Int: String] = [0: "ACTIVE"]
+        for index in partyPokemon.indices where partyPokemon[index].currentHP == 0 {
+            annotationByIndex[index] = "FAINTED"
+        }
+        return annotationByIndex
     }
 }

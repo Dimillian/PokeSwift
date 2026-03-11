@@ -212,7 +212,7 @@ private struct BattleStageView: View {
     private var footerContent: some View {
         DialogueBoxView(
             title: "Battle",
-            lines: props.textLines.isEmpty ? ["Pick the next move."] : props.textLines
+            lines: GameplayBattlePrompts.textLines(props.textLines, phase: props.phase)
         )
         .frame(maxWidth: 760)
         .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)

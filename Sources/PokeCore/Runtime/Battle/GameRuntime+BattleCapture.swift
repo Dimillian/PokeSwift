@@ -5,6 +5,13 @@ enum WildCaptureResolution {
     case continueEnemyTurn
 }
 
+struct CaptureBallProfile {
+    let guaranteesCapture: Bool
+    let rerollThreshold: Int?
+    let wDivisor: Int
+    let shakeRateDivisor: Int
+}
+
 extension GameRuntime {
     func canSendCapturedPokemonToCurrentBox(_ gameplayState: GameplayState) -> Bool {
         guard gameplayState.boxedPokemon.indices.contains(gameplayState.currentBoxIndex) else {
@@ -74,22 +81,16 @@ extension GameRuntime {
             return .uncatchable
         }
 
-        if item.id == "MASTER_BALL" {
+        let ballProfile = captureBallProfile(for: item.id)
+        if ballProfile.guaranteesCapture {
             return .success
         }
 
         var rand1 = nextBattleRandomByte()
-        switch item.id {
-        case "GREAT_BALL":
-            while rand1 > 200 {
+        if let rerollThreshold = ballProfile.rerollThreshold {
+            while rand1 > rerollThreshold {
                 rand1 = nextBattleRandomByte()
             }
-        case "ULTRA_BALL", "SAFARI_BALL":
-            while rand1 > 150 {
-                rand1 = nextBattleRandomByte()
-            }
-        default:
-            break
         }
 
         let statusValue = captureStatusBonus(for: pokemon.majorStatus)
@@ -98,7 +99,7 @@ extension GameRuntime {
         }
 
         let randMinusStatus = rand1 - statusValue
-        let w = captureWValue(for: pokemon, item: item)
+        let w = captureWValue(for: pokemon, ballProfile: ballProfile)
         let x = min(w, 255)
 
         if randMinusStatus <= catchRate {
@@ -112,14 +113,33 @@ extension GameRuntime {
             }
         }
 
-        return .failed(shakes: captureFailureShakeCount(catchRate: catchRate, x: x, status: pokemon.majorStatus, item: item))
+        return .failed(
+            shakes: captureFailureShakeCount(
+                catchRate: catchRate,
+                x: x,
+                status: pokemon.majorStatus,
+                ballProfile: ballProfile
+            )
+        )
     }
 
-    func captureWValue(for pokemon: RuntimePokemonState, item: ItemManifest) -> Int {
-        let ballFactor = item.id == "GREAT_BALL" ? 8 : 12
+    func captureBallProfile(for itemID: String) -> CaptureBallProfile {
+        switch itemID {
+        case "MASTER_BALL":
+            return .init(guaranteesCapture: true, rerollThreshold: nil, wDivisor: 12, shakeRateDivisor: 255)
+        case "GREAT_BALL":
+            return .init(guaranteesCapture: false, rerollThreshold: 200, wDivisor: 8, shakeRateDivisor: 200)
+        case "ULTRA_BALL", "SAFARI_BALL":
+            return .init(guaranteesCapture: false, rerollThreshold: 150, wDivisor: 12, shakeRateDivisor: 150)
+        default:
+            return .init(guaranteesCapture: false, rerollThreshold: nil, wDivisor: 12, shakeRateDivisor: 255)
+        }
+    }
+
+    func captureWValue(for pokemon: RuntimePokemonState, ballProfile: CaptureBallProfile) -> Int {
         let maxHP = max(1, pokemon.maxHP)
         let hpDivisor = max(1, pokemon.currentHP / 4)
-        let scaledHP = (maxHP * 255) / ballFactor
+        let scaledHP = (maxHP * 255) / ballProfile.wDivisor
         return scaledHP / hpDivisor
     }
 
@@ -127,19 +147,9 @@ extension GameRuntime {
         catchRate: Int,
         x: Int,
         status: MajorStatusCondition,
-        item: ItemManifest
+        ballProfile: CaptureBallProfile
     ) -> Int {
-        let ballFactor2: Int
-        switch item.id {
-        case "GREAT_BALL":
-            ballFactor2 = 200
-        case "ULTRA_BALL", "SAFARI_BALL":
-            ballFactor2 = 150
-        default:
-            ballFactor2 = 255
-        }
-
-        let y = (catchRate * 100) / ballFactor2
+        let y = (catchRate * 100) / ballProfile.shakeRateDivisor
         let z = ((x * y) / 255) + captureShakeStatusBonus(for: status)
 
         switch z {

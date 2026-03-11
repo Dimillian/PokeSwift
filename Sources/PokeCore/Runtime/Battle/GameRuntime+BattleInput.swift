@@ -1,15 +1,40 @@
 import PokeDataModel
 
+enum BattleSelectionAction {
+    case move(index: Int)
+    case bag
+    case partySwitch
+    case run
+}
+
 extension GameRuntime {
+    func battlePrompt(for phase: RuntimeBattlePhase) -> String {
+        switch phase {
+        case .partySelection:
+            return "Bring out which #MON?"
+        case .bagSelection:
+            return "Choose an item."
+        default:
+            return "Pick the next move."
+        }
+    }
+
+    func enterBattlePromptState(
+        _ phase: RuntimeBattlePhase,
+        battle: inout RuntimeBattleState,
+        message: String? = nil
+    ) {
+        battle.phase = phase
+        battle.message = message ?? battlePrompt(for: phase)
+    }
+
     func returnToBattleMoveSelection(battle: inout RuntimeBattleState) {
-        battle.phase = .moveSelection
-        battle.message = "Pick the next move."
+        enterBattlePromptState(.moveSelection, battle: &battle)
     }
 
     func enterBattleBagSelection(battle: inout RuntimeBattleState) {
-        battle.phase = .bagSelection
+        enterBattlePromptState(.bagSelection, battle: &battle)
         battle.focusedBagItemIndex = 0
-        battle.message = "Choose an item."
     }
 
     func enterOptionalBattleSwitchSelection(
@@ -39,10 +64,9 @@ extension GameRuntime {
         gameplayState: GameplayState,
         mode: RuntimeBattlePartySelectionMode
     ) {
-        battle.phase = .partySelection
+        enterBattlePromptState(.partySelection, battle: &battle)
         battle.partySelectionMode = mode
         battle.focusedPartyIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) ?? 0
-        battle.message = "Bring out which #MON?"
     }
 
     func handleBattle(button: RuntimeButton) {
@@ -65,7 +89,10 @@ extension GameRuntime {
         case .down:
             switch battle.phase {
             case .moveSelection:
-                battle.focusedMoveIndex = min(maxBattleActionIndex(for: battle), battle.focusedMoveIndex + 1)
+                battle.focusedMoveIndex = min(
+                    maxBattleActionIndex(for: battle, gameplayState: gameplayState),
+                    battle.focusedMoveIndex + 1
+                )
             case .bagSelection:
                 battle.focusedBagItemIndex = min(max(0, currentBattleBagItems.count - 1), battle.focusedBagItemIndex + 1)
             case .partySelection:
@@ -154,24 +181,25 @@ extension GameRuntime {
             return
         }
 
-        if canUseBattleBag(for: battle), battle.focusedMoveIndex == bagActionIndex(for: battle) {
+        guard let selectedAction = focusedBattleAction(for: battle, gameplayState: gameplayState) else {
+            return
+        }
+
+        switch selectedAction {
+        case .bag:
             enterBattleBagSelection(battle: &battle)
             return
-        }
-
-        if canUseBattleSwitch(for: battle, gameplayState: gameplayState),
-           battle.focusedMoveIndex == switchActionIndex(for: battle) {
+        case .partySwitch:
             enterOptionalBattleSwitchSelection(battle: &battle, gameplayState: gameplayState)
             return
-        }
-
-        if battle.canRun, battle.focusedMoveIndex == runActionIndex(for: battle) {
+        case .run:
             attemptBattleEscape(battle: &battle)
             return
-        }
-
-        guard battle.playerPokemon.moves.indices.contains(battle.focusedMoveIndex) else {
-            return
+        case let .move(index):
+            guard battle.playerPokemon.moves.indices.contains(index) else {
+                return
+            }
+            battle.focusedMoveIndex = index
         }
 
         battle.phase = .resolvingTurn
@@ -241,19 +269,39 @@ extension GameRuntime {
         }
     }
 
-    func maxBattleActionIndex(for battle: RuntimeBattleState) -> Int {
-        let moveActionCount = battle.playerPokemon.moves.count
-        var count = moveActionCount
+    func availableBattleActions(
+        for battle: RuntimeBattleState,
+        gameplayState: GameplayState? = nil
+    ) -> [BattleSelectionAction] {
+        var actions = battle.playerPokemon.moves.indices.map { BattleSelectionAction.move(index: $0) }
         if canUseBattleBag(for: battle) {
-            count += 1
+            actions.append(.bag)
         }
         if let gameplayState, canUseBattleSwitch(for: battle, gameplayState: gameplayState) {
-            count += 1
+            actions.append(.partySwitch)
         }
         if battle.canRun {
-            count += 1
+            actions.append(.run)
         }
-        return max(0, count - 1)
+        return actions
+    }
+
+    func focusedBattleAction(
+        for battle: RuntimeBattleState,
+        gameplayState: GameplayState? = nil
+    ) -> BattleSelectionAction? {
+        let actions = availableBattleActions(for: battle, gameplayState: gameplayState)
+        guard actions.indices.contains(battle.focusedMoveIndex) else {
+            return nil
+        }
+        return actions[battle.focusedMoveIndex]
+    }
+
+    func maxBattleActionIndex(
+        for battle: RuntimeBattleState,
+        gameplayState: GameplayState? = nil
+    ) -> Int {
+        max(0, availableBattleActions(for: battle, gameplayState: gameplayState).count - 1)
     }
 
     func canUseBattleBag(for battle: RuntimeBattleState) -> Bool {
@@ -262,24 +310,45 @@ extension GameRuntime {
 
     func canUseBattleSwitch(for battle: RuntimeBattleState, gameplayState: GameplayState) -> Bool {
         let _ = battle
-        return gameplayState.playerParty.dropFirst().contains(where: { $0.currentHP > 0 })
+        return battleSwitchablePartyIndices(gameplayState: gameplayState).isEmpty == false
     }
 
     func firstSwitchablePartyIndex(gameplayState: GameplayState) -> Int? {
-        gameplayState.playerParty.indices.first(where: { $0 != 0 && gameplayState.playerParty[$0].currentHP > 0 })
+        battleSwitchablePartyIndices(gameplayState: gameplayState).first
+    }
+
+    func battleSwitchablePartyIndices(gameplayState: GameplayState) -> [Int] {
+        gameplayState.playerParty.indices.filter { index in
+            index != 0 && gameplayState.playerParty[index].currentHP > 0
+        }
+    }
+
+    func battleActionIndex(
+        for targetAction: BattleSelectionAction,
+        battle: RuntimeBattleState,
+        gameplayState: GameplayState? = nil
+    ) -> Int? {
+        availableBattleActions(for: battle, gameplayState: gameplayState).firstIndex { action in
+            switch (action, targetAction) {
+            case (.bag, .bag), (.partySwitch, .partySwitch), (.run, .run):
+                return true
+            case let (.move(lhs), .move(rhs)):
+                return lhs == rhs
+            default:
+                return false
+            }
+        }
     }
 
     func bagActionIndex(for battle: RuntimeBattleState) -> Int {
-        battle.playerPokemon.moves.count
+        battleActionIndex(for: .bag, battle: battle, gameplayState: gameplayState) ?? battle.playerPokemon.moves.count
     }
 
     func switchActionIndex(for battle: RuntimeBattleState) -> Int {
-        battle.playerPokemon.moves.count + (canUseBattleBag(for: battle) ? 1 : 0)
+        battleActionIndex(for: .partySwitch, battle: battle, gameplayState: gameplayState) ?? battle.playerPokemon.moves.count
     }
 
     func runActionIndex(for battle: RuntimeBattleState) -> Int {
-        battle.playerPokemon.moves.count
-            + (canUseBattleBag(for: battle) ? 1 : 0)
-            + ((gameplayState.map { canUseBattleSwitch(for: battle, gameplayState: $0) } ?? false) ? 1 : 0)
+        battleActionIndex(for: .run, battle: battle, gameplayState: gameplayState) ?? battle.playerPokemon.moves.count
     }
 }

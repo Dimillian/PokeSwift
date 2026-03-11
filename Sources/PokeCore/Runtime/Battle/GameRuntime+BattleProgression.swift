@@ -305,8 +305,7 @@ extension GameRuntime {
 
     func resumeRewardContinuation(battle: inout RuntimeBattleState) {
         guard let rewardContinuation = battle.rewardContinuation else {
-            battle.phase = .moveSelection
-            battle.message = "Pick the next move."
+            returnToBattleMoveSelection(battle: &battle)
             return
         }
 

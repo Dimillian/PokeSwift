@@ -28,19 +28,11 @@ extension GameRuntime {
         case .confirm, .start:
             playUIConfirmSound()
             if transactionKind == .sell, canSell(item: selectedItem) == false {
-                showShopResult(
-                    message: shopDialogueText(id: "pokemart_unsellable_item", fallback: "I can't put a price on that."),
-                    nextPhase: .mainMenu,
-                    state: &state
-                )
+                showShopFailure(.unsellableItem, state: &state)
                 return
             }
 
-            state.phase = .quantity
-            state.transaction = RuntimeShopTransactionState(kind: transactionKind, itemID: selectedItem.id)
-            state.selectedQuantity = 1
-            state.focusedConfirmationIndex = 0
-            state.message = shopQuantityPrompt(for: transactionKind)
+            beginShopQuantitySelection(for: selectedItem, transactionKind: transactionKind, state: &state)
         case .cancel:
             playUIConfirmSound()
             returnToShopMainMenu(state: &state)
@@ -58,13 +50,7 @@ extension GameRuntime {
 
         let maximumQuantity = maxShopQuantity(for: transaction, item: item)
         guard maximumQuantity > 0 else {
-            showShopResult(
-                message: transaction.kind == .buy
-                    ? shopDialogueText(id: "pokemart_not_enough_money", fallback: "You don't have enough money.")
-                    : shopDialogueText(id: "pokemart_item_bag_empty", fallback: "You don't have anything to sell."),
-                nextPhase: .mainMenu,
-                state: &state
-            )
+            showShopFailure(transaction.kind == .buy ? .notEnoughMoney : .emptyInventory, state: &state)
             return
         }
 

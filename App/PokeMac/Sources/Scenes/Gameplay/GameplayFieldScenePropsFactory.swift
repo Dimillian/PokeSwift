@@ -1,12 +1,15 @@
+import Foundation
 import PokeCore
 import PokeDataModel
 import PokeUI
 
 @MainActor
 enum GameplayScenePropsFactory {
+    private static var sidebarManifestIndexCache: [String: GameplaySidebarManifestIndex] = [:]
+
     static func make(runtime: GameRuntime) -> GameplaySceneProps? {
         let snapshot = runtime.currentSnapshot()
-        let manifestIndex = GameplaySidebarManifestIndex(runtime: runtime)
+        let manifestIndex = cachedManifestIndex(for: runtime)
         let saveSidebar = makeSaveSidebar(runtime: runtime)
         let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
             items: snapshot.inventory?.items.map {
@@ -72,7 +75,11 @@ enum GameplayScenePropsFactory {
             let enemySpriteURL = runtime.content.species(id: battle.enemyPokemon.speciesID)?
                 .battleSprite
                 .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
-            let promptText = battle.textLines.last ?? (battle.battleMessage.isEmpty ? "Pick the next move." : battle.battleMessage)
+            let promptText = GameplayBattlePrompts.promptText(
+                textLines: battle.textLines,
+                battleMessage: battle.battleMessage,
+                phase: battle.phase
+            )
 
             return GameplaySceneProps(
                 viewport: .battle(
@@ -117,6 +124,17 @@ enum GameplayScenePropsFactory {
                 initialFieldDisplayStyle: .defaultGameplayStyle
             )
         }
+    }
+
+    private static func cachedManifestIndex(for runtime: GameRuntime) -> GameplaySidebarManifestIndex {
+        let cacheKey = "\(runtime.content.rootURL.path)::\(runtime.content.gameManifest.contentVersion)"
+        if let cached = sidebarManifestIndexCache[cacheKey] {
+            return cached
+        }
+
+        let manifestIndex = GameplaySidebarManifestIndex(runtime: runtime)
+        sidebarManifestIndexCache[cacheKey] = manifestIndex
+        return manifestIndex
     }
 
     private static func makeTrainerProfile(runtime: GameRuntime) -> TrainerProfileProps {

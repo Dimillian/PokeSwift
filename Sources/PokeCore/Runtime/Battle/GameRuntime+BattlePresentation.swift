@@ -12,7 +12,7 @@ extension GameRuntime {
             stage: .commandReady,
             uiVisibility: .visible,
             transitionStyle: .none,
-            message: "Pick the next move.",
+            message: battlePrompt(for: .moveSelection),
             phase: .moveSelection,
             pendingAction: nil,
             playerPokemon: playerPokemon,
@@ -430,7 +430,7 @@ extension GameRuntime {
         battle.pendingAction = pendingAction
         battle.phase = phase
         battle.queuedMessages = messages
-        battle.message = messages.first ?? "Pick the next move."
+        battle.message = messages.first ?? battlePrompt(for: .moveSelection)
         if battle.queuedMessages.isEmpty == false {
             battle.queuedMessages.removeFirst()
         }

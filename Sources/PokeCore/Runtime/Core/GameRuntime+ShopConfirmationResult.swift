@@ -1,6 +1,18 @@
 import PokeDataModel
 
 extension GameRuntime {
+    func beginShopQuantitySelection(
+        for item: ItemManifest,
+        transactionKind: RuntimeShopTransactionKind,
+        state: inout RuntimeShopState
+    ) {
+        state.phase = .quantity
+        state.transaction = RuntimeShopTransactionState(kind: transactionKind, itemID: item.id)
+        state.selectedQuantity = 1
+        state.focusedConfirmationIndex = 0
+        state.message = shopQuantityPrompt(for: transactionKind)
+    }
+
     func shopListPhase(for kind: RuntimeShopTransactionKind) -> RuntimeShopPhase {
         switch kind {
         case .buy:
@@ -40,6 +52,33 @@ extension GameRuntime {
         state.message = shopListPrompt(for: kind)
     }
 
+    func returnToShopPhase(_ phase: RuntimeShopPhase, state: inout RuntimeShopState) {
+        switch phase {
+        case .mainMenu:
+            returnToShopMainMenu(state: &state)
+        case .buyList:
+            transitionToShopList(for: .buy, state: &state)
+        case .sellList:
+            transitionToShopList(for: .sell, state: &state)
+        case .quantity, .confirmation, .result:
+            returnToShopMainMenu(state: &state)
+        }
+    }
+
+    func confirmShopTransaction(item: ItemManifest, state: inout RuntimeShopState) {
+        guard let transaction = state.transaction else {
+            returnToShopMainMenu(state: &state)
+            return
+        }
+
+        switch transaction.kind {
+        case .buy:
+            confirmShopPurchase(item: item, state: &state)
+        case .sell:
+            confirmShopSale(item: item, state: &state)
+        }
+    }
+
     func handleShopConfirmation(button: RuntimeButton, state: inout RuntimeShopState) {
         guard let transaction = state.transaction,
               let item = content.item(id: transaction.itemID) else {
@@ -57,12 +96,7 @@ extension GameRuntime {
                 return
             }
 
-            switch transaction.kind {
-            case .buy:
-                confirmShopPurchase(item: item, state: &state)
-            case .sell:
-                confirmShopSale(item: item, state: &state)
-            }
+            confirmShopTransaction(item: item, state: &state)
         case .cancel:
             playUIConfirmSound()
             state.phase = .quantity
@@ -76,17 +110,7 @@ extension GameRuntime {
             playUIConfirmSound()
             let nextPhase = state.nextPhaseAfterResult ?? .mainMenu
             state.nextPhaseAfterResult = nil
-
-            switch nextPhase {
-            case .mainMenu:
-                returnToShopMainMenu(state: &state)
-            case .buyList:
-                transitionToShopList(for: .buy, state: &state)
-            case .sellList:
-                transitionToShopList(for: .sell, state: &state)
-            case .quantity, .confirmation, .result:
-                returnToShopMainMenu(state: &state)
-            }
+            returnToShopPhase(nextPhase, state: &state)
         case .up, .down, .left, .right:
             break
         }
