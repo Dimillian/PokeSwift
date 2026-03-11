@@ -274,25 +274,45 @@ final class PokeAudioService: RuntimeAudioPlaying {
             let sampleValue: Double
             switch event.waveform {
             case .square:
-                let baseFrequency = event.frequencyHz ?? 440
-                let frequency = vibratoAdjustedFrequency(baseFrequency: baseFrequency, event: event, localTime: localTime)
+                let frequency = modulatedFrequency(for: event, localTime: localTime)
                 let phase = (localTime * frequency).truncatingRemainder(dividingBy: 1)
                 sampleValue = phase < effectiveDuty ? 1 : -1
             case .wave:
-                let baseFrequency = event.frequencyHz ?? 440
-                let frequency = vibratoAdjustedFrequency(baseFrequency: baseFrequency, event: event, localTime: localTime)
+                let frequency = modulatedFrequency(for: event, localTime: localTime)
                 sampleValue = waveTableSample(event.waveSamples, localTime: localTime, frequency: frequency)
             case .noise:
-                var hash = seed &+ UInt64(frame * 1103515245)
-                hash ^= hash >> 13
-                hash &*= 1274126177
-                let normalized = Double(hash % 10_000) / 5_000 - 1
-                sampleValue = normalized
+                sampleValue = noiseSample(
+                    event: event,
+                    localTime: localTime,
+                    sampleRate: sampleRate,
+                    seed: seed &+ UInt64(truncatingIfNeeded: startFrame)
+                )
             }
 
             let amplitude = envelopeAdjustedAmplitude(for: event, localTime: localTime)
             samples[frame] += Float(sampleValue * amplitude * envelope * 0.18)
         }
+    }
+
+    private nonisolated static func modulatedFrequency(for event: AudioManifest.Event, localTime: Double) -> Double {
+        let baseFrequency = pitchSlideAdjustedFrequency(
+            baseFrequency: event.frequencyHz ?? 440,
+            event: event,
+            localTime: localTime
+        )
+        return vibratoAdjustedFrequency(baseFrequency: baseFrequency, event: event, localTime: localTime)
+    }
+
+    private nonisolated static func pitchSlideAdjustedFrequency(
+        baseFrequency: Double,
+        event: AudioManifest.Event,
+        localTime: Double
+    ) -> Double {
+        guard let targetFrequency = event.pitchSlideTargetHz, event.duration > 0 else {
+            return baseFrequency
+        }
+        let progress = max(0, min(1, localTime / event.duration))
+        return baseFrequency + ((targetFrequency - baseFrequency) * progress)
     }
 
     private nonisolated static func vibratoAdjustedFrequency(baseFrequency: Double, event: AudioManifest.Event, localTime: Double) -> Double {
@@ -309,6 +329,45 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let steps = Int(localTime / stepDuration)
         let delta = Double(event.envelopeDirection * steps) / 15
         return max(0, min(1, event.amplitude + delta))
+    }
+
+    private nonisolated static func noiseSample(
+        event: AudioManifest.Event,
+        localTime: Double,
+        sampleRate: Double,
+        seed: UInt64
+    ) -> Double {
+        let clockHz = max(1, min(event.frequencyHz ?? 4_096, sampleRate * 0.45))
+        let stepPosition = localTime * clockHz
+        let stepIndex = Int(stepPosition.rounded(.down))
+        let nextIndex = stepIndex + 1
+        let mix = stepPosition - floor(stepPosition)
+
+        let current = heldNoiseValue(
+            stepIndex: stepIndex,
+            seed: seed,
+            shortMode: event.noiseShortMode ?? false
+        )
+        let next = heldNoiseValue(
+            stepIndex: nextIndex,
+            seed: seed,
+            shortMode: event.noiseShortMode ?? false
+        )
+
+        // Short interpolation removes the worst edge aliasing without blurring the attack.
+        return current + ((next - current) * mix * 0.2)
+    }
+
+    private nonisolated static func heldNoiseValue(stepIndex: Int, seed: UInt64, shortMode: Bool) -> Double {
+        let effectiveIndex = shortMode ? (stepIndex & 0x7f) : stepIndex
+        var hash = seed &+ (UInt64(truncatingIfNeeded: effectiveIndex) &* 1_103_515_245)
+        hash ^= hash >> 15
+        hash &*= 0xD168_AAAD
+        let bipolar = (Double(hash & 0xffff) / 32_767.5) - 1
+
+        guard shortMode else { return bipolar }
+        let metallicPulse = ((effectiveIndex >> 1) & 1) == 0 ? 0.35 : -0.35
+        return max(-1, min(1, (bipolar * 0.65) + metallicPulse))
     }
 
     private nonisolated static func waveTableSample(_ waveSamples: [Double]?, localTime: Double, frequency: Double) -> Double {

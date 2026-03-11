@@ -182,6 +182,8 @@ public struct AudioManifest: Codable, Equatable, Sendable {
         public let vibratoDelaySeconds: Double
         public let vibratoDepthSemitones: Double
         public let vibratoRateHz: Double
+        public let pitchSlideTargetHz: Double?
+        public let noiseShortMode: Bool?
         public let waveform: Waveform
 
         public init(
@@ -196,6 +198,8 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             vibratoDelaySeconds: Double = 0,
             vibratoDepthSemitones: Double = 0,
             vibratoRateHz: Double = 0,
+            pitchSlideTargetHz: Double? = nil,
+            noiseShortMode: Bool? = nil,
             waveform: Waveform
         ) {
             self.startTime = startTime
@@ -209,6 +213,8 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             self.vibratoDelaySeconds = vibratoDelaySeconds
             self.vibratoDepthSemitones = vibratoDepthSemitones
             self.vibratoRateHz = vibratoRateHz
+            self.pitchSlideTargetHz = pitchSlideTargetHz
+            self.noiseShortMode = noiseShortMode
             self.waveform = waveform
         }
     }

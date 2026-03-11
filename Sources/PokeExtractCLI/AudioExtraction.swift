@@ -7,6 +7,8 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
     let musicHeaders = try parseMusicHeaders(repoRoot: source.repoRoot)
     let labelIndex = try buildMusicLabelIndex(repoRoot: source.repoRoot)
     let waveTables = try parseWaveSampleTables(repoRoot: source.repoRoot)
+    let pitchRegisters = try parsePitchRegisters(repoRoot: source.repoRoot)
+    let noiseInstruments = try parseNoiseInstrumentTables(repoRoot: source.repoRoot)
 
     let cueDefinitions: [AudioManifest.Cue] = [
         .init(id: "title_default", trackID: titleTrackID),
@@ -48,7 +50,9 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
                 id: "default",
                 channelEntries: header.channels,
                 parser: parser,
-                waveTables: waveTables
+                waveTables: waveTables,
+                pitchRegisters: pitchRegisters,
+                noiseInstruments: noiseInstruments
             ),
         ]
 
@@ -61,7 +65,9 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
                     id: "alternateStart",
                     channelEntries: alternateChannels,
                     parser: parser,
-                    waveTables: waveTables
+                    waveTables: waveTables,
+                    pitchRegisters: pitchRegisters,
+                    noiseInstruments: noiseInstruments
                 )
             )
         }
@@ -219,8 +225,11 @@ private enum MusicInstruction {
     case volume(Int, Int)
     case dutyCycle(Int)
     case vibrato(Int, Int, Int)
+    case pitchSlide(Int, Int, String)
     case togglePerfectPitch
     case noteType(Int, Int, Int)
+    case drumSpeed(Int)
+    case drumNote(Int, Int)
     case octave(Int)
     case note(String, Int)
     case rest(Int)
@@ -245,6 +254,7 @@ private struct ChannelState {
     var vibratoDelaySeconds: Double = 0
     var vibratoDepthSemitones: Double = 0
     var vibratoRateHz: Double = 0
+    var pendingPitchSlideTargetHz: Double?
     var waveform: AudioManifest.Waveform
 }
 
@@ -260,6 +270,8 @@ private struct TimedEvent {
     let vibratoDelaySeconds: Double
     let vibratoDepthSemitones: Double
     let vibratoRateHz: Double
+    let pitchSlideTargetHz: Double?
+    let noiseShortMode: Bool?
     let waveform: AudioManifest.Waveform
 }
 
@@ -272,6 +284,16 @@ private struct EntryRenderResult {
     let playbackMode: AudioManifest.PlaybackMode
     let prelude: [TimedEvent]
     let loop: [TimedEvent]
+}
+
+private struct NoiseInstrumentEventTemplate {
+    let startTime: Double
+    let duration: Double
+    let amplitude: Double
+    let envelopeStepDuration: Double?
+    let envelopeDirection: Int
+    let clockHz: Double
+    let shortMode: Bool
 }
 
 private func parseMusicFile(at url: URL) throws -> ParsedMusicFile {
@@ -340,6 +362,11 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
        let third = Int(match.output.3) {
         return .vibrato(first, second, third)
     }
+    if let match = line.firstMatch(of: /pitch_slide\s+(-?\d+),\s*(-?\d+),\s*([A-G][#_]|C_|D_|E_|F_|G_|A_|B_)/),
+       let length = Int(match.output.1),
+       let octave = Int(match.output.2) {
+        return .pitchSlide(length, octave, String(match.output.3))
+    }
     if line == "toggle_perfect_pitch" {
         return .togglePerfectPitch
     }
@@ -348,6 +375,14 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
        let volume = Int(match.output.2),
        let fade = Int(match.output.3) {
         return .noteType(length, volume, fade)
+    }
+    if let match = line.firstMatch(of: /drum_speed\s+(-?\d+)/), let value = Int(match.output.1) {
+        return .drumSpeed(value)
+    }
+    if let match = line.firstMatch(of: /drum_note\s+(-?\d+),\s*(-?\d+)/),
+       let instrument = Int(match.output.1),
+       let length = Int(match.output.2) {
+        return .drumNote(instrument, length)
     }
     if let match = line.firstMatch(of: /octave\s+(-?\d+)/), let value = Int(match.output.1) {
         return .octave(value)
@@ -376,7 +411,9 @@ private func renderTrackEntry(
     id: String,
     channelEntries: [MusicChannelHeader],
     parser: ParsedMusicFile,
-    waveTables: [Int: [Double]]
+    waveTables: [Int: [Double]],
+    pitchRegisters: [String: Int],
+    noiseInstruments: [Int: [NoiseInstrumentEventTemplate]]
 ) throws -> AudioManifest.Entry {
     let globalState = resolveTrackGlobalAudioState(
         entryLabel: channelEntries.first?.label ?? id,
@@ -401,7 +438,9 @@ private func renderTrackEntry(
                 waveSamples: waveform == .wave ? waveTables[0] : nil,
                 waveform: waveform
             ),
-            waveTables: waveTables
+            waveTables: waveTables,
+            pitchRegisters: pitchRegisters,
+            noiseInstruments: noiseInstruments
         )
         return AudioManifest.ChannelProgram(
             channelNumber: header.channelNumber,
@@ -449,6 +488,8 @@ private func renderChannelEntry(
     parser: ParsedMusicFile,
     initialState: ChannelState,
     waveTables: [Int: [Double]],
+    pitchRegisters: [String: Int],
+    noiseInstruments: [Int: [NoiseInstrumentEventTemplate]],
     visitedLabels: Set<String> = []
 ) throws -> EntryRenderResult {
     if visitedLabels.contains(label) {
@@ -479,6 +520,14 @@ private func renderChannelEntry(
                 state.vibratoDelaySeconds = Double(max(0, length)) / 60
                 state.vibratoDepthSemitones = Double(abs(depth)) / 64
                 state.vibratoRateHz = rate <= 0 ? 0 : 60 / Double(rate * 2)
+            case let .pitchSlide(_, octave, noteName):
+                state.pendingPitchSlideTargetHz = frequencyHz(
+                    for: noteName,
+                    octave: octave,
+                    waveform: state.waveform,
+                    perfectPitchEnabled: state.perfectPitchEnabled,
+                    pitchRegisters: pitchRegisters
+                )
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
             case let .noteType(length, volume, parameter):
@@ -493,15 +542,31 @@ private func renderChannelEntry(
                     state.envelopeStepDuration = envelopeStepDuration(for: parameter)
                     state.envelopeDirection = envelopeDirection(for: parameter)
                 }
+            case let .drumSpeed(value):
+                state.noteSpeed = max(1, value)
+            case let .drumNote(instrumentID, length):
+                let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                if let instrumentEvents = noiseInstruments[instrumentID] {
+                    events.append(contentsOf: renderNoiseInstrument(instrumentEvents, startingAt: state.currentTime))
+                }
+                state.currentTime += duration
             case let .octave(value):
                 state.octave = value
             case let .note(name, length):
                 let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                let slideTargetHz = state.pendingPitchSlideTargetHz
+                state.pendingPitchSlideTargetHz = nil
                 events.append(
                     TimedEvent(
                         startTime: state.currentTime,
                         duration: duration,
-                        frequencyHz: frequencyHz(for: name, octave: state.octave),
+                        frequencyHz: frequencyHz(
+                            for: name,
+                            octave: state.octave,
+                            waveform: state.waveform,
+                            perfectPitchEnabled: state.perfectPitchEnabled,
+                            pitchRegisters: pitchRegisters
+                        ),
                         amplitude: state.masterVolume * state.noteVolume,
                         dutyCycle: state.waveform == .square ? state.dutyCycle : nil,
                         envelopeStepDuration: state.envelopeStepDuration,
@@ -510,6 +575,8 @@ private func renderChannelEntry(
                         vibratoDelaySeconds: state.vibratoDelaySeconds,
                         vibratoDepthSemitones: state.vibratoDepthSemitones,
                         vibratoRateHz: state.vibratoRateHz,
+                        pitchSlideTargetHz: slideTargetHz,
+                        noiseShortMode: nil,
                         waveform: state.waveform
                     )
                 )
@@ -522,7 +589,9 @@ private func renderChannelEntry(
                     label: resolved,
                     parser: parser,
                     initialState: state,
-                    waveTables: waveTables
+                    waveTables: waveTables,
+                    pitchRegisters: pitchRegisters,
+                    noiseInstruments: noiseInstruments
                 )
                 events.append(contentsOf: subroutine.events)
                 state = subroutine.state
@@ -547,6 +616,8 @@ private func renderChannelEntry(
                         parser: parser,
                         initialState: state,
                         waveTables: waveTables,
+                        pitchRegisters: pitchRegisters,
+                        noiseInstruments: noiseInstruments,
                         visitedLabels: visitedLabels.union([label])
                     )
                     let shiftedPrelude = recursive.prelude.map { shiftTimedEvent($0, by: state.currentTime) }
@@ -587,7 +658,9 @@ private func renderSubroutine(
     label: String,
     parser: ParsedMusicFile,
     initialState: ChannelState,
-    waveTables: [Int: [Double]]
+    waveTables: [Int: [Double]],
+    pitchRegisters: [String: Int],
+    noiseInstruments: [Int: [NoiseInstrumentEventTemplate]]
 ) throws -> (events: [TimedEvent], state: ChannelState) {
     var state = initialState
     var events: [TimedEvent] = []
@@ -619,6 +692,14 @@ private func renderSubroutine(
                 state.vibratoDelaySeconds = Double(max(0, length)) / 60
                 state.vibratoDepthSemitones = Double(abs(depth)) / 64
                 state.vibratoRateHz = rate <= 0 ? 0 : 60 / Double(rate * 2)
+            case let .pitchSlide(_, octave, noteName):
+                state.pendingPitchSlideTargetHz = frequencyHz(
+                    for: noteName,
+                    octave: octave,
+                    waveform: state.waveform,
+                    perfectPitchEnabled: state.perfectPitchEnabled,
+                    pitchRegisters: pitchRegisters
+                )
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
             case let .noteType(length, volume, parameter):
@@ -633,15 +714,31 @@ private func renderSubroutine(
                     state.envelopeStepDuration = envelopeStepDuration(for: parameter)
                     state.envelopeDirection = envelopeDirection(for: parameter)
                 }
+            case let .drumSpeed(value):
+                state.noteSpeed = max(1, value)
+            case let .drumNote(instrumentID, length):
+                let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                if let instrumentEvents = noiseInstruments[instrumentID] {
+                    events.append(contentsOf: renderNoiseInstrument(instrumentEvents, startingAt: state.currentTime))
+                }
+                state.currentTime += duration
             case let .octave(value):
                 state.octave = value
             case let .note(name, length):
                 let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                let slideTargetHz = state.pendingPitchSlideTargetHz
+                state.pendingPitchSlideTargetHz = nil
                 events.append(
                     TimedEvent(
                         startTime: state.currentTime,
                         duration: duration,
-                        frequencyHz: frequencyHz(for: name, octave: state.octave),
+                        frequencyHz: frequencyHz(
+                            for: name,
+                            octave: state.octave,
+                            waveform: state.waveform,
+                            perfectPitchEnabled: state.perfectPitchEnabled,
+                            pitchRegisters: pitchRegisters
+                        ),
                         amplitude: state.masterVolume * state.noteVolume,
                         dutyCycle: state.waveform == .square ? state.dutyCycle : nil,
                         envelopeStepDuration: state.envelopeStepDuration,
@@ -650,6 +747,8 @@ private func renderSubroutine(
                         vibratoDelaySeconds: state.vibratoDelaySeconds,
                         vibratoDepthSemitones: state.vibratoDepthSemitones,
                         vibratoRateHz: state.vibratoRateHz,
+                        pitchSlideTargetHz: slideTargetHz,
+                        noiseShortMode: nil,
                         waveform: state.waveform
                     )
                 )
@@ -661,7 +760,9 @@ private func renderSubroutine(
                     label: resolveLabelReference(target, from: currentLabel),
                     parser: parser,
                     initialState: state,
-                    waveTables: waveTables
+                    waveTables: waveTables,
+                    pitchRegisters: pitchRegisters,
+                    noiseInstruments: noiseInstruments
                 )
                 events.append(contentsOf: subroutine.events)
                 state = subroutine.state
@@ -755,6 +856,8 @@ private func silentTimedEvent(duration: Double, waveform: AudioManifest.Waveform
         vibratoDelaySeconds: 0,
         vibratoDepthSemitones: 0,
         vibratoRateHz: 0,
+        pitchSlideTargetHz: nil,
+        noiseShortMode: nil,
         waveform: waveform
     )
 }
@@ -781,6 +884,8 @@ private func audioEvent(from event: TimedEvent) -> AudioManifest.Event {
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
+        pitchSlideTargetHz: event.pitchSlideTargetHz,
+        noiseShortMode: event.noiseShortMode,
         waveform: event.waveform
     )
 }
@@ -798,8 +903,34 @@ private func shiftTimedEvent(_ event: TimedEvent, by offset: Double) -> TimedEve
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
+        pitchSlideTargetHz: event.pitchSlideTargetHz,
+        noiseShortMode: event.noiseShortMode,
         waveform: event.waveform
     )
+}
+
+private func renderNoiseInstrument(
+    _ templates: [NoiseInstrumentEventTemplate],
+    startingAt startTime: Double
+) -> [TimedEvent] {
+    templates.map { template in
+        TimedEvent(
+            startTime: startTime + template.startTime,
+            duration: template.duration,
+            frequencyHz: template.clockHz,
+            amplitude: template.amplitude,
+            dutyCycle: nil,
+            envelopeStepDuration: template.envelopeStepDuration,
+            envelopeDirection: template.envelopeDirection,
+            waveSamples: nil,
+            vibratoDelaySeconds: 0,
+            vibratoDepthSemitones: 0,
+            vibratoRateHz: 0,
+            pitchSlideTargetHz: nil,
+            noiseShortMode: template.shortMode,
+            waveform: .noise
+        )
+    }
 }
 
 private func dutyCycle(for value: Int) -> Double {
@@ -891,23 +1022,104 @@ private func parseWaveSampleTables(repoRoot: URL) throws -> [Int: [Double]] {
     return tables
 }
 
-private func frequencyHz(for name: String, octave: Int) -> Double? {
-    let semitone: Int
-    switch name {
-    case "C_": semitone = 0
-    case "C#": semitone = 1
-    case "D_": semitone = 2
-    case "D#": semitone = 3
-    case "E_": semitone = 4
-    case "F_": semitone = 5
-    case "F#": semitone = 6
-    case "G_": semitone = 7
-    case "G#": semitone = 8
-    case "A_": semitone = 9
-    case "A#": semitone = 10
-    case "B_": semitone = 11
-    default: return nil
+private func parseNoiseInstrumentTables(repoRoot: URL) throws -> [Int: [NoiseInstrumentEventTemplate]] {
+    let regex = try NSRegularExpression(pattern: #"noise_note\s+(-?\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)"#)
+    var result: [Int: [NoiseInstrumentEventTemplate]] = [:]
+
+    for instrumentID in 1...19 {
+        let url = repoRoot.appendingPathComponent(String(format: "audio/sfx/noise_instrument%02d_1.asm", instrumentID))
+        let contents = try String(contentsOf: url)
+        let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+        var startTime = 0.0
+        var events: [NoiseInstrumentEventTemplate] = []
+
+        for match in regex.matches(in: contents, range: nsRange) {
+            guard
+                let lengthRange = Range(match.range(at: 1), in: contents),
+                let volumeRange = Range(match.range(at: 2), in: contents),
+                let fadeRange = Range(match.range(at: 3), in: contents),
+                let counterRange = Range(match.range(at: 4), in: contents),
+                let length = Int(contents[lengthRange]),
+                let volume = Int(contents[volumeRange]),
+                let fade = Int(contents[fadeRange]),
+                let polynomialCounter = Int(contents[counterRange])
+            else {
+                continue
+            }
+
+            let duration = Double(max(1, length + 1)) / 60.0
+            let (clockHz, shortMode) = noiseClockParameters(for: polynomialCounter)
+            events.append(
+                NoiseInstrumentEventTemplate(
+                    startTime: startTime,
+                    duration: duration,
+                    amplitude: max(0, min(1, Double(volume) / 15)),
+                    envelopeStepDuration: envelopeStepDuration(for: fade),
+                    envelopeDirection: envelopeDirection(for: fade),
+                    clockHz: clockHz,
+                    shortMode: shortMode
+                )
+            )
+            startTime += duration
+        }
+
+        result[instrumentID] = events
     }
-    let midiNote = (octave + 1) * 12 + semitone
-    return 440 * pow(2, Double(midiNote - 69) / 12)
+
+    return result
+}
+
+private func parsePitchRegisters(repoRoot: URL) throws -> [String: Int] {
+    let noteOrder = ["C_", "C#", "D_", "D#", "E_", "F_", "F#", "G_", "G#", "A_", "A#", "B_"]
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("audio/notes.asm"))
+    let regex = try NSRegularExpression(pattern: #"dw\s+\$([0-9A-Fa-f]{4})"#)
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    let matches = regex.matches(in: contents, range: nsRange)
+    guard matches.count >= noteOrder.count else {
+        throw ExtractorError.invalidArguments("failed to resolve all pitch registers from audio/notes.asm")
+    }
+
+    var registers: [String: Int] = [:]
+    for (index, noteName) in noteOrder.enumerated() {
+        guard let range = Range(matches[index].range(at: 1), in: contents),
+              let value = Int(contents[range], radix: 16) else {
+            throw ExtractorError.invalidArguments("failed to parse pitch register for \(noteName)")
+        }
+        registers[noteName] = value
+    }
+    return registers
+}
+
+private func frequencyHz(
+    for name: String,
+    octave: Int,
+    waveform: AudioManifest.Waveform,
+    perfectPitchEnabled: Bool,
+    pitchRegisters: [String: Int]
+) -> Double? {
+    guard waveform != .noise, let baseRegister = pitchRegisters[name] else {
+        return nil
+    }
+
+    let shiftCount = max(0, octave - 1)
+    let signedRegister = Int(Int16(bitPattern: UInt16(baseRegister)))
+    var hardwareRegister = (signedRegister >> shiftCount) + 0x0800
+    if perfectPitchEnabled {
+        hardwareRegister += 1
+    }
+
+    let frequencyBits = hardwareRegister & 0x07ff
+    let denominator = 2048 - frequencyBits
+    guard denominator > 0 else { return nil }
+    let numerator: Double = waveform == .wave ? 65_536 : 131_072
+    return numerator / Double(denominator)
+}
+
+private func noiseClockParameters(for polynomialCounter: Int) -> (Double, Bool) {
+    let divisorCode = polynomialCounter & 0b111
+    let shortMode = (polynomialCounter & 0b1000) != 0
+    let shift = (polynomialCounter >> 4) & 0b1111
+    let divisor: Double = divisorCode == 0 ? 8 : Double(divisorCode * 16)
+    let clockHz = 524_288 / divisor / pow(2, Double(shift + 1))
+    return (clockHz, shortMode)
 }

@@ -279,6 +279,48 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(firstEvent.duration, 6.0 / 60.0, accuracy: 0.000_001)
     }
 
+    func testAudioExtractorIncludesTitleScreenDrumPreludeEvents() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let titleTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_TITLE_SCREEN" })
+        let channelFour = try XCTUnwrap(
+            titleTrack.entries.first { $0.id == "default" }?.channels.first { $0.channelNumber == 4 }
+        )
+        let firstEvent = try XCTUnwrap(channelFour.prelude.first)
+
+        XCTAssertFalse(channelFour.prelude.isEmpty)
+        XCTAssertEqual(firstEvent.waveform, .noise)
+        XCTAssertGreaterThan(try XCTUnwrap(firstEvent.frequencyHz), 0)
+        XCTAssertNotNil(firstEvent.noiseShortMode)
+        XCTAssertGreaterThan(firstEvent.duration, 0)
+    }
+
+    func testAudioExtractorCarriesPitchSlideTargetsIntoPkmnHealedLead() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let healTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_PKMN_HEALED" })
+        let channelOne = try XCTUnwrap(
+            healTrack.entries.first { $0.id == "default" }?.channels.first { $0.channelNumber == 1 }
+        )
+        let opening = Array(channelOne.prelude.prefix(3))
+        let firstSlideTarget = try XCTUnwrap(opening[0].pitchSlideTargetHz)
+        let firstFrequency = try XCTUnwrap(opening[0].frequencyHz)
+        let secondSlideTarget = try XCTUnwrap(opening[1].pitchSlideTargetHz)
+        let secondFrequency = try XCTUnwrap(opening[1].frequencyHz)
+        let thirdSlideTarget = try XCTUnwrap(opening[2].pitchSlideTargetHz)
+
+        XCTAssertEqual(opening.count, 3)
+        XCTAssertEqual(firstSlideTarget, firstFrequency, accuracy: 0.000_001)
+        XCTAssertLessThan(secondSlideTarget, secondFrequency)
+        XCTAssertEqual(thirdSlideTarget, 661.979_797_979_798, accuracy: 0.000_001)
+    }
+
     func testExtractorWritesDeterministicAudioManifestJSON() throws {
         let repoRoot = repoRoot()
         let firstOutputRoot = try temporaryDirectory()
