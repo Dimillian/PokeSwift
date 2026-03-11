@@ -85,44 +85,7 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            FieldRetroPalette.shellBackdrop,
-                            FieldRetroPalette.stageInner,
-                            FieldRetroPalette.stageMiddle.opacity(0.86),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    PokeThemePalette.appHighlightGlow.opacity(0.9),
-                                    Color.clear,
-                                ],
-                                center: .topLeading,
-                                startRadius: 20,
-                                endRadius: 280
-                            )
-                        )
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.clear,
-                                    FieldRetroPalette.shellBackdropShadow.opacity(0.06),
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
+                .fill(FieldRetroPalette.shellBackdrop)
         )
         .glassEffect(
             .regular.tint(FieldRetroPalette.glassTint),
@@ -285,6 +248,8 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
             )
             let screenRect = CGRect(
                 origin: screenOrigin, size: CGSize(width: screenWidth, height: screenHeight))
+            let outerGlowPadding = max(14, lcdScale * 3)
+            let innerGlowPadding = max(6, lcdScale * 1.1)
             let wellShape = UnevenRoundedRectangle(
                 cornerRadii: .init(
                     topLeading: 22,
@@ -296,42 +261,32 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
             )
 
             ZStack(alignment: .topLeading) {
-                if appearanceMode.isDark(for: colorScheme) {
-                    RoundedRectangle(cornerRadius: max(14, lcdScale * 3), style: .continuous)
-                        .fill(PokeThemePalette.screenGlow)
-                        .frame(
-                            width: screenRect.width + max(36, lcdScale * 10),
-                            height: screenRect.height + max(32, lcdScale * 8)
-                        )
-                        .blur(radius: max(18, lcdScale * 4))
-                        .position(x: screenRect.midX, y: screenRect.midY)
-
-                    RoundedRectangle(cornerRadius: max(10, lcdScale * 2.4), style: .continuous)
-                        .fill(PokeThemePalette.screenGlowInner)
-                        .frame(
-                            width: screenRect.width + max(8, lcdScale * 2),
-                            height: screenRect.height + max(8, lcdScale * 2)
-                        )
-                        .blur(radius: max(8, lcdScale * 1.4))
-                        .position(x: screenRect.midX, y: screenRect.midY)
-                }
-
                 wellShape
                     .fill(PokeThemePalette.screenWellFill)
-                    .overlay {
-                        wellShape
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        PokeThemePalette.screenWellHighlight,
-                                        Color.clear,
-                                        PokeThemePalette.screenWellDepth,
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+
+                if appearanceMode.isDark(for: colorScheme) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: max(14, lcdScale * 3), style: .continuous)
+                            .fill(PokeThemePalette.screenGlow)
+                            .frame(
+                                width: screenRect.width + (outerGlowPadding * 2),
+                                height: screenRect.height + (outerGlowPadding * 2)
                             )
+                            .blur(radius: max(22, lcdScale * 4))
+                            .opacity(0.72)
+
+                        RoundedRectangle(cornerRadius: max(10, lcdScale * 2.4), style: .continuous)
+                            .fill(PokeThemePalette.screenGlowInner)
+                            .frame(
+                                width: screenRect.width + (innerGlowPadding * 2),
+                                height: screenRect.height + (innerGlowPadding * 2)
+                            )
+                            .blur(radius: max(10, lcdScale * 2))
+                            .opacity(0.5)
                     }
+                    .blendMode(.plusLighter)
+                    .position(x: screenRect.midX, y: screenRect.midY)
+                }
 
                 HStack(spacing: 12) {
                     DMGAccentBarStack()
@@ -367,12 +322,6 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                         .foregroundStyle(PokeThemePalette.screenLabel.opacity(0.95))
                 }
                 .position(x: size.width * 0.07, y: screenRect.midY)
-
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .stroke(PokeThemePalette.screenRim, lineWidth: 1)
-                    .frame(width: screenRect.width, height: screenRect.height)
-                    .position(x: screenRect.midX, y: screenRect.midY)
-                    .shadow(color: appearanceMode.isDark(for: colorScheme) ? PokeThemePalette.screenGlow.opacity(0.85) : .clear, radius: appearanceMode.isDark(for: colorScheme) ? max(10, lcdScale * 2) : 0)
 
                 content
                     .frame(width: screenRect.width, height: screenRect.height)

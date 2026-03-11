@@ -642,10 +642,6 @@ private struct FixedViewportRenderedField: View {
                 FieldViewportTransitionOverlay(transition: transition)
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.black.opacity(0.16), lineWidth: max(1, displayScale * 0.16))
-            }
         }
     }
 
@@ -684,20 +680,8 @@ private struct FixedViewportRenderedField: View {
     }
 
     private var lcdBackground: some View {
-        ZStack {
-            Rectangle()
-                .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
-
-            LinearGradient(
-                colors: [
-                    Color.white.opacity(0.07),
-                    Color.clear,
-                    Color.black.opacity(0.08),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
+        Rectangle()
+            .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
     }
 }
 
@@ -780,10 +764,6 @@ private struct FixedViewportPlaceholderField: View {
         .overlay {
             FieldViewportTransitionOverlay(transition: transition)
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(Color.black.opacity(0.16), lineWidth: max(1, displayScale * 0.16))
         }
     }
 

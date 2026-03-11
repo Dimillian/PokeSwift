@@ -443,6 +443,14 @@ When a blocker is discovered, add:
 
 - Added a persisted gameplay `Appearance` toggle backed by app settings, cycling `System`, `Dark`, and `Light` from the live sidebar `Options` section with `System` as the default, and re-themed the shared title/gameplay/battle chrome around semantic palette tokens so presentation can switch globally without touching save data or extracted content.
 - Added a retro-charcoal dark presentation pass for the shared Game Boy shell, including a restrained phosphor-style green LCD glow around the gameplay/battle screen well while keeping the existing field filter and screen shaders independent from the new appearance toggle.
+- Reworked the dark gameplay shell away from the earlier charcoal pass toward a black-hardware variant with a stronger glow-in-the-dark green halo concentrated around the LCD well, keeping the non-gameplay shell locked to the light presentation.
+- Flattened the gameplay-shell backdrop to a solid fill and pushed the dark-mode phosphor effect further outward from the LCD so the glow reads around the screen instead of across the full background.
+- Removed the remaining LCD reflection gradients and bezel-centered glow bias so the dark-mode phosphor effect now hugs the active screen area itself instead of tinting the surrounding shell.
+- Replaced the clipped LCD halo with a softer screen-edge bloom and removed the green dark-mode rim so the phosphor effect now feathers just outside the active display without reading like a hard border.
+- Dropped the extra dark-mode shell stroke around the LCD so the rounded viewport itself defines the screen edge without a mismatched border radius.
+- Softened the dark-mode LCD bloom slightly after the visibility pass so the glow still feathers outside the screen without overpowering the shell.
+- Restored the tinted LCD reflection band in the field shader for the stylized DMG preset while leaving the authentic preset path unchanged.
+- Removed the remaining LCD outline strokes in both the shared shell and field viewport overlays so light and dark gameplay rely on the clipped screen shape instead of an extra border.
 - Removed the full-screen pixel-grid overlay from `GameBoyScreen` so gameplay and title surfaces read cleaner while keeping the shared Game Boy shell layout intact.
 - Reworked the gameplay host/sidebar chrome toward native macOS 26 Liquid Glass, using shared sidebar card/inset/chip surface primitives with retro-tinted materials instead of repeated hardcoded fills.
 - Split the monolithic gameplay sidebar view into focused field, battle, trainer, party, inventory/save/options, and shared-primitives files so future native UI iterations can stay scoped without changing gameplay/sidebar behavior contracts.

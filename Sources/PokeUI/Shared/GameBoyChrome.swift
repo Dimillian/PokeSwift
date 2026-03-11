@@ -71,47 +71,7 @@ private struct GameBoyScreenBackground: View {
         case .classic:
             palette.classicBackground.color
         case .fieldShell:
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        PokeThemePalette.appBackgroundTop,
-                        PokeThemePalette.appBackgroundMiddle,
-                        PokeThemePalette.appBackgroundBottom,
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-
-                RadialGradient(
-                    colors: [
-                        PokeThemePalette.appHighlightGlow,
-                        Color.clear,
-                    ],
-                    center: .topLeading,
-                    startRadius: 20,
-                    endRadius: 420
-                )
-
-                RadialGradient(
-                    colors: [
-                        PokeThemePalette.appAccentGlow,
-                        Color.clear,
-                    ],
-                    center: .bottomTrailing,
-                    startRadius: 40,
-                    endRadius: 360
-                )
-
-                LinearGradient(
-                    colors: [
-                        PokeThemePalette.appHighlightGlow.opacity(0.45),
-                        Color.clear,
-                        PokeThemePalette.appDepthShadow,
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
+            PokeThemePalette.appBackgroundMiddle
         }
     }
 }
