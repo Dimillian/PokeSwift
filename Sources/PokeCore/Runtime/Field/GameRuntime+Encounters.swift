@@ -3,8 +3,7 @@ import PokeDataModel
 
 extension GameRuntime {
     func evaluateWildEncounterIfNeeded() {
-        guard scene == .field,
-              dialogueState == nil,
+        guard isReadyForFreeFieldStep,
               var gameplayState,
               gameplayState.battle == nil,
               let map = currentMapManifest,

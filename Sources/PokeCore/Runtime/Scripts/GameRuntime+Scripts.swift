@@ -3,6 +3,10 @@ import PokeContent
 import PokeDataModel
 
 extension GameRuntime {
+    var isReadyForFreeFieldStep: Bool {
+        scene == .field && dialogueState == nil && gameplayState?.activeScriptID == nil
+    }
+
     func evaluateMapScriptsIfNeeded(blockedMoveFacing: FacingDirection? = nil) {
         guard scene == .field, dialogueState == nil, let gameplayState else { return }
         guard let mapScript = content.mapScript(for: gameplayState.mapID) else {
@@ -60,9 +64,19 @@ extension GameRuntime {
     }
 
     func runActiveScript() {
-        guard let scriptID = gameplayState?.activeScriptID,
-              let script = content.script(id: scriptID) else {
+        guard let scriptID = gameplayState?.activeScriptID else {
             finishScript()
+            return
+        }
+        guard let script = content.script(id: scriptID) else {
+            failActiveScript(
+                scriptID: scriptID,
+                message: "Missing script content for \(scriptID).",
+                details: [
+                    "failureKind": "missingScript",
+                    "missingScriptID": scriptID,
+                ]
+            )
             return
         }
 
@@ -208,14 +222,35 @@ extension GameRuntime {
         }
     }
 
-    func finishScript() {
+    func finishScript(traceCompletion: Bool = true) {
         let completedScriptID = gameplayState?.activeScriptID
         gameplayState?.activeScriptID = nil
         gameplayState?.activeScriptStep = nil
-        if let completedScriptID {
+        if traceCompletion, let completedScriptID {
             traceEvent(.scriptFinished, "Finished script \(completedScriptID).", mapID: gameplayState?.mapID, scriptID: completedScriptID)
         }
         if scene == .scriptedSequence {
+            scene = .field
+            substate = "field"
+        }
+    }
+
+    func failActiveScript(
+        scriptID: String? = nil,
+        message: String,
+        details: [String: String]
+    ) {
+        let failingScriptID = scriptID ?? gameplayState?.activeScriptID
+        traceEvent(
+            .scriptFailed,
+            message,
+            mapID: gameplayState?.mapID,
+            scriptID: failingScriptID,
+            details: details
+        )
+        if gameplayState?.activeScriptID != nil {
+            finishScript(traceCompletion: false)
+        } else {
             scene = .field
             substate = "field"
         }

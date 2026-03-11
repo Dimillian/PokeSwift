@@ -62,7 +62,7 @@ extension GameRuntime {
         beginFieldMovementCooldown()
         substate = "field"
         evaluateMapScriptsIfNeeded()
-        if scene == .field, dialogueState == nil, self.gameplayState?.activeScriptID == nil {
+        if isReadyForFreeFieldStep {
             evaluateWildEncounterIfNeeded()
         }
     }

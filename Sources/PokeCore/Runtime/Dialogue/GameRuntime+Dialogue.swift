@@ -63,8 +63,27 @@ extension GameRuntime {
 
     func showDialogue(id: String, completion: DialogueState.CompletionAction) {
         guard let dialogue = content.dialogue(id: id) else {
-            scene = .field
-            substate = "field"
+            var details: [String: String] = [
+                "failureKind": "missingDialogue",
+                "missingDialogueID": id,
+            ]
+            if case .continueScript = completion {
+                details["completionAction"] = "continueScript"
+            }
+            let message = "Missing dialogue content for \(id)."
+            if gameplayState?.activeScriptID != nil {
+                failActiveScript(message: message, details: details)
+            } else {
+                traceEvent(
+                    .scriptFailed,
+                    message,
+                    mapID: gameplayState?.mapID,
+                    dialogueID: id,
+                    details: details
+                )
+                scene = .field
+                substate = "field"
+            }
             return
         }
         dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)

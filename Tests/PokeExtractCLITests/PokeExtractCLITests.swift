@@ -298,6 +298,14 @@ final class PokeExtractCLITests: XCTestCase {
         let oakDialogue = try XCTUnwrap(manifest.dialogues.first { $0.id == "pallet_town_oak_its_unsafe" })
         XCTAssertEqual(oakDialogue.pages.first?.lines.first, "OAK: It's unsafe!")
         XCTAssertEqual(oakDialogue.pages.last?.lines.last, "me!")
+        XCTAssertNotNil(manifest.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
+
+        let extractedDialogueIDs = Set(manifest.dialogues.map(\.id))
+        let parcelHandoff = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_parcel_handoff" })
+        let missingDialogueReferences = parcelHandoff.steps
+            .compactMap(\.dialogueID)
+            .filter { extractedDialogueIDs.contains($0) == false }
+        XCTAssertEqual(missingDialogueReferences, [])
     }
 
     func testExtractorWritesDeterministicGameplayManifestJSON() throws {
@@ -326,6 +334,7 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(decoded.items.count, 2)
         XCTAssertEqual(decoded.wildEncounterTables.count, 1)
         XCTAssertGreaterThan(decoded.dialogues.count, 80)
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_pokecenter_nurse_heal" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "OAKS_LAB" })

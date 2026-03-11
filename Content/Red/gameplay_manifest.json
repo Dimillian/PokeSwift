@@ -1357,6 +1357,17 @@
       ]
     },
     {
+      "id" : "oaks_lab_rival_gramps",
+      "pages" : [
+        {
+          "lines" : [
+            "<RIVAL>: Gramps!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "oaks_lab_rival_what_did_you_call_me_for",
       "pages" : [
         {

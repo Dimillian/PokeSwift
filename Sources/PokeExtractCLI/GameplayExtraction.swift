@@ -1114,6 +1114,7 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_LINK_RECEPTIONIST"): return "viridian_pokecenter_link_receptionist"
     case ("OAKS_LAB", "TEXT_OAKSLAB_RIVAL"): return "oaks_lab_rival_gramps_isnt_around"
+    case ("OAKS_LAB", "TEXT_OAKSLAB_RIVAL_GRAMPS"): return "oaks_lab_rival_gramps"
     case ("OAKS_LAB", "TEXT_OAKSLAB_CHARMANDER_POKE_BALL"),
          ("OAKS_LAB", "TEXT_OAKSLAB_SQUIRTLE_POKE_BALL"),
          ("OAKS_LAB", "TEXT_OAKSLAB_BULBASAUR_POKE_BALL"):
@@ -1227,6 +1228,7 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "oaks_lab_rival_i_picked_the_wrong_pokemon", label: "_OaksLabRivalIPickedTheWrongPokemonText", from: oaksLab),
         try extractDialogue(id: "oaks_lab_rival_am_i_great_or_what", label: "_OaksLabRivalAmIGreatOrWhatText", from: oaksLab),
         try extractDialogue(id: "oaks_lab_rival_smell_you_later", label: "_OaksLabRivalSmellYouLaterText", from: oaksLab),
+        try extractDialogue(id: "oaks_lab_rival_gramps", label: "_OaksLabRivalGrampsText", from: oaksLab),
         try extractDialogue(id: "oaks_lab_rival_what_did_you_call_me_for", label: "_OaksLabRivalWhatDidYouCallMeForText", from: oaksLab),
         try extractDialogue(id: "oaks_lab_oak_i_have_a_request", label: "_OaksLabOakIHaveARequestText", from: oaksLab),
         try extractDialogue(id: "oaks_lab_oak_my_invention_pokedex", label: "_OaksLabOakMyInventionPokedexText", from: oaksLab),

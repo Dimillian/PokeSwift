@@ -425,6 +425,57 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(runtime.itemQuantity("OAKS_PARCEL"), 0)
         XCTAssertTrue(runtime.hasFlag("EVENT_OAK_GOT_PARCEL"))
         XCTAssertTrue(runtime.hasFlag("EVENT_GOT_POKEDEX"))
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.gameplayState?.activeScriptID)
+        XCTAssertNil(runtime.gameplayState?.activeScriptStep)
+
+        let grassTile = try findGrassTile(in: runtime, mapID: "ROUTE_1")
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = grassTile
+        runtime.gameplayState?.facing = .up
+        runtime.setAcquisitionRandomOverrides([0, 0])
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .wild)
+    }
+
+    func testMissingDialogueDuringScriptFailsCleanlyAndPublishesSessionEvent() async {
+        let telemetry = RecordingTelemetryPublisher()
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    scripts: [
+                        .init(
+                            id: "broken_script",
+                            steps: [.init(action: "showDialogue", dialogueID: "missing_dialogue")]
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: telemetry
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.beginScript(id: "broken_script")
+
+        await telemetry.waitForEventCount(2)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.substate, "field")
+        XCTAssertNil(runtime.dialogueState)
+        XCTAssertNil(runtime.gameplayState?.activeScriptID)
+        XCTAssertNil(runtime.gameplayState?.activeScriptStep)
+
+        let failureEvent = await telemetry.events.last
+        XCTAssertEqual(failureEvent?.kind, .scriptFailed)
+        XCTAssertEqual(failureEvent?.scriptID, "broken_script")
+        XCTAssertEqual(failureEvent?.details["failureKind"], "missingDialogue")
+        XCTAssertEqual(failureEvent?.details["missingDialogueID"], "missing_dialogue")
     }
 
     func testRepoGeneratedDoorWarpIntoRedsHouseUsesExactDoorTileAndFadeTelemetry() async throws {
@@ -1406,6 +1457,7 @@ final class PokeCoreTests: XCTestCase {
 
     private func fixtureGameplayManifest(
         dialogues: [DialogueManifest] = [],
+        scripts: [ScriptManifest] = [],
         species: [SpeciesManifest] = [],
         moves: [MoveManifest] = [],
         typeEffectiveness: [TypeEffectivenessManifest] = [],
@@ -1464,7 +1516,7 @@ final class PokeCoreTests: XCTestCase {
             dialogues: dialogues,
             eventFlags: .init(flags: []),
             mapScripts: [],
-            scripts: [],
+            scripts: scripts,
             species: species,
             moves: moves,
             typeEffectiveness: typeEffectiveness,
@@ -1557,6 +1609,22 @@ final class PokeCoreTests: XCTestCase {
             default:
                 XCTFail("unexpected scene while draining dialogue/script sequence: \(runtime.scene)")
                 return
+            }
+        }
+    }
+
+    actor RecordingTelemetryPublisher: TelemetryPublisher {
+        private(set) var events: [RuntimeSessionEvent] = []
+
+        func publish(snapshot: RuntimeTelemetrySnapshot) async {}
+
+        func publish(event: RuntimeSessionEvent) async {
+            events.append(event)
+        }
+
+        func waitForEventCount(_ expectedCount: Int, attempts: Int = 40) async {
+            for _ in 0..<attempts where events.count < expectedCount {
+                try? await Task.sleep(nanoseconds: 5_000_000)
             }
         }
     }

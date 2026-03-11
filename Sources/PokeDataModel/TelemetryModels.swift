@@ -502,6 +502,7 @@ public enum RuntimeSessionEventKind: String, Codable, Equatable, Sendable {
     case sessionStarted
     case scriptStarted
     case scriptFinished
+    case scriptFailed
     case dialogueStarted
     case warpCompleted
     case encounterTriggered
