@@ -159,6 +159,11 @@ public struct TitleSceneManifest: Codable, Equatable, Sendable {
 }
 
 public struct AudioManifest: Codable, Equatable, Sendable {
+    public enum CueAssetKind: String, Codable, Equatable, Sendable {
+        case music
+        case soundEffect
+    }
+
     public enum PlaybackMode: String, Codable, Equatable, Sendable {
         case looping
         case oneShot
@@ -268,6 +273,37 @@ public struct AudioManifest: Codable, Equatable, Sendable {
         }
     }
 
+    public struct SoundEffect: Codable, Equatable, Sendable {
+        public let id: String
+        public let sourceLabel: String
+        public let sourceFile: String
+        public let bank: Int
+        public let priority: Int
+        public let order: Int
+        public let requestedChannels: [Int]
+        public let channels: [ChannelProgram]
+
+        public init(
+            id: String,
+            sourceLabel: String,
+            sourceFile: String,
+            bank: Int,
+            priority: Int,
+            order: Int,
+            requestedChannels: [Int],
+            channels: [ChannelProgram]
+        ) {
+            self.id = id
+            self.sourceLabel = sourceLabel
+            self.sourceFile = sourceFile
+            self.bank = bank
+            self.priority = priority
+            self.order = order
+            self.requestedChannels = requestedChannels
+            self.channels = channels
+        }
+    }
+
     public struct MapRoute: Codable, Equatable, Sendable {
         public let mapID: String
         public let musicID: String
@@ -280,13 +316,30 @@ public struct AudioManifest: Codable, Equatable, Sendable {
 
     public struct Cue: Codable, Equatable, Sendable {
         public let id: String
-        public let trackID: String
+        public let assetKind: CueAssetKind
+        public let assetID: String
         public let entryID: String
+        public let waitForCompletion: Bool
+        public let resumeMusicAfterCompletion: Bool
 
-        public init(id: String, trackID: String, entryID: String = "default") {
+        public init(
+            id: String,
+            assetKind: CueAssetKind = .music,
+            assetID: String,
+            entryID: String = "default",
+            waitForCompletion: Bool = false,
+            resumeMusicAfterCompletion: Bool = false
+        ) {
             self.id = id
-            self.trackID = trackID
+            self.assetKind = assetKind
+            self.assetID = assetID
             self.entryID = entryID
+            self.waitForCompletion = waitForCompletion
+            self.resumeMusicAfterCompletion = resumeMusicAfterCompletion
+        }
+
+        public var trackID: String {
+            assetID
         }
     }
 
@@ -295,18 +348,21 @@ public struct AudioManifest: Codable, Equatable, Sendable {
     public let mapRoutes: [MapRoute]
     public let cues: [Cue]
     public let tracks: [Track]
+    public let soundEffects: [SoundEffect]
 
     public init(
         variant: GameVariant,
         titleTrackID: String,
         mapRoutes: [MapRoute],
         cues: [Cue],
-        tracks: [Track]
+        tracks: [Track],
+        soundEffects: [SoundEffect] = []
     ) {
         self.variant = variant
         self.titleTrackID = titleTrackID
         self.mapRoutes = mapRoutes
         self.cues = cues
         self.tracks = tracks
+        self.soundEffects = soundEffects
     }
 }

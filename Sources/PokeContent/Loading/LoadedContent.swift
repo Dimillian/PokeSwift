@@ -99,4 +99,8 @@ public struct LoadedContent: Sendable {
     public func audioCue(id: String) -> AudioManifest.Cue? {
         audioManifest.cues.first { $0.id == id }
     }
+
+    public func soundEffect(id: String) -> AudioManifest.SoundEffect? {
+        audioManifest.soundEffects.first { $0.id == id }
+    }
 }

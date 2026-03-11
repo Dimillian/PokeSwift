@@ -350,26 +350,26 @@ final class PokeCoreTests: XCTestCase {
         runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
 
         runtime.requestDefaultMapMusic()
-        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
 
         runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
-        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
 
         let battle = try XCTUnwrap(runtime.gameplayState?.battle)
         runtime.finishWildBattle(battle: battle, won: true)
 
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_ROUTES1")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
-        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
 
         runtime.startWildBattle(speciesID: "RATTATA", level: 3)
-        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
 
         runtime.finishWildBattleEscape()
 
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_ROUTES1")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
-        XCTAssertEqual(audioPlayer.requests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
     }
 
     func testRepoGeneratedViridianPokecenterNurseHealsParty() throws {
@@ -549,6 +549,36 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
     }
 
+    func testRepoGeneratedDoorAndWarpTransitionsChooseExpectedSoundEffects() async throws {
+        let enterAudioPlayer = RecordingAudioPlayer()
+        let enterRuntime = try makeRepoRuntime(audioPlayer: enterAudioPlayer)
+        enterRuntime.gameplayState = enterRuntime.makeInitialGameplayState()
+        enterRuntime.scene = .field
+        enterRuntime.substate = "field"
+        enterRuntime.gameplayState?.mapID = "PALLET_TOWN"
+        enterRuntime.gameplayState?.playerPosition = TilePoint(x: 5, y: 6)
+        enterRuntime.gameplayState?.facing = .up
+
+        enterRuntime.movePlayer(in: .up)
+        XCTAssertEqual(enterAudioPlayer.soundEffectRequests.last?.soundEffectID, "SFX_GO_INSIDE")
+
+        _ = try await waitForSnapshot(enterRuntime) {
+            $0.field?.mapID == "REDS_HOUSE_1F" && $0.field?.transition == nil
+        }
+
+        let warpAudioPlayer = RecordingAudioPlayer()
+        let warpRuntime = try makeRepoRuntime(audioPlayer: warpAudioPlayer)
+        warpRuntime.gameplayState = warpRuntime.makeInitialGameplayState()
+        warpRuntime.scene = .field
+        warpRuntime.substate = "field"
+        warpRuntime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        warpRuntime.gameplayState?.playerPosition = TilePoint(x: 6, y: 1)
+        warpRuntime.gameplayState?.facing = .right
+
+        warpRuntime.movePlayer(in: .right)
+        XCTAssertEqual(warpAudioPlayer.soundEffectRequests.last?.soundEffectID, "SFX_GO_OUTSIDE")
+    }
+
     func testRepoGeneratedStairWarpUsesExactTileWithFadeAndNoStepOut() async throws {
         let runtime = try makeRepoRuntime()
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -638,14 +668,14 @@ final class PokeCoreTests: XCTestCase {
 
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TITLE_SCREEN")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "title")
-        XCTAssertEqual(audioPlayer.requests, [.init(trackID: "MUSIC_TITLE_SCREEN", entryID: "default")])
+        XCTAssertEqual(audioPlayer.musicRequests, [.init(trackID: "MUSIC_TITLE_SCREEN", entryID: "default")])
 
         runtime.handle(button: .start)
 
         XCTAssertEqual(runtime.scene, .titleMenu)
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TITLE_SCREEN")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "title")
-        XCTAssertEqual(audioPlayer.requests.count, 1)
+        XCTAssertEqual(audioPlayer.musicRequests.count, 1)
     }
 
     func testRepoGeneratedOakIntroAndLabArrivalUpdateAudioTelemetry() throws {
@@ -675,6 +705,95 @@ final class PokeCoreTests: XCTestCase {
 
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+    }
+
+    func testDialoguePageEventsBlockProgressUntilSoundCompletes() {
+        let audioPlayer = RecordingAudioPlayer()
+        let audioManifest = AudioManifest(
+            variant: .red,
+            titleTrackID: "MUSIC_TITLE_SCREEN",
+            mapRoutes: [],
+            cues: [],
+            tracks: [],
+            soundEffects: [
+                .init(
+                    id: "SFX_LEVEL_UP",
+                    sourceLabel: "SFX_LevelUp",
+                    sourceFile: "audio/sfx/levelup.asm",
+                    bank: 2,
+                    priority: 95,
+                    order: 95,
+                    requestedChannels: [5, 6, 7],
+                    channels: []
+                ),
+                .init(
+                    id: "SFX_PRESS_AB",
+                    sourceLabel: "SFX_PressAB",
+                    sourceFile: "audio/sfx/pressab.asm",
+                    bank: 1,
+                    priority: 62,
+                    order: 62,
+                    requestedChannels: [5],
+                    channels: []
+                ),
+            ]
+        )
+        let gameplayManifest = fixtureGameplayManifest(
+            dialogues: [
+                .init(
+                    id: "dialogue_with_audio",
+                    pages: [
+                        .init(
+                            lines: ["You found", "something!"],
+                            waitsForPrompt: true,
+                            events: [
+                                .init(kind: .soundEffect, soundEffectID: "SFX_LEVEL_UP"),
+                                .init(kind: .soundEffect, soundEffectID: "SFX_PRESS_AB", waitForCompletion: false),
+                            ]
+                        ),
+                    ]
+                ),
+            ]
+        )
+        let runtime = GameRuntime(
+            content: fixtureContent(gameplayManifest: gameplayManifest, audioManifest: audioManifest),
+            telemetryPublisher: nil,
+            audioPlayer: audioPlayer
+        )
+
+        runtime.showDialogue(id: "dialogue_with_audio", completion: .returnToField)
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.map(\.soundEffectID), ["SFX_LEVEL_UP"])
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "dialogue_with_audio")
+
+        audioPlayer.completePendingPlayback()
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.map(\.soundEffectID), ["SFX_LEVEL_UP", "SFX_PRESS_AB"])
+        runtime.handle(button: .confirm)
+        XCTAssertNil(runtime.currentSnapshot().dialogue)
+    }
+
+    func testBlockedMovementCollisionSoundDoesNotStackUntilPlaybackCompletes() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 0)
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.map(\.soundEffectID), ["SFX_COLLISION"])
+
+        audioPlayer.completePendingPlayback()
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.map(\.soundEffectID), ["SFX_COLLISION", "SFX_COLLISION"])
     }
 
     func testFinalizeStarterChoiceSequenceLeavesRivalBallVisibleForDeferredPickupScript() throws {
@@ -744,6 +863,33 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(settledSnapshot.audio?.trackID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(settledSnapshot.audio?.reason, "mapDefault")
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
+    }
+
+    func testRepoGeneratedBattleMoveUsesExtractedMoveSoundEffect() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 4, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
+
+        runtime.startBattle(id: "opp_rival1_2")
+        drainBattleText(runtime)
+        runtime.battleRandomOverrides = [0, 255]
+        runtime.handle(button: .confirm)
+
+        XCTAssertTrue(
+            audioPlayer.soundEffectRequests.contains {
+                $0.soundEffectID == "SFX_DAMAGE" &&
+                    $0.frequencyModifier == 0 &&
+                    $0.tempoModifier == 128
+            }
+        )
     }
 
     func testBattleFinishStopsTrainerMusicBeforePostBattleDialogue() throws {
@@ -1556,9 +1702,14 @@ final class PokeCoreTests: XCTestCase {
             titleTrackID: "MUSIC_TITLE_SCREEN",
             mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
             cues: [
-                .init(id: "title_default", trackID: "MUSIC_TITLE_SCREEN"),
-                .init(id: "trainer_battle", trackID: "MUSIC_TRAINER_BATTLE"),
-                .init(id: "mom_heal", trackID: "MUSIC_PKMN_HEALED"),
+                .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+                .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+                .init(
+                    id: "mom_heal",
+                    assetID: "MUSIC_PKMN_HEALED",
+                    waitForCompletion: true,
+                    resumeMusicAfterCompletion: true
+                ),
             ],
             tracks: [
                 .init(
@@ -1584,6 +1735,28 @@ final class PokeCoreTests: XCTestCase {
                     sourceLabel: "Music_PkmnHealed",
                     sourceFile: "audio/music/pkmnhealed.asm",
                     entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
+                ),
+            ],
+            soundEffects: [
+                .init(
+                    id: "SFX_PRESS_AB",
+                    sourceLabel: "SFX_Press_AB",
+                    sourceFile: "audio/sfx/press_ab.asm",
+                    bank: 2,
+                    priority: 0,
+                    order: 0,
+                    requestedChannels: [5],
+                    channels: []
+                ),
+                .init(
+                    id: "SFX_COLLISION",
+                    sourceLabel: "SFX_Collision",
+                    sourceFile: "audio/sfx/collision.asm",
+                    bank: 2,
+                    priority: 0,
+                    order: 0,
+                    requestedChannels: [5],
+                    channels: []
                 ),
             ]
         )
@@ -1730,7 +1903,8 @@ final class PokeCoreTests: XCTestCase {
 
 @MainActor
 private final class RecordingAudioPlayer: RuntimeAudioPlaying {
-    private(set) var requests: [AudioPlaybackRequest] = []
+    private(set) var musicRequests: [MusicPlaybackRequest] = []
+    private(set) var soundEffectRequests: [SoundEffectPlaybackRequest] = []
     private(set) var stopAllMusicCount = 0
     private var pendingCompletions: [() -> Void] = []
 
@@ -1738,11 +1912,22 @@ private final class RecordingAudioPlayer: RuntimeAudioPlaying {
         pendingCompletions.count
     }
 
-    func play(request: AudioPlaybackRequest, completion: (@MainActor () -> Void)?) {
-        requests.append(request)
+    func playMusic(request: MusicPlaybackRequest, completion: (@MainActor @Sendable () -> Void)?) {
+        musicRequests.append(request)
         if let completion {
             pendingCompletions.append(completion)
         }
+    }
+
+    func playSFX(
+        request: SoundEffectPlaybackRequest,
+        completion: (@MainActor @Sendable () -> Void)?
+    ) -> SoundEffectPlaybackResult {
+        soundEffectRequests.append(request)
+        if let completion {
+            pendingCompletions.append(completion)
+        }
+        return .init(soundEffectID: request.soundEffectID, status: .started)
     }
 
     func stopAllMusic() {

@@ -26,6 +26,7 @@ extension GameRuntime {
         case .right:
             movePlayer(in: .right)
         case .confirm, .start:
+            playUIConfirmSound()
             interactAhead()
         case .cancel:
             break
@@ -44,6 +45,7 @@ extension GameRuntime {
             guard scene == .field, dialogueState == nil, self.gameplayState?.activeScriptID == nil else {
                 return
             }
+            playCollisionSoundIfNeeded()
             substate = "blocked"
             return
         }
@@ -151,6 +153,11 @@ extension GameRuntime {
 
         gameplayState.activeMapScriptTriggerID = nil
         self.gameplayState = gameplayState
+        if transitionKind == .door {
+            _ = playSoundEffect(id: "SFX_GO_INSIDE", reason: "warpTransition")
+        } else {
+            _ = playSoundEffect(id: "SFX_GO_OUTSIDE", reason: "warpTransition")
+        }
         fieldTransitionTask?.cancel()
         fieldTransitionTask = Task { [weak self] in
             await self?.runWarpTransition(

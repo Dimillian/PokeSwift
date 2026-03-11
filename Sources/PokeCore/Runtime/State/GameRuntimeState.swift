@@ -161,6 +161,14 @@ struct RuntimeAudioState: Equatable {
     var playbackRevision: Int
 }
 
+struct RuntimeSoundEffectState: Equatable {
+    var soundEffectID: String
+    var reason: String
+    var playbackRevision: Int
+    var status: SoundEffectPlaybackStatusTelemetry
+    var replacedSoundEffectID: String?
+}
+
 enum RuntimeFieldTransitionKind: String {
     case door
     case warp

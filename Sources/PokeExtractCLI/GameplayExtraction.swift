@@ -1219,6 +1219,7 @@ private func dialogueID(for mapID: String, textID: String) -> String {
 }
 
 private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
+    let scriptDialogueEvents = try buildScriptDialogueEvents(repoRoot: repoRoot)
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
@@ -1231,40 +1232,40 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
 
     return [
-        try extractDialogue(id: "pallet_town_oak_hey_wait", label: "_PalletTownOakHeyWaitDontGoOutText", from: pallet),
-        try extractDialogue(id: "pallet_town_oak_its_unsafe", label: "_PalletTownOakItsUnsafeText", from: pallet),
-        try extractDialogue(id: "pallet_town_girl", label: "_PalletTownGirlText", from: pallet),
-        try extractDialogue(id: "pallet_town_fisher", label: "_PalletTownFisherText", from: pallet),
-        try extractDialogue(id: "pallet_town_oaks_lab_sign", label: "_PalletTownOaksLabSignText", from: pallet),
-        try extractDialogue(id: "pallet_town_sign", label: "_PalletTownSignText", from: pallet),
-        try extractDialogue(id: "pallet_town_players_house_sign", label: "_PalletTownPlayersHouseSignText", from: pallet),
-        try extractDialogue(id: "pallet_town_rivals_house_sign", label: "_PalletTownRivalsHouseSignText", from: pallet),
-        try extractDialogue(id: "reds_house_1f_mom_wakeup", label: "_RedsHouse1FMomWakeUpText", from: redsHouse),
-        try extractDialogue(id: "reds_house_1f_mom_rest", label: "_RedsHouse1FMomYouShouldRestText", from: redsHouse),
-        try extractDialogue(id: "reds_house_1f_mom_looking_great", label: "_RedsHouse1FMomLookingGreatText", from: redsHouse),
-        try extractDialogue(id: "reds_house_1f_tv", label: "_RedsHouse1FTVStandByMeMovieText", from: redsHouse),
-        try extractDialogue(id: "route_1_youngster_1_mart_sample", label: "_Route1Youngster1MartSampleText", from: route1),
-        try extractDialogue(id: "route_1_youngster_1_got_potion", label: "_Route1Youngster1GotPotionText", from: route1),
-        try extractDialogue(id: "route_1_youngster_1_after_sample", label: "_Route1Youngster1AlsoGotPokeballsText", from: route1),
-        try extractDialogue(id: "route_1_youngster_1_no_room", label: "_Route1Youngster1NoRoomText", from: route1),
-        try extractDialogue(id: "route_1_youngster_2", label: "_Route1Youngster2Text", from: route1),
-        try extractDialogue(id: "route_1_sign", label: "_Route1SignText", from: route1),
-        try extractDialogue(id: "viridian_city_youngster_1", label: "_ViridianCityYoungster1Text", from: viridianCity),
-        try extractDialogue(id: "viridian_city_gambler", label: "_ViridianCityGambler1GymAlwaysClosedText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_youngster_2_prompt", label: "_ViridianCityYoungster2YouWantToKnowAboutText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_youngster_2_ok_then", label: "ViridianCityYoungster2OkThenText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_youngster_2_description", label: "ViridianCityYoungster2CaterpieAndWeedleDescriptionText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_girl_before_pokedex", label: "_ViridianCityGirlHasntHadHisCoffeeYetText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_girl_after_pokedex", label: "_ViridianCityGirlWhenIGoShopText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_old_man_private_property", label: "_ViridianCityOldManSleepyPrivatePropertyText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_fisher", label: "ViridianCityFisherYouCanHaveThisText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_old_man_had_coffee", label: "_ViridianCityOldManHadMyCoffeeNowText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_old_man_weaken_target", label: "_ViridianCityOldManYouNeedToWeakenTheTargetText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_sign", label: "_ViridianCitySignText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_trainer_tips_1", label: "_ViridianCityTrainerTips1Text", from: viridianCity),
-        try extractDialogue(id: "viridian_city_trainer_tips_2", label: "_ViridianCityTrainerTips2Text", from: viridianCity),
-        try extractDialogue(id: "viridian_city_gym_sign", label: "_ViridianCityGymSignText", from: viridianCity),
-        try extractDialogue(id: "viridian_city_gym_locked", label: "_ViridianCityGymLockedText", from: viridianCity),
+        try extractDialogue(id: "pallet_town_oak_hey_wait", label: "_PalletTownOakHeyWaitDontGoOutText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOakHeyWaitDontGoOutText"] ?? []),
+        try extractDialogue(id: "pallet_town_oak_its_unsafe", label: "_PalletTownOakItsUnsafeText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOakItsUnsafeText"] ?? []),
+        try extractDialogue(id: "pallet_town_girl", label: "_PalletTownGirlText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownGirlText"] ?? []),
+        try extractDialogue(id: "pallet_town_fisher", label: "_PalletTownFisherText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownFisherText"] ?? []),
+        try extractDialogue(id: "pallet_town_oaks_lab_sign", label: "_PalletTownOaksLabSignText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOaksLabSignText"] ?? []),
+        try extractDialogue(id: "pallet_town_sign", label: "_PalletTownSignText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownSignText"] ?? []),
+        try extractDialogue(id: "pallet_town_players_house_sign", label: "_PalletTownPlayersHouseSignText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownPlayersHouseSignText"] ?? []),
+        try extractDialogue(id: "pallet_town_rivals_house_sign", label: "_PalletTownRivalsHouseSignText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownRivalsHouseSignText"] ?? []),
+        try extractDialogue(id: "reds_house_1f_mom_wakeup", label: "_RedsHouse1FMomWakeUpText", from: redsHouse, extraEvents: scriptDialogueEvents["_RedsHouse1FMomWakeUpText"] ?? []),
+        try extractDialogue(id: "reds_house_1f_mom_rest", label: "_RedsHouse1FMomYouShouldRestText", from: redsHouse, extraEvents: scriptDialogueEvents["_RedsHouse1FMomYouShouldRestText"] ?? []),
+        try extractDialogue(id: "reds_house_1f_mom_looking_great", label: "_RedsHouse1FMomLookingGreatText", from: redsHouse, extraEvents: scriptDialogueEvents["_RedsHouse1FMomLookingGreatText"] ?? []),
+        try extractDialogue(id: "reds_house_1f_tv", label: "_RedsHouse1FTVStandByMeMovieText", from: redsHouse, extraEvents: scriptDialogueEvents["_RedsHouse1FTVStandByMeMovieText"] ?? []),
+        try extractDialogue(id: "route_1_youngster_1_mart_sample", label: "_Route1Youngster1MartSampleText", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster1MartSampleText"] ?? []),
+        try extractDialogue(id: "route_1_youngster_1_got_potion", label: "_Route1Youngster1GotPotionText", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster1GotPotionText"] ?? []),
+        try extractDialogue(id: "route_1_youngster_1_after_sample", label: "_Route1Youngster1AlsoGotPokeballsText", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster1AlsoGotPokeballsText"] ?? []),
+        try extractDialogue(id: "route_1_youngster_1_no_room", label: "_Route1Youngster1NoRoomText", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster1NoRoomText"] ?? []),
+        try extractDialogue(id: "route_1_youngster_2", label: "_Route1Youngster2Text", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster2Text"] ?? []),
+        try extractDialogue(id: "route_1_sign", label: "_Route1SignText", from: route1, extraEvents: scriptDialogueEvents["_Route1SignText"] ?? []),
+        try extractDialogue(id: "viridian_city_youngster_1", label: "_ViridianCityYoungster1Text", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster1Text"] ?? []),
+        try extractDialogue(id: "viridian_city_gambler", label: "_ViridianCityGambler1GymAlwaysClosedText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGambler1GymAlwaysClosedText"] ?? []),
+        try extractDialogue(id: "viridian_city_youngster_2_prompt", label: "_ViridianCityYoungster2YouWantToKnowAboutText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster2YouWantToKnowAboutText"] ?? []),
+        try extractDialogue(id: "viridian_city_youngster_2_ok_then", label: "ViridianCityYoungster2OkThenText", from: viridianCity, extraEvents: scriptDialogueEvents["ViridianCityYoungster2OkThenText"] ?? []),
+        try extractDialogue(id: "viridian_city_youngster_2_description", label: "ViridianCityYoungster2CaterpieAndWeedleDescriptionText", from: viridianCity, extraEvents: scriptDialogueEvents["ViridianCityYoungster2CaterpieAndWeedleDescriptionText"] ?? []),
+        try extractDialogue(id: "viridian_city_girl_before_pokedex", label: "_ViridianCityGirlHasntHadHisCoffeeYetText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGirlHasntHadHisCoffeeYetText"] ?? []),
+        try extractDialogue(id: "viridian_city_girl_after_pokedex", label: "_ViridianCityGirlWhenIGoShopText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGirlWhenIGoShopText"] ?? []),
+        try extractDialogue(id: "viridian_city_old_man_private_property", label: "_ViridianCityOldManSleepyPrivatePropertyText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityOldManSleepyPrivatePropertyText"] ?? []),
+        try extractDialogue(id: "viridian_city_fisher", label: "ViridianCityFisherYouCanHaveThisText", from: viridianCity, extraEvents: scriptDialogueEvents["ViridianCityFisherYouCanHaveThisText"] ?? []),
+        try extractDialogue(id: "viridian_city_old_man_had_coffee", label: "_ViridianCityOldManHadMyCoffeeNowText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityOldManHadMyCoffeeNowText"] ?? []),
+        try extractDialogue(id: "viridian_city_old_man_weaken_target", label: "_ViridianCityOldManYouNeedToWeakenTheTargetText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityOldManYouNeedToWeakenTheTargetText"] ?? []),
+        try extractDialogue(id: "viridian_city_sign", label: "_ViridianCitySignText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCitySignText"] ?? []),
+        try extractDialogue(id: "viridian_city_trainer_tips_1", label: "_ViridianCityTrainerTips1Text", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityTrainerTips1Text"] ?? []),
+        try extractDialogue(id: "viridian_city_trainer_tips_2", label: "_ViridianCityTrainerTips2Text", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityTrainerTips2Text"] ?? []),
+        try extractDialogue(id: "viridian_city_gym_sign", label: "_ViridianCityGymSignText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGymSignText"] ?? []),
+        try extractDialogue(id: "viridian_city_gym_locked", label: "_ViridianCityGymLockedText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGymLockedText"] ?? []),
         DialogueManifest(id: "viridian_city_mart_sign", pages: [.init(lines: ["#MON MART"], waitsForPrompt: true)]),
         DialogueManifest(id: "viridian_city_pokecenter_sign", pages: [.init(lines: ["#MON CENTER"], waitsForPrompt: true)]),
         try extractDialogue(id: "viridian_school_house_brunette_girl", label: "_ViridianSchoolHouseBrunetteGirlText", from: viridianSchoolHouse),
@@ -1273,11 +1274,11 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "viridian_nickname_house_little_girl", label: "_ViridianNicknameHouseLittleGirlText", from: viridianNicknameHouse),
         try extractDialogue(id: "viridian_nickname_house_spearow", label: "_ViridianNicknameHouseSpearowText", from: viridianNicknameHouse),
         try extractDialogue(id: "viridian_nickname_house_speary_sign", label: "_ViridianNicknameHouseSpearySignText", from: viridianNicknameHouse),
-        try extractDialogue(id: "viridian_mart_clerk_you_came_from_pallet_town", label: "_ViridianMartClerkYouCameFromPalletTownText", from: viridianMart),
-        try extractDialogue(id: "viridian_mart_clerk_parcel_quest", label: "_ViridianMartClerkParcelQuestText", from: viridianMart),
-        try extractDialogue(id: "viridian_mart_clerk_after_parcel", label: "_ViridianMartClerkSayHiToOakText", from: viridianMart),
-        try extractDialogue(id: "viridian_mart_youngster", label: "_ViridianMartYoungsterText", from: viridianMart),
-        try extractDialogue(id: "viridian_mart_cooltrainer", label: "_ViridianMartCooltrainerMText", from: viridianMart),
+        try extractDialogue(id: "viridian_mart_clerk_you_came_from_pallet_town", label: "_ViridianMartClerkYouCameFromPalletTownText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartClerkYouCameFromPalletTownText"] ?? []),
+        try extractDialogue(id: "viridian_mart_clerk_parcel_quest", label: "_ViridianMartClerkParcelQuestText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartClerkParcelQuestText"] ?? []),
+        try extractDialogue(id: "viridian_mart_clerk_after_parcel", label: "_ViridianMartClerkSayHiToOakText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartClerkSayHiToOakText"] ?? []),
+        try extractDialogue(id: "viridian_mart_youngster", label: "_ViridianMartYoungsterText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartYoungsterText"] ?? []),
+        try extractDialogue(id: "viridian_mart_cooltrainer", label: "_ViridianMartCooltrainerMText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartCooltrainerMText"] ?? []),
         DialogueManifest(
             id: "viridian_pokecenter_nurse_heal",
             pages: [
@@ -1287,60 +1288,102 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
                 .init(lines: ["Thank you!", "Your #MON are", "fighting fit!"], waitsForPrompt: true),
             ]
         ),
-        try extractDialogue(id: "viridian_pokecenter_gentleman", label: "_ViridianPokecenterGentlemanText", from: viridianPokecenter),
-        try extractDialogue(id: "viridian_pokecenter_cooltrainer", label: "_ViridianPokecenterCooltrainerMText", from: viridianPokecenter),
-        try extractDialogue(id: "oaks_lab_rival_gramps_isnt_around", label: "_OaksLabRivalGrampsIsntAroundText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_go_ahead_and_choose", label: "_OaksLabRivalGoAheadAndChooseText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_my_pokemon_looks_stronger", label: "_OaksLabRivalMyPokemonLooksStrongerText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_those_are_pokeballs", label: "_OaksLabThoseArePokeBallsText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_you_want_charmander", label: "_OaksLabYouWantCharmanderText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_you_want_squirtle", label: "_OaksLabYouWantSquirtleText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_you_want_bulbasaur", label: "_OaksLabYouWantBulbasaurText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_mon_energetic", label: "_OaksLabMonEnergeticText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_last_mon", label: "_OaksLabLastMonText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_which_pokemon_do_you_want", label: "_OaksLabOak1WhichPokemonDoYouWantText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", label: "_OaksLabOak1RaiseYourYoungPokemonText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_deliver_parcel", label: "_OaksLabOak1DeliverParcelText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_parcel_thanks", label: "_OaksLabOak1ParcelThanksText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_pokemon_around_the_world", label: "_OaksLabOak1PokemonAroundTheWorldText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_come_see_me_sometimes", label: "_OaksLabOak1ComeSeeMeSometimesText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_how_is_your_pokedex_coming", label: "_OaksLabOak1HowIsYourPokedexComingText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_pokedex", label: "_OaksLabPokedexText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_girl", label: "_OaksLabGirlText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_fed_up_with_waiting", label: "_OaksLabRivalFedUpWithWaitingText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_choose_mon", label: "_OaksLabOakChooseMonText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_what_about_me", label: "_OaksLabRivalWhatAboutMeText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_be_patient", label: "_OaksLabOakBePatientText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_dont_go_away_yet", label: "_OaksLabOakDontGoAwayYetText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_ill_take_this_one", label: "_OaksLabRivalIllTakeThisOneText", from: oaksLab),
-        makeReceivedDialogue(id: "oaks_lab_received_mon_charmander", speciesName: "CHARMANDER"),
-        makeReceivedDialogue(id: "oaks_lab_received_mon_squirtle", speciesName: "SQUIRTLE"),
-        makeReceivedDialogue(id: "oaks_lab_received_mon_bulbasaur", speciesName: "BULBASAUR"),
-        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_charmander", speciesName: "CHARMANDER"),
-        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_squirtle", speciesName: "SQUIRTLE"),
-        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_bulbasaur", speciesName: "BULBASAUR"),
-        try extractDialogue(id: "oaks_lab_rival_ill_take_you_on", label: "_OaksLabRivalIllTakeYouOnText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_i_picked_the_wrong_pokemon", label: "_OaksLabRivalIPickedTheWrongPokemonText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_am_i_great_or_what", label: "_OaksLabRivalAmIGreatOrWhatText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_smell_you_later", label: "_OaksLabRivalSmellYouLaterText", from: oaksLab),
+        try extractDialogue(id: "viridian_pokecenter_gentleman", label: "_ViridianPokecenterGentlemanText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterGentlemanText"] ?? []),
+        try extractDialogue(id: "viridian_pokecenter_cooltrainer", label: "_ViridianPokecenterCooltrainerMText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterCooltrainerMText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_gramps_isnt_around", label: "_OaksLabRivalGrampsIsntAroundText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalGrampsIsntAroundText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_go_ahead_and_choose", label: "_OaksLabRivalGoAheadAndChooseText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalGoAheadAndChooseText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_my_pokemon_looks_stronger", label: "_OaksLabRivalMyPokemonLooksStrongerText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalMyPokemonLooksStrongerText"] ?? []),
+        try extractDialogue(id: "oaks_lab_those_are_pokeballs", label: "_OaksLabThoseArePokeBallsText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabThoseArePokeBallsText"] ?? []),
+        try extractDialogue(id: "oaks_lab_you_want_charmander", label: "_OaksLabYouWantCharmanderText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabYouWantCharmanderText"] ?? []),
+        try extractDialogue(id: "oaks_lab_you_want_squirtle", label: "_OaksLabYouWantSquirtleText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabYouWantSquirtleText"] ?? []),
+        try extractDialogue(id: "oaks_lab_you_want_bulbasaur", label: "_OaksLabYouWantBulbasaurText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabYouWantBulbasaurText"] ?? []),
+        try extractDialogue(id: "oaks_lab_mon_energetic", label: "_OaksLabMonEnergeticText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabMonEnergeticText"] ?? []),
+        try extractDialogue(id: "oaks_lab_last_mon", label: "_OaksLabLastMonText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabLastMonText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_which_pokemon_do_you_want", label: "_OaksLabOak1WhichPokemonDoYouWantText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1WhichPokemonDoYouWantText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_raise_your_young_pokemon", label: "_OaksLabOak1RaiseYourYoungPokemonText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1RaiseYourYoungPokemonText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_deliver_parcel", label: "_OaksLabOak1DeliverParcelText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1DeliverParcelText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_parcel_thanks", label: "_OaksLabOak1ParcelThanksText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1ParcelThanksText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_pokemon_around_the_world", label: "_OaksLabOak1PokemonAroundTheWorldText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1PokemonAroundTheWorldText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_come_see_me_sometimes", label: "_OaksLabOak1ComeSeeMeSometimesText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1ComeSeeMeSometimesText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_how_is_your_pokedex_coming", label: "_OaksLabOak1HowIsYourPokedexComingText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOak1HowIsYourPokedexComingText"] ?? []),
+        try extractDialogue(id: "oaks_lab_pokedex", label: "_OaksLabPokedexText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabPokedexText"] ?? []),
+        try extractDialogue(id: "oaks_lab_girl", label: "_OaksLabGirlText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabGirlText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_fed_up_with_waiting", label: "_OaksLabRivalFedUpWithWaitingText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalFedUpWithWaitingText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_choose_mon", label: "_OaksLabOakChooseMonText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakChooseMonText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_what_about_me", label: "_OaksLabRivalWhatAboutMeText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalWhatAboutMeText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_be_patient", label: "_OaksLabOakBePatientText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakBePatientText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_dont_go_away_yet", label: "_OaksLabOakDontGoAwayYetText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakDontGoAwayYetText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_ill_take_this_one", label: "_OaksLabRivalIllTakeThisOneText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalIllTakeThisOneText"] ?? []),
+        makeReceivedDialogue(id: "oaks_lab_received_mon_charmander", speciesName: "CHARMANDER", events: scriptDialogueEvents["_OaksLabReceivedMonText"] ?? []),
+        makeReceivedDialogue(id: "oaks_lab_received_mon_squirtle", speciesName: "SQUIRTLE", events: scriptDialogueEvents["_OaksLabReceivedMonText"] ?? []),
+        makeReceivedDialogue(id: "oaks_lab_received_mon_bulbasaur", speciesName: "BULBASAUR", events: scriptDialogueEvents["_OaksLabReceivedMonText"] ?? []),
+        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_charmander", speciesName: "CHARMANDER", events: scriptDialogueEvents["_OaksLabRivalReceivedMonText"] ?? []),
+        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_squirtle", speciesName: "SQUIRTLE", events: scriptDialogueEvents["_OaksLabRivalReceivedMonText"] ?? []),
+        makeRivalReceivedDialogue(id: "oaks_lab_rival_received_mon_bulbasaur", speciesName: "BULBASAUR", events: scriptDialogueEvents["_OaksLabRivalReceivedMonText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_ill_take_you_on", label: "_OaksLabRivalIllTakeYouOnText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalIllTakeYouOnText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_i_picked_the_wrong_pokemon", label: "_OaksLabRivalIPickedTheWrongPokemonText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalIPickedTheWrongPokemonText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_am_i_great_or_what", label: "_OaksLabRivalAmIGreatOrWhatText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalAmIGreatOrWhatText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_smell_you_later", label: "_OaksLabRivalSmellYouLaterText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalSmellYouLaterText"] ?? []),
         try extractDialogue(id: "oaks_lab_rival_gramps", label: "_OaksLabRivalGrampsText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_what_did_you_call_me_for", label: "_OaksLabRivalWhatDidYouCallMeForText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_i_have_a_request", label: "_OaksLabOakIHaveARequestText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_my_invention_pokedex", label: "_OaksLabOakMyInventionPokedexText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_got_pokedex", label: "_OaksLabOakGotPokedexText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_oak_that_was_my_dream", label: "_OaksLabOakThatWasMyDreamText", from: oaksLab),
-        try extractDialogue(id: "oaks_lab_rival_leave_it_all_to_me", label: "_OaksLabRivalLeaveItAllToMeText", from: oaksLab),
-        try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2),
+        try extractDialogue(id: "oaks_lab_rival_what_did_you_call_me_for", label: "_OaksLabRivalWhatDidYouCallMeForText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalWhatDidYouCallMeForText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_i_have_a_request", label: "_OaksLabOakIHaveARequestText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakIHaveARequestText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_my_invention_pokedex", label: "_OaksLabOakMyInventionPokedexText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakMyInventionPokedexText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_got_pokedex", label: "_OaksLabOakGotPokedexText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakGotPokedexText"] ?? []),
+        try extractDialogue(id: "oaks_lab_oak_that_was_my_dream", label: "_OaksLabOakThatWasMyDreamText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakThatWasMyDreamText"] ?? []),
+        try extractDialogue(id: "oaks_lab_rival_leave_it_all_to_me", label: "_OaksLabRivalLeaveItAllToMeText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalLeaveItAllToMeText"] ?? []),
+        try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2, extraEvents: scriptDialogueEvents["_Rival1WinText"] ?? []),
     ]
 }
 
-private func extractDialogue(id: String, label: String, from contents: String) throws -> DialogueManifest {
+private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [DialogueEvent]] {
+    let scriptPaths = [
+        "scripts/Route1.asm",
+        "scripts/ViridianCity.asm",
+        "scripts/ViridianMart.asm",
+        "scripts/OaksLab.asm",
+    ]
+
+    var eventsByTextLabel: [String: [DialogueEvent]] = [:]
+
+    for path in scriptPaths {
+        let contents = try String(contentsOf: repoRoot.appendingPathComponent(path))
+        var currentTextLabel: String?
+
+        for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+
+            if line.hasSuffix(":") {
+                currentTextLabel = nil
+                continue
+            }
+
+            if let match = line.firstMatch(of: /text_far\s+([A-Za-z0-9_\.]+)/) {
+                currentTextLabel = String(match.output.1)
+                continue
+            }
+
+            if let event = dialogueEvent(for: line), let currentTextLabel {
+                eventsByTextLabel[currentTextLabel, default: []].append(event)
+                continue
+            }
+
+            if line == "text_end" || line == "text" {
+                currentTextLabel = nil
+            }
+        }
+    }
+
+    return eventsByTextLabel
+}
+
+private func extractDialogue(id: String, label: String, from contents: String, extraEvents: [DialogueEvent] = []) throws -> DialogueManifest {
     guard let range = contents.range(of: "\(label)::") else {
         throw ExtractorError.invalidArguments("missing dialogue label \(label)")
     }
 
     let tail = contents[range.upperBound...]
     var lines: [String] = []
+    var events: [DialogueEvent] = []
     var pages: [DialoguePage] = []
 
     for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
@@ -1351,20 +1394,25 @@ private func extractDialogue(id: String, label: String, from contents: String) t
         if line.hasPrefix("text \"") || line.hasPrefix("line \"") || line.hasPrefix("cont \"") || line.hasPrefix("para \"") {
             let value = extractQuotedString(from: line)
             if line.hasPrefix("para ") && lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true))
+                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
                 lines = []
+                events = []
             }
             lines.append(value)
             if lines.count == 4 {
-                pages.append(.init(lines: lines, waitsForPrompt: true))
+                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
                 lines = []
+                events = []
             }
         } else if line.hasPrefix("text_ram") {
             lines.append("<NAME>")
+        } else if let event = dialogueEvent(for: line) {
+            events.append(event)
         } else if line == "done" || line == "prompt" || line == "text_end" {
             if lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true))
+                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
                 lines = []
+                events = []
             }
             if line == "text_end" || line == "done" || line == "prompt" {
                 break
@@ -1373,17 +1421,50 @@ private func extractDialogue(id: String, label: String, from contents: String) t
     }
 
     if lines.isEmpty == false {
-        pages.append(.init(lines: lines, waitsForPrompt: true))
+        pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
+    }
+
+    if extraEvents.isEmpty == false, pages.isEmpty == false {
+        let lastIndex = pages.index(before: pages.endIndex)
+        let lastPage = pages[lastIndex]
+        pages[lastIndex] = .init(
+            lines: lastPage.lines,
+            waitsForPrompt: lastPage.waitsForPrompt,
+            events: lastPage.events + extraEvents
+        )
     }
     return DialogueManifest(id: id, pages: pages)
 }
 
-private func makeReceivedDialogue(id: String, speciesName: String) -> DialogueManifest {
-    DialogueManifest(id: id, pages: [.init(lines: ["<PLAYER> received", speciesName + "!"], waitsForPrompt: true)])
+private func makeReceivedDialogue(id: String, speciesName: String, events: [DialogueEvent] = []) -> DialogueManifest {
+    DialogueManifest(id: id, pages: [.init(lines: ["<PLAYER> received", speciesName + "!"], waitsForPrompt: true, events: events)])
 }
 
-private func makeRivalReceivedDialogue(id: String, speciesName: String) -> DialogueManifest {
-    DialogueManifest(id: id, pages: [.init(lines: ["<RIVAL> received", speciesName + "!"], waitsForPrompt: true)])
+private func makeRivalReceivedDialogue(id: String, speciesName: String, events: [DialogueEvent] = []) -> DialogueManifest {
+    DialogueManifest(id: id, pages: [.init(lines: ["<RIVAL> received", speciesName + "!"], waitsForPrompt: true, events: events)])
+}
+
+private func dialogueEvent(for line: String) -> DialogueEvent? {
+    switch line {
+    case "sound_get_item_1", "sound_level_up":
+        return .init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")
+    case "sound_get_item_2":
+        return .init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")
+    case "sound_get_key_item":
+        return .init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")
+    case "sound_caught_mon":
+        return .init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")
+    case "sound_dex_page_added":
+        return .init(kind: .soundEffect, soundEffectID: "SFX_DEX_PAGE_ADDED")
+    case "sound_cry_nidorina":
+        return .init(kind: .cry, speciesID: "NIDORINA")
+    case "sound_cry_pidgeot":
+        return .init(kind: .cry, speciesID: "PIDGEOT")
+    case "sound_cry_dewgong":
+        return .init(kind: .cry, speciesID: "DEWGONG")
+    default:
+        return nil
+    }
 }
 
 private func extractQuotedString(from line: String) -> String {
@@ -1995,6 +2076,7 @@ private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
 
 private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: String) throws -> SpeciesManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(file))
+    let cryData = try parseCryData(repoRoot: repoRoot, displayName: displayName)
     guard let statsMatch = contents.firstMatch(of: /db\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+)\s*\n\s*;\s*hp\s+atk\s+def\s+spd\s+spc/),
           let typeMatch = contents.firstMatch(of: /db\s+([A-Z_]+),\s+([A-Z_]+)\s*;\s*type/),
           let baseExpMatch = contents.firstMatch(of: /db\s+(\d+)\s*;\s*base exp/),
@@ -2044,8 +2126,38 @@ private func parseSpecies(repoRoot: URL, file: String, id: String, displayName: 
         baseDefense: statsValues[safe: 2] ?? 0,
         baseSpeed: statsValues[safe: 3] ?? 0,
         baseSpecial: statsValues[safe: 4] ?? 0,
-        startingMoves: moveValues.filter { $0 != "NO_MOVE" }
+        startingMoves: moveValues.filter { $0 != "NO_MOVE" },
+        crySoundEffectID: cryData.soundEffectID,
+        cryPitch: cryData.pitch,
+        cryLength: cryData.length
     )
+}
+
+private func parseCryData(repoRoot: URL, displayName: String) throws -> (soundEffectID: String?, pitch: Int?, length: Int?) {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/cries.asm"))
+    let regex = try NSRegularExpression(
+        pattern: #"mon_cry\s+(SFX_[A-Z0-9_]+),\s+\$([0-9A-Fa-f]{2}),\s+\$([0-9A-Fa-f]{2})\s*;\s*(.+)$"#,
+        options: [.anchorsMatchLines]
+    )
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    for match in regex.matches(in: contents, range: nsRange) {
+        guard
+            let idRange = Range(match.range(at: 1), in: contents),
+            let pitchRange = Range(match.range(at: 2), in: contents),
+            let lengthRange = Range(match.range(at: 3), in: contents),
+            let nameRange = Range(match.range(at: 4), in: contents)
+        else {
+            continue
+        }
+        let name = String(contents[nameRange]).trimmingCharacters(in: .whitespaces)
+        guard name == displayName else { continue }
+        return (
+            soundEffectID: String(contents[idRange]),
+            pitch: Int(contents[pitchRange], radix: 16),
+            length: Int(contents[lengthRange], radix: 16)
+        )
+    }
+    return (nil, nil, nil)
 }
 
 private func battleSpriteManifest(speciesID: String, frontSymbol: String, backSymbol: String) throws -> BattleSpriteManifest {
@@ -2120,6 +2232,7 @@ private func resolveTypeEffectivenessMultiplier(_ token: String) throws -> Int {
 
 private func buildMoves(repoRoot: URL) throws -> [MoveManifest] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/moves/moves.asm"))
+    let battleAudioByMoveID = try parseMoveBattleAudio(repoRoot: repoRoot)
     let needed = Set(["SCRATCH", "TACKLE", "GROWL", "TAIL_WHIP", "GUST"])
     return contents.split(separator: "\n").compactMap { rawLine in
         let line = rawLine.trimmingCharacters(in: .whitespaces)
@@ -2133,9 +2246,52 @@ private func buildMoves(repoRoot: URL) throws -> [MoveManifest] {
             accuracy: Int(parts[4]) ?? 100,
             maxPP: Int(parts[5]) ?? 0,
             effect: parts[1],
-            type: parts[3]
+            type: parts[3],
+            battleAudio: battleAudioByMoveID[parts[0]]
         )
     }
+}
+
+private func parseMoveBattleAudio(repoRoot: URL) throws -> [String: BattleAudioManifest] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/moves/sfx.asm"))
+    let regex = try NSRegularExpression(
+        pattern: #"db\s+(SFX_[A-Z0-9_]+),\s+\$([0-9A-Fa-f]{2}),\s+\$([0-9A-Fa-f]{2})\s*;\s*([A-Z0-9_]+)$"#,
+        options: [.anchorsMatchLines]
+    )
+    let cryMoveIDs: Set<String> = ["GROWL", "ROAR"]
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    var result: [String: BattleAudioManifest] = [:]
+
+    for match in regex.matches(in: contents, range: nsRange) {
+        guard
+            let soundRange = Range(match.range(at: 1), in: contents),
+            let frequencyRange = Range(match.range(at: 2), in: contents),
+            let tempoRange = Range(match.range(at: 3), in: contents),
+            let moveRange = Range(match.range(at: 4), in: contents)
+        else {
+            continue
+        }
+
+        let moveID = String(contents[moveRange])
+        let frequencyModifier = Int(contents[frequencyRange], radix: 16)
+        let tempoModifier = Int(contents[tempoRange], radix: 16)
+        if cryMoveIDs.contains(moveID) {
+            result[moveID] = .init(
+                kind: .cry,
+                frequencyModifier: frequencyModifier,
+                tempoModifier: tempoModifier
+            )
+        } else {
+            result[moveID] = .init(
+                kind: .soundEffect,
+                soundEffectID: String(contents[soundRange]),
+                frequencyModifier: frequencyModifier,
+                tempoModifier: tempoModifier
+            )
+        }
+    }
+
+    return result
 }
 
 private func buildItems(repoRoot: URL) throws -> [ItemManifest] {

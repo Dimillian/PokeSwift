@@ -33,7 +33,11 @@ public final class GameRuntime {
     var dialogueState: DialogueState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
+    var recentSoundEffects: [RuntimeSoundEffectState] = []
     var fieldTransitionState: RuntimeFieldTransitionState?
+    var dialogueAudioRevision = 0
+    var isDialogueAudioBlockingInput = false
+    var collisionSoundInFlight = false
     var battleRNGState: UInt64 = 0x504f4b4553574946
     var battleRandomOverrides: [Int] = []
     var acquisitionRNGState: UInt64 = 0x4456535354415445
@@ -250,6 +254,7 @@ public final class GameRuntime {
             break
         case .titleAttract:
             if button == .start || button == .confirm {
+                playUIConfirmSound()
                 scene = .titleMenu
                 substate = "title_menu"
                 focusedIndex = 0

@@ -418,6 +418,33 @@ public struct AudioTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public enum SoundEffectPlaybackStatusTelemetry: String, Codable, Equatable, Sendable {
+    case started
+    case rejected
+}
+
+public struct SoundEffectTelemetry: Codable, Equatable, Sendable {
+    public let soundEffectID: String
+    public let reason: String
+    public let playbackRevision: Int
+    public let status: SoundEffectPlaybackStatusTelemetry
+    public let replacedSoundEffectID: String?
+
+    public init(
+        soundEffectID: String,
+        reason: String,
+        playbackRevision: Int,
+        status: SoundEffectPlaybackStatusTelemetry,
+        replacedSoundEffectID: String? = nil
+    ) {
+        self.soundEffectID = soundEffectID
+        self.reason = reason
+        self.playbackRevision = playbackRevision
+        self.status = status
+        self.replacedSoundEffectID = replacedSoundEffectID
+    }
+}
+
 public struct SaveTelemetry: Codable, Equatable, Sendable {
     public let metadata: GameSaveMetadata?
     public let canSave: Bool
@@ -454,6 +481,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let battle: BattleTelemetry?
     public let eventFlags: EventFlagTelemetry?
     public let audio: AudioTelemetry?
+    public let soundEffects: [SoundEffectTelemetry]
     public let save: SaveTelemetry?
     public let recentInputEvents: [InputEventTelemetry]
     public let assetLoadingFailures: [String]
@@ -473,6 +501,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         battle: BattleTelemetry?,
         eventFlags: EventFlagTelemetry?,
         audio: AudioTelemetry?,
+        soundEffects: [SoundEffectTelemetry] = [],
         save: SaveTelemetry?,
         recentInputEvents: [InputEventTelemetry],
         assetLoadingFailures: [String],
@@ -491,6 +520,7 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.battle = battle
         self.eventFlags = eventFlags
         self.audio = audio
+        self.soundEffects = soundEffects
         self.save = save
         self.recentInputEvents = recentInputEvents
         self.assetLoadingFailures = assetLoadingFailures

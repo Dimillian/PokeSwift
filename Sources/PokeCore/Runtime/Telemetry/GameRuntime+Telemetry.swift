@@ -17,6 +17,7 @@ extension GameRuntime {
             battle: makeBattleTelemetry(),
             eventFlags: makeFlagTelemetry(),
             audio: makeAudioTelemetry(),
+            soundEffects: makeSoundEffectTelemetry(),
             save: makeSaveTelemetry(),
             recentInputEvents: recentInputEvents,
             assetLoadingFailures: Array(Set(assetLoadingFailures + currentFieldRenderIssues)).sorted(),
@@ -130,6 +131,18 @@ extension GameRuntime {
             reason: currentAudioState.reason,
             playbackRevision: currentAudioState.playbackRevision
         )
+    }
+
+    func makeSoundEffectTelemetry() -> [SoundEffectTelemetry] {
+        recentSoundEffects.map {
+            .init(
+                soundEffectID: $0.soundEffectID,
+                reason: $0.reason,
+                playbackRevision: $0.playbackRevision,
+                status: $0.status,
+                replacedSoundEffectID: $0.replacedSoundEffectID
+            )
+        }
     }
 
     func makeSaveTelemetry() -> SaveTelemetry? {

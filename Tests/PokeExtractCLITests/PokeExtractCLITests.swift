@@ -420,6 +420,8 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertEqual(cueByID["rival_exit"]?.entryID, "alternateStart")
         XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
         XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
+        XCTAssertEqual(cueByID["mom_heal"]?.waitForCompletion, true)
+        XCTAssertEqual(cueByID["mom_heal"]?.resumeMusicAfterCompletion, true)
 
         let requiredTrackIDs: Set<String> = [
             "MUSIC_TITLE_SCREEN",
@@ -439,6 +441,56 @@ final class PokeExtractCLITests: XCTestCase {
         XCTAssertNotNil(rivalTrack.entries.first { $0.id == "default" })
         XCTAssertNotNil(rivalTrack.entries.first { $0.id == "alternateStart" })
         XCTAssertEqual(rivalTrack.entries.first { $0.id == "alternateStart" }?.playbackMode, .looping)
+
+        let soundEffectsByID = Dictionary(uniqueKeysWithValues: manifest.soundEffects.map { ($0.id, $0) })
+        XCTAssertEqual(soundEffectsByID["SFX_PRESS_AB"]?.requestedChannels, [5])
+        XCTAssertEqual(soundEffectsByID["SFX_COLLISION"]?.requestedChannels, [5])
+        XCTAssertEqual(soundEffectsByID["SFX_GO_INSIDE"]?.requestedChannels, [8])
+        XCTAssertEqual(soundEffectsByID["SFX_GO_OUTSIDE"]?.requestedChannels, [8])
+        XCTAssertEqual(soundEffectsByID["SFX_LEVEL_UP"]?.requestedChannels, [5, 6, 7])
+        XCTAssertEqual(soundEffectsByID["SFX_POUND"]?.requestedChannels, [8])
+    }
+
+    func testGameplayExtractorPreservesCurrentSliceDialogueSoundCommandsAndMoveAudio() throws {
+        let manifest = try extractGameplayManifest(source: SourceTree(repoRoot: repoRoot()))
+
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "route_1_youngster_1_got_potion" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "viridian_mart_clerk_parcel_quest" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "oaks_lab_oak_deliver_parcel" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "oaks_lab_received_mon_charmander" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "oaks_lab_rival_received_mon_bulbasaur" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "oaks_lab_oak_got_pokedex" }?.pages.last?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+
+        XCTAssertEqual(
+            manifest.moves.first { $0.id == "SCRATCH" }?.battleAudio,
+            .init(kind: .soundEffect, soundEffectID: "SFX_DAMAGE", frequencyModifier: 0, tempoModifier: 128)
+        )
+        XCTAssertEqual(
+            manifest.moves.first { $0.id == "TACKLE" }?.battleAudio,
+            .init(kind: .soundEffect, soundEffectID: "SFX_SUPER_EFFECTIVE", frequencyModifier: 16, tempoModifier: 160)
+        )
+        XCTAssertEqual(
+            manifest.moves.first { $0.id == "GROWL" }?.battleAudio,
+            .init(kind: .cry, soundEffectID: nil, frequencyModifier: 0, tempoModifier: 192)
+        )
     }
 
     func testAudioExtractorQuantizesOakLabLeadToEngineFrameDurations() throws {

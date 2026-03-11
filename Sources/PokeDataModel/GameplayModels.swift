@@ -493,10 +493,25 @@ public struct OverworldSpriteManifest: Codable, Equatable, Sendable {
 public struct DialoguePage: Codable, Equatable, Sendable {
     public let lines: [String]
     public let waitsForPrompt: Bool
+    public let events: [DialogueEvent]
 
-    public init(lines: [String], waitsForPrompt: Bool) {
+    public init(lines: [String], waitsForPrompt: Bool, events: [DialogueEvent] = []) {
         self.lines = lines
         self.waitsForPrompt = waitsForPrompt
+        self.events = events
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case lines
+        case waitsForPrompt
+        case events
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        lines = try container.decode([String].self, forKey: .lines)
+        waitsForPrompt = try container.decode(Bool.self, forKey: .waitsForPrompt)
+        events = try container.decodeIfPresent([DialogueEvent].self, forKey: .events) ?? []
     }
 }
 
@@ -507,6 +522,30 @@ public struct DialogueManifest: Codable, Equatable, Sendable {
     public init(id: String, pages: [DialoguePage]) {
         self.id = id
         self.pages = pages
+    }
+}
+
+public enum DialogueEventKind: String, Codable, Equatable, Sendable {
+    case soundEffect
+    case cry
+}
+
+public struct DialogueEvent: Codable, Equatable, Sendable {
+    public let kind: DialogueEventKind
+    public let soundEffectID: String?
+    public let speciesID: String?
+    public let waitForCompletion: Bool
+
+    public init(
+        kind: DialogueEventKind,
+        soundEffectID: String? = nil,
+        speciesID: String? = nil,
+        waitForCompletion: Bool = true
+    ) {
+        self.kind = kind
+        self.soundEffectID = soundEffectID
+        self.speciesID = speciesID
+        self.waitForCompletion = waitForCompletion
     }
 }
 
@@ -693,8 +732,18 @@ public struct MoveManifest: Codable, Equatable, Sendable {
     public let maxPP: Int
     public let effect: String
     public let type: String
+    public let battleAudio: BattleAudioManifest?
 
-    public init(id: String, displayName: String, power: Int, accuracy: Int, maxPP: Int, effect: String, type: String) {
+    public init(
+        id: String,
+        displayName: String,
+        power: Int,
+        accuracy: Int,
+        maxPP: Int,
+        effect: String,
+        type: String,
+        battleAudio: BattleAudioManifest? = nil
+    ) {
         self.id = id
         self.displayName = displayName
         self.power = power
@@ -702,6 +751,54 @@ public struct MoveManifest: Codable, Equatable, Sendable {
         self.maxPP = maxPP
         self.effect = effect
         self.type = type
+        self.battleAudio = battleAudio
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case displayName
+        case power
+        case accuracy
+        case maxPP
+        case effect
+        case type
+        case battleAudio
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        power = try container.decode(Int.self, forKey: .power)
+        accuracy = try container.decode(Int.self, forKey: .accuracy)
+        maxPP = try container.decode(Int.self, forKey: .maxPP)
+        effect = try container.decode(String.self, forKey: .effect)
+        type = try container.decode(String.self, forKey: .type)
+        battleAudio = try container.decodeIfPresent(BattleAudioManifest.self, forKey: .battleAudio)
+    }
+}
+
+public enum BattleAudioKind: String, Codable, Equatable, Sendable {
+    case soundEffect
+    case cry
+}
+
+public struct BattleAudioManifest: Codable, Equatable, Sendable {
+    public let kind: BattleAudioKind
+    public let soundEffectID: String?
+    public let frequencyModifier: Int?
+    public let tempoModifier: Int?
+
+    public init(
+        kind: BattleAudioKind,
+        soundEffectID: String? = nil,
+        frequencyModifier: Int? = nil,
+        tempoModifier: Int? = nil
+    ) {
+        self.kind = kind
+        self.soundEffectID = soundEffectID
+        self.frequencyModifier = frequencyModifier
+        self.tempoModifier = tempoModifier
     }
 }
 
@@ -766,6 +863,9 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let baseSpeed: Int
     public let baseSpecial: Int
     public let startingMoves: [String]
+    public let crySoundEffectID: String?
+    public let cryPitch: Int?
+    public let cryLength: Int?
 
     public init(
         id: String,
@@ -780,7 +880,10 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseDefense: Int,
         baseSpeed: Int,
         baseSpecial: Int,
-        startingMoves: [String]
+        startingMoves: [String],
+        crySoundEffectID: String? = nil,
+        cryPitch: Int? = nil,
+        cryLength: Int? = nil
     ) {
         self.id = id
         self.displayName = displayName
@@ -795,6 +898,9 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
         self.startingMoves = startingMoves
+        self.crySoundEffectID = crySoundEffectID
+        self.cryPitch = cryPitch
+        self.cryLength = cryLength
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -811,6 +917,9 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case baseSpeed
         case baseSpecial
         case startingMoves
+        case crySoundEffectID
+        case cryPitch
+        case cryLength
     }
 
     public init(from decoder: Decoder) throws {
@@ -828,6 +937,9 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed = try container.decode(Int.self, forKey: .baseSpeed)
         baseSpecial = try container.decode(Int.self, forKey: .baseSpecial)
         startingMoves = try container.decode([String].self, forKey: .startingMoves)
+        crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
+        cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
+        cryLength = try container.decodeIfPresent(Int.self, forKey: .cryLength)
     }
 }
 

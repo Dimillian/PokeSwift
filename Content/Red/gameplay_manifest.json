@@ -4,6 +4,9 @@
       "id" : "pallet_town_oak_hey_wait",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Hey! Wait!",
             "Don't go out!"
@@ -16,6 +19,9 @@
       "id" : "pallet_town_oak_its_unsafe",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: It's unsafe!",
             "Wild POKéMON live",
@@ -24,6 +30,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You need your own",
             "POKéMON for your",
@@ -33,6 +42,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Here, come with",
             "me!"
@@ -45,6 +57,9 @@
       "id" : "pallet_town_girl",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I'm raising",
             "POKéMON too!"
@@ -52,6 +67,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "When they get",
             "strong, they can",
@@ -65,6 +83,9 @@
       "id" : "pallet_town_fisher",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Technology is",
             "incredible!"
@@ -72,6 +93,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You can now store",
             "and recall items",
@@ -86,6 +110,9 @@
       "id" : "pallet_town_oaks_lab_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK POKéMON",
             "RESEARCH LAB"
@@ -98,6 +125,9 @@
       "id" : "pallet_town_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "PALLET TOWN",
             "Shades of your",
@@ -111,6 +141,9 @@
       "id" : "pallet_town_players_house_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<PLAYER>'s house"
           ],
@@ -122,6 +155,9 @@
       "id" : "pallet_town_rivals_house_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>'s house"
           ],
@@ -133,6 +169,9 @@
       "id" : "reds_house_1f_mom_wakeup",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "MOM: Right.",
             "All boys leave",
@@ -142,6 +181,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "PROF.OAK, next",
             "door, is looking",
@@ -155,6 +197,9 @@
       "id" : "reds_house_1f_mom_rest",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "MOM: <PLAYER>!",
             "You should take a",
@@ -168,6 +213,9 @@
       "id" : "reds_house_1f_mom_looking_great",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "MOM: Oh good!",
             "You and your",
@@ -177,6 +225,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Take care now!"
           ],
@@ -188,6 +239,9 @@
       "id" : "reds_house_1f_tv",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "There's a movie",
             "on TV. Four boys",
@@ -197,6 +251,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I better go too."
           ],
@@ -208,6 +265,9 @@
       "id" : "route_1_youngster_1_mart_sample",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Hi! I work at a",
             "POKéMON MART."
@@ -215,6 +275,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It's a convenient",
             "shop, so please",
@@ -224,6 +287,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I know, I'll give",
             "you a sample!",
@@ -237,6 +303,13 @@
       "id" : "route_1_youngster_1_got_potion",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> got",
             "",
@@ -251,6 +324,9 @@
       "id" : "route_1_youngster_1_after_sample",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "We also carry",
             "POKé BALLs for",
@@ -264,6 +340,9 @@
       "id" : "route_1_youngster_1_no_room",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You have too much",
             "stuff with you!"
@@ -276,6 +355,9 @@
       "id" : "route_1_youngster_2",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "See those ledges",
             "along the road?"
@@ -283,6 +365,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It's a bit scary,",
             "but you can jump",
@@ -291,6 +376,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You can get back",
             "to PALLET TOWN",
@@ -304,6 +392,9 @@
       "id" : "route_1_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "ROUTE 1",
             "PALLET TOWN -",
@@ -317,6 +408,9 @@
       "id" : "viridian_city_youngster_1",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Those POKé BALLs",
             "at your waist!",
@@ -325,6 +419,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It's great that",
             "you can carry and",
@@ -339,6 +436,9 @@
       "id" : "viridian_city_gambler",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This POKéMON GYM",
             "is always closed."
@@ -346,6 +446,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I wonder who the",
             "LEADER is?"
@@ -358,6 +461,9 @@
       "id" : "viridian_city_youngster_2_prompt",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You want to know",
             "about the 2 kinds",
@@ -372,6 +478,9 @@
       "id" : "viridian_city_youngster_2_ok_then",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Oh, OK then!"
           ],
@@ -383,6 +492,9 @@
       "id" : "viridian_city_youngster_2_description",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "CATERPIE has no",
             "poison, but",
@@ -391,6 +503,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Watch out for its",
             "POISON STING!"
@@ -403,6 +518,9 @@
       "id" : "viridian_city_girl_before_pokedex",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Oh Grandpa! Don't",
             "be so mean!",
@@ -417,6 +535,9 @@
       "id" : "viridian_city_girl_after_pokedex",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "When I go shop in",
             "PEWTER CITY, I",
@@ -426,6 +547,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "VIRIDIAN FOREST."
           ],
@@ -437,6 +561,9 @@
       "id" : "viridian_city_old_man_private_property",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You can't go",
             "through here!"
@@ -444,6 +571,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This is private",
             "property!"
@@ -456,6 +586,9 @@
       "id" : "viridian_city_fisher",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Yawn!",
             "I must have dozed",
@@ -464,6 +597,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I had this dream",
             "about a DROWZEE",
@@ -473,6 +609,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Where did this TM",
             "come from?"
@@ -480,6 +619,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This is spooky!",
             "Here, you can",
@@ -493,6 +635,9 @@
       "id" : "viridian_city_old_man_had_coffee",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Ahh, I've had my",
             "coffee now and I",
@@ -501,6 +646,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Sure you can go",
             "through!"
@@ -508,6 +656,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Are you in a",
             "hurry?"
@@ -520,6 +671,9 @@
       "id" : "viridian_city_old_man_weaken_target",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "First, you need",
             "to weaken the",
@@ -533,6 +687,9 @@
       "id" : "viridian_city_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "VIRIDIAN CITY",
             "The Eternally",
@@ -546,12 +703,18 @@
       "id" : "viridian_city_trainer_tips_1",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "TRAINER TIPS"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Catch POKéMON",
             "and expand your",
@@ -560,6 +723,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "The more you have,",
             "the easier it is",
@@ -573,12 +739,18 @@
       "id" : "viridian_city_trainer_tips_2",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "TRAINER TIPS"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "The battle moves",
             "of POKéMON are",
@@ -588,6 +760,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "To replenish PP,",
             "rest your tired",
@@ -602,6 +777,9 @@
       "id" : "viridian_city_gym_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "VIRIDIAN CITY",
             "POKéMON GYM"
@@ -614,6 +792,9 @@
       "id" : "viridian_city_gym_locked",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "The GYM's doors",
             "are locked..."
@@ -626,6 +807,9 @@
       "id" : "viridian_city_mart_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "#MON MART"
           ],
@@ -637,6 +821,9 @@
       "id" : "viridian_city_pokecenter_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "#MON CENTER"
           ],
@@ -648,6 +835,9 @@
       "id" : "viridian_school_house_brunette_girl",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Whew! I'm trying",
             "to memorize all",
@@ -661,12 +851,18 @@
       "id" : "viridian_school_house_cooltrainer_f",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Okay!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Be sure to read",
             "the blackboard",
@@ -680,6 +876,9 @@
       "id" : "viridian_nickname_house_balding_guy",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Coming up with",
             "nicknames is fun,",
@@ -688,6 +887,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Simple names are",
             "the easiest to",
@@ -701,6 +903,9 @@
       "id" : "viridian_nickname_house_little_girl",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "My Daddy loves",
             "POKéMON too."
@@ -713,6 +918,9 @@
       "id" : "viridian_nickname_house_spearow",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "SPEARY: Tetweet!"
           ],
@@ -724,6 +932,9 @@
       "id" : "viridian_nickname_house_speary_sign",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "SPEAROW",
             "Name: SPEARY"
@@ -736,6 +947,9 @@
       "id" : "viridian_mart_clerk_you_came_from_pallet_town",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Hey! You came from",
             "PALLET TOWN?"
@@ -748,6 +962,9 @@
       "id" : "viridian_mart_clerk_parcel_quest",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You know PROF.",
             "OAK, right?"
@@ -755,6 +972,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "His order came in.",
             "Will you take it",
@@ -763,6 +983,13 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> got",
             "OAK's PARCEL!"
@@ -775,6 +1002,9 @@
       "id" : "viridian_mart_clerk_after_parcel",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Okay! Say hi to",
             "PROF.OAK for me!"
@@ -787,6 +1017,9 @@
       "id" : "viridian_mart_youngster",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This shop sells",
             "many ANTIDOTEs."
@@ -799,6 +1032,9 @@
       "id" : "viridian_mart_cooltrainer",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "No! POTIONs are",
             "all sold out."
@@ -811,6 +1047,9 @@
       "id" : "viridian_pokecenter_nurse_heal",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Welcome to our",
             "#MON CENTER!",
@@ -820,12 +1059,18 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "perfect health!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OK. We'll need",
             "your #MON."
@@ -833,6 +1078,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Thank you!",
             "Your #MON are",
@@ -846,6 +1094,9 @@
       "id" : "viridian_pokecenter_gentleman",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You can use that",
             "PC in the corner."
@@ -853,6 +1104,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "The receptionist",
             "told me. So kind!"
@@ -865,6 +1119,9 @@
       "id" : "viridian_pokecenter_cooltrainer",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "There's a POKéMON",
             "CENTER in every",
@@ -873,6 +1130,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "They don't charge",
             "any money either!"
@@ -885,6 +1145,9 @@
       "id" : "oaks_lab_rival_gramps_isnt_around",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Yo",
             "<PLAYER>! Gramps",
@@ -898,6 +1161,9 @@
       "id" : "oaks_lab_rival_go_ahead_and_choose",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Heh, I",
             "don't need to be",
@@ -906,6 +1172,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Go ahead and",
             "choose, <PLAYER>!"
@@ -918,6 +1187,9 @@
       "id" : "oaks_lab_rival_my_pokemon_looks_stronger",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: My",
             "POKéMON looks a",
@@ -931,6 +1203,9 @@
       "id" : "oaks_lab_those_are_pokeballs",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Those are POKé",
             "BALLs. They",
@@ -944,6 +1219,9 @@
       "id" : "oaks_lab_you_want_charmander",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "So! You want the",
             "fire POKéMON,",
@@ -957,6 +1235,9 @@
       "id" : "oaks_lab_you_want_squirtle",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "So! You want the",
             "water POKéMON,",
@@ -970,6 +1251,9 @@
       "id" : "oaks_lab_you_want_bulbasaur",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "So! You want the",
             "plant POKéMON,",
@@ -983,6 +1267,9 @@
       "id" : "oaks_lab_mon_energetic",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This POKéMON is",
             "really energetic!"
@@ -995,6 +1282,9 @@
       "id" : "oaks_lab_last_mon",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "That's PROF.OAK's",
             "last POKéMON!"
@@ -1007,6 +1297,9 @@
       "id" : "oaks_lab_oak_which_pokemon_do_you_want",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Now, <PLAYER>,",
             "which POKéMON do",
@@ -1020,6 +1313,9 @@
       "id" : "oaks_lab_oak_raise_your_young_pokemon",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: <PLAYER>,",
             "raise your young",
@@ -1034,12 +1330,18 @@
       "id" : "oaks_lab_oak_deliver_parcel",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Oh, <PLAYER>!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "How is my old",
             "POKéMON?"
@@ -1047,6 +1349,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Well, it seems to",
             "like you a lot."
@@ -1054,6 +1359,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "You must be",
             "talented as a",
@@ -1062,6 +1370,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "What? You have",
             "something for me?"
@@ -1069,6 +1380,13 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> delivered",
             "OAK's PARCEL."
@@ -1081,6 +1399,9 @@
       "id" : "oaks_lab_oak_parcel_thanks",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Ah! This is the",
             "custom POKé BALL",
@@ -1095,6 +1416,9 @@
       "id" : "oaks_lab_oak_pokemon_around_the_world",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "POKéMON around the",
             "world wait for",
@@ -1108,6 +1432,9 @@
       "id" : "oaks_lab_oak_come_see_me_sometimes",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Come see me",
             "sometimes."
@@ -1115,6 +1442,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I want to know how",
             "your POKéDEX is",
@@ -1128,6 +1458,9 @@
       "id" : "oaks_lab_oak_how_is_your_pokedex_coming",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Good to see",
             "you! How is your",
@@ -1137,6 +1470,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "a look!"
           ],
@@ -1148,6 +1484,9 @@
       "id" : "oaks_lab_pokedex",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It's encyclopedia-",
             "like, but the",
@@ -1161,6 +1500,9 @@
       "id" : "oaks_lab_girl",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "PROF.OAK is the",
             "authority on",
@@ -1169,6 +1511,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Many POKéMON",
             "trainers hold him",
@@ -1182,6 +1527,9 @@
       "id" : "oaks_lab_rival_fed_up_with_waiting",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Gramps!",
             "I'm fed up with",
@@ -1195,6 +1543,9 @@
       "id" : "oaks_lab_oak_choose_mon",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: <RIVAL>?",
             "Let me think..."
@@ -1202,6 +1553,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Oh, that's right,",
             "I told you to",
@@ -1210,12 +1564,18 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Here, <PLAYER>!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "There are 3",
             "POKéMON here!"
@@ -1223,12 +1583,18 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Haha!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "They are inside",
             "the POKé BALLs."
@@ -1236,6 +1602,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "When I was young,",
             "I was a serious",
@@ -1244,6 +1613,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "In my old age, I",
             "have only 3 left,",
@@ -1258,6 +1630,9 @@
       "id" : "oaks_lab_rival_what_about_me",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Hey!",
             "Gramps! What",
@@ -1271,6 +1646,9 @@
       "id" : "oaks_lab_oak_be_patient",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Be patient!",
             "<RIVAL>, you can",
@@ -1284,6 +1662,9 @@
       "id" : "oaks_lab_oak_dont_go_away_yet",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Hey! Don't go",
             "away yet!"
@@ -1296,6 +1677,9 @@
       "id" : "oaks_lab_rival_ill_take_this_one",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: I'll take",
             "this one, then!"
@@ -1308,6 +1692,13 @@
       "id" : "oaks_lab_received_mon_charmander",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> received",
             "CHARMANDER!"
@@ -1320,6 +1711,13 @@
       "id" : "oaks_lab_received_mon_squirtle",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> received",
             "SQUIRTLE!"
@@ -1332,6 +1730,13 @@
       "id" : "oaks_lab_received_mon_bulbasaur",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> received",
             "BULBASAUR!"
@@ -1344,6 +1749,13 @@
       "id" : "oaks_lab_rival_received_mon_charmander",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<RIVAL> received",
             "CHARMANDER!"
@@ -1356,6 +1768,13 @@
       "id" : "oaks_lab_rival_received_mon_squirtle",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<RIVAL> received",
             "SQUIRTLE!"
@@ -1368,6 +1787,13 @@
       "id" : "oaks_lab_rival_received_mon_bulbasaur",
       "pages" : [
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<RIVAL> received",
             "BULBASAUR!"
@@ -1380,6 +1806,9 @@
       "id" : "oaks_lab_rival_ill_take_you_on",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Wait",
             "<PLAYER>!",
@@ -1389,6 +1818,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Come on, I'll take",
             "you on!"
@@ -1401,6 +1833,9 @@
       "id" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "WHAT?",
             "Unbelievable!",
@@ -1415,6 +1850,9 @@
       "id" : "oaks_lab_rival_am_i_great_or_what",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Yeah! Am",
             "I great or what?"
@@ -1427,6 +1865,9 @@
       "id" : "oaks_lab_rival_smell_you_later",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Okay!",
             "I'll make my",
@@ -1436,6 +1877,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<PLAYER>! Gramps!",
             "Smell you later!"
@@ -1448,6 +1892,9 @@
       "id" : "oaks_lab_rival_gramps",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Gramps!"
           ],
@@ -1459,6 +1906,9 @@
       "id" : "oaks_lab_rival_what_did_you_call_me_for",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: What did",
             "you call me for?"
@@ -1471,6 +1921,9 @@
       "id" : "oaks_lab_oak_i_have_a_request",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: Oh right! I",
             "have a request",
@@ -1484,6 +1937,9 @@
       "id" : "oaks_lab_oak_my_invention_pokedex",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "On the desk there",
             "is my invention,",
@@ -1492,6 +1948,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It automatically",
             "records data on",
@@ -1501,6 +1960,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "It's a hi-tech",
             "encyclopedia!"
@@ -1513,6 +1975,9 @@
       "id" : "oaks_lab_oak_got_pokedex",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "OAK: <PLAYER> and",
             "<RIVAL>! Take",
@@ -1521,6 +1986,13 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
           "lines" : [
             "<PLAYER> got",
             "POKéDEX from OAK!"
@@ -1533,6 +2005,9 @@
       "id" : "oaks_lab_oak_that_was_my_dream",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "To make a complete",
             "guide on all the",
@@ -1542,12 +2017,18 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "That was my dream!"
           ],
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "But, I'm too old!",
             "I can't do it!"
@@ -1555,6 +2036,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "So, I want you two",
             "to fulfill my",
@@ -1563,6 +2047,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "Get moving, you",
             "two!"
@@ -1570,6 +2057,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "This is a great",
             "undertaking in",
@@ -1583,6 +2073,9 @@
       "id" : "oaks_lab_rival_leave_it_all_to_me",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Alright",
             "Gramps! Leave it",
@@ -1591,6 +2084,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<PLAYER>, I hate to",
             "say it, but I",
@@ -1599,6 +2095,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I know! I'll",
             "borrow a TOWN MAP",
@@ -1607,6 +2106,9 @@
           "waitsForPrompt" : true
         },
         {
+          "events" : [
+
+          ],
           "lines" : [
             "I'll tell her not",
             "to lend you one,",
@@ -1620,6 +2122,9 @@
       "id" : "rival_1_win_text",
       "pages" : [
         {
+          "events" : [
+
+          ],
           "lines" : [
             "<RIVAL>: Yeah! Am",
             "I great or what?"
@@ -9314,6 +9819,12 @@
   "moves" : [
     {
       "accuracy" : 100,
+      "battleAudio" : {
+        "frequencyModifier" : 0,
+        "kind" : "soundEffect",
+        "soundEffectID" : "SFX_DAMAGE",
+        "tempoModifier" : 128
+      },
       "displayName" : "SCRATCH",
       "effect" : "NO_ADDITIONAL_EFFECT",
       "id" : "SCRATCH",
@@ -9323,6 +9834,12 @@
     },
     {
       "accuracy" : 100,
+      "battleAudio" : {
+        "frequencyModifier" : 0,
+        "kind" : "soundEffect",
+        "soundEffectID" : "SFX_BATTLE_12",
+        "tempoModifier" : 192
+      },
       "displayName" : "GUST",
       "effect" : "NO_ADDITIONAL_EFFECT",
       "id" : "GUST",
@@ -9332,6 +9849,12 @@
     },
     {
       "accuracy" : 95,
+      "battleAudio" : {
+        "frequencyModifier" : 16,
+        "kind" : "soundEffect",
+        "soundEffectID" : "SFX_SUPER_EFFECTIVE",
+        "tempoModifier" : 160
+      },
       "displayName" : "TACKLE",
       "effect" : "NO_ADDITIONAL_EFFECT",
       "id" : "TACKLE",
@@ -9341,6 +9864,12 @@
     },
     {
       "accuracy" : 100,
+      "battleAudio" : {
+        "frequencyModifier" : 0,
+        "kind" : "soundEffect",
+        "soundEffectID" : "SFX_BATTLE_21",
+        "tempoModifier" : 128
+      },
       "displayName" : "TAIL WHIP",
       "effect" : "DEFENSE_DOWN1_EFFECT",
       "id" : "TAIL_WHIP",
@@ -9350,6 +9879,11 @@
     },
     {
       "accuracy" : 100,
+      "battleAudio" : {
+        "frequencyModifier" : 0,
+        "kind" : "cry",
+        "tempoModifier" : 192
+      },
       "displayName" : "GROWL",
       "effect" : "ATTACK_DOWN1_EFFECT",
       "id" : "GROWL",
@@ -11924,6 +12458,9 @@
         "backImagePath" : "Assets/battle/pokemon/back/charmander.png",
         "frontImagePath" : "Assets/battle/pokemon/front/charmander.png"
       },
+      "cryLength" : 64,
+      "cryPitch" : 96,
+      "crySoundEffectID" : "SFX_CRY_04",
       "displayName" : "Charmander",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "id" : "CHARMANDER",
@@ -11944,6 +12481,9 @@
         "backImagePath" : "Assets/battle/pokemon/back/squirtle.png",
         "frontImagePath" : "Assets/battle/pokemon/front/squirtle.png"
       },
+      "cryLength" : 64,
+      "cryPitch" : 96,
+      "crySoundEffectID" : "SFX_CRY_1D",
       "displayName" : "Squirtle",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "id" : "SQUIRTLE",
@@ -11964,6 +12504,9 @@
         "backImagePath" : "Assets/battle/pokemon/back/bulbasaur.png",
         "frontImagePath" : "Assets/battle/pokemon/front/bulbasaur.png"
       },
+      "cryLength" : 1,
+      "cryPitch" : 128,
+      "crySoundEffectID" : "SFX_CRY_0F",
       "displayName" : "Bulbasaur",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "id" : "BULBASAUR",
@@ -11985,6 +12528,9 @@
         "backImagePath" : "Assets/battle/pokemon/back/pidgey.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pidgey.png"
       },
+      "cryLength" : 4,
+      "cryPitch" : 223,
+      "crySoundEffectID" : "SFX_CRY_0E",
       "displayName" : "Pidgey",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "id" : "PIDGEY",
@@ -12005,6 +12551,9 @@
         "backImagePath" : "Assets/battle/pokemon/back/rattata.png",
         "frontImagePath" : "Assets/battle/pokemon/front/rattata.png"
       },
+      "cryLength" : 128,
+      "cryPitch" : 0,
+      "crySoundEffectID" : "SFX_CRY_22",
       "displayName" : "Rattata",
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "id" : "RATTATA",

@@ -1,36 +1,51 @@
 import Foundation
 import PokeDataModel
 
+private struct AudioConstantDefinition {
+    let id: String
+    let label: String
+    let order: Int
+}
+
 func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> AudioManifest {
-    let musicConstants = try parseMusicConstants(repoRoot: source.repoRoot)
+    let musicConstants = try parseAudioConstants(repoRoot: source.repoRoot, prefix: "MUSIC_")
+    let soundEffectConstants = try parseAudioConstants(repoRoot: source.repoRoot, prefix: "SFX_")
     let mapRoutes = try parseCurrentSliceMapRoutes(repoRoot: source.repoRoot)
     let musicHeaders = try parseMusicHeaders(repoRoot: source.repoRoot)
+    let soundEffectHeaders = try parseSoundEffectHeaders(repoRoot: source.repoRoot)
     let labelIndex = try buildMusicLabelIndex(repoRoot: source.repoRoot)
+    let soundEffectLabelIndex = try buildSoundEffectLabelIndex(repoRoot: source.repoRoot)
     let waveTables = try parseWaveSampleTables(repoRoot: source.repoRoot)
     let pitchRegisters = try parsePitchRegisters(repoRoot: source.repoRoot)
     let noiseInstruments = try parseNoiseInstrumentTables(repoRoot: source.repoRoot)
 
     let cueDefinitions: [AudioManifest.Cue] = [
-        .init(id: "title_default", trackID: titleTrackID),
-        .init(id: "oak_intro", trackID: "MUSIC_MEET_PROF_OAK"),
-        .init(id: "rival_intro", trackID: "MUSIC_MEET_RIVAL"),
-        .init(id: "rival_exit", trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"),
-        .init(id: "trainer_battle", trackID: "MUSIC_TRAINER_BATTLE"),
-        .init(id: "mom_heal", trackID: "MUSIC_PKMN_HEALED"),
+        .init(id: "title_default", assetID: titleTrackID),
+        .init(id: "oak_intro", assetID: "MUSIC_MEET_PROF_OAK"),
+        .init(id: "rival_intro", assetID: "MUSIC_MEET_RIVAL"),
+        .init(id: "rival_exit", assetID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"),
+        .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+        .init(
+            id: "mom_heal",
+            assetID: "MUSIC_PKMN_HEALED",
+            waitForCompletion: true,
+            resumeMusicAfterCompletion: true
+        ),
     ]
 
     let requiredTrackIDs = Array(
-        Set([titleTrackID] + mapRoutes.map(\.musicID) + cueDefinitions.map(\.trackID))
+        Set([titleTrackID] + mapRoutes.map(\.musicID) + cueDefinitions.filter { $0.assetKind == .music }.map(\.assetID))
     ).sorted()
 
     var fileParsers: [String: ParsedMusicFile] = [:]
     var tracks: [AudioManifest.Track] = []
+    var soundEffects: [AudioManifest.SoundEffect] = []
 
     for trackID in requiredTrackIDs {
-        guard let headerLabel = musicConstants[trackID] else {
+        guard let constant = musicConstants.first(where: { $0.id == trackID }) else {
             throw ExtractorError.invalidArguments("missing music constant mapping for \(trackID)")
         }
-        guard let header = musicHeaders[headerLabel], let firstChannel = header.channels.first else {
+        guard let header = musicHeaders[constant.label], let firstChannel = header.channels.first else {
             throw ExtractorError.invalidArguments("missing music header for \(trackID)")
         }
         guard let sourceFile = labelIndex[firstChannel.label] else {
@@ -82,20 +97,61 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
         )
     }
 
+    for constant in soundEffectConstants {
+        guard let header = soundEffectHeaders[constant.label], let firstChannel = header.channels.first else {
+            continue
+        }
+        guard let sourceFile = soundEffectLabelIndex[firstChannel.label] else {
+            continue
+        }
+        let parser: ParsedMusicFile
+        if let cached = fileParsers[sourceFile] {
+            parser = cached
+        } else {
+            let parsed = try parseMusicFile(at: source.repoRoot.appendingPathComponent(sourceFile))
+            fileParsers[sourceFile] = parsed
+            parser = parsed
+        }
+
+        let entry = try renderTrackEntry(
+            id: "default",
+            channelEntries: header.channels,
+            parser: parser,
+            waveTables: waveTables,
+            pitchRegisters: pitchRegisters,
+            noiseInstruments: noiseInstruments
+        )
+
+        soundEffects.append(
+            AudioManifest.SoundEffect(
+                id: constant.id,
+                sourceLabel: header.label,
+                sourceFile: sourceFile,
+                bank: header.bank,
+                priority: constant.order,
+                order: constant.order,
+                requestedChannels: header.channels.map(\.channelNumber),
+                channels: entry.channels
+            )
+        )
+    }
+
     return AudioManifest(
         variant: .red,
         titleTrackID: titleTrackID,
         mapRoutes: mapRoutes,
         cues: cueDefinitions,
-        tracks: tracks.sorted { $0.id < $1.id }
+        tracks: tracks.sorted { $0.id < $1.id },
+        soundEffects: soundEffects.sorted { $0.order < $1.order }
     )
 }
 
-func parseMusicConstants(repoRoot: URL) throws -> [String: String] {
+private func parseAudioConstants(repoRoot: URL, prefix: String) throws -> [AudioConstantDefinition] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/music_constants.asm"))
-    let regex = try NSRegularExpression(pattern: #"music_const\s+(MUSIC_[A-Z0-9_]+),\s+(Music_[A-Za-z0-9_]+)"#)
+    let regex = try NSRegularExpression(pattern: #"music_const\s+([A-Z0-9_]+),\s+([A-Za-z0-9_]+)"#)
     let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
-    var result: [String: String] = [:]
+    var result: [AudioConstantDefinition] = []
+    var order = 0
     for match in regex.matches(in: contents, range: nsRange) {
         guard
             let idRange = Range(match.range(at: 1), in: contents),
@@ -103,7 +159,10 @@ func parseMusicConstants(repoRoot: URL) throws -> [String: String] {
         else {
             continue
         }
-        result[String(contents[idRange])] = String(contents[labelRange])
+        let id = String(contents[idRange])
+        guard id.hasPrefix(prefix) else { continue }
+        result.append(.init(id: id, label: String(contents[labelRange]), order: order))
+        order += 1
     }
     return result
 }
@@ -133,6 +192,7 @@ func parseCurrentSliceMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute
 
 private struct MusicHeader {
     let label: String
+    let bank: Int
     let channels: [MusicChannelHeader]
 }
 
@@ -143,14 +203,14 @@ private struct MusicChannelHeader {
 
 private func parseMusicHeaders(repoRoot: URL) throws -> [String: MusicHeader] {
     let headerFiles = [
-        "audio/headers/musicheaders1.asm",
-        "audio/headers/musicheaders2.asm",
-        "audio/headers/musicheaders3.asm",
+        (path: "audio/headers/musicheaders1.asm", bank: 1),
+        (path: "audio/headers/musicheaders2.asm", bank: 2),
+        (path: "audio/headers/musicheaders3.asm", bank: 3),
     ]
     var headers: [String: MusicHeader] = [:]
 
-    for path in headerFiles {
-        let contents = try String(contentsOf: repoRoot.appendingPathComponent(path))
+    for file in headerFiles {
+        let contents = try String(contentsOf: repoRoot.appendingPathComponent(file.path))
         let lines = contents.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         var index = 0
         while index < lines.count {
@@ -181,7 +241,54 @@ private func parseMusicHeaders(repoRoot: URL) throws -> [String: MusicHeader] {
                 }
                 index += 1
             }
-            headers[label] = MusicHeader(label: label, channels: channels)
+            headers[label] = MusicHeader(label: label, bank: file.bank, channels: channels)
+        }
+    }
+
+    return headers
+}
+
+private func parseSoundEffectHeaders(repoRoot: URL) throws -> [String: MusicHeader] {
+    let headerFiles = [
+        (path: "audio/headers/sfxheaders1.asm", bank: 1),
+        (path: "audio/headers/sfxheaders2.asm", bank: 2),
+        (path: "audio/headers/sfxheaders3.asm", bank: 3),
+    ]
+    var headers: [String: MusicHeader] = [:]
+
+    for file in headerFiles {
+        let contents = try String(contentsOf: repoRoot.appendingPathComponent(file.path))
+        let lines = contents.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        var index = 0
+        while index < lines.count {
+            let rawLine = lines[index].split(separator: ";", maxSplits: 1).first.map(String.init) ?? ""
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            guard line.hasSuffix("::"), line != "SFX_Headers_1::", line != "SFX_Headers_2::", line != "SFX_Headers_3::" else {
+                index += 1
+                continue
+            }
+
+            let label = String(line.dropLast(2))
+            index += 1
+            guard index < lines.count else { break }
+            let countLine = (lines[index].split(separator: ";", maxSplits: 1).first.map(String.init) ?? "")
+                .trimmingCharacters(in: .whitespaces)
+            guard let countMatch = countLine.firstMatch(of: /channel_count\s+(\d+)/),
+                  let channelCount = Int(countMatch.output.1) else {
+                continue
+            }
+            index += 1
+            var channels: [MusicChannelHeader] = []
+            for _ in 0..<channelCount where index < lines.count {
+                let channelLine = (lines[index].split(separator: ";", maxSplits: 1).first.map(String.init) ?? "")
+                    .trimmingCharacters(in: .whitespaces)
+                if let match = channelLine.firstMatch(of: /channel\s+(\d+),\s+([A-Za-z0-9_\.]+)/),
+                   let channelNumber = Int(match.output.1) {
+                    channels.append(.init(channelNumber: channelNumber, label: String(match.output.2)))
+                }
+                index += 1
+            }
+            headers[label] = MusicHeader(label: label, bank: file.bank, channels: channels)
         }
     }
 
@@ -200,6 +307,28 @@ private func buildMusicLabelIndex(repoRoot: URL) throws -> [String: String] {
     for fileURL in files where fileURL.pathExtension == "asm" {
         let contents = try String(contentsOf: fileURL)
         let relativePath = "audio/music/\(fileURL.lastPathComponent)"
+        let regex = try NSRegularExpression(pattern: #"(?m)^([A-Za-z0-9_\.]+)::?$"#)
+        let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+        for match in regex.matches(in: contents, range: nsRange) {
+            guard let range = Range(match.range(at: 1), in: contents) else { continue }
+            index[String(contents[range])] = relativePath
+        }
+    }
+    return index
+}
+
+private func buildSoundEffectLabelIndex(repoRoot: URL) throws -> [String: String] {
+    let soundEffectRoot = repoRoot.appendingPathComponent("audio/sfx", isDirectory: true)
+    let files = try FileManager.default.contentsOfDirectory(
+        at: soundEffectRoot,
+        includingPropertiesForKeys: nil,
+        options: [.skipsHiddenFiles]
+    )
+
+    var index: [String: String] = [:]
+    for fileURL in files where fileURL.pathExtension == "asm" {
+        let contents = try String(contentsOf: fileURL)
+        let relativePath = "audio/sfx/\(fileURL.lastPathComponent)"
         let regex = try NSRegularExpression(pattern: #"(?m)^([A-Za-z0-9_\.]+)::?$"#)
         let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
         for match in regex.matches(in: contents, range: nsRange) {
@@ -232,6 +361,8 @@ private enum MusicInstruction {
     case drumNote(Int, Int)
     case octave(Int)
     case note(String, Int)
+    case squareNote(Int, Int, Int, Int)
+    case noiseNote(Int, Int, Int, Int)
     case rest(Int)
     case soundCall(String)
     case soundLoop(Int, String)
@@ -399,6 +530,20 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
     if let match = line.firstMatch(of: /note\s+([A-G][#_]|__[A-Z]?|C_|D_|E_|F_|G_|A_|B_),\s*(-?\d+)/),
        let length = Int(match.output.2) {
         return .note(String(match.output.1), length)
+    }
+    if let match = line.firstMatch(of: /square_note\s+(-?\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)/),
+       let length = Int(match.output.1),
+       let volume = Int(match.output.2),
+       let fade = Int(match.output.3),
+       let register = Int(match.output.4) {
+        return .squareNote(length, volume, fade, register)
+    }
+    if let match = line.firstMatch(of: /noise_note\s+(-?\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)/),
+       let length = Int(match.output.1),
+       let volume = Int(match.output.2),
+       let fade = Int(match.output.3),
+       let counter = Int(match.output.4) {
+        return .noiseNote(length, volume, fade, counter)
     }
     if let match = line.firstMatch(of: /rest\s+(-?\d+)/), let length = Int(match.output.1) {
         return .rest(length)
@@ -597,6 +742,56 @@ private func renderChannelEntry(
                     )
                 )
                 state.currentTime += duration
+            case let .squareNote(length, volume, fade, register):
+                let duration = Double(max(1, length + 1)) / 60
+                let noteRegister = register == 0 ? nil : register
+                events.append(
+                    TimedEvent(
+                        startTime: state.currentTime,
+                        duration: duration,
+                        frequencyHz: noteRegister.map { frequencyHz(forRegister: $0, waveform: .square) },
+                        frequencyRegister: noteRegister,
+                        amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
+                        dutyCycle: state.dutyCycle,
+                        envelopeStepDuration: envelopeStepDuration(for: fade),
+                        envelopeDirection: envelopeDirection(for: fade),
+                        waveSamples: nil,
+                        vibratoDelaySeconds: 0,
+                        vibratoDepthSemitones: 0,
+                        vibratoRateHz: 0,
+                        pitchSlideTargetHz: nil,
+                        pitchSlideTargetRegister: nil,
+                        pitchSlideFrameCount: nil,
+                        noiseShortMode: nil,
+                        waveform: .square
+                    )
+                )
+                state.currentTime += duration
+            case let .noiseNote(length, volume, fade, polynomialCounter):
+                let duration = Double(max(1, length + 1)) / 60
+                let (clockHz, shortMode) = noiseClockParameters(for: polynomialCounter)
+                events.append(
+                    TimedEvent(
+                        startTime: state.currentTime,
+                        duration: duration,
+                        frequencyHz: clockHz,
+                        frequencyRegister: nil,
+                        amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
+                        dutyCycle: nil,
+                        envelopeStepDuration: envelopeStepDuration(for: fade),
+                        envelopeDirection: envelopeDirection(for: fade),
+                        waveSamples: nil,
+                        vibratoDelaySeconds: 0,
+                        vibratoDepthSemitones: 0,
+                        vibratoRateHz: 0,
+                        pitchSlideTargetHz: nil,
+                        pitchSlideTargetRegister: nil,
+                        pitchSlideFrameCount: nil,
+                        noiseShortMode: shortMode,
+                        waveform: .noise
+                    )
+                )
+                state.currentTime += duration
             case let .rest(length):
                 state.currentTime += advanceNoteDurationSeconds(length: length, state: &state)
             case let .soundCall(target):
@@ -644,12 +839,17 @@ private func renderChannelEntry(
                     )
                 }
 
-                if let startIndex = labelEventStartIndex[resolved], startIndex < events.count {
+                let startIndex = labelEventStartIndex[resolved]
+                    ?? ((events.isEmpty == false) ? 0 : nil)
+                let segmentStartTime = labelStates[resolved]?.currentTime
+                    ?? initialState.currentTime
+
+                if let startIndex, startIndex < events.count {
                     appendRepeatedSegment(
                         events: &events,
                         state: &state,
                         startIndex: startIndex,
-                        segmentStartTime: labelStates[resolved]?.currentTime ?? state.currentTime,
+                        segmentStartTime: segmentStartTime ?? state.currentTime,
                         waveform: state.waveform,
                         additionalRepeats: max(0, count - 1)
                     )
@@ -776,6 +976,56 @@ private func renderSubroutine(
                     )
                 )
                 state.currentTime += duration
+            case let .squareNote(length, volume, fade, register):
+                let duration = Double(max(1, length + 1)) / 60
+                let noteRegister = register == 0 ? nil : register
+                events.append(
+                    TimedEvent(
+                        startTime: state.currentTime,
+                        duration: duration,
+                        frequencyHz: noteRegister.map { frequencyHz(forRegister: $0, waveform: .square) },
+                        frequencyRegister: noteRegister,
+                        amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
+                        dutyCycle: state.dutyCycle,
+                        envelopeStepDuration: envelopeStepDuration(for: fade),
+                        envelopeDirection: envelopeDirection(for: fade),
+                        waveSamples: nil,
+                        vibratoDelaySeconds: 0,
+                        vibratoDepthSemitones: 0,
+                        vibratoRateHz: 0,
+                        pitchSlideTargetHz: nil,
+                        pitchSlideTargetRegister: nil,
+                        pitchSlideFrameCount: nil,
+                        noiseShortMode: nil,
+                        waveform: .square
+                    )
+                )
+                state.currentTime += duration
+            case let .noiseNote(length, volume, fade, polynomialCounter):
+                let duration = Double(max(1, length + 1)) / 60
+                let (clockHz, shortMode) = noiseClockParameters(for: polynomialCounter)
+                events.append(
+                    TimedEvent(
+                        startTime: state.currentTime,
+                        duration: duration,
+                        frequencyHz: clockHz,
+                        frequencyRegister: nil,
+                        amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
+                        dutyCycle: nil,
+                        envelopeStepDuration: envelopeStepDuration(for: fade),
+                        envelopeDirection: envelopeDirection(for: fade),
+                        waveSamples: nil,
+                        vibratoDelaySeconds: 0,
+                        vibratoDepthSemitones: 0,
+                        vibratoRateHz: 0,
+                        pitchSlideTargetHz: nil,
+                        pitchSlideTargetRegister: nil,
+                        pitchSlideFrameCount: nil,
+                        noiseShortMode: shortMode,
+                        waveform: .noise
+                    )
+                )
+                state.currentTime += duration
             case let .rest(length):
                 state.currentTime += advanceNoteDurationSeconds(length: length, state: &state)
             case let .soundCall(target):
@@ -794,12 +1044,17 @@ private func renderSubroutine(
                     throw ExtractorError.invalidArguments("unsupported infinite loop inside audio subroutine \(label)")
                 }
                 let resolved = resolveLabelReference(target, from: currentLabel)
-                if let startIndex = labelEventStartIndex[resolved], startIndex < events.count {
+                let startIndex = labelEventStartIndex[resolved]
+                    ?? ((events.isEmpty == false) ? 0 : nil)
+                let segmentStartTime = labelStartTimes[resolved]
+                    ?? initialState.currentTime
+
+                if let startIndex, startIndex < events.count {
                     appendRepeatedSegment(
                         events: &events,
                         state: &state,
                         startIndex: startIndex,
-                        segmentStartTime: labelStartTimes[resolved] ?? state.currentTime,
+                        segmentStartTime: segmentStartTime ?? state.currentTime,
                         waveform: state.waveform,
                         additionalRepeats: max(0, count - 1)
                     )

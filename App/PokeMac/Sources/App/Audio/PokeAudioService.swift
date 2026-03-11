@@ -5,51 +5,74 @@ import PokeDataModel
 
 @MainActor
 final class PokeAudioService: RuntimeAudioPlaying {
-    private struct RenderedEntry {
+    private struct RenderedChannelBuffers: @unchecked Sendable {
         let prelude: AVAudioPCMBuffer?
         let loop: AVAudioPCMBuffer?
-        let oneShotDuration: Double
+        let duration: Double
     }
 
-    private struct RenderedSamples {
-        let prelude: [Float]?
-        let loop: [Float]?
-        let oneShotDuration: Double
+    private struct RenderedAudioAsset: @unchecked Sendable {
+        let channels: [Int: RenderedChannelBuffers]
+        let playbackMode: AudioManifest.PlaybackMode
+        let maxDuration: Double
     }
 
-    private struct PendingPlayback {
+    private struct PendingMusicPlayback {
         let requestID: Int
         let cacheKey: String
         let playbackMode: AudioManifest.PlaybackMode
         let completion: (@MainActor () -> Void)?
     }
 
+    private struct PendingSoundEffectPlayback {
+        let requestID: Int
+        let cacheKey: String
+        let soundEffectID: String
+        let order: Int
+        let requestedHardwareChannels: [Int]
+        let replacedSoundEffectID: String?
+        let completion: (@MainActor () -> Void)?
+    }
+
+    private struct ActiveSoundEffectChannelState {
+        let requestID: Int
+        let soundEffectID: String
+        let order: Int
+    }
+
     private let manifest: AudioManifest
     private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
     private let renderQueue = DispatchQueue(
         label: "com.dimillian.PokeSwift.audio-render",
         qos: .userInitiated,
         attributes: .concurrent
     )
-    private var renderCache: [String: RenderedEntry] = [:]
+    private let musicPlayers = (0..<4).map { _ in AVAudioPlayerNode() }
+    private let soundEffectPlayers = (0..<4).map { _ in AVAudioPlayerNode() }
+    private var musicRenderCache: [String: RenderedAudioAsset] = [:]
+    private var soundEffectRenderCache: [String: RenderedAudioAsset] = [:]
     private var rendersInFlight: Set<String> = []
-    private var completionWorkItem: DispatchWorkItem?
+    private var pendingMusicPlayback: PendingMusicPlayback?
+    private var pendingSoundEffectPlayback: [Int: PendingSoundEffectPlayback] = [:]
+    private var activeSoundEffectsByHardwareChannel: [Int: ActiveSoundEffectChannelState] = [:]
+    private var musicCompletionWorkItem: DispatchWorkItem?
+    private var soundEffectCompletionWorkItems: [Int: DispatchWorkItem] = [:]
     private var playbackRequestID = 0
-    private var pendingPlayback: PendingPlayback?
 
     init(manifest: AudioManifest) {
         self.manifest = manifest
-        engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
+        for player in musicPlayers + soundEffectPlayers {
+            engine.attach(player)
+            engine.connect(player, to: engine.mainMixerNode, format: format)
+        }
         engine.mainMixerNode.outputVolume = 0.6
         try? engine.start()
-        primeEntryIfPossible(trackID: manifest.titleTrackID, entryID: "default")
-        prewarmManifest()
+        primeMusicEntryIfPossible(trackID: manifest.titleTrackID, entryID: "default")
+        prewarmMusicManifest()
     }
 
-    func play(request: AudioPlaybackRequest, completion: (@MainActor () -> Void)?) {
+    func playMusic(request: MusicPlaybackRequest, completion: (@MainActor () -> Void)?) {
         guard let track = manifest.tracks.first(where: { $0.id == request.trackID }),
               let entry = track.entries.first(where: { $0.id == request.entryID }) else {
             completion?()
@@ -57,17 +80,15 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
 
         ensureEngineRunning()
-        completionWorkItem?.cancel()
-        player.stop()
-        player.reset()
+        stopMusicPlayers()
 
-        let cacheKey = "\(request.trackID):\(request.entryID)"
+        let cacheKey = musicCacheKey(trackID: request.trackID, entryID: request.entryID)
         playbackRequestID += 1
         let requestID = playbackRequestID
 
-        if let rendered = renderCache[cacheKey] {
-            pendingPlayback = nil
-            startPlayback(
+        if let rendered = musicRenderCache[cacheKey] {
+            pendingMusicPlayback = nil
+            startMusicPlayback(
                 rendered,
                 cacheKey: cacheKey,
                 playbackMode: entry.playbackMode,
@@ -76,29 +97,70 @@ final class PokeAudioService: RuntimeAudioPlaying {
             return
         }
 
-        pendingPlayback = PendingPlayback(
+        pendingMusicPlayback = PendingMusicPlayback(
             requestID: requestID,
             cacheKey: cacheKey,
             playbackMode: entry.playbackMode,
             completion: completion
         )
-        scheduleRenderIfNeeded(cacheKey: cacheKey, entry: entry)
+        scheduleMusicRenderIfNeeded(cacheKey: cacheKey, entry: entry)
+    }
+
+    func playSFX(
+        request: SoundEffectPlaybackRequest,
+        completion: (@MainActor () -> Void)?
+    ) -> SoundEffectPlaybackResult {
+        guard let soundEffect = manifest.soundEffects.first(where: { $0.id == request.soundEffectID }) else {
+            completion?()
+            return .init(soundEffectID: request.soundEffectID, status: .rejected)
+        }
+
+        let requestedHardwareChannels = Array(
+            Set(soundEffect.requestedChannels.compactMap(Self.hardwareChannelIndex(forSoftwareChannel:)))
+        ).sorted()
+        let conflictingStates = requestedHardwareChannels.compactMap { activeSoundEffectsByHardwareChannel[$0] }
+        if conflictingStates.contains(where: { soundEffect.order > $0.order }) {
+            completion?()
+            return .init(soundEffectID: request.soundEffectID, status: .rejected)
+        }
+
+        let replacedID = conflictingStates.map(\.soundEffectID).first
+        ensureEngineRunning()
+        playbackRequestID += 1
+        let requestID = playbackRequestID
+        let cacheKey = soundEffectCacheKey(request: request)
+
+        if let rendered = soundEffectRenderCache[cacheKey] {
+            startSoundEffectPlayback(
+                rendered,
+                requestID: requestID,
+                soundEffectID: soundEffect.id,
+                order: soundEffect.order,
+                requestedHardwareChannels: requestedHardwareChannels,
+                replacedSoundEffectID: replacedID,
+                completion: completion
+            )
+            return .init(soundEffectID: request.soundEffectID, status: .started, replacedSoundEffectID: replacedID)
+        }
+
+        pendingSoundEffectPlayback[requestID] = PendingSoundEffectPlayback(
+            requestID: requestID,
+            cacheKey: cacheKey,
+            soundEffectID: soundEffect.id,
+            order: soundEffect.order,
+            requestedHardwareChannels: requestedHardwareChannels,
+            replacedSoundEffectID: replacedID,
+            completion: completion
+        )
+        scheduleSoundEffectRenderIfNeeded(cacheKey: cacheKey, soundEffect: soundEffect)
+        return .init(soundEffectID: request.soundEffectID, status: .started, replacedSoundEffectID: replacedID)
     }
 
     func stopAllMusic() {
         playbackRequestID += 1
-        pendingPlayback = nil
-        completionWorkItem?.cancel()
-        player.stop()
-        player.reset()
-    }
-
-    private func scheduleLoopBufferIfNeeded(_ buffer: AVAudioPCMBuffer?) {
-        guard let buffer, buffer.frameLength > 0 else { return }
-        player.scheduleBuffer(buffer, at: nil, options: [.loops])
-        if player.isPlaying == false {
-            player.play()
-        }
+        pendingMusicPlayback = nil
+        musicCompletionWorkItem?.cancel()
+        stopMusicPlayers()
     }
 
     private func ensureEngineRunning() {
@@ -107,146 +169,298 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    private func prewarmManifest() {
+    private func stopMusicPlayers() {
+        for player in musicPlayers {
+            player.stop()
+            player.reset()
+            player.volume = 1
+        }
+    }
+
+    private func prewarmMusicManifest() {
         for track in manifest.tracks {
             for entry in track.entries {
-                let cacheKey = "\(track.id):\(entry.id)"
-                scheduleRenderIfNeeded(cacheKey: cacheKey, entry: entry)
+                scheduleMusicRenderIfNeeded(cacheKey: musicCacheKey(trackID: track.id, entryID: entry.id), entry: entry)
             }
         }
     }
 
-    private func primeEntryIfPossible(trackID: String, entryID: String) {
+    private func primeMusicEntryIfPossible(trackID: String, entryID: String) {
         guard let track = manifest.tracks.first(where: { $0.id == trackID }),
               let entry = track.entries.first(where: { $0.id == entryID }) else {
             return
         }
-        let cacheKey = "\(trackID):\(entryID)"
-        guard renderCache[cacheKey] == nil else { return }
-        let samples = Self.renderedSamples(for: entry, sampleRate: format.sampleRate)
-        renderCache[cacheKey] = RenderedEntry(
-            prelude: makeBuffer(from: samples.prelude),
-            loop: makeBuffer(from: samples.loop),
-            oneShotDuration: samples.oneShotDuration
+        let cacheKey = musicCacheKey(trackID: trackID, entryID: entryID)
+        guard musicRenderCache[cacheKey] == nil else { return }
+        musicRenderCache[cacheKey] = Self.renderedAudioAsset(
+            playbackMode: entry.playbackMode,
+            channels: entry.channels,
+            sampleRate: format.sampleRate
         )
     }
 
-    private func scheduleRenderIfNeeded(cacheKey: String, entry: AudioManifest.Entry) {
-        guard renderCache[cacheKey] == nil, rendersInFlight.contains(cacheKey) == false else { return }
+    private func musicCacheKey(trackID: String, entryID: String) -> String {
+        "music:\(trackID):\(entryID)"
+    }
+
+    private func soundEffectCacheKey(request: SoundEffectPlaybackRequest) -> String {
+        "sfx:\(request.soundEffectID):\(request.frequencyModifier ?? -1):\(request.tempoModifier ?? -1)"
+    }
+
+    private func scheduleMusicRenderIfNeeded(cacheKey: String, entry: AudioManifest.Entry) {
+        guard musicRenderCache[cacheKey] == nil, rendersInFlight.contains(cacheKey) == false else { return }
         rendersInFlight.insert(cacheKey)
 
         let sampleRate = format.sampleRate
         renderQueue.async { [entry] in
-            let samples = Self.renderedSamples(for: entry, sampleRate: sampleRate)
+            let rendered = Self.renderedAudioAsset(
+                playbackMode: entry.playbackMode,
+                channels: entry.channels,
+                sampleRate: sampleRate
+            )
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 self.rendersInFlight.remove(cacheKey)
-                let rendered = RenderedEntry(
-                    prelude: self.makeBuffer(from: samples.prelude),
-                    loop: self.makeBuffer(from: samples.loop),
-                    oneShotDuration: samples.oneShotDuration
-                )
-                self.renderCache[cacheKey] = rendered
+                self.musicRenderCache[cacheKey] = rendered
 
-                guard let pendingPlayback = self.pendingPlayback,
-                      pendingPlayback.requestID == self.playbackRequestID,
-                      pendingPlayback.cacheKey == cacheKey else {
+                guard let pendingMusicPlayback = self.pendingMusicPlayback,
+                      pendingMusicPlayback.requestID == self.playbackRequestID,
+                      pendingMusicPlayback.cacheKey == cacheKey else {
                     return
                 }
 
-                self.pendingPlayback = nil
-                self.startPlayback(
+                self.pendingMusicPlayback = nil
+                self.startMusicPlayback(
                     rendered,
                     cacheKey: cacheKey,
-                    playbackMode: pendingPlayback.playbackMode,
-                    completion: pendingPlayback.completion
+                    playbackMode: pendingMusicPlayback.playbackMode,
+                    completion: pendingMusicPlayback.completion
                 )
             }
         }
     }
 
-    private func startPlayback(
-        _ rendered: RenderedEntry,
+    private func scheduleSoundEffectRenderIfNeeded(cacheKey: String, soundEffect: AudioManifest.SoundEffect) {
+        guard soundEffectRenderCache[cacheKey] == nil, rendersInFlight.contains(cacheKey) == false else { return }
+        rendersInFlight.insert(cacheKey)
+
+        let sampleRate = format.sampleRate
+        renderQueue.async { [channels = soundEffect.channels] in
+            let rendered = Self.renderedAudioAsset(
+                playbackMode: .oneShot,
+                channels: channels,
+                sampleRate: sampleRate
+            )
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.rendersInFlight.remove(cacheKey)
+                self.soundEffectRenderCache[cacheKey] = rendered
+
+                let pending = self.pendingSoundEffectPlayback.values.filter { $0.cacheKey == cacheKey }
+                for request in pending.sorted(by: { $0.requestID < $1.requestID }) {
+                    self.pendingSoundEffectPlayback.removeValue(forKey: request.requestID)
+                    self.startSoundEffectPlayback(
+                        rendered,
+                        requestID: request.requestID,
+                        soundEffectID: request.soundEffectID,
+                        order: request.order,
+                        requestedHardwareChannels: request.requestedHardwareChannels,
+                        replacedSoundEffectID: request.replacedSoundEffectID,
+                        completion: request.completion
+                    )
+                }
+            }
+        }
+    }
+
+    private func startMusicPlayback(
+        _ rendered: RenderedAudioAsset,
         cacheKey: String,
         playbackMode: AudioManifest.PlaybackMode,
         completion: (@MainActor () -> Void)?
     ) {
-        switch playbackMode {
-        case .looping:
-            if let prelude = rendered.prelude, prelude.frameLength > 0 {
-                player.scheduleBuffer(prelude) { [weak self] in
-                    Task { @MainActor [weak self, cacheKey] in
-                        guard let self else { return }
-                        self.scheduleLoopBufferIfNeeded(self.renderCache[cacheKey]?.loop)
+        musicCompletionWorkItem?.cancel()
+
+        for hardwareChannel in 0..<4 {
+            guard let buffers = rendered.channels[hardwareChannel] else { continue }
+            let player = musicPlayers[hardwareChannel]
+            switch playbackMode {
+            case .looping:
+                if let prelude = buffers.prelude, prelude.frameLength > 0 {
+                    player.scheduleBuffer(prelude) { [weak self] in
+                        Task { @MainActor [weak self] in
+                            guard let self,
+                                  let loop = self.musicRenderCache[cacheKey]?.channels[hardwareChannel]?.loop,
+                                  loop.frameLength > 0 else {
+                                return
+                            }
+                            self.musicPlayers[hardwareChannel].scheduleBuffer(loop, at: nil, options: [.loops])
+                            if self.musicPlayers[hardwareChannel].isPlaying == false {
+                                self.musicPlayers[hardwareChannel].play()
+                            }
+                        }
                     }
+                } else if let loop = buffers.loop, loop.frameLength > 0 {
+                    player.scheduleBuffer(loop, at: nil, options: [.loops])
                 }
-            } else {
-                scheduleLoopBufferIfNeeded(rendered.loop)
+            case .oneShot:
+                if let prelude = buffers.prelude {
+                    player.scheduleBuffer(prelude)
+                }
             }
-            player.play()
-        case .oneShot:
-            if let prelude = rendered.prelude {
-                player.scheduleBuffer(prelude)
+
+            if player.isPlaying == false {
                 player.play()
             }
-            if let completion {
-                let workItem = DispatchWorkItem { completion() }
-                completionWorkItem = workItem
-                DispatchQueue.main.asyncAfter(deadline: .now() + rendered.oneShotDuration, execute: workItem)
-            }
+        }
+
+        if playbackMode == .oneShot, let completion {
+            let workItem = DispatchWorkItem { completion() }
+            musicCompletionWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + rendered.maxDuration, execute: workItem)
         }
     }
 
-    private func makeBuffer(from samples: [Float]?) -> AVAudioPCMBuffer? {
-        guard let samples, samples.isEmpty == false else { return nil }
-        let frameCount = AVAudioFrameCount(samples.count)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount),
+    private func startSoundEffectPlayback(
+        _ rendered: RenderedAudioAsset,
+        requestID: Int,
+        soundEffectID: String,
+        order: Int,
+        requestedHardwareChannels: [Int],
+        replacedSoundEffectID: String?,
+        completion: (@MainActor () -> Void)?
+    ) {
+        var maxDuration = 0.0
+
+        for hardwareChannel in requestedHardwareChannels {
+            soundEffectCompletionWorkItems[hardwareChannel]?.cancel()
+            soundEffectCompletionWorkItems[hardwareChannel] = nil
+
+            let player = soundEffectPlayers[hardwareChannel]
+            player.stop()
+            player.reset()
+            activeSoundEffectsByHardwareChannel[hardwareChannel] = .init(
+                requestID: requestID,
+                soundEffectID: soundEffectID,
+                order: order
+            )
+
+            if let buffers = rendered.channels[hardwareChannel] {
+                maxDuration = max(maxDuration, buffers.duration)
+                if buffers.duration > 0 {
+                    musicPlayers[hardwareChannel].volume = 0
+                }
+                if let prelude = buffers.prelude {
+                    player.scheduleBuffer(prelude)
+                    player.play()
+                }
+
+                let workItem = DispatchWorkItem { [weak self] in
+                    guard let self,
+                          self.activeSoundEffectsByHardwareChannel[hardwareChannel]?.requestID == requestID else {
+                        return
+                    }
+                    self.activeSoundEffectsByHardwareChannel.removeValue(forKey: hardwareChannel)
+                    self.musicPlayers[hardwareChannel].volume = 1
+                    self.soundEffectCompletionWorkItems[hardwareChannel] = nil
+                }
+                soundEffectCompletionWorkItems[hardwareChannel] = workItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + buffers.duration, execute: workItem)
+            } else {
+                activeSoundEffectsByHardwareChannel.removeValue(forKey: hardwareChannel)
+            }
+        }
+
+        if let completion {
+            let completionDelay = max(0.0, maxDuration)
+            DispatchQueue.main.asyncAfter(deadline: .now() + completionDelay) {
+                completion()
+            }
+        }
+
+        _ = replacedSoundEffectID
+    }
+
+    nonisolated private static func renderedAudioAsset(
+        playbackMode: AudioManifest.PlaybackMode,
+        channels: [AudioManifest.ChannelProgram],
+        sampleRate: Double
+    ) -> RenderedAudioAsset {
+        var renderedChannels: [Int: RenderedChannelBuffers] = [:]
+        var maxDuration = 0.0
+
+        for channel in channels {
+            let hardwareChannel = hardwareChannelIndex(forSoftwareChannel: channel.channelNumber)
+                ?? max(0, min(3, channel.channelNumber - 1))
+            let preludeSamples = renderSegment(events: channel.prelude, sampleRate: sampleRate, seed: UInt64(channel.channelNumber * 7919))
+            let loopSamples = renderSegment(events: channel.loop, sampleRate: sampleRate, seed: UInt64(channel.channelNumber * 7919))
+            let preludeDuration = renderedDuration(for: channel.prelude)
+            let loopDuration = renderedDuration(for: channel.loop)
+            let duration = max(preludeDuration, loopDuration)
+            maxDuration = max(maxDuration, duration)
+            renderedChannels[hardwareChannel] = RenderedChannelBuffers(
+                prelude: makeBuffer(from: preludeSamples, sampleRate: sampleRate),
+                loop: makeBuffer(from: loopSamples, sampleRate: sampleRate),
+                duration: duration
+            )
+        }
+
+        return RenderedAudioAsset(
+            channels: renderedChannels,
+            playbackMode: playbackMode,
+            maxDuration: maxDuration
+        )
+    }
+
+    nonisolated private static func hardwareChannelIndex(forSoftwareChannel channelNumber: Int) -> Int? {
+        switch channelNumber {
+        case 1, 5:
+            return 0
+        case 2, 6:
+            return 1
+        case 3, 7:
+            return 2
+        case 4, 8:
+            return 3
+        default:
+            return nil
+        }
+    }
+
+    nonisolated private static func makeBuffer(from samples: [Float]?, sampleRate: Double) -> AVAudioPCMBuffer? {
+        guard let samples, samples.isEmpty == false,
+              let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1),
+              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)),
               let channelData = buffer.floatChannelData?[0] else {
             return nil
         }
-        buffer.frameLength = frameCount
+        buffer.frameLength = AVAudioFrameCount(samples.count)
         samples.withUnsafeBufferPointer { source in
             channelData.update(from: source.baseAddress!, count: source.count)
         }
         return buffer
     }
 
-    private nonisolated static func renderedSamples(
-        for entry: AudioManifest.Entry,
-        sampleRate: Double
-    ) -> RenderedSamples {
-        let prelude = renderSegment(channels: entry.channels, keyPath: \.prelude, sampleRate: sampleRate)
-        let loop = renderSegment(channels: entry.channels, keyPath: \.loop, sampleRate: sampleRate)
-        let duration = max(
-            renderedDuration(for: entry.channels, keyPath: \.prelude),
-            renderedDuration(for: entry.channels, keyPath: \.loop)
-        )
-        return RenderedSamples(prelude: prelude, loop: loop, oneShotDuration: duration)
-    }
-
-    private nonisolated static func renderSegment(
-        channels: [AudioManifest.ChannelProgram],
-        keyPath: KeyPath<AudioManifest.ChannelProgram, [AudioManifest.Event]>,
-        sampleRate: Double
+    nonisolated private static func renderSegment(
+        events: [AudioManifest.Event],
+        sampleRate: Double,
+        seed: UInt64
     ) -> [Float]? {
-        let totalDuration = renderedDuration(for: channels, keyPath: keyPath)
+        let totalDuration = renderedDuration(for: events)
         guard totalDuration > 0 else { return nil }
         let frameCount = max(1, Int(ceil(totalDuration * sampleRate)))
         var samples = Array(repeating: Float.zero, count: frameCount)
 
         samples.withUnsafeMutableBufferPointer { buffer in
             guard let baseAddress = buffer.baseAddress else { return }
-            for channel in channels {
-                let events = channel[keyPath: keyPath]
-                for event in events {
-                    render(
-                        event: event,
-                        into: baseAddress,
-                        frameCount: frameCount,
-                        sampleRate: sampleRate,
-                        seed: UInt64(channel.channelNumber * 7919)
-                    )
-                }
+            for event in events {
+                render(
+                    event: event,
+                    into: baseAddress,
+                    frameCount: frameCount,
+                    sampleRate: sampleRate,
+                    seed: seed
+                )
             }
             normalize(samples: baseAddress, frameCount: frameCount)
         }
@@ -254,17 +468,11 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return samples
     }
 
-    private nonisolated static func renderedDuration(
-        for channels: [AudioManifest.ChannelProgram],
-        keyPath: KeyPath<AudioManifest.ChannelProgram, [AudioManifest.Event]>
-    ) -> Double {
-        channels
-            .flatMap { $0[keyPath: keyPath] }
-            .map { $0.startTime + $0.duration }
-            .max() ?? 0
+    nonisolated private static func renderedDuration(for events: [AudioManifest.Event]) -> Double {
+        events.map { $0.startTime + $0.duration }.max() ?? 0
     }
 
-    private nonisolated static func render(
+    nonisolated private static func render(
         event: AudioManifest.Event,
         into samples: UnsafeMutablePointer<Float>,
         frameCount: Int,
@@ -314,7 +522,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    private nonisolated static func modulatedFrequency(for event: AudioManifest.Event, localTime: Double) -> Double {
+    nonisolated private static func modulatedFrequency(for event: AudioManifest.Event, localTime: Double) -> Double {
         let baseFrequency = pitchSlideAdjustedFrequency(
             baseFrequency: event.frequencyHz ?? 440,
             event: event,
@@ -323,7 +531,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return vibratoAdjustedFrequency(baseFrequency: baseFrequency, event: event, localTime: localTime)
     }
 
-    private nonisolated static func pitchSlideAdjustedFrequency(
+    nonisolated private static func pitchSlideAdjustedFrequency(
         baseFrequency: Double,
         event: AudioManifest.Event,
         localTime: Double
@@ -348,14 +556,14 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return frequencyHz(forRegister: currentRegister, waveform: event.waveform)
     }
 
-    private nonisolated static func vibratoAdjustedFrequency(baseFrequency: Double, event: AudioManifest.Event, localTime: Double) -> Double {
+    nonisolated private static func vibratoAdjustedFrequency(baseFrequency: Double, event: AudioManifest.Event, localTime: Double) -> Double {
         guard event.vibratoDepthSemitones > 0, event.vibratoRateHz > 0 else { return baseFrequency }
         guard localTime >= event.vibratoDelaySeconds else { return baseFrequency }
         let semitoneOffset = sin(2 * .pi * localTime * event.vibratoRateHz) * event.vibratoDepthSemitones
         return baseFrequency * pow(2, semitoneOffset / 12)
     }
 
-    private nonisolated static func envelopeAdjustedAmplitude(for event: AudioManifest.Event, localTime: Double) -> Double {
+    nonisolated private static func envelopeAdjustedAmplitude(for event: AudioManifest.Event, localTime: Double) -> Double {
         guard let stepDuration = event.envelopeStepDuration, event.envelopeDirection != 0 else {
             return event.amplitude
         }
@@ -364,7 +572,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return max(0, min(1, event.amplitude + delta))
     }
 
-    private nonisolated static func noiseSample(
+    nonisolated private static func noiseSample(
         event: AudioManifest.Event,
         localTime: Double,
         sampleRate: Double,
@@ -387,11 +595,10 @@ final class PokeAudioService: RuntimeAudioPlaying {
             shortMode: event.noiseShortMode ?? false
         )
 
-        // Short interpolation removes the worst edge aliasing without blurring the attack.
         return current + ((next - current) * mix * 0.2)
     }
 
-    private nonisolated static func heldNoiseValue(stepIndex: Int, seed: UInt64, shortMode: Bool) -> Double {
+    nonisolated private static func heldNoiseValue(stepIndex: Int, seed: UInt64, shortMode: Bool) -> Double {
         let effectiveIndex = shortMode ? (stepIndex & 0x7f) : stepIndex
         var hash = seed &+ (UInt64(truncatingIfNeeded: effectiveIndex) &* 1_103_515_245)
         hash ^= hash >> 15
@@ -403,7 +610,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return max(-1, min(1, (bipolar * 0.65) + metallicPulse))
     }
 
-    private nonisolated static func waveTableSample(_ waveSamples: [Double]?, localTime: Double, frequency: Double) -> Double {
+    nonisolated private static func waveTableSample(_ waveSamples: [Double]?, localTime: Double, frequency: Double) -> Double {
         guard let waveSamples, waveSamples.isEmpty == false else {
             return sin(2 * .pi * localTime * frequency)
         }
@@ -417,7 +624,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return lowerValue + ((upperValue - lowerValue) * fraction)
     }
 
-    private nonisolated static func normalize(samples: UnsafeMutablePointer<Float>, frameCount: Int) {
+    nonisolated private static func normalize(samples: UnsafeMutablePointer<Float>, frameCount: Int) {
         var peak: Float = 0
         for index in 0..<frameCount {
             peak = max(peak, abs(samples[index]))
@@ -429,7 +636,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    private nonisolated static func frequencyHz(forRegister hardwareRegister: Int, waveform: AudioManifest.Waveform) -> Double {
+    nonisolated private static func frequencyHz(forRegister hardwareRegister: Int, waveform: AudioManifest.Waveform) -> Double {
         let frequencyBits = hardwareRegister & 0x07ff
         let denominator = 2048 - frequencyBits
         guard denominator > 0 else { return 440 }

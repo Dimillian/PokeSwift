@@ -4,19 +4,24 @@ import PokeDataModel
 extension GameRuntime {
     func handleDialogue(button: RuntimeButton) {
         guard button == .confirm || button == .start || button == .cancel,
+              isDialogueAudioBlockingInput == false,
               var dialogueState,
               let dialogue = content.dialogue(id: dialogueState.dialogueID) else {
             return
         }
 
+        playUIConfirmSound()
+
         if dialogueState.pageIndex < dialogue.pages.count - 1 {
             dialogueState.pageIndex += 1
             self.dialogueState = dialogueState
             substate = "dialogue_\(dialogueState.dialogueID)"
+            executeDialoguePageEventsIfNeeded()
             return
         }
 
         self.dialogueState = nil
+        isDialogueAudioBlockingInput = false
         switch dialogueState.completionAction {
         case .returnToField:
             scene = .field
@@ -28,7 +33,6 @@ extension GameRuntime {
             healParty()
             playAudioCue(id: "mom_heal", reason: "jingle") { [weak self] in
                 guard let self else { return }
-                self.requestDefaultMapMusic()
                 self.showDialogue(id: dialogueID, completion: .returnToField)
             }
         case let .openStarterChoice(preselectedSpeciesID):
@@ -54,8 +58,10 @@ extension GameRuntime {
         case .right, .down:
             starterChoiceFocusedIndex = (starterChoiceFocusedIndex + 1) % starterChoiceOptions.count
         case .confirm, .start:
+            playUIConfirmSound()
             chooseStarter(speciesID: starterChoiceOptions[starterChoiceFocusedIndex].id)
         case .cancel:
+            playUIConfirmSound()
             scene = .field
             substate = "field"
         }
@@ -89,6 +95,7 @@ extension GameRuntime {
         dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)
         scene = .dialogue
         substate = "dialogue_\(id)"
+        executeDialoguePageEventsIfNeeded()
         traceEvent(.dialogueStarted, "Started dialogue \(id).", mapID: gameplayState?.mapID, dialogueID: id)
     }
 

@@ -22,8 +22,10 @@ extension GameRuntime {
             break
         case .cancel:
             guard battle.phase == .moveSelection, battle.canRun else { break }
+            playUIConfirmSound()
             attemptBattleEscape(battle: &battle)
         case .confirm, .start:
+            playUIConfirmSound()
             switch battle.phase {
             case .introText, .turnText:
                 advanceBattleText(battle: &battle)
@@ -170,6 +172,7 @@ extension GameRuntime {
         attacker.moves[moveIndex].currentPP -= 1
 
         var messages = ["\(attacker.nickname) used \(move.displayName)!"]
+        _ = playMoveAudio(for: move, attackerSpeciesID: attacker.speciesID)
 
         if move.accuracy > 0 {
             let hitChance = scaledAccuracy(

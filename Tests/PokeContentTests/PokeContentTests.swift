@@ -63,6 +63,8 @@ final class PokeContentTests: XCTestCase {
         XCTAssertEqual(loaded.map(id: "OAKS_LAB")?.defaultMusicID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(loaded.audioCue(id: "oak_intro")?.trackID, "MUSIC_MEET_PROF_OAK")
         XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
+        XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.waitForCompletion, true)
+        XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.resumeMusicAfterCompletion, true)
         XCTAssertNotNil(loaded.audioTrack(id: "MUSIC_TITLE_SCREEN"))
         XCTAssertNotNil(loaded.audioEntry(trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"))
         XCTAssertEqual(
@@ -113,8 +115,13 @@ final class PokeContentTests: XCTestCase {
                 titleTrackID: "MUSIC_TITLE_SCREEN",
                 mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
                 cues: [
-                    .init(id: "title_default", trackID: "MUSIC_TITLE_SCREEN"),
-                    .init(id: "mom_heal", trackID: "MUSIC_PKMN_HEALED"),
+                    .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+                    .init(
+                        id: "mom_heal",
+                        assetID: "MUSIC_PKMN_HEALED",
+                        waitForCompletion: true,
+                        resumeMusicAfterCompletion: true
+                    ),
                 ],
                 tracks: [
                     .init(
@@ -135,7 +142,8 @@ final class PokeContentTests: XCTestCase {
                         sourceFile: "audio/music/pkmnhealed.asm",
                         entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
                     ),
-                ]
+                ],
+                soundEffects: []
             )
         ).write(to: root.appendingPathComponent("audio_manifest.json"))
 

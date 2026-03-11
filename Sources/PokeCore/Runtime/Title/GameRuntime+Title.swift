@@ -11,6 +11,7 @@ extension GameRuntime {
             focusedIndex = (focusedIndex + 1) % menuEntries.count
             substate = "title_menu"
         case .confirm, .start:
+            playUIConfirmSound()
             let selected = menuEntries[focusedIndex]
             guard selected.isEnabled else {
                 substate = "continue_disabled"
@@ -29,6 +30,7 @@ extension GameRuntime {
                 scene = .placeholder
             }
         case .cancel:
+            playUIConfirmSound()
             scene = .titleAttract
             substate = "attract"
             requestTitleMusic()
