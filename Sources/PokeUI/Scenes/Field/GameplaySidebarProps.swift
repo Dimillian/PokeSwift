@@ -300,6 +300,68 @@ public struct BattleSidebarProps: Equatable, Sendable {
         self.canRun = canRun
         self.party = party
     }
+
+    public var shouldForceCombatSectionOpen: Bool {
+        phase == "moveSelection"
+    }
+
+    public var actionRows: [BattleSidebarActionRowProps] {
+        let moveRows = moveSlots.enumerated().map { index, slot in
+            BattleSidebarActionRowProps(
+                id: "move-\(index)",
+                title: slot.displayName,
+                detail: "\(slot.currentPP)/\(slot.maxPP)",
+                isSelectable: slot.isSelectable,
+                isFocused: shouldForceCombatSectionOpen && index == focusedMoveIndex,
+                kind: .move
+            )
+        }
+
+        guard canRun else {
+            return moveRows
+        }
+
+        return moveRows + [
+            BattleSidebarActionRowProps(
+                id: "run",
+                title: "Run",
+                detail: nil,
+                isSelectable: shouldForceCombatSectionOpen,
+                isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == moveSlots.count,
+                kind: .run
+            ),
+        ]
+    }
+}
+
+public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
+    public enum Kind: String, Equatable, Sendable {
+        case move
+        case run
+    }
+
+    public let id: String
+    public let title: String
+    public let detail: String?
+    public let isSelectable: Bool
+    public let isFocused: Bool
+    public let kind: Kind
+
+    public init(
+        id: String,
+        title: String,
+        detail: String?,
+        isSelectable: Bool,
+        isFocused: Bool,
+        kind: Kind
+    ) {
+        self.id = id
+        self.title = title
+        self.detail = detail
+        self.isSelectable = isSelectable
+        self.isFocused = isFocused
+        self.kind = kind
+    }
 }
 
 public enum GameplaySidebarKind: String, Equatable, Sendable {
@@ -338,6 +400,15 @@ public enum GameplaySidebarMode: Equatable, Sendable {
         }
     }
 
+    public var requiredExpandedSection: GameplaySidebarExpandedSection? {
+        switch self {
+        case .fieldLike:
+            return nil
+        case let .battle(props):
+            return props.shouldForceCombatSectionOpen ? .battleCombat : nil
+        }
+    }
+
     public func supports(_ section: GameplaySidebarExpandedSection) -> Bool {
         switch self {
         case .fieldLike:
@@ -355,6 +426,13 @@ public enum GameplaySidebarMode: Equatable, Sendable {
                 return false
             }
         }
+    }
+
+    public func resolvedExpandedSection(afterRequesting section: GameplaySidebarExpandedSection) -> GameplaySidebarExpandedSection {
+        if let requiredExpandedSection {
+            return requiredExpandedSection
+        }
+        return supports(section) ? section : defaultExpandedSection
     }
 }
 

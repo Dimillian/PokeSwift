@@ -17,7 +17,7 @@ extension GameRuntime {
             battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
         case .down:
             guard battle.phase == .moveSelection else { break }
-            battle.focusedMoveIndex = min(max(0, battle.playerPokemon.moves.count - 1), battle.focusedMoveIndex + 1)
+            battle.focusedMoveIndex = min(maxBattleActionIndex(for: battle), battle.focusedMoveIndex + 1)
         case .left, .right:
             break
         case .cancel:
@@ -64,8 +64,16 @@ extension GameRuntime {
     }
 
     func resolveBattleTurn(battle: inout RuntimeBattleState) {
-        guard battle.phase == .moveSelection,
-              battle.playerPokemon.moves.indices.contains(battle.focusedMoveIndex) else {
+        guard battle.phase == .moveSelection else {
+            return
+        }
+
+        if battle.canRun, battle.focusedMoveIndex == battle.playerPokemon.moves.count {
+            attemptBattleEscape(battle: &battle)
+            return
+        }
+
+        guard battle.playerPokemon.moves.indices.contains(battle.focusedMoveIndex) else {
             return
         }
 
@@ -469,6 +477,14 @@ extension GameRuntime {
             battle: &battle,
             pendingAction: .escape
         )
+    }
+
+    func maxBattleActionIndex(for battle: RuntimeBattleState) -> Int {
+        let moveActionCount = battle.playerPokemon.moves.count
+        guard battle.canRun else {
+            return max(0, moveActionCount - 1)
+        }
+        return moveActionCount
     }
 
     func finishWildBattleEscape() {

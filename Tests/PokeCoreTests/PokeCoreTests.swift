@@ -287,6 +287,55 @@ final class PokeCoreTests: XCTestCase {
         XCTAssertEqual(runtime.gameplayState?.playerPosition, grassTile)
     }
 
+    func testWildBattleCursorCanReachRunAndConfirmEscape() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 2)
+
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.currentSnapshot().battle, nil)
+    }
+
+    func testTrainerBattleCursorDoesNotExposeRunAction() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_rival1_1")
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .trainer)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 1)
+    }
+
     func testRepoGeneratedWildBattleExitRestoresRouteMusic() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)

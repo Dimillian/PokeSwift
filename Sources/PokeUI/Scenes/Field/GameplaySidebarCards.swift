@@ -35,16 +35,21 @@ struct GameplaySidebar: View {
                     props: props,
                     expansionState: expansionState
                 ) { section in
-                    expansionState.activate(section)
+                    expansionState.activate(mode.resolvedExpandedSection(afterRequesting: section))
                 }
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .animation(.snappy(duration: 0.24, extraBounce: 0), value: expansionState.expandedSection)
-        .onChange(of: mode.kind) { _, _ in
-            guard mode.supports(expansionState.expandedSection) == false else { return }
-            expansionState.activate(mode.defaultExpandedSection)
+        .onChange(of: mode) { _, updatedMode in
+            syncExpansionState(for: updatedMode)
         }
+    }
+
+    private func syncExpansionState(for mode: GameplaySidebarMode) {
+        let resolvedSection = mode.resolvedExpandedSection(afterRequesting: expansionState.expandedSection)
+        guard resolvedSection != expansionState.expandedSection else { return }
+        expansionState.activate(resolvedSection)
     }
 
     @ViewBuilder
@@ -221,12 +226,6 @@ private struct BattleSummaryContent: View {
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(FieldRetroPalette.ink.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
-
-            if props.canRun {
-                Text("Press B to run.")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
-            }
         }
     }
 }
@@ -236,26 +235,26 @@ private struct BattleActionContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if props.moveSlots.isEmpty {
+            if props.actionRows.isEmpty {
                 Text("No move choices available in this phase.")
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                ForEach(Array(props.moveSlots.enumerated()), id: \.offset) { index, slot in
-                    BattleMoveSidebarRow(
-                        title: moveSlotLabel(index: index, slot: slot),
-                        isSelectable: slot.isSelectable,
-                        isFocused: props.phase == "moveSelection" && index == props.focusedMoveIndex
+                ForEach(props.actionRows) { action in
+                    if action.kind == .run {
+                        BattleActionDivider()
+                    }
+
+                    BattleActionSidebarRow(
+                        title: action.title,
+                        detail: action.detail,
+                        isSelectable: action.isSelectable,
+                        isFocused: action.isFocused
                     )
                 }
             }
         }
-    }
-
-    private func moveSlotLabel(index: Int, slot: BattleMoveSlotTelemetry) -> String {
-        let prefix = props.phase == "moveSelection" && index == props.focusedMoveIndex ? "▶" : " "
-        return "\(prefix) \(slot.displayName) \(slot.currentPP)/\(slot.maxPP)"
     }
 }
 
@@ -319,23 +318,38 @@ private struct BattleCombatantStatusRow: View {
     }
 }
 
-private struct BattleMoveSidebarRow: View {
+private struct BattleActionSidebarRow: View {
     let title: String
+    let detail: String?
     let isSelectable: Bool
     let isFocused: Bool
 
     var body: some View {
-        Text(title.uppercased())
-            .font(.system(size: 12, weight: .bold, design: .monospaced))
-            .foregroundStyle(textColor)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(backgroundFill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(borderColor, lineWidth: isFocused ? 2 : 1)
+        HStack(spacing: 12) {
+            Text(titlePrefix + title.uppercased())
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                .foregroundStyle(textColor)
+
+            Spacer(minLength: 8)
+
+            if let detail {
+                Text(detail.uppercased())
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundStyle(textColor.opacity(0.86))
             }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(backgroundFill, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(borderColor, lineWidth: isFocused ? 2 : 1)
+        }
+    }
+
+    private var titlePrefix: String {
+        isFocused ? "▶ " : "  "
     }
 
     private var textColor: Color {
@@ -354,6 +368,15 @@ private struct BattleMoveSidebarRow: View {
 
     private var borderColor: Color {
         FieldRetroPalette.outline.opacity(isFocused ? 0.24 : 0.08)
+    }
+}
+
+private struct BattleActionDivider: View {
+    var body: some View {
+        Rectangle()
+            .fill(FieldRetroPalette.outline.opacity(0.16))
+            .frame(height: 1)
+            .padding(.vertical, 2)
     }
 }
 

@@ -373,6 +373,157 @@ final class PokeUITests: XCTestCase {
         XCTAssertFalse(battleMode.supports(GameplaySidebarExpandedSection.bag))
     }
 
+    func testBattleSidebarMoveSelectionForcesCombatSectionOpen() {
+        let battleMode = GameplaySidebarMode.battle(
+            BattleSidebarProps(
+                trainerName: "PIDGEY",
+                kind: .wild,
+                phase: "moveSelection",
+                promptText: "Pick the next move.",
+                playerPokemon: .init(
+                    speciesID: "BULBASAUR",
+                    displayName: "Bulbasaur",
+                    level: 5,
+                    currentHP: 19,
+                    maxHP: 19,
+                    attack: 11,
+                    defense: 10,
+                    speed: 9,
+                    special: 12,
+                    moves: ["TACKLE", "GROWL"]
+                ),
+                enemyPokemon: .init(
+                    speciesID: "PIDGEY",
+                    displayName: "Pidgey",
+                    level: 3,
+                    currentHP: 12,
+                    maxHP: 12,
+                    attack: 8,
+                    defense: 8,
+                    speed: 10,
+                    special: 7,
+                    moves: ["TACKLE"]
+                ),
+                moveSlots: [
+                    .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true),
+                    .init(moveID: "GROWL", displayName: "Growl", currentPP: 40, maxPP: 40, isSelectable: true),
+                ],
+                focusedMoveIndex: 1,
+                canRun: true,
+                party: .init(pokemon: [])
+            )
+        )
+
+        XCTAssertEqual(battleMode.requiredExpandedSection, .battleCombat)
+        XCTAssertEqual(
+            battleMode.resolvedExpandedSection(afterRequesting: .party),
+            .battleCombat
+        )
+    }
+
+    func testBattleSidebarActionRowsAppendRunBelowMoves() {
+        let props = BattleSidebarProps(
+            trainerName: "PIDGEY",
+            kind: .wild,
+            phase: "moveSelection",
+            promptText: "Pick the next move.",
+            playerPokemon: .init(
+                speciesID: "BULBASAUR",
+                displayName: "Bulbasaur",
+                level: 5,
+                currentHP: 19,
+                maxHP: 19,
+                attack: 11,
+                defense: 10,
+                speed: 9,
+                special: 12,
+                moves: ["TACKLE", "GROWL"]
+            ),
+            enemyPokemon: .init(
+                speciesID: "PIDGEY",
+                displayName: "Pidgey",
+                level: 3,
+                currentHP: 12,
+                maxHP: 12,
+                attack: 8,
+                defense: 8,
+                speed: 10,
+                special: 7,
+                moves: ["TACKLE"]
+            ),
+            moveSlots: [
+                .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true),
+                .init(moveID: "GROWL", displayName: "Growl", currentPP: 40, maxPP: 40, isSelectable: true),
+            ],
+            focusedMoveIndex: 1,
+            canRun: true,
+            party: .init(pokemon: [])
+        )
+
+        XCTAssertEqual(props.actionRows.map(\.kind), [.move, .move, .run])
+        XCTAssertEqual(props.actionRows.last?.title, "Run")
+        XCTAssertEqual(props.actionRows.last?.detail, nil)
+        XCTAssertEqual(props.actionRows[0].detail, "35/35")
+        XCTAssertEqual(props.actionRows[1].isFocused, true)
+        XCTAssertEqual(props.actionRows.last?.isSelectable, true)
+    }
+
+    func testBattleSidebarActionRowsFocusRunOnlyForWildBattles() {
+        let wildProps = BattleSidebarProps(
+            trainerName: "PIDGEY",
+            kind: .wild,
+            phase: "moveSelection",
+            promptText: "Pick the next move.",
+            playerPokemon: .init(
+                speciesID: "BULBASAUR",
+                displayName: "Bulbasaur",
+                level: 5,
+                currentHP: 19,
+                maxHP: 19,
+                attack: 11,
+                defense: 10,
+                speed: 9,
+                special: 12,
+                moves: ["TACKLE", "GROWL"]
+            ),
+            enemyPokemon: .init(
+                speciesID: "PIDGEY",
+                displayName: "Pidgey",
+                level: 3,
+                currentHP: 12,
+                maxHP: 12,
+                attack: 8,
+                defense: 8,
+                speed: 10,
+                special: 7,
+                moves: ["TACKLE"]
+            ),
+            moveSlots: [
+                .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true),
+                .init(moveID: "GROWL", displayName: "Growl", currentPP: 40, maxPP: 40, isSelectable: true),
+            ],
+            focusedMoveIndex: 2,
+            canRun: true,
+            party: .init(pokemon: [])
+        )
+        let trainerProps = BattleSidebarProps(
+            trainerName: "BLUE",
+            kind: .trainer,
+            phase: "moveSelection",
+            promptText: "Pick the next move.",
+            playerPokemon: wildProps.playerPokemon,
+            enemyPokemon: wildProps.enemyPokemon,
+            moveSlots: wildProps.moveSlots,
+            focusedMoveIndex: 1,
+            canRun: false,
+            party: .init(pokemon: [])
+        )
+
+        XCTAssertEqual(wildProps.actionRows.map(\.kind), [.move, .move, .run])
+        XCTAssertEqual(wildProps.actionRows.last?.isFocused, true)
+        XCTAssertEqual(trainerProps.actionRows.map(\.kind), [.move, .move])
+    }
+
     func testSidebarPropBuilderMapsPartyAfterStarterSelection() {
         let party = PartyTelemetry(
             pokemon: [
