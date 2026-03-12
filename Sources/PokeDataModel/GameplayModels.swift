@@ -696,15 +696,18 @@ public struct FieldHealingSequenceManifest: Codable, Equatable, Sendable {
     public let nurseObjectID: String?
     public let machineSoundEffectID: String
     public let healedAudioCueID: String
+    public let blackoutCheckpoint: BlackoutCheckpointManifest?
 
     public init(
         nurseObjectID: String? = nil,
         machineSoundEffectID: String,
-        healedAudioCueID: String
+        healedAudioCueID: String,
+        blackoutCheckpoint: BlackoutCheckpointManifest? = nil
     ) {
         self.nurseObjectID = nurseObjectID
         self.machineSoundEffectID = machineSoundEffectID
         self.healedAudioCueID = healedAudioCueID
+        self.blackoutCheckpoint = blackoutCheckpoint
     }
 }
 
@@ -1115,6 +1118,7 @@ public struct BattleTextTemplateManifest: Codable, Equatable, Sendable {
     public let wantsToFight: String
     public let enemyFainted: String
     public let playerFainted: String
+    public let playerBlackedOut: String
     public let trainerDefeated: String
     public let moneyForWinning: String
     public let trainerAboutToUse: String
@@ -1128,6 +1132,7 @@ public struct BattleTextTemplateManifest: Codable, Equatable, Sendable {
         wantsToFight: String,
         enemyFainted: String,
         playerFainted: String,
+        playerBlackedOut: String,
         trainerDefeated: String,
         moneyForWinning: String,
         trainerAboutToUse: String,
@@ -1140,6 +1145,7 @@ public struct BattleTextTemplateManifest: Codable, Equatable, Sendable {
         self.wantsToFight = wantsToFight
         self.enemyFainted = enemyFainted
         self.playerFainted = playerFainted
+        self.playerBlackedOut = playerBlackedOut
         self.trainerDefeated = trainerDefeated
         self.moneyForWinning = moneyForWinning
         self.trainerAboutToUse = trainerAboutToUse
@@ -1148,6 +1154,50 @@ public struct BattleTextTemplateManifest: Codable, Equatable, Sendable {
         self.playerSendOutDoIt = playerSendOutDoIt
         self.playerSendOutGetm = playerSendOutGetm
         self.playerSendOutEnemyWeak = playerSendOutEnemyWeak
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case wantsToFight
+        case enemyFainted
+        case playerFainted
+        case playerBlackedOut
+        case trainerDefeated
+        case moneyForWinning
+        case trainerAboutToUse
+        case trainerSentOut
+        case playerSendOutGo
+        case playerSendOutDoIt
+        case playerSendOutGetm
+        case playerSendOutEnemyWeak
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        wantsToFight = try container.decode(String.self, forKey: .wantsToFight)
+        enemyFainted = try container.decode(String.self, forKey: .enemyFainted)
+        playerFainted = try container.decode(String.self, forKey: .playerFainted)
+        playerBlackedOut = try container.decodeIfPresent(String.self, forKey: .playerBlackedOut)
+            ?? "{playerName} is out of useable POKéMON! {playerName} blacked out!"
+        trainerDefeated = try container.decode(String.self, forKey: .trainerDefeated)
+        moneyForWinning = try container.decode(String.self, forKey: .moneyForWinning)
+        trainerAboutToUse = try container.decode(String.self, forKey: .trainerAboutToUse)
+        trainerSentOut = try container.decode(String.self, forKey: .trainerSentOut)
+        playerSendOutGo = try container.decode(String.self, forKey: .playerSendOutGo)
+        playerSendOutDoIt = try container.decode(String.self, forKey: .playerSendOutDoIt)
+        playerSendOutGetm = try container.decode(String.self, forKey: .playerSendOutGetm)
+        playerSendOutEnemyWeak = try container.decode(String.self, forKey: .playerSendOutEnemyWeak)
+    }
+}
+
+public struct BlackoutCheckpointManifest: Codable, Equatable, Sendable {
+    public let mapID: String
+    public let position: TilePoint
+    public let facing: FacingDirection
+
+    public init(mapID: String, position: TilePoint, facing: FacingDirection) {
+        self.mapID = mapID
+        self.position = position
+        self.facing = facing
     }
 }
 
@@ -1365,14 +1415,48 @@ public struct PlayerStartManifest: Codable, Equatable, Sendable {
     public let playerName: String
     public let rivalName: String
     public let initialFlags: [String]
+    public let defaultBlackoutCheckpoint: BlackoutCheckpointManifest?
 
-    public init(mapID: String, position: TilePoint, facing: FacingDirection, playerName: String, rivalName: String, initialFlags: [String]) {
+    public init(
+        mapID: String,
+        position: TilePoint,
+        facing: FacingDirection,
+        playerName: String,
+        rivalName: String,
+        initialFlags: [String],
+        defaultBlackoutCheckpoint: BlackoutCheckpointManifest? = nil
+    ) {
         self.mapID = mapID
         self.position = position
         self.facing = facing
         self.playerName = playerName
         self.rivalName = rivalName
         self.initialFlags = initialFlags
+        self.defaultBlackoutCheckpoint = defaultBlackoutCheckpoint
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mapID
+        case position
+        case facing
+        case playerName
+        case rivalName
+        case initialFlags
+        case defaultBlackoutCheckpoint
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        mapID = try container.decode(String.self, forKey: .mapID)
+        position = try container.decode(TilePoint.self, forKey: .position)
+        facing = try container.decode(FacingDirection.self, forKey: .facing)
+        playerName = try container.decode(String.self, forKey: .playerName)
+        rivalName = try container.decode(String.self, forKey: .rivalName)
+        initialFlags = try container.decode([String].self, forKey: .initialFlags)
+        defaultBlackoutCheckpoint = try container.decodeIfPresent(
+            BlackoutCheckpointManifest.self,
+            forKey: .defaultBlackoutCheckpoint
+        )
     }
 }
 
@@ -1417,6 +1501,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
             wantsToFight: "{trainerName} wants to fight!",
             enemyFainted: "Enemy {enemyPokemon} fainted!",
             playerFainted: "{playerPokemon} fainted!",
+            playerBlackedOut: "{playerName} is out of useable POKéMON! {playerName} blacked out!",
             trainerDefeated: "{playerName} defeated {trainerName}!",
             moneyForWinning: "{playerName} got ¥{money} for winning!",
             trainerAboutToUse: "{trainerName} is about to use {enemyPokemon}! Will {playerName} change #MON?",
@@ -1491,6 +1576,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
             wantsToFight: "{trainerName} wants to fight!",
             enemyFainted: "Enemy {enemyPokemon} fainted!",
             playerFainted: "{playerPokemon} fainted!",
+            playerBlackedOut: "{playerName} is out of useable POKéMON! {playerName} blacked out!",
             trainerDefeated: "{playerName} defeated {trainerName}!",
             moneyForWinning: "{playerName} got ¥{money} for winning!",
             trainerAboutToUse: "{trainerName} is about to use {enemyPokemon}! Will {playerName} change #MON?",

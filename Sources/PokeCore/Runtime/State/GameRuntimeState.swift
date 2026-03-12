@@ -123,6 +123,7 @@ enum RuntimeBattleCaptureResult: Equatable {
 enum RuntimeBattlePendingAction {
     case moveSelection
     case finish(won: Bool)
+    case performBlackout(sourceTrainerObjectID: String?)
     case escape
     case captured
     case enterTrainerAboutToUseDecision(nextIndex: Int)
@@ -420,6 +421,7 @@ struct GameplayState {
     var mapID: String
     var playerPosition: TilePoint
     var facing: FacingDirection
+    var blackoutCheckpoint: BlackoutCheckpointManifest?
     var objectStates: [String: RuntimeObjectState]
     var activeFlags: Set<String>
     var money: Int

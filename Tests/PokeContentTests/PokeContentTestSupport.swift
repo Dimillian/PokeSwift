@@ -269,7 +269,12 @@ enum PokeContentTestSupport {
                 facing: .down,
                 playerName: "RED",
                 rivalName: "BLUE",
-                initialFlags: []
+                initialFlags: [],
+                defaultBlackoutCheckpoint: .init(
+                    mapID: "REDS_HOUSE_2F",
+                    position: .init(x: 2, y: 2),
+                    facing: .down
+                )
             )
         )
     }

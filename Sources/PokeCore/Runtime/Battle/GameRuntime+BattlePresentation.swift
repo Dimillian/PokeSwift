@@ -584,8 +584,14 @@ extension GameRuntime {
                 battle.presentation.uiVisibility = .visible
             }
         case let .finish(won):
-            battle.phase = .battleComplete
-            finishBattle(battle: battle, won: won)
+            if won == false, shouldBlackoutOnLoss(for: battle) {
+                beginBlackoutSequence(battle: &battle)
+            } else {
+                battle.phase = .battleComplete
+                finishBattle(battle: battle, won: won)
+            }
+        case let .performBlackout(sourceTrainerObjectID):
+            performBlackout(sourceTrainerObjectID: sourceTrainerObjectID)
         case .escape:
             finishWildBattleEscape()
         case .captured:

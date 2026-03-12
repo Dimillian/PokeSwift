@@ -283,6 +283,7 @@ extension GameRuntime {
             mapID: start.mapID,
             playerPosition: start.position,
             facing: start.facing,
+            blackoutCheckpoint: start.defaultBlackoutCheckpoint,
             objectStates: objectStates,
             activeFlags: Set(start.initialFlags),
             money: 3000,

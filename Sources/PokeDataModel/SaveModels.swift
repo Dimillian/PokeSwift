@@ -45,6 +45,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let mapID: String
     public let playerPosition: TilePoint
     public let facing: FacingDirection
+    public let blackoutCheckpoint: BlackoutCheckpointManifest?
     public let objectStates: [String: GameSaveObjectState]
     public let activeFlags: [String]
     public let money: Int
@@ -69,6 +70,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         mapID: String,
         playerPosition: TilePoint,
         facing: FacingDirection,
+        blackoutCheckpoint: BlackoutCheckpointManifest? = nil,
         objectStates: [String: GameSaveObjectState],
         activeFlags: [String],
         money: Int,
@@ -92,6 +94,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.mapID = mapID
         self.playerPosition = playerPosition
         self.facing = facing
+        self.blackoutCheckpoint = blackoutCheckpoint
         self.objectStates = objectStates
         self.activeFlags = activeFlags
         self.money = money
@@ -117,6 +120,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         case mapID
         case playerPosition
         case facing
+        case blackoutCheckpoint
         case objectStates
         case activeFlags
         case money
@@ -143,6 +147,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         mapID = try container.decode(String.self, forKey: .mapID)
         playerPosition = try container.decode(TilePoint.self, forKey: .playerPosition)
         facing = try container.decode(FacingDirection.self, forKey: .facing)
+        blackoutCheckpoint = try container.decodeIfPresent(BlackoutCheckpointManifest.self, forKey: .blackoutCheckpoint)
         objectStates = try container.decode([String: GameSaveObjectState].self, forKey: .objectStates)
         activeFlags = try container.decode([String].self, forKey: .activeFlags)
         money = try container.decode(Int.self, forKey: .money)

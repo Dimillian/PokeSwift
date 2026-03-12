@@ -22,13 +22,14 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         )
     }
     let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
+    let playerStart = try buildPlayerStart(repoRoot: source.repoRoot)
 
     return GameplayManifest(
         maps: maps,
         tilesets: tilesets,
         overworldSprites: buildOverworldSprites(),
         dialogues: try buildDialogues(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
-        fieldInteractions: buildFieldInteractions(),
+        fieldInteractions: try buildFieldInteractions(maps: maps, repoRoot: source.repoRoot),
         eventFlags: EventFlagManifest(flags: eventFlags),
         mapScripts: buildMapScripts(),
         scripts: try buildScripts(repoRoot: source.repoRoot),
@@ -41,14 +42,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         trainerAIMoveChoiceModifications: try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot),
         trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
         commonBattleText: try buildCommonBattleText(repoRoot: source.repoRoot),
-        playerStart: .init(
-            mapID: "REDS_HOUSE_2F",
-            position: .init(x: 4, y: 4),
-            facing: .down,
-            playerName: "RED",
-            rivalName: "BLUE",
-            initialFlags: []
-        )
+        playerStart: playerStart
     )
 }
 
@@ -1706,8 +1700,14 @@ private func buildDialogues(
     return dialogues
 }
 
-private func buildFieldInteractions() -> [FieldInteractionManifest] {
-    [
+private func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -> [FieldInteractionManifest] {
+    let viridianPokecenterCheckpoint = try blackoutCheckpointForPokemonCenter(
+        mapID: "VIRIDIAN_POKECENTER",
+        maps: maps,
+        repoRoot: repoRoot
+    )
+
+    let interactions: [FieldInteractionManifest] = [
         .init(
             id: "pokemon_center_healing",
             kind: .pokemonCenterHealing,
@@ -1719,10 +1719,64 @@ private func buildFieldInteractions() -> [FieldInteractionManifest] {
             healingSequence: .init(
                 nurseObjectID: "viridian_pokecenter_nurse",
                 machineSoundEffectID: "SFX_HEALING_MACHINE",
-                healedAudioCueID: "pokemon_center_healed"
+                healedAudioCueID: "pokemon_center_healed",
+                blackoutCheckpoint: viridianPokecenterCheckpoint
             )
         ),
     ]
+
+    return interactions
+}
+
+private func blackoutCheckpointForPokemonCenter(
+    mapID: String,
+    maps: [MapManifest],
+    repoRoot: URL
+) throws -> BlackoutCheckpointManifest? {
+    guard let overworldMapID = maps
+        .first(where: { $0.id == mapID })?
+        .warps
+        .first?
+        .targetMapID else {
+        return nil
+    }
+
+    return try parseFlyWarpCheckpoint(repoRoot: repoRoot, mapID: overworldMapID)
+}
+
+private func buildPlayerStart(repoRoot: URL) throws -> PlayerStartManifest {
+    PlayerStartManifest(
+        mapID: "REDS_HOUSE_2F",
+        position: .init(x: 4, y: 4),
+        facing: .down,
+        playerName: "RED",
+        rivalName: "BLUE",
+        initialFlags: [],
+        defaultBlackoutCheckpoint: try parseFlyWarpCheckpoint(repoRoot: repoRoot, mapID: "PALLET_TOWN")
+    )
+}
+
+private func parseFlyWarpCheckpoint(repoRoot: URL, mapID: String) throws -> BlackoutCheckpointManifest? {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/special_warps.asm"))
+    let labelToken = mapID
+        .split(separator: "_")
+        .map { $0.prefix(1).uppercased() + $0.dropFirst().lowercased() }
+        .joined()
+
+    let pattern = #"\.\#(labelToken):\s+fly_warp\s+\#(mapID),\s+(\d+),\s+(\d+)"#
+    let regex = try NSRegularExpression(pattern: pattern)
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    guard let match = regex.firstMatch(in: contents, range: nsRange),
+          let xRange = Range(match.range(at: 1), in: contents),
+          let yRange = Range(match.range(at: 2), in: contents) else {
+        return nil
+    }
+
+    return BlackoutCheckpointManifest(
+        mapID: mapID,
+        position: .init(x: Int(contents[xRange]) ?? 0, y: Int(contents[yRange]) ?? 0),
+        facing: .down
+    )
 }
 
 private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [DialogueEvent]] {
@@ -3516,6 +3570,11 @@ private func buildCommonBattleText(repoRoot: URL) throws -> BattleTextTemplateMa
             label: "_PlayerMonFaintedText",
             from: text2,
             placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        ),
+        playerBlackedOut: try extractBattleTextTemplate(
+            label: "_PlayerBlackedOutText2",
+            from: text2,
+            placeholderMap: ["<PLAYER>": "playerName"]
         ),
         trainerDefeated: try extractBattleTextTemplate(
             label: "_TrainerDefeatedText",

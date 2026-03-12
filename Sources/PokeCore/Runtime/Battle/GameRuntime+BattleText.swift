@@ -65,6 +65,15 @@ extension GameRuntime {
         )
     }
 
+    func playerBlackedOutText() -> String {
+        formattedBattleText(
+            content.commonBattleText.playerBlackedOut,
+            replacements: [
+                "playerName": playerName,
+            ]
+        )
+    }
+
     func trainerDefeatedText(trainerName: String) -> String {
         formattedBattleText(
             content.commonBattleText.trainerDefeated,

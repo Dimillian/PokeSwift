@@ -91,6 +91,7 @@ extension GameRuntime {
             return
         }
 
+        recordBlackoutCheckpoint(healing.blackoutCheckpoint)
         fieldInteractionTask?.cancel()
 
         let originalFacing: FacingDirection?
@@ -190,6 +191,12 @@ extension GameRuntime {
                 completionAction: completionAction
             )
         )
+    }
+
+    private func recordBlackoutCheckpoint(_ checkpoint: BlackoutCheckpointManifest?) {
+        guard let checkpoint, var gameplayState else { return }
+        gameplayState.blackoutCheckpoint = checkpoint
+        self.gameplayState = gameplayState
     }
 
     private func setObjectFacing(_ objectID: String, to facing: FacingDirection) {

@@ -147,6 +147,40 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
     }
 
+    func testRepoGeneratedViridianPokecenterHealingUpdatesBlackoutCheckpointOnAcceptance() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_POKECENTER"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.fieldHealing?.phase == "priming" || $0.fieldHealing?.phase == "machineActive"
+        }
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_CITY", position: .init(x: 23, y: 26), facing: .down)
+        )
+    }
+
     func testRepoGeneratedViridianPokecenterNoChoiceSkipsHealing() throws {
         let runtime = try makeRepoRuntime()
 
@@ -169,6 +203,10 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_farewell")
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, 7)
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
 
         runtime.handle(button: .confirm)
         XCTAssertEqual(runtime.scene, .field)

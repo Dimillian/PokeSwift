@@ -885,6 +885,7 @@ public enum RuntimeSessionEventKind: String, Codable, Equatable, Sendable {
     case encounterTriggered
     case battleStarted
     case battleEnded
+    case blackout
     case shopOpened
     case shopClosed
     case shopPurchase

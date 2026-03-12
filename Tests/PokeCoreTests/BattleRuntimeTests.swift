@@ -2159,4 +2159,151 @@ extension PokeCoreTests {
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.phase, "moveSelection")
     }
+
+    func testTrainerLossFinishActionQueuesOnlyBlackoutText() async throws {
+        let telemetryPublisher = RecordingTelemetryPublisher()
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "CATERPIE", displayName: "Caterpie", baseHP: 45, baseAttack: 30, baseDefense: 35, baseSpeed: 45, baseSpecial: 20, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_bug_catcher_1",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [.init(speciesID: "CATERPIE", level: 6)],
+                            playerWinDialogueID: "lose",
+                            playerLoseDialogueID: "lose",
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: telemetryPublisher,
+            audioPlayer: audioPlayer
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_bug_catcher_1")
+
+        var battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        battle.phase = .turnText
+        battle.pendingAction = .finish(won: false)
+        battle.message = ""
+        battle.queuedMessages = []
+
+        runtime.advanceBattleText(battle: &battle)
+
+        let expectedMessages = runtime.paginatedBattleMessages([runtime.playerBlackedOutText()])
+        XCTAssertEqual(battle.message, expectedMessages.first)
+        XCTAssertEqual(battle.queuedMessages, Array(expectedMessages.dropFirst()))
+        XCTAssertEqual(audioPlayer.stopAllMusicCount, 1)
+
+        await telemetryPublisher.waitForEventCount(2)
+        let events = await telemetryPublisher.recordedEvents()
+        let battleEnded = try XCTUnwrap(events.first { $0.kind == .battleEnded })
+        XCTAssertEqual(battleEnded.battleID, "opp_bug_catcher_1")
+        XCTAssertEqual(battleEnded.details["outcome"], "lost")
+    }
+
+    func testWildLossFinishActionQueuesBlackoutTextWithoutTrainerDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        var battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        battle.phase = .turnText
+        battle.pendingAction = .finish(won: false)
+        battle.message = ""
+        battle.queuedMessages = []
+
+        runtime.advanceBattleText(battle: &battle)
+
+        let expectedMessages = runtime.paginatedBattleMessages([runtime.playerBlackedOutText()])
+        XCTAssertEqual(battle.message, expectedMessages.first)
+        XCTAssertEqual(battle.queuedMessages, Array(expectedMessages.dropFirst()))
+    }
+
+    func testTrainerLossWithPreventedBlackoutLeavesMoneyAndMapUntouched() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "BULBASAUR", displayName: "Bulbasaur", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_rival1_1",
+                            trainerClass: "OPP_RIVAL1",
+                            trainerNumber: 1,
+                            displayName: "BLUE",
+                            party: [.init(speciesID: "BULBASAUR", level: 5)],
+                            playerWinDialogueID: "lose",
+                            playerLoseDialogueID: "lose",
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: true,
+                            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.money = 777
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_rival1_1")
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.finishBattle(battle: battle, won: false)
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "OAKS_LAB")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, .init(x: 5, y: 6))
+        XCTAssertEqual(runtime.gameplayState?.facing, .up)
+        XCTAssertEqual(runtime.playerMoney, 777)
+    }
 }

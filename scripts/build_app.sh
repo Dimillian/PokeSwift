@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DERIVED_DATA="$ROOT/.build/DerivedData"
 LOG_DIR="$ROOT/.build/logs"
 XCBEAUTIFY_BIN="${XCBEAUTIFY_BIN:-$(command -v xcbeautify || true)}"
+XCBUILD_STATE_DIR="$DERIVED_DATA/Build/Intermediates.noindex/XCBuildData"
 
 timestamp() {
   date '+%H:%M:%S'
@@ -16,6 +17,13 @@ section() {
 
 detail() {
   printf '  - %s\n' "$1"
+}
+
+reset_xcode_incremental_state() {
+  if [[ -d "$XCBUILD_STATE_DIR" ]]; then
+    detail "Resetting cached Xcode task metadata"
+    rm -rf "$XCBUILD_STATE_DIR"
+  fi
 }
 
 run_xcodebuild() {
@@ -55,6 +63,7 @@ detail "Build logs: $LOG_DIR"
 
 section "Generate workspace"
 tuist generate --no-open
+reset_xcode_incremental_state
 
 run_xcodebuild "PokeExtractCLI"
 run_xcodebuild "PokeMac"

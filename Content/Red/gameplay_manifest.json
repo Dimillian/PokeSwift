@@ -2,6 +2,7 @@
   "commonBattleText" : {
     "enemyFainted" : "Enemy {enemyPokemon} fainted!",
     "moneyForWinning" : "{playerName} got ¥{money} for winning!",
+    "playerBlackedOut" : "{playerName} is out of useable POKéMON! {playerName} blacked out!",
     "playerFainted" : "{playerPokemon} fainted!",
     "playerSendOutDoIt" : "Do it!",
     "playerSendOutEnemyWeak" : "The enemy's weak! Get'm!",
@@ -3082,6 +3083,14 @@
       "acceptedDialogueID" : "pokemon_center_need_your_pokemon",
       "farewellDialogueID" : "pokemon_center_farewell",
       "healingSequence" : {
+        "blackoutCheckpoint" : {
+          "facing" : "down",
+          "mapID" : "VIRIDIAN_CITY",
+          "position" : {
+            "x" : 23,
+            "y" : 26
+          }
+        },
         "healedAudioCueID" : "pokemon_center_healed",
         "machineSoundEffectID" : "SFX_HEALING_MACHINE",
         "nurseObjectID" : "viridian_pokecenter_nurse"
@@ -20010,6 +20019,14 @@
     }
   ],
   "playerStart" : {
+    "defaultBlackoutCheckpoint" : {
+      "facing" : "down",
+      "mapID" : "PALLET_TOWN",
+      "position" : {
+        "x" : 5,
+        "y" : 6
+      }
+    },
     "facing" : "down",
     "initialFlags" : [
 

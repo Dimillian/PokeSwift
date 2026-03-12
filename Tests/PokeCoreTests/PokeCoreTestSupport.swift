@@ -110,7 +110,19 @@ func fixtureGameplayManifest(
         wildEncounterTables: wildEncounterTables,
         trainerAIMoveChoiceModifications: trainerAIMoveChoiceModifications,
         trainerBattles: trainerBattles,
-        playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
+        playerStart: .init(
+            mapID: "REDS_HOUSE_2F",
+            position: .init(x: 4, y: 4),
+            facing: .down,
+            playerName: "RED",
+            rivalName: "BLUE",
+            initialFlags: [],
+            defaultBlackoutCheckpoint: .init(
+                mapID: "REDS_HOUSE_2F",
+                position: .init(x: 4, y: 4),
+                facing: .down
+            )
+        )
     )
 }
 
@@ -445,6 +457,10 @@ actor RecordingTelemetryPublisher: TelemetryPublisher {
             try? await Task.sleep(nanoseconds: 5_000_000)
         }
     }
+
+    func recordedEvents() -> [RuntimeSessionEvent] {
+        events
+    }
 }
 
 @MainActor
@@ -456,10 +472,13 @@ func repoRoot() -> URL {
 }
 
 @MainActor
-func makeRepoRuntime(audioPlayer: RuntimeAudioPlaying? = nil) throws -> GameRuntime {
+func makeRepoRuntime(
+    telemetryPublisher: (any TelemetryPublisher)? = nil,
+    audioPlayer: RuntimeAudioPlaying? = nil
+) throws -> GameRuntime {
     let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
     let content = try FileSystemContentLoader(rootURL: contentRoot).load()
-    return GameRuntime(content: content, telemetryPublisher: nil, audioPlayer: audioPlayer)
+    return GameRuntime(content: content, telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
 }
 
 @MainActor

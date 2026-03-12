@@ -173,14 +173,21 @@ extension PokeCoreTests {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
-        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var state = runtime.makeInitialGameplayState()
+        state.mapID = "VIRIDIAN_FOREST"
+        state.playerPosition = TilePoint(x: 29, y: 33)
+        state.facing = .right
+        state.chosenStarterSpeciesID = "SQUIRTLE"
+        state.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+        state.money = 3001
+        state.blackoutCheckpoint = .init(
+            mapID: "VIRIDIAN_POKECENTER",
+            position: .init(x: 3, y: 7),
+            facing: .down
+        )
+        runtime.gameplayState = state
         runtime.scene = .field
         runtime.substate = "field"
-        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
-        runtime.gameplayState?.playerPosition = TilePoint(x: 29, y: 33)
-        runtime.gameplayState?.facing = .right
-        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
-        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
 
         runtime.handle(button: .confirm)
 
@@ -650,18 +657,48 @@ extension PokeCoreTests {
         XCTAssertTrue(hasEnemyFaintSequence, "enemy faint did not request faint fall then faint thud")
     }
 
-    func testRepoGeneratedOrdinaryTrainerLossBlackoutsToViridianPokecenterAndRestartsMapMusic() throws {
+    func testRepoGeneratedOrdinaryTrainerLossBlackoutsToViridianCityAndRestartsMapMusic() async throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
-        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var state = runtime.makeInitialGameplayState()
+        state.mapID = "VIRIDIAN_POKECENTER"
+        state.playerPosition = .init(x: 3, y: 4)
+        state.facing = .up
+        state.chosenStarterSpeciesID = "SQUIRTLE"
+        state.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+        state.playerParty[0].currentHP = 7
+        state.money = 3001
+        runtime.gameplayState = state
         runtime.scene = .field
         runtime.substate = "field"
+        runtime.requestDefaultMapMusic()
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.fieldHealing?.phase == "healedJingle"
+        }
+        audioPlayer.completePendingPlayback()
+        _ = try await waitForSnapshot(runtime) {
+            $0.dialogue?.dialogueID == "pokemon_center_fighting_fit"
+        }
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_CITY", position: .init(x: 23, y: 26), facing: .down)
+        )
+
         runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
         runtime.gameplayState?.playerPosition = TilePoint(x: 29, y: 33)
         runtime.gameplayState?.facing = .right
-        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
-        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
 
         runtime.startBattle(id: "opp_bug_catcher_1")
         let battle = try XCTUnwrap(runtime.gameplayState?.battle)
@@ -669,37 +706,86 @@ extension PokeCoreTests {
         advanceDialogueUntilComplete(runtime)
 
         XCTAssertEqual(runtime.scene, .field)
-        XCTAssertEqual(runtime.gameplayState?.mapID, "VIRIDIAN_POKECENTER")
-        XCTAssertEqual(runtime.gameplayState?.playerPosition, TilePoint(x: 3, y: 7))
+        XCTAssertEqual(runtime.gameplayState?.mapID, "VIRIDIAN_CITY")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, TilePoint(x: 23, y: 26))
         XCTAssertEqual(runtime.gameplayState?.facing, .down)
-        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_POKECENTER")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_CITIES1")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
-        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_POKECENTER", entryID: "default"))
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_CITIES1", entryID: "default"))
+        XCTAssertEqual(runtime.playerMoney, 1500)
         let lead = try XCTUnwrap(runtime.gameplayState?.playerParty.first)
         XCTAssertEqual(lead.currentHP, lead.maxHP)
+    }
+
+    func testRepoGeneratedWildLossUsesFallbackBlackoutCheckpointAndMoneyPenalty() async throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let telemetryPublisher = RecordingTelemetryPublisher()
+        let runtime = try makeRepoRuntime(telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
+
+        var state = runtime.makeInitialGameplayState()
+        state.mapID = "ROUTE_1"
+        state.playerPosition = .init(x: 10, y: 18)
+        state.facing = .up
+        state.chosenStarterSpeciesID = "SQUIRTLE"
+        state.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        state.playerParty[0].currentHP = 1
+        state.money = 321
+        runtime.gameplayState = state
+        runtime.scene = .field
+        runtime.substate = "field"
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.finishWildBattle(battle: battle, won: false)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "PALLET_TOWN")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, .init(x: 5, y: 6))
+        XCTAssertEqual(runtime.gameplayState?.facing, .down)
+        XCTAssertEqual(runtime.playerMoney, 160)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_PALLET_TOWN", entryID: "default"))
+        let lead = try XCTUnwrap(runtime.gameplayState?.playerParty.first)
+        XCTAssertEqual(lead.currentHP, lead.maxHP)
+
+        await telemetryPublisher.waitForEventCount(4)
+        let events = await telemetryPublisher.recordedEvents()
+        let battleEnded = try XCTUnwrap(events.first { $0.kind == .battleEnded })
+        XCTAssertEqual(battleEnded.battleID, battle.battleID)
+        XCTAssertEqual(battleEnded.details["outcome"], "lost")
     }
 
     func testRepoGeneratedTrainerLossResetsAutoMovedTrainerBeforeBlackout() async throws {
         let runtime = try makeRepoRuntime()
 
-        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var state = runtime.makeInitialGameplayState()
+        state.mapID = "VIRIDIAN_FOREST"
+        state.playerPosition = TilePoint(x: 25, y: 33)
+        state.facing = .right
+        state.chosenStarterSpeciesID = "SQUIRTLE"
+        state.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+        state.blackoutCheckpoint = .init(
+            mapID: "VIRIDIAN_POKECENTER",
+            position: .init(x: 3, y: 7),
+            facing: .down
+        )
+        runtime.gameplayState = state
         runtime.scene = .field
         runtime.substate = "field"
-        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
-        runtime.gameplayState?.playerPosition = TilePoint(x: 25, y: 33)
-        runtime.gameplayState?.facing = .right
-        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
-        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
-
-        runtime.movePlayer(in: .right)
-
-        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
-            $0.battle?.battleID == "opp_bug_catcher_1"
-        }
-        XCTAssertEqual(battleSnapshot.battle?.battleID, "opp_bug_catcher_1")
+        runtime.gameplayState?.objectStates["viridian_forest_bug_catcher_1"] = .init(
+            position: .init(x: 27, y: 33),
+            facing: .left,
+            visible: true
+        )
 
         let displacedTrainer = try XCTUnwrap(runtime.gameplayState?.objectStates["viridian_forest_bug_catcher_1"])
         XCTAssertEqual(displacedTrainer.position, TilePoint(x: 27, y: 33))
+
+        runtime.startBattle(
+            id: "opp_bug_catcher_1",
+            sourceTrainerObjectID: "viridian_forest_bug_catcher_1"
+        )
 
         let battle = try XCTUnwrap(runtime.gameplayState?.battle)
         runtime.finishBattle(battle: battle, won: false)

@@ -83,7 +83,7 @@ extension GameRuntime {
         }
 
         if won == false, preventsBlackoutOnLoss == false {
-            recoverFromTrainerLoss(sourceTrainerObjectID: sourceTrainerObjectID)
+            performBlackout(sourceTrainerObjectID: sourceTrainerObjectID)
             return
         }
 
@@ -126,7 +126,19 @@ extension GameRuntime {
         gameplayState.battle = nil
         self.gameplayState = gameplayState
         if won == false {
-            healParty()
+            traceEvent(
+                .battleEnded,
+                "Finished wild battle \(battle.battleID).",
+                mapID: gameplayState.mapID,
+                battleID: battle.battleID,
+                battleKind: battle.kind,
+                details: [
+                    "outcome": "lost",
+                    "opponent": battle.trainerName,
+                ]
+            )
+            performBlackout(sourceTrainerObjectID: nil)
+            return
         }
         scene = .field
         substate = "field"
@@ -142,6 +154,46 @@ extension GameRuntime {
             ]
         )
         requestDefaultMapMusic()
+    }
+
+    func shouldBlackoutOnLoss(for battle: RuntimeBattleState) -> Bool {
+        wonBattleWouldPreventBlackout(battle) == false
+    }
+
+    private func wonBattleWouldPreventBlackout(_ battle: RuntimeBattleState) -> Bool {
+        battle.kind == .trainer && battle.preventsBlackoutOnLoss
+    }
+
+    func beginBlackoutSequence(battle: inout RuntimeBattleState) {
+        traceEvent(
+            .battleEnded,
+            "Finished \(battle.kind == .trainer ? "trainer" : "wild") battle \(battle.battleID).",
+            mapID: gameplayState?.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "outcome": "lost",
+                "opponent": battle.trainerName,
+            ]
+        )
+        if battle.kind == .trainer {
+            stopAllMusic()
+        }
+        let messages = blackoutFollowUpMessages(for: battle)
+        guard messages.isEmpty == false else {
+            performBlackout(sourceTrainerObjectID: battle.sourceTrainerObjectID)
+            return
+        }
+
+        presentBattleMessages(
+            messages,
+            battle: &battle,
+            pendingAction: .performBlackout(sourceTrainerObjectID: battle.sourceTrainerObjectID)
+        )
+    }
+
+    func blackoutFollowUpMessages(for battle: RuntimeBattleState) -> [String] {
+        [playerBlackedOutText()]
     }
 
     func finishWildBattleCapture(battle: RuntimeBattleState) {
@@ -378,37 +430,49 @@ extension GameRuntime {
         )
     }
 
-    private func recoverFromTrainerLoss(sourceTrainerObjectID: String?) {
-        healParty()
+    func performBlackout(sourceTrainerObjectID: String?) {
         guard var gameplayState else { return }
+        let previousMoney = gameplayState.money
         if let sourceTrainerObjectID {
             resetObjectStateToManifest(sourceTrainerObjectID, in: &gameplayState)
         }
-        if let recoveryDestination = defaultTrainerLossRecoveryDestination() {
-            gameplayState.mapID = recoveryDestination.mapID
-            gameplayState.playerPosition = recoveryDestination.position
-            gameplayState.facing = recoveryDestination.facing
-            gameplayState.activeMapScriptTriggerID = nil
-            gameplayState.activeScriptID = nil
-            gameplayState.activeScriptStep = nil
-            self.gameplayState = gameplayState
+        let checkpoint = gameplayState.blackoutCheckpoint ?? content.gameplayManifest.playerStart.defaultBlackoutCheckpoint
+        gameplayState.money /= 2
+        if let checkpoint {
+            gameplayState.mapID = checkpoint.mapID
+            gameplayState.playerPosition = checkpoint.position
+            gameplayState.facing = checkpoint.facing
         }
+        gameplayState.battle = nil
+        gameplayState.activeMapScriptTriggerID = nil
+        gameplayState.activeScriptID = nil
+        gameplayState.activeScriptStep = nil
+        self.gameplayState = gameplayState
+        healParty()
+        dialogueState = nil
+        fieldPromptState = nil
+        fieldHealingState = nil
+        shopState = nil
+        fieldPartyReorderState = nil
+        deferredActions.removeAll()
+        currentAudioState = nil
+        fieldInteractionTask?.cancel()
+        fieldInteractionTask = nil
         fieldAlertState = nil
+        traceEvent(
+            .blackout,
+            "Player blacked out.",
+            mapID: gameplayState.mapID,
+            details: [
+                "previousMoney": String(previousMoney),
+                "remainingMoney": String(gameplayState.money),
+                "moneyLost": String(max(0, previousMoney - gameplayState.money)),
+                "checkpointMapID": checkpoint?.mapID ?? gameplayState.mapID,
+            ]
+        )
         scene = .field
         substate = "field"
         requestDefaultMapMusic()
-    }
-
-    private func defaultTrainerLossRecoveryDestination() -> (mapID: String, position: TilePoint, facing: FacingDirection)? {
-        guard let pokecenter = content.map(id: "VIRIDIAN_POKECENTER"),
-              let entranceWarp = pokecenter.warps.first else {
-            return nil
-        }
-        return (
-            mapID: pokecenter.id,
-            position: entranceWarp.origin,
-            facing: entranceWarp.targetFacing
-        )
     }
 
     func rivalStarter(for playerStarter: String) -> String {

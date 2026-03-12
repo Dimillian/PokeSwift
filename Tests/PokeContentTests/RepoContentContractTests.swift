@@ -92,5 +92,17 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(interaction.farewellDialogueID, "pokemon_center_farewell")
         XCTAssertEqual(interaction.healingSequence?.machineSoundEffectID, "SFX_HEALING_MACHINE")
         XCTAssertEqual(interaction.healingSequence?.healedAudioCueID, "pokemon_center_healed")
+        XCTAssertEqual(
+            interaction.healingSequence?.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_CITY", position: .init(x: 23, y: 26), facing: .down)
+        )
+        XCTAssertEqual(
+            loaded.gameplayManifest.playerStart.defaultBlackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
+        XCTAssertEqual(
+            loaded.commonBattleText.playerBlackedOut,
+            "{playerName} is out of useable POKéMON! {playerName} blacked out!"
+        )
     }
 }
