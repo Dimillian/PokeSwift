@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 public struct PixelAssetView: View {
@@ -17,6 +18,12 @@ public struct PixelAssetView: View {
         Group {
             if let renderedImage {
                 Image(decorative: renderedImage, scale: 1)
+                    .resizable()
+                    .interpolation(.none)
+                    .antialiased(false)
+                    .aspectRatio(contentMode: .fit)
+            } else if let fallbackImage {
+                Image(nsImage: fallbackImage)
                     .resizable()
                     .interpolation(.none)
                     .antialiased(false)
@@ -52,5 +59,9 @@ public struct PixelAssetView: View {
 
     private var taskID: String {
         "\(url.standardizedFileURL.path)|\(whiteIsTransparent)"
+    }
+
+    private var fallbackImage: NSImage? {
+        NSImage(contentsOf: url)
     }
 }
