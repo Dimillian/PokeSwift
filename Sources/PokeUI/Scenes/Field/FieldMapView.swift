@@ -108,8 +108,7 @@ public struct FieldMapView: View {
             playerFacing: playerFacing,
             playerSpriteID: playerSpriteID,
             objects: objects,
-            renderAssets: renderAssets,
-            displayStyle: displayStyle
+            renderAssets: renderAssets
         )
     }
 
@@ -118,8 +117,7 @@ public struct FieldMapView: View {
         playerFacing: FacingDirection,
         playerSpriteID: String,
         objects: [FieldObjectRenderState],
-        renderAssets: FieldRenderAssets?,
-        displayStyle _: FieldDisplayStyle
+        renderAssets: FieldRenderAssets?
     ) -> FieldSceneRenderIdentity? {
         guard let renderAssets else { return nil }
         return FieldSceneRenderIdentity(
@@ -528,14 +526,6 @@ private struct RenderedFieldSceneBox: @unchecked Sendable {
     let scene: FieldRenderedScene
 }
 
-struct FieldSceneRenderIdentity: Equatable {
-    let map: MapManifest
-    let playerFacing: FacingDirection
-    let playerSpriteID: String
-    let objects: [FieldObjectRenderState]
-    let assets: FieldRenderAssets
-}
-
 private struct FieldPresentationIdentity: Equatable {
     let mapID: String
     let playerPosition: TilePoint
@@ -599,7 +589,7 @@ private struct FixedViewportRenderedField: View {
                         y: -cameraOrigin.y * displayScale
                     )
 
-                ForEach(sortedActors) { actor in
+                ForEach(scene.actors) { actor in
                     let renderedWorldPosition = actor.role == .player
                         ? playerWorldPosition
                         : (objectWorldPositions[actor.id] ?? CGPoint(x: CGFloat(actor.worldPosition.x), y: CGFloat(actor.worldPosition.y)))
@@ -668,15 +658,6 @@ private struct FixedViewportRenderedField: View {
             elapsed: elapsed,
             stepDuration: playerStepDuration
         )
-    }
-
-    private var sortedActors: [FieldRenderedActor] {
-        scene.actors.sorted { lhs, rhs in
-            if lhs.worldPosition.y == rhs.worldPosition.y {
-                return lhs.id < rhs.id
-            }
-            return lhs.worldPosition.y < rhs.worldPosition.y
-        }
     }
 
     private var lcdBackground: some View {

@@ -339,6 +339,42 @@ struct FieldRenderSignature: Hashable, Sendable {
     }
 }
 
+struct FieldSceneRenderIdentity: Equatable {
+    struct ObjectVisualSignature: Equatable {
+        let id: String
+        let spriteID: String
+        let facingRawValue: String
+
+        init(object: FieldObjectRenderState) {
+            id = object.id
+            spriteID = object.sprite
+            facingRawValue = object.facing.rawValue
+        }
+    }
+
+    let map: MapManifest
+    let playerFacing: FacingDirection
+    let playerSpriteID: String
+    let objectVisuals: [ObjectVisualSignature]
+    let assets: FieldRenderAssets
+
+    init(
+        map: MapManifest,
+        playerFacing: FacingDirection,
+        playerSpriteID: String,
+        objects: [FieldObjectRenderState],
+        assets: FieldRenderAssets
+    ) {
+        self.map = map
+        self.playerFacing = playerFacing
+        self.playerSpriteID = playerSpriteID
+        objectVisuals = objects
+            .map(ObjectVisualSignature.init(object:))
+            .sorted { lhs, rhs in lhs.id < rhs.id }
+        self.assets = assets
+    }
+}
+
 private struct FieldBackgroundSignature: Hashable, Sendable {
     let mapID: String
     let blockWidth: Int
@@ -631,7 +667,7 @@ struct FieldSceneRenderer {
             mapID: map.id,
             metrics: metrics,
             backgroundImage: backgroundImage,
-            actors: actors
+            actors: sortedActorsForPresentation(actors)
         )
     }
 
@@ -769,6 +805,15 @@ struct FieldSceneRenderer {
         }
 
         return actors
+    }
+
+    private static func sortedActorsForPresentation(_ actors: [FieldRenderedActor]) -> [FieldRenderedActor] {
+        actors.sorted { lhs, rhs in
+            if lhs.worldPosition.y == rhs.worldPosition.y {
+                return lhs.id < rhs.id
+            }
+            return lhs.worldPosition.y < rhs.worldPosition.y
+        }
     }
 
     private static func renderedActor(

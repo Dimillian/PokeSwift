@@ -18,7 +18,7 @@ extension PokeUITests {
     XCTAssertEqual(FieldDisplayStyle.dmgTinted.sidebarOptionTitle, "Tinted")
     XCTAssertEqual(FieldDisplayStyle.rawGrayscale.sidebarOptionTitle, "Raw Gray")
   }
-  func testFieldSceneRenderTaskIdentityIgnoresDisplayStyle() {
+  func testFieldSceneRenderTaskIdentityIgnoresPurePositionChanges() {
     let map = makePaletteMap(blockWidth: 2, blockHeight: 2)
     let root = repoRoot()
     let assets = FieldRenderAssets(
@@ -44,24 +44,77 @@ extension PokeUITests {
       )
     ]
 
-    let tintedIdentity = FieldMapView.sceneRenderTaskIdentity(
+    let movedObjects = [
+      FieldObjectRenderState(
+        id: "oak",
+        displayName: "Oak",
+        sprite: "SPRITE_OAK",
+        position: .init(x: 0, y: 0),
+        facing: .left,
+        interactionDialogueID: nil,
+        trainerBattleID: nil
+      )
+    ]
+
+    let initialIdentity = FieldMapView.sceneRenderTaskIdentity(
       map: map,
       playerFacing: .down,
       playerSpriteID: "SPRITE_RED",
       objects: objects,
-      renderAssets: assets,
-      displayStyle: .dmgTinted
+      renderAssets: assets
     )
-    let authenticIdentity = FieldMapView.sceneRenderTaskIdentity(
+    let movedIdentity = FieldMapView.sceneRenderTaskIdentity(
       map: map,
       playerFacing: .down,
       playerSpriteID: "SPRITE_RED",
-      objects: objects,
-      renderAssets: assets,
-      displayStyle: .dmgAuthentic
+      objects: movedObjects,
+      renderAssets: assets
     )
 
-    XCTAssertEqual(tintedIdentity, authenticIdentity)
+    XCTAssertEqual(initialIdentity, movedIdentity)
+  }
+  func testFieldSceneRenderTaskIdentityTracksFacingChanges() {
+    let map = makePaletteMap(blockWidth: 2, blockHeight: 2)
+    let root = repoRoot()
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "OVERWORLD",
+        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
+        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
+      ),
+      overworldSprites: [
+        "SPRITE_RED": spriteDefinition(id: "SPRITE_RED", filename: "red.png"),
+        "SPRITE_OAK": spriteDefinition(id: "SPRITE_OAK", filename: "oak.png"),
+      ]
+    )
+    let objects = [
+      FieldObjectRenderState(
+        id: "oak",
+        displayName: "Oak",
+        sprite: "SPRITE_OAK",
+        position: .init(x: 1, y: 1),
+        facing: .left,
+        interactionDialogueID: nil,
+        trainerBattleID: nil
+      )
+    ]
+
+    let downIdentity = FieldMapView.sceneRenderTaskIdentity(
+      map: map,
+      playerFacing: .down,
+      playerSpriteID: "SPRITE_RED",
+      objects: objects,
+      renderAssets: assets
+    )
+    let upIdentity = FieldMapView.sceneRenderTaskIdentity(
+      map: map,
+      playerFacing: .up,
+      playerSpriteID: "SPRITE_RED",
+      objects: objects,
+      renderAssets: assets
+    )
+
+    XCTAssertNotEqual(downIdentity, upIdentity)
   }
   func testFieldSceneMetricsUseFixedGameplayViewportPadding() {
     let metrics = FieldSceneRenderer.sceneMetrics(
