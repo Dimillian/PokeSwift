@@ -468,6 +468,7 @@ When a blocker is discovered, add:
 - Added battle-sidebar attention chrome so the blocking accordion card now brightens with a soft glow while move choice, trainer shift confirmation, learn-move prompts, or party switch selection are waiting on sidebar input.
 - Narrowed the old intro/M3 smoke validator back to the accepted boundary before later retiring it, and removed the abandoned early-M4 scripted validator plus its external RNG debug endpoint.
 - Added runtime session-event tracing for scripts, dialogue, warps, encounters, battles, inventory changes, heals, and save/load outcomes, written to `.runtime-traces/pokemac/session_events.jsonl` for manual session debugging.
+- Updated `./scripts/launch_app.sh` with an interactive live-watch mode that keeps the launch script attached, tails fresh `session_events.jsonl` entries, polls `/telemetry/latest`, and quits the app cleanly on `Ctrl-C` for manual debugging sessions.
 - Added focused extractor/runtime/telemetry coverage for the early-M4 slice so Route 1, Viridian, encounters, healing, and parcel/Pokedex state can be validated without relying on a brittle long autoplay flow.
 - Extended the extracted field map contract with source-driven connection strips so maps can render adjacent-map border data instead of repeating the local border block everywhere outside bounds.
 - Updated field background composition and the field debug map to resolve out-of-bounds blocks through GB-style north/south/west/east connection offsets before falling back to the map border block.
