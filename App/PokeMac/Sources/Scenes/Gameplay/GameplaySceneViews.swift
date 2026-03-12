@@ -1,6 +1,7 @@
 import SwiftUI
 import PokeCore
 import PokeDataModel
+import PokeRender
 import PokeUI
 
 struct GameplaySceneProps {
@@ -21,7 +22,7 @@ struct GameplayFieldViewportProps {
     let playerPosition: TilePoint?
     let playerFacing: FacingDirection
     let playerStepDuration: TimeInterval
-    let objects: [FieldObjectRenderState]
+    let objects: [FieldRenderableObjectState]
     let playerSpriteID: String
     let renderAssets: FieldRenderAssets?
     let fieldTransition: FieldTransitionTelemetry?

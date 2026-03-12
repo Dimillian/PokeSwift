@@ -2,6 +2,7 @@ import AppKit
 import ImageIO
 import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest

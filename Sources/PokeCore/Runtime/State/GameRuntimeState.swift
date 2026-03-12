@@ -1,45 +1,6 @@
 import Foundation
 import PokeDataModel
 
-public struct FieldObjectRenderState: Equatable, Sendable {
-    public let id: String
-    public let displayName: String
-    public let sprite: String
-    public let position: TilePoint
-    public let facing: FacingDirection
-    public let movementBehavior: ObjectMovementBehavior
-    public let movementMode: ActorMovementMode?
-    public let interactionDialogueID: String?
-    public let trainerBattleID: String?
-
-    public init(
-        id: String,
-        displayName: String,
-        sprite: String,
-        position: TilePoint,
-        facing: FacingDirection,
-        movementBehavior: ObjectMovementBehavior = .init(
-            idleMode: .stay,
-            axis: .none,
-            home: .init(x: 0, y: 0),
-            maxDistanceFromHome: 0
-        ),
-        movementMode: ActorMovementMode? = nil,
-        interactionDialogueID: String?,
-        trainerBattleID: String?
-    ) {
-        self.id = id
-        self.displayName = displayName
-        self.sprite = sprite
-        self.position = position
-        self.facing = facing
-        self.movementBehavior = movementBehavior
-        self.movementMode = movementMode
-        self.interactionDialogueID = interactionDialogueID
-        self.trainerBattleID = trainerBattleID
-    }
-}
-
 struct RuntimeObjectState {
     var position: TilePoint
     var facing: FacingDirection

@@ -1,14 +1,14 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
 
-@testable import PokeUI
+@testable import PokeRender
 
 @MainActor
-extension PokeUITests {
+extension PokeRenderTests {
   func testPixelAssetMaskKeepsInteriorWhiteHighlightsOpaque() throws {
     let image = try makeRGBAImage(
       width: 5,

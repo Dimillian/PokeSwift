@@ -81,6 +81,28 @@ public enum ActorMovementMode: String, Codable, Equatable, Sendable {
     case scripted
 }
 
+public struct FieldRenderableObjectState: Codable, Equatable, Sendable {
+    public let id: String
+    public let sprite: String
+    public let position: TilePoint
+    public let facing: FacingDirection
+    public let movementMode: ActorMovementMode?
+
+    public init(
+        id: String,
+        sprite: String,
+        position: TilePoint,
+        facing: FacingDirection,
+        movementMode: ActorMovementMode? = nil
+    ) {
+        self.id = id
+        self.sprite = sprite
+        self.position = position
+        self.facing = facing
+        self.movementMode = movementMode
+    }
+}
+
 public enum ObjectMovementAxis: String, Codable, Equatable, Sendable {
     case none
     case any

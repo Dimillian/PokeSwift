@@ -1,11 +1,9 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
-
-@testable import PokeUI
 
 func spriteDefinition(id: String, filename: String) -> FieldSpriteDefinition {
   let root = repoRoot()

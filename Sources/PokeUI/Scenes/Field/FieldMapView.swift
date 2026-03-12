@@ -1,14 +1,14 @@
 import Foundation
 import SwiftUI
-import PokeCore
 import PokeDataModel
+import PokeRender
 
 public struct FieldMapView: View {
     let map: MapManifest
     let playerPosition: TilePoint
     let playerFacing: FacingDirection
     let playerStepDuration: TimeInterval
-    let objects: [FieldObjectRenderState]
+    let objects: [FieldRenderableObjectState]
     let playerSpriteID: String
     let renderAssets: FieldRenderAssets?
     let transition: FieldTransitionTelemetry?
@@ -28,7 +28,7 @@ public struct FieldMapView: View {
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerStepDuration: TimeInterval = 16.0 / 60.0,
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         playerSpriteID: String = "SPRITE_RED",
         renderAssets: FieldRenderAssets? = nil,
         transition: FieldTransitionTelemetry? = nil,
@@ -116,7 +116,7 @@ public struct FieldMapView: View {
         map: MapManifest,
         playerFacing: FacingDirection,
         playerSpriteID: String,
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         renderAssets: FieldRenderAssets?
     ) -> FieldSceneRenderIdentity? {
         guard let renderAssets else { return nil }
@@ -554,6 +554,10 @@ private struct ObjectStepAnimationState: Equatable {
 }
 
 private struct FixedViewportRenderedField: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
+
     let scene: FieldRenderedScene
     let playerFacing: FacingDirection
     let playerStepAnimation: PlayerStepAnimationState?
@@ -621,7 +625,11 @@ private struct FixedViewportRenderedField: View {
                 }
 
             }
-            .fieldScreenEffect(displayStyle: displayStyle, displayScale: displayScale)
+            .fieldScreenEffect(
+                displayStyle: displayStyle,
+                displayScale: displayScale,
+                hdrBoost: fieldShaderHDRBoost
+            )
             .frame(
                 width: CGFloat(FieldSceneRenderer.viewportPixelSize.width) * displayScale,
                 height: CGFloat(FieldSceneRenderer.viewportPixelSize.height) * displayScale,
@@ -664,13 +672,28 @@ private struct FixedViewportRenderedField: View {
         Rectangle()
             .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
     }
+
+    private var fieldShaderHDRBoost: Float {
+        Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
+            .fieldShaderBoost
+        )
+    }
 }
 
 private struct FixedViewportPlaceholderField: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
+
     let map: MapManifest
     let playerPosition: TilePoint
     let playerFacing: FacingDirection
-    let objects: [FieldObjectRenderState]
+    let objects: [FieldRenderableObjectState]
     let metrics: FieldSceneMetrics
     let transition: FieldTransitionTelemetry?
     let displayStyle: FieldDisplayStyle
@@ -714,7 +737,7 @@ private struct FixedViewportPlaceholderField: View {
                     .fill(objectColor(for: object.sprite))
                     .frame(width: stepSize * 0.88, height: stepSize * 0.88)
                     .overlay {
-                        Text(object.displayName.prefix(1))
+                        Text(object.id.prefix(1))
                             .font(.system(size: max(8, stepSize * 0.34), weight: .black, design: .monospaced))
                             .foregroundStyle(.white.opacity(0.9))
                     }
@@ -739,7 +762,11 @@ private struct FixedViewportPlaceholderField: View {
                 )
 
         }
-        .fieldScreenEffect(displayStyle: displayStyle, displayScale: displayScale)
+        .fieldScreenEffect(
+            displayStyle: displayStyle,
+            displayScale: displayScale,
+            hdrBoost: fieldShaderHDRBoost
+        )
         .frame(width: viewportWidth, height: viewportHeight, alignment: .topLeading)
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay {
@@ -808,6 +835,17 @@ private struct FixedViewportPlaceholderField: View {
         case .right:
             return CGSize(width: -amount, height: 0)
         }
+    }
+
+    private var fieldShaderHDRBoost: Float {
+        Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
+            .fieldShaderBoost
+        )
     }
 }
 

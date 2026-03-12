@@ -1,5 +1,6 @@
 import SwiftUI
 import PokeDataModel
+import PokeRender
 import PokeUI
 
 struct TitleMenuSceneProps {

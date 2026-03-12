@@ -1,4 +1,5 @@
 import SwiftUI
+import PokeRender
 
 struct GameplaySidebar: View {
     let mode: GameplaySidebarMode

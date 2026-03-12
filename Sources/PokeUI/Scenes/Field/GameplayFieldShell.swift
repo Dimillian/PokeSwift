@@ -1,4 +1,5 @@
 import SwiftUI
+import PokeRender
 
 public enum GameplayFooterPlacement {
     case insideScreen

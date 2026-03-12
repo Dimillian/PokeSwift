@@ -1,5 +1,6 @@
 import SwiftUI
 import PokeDataModel
+import PokeRender
 
 struct BattleViewportCanvas: View {
     let playerPokemon: PartyPokemonTelemetry

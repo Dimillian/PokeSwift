@@ -1,7 +1,12 @@
 import SwiftUI
 import PokeDataModel
+import PokeRender
 
 public struct BattlePanel: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
+
     let trainerName: String
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
@@ -41,7 +46,11 @@ public struct BattlePanel: View {
                 presentation: presentation
             )
             .frame(width: viewportSize.width, height: viewportSize.height)
-            .battleScreenEffect(displayScale: scale, presentation: presentation)
+            .battleScreenEffect(
+                displayScale: scale,
+                presentation: presentation,
+                hdrBoost: battleShaderHDRBoost
+            )
             .overlay {
                 BattleIntroFlashOverlay(presentation: presentation)
             }
@@ -66,6 +75,17 @@ public struct BattlePanel: View {
             return max(1, floor(rawScale))
         }
         return rawScale
+    }
+
+    private var battleShaderHDRBoost: Float {
+        Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
+            .battleShaderBoost
+        )
     }
 }
 

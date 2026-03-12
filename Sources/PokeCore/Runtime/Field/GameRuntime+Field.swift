@@ -95,7 +95,7 @@ extension GameRuntime {
         }
     }
 
-    func canInteractOverCounter(with object: FieldObjectRenderState, through tile: TilePoint, on map: MapManifest) -> Bool {
+    func canInteractOverCounter(with object: FieldRenderableObjectState, through tile: TilePoint, on map: MapManifest) -> Bool {
         guard currentMapObjectManifest(id: object.id)?.interactionReach == .overCounter,
               let tileID = collisionTileID(at: tile, in: map),
               let tileset = content.tileset(id: map.tileset) else {
@@ -104,13 +104,8 @@ extension GameRuntime {
         return tileset.collision.passableTileIDs.contains(tileID) == false
     }
 
-    func interact(with object: FieldObjectRenderState) {
-        guard let objectManifest = currentMapObjectManifest(id: object.id) else {
-            if let dialogueID = object.interactionDialogueID {
-                showDialogue(id: dialogueID, completion: .returnToField)
-            }
-            return
-        }
+    func interact(with object: FieldRenderableObjectState) {
+        guard let objectManifest = currentMapObjectManifest(id: object.id) else { return }
 
         if let trigger = objectManifest.interactionTriggers.first(where: { trigger in
             trigger.conditions.allSatisfy { conditionMatches($0, blockedMoveFacing: nil) }

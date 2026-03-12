@@ -154,22 +154,18 @@ public final class GameRuntime {
         gameplayState?.chosenStarterSpeciesID
     }
 
-    public var currentFieldObjects: [FieldObjectRenderState] {
+    public var currentFieldObjects: [FieldRenderableObjectState] {
         guard let gameplayState, let map = currentMapManifest else { return [] }
         return map.objects.compactMap { object in
             let state = gameplayState.objectStates[object.id]
             let visible = state?.visible ?? object.visibleByDefault
             guard visible else { return nil }
-            return FieldObjectRenderState(
+            return FieldRenderableObjectState(
                 id: object.id,
-                displayName: object.displayName,
                 sprite: object.sprite,
                 position: state?.position ?? object.position,
                 facing: state?.facing ?? object.facing,
-                movementBehavior: object.movementBehavior,
-                movementMode: state?.movementMode,
-                interactionDialogueID: object.interactionDialogueID,
-                trainerBattleID: object.trainerBattleID
+                movementMode: state?.movementMode
             )
         }
     }
