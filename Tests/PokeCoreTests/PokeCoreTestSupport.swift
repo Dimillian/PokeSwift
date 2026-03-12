@@ -43,6 +43,7 @@ func fixtureGameplayManifest(
     wildEncounterTables: [WildEncounterTableManifest] = [],
     maps: [MapManifest]? = nil,
     tilesets: [TilesetManifest]? = nil,
+    trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest] = [],
     trainerBattles: [TrainerBattleManifest] = [],
     marts: [MartManifest] = []
 ) -> GameplayManifest {
@@ -107,6 +108,7 @@ func fixtureGameplayManifest(
         moves: moves,
         typeEffectiveness: typeEffectiveness,
         wildEncounterTables: wildEncounterTables,
+        trainerAIMoveChoiceModifications: trainerAIMoveChoiceModifications,
         trainerBattles: trainerBattles,
         playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
     )

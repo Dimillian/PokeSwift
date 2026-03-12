@@ -21,9 +21,9 @@ extension GameRuntime {
         }
 
         let recalledPokemon = battle.playerPokemon
-        gameplayState.playerParty[0] = recalledPokemon
+        gameplayState.playerParty[0] = clearBattleStatStages(recalledPokemon)
         gameplayState.playerParty.swapAt(0, selectedIndex)
-        battle.playerPokemon = gameplayState.playerParty[0]
+        battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[0])
         battle.phase = .resolvingTurn
         battle.pendingAction = selectionMode == .forcedReplacement ? .moveSelection : .continueSwitchTurn
         battle.queuedMessages = []
@@ -75,8 +75,9 @@ extension GameRuntime {
     func continueSwitchTurnAfterPlayerSwap(battle: inout RuntimeBattleState) {
         var enemyPokemon = battle.enemyPokemon
         var playerPokemon = battle.playerPokemon
-        let enemyMoveIndex = selectEnemyMoveIndex(enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+        let enemyMoveIndex = selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
         let enemyMove = applyMove(attacker: &enemyPokemon, defender: &playerPokemon, moveIndex: enemyMoveIndex)
+        battle.aiLayer2Encouragement += 1
         battle.enemyPokemon = enemyPokemon
         battle.playerPokemon = playerPokemon
 

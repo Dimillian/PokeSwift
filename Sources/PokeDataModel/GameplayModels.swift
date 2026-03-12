@@ -1194,6 +1194,16 @@ public struct TrainerPokemonManifest: Codable, Equatable, Sendable {
     }
 }
 
+public struct TrainerAIMoveChoiceModificationManifest: Codable, Equatable, Sendable {
+    public let trainerClass: String
+    public let modifications: [Int]
+
+    public init(trainerClass: String, modifications: [Int]) {
+        self.trainerClass = trainerClass
+        self.modifications = modifications
+    }
+}
+
 public struct TrainerBattleManifest: Codable, Equatable, Sendable {
     public let id: String
     public let trainerClass: String
@@ -1264,6 +1274,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public let moves: [MoveManifest]
     public let typeEffectiveness: [TypeEffectivenessManifest]
     public let wildEncounterTables: [WildEncounterTableManifest]
+    public let trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest]
     public let trainerBattles: [TrainerBattleManifest]
     public let playerStart: PlayerStartManifest
 
@@ -1282,6 +1293,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         moves: [MoveManifest],
         typeEffectiveness: [TypeEffectivenessManifest] = [],
         wildEncounterTables: [WildEncounterTableManifest] = [],
+        trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest] = [],
         trainerBattles: [TrainerBattleManifest],
         playerStart: PlayerStartManifest
     ) {
@@ -1299,6 +1311,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         self.moves = moves
         self.typeEffectiveness = typeEffectiveness
         self.wildEncounterTables = wildEncounterTables
+        self.trainerAIMoveChoiceModifications = trainerAIMoveChoiceModifications
         self.trainerBattles = trainerBattles
         self.playerStart = playerStart
     }
@@ -1318,6 +1331,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         case moves
         case typeEffectiveness
         case wildEncounterTables
+        case trainerAIMoveChoiceModifications
         case trainerBattles
         case playerStart
     }
@@ -1338,6 +1352,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         moves = try container.decode([MoveManifest].self, forKey: .moves)
         typeEffectiveness = try container.decodeIfPresent([TypeEffectivenessManifest].self, forKey: .typeEffectiveness) ?? []
         wildEncounterTables = try container.decodeIfPresent([WildEncounterTableManifest].self, forKey: .wildEncounterTables) ?? []
+        trainerAIMoveChoiceModifications = try container.decodeIfPresent([TrainerAIMoveChoiceModificationManifest].self, forKey: .trainerAIMoveChoiceModifications) ?? []
         trainerBattles = try container.decode([TrainerBattleManifest].self, forKey: .trainerBattles)
         playerStart = try container.decode(PlayerStartManifest.self, forKey: .playerStart)
     }

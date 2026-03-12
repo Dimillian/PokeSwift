@@ -216,7 +216,7 @@ extension GameRuntime {
             transitionStyle: .none
         )
 
-        let batches = makeTurnPresentationBatches(for: battle)
+        let batches = makeTurnPresentationBatches(for: &battle)
         guard let firstBatch = batches.first else { return }
         battle.pendingPresentationBatches = Array(batches.dropFirst())
         scheduleBattlePresentation(firstBatch, battleID: battle.battleID)
@@ -254,8 +254,9 @@ extension GameRuntime {
 
         var enemyPokemon = battle.enemyPokemon
         var playerPokemon = battle.playerPokemon
-        let enemyMoveIndex = selectEnemyMoveIndex(enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+        let enemyMoveIndex = selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
         let enemyMove = applyMove(attacker: &enemyPokemon, defender: &playerPokemon, moveIndex: enemyMoveIndex)
+        battle.aiLayer2Encouragement += 1
         battle.enemyPokemon = enemyPokemon
         battle.playerPokemon = playerPokemon
 

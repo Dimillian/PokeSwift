@@ -22688,6 +22688,319 @@
       "sourceTileSize" : 8
     }
   ],
+  "trainerAIMoveChoiceModifications" : [
+    {
+      "modifications" : [
+
+      ],
+      "trainerClass" : "YOUNGSTER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BUG CATCHER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "LASS"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "SAILOR"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "JR_TRAINER_M"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "JR_TRAINER_F"
+    },
+    {
+      "modifications" : [
+        1,
+        2,
+        3
+      ],
+      "trainerClass" : "POKEMANIAC"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "SUPER_NERD"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "HIKER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BIKER"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "BURGLAR"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "ENGINEER"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "UNUSED_JUGGLER"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "FISHER"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "SWIMMER"
+    },
+    {
+      "modifications" : [
+
+      ],
+      "trainerClass" : "CUE_BALL"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "GAMBLER"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "BEAUTY"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "PSYCHIC_TR"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "ROCKER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "JUGGLER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "TAMER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BIRD_KEEPER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BLACKBELT"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "RIVAL1"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "PROF_OAK"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "CHIEF"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "SCIENTIST"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "GIOVANNI"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "ROCKET"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "COOLTRAINER_M"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "COOLTRAINER_F"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BRUNO"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "BROCK"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "MISTY"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "LT_SURGE"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "ERIKA"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "KOGA"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "BLAINE"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "SABRINA"
+    },
+    {
+      "modifications" : [
+        1,
+        2
+      ],
+      "trainerClass" : "GENTLEMAN"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "RIVAL2"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "RIVAL3"
+    },
+    {
+      "modifications" : [
+        1,
+        2,
+        3
+      ],
+      "trainerClass" : "LORELEI"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "CHANNELER"
+    },
+    {
+      "modifications" : [
+        1
+      ],
+      "trainerClass" : "AGATHA"
+    },
+    {
+      "modifications" : [
+        1,
+        3
+      ],
+      "trainerClass" : "LANCE"
+    }
+  ],
   "trainerBattles" : [
     {
       "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",

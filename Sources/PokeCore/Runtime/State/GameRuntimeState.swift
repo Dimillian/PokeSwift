@@ -48,10 +48,56 @@ struct RuntimePokemonState {
     let special: Int
     var attackStage: Int
     var defenseStage: Int
+    var speedStage: Int
+    var specialStage: Int
     var accuracyStage: Int
     var evasionStage: Int
     var majorStatus: MajorStatusCondition
     var moves: [RuntimeMoveState]
+
+    init(
+        speciesID: String,
+        nickname: String,
+        level: Int,
+        experience: Int,
+        dvs: PokemonDVs,
+        statExp: PokemonStatExp,
+        maxHP: Int,
+        currentHP: Int,
+        attack: Int,
+        defense: Int,
+        speed: Int,
+        special: Int,
+        attackStage: Int = 0,
+        defenseStage: Int = 0,
+        speedStage: Int = 0,
+        specialStage: Int = 0,
+        accuracyStage: Int = 0,
+        evasionStage: Int = 0,
+        majorStatus: MajorStatusCondition = .none,
+        moves: [RuntimeMoveState]
+    ) {
+        self.speciesID = speciesID
+        self.nickname = nickname
+        self.level = level
+        self.experience = experience
+        self.dvs = dvs
+        self.statExp = statExp
+        self.maxHP = maxHP
+        self.currentHP = currentHP
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.special = special
+        self.attackStage = attackStage
+        self.defenseStage = defenseStage
+        self.speedStage = speedStage
+        self.specialStage = specialStage
+        self.accuracyStage = accuracyStage
+        self.evasionStage = evasionStage
+        self.majorStatus = majorStatus
+        self.moves = moves
+    }
 }
 
 enum RuntimeBattlePhase: String {
@@ -237,9 +283,11 @@ struct RuntimeBattleState {
     let winDialogueID: String
     let loseDialogueID: String
     let canRun: Bool
+    let trainerClass: String?
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
+    var aiLayer2Encouragement: Int
     var phase: RuntimeBattlePhase
     var focusedMoveIndex: Int
     var focusedBagItemIndex: Int

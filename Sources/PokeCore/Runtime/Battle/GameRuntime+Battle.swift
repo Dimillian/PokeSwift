@@ -26,7 +26,7 @@ extension GameRuntime {
 
         guard var gameplayState else { return }
         gameplayState.activeFlags.insert(battle.completionFlagID)
-        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
         if battle.healsPartyAfterBattle {
@@ -59,7 +59,7 @@ extension GameRuntime {
         guard var gameplayState else { return }
         let battle = gameplayState.battle
         if let battle = gameplayState.battle {
-            gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+            gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         }
         gameplayState.battle = nil
         self.gameplayState = gameplayState
@@ -84,7 +84,7 @@ extension GameRuntime {
     func finishWildBattle(battle: RuntimeBattleState, won: Bool) {
         cancelBattlePresentation()
         guard var gameplayState else { return }
-        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
         if won == false {
@@ -109,7 +109,7 @@ extension GameRuntime {
     func finishWildBattleCapture(battle: RuntimeBattleState) {
         cancelBattlePresentation()
         guard var gameplayState else { return }
-        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
         scene = .field
@@ -138,7 +138,9 @@ extension GameRuntime {
             return
         }
 
-        let playerPokemon = gameplayState.playerParty.first ?? makePokemon(speciesID: chosenStarter, level: 5, nickname: chosenStarter.capitalized)
+        let playerPokemon = clearBattleStatStages(
+            gameplayState.playerParty.first ?? makePokemon(speciesID: chosenStarter, level: 5, nickname: chosenStarter.capitalized)
+        )
         let enemyParty = battleManifest.party.map {
             makeTrainerBattlePokemon(speciesID: $0.speciesID, level: $0.level, nickname: $0.speciesID.capitalized)
         }
@@ -155,9 +157,11 @@ extension GameRuntime {
             winDialogueID: battleManifest.winDialogueID,
             loseDialogueID: battleManifest.loseDialogueID,
             canRun: false,
+            trainerClass: battleManifest.trainerClass,
             playerPokemon: playerPokemon,
             enemyParty: enemyParty,
             enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
             phase: .introText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -209,15 +213,19 @@ extension GameRuntime {
 
     func startWildBattle(speciesID: String, level: Int) {
         guard var gameplayState else { return }
-        let playerPokemon = gameplayState.playerParty.first ?? makePokemon(
-            speciesID: gameplayState.chosenStarterSpeciesID ?? "SQUIRTLE",
-            level: 5,
-            nickname: gameplayState.chosenStarterSpeciesID?.capitalized ?? "Squirtle"
+        let playerPokemon = clearBattleStatStages(
+            gameplayState.playerParty.first ?? makePokemon(
+                speciesID: gameplayState.chosenStarterSpeciesID ?? "SQUIRTLE",
+                level: 5,
+                nickname: gameplayState.chosenStarterSpeciesID?.capitalized ?? "Squirtle"
+            )
         )
-        let enemyPokemon = makePokemon(
-            speciesID: speciesID,
-            level: level,
-            nickname: content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+        let enemyPokemon = clearBattleStatStages(
+            makePokemon(
+                speciesID: speciesID,
+                level: level,
+                nickname: content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+            )
         )
         let battleID = "wild_\(gameplayState.mapID.lowercased())_\(speciesID.lowercased())_\(level)"
 
@@ -231,9 +239,11 @@ extension GameRuntime {
             winDialogueID: "",
             loseDialogueID: "",
             canRun: true,
+            trainerClass: nil,
             playerPokemon: playerPokemon,
             enemyParty: [enemyPokemon],
             enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
             phase: .introText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -287,10 +297,7 @@ extension GameRuntime {
         gameplayState.playerParty = gameplayState.playerParty.map { pokemon in
             var healed = pokemon
             healed.currentHP = healed.maxHP
-            healed.attackStage = 0
-            healed.defenseStage = 0
-            healed.accuracyStage = 0
-            healed.evasionStage = 0
+            healed = clearBattleStatStages(healed)
             healed.moves = healed.moves.map { move in
                 var restored = move
                 restored.currentPP = content.move(id: move.id)?.maxPP ?? move.currentPP
@@ -350,5 +357,22 @@ extension GameRuntime {
         var party = gameplayState.playerParty
         party[0] = battle.playerPokemon
         return party
+    }
+
+    func finalizedPlayerPartyAfterBattle(from battle: RuntimeBattleState, gameplayState: GameplayState) -> [RuntimePokemonState] {
+        var finalizedBattle = battle
+        finalizedBattle.playerPokemon = clearBattleStatStages(finalizedBattle.playerPokemon)
+        return syncedPlayerParty(from: finalizedBattle, gameplayState: gameplayState)
+    }
+
+    func clearBattleStatStages(_ pokemon: RuntimePokemonState) -> RuntimePokemonState {
+        var cleared = pokemon
+        cleared.attackStage = 0
+        cleared.defenseStage = 0
+        cleared.speedStage = 0
+        cleared.specialStage = 0
+        cleared.accuracyStage = 0
+        cleared.evasionStage = 0
+        return cleared
     }
 }

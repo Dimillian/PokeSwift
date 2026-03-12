@@ -36,6 +36,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         moves: try buildMoves(repoRoot: source.repoRoot),
         typeEffectiveness: try buildTypeEffectiveness(repoRoot: source.repoRoot),
         wildEncounterTables: try buildWildEncounterTables(repoRoot: source.repoRoot),
+        trainerAIMoveChoiceModifications: try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot),
         trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot),
         playerStart: .init(
             mapID: "REDS_HOUSE_2F",
@@ -2791,6 +2792,38 @@ private func buildTrainerBattles(repoRoot: URL) throws -> [TrainerBattleManifest
             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
         )
     }
+}
+
+private func buildTrainerAIMoveChoiceModifications(repoRoot: URL) throws -> [TrainerAIMoveChoiceModificationManifest] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/move_choices.asm"))
+    return contents
+        .split(separator: "\n")
+        .compactMap { rawLine in
+            let line = String(rawLine)
+            guard line.contains("move_choices") else {
+                return nil
+            }
+
+            let parts = line.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            guard parts.count == 2 else {
+                return nil
+            }
+
+            let trainerClass = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard trainerClass.isEmpty == false else {
+                return nil
+            }
+
+            let command = parts[0].replacingOccurrences(of: "move_choices", with: "")
+            let modifications = command
+                .split(separator: ",")
+                .compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+
+            return TrainerAIMoveChoiceModificationManifest(
+                trainerClass: trainerClass,
+                modifications: modifications
+            )
+        }
 }
 
 private func parseTrainerParties(repoRoot: URL, label: String) throws -> [[TrainerPokemonManifest]] {

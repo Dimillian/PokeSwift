@@ -222,6 +222,8 @@ public struct GameSavePokemon: Codable, Equatable, Sendable {
     public let special: Int
     public let attackStage: Int
     public let defenseStage: Int
+    public let speedStage: Int
+    public let specialStage: Int
     public let accuracyStage: Int
     public let evasionStage: Int
     public let majorStatus: MajorStatusCondition
@@ -242,6 +244,8 @@ public struct GameSavePokemon: Codable, Equatable, Sendable {
         special: Int,
         attackStage: Int,
         defenseStage: Int,
+        speedStage: Int = 0,
+        specialStage: Int = 0,
         accuracyStage: Int,
         evasionStage: Int,
         majorStatus: MajorStatusCondition = .none,
@@ -261,6 +265,8 @@ public struct GameSavePokemon: Codable, Equatable, Sendable {
         self.special = special
         self.attackStage = attackStage
         self.defenseStage = defenseStage
+        self.speedStage = speedStage
+        self.specialStage = specialStage
         self.accuracyStage = accuracyStage
         self.evasionStage = evasionStage
         self.majorStatus = majorStatus
@@ -282,6 +288,8 @@ public struct GameSavePokemon: Codable, Equatable, Sendable {
         case special
         case attackStage
         case defenseStage
+        case speedStage
+        case specialStage
         case accuracyStage
         case evasionStage
         case majorStatus
@@ -304,6 +312,8 @@ public struct GameSavePokemon: Codable, Equatable, Sendable {
         special = try container.decode(Int.self, forKey: .special)
         attackStage = try container.decode(Int.self, forKey: .attackStage)
         defenseStage = try container.decode(Int.self, forKey: .defenseStage)
+        speedStage = try container.decodeIfPresent(Int.self, forKey: .speedStage) ?? 0
+        specialStage = try container.decodeIfPresent(Int.self, forKey: .specialStage) ?? 0
         accuracyStage = try container.decode(Int.self, forKey: .accuracyStage)
         evasionStage = try container.decode(Int.self, forKey: .evasionStage)
         majorStatus = try container.decodeIfPresent(MajorStatusCondition.self, forKey: .majorStatus) ?? .none

@@ -39,7 +39,7 @@ extension GameRuntime {
     ) -> Int {
         side == .player
             ? battle.focusedMoveIndex
-            : selectEnemyMoveIndex(enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+            : selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
     }
 
     func applyResolvedBattleAction(
@@ -260,11 +260,11 @@ extension GameRuntime {
         return beats
     }
 
-    func makeTurnPresentationBatches(for battle: RuntimeBattleState) -> [[RuntimeBattlePresentationBeat]] {
+    func makeTurnPresentationBatches(for battle: inout RuntimeBattleState) -> [[RuntimeBattlePresentationBeat]] {
         var simulatedPlayer = battle.playerPokemon
         var simulatedEnemy = battle.enemyPokemon
         var batches: [[RuntimeBattlePresentationBeat]] = []
-        let actionSides: [BattlePresentationSide] = simulatedPlayer.speed >= simulatedEnemy.speed
+        let actionSides: [BattlePresentationSide] = adjustedSpeedStat(for: simulatedPlayer) >= adjustedSpeedStat(for: simulatedEnemy)
             ? [.player, .enemy]
             : [.enemy, .player]
 
@@ -288,6 +288,10 @@ extension GameRuntime {
                 simulatedPlayer: &simulatedPlayer,
                 simulatedEnemy: &simulatedEnemy
             )
+
+            if side == .enemy {
+                battle.aiLayer2Encouragement += 1
+            }
 
             if appendPostActionResolutionIfNeeded(
                 battle: battle,
@@ -523,6 +527,7 @@ extension GameRuntime {
         battle.pendingPresentationBatches = []
         battle.queuedMessages = []
         battle.message = ""
+        battle.aiLayer2Encouragement = 0
 
         scheduleBattlePresentation(
             [

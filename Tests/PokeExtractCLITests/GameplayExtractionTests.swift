@@ -187,6 +187,14 @@ final class GameplayExtractionTests: XCTestCase {
         let rivalExitScript = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_rival_exit_after_battle" })
         XCTAssertEqual(rivalExitScript.steps.compactMap(\.movement?.kind), [.fixedPath])
         XCTAssertEqual(rivalExitScript.steps.last?.action, "restoreMapMusic")
+        XCTAssertEqual(
+            manifest.trainerAIMoveChoiceModifications.first { $0.trainerClass == "RIVAL1" }?.modifications,
+            [1]
+        )
+        XCTAssertEqual(
+            manifest.trainerAIMoveChoiceModifications.first { $0.trainerClass == "LORELEI" }?.modifications,
+            [1, 2, 3]
+        )
         XCTAssertEqual(manifest.species.count, 151)
         XCTAssertEqual(manifest.species.prefix(10).map(\.id), [
             "BULBASAUR",

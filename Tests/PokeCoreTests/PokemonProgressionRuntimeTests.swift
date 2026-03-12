@@ -128,6 +128,87 @@ extension PokeCoreTests {
         XCTAssertEqual(squirtle.speed, 10)
         XCTAssertEqual(squirtle.special, 10)
     }
+
+    func testMakePokemonLearnsLevelAppropriateWildMovesOnSpawn() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["GUST"],
+                            levelUpLearnset: [
+                                .init(level: 5, moveID: "SAND_ATTACK"),
+                                .init(level: 12, moveID: "QUICK_ATTACK"),
+                            ]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "GUST", displayName: "GUST", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "FLYING"),
+                        .init(id: "SAND_ATTACK", displayName: "SAND-ATTACK", power: 0, accuracy: 100, maxPP: 15, effect: "ACCURACY_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "QUICK_ATTACK", displayName: "QUICK ATTACK", power: 40, accuracy: 100, maxPP: 30, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let lowLevelPidgey = runtime.makePokemon(speciesID: "PIDGEY", level: 4, nickname: "Pidgey")
+        let route1LevelFivePidgey = runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Pidgey")
+
+        XCTAssertEqual(lowLevelPidgey.moves.map(\.id), ["GUST"])
+        XCTAssertEqual(route1LevelFivePidgey.moves.map(\.id), ["GUST", "SAND_ATTACK"])
+    }
+
+    func testSpawnedPokemonKeepLatestFourMovesFromLevelUpLearnset() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH", "GROWL"],
+                            levelUpLearnset: [
+                                .init(level: 9, moveID: "EMBER"),
+                                .init(level: 15, moveID: "LEER"),
+                                .init(level: 22, moveID: "RAGE"),
+                                .init(level: 30, moveID: "SLASH"),
+                            ]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "NO_ADDITIONAL_EFFECT", type: "FIRE"),
+                        .init(id: "LEER", displayName: "LEER", power: 0, accuracy: 100, maxPP: 30, effect: "DEFENSE_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "RAGE", displayName: "RAGE", power: 20, accuracy: 100, maxPP: 20, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "SLASH", displayName: "SLASH", power: 70, accuracy: 100, maxPP: 20, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let charmander = runtime.makeTrainerBattlePokemon(speciesID: "CHARMANDER", level: 30, nickname: "Charmander")
+
+        XCTAssertEqual(charmander.moves.map(\.id), ["EMBER", "LEER", "RAGE", "SLASH"])
+    }
+
     func testBattleExperienceRewardLevelsUpStarterAndUpdatesTelemetry() throws {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -475,8 +556,8 @@ extension PokeCoreTests {
         )
 
         runtime.battleRandomOverrides = [0, 255]
-        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
-        let batches = runtime.makeTurnPresentationBatches(for: battle)
+        var battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let batches = runtime.makeTurnPresentationBatches(for: &battle)
         for batch in batches {
             for beat in batch {
                 runtime.applyBattlePresentationBeat(beat, battleID: battle.battleID)
