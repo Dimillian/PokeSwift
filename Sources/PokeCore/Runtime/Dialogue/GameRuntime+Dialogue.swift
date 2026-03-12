@@ -47,6 +47,19 @@ extension GameRuntime {
             scene = .field
             substate = "field"
             finalizeStarterChoiceSequence()
+        case .beginPostChoiceNaming:
+            guard let speciesID = gameplayState?.pendingStarterSpeciesID else {
+                scene = .field
+                substate = "field"
+                finalizeStarterChoiceSequence()
+                return
+            }
+            let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+            beginNaming(
+                speciesID: speciesID,
+                defaultName: defaultName,
+                completion: .returnToFieldAfterStarter
+            )
         case let .startPostBattleDialogue(won):
             scene = .field
             substate = "field"

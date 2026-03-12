@@ -36,6 +36,7 @@ public final class GameRuntime {
     var dialogueState: DialogueState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
+    public internal(set) var namingState: RuntimeNamingState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
     var recentSoundEffects: [RuntimeSoundEffectState] = []
@@ -295,6 +296,8 @@ public final class GameRuntime {
             handleStarterChoice(button: button)
         case .battle:
             handleBattle(button: button)
+        case .naming:
+            handleNaming(button: button)
         case .placeholder:
             if button == .cancel {
                 scene = .titleMenu

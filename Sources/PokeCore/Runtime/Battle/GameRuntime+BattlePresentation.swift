@@ -465,6 +465,8 @@ extension GameRuntime {
             finishWildBattleEscape()
         case .captured:
             finishWildBattleCapture(battle: battle)
+        case .capturedNicknamePrompt:
+            beginNamingAfterCapture(battle: battle)
         case .continueSwitchTurn:
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:

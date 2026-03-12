@@ -59,10 +59,13 @@ extension GameRuntime {
         gameplayState.ownedSpeciesIDs.insert(capturedPokemon.speciesID)
         var messages = ["All right! \(capturedPokemon.nickname) was caught!"]
 
+        let addedToParty: Bool
         if gameplayState.playerParty.count < 6 {
             gameplayState.playerParty.append(capturedPokemon)
+            addedToParty = true
         } else if addPokemonToCurrentBox(capturedPokemon, in: &gameplayState) {
             messages.append("\(capturedPokemon.nickname) was transferred to BOX \(gameplayState.currentBoxIndex + 1).")
+            addedToParty = false
         } else {
             battle.lastCaptureResult = .boxFull
             addItem(item.id, quantity: 1, to: &gameplayState)
@@ -71,7 +74,10 @@ extension GameRuntime {
             return .handled
         }
 
-        presentBattleMessages(messages, battle: &battle, pendingAction: .captured)
+        let action: RuntimeBattlePendingAction = addedToParty
+            ? .capturedNicknamePrompt
+            : .captured
+        presentBattleMessages(messages, battle: &battle, pendingAction: action)
         return .handled
     }
 

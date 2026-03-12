@@ -16,6 +16,12 @@ enum GameplayViewportProps {
     case battle(BattleViewportProps)
 }
 
+struct NamingOverlayProps {
+    let speciesDisplayName: String
+    let enteredText: String
+    let maxLength: Int
+}
+
 struct GameplayFieldViewportProps {
     let map: MapManifest?
     let playerPosition: TilePoint?
@@ -29,6 +35,7 @@ struct GameplayFieldViewportProps {
     let shop: ShopTelemetry?
     let starterChoiceOptions: [SpeciesManifest]
     let starterChoiceFocusedIndex: Int
+    let namingProps: NamingOverlayProps?
 }
 
 struct BattleViewportProps {
@@ -176,7 +183,10 @@ private struct FieldStageView: View {
 
     @ViewBuilder
     private var overlayContent: some View {
-        if let shop = props.shop {
+        if let namingProps = props.namingProps {
+            NamingOverlayPanel(props: namingProps)
+                .frame(width: 420)
+        } else if let shop = props.shop {
             ShopOverlayPanel(shop: shop)
                 .frame(width: 420)
         } else if props.starterChoiceOptions.isEmpty == false {
@@ -351,6 +361,44 @@ private struct BattleBagOverlayPanel: View {
                     }
                     .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(index == focusedIndex ? 1 : 0.78))
                 }
+            }
+        }
+    }
+}
+
+private struct NamingOverlayPanel: View {
+    let props: NamingOverlayProps
+
+    var body: some View {
+        GameplayHoverCardSurface {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("YOUR \(props.speciesDisplayName.uppercased())'S NICKNAME?")
+                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .foregroundStyle(GameplayFieldStyleTokens.ink)
+
+                nameDisplay
+            }
+        }
+    }
+
+    private var nameDisplay: some View {
+        let characters = Array(props.enteredText)
+        return HStack(spacing: 2) {
+            ForEach(0..<props.maxLength, id: \.self) { index in
+                let char = index < characters.count
+                    ? String(characters[index])
+                    : ""
+                Text(char)
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundStyle(GameplayFieldStyleTokens.ink)
+                    .frame(width: 18, height: 22)
+                    .overlay(alignment: .bottom) {
+                        Rectangle()
+                            .fill(GameplayFieldStyleTokens.ink.opacity(
+                                index == characters.count ? 1 : 0.24
+                            ))
+                            .frame(height: 2)
+                    }
             }
         }
     }

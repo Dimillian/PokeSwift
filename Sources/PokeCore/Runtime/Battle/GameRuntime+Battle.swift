@@ -1,12 +1,13 @@
 import PokeDataModel
 
 extension GameRuntime {
-    func finalizeStarterChoiceSequence() {
+    func finalizeStarterChoiceSequence(nickname: String? = nil) {
         guard var gameplayState, let speciesID = gameplayState.pendingStarterSpeciesID else { return }
 
         gameplayState.gotStarterBit = true
         gameplayState.chosenStarterSpeciesID = speciesID
-        gameplayState.playerParty = [makePokemon(speciesID: speciesID, level: 5, nickname: speciesID.capitalized)]
+        let resolvedNickname = nickname ?? content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+        gameplayState.playerParty = [makePokemon(speciesID: speciesID, level: 5, nickname: resolvedNickname)]
         gameplayState.activeFlags.insert("EVENT_GOT_STARTER")
         let rivalSpeciesID = rivalStarter(for: speciesID)
         gameplayState.rivalStarterSpeciesID = rivalSpeciesID

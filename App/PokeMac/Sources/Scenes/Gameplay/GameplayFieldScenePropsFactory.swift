@@ -41,7 +41,8 @@ enum GameplayScenePropsFactory {
                         dialogueLines: runtime.currentDialoguePage?.lines,
                         shop: snapshot.shop,
                         starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
-                        starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex
+                        starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
+                        namingProps: makeNamingProps(runtime: runtime)
                     )
                 ),
                 sidebarMode: .fieldLike(
@@ -180,6 +181,15 @@ enum GameplayScenePropsFactory {
             label: runtime.playerName,
             spriteURL: runtime.content.rootURL.appendingPathComponent(sprite.imagePath),
             spriteFrame: spriteFrame
+        )
+    }
+
+    private static func makeNamingProps(runtime: GameRuntime) -> NamingOverlayProps? {
+        guard let state = runtime.namingState else { return nil }
+        return NamingOverlayProps(
+            speciesDisplayName: state.defaultName,
+            enteredText: state.enteredText,
+            maxLength: RuntimeNamingState.maxLength
         )
     }
 

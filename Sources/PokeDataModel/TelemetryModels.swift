@@ -10,6 +10,7 @@ public enum RuntimeScene: String, Codable, Sendable {
     case scriptedSequence
     case starterChoice
     case battle
+    case naming
     case placeholder
 }
 
@@ -821,6 +822,7 @@ public enum RuntimeSessionEventKind: String, Codable, Equatable, Sendable {
     case inventoryChanged
     case partyHealed
     case saveResult
+    case nicknameApplied
 }
 
 public struct RuntimeSessionEvent: Codable, Equatable, Sendable {

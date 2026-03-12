@@ -143,7 +143,7 @@ extension GameRuntime {
         scene = .field
         substate = "field"
         gameplayState?.pendingStarterSpeciesID = speciesID
-        showDialogue(id: "oaks_lab_mon_energetic", completion: .beginPostChoiceSequence)
+        showDialogue(id: "oaks_lab_mon_energetic", completion: .beginPostChoiceNaming)
     }
 
     func currentMapObjectManifest(id: String) -> MapObjectManifest? {

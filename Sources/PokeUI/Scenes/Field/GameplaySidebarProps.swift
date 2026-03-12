@@ -731,6 +731,8 @@ public enum GameplaySidebarPropsBuilder {
             "LAUNCH"
         case .splash:
             "SPLASH"
+        case .naming:
+            "NAMING"
         case .placeholder:
             "PLACEHOLDER"
         }

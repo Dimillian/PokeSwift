@@ -74,7 +74,7 @@ struct RuntimeInventoryItemState {
 
 struct RuntimePokemonState {
     let speciesID: String
-    let nickname: String
+    var nickname: String
     let level: Int
     let experience: Int
     let dvs: PokemonDVs
@@ -117,6 +117,7 @@ enum RuntimeBattlePendingAction {
     case finish(won: Bool)
     case escape
     case captured
+    case capturedNicknamePrompt
     case continueSwitchTurn
     case continueForcedSwitch
     case continueLevelUpResolution
@@ -306,6 +307,7 @@ struct DialogueState {
         case healAndShow(dialogueID: String)
         case openStarterChoice(preselectedSpeciesID: String)
         case beginPostChoiceSequence
+        case beginPostChoiceNaming
         case startPostBattleDialogue(won: Bool)
     }
 
@@ -351,6 +353,34 @@ enum RuntimeFieldTransitionPhase: String {
 struct RuntimeFieldTransitionState: Equatable {
     var kind: RuntimeFieldTransitionKind
     var phase: RuntimeFieldTransitionPhase
+}
+
+enum RuntimeNamingCompletionAction {
+    case returnToFieldAfterCapture
+    case returnToFieldAfterStarter
+}
+
+public struct RuntimeNamingState {
+    public static let maxLength = 10
+    public static let gridCharacters: [[Character]] = [
+        ["A","B","C","D","E","F","G","H","I"],
+        ["J","K","L","M","N","O","P","Q","R"],
+        ["S","T","U","V","W","X","Y","Z"," "],
+    ]
+    public static let endRow = 3
+    public static let validCharacters: Set<Character> = Set(gridCharacters.flatMap { $0 })
+
+    let speciesID: String
+    public let defaultName: String
+    var enteredCharacters: [Character]
+    public var cursorRow: Int
+    public var cursorColumn: Int
+    var completionAction: RuntimeNamingCompletionAction
+
+    public var enteredText: String { String(enteredCharacters) }
+    public var isOnEnd: Bool { cursorRow == Self.endRow }
+    public var gridRowCount: Int { Self.gridCharacters.count + 1 }
+    public var gridColumnCount: Int { Self.gridCharacters.first?.count ?? 9 }
 }
 
 struct GameplayState {
