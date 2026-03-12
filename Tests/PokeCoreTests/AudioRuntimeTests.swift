@@ -409,7 +409,6 @@ extension PokeCoreTests {
         drainBattleText(runtime)
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattlePresentationBatch(runtime)
 
         waitUntil(
             audioPlayer.soundEffectRequests.contains {

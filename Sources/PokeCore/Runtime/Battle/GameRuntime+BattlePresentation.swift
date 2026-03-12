@@ -179,7 +179,31 @@ extension GameRuntime {
             }
 
             battlePresentationTask = nil
+            autoAdvanceBattlePresentationIfNeeded(battleID: battleID)
         }
+    }
+
+    func autoAdvanceBattlePresentationIfNeeded(battleID: String) {
+        guard var gameplayState,
+              var battle = gameplayState.battle,
+              battle.battleID == battleID,
+              battle.pendingPresentationBatches.isEmpty == false,
+              battle.pendingAction == nil,
+              battle.phase != .moveSelection,
+              battle.phase != .bagSelection,
+              battle.phase != .partySelection,
+              battle.phase != .trainerAboutToUseDecision,
+              battle.phase != .learnMoveDecision,
+              battle.phase != .learnMoveSelection,
+              battle.phase != .battleComplete else {
+            return
+        }
+
+        let nextBatch = battle.pendingPresentationBatches.removeFirst()
+        battle.phase = .resolvingTurn
+        gameplayState.battle = battle
+        self.gameplayState = gameplayState
+        scheduleBattlePresentation(nextBatch, battleID: battleID)
     }
 
     func prependBattlePresentationBeats(_ beats: [RuntimeBattlePresentationBeat], battleID: String) {
@@ -392,7 +416,6 @@ extension GameRuntime {
                 stage: .attackWindup,
                 uiVisibility: .visible,
                 activeSide: action.side,
-                requiresConfirmAfterDisplay: true,
                 message: action.messages.first,
                 phase: .turnText,
                 playerPokemon: attackerPokemon,

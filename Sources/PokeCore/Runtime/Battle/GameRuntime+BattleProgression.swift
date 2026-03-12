@@ -324,11 +324,16 @@ extension GameRuntime {
         battle.rewardContinuation = nil
         switch rewardContinuation {
         case let .aboutToUse(index, _):
-            presentBattleMessages(
-                trainerAboutToUseMessages(trainerName: battle.trainerName, pokemon: battle.enemyParty[index]),
-                battle: &battle,
-                pendingAction: .enterTrainerAboutToUseDecision(nextIndex: index)
-            )
+            let messages = trainerAboutToUseMessages(trainerName: battle.trainerName, pokemon: battle.enemyParty[index])
+            if messages.count > 1 {
+                presentBattleMessages(
+                    [messages[0]],
+                    battle: &battle,
+                    pendingAction: .enterTrainerAboutToUseDecision(nextIndex: index)
+                )
+            } else {
+                enterTrainerAboutToUseDecision(battle: &battle, nextIndex: index)
+            }
         case let .sendNextEnemy(index):
             scheduleNextEnemySendOut(battle: &battle, nextIndex: index)
         case let .finishTrainerWin(payout):

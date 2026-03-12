@@ -675,7 +675,7 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPartyCount, 2)
     }
 
-    func testTrainerAboutToUsePromptPaginatesBeforeDecision() throws {
+    func testTrainerAboutToUsePromptTransitionsDirectlyIntoDecisionUI() throws {
         let runtime = GameRuntime(
             content: fixtureContent(
                 gameplayManifest: fixtureGameplayManifest(
@@ -724,23 +724,16 @@ extension PokeCoreTests {
         drainBattleText(runtime)
 
         var battle = try XCTUnwrap(runtime.gameplayState?.battle)
-        runtime.presentBattleMessages(
-            runtime.trainerAboutToUseMessages(
-                trainerName: battle.trainerName,
-                pokemon: battle.enemyParty[1]
-            ),
-            battle: &battle,
-            pendingAction: .enterTrainerAboutToUseDecision(nextIndex: 1)
-        )
+        battle.rewardContinuation = .aboutToUse(index: 1, previousMoveIndex: 0)
+        runtime.resumeRewardContinuation(battle: &battle)
 
         XCTAssertEqual(battle.phase, .turnText)
         XCTAssertEqual(battle.message, "BLUE is about to\nuse Squirtle!")
-        XCTAssertEqual(battle.queuedMessages, ["Will RED change\n#MON?"])
-
-        runtime.advanceBattleText(battle: &battle)
-        XCTAssertEqual(battle.phase, .turnText)
-        XCTAssertEqual(battle.message, "Will RED change\n#MON?")
         XCTAssertEqual(battle.queuedMessages, [])
+        guard case let .enterTrainerAboutToUseDecision(nextIndex)? = battle.pendingAction else {
+            return XCTFail("trainer switch prompt did not queue the decision transition")
+        }
+        XCTAssertEqual(nextIndex, 1)
 
         runtime.advanceBattleText(battle: &battle)
         XCTAssertEqual(battle.phase, .trainerAboutToUseDecision)
@@ -1142,7 +1135,7 @@ extension PokeCoreTests {
 
         let beats = runtime.makeBeats(for: action)
         XCTAssertEqual(beats.first?.message, "Charmander used EMBER!")
-        XCTAssertEqual(beats.first?.requiresConfirmAfterDisplay, true)
+        XCTAssertEqual(beats.first?.requiresConfirmAfterDisplay, false)
         XCTAssertTrue(
             beats.contains(where: {
                 $0.message == "It's super effective!" && $0.requiresConfirmAfterDisplay
@@ -1856,19 +1849,9 @@ extension PokeCoreTests {
                 $0.presentation.activeSide == .enemy &&
                 $0.battleMessage == "Bulbasaur used GROWL!"
         }
-        XCTAssertNil(enemyWindupIndex, "enemy attack should wait for confirm after the player action")
-
-        runtime.handle(button: .confirm)
-        advanceBattlePresentationBatch(runtime)
-        let resumedTimeline = captureBattleTimeline(runtime)
-        let resumedEnemyWindupIndex = resumedTimeline.firstIndex {
-            $0.presentation.stage == .attackWindup &&
-                $0.presentation.activeSide == .enemy &&
-                $0.battleMessage == "Bulbasaur used GROWL!"
-        }
         XCTAssertNotNil(
-            resumedEnemyWindupIndex,
-            "enemy attack did not start after confirming the next action"
+            enemyWindupIndex,
+            "enemy attack did not auto-chain after the player action"
         )
 
         runtime.handle(button: .confirm)
@@ -1882,10 +1865,10 @@ extension PokeCoreTests {
             "enemy follow-up effect text did not appear"
         )
 
-        if let resumedEnemyWindupIndex, let resumedEnemyResultIndex {
-            XCTAssertGreaterThan(resumedEnemyResultIndex, resumedEnemyWindupIndex)
+        if let playerWindupIndex, let enemyWindupIndex {
+            XCTAssertGreaterThan(enemyWindupIndex, playerWindupIndex)
 
-            let snapshotBeforeEnemyAction = resumedTimeline[resumedEnemyWindupIndex]
+            let snapshotBeforeEnemyAction = timeline[enemyWindupIndex]
             XCTAssertEqual(snapshotBeforeEnemyAction.playerPokemon.currentHP, snapshotBeforeEnemyAction.playerPokemon.maxHP)
             XCTAssertLessThan(snapshotBeforeEnemyAction.enemyPokemon.currentHP, snapshotBeforeEnemyAction.enemyPokemon.maxHP)
         }
@@ -1936,7 +1919,6 @@ extension PokeCoreTests {
 
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattlePresentationBatch(runtime)
         advanceBattlePresentationBatch(runtime)
 
         waitUntil(
@@ -2027,7 +2009,6 @@ extension PokeCoreTests {
 
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattlePresentationBatch(runtime)
         advanceBattleUntilPhase(runtime, phase: "learnMoveDecision")
 
         var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
@@ -2116,46 +2097,41 @@ extension PokeCoreTests {
         runtime.battleRandomOverrides = [0, 255, 0]
         runtime.handle(button: .confirm)
 
+        let timeline = captureBattleTimeline(runtime)
+        let playerWindupIndex = timeline.firstIndex {
+            $0.presentation.stage == .attackWindup &&
+                $0.presentation.activeSide == .player &&
+                $0.battleMessage == "Charmander used SCRATCH!"
+        }
+        XCTAssertNotNil(playerWindupIndex, "player attack windup did not begin")
+
+        let enemyWindupIndex = timeline.firstIndex {
+            $0.presentation.stage == .attackWindup &&
+                $0.presentation.activeSide == .enemy &&
+                $0.battleMessage == "Bulbasaur used GROWL!"
+        }
+        XCTAssertNotNil(enemyWindupIndex, "enemy attack did not auto-chain after the player action")
+
+        let enemyResultIndex = timeline.firstIndex {
+            $0.presentation.stage == .resultText &&
+                $0.battleMessage == "Charmander's Attack fell!"
+        }
+        XCTAssertNotNil(enemyResultIndex, "enemy effect text did not appear")
+
+        if let playerWindupIndex, let enemyWindupIndex, let enemyResultIndex {
+            XCTAssertGreaterThan(enemyWindupIndex, playerWindupIndex)
+            XCTAssertGreaterThan(enemyResultIndex, enemyWindupIndex)
+        }
+
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .attackWindup &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .player,
-            message: "player attack windup did not begin"
+            runtime.currentSnapshot().battle?.battleMessage == "Charmander's Attack fell!",
+            message: "enemy effect text did not remain on screen for confirmation"
         )
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.phase, "turnText")
-        XCTAssertEqual(snapshot.textLines, ["Charmander used SCRATCH!"])
-
-        RunLoop.current.run(until: Date().addingTimeInterval(0.12))
-        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertFalse(
-            snapshot.presentation.stage == .attackWindup &&
-                snapshot.presentation.activeSide == .enemy &&
-                snapshot.battleMessage == "Bulbasaur used GROWL!"
-        )
-
-        advanceBattlePresentationBatch(runtime)
-        advanceBattlePresentationBatch(runtime)
-        waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .attackWindup &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .enemy,
-            message: "enemy attack windup did not begin after confirm"
-        )
-        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.textLines, ["Bulbasaur used GROWL!"])
-
-        advanceBattlePresentationBatch(runtime)
-        waitUntil(
-            runtime.currentSnapshot().battle?.battleMessage == "Charmander's Attack fell!",
-            message: "enemy effect text did not appear"
-        )
-        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.textLines, ["Charmander's Attack fell!"])
 
-        advanceBattlePresentationBatch(runtime)
-        waitUntil(
-            runtime.currentSnapshot().battle?.phase == "moveSelection",
-            message: "battle text did not drain to move selection"
-        )
+        drainBattleText(runtime)
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.phase, "moveSelection")
     }
