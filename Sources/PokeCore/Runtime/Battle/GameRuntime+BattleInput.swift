@@ -128,6 +128,13 @@ extension GameRuntime {
             case .learnMoveSelection:
                 playUIConfirmSound()
                 enterLearnMoveDecisionPrompt(battle: &battle)
+            case .turnText, .battleComplete:
+                if case .capturedNicknameChoice = battle.pendingAction {
+                    playUIConfirmSound()
+                    battle.pendingAction = nil
+                    finishWildBattleCapture(battle: battle)
+                    return
+                }
             default:
                 break
             }

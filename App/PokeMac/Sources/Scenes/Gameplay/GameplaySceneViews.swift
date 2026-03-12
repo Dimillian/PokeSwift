@@ -136,12 +136,21 @@ private struct FieldStageView: View {
     let fieldDisplayStyle: FieldDisplayStyle
 
     var body: some View {
-        FieldMapStage {
-            mapContent
-        } footer: {
-            footerContent
-        } overlayContent: {
-            overlayContent
+        ZStack {
+            FieldMapStage {
+                mapContent
+            } footer: {
+                footerContent
+            } overlayContent: {
+                overlayContent
+            }
+
+            if let namingProps = props.namingProps {
+                Color.black
+                    .ignoresSafeArea()
+                NamingOverlayPanel(props: namingProps)
+                    .frame(width: 420)
+            }
         }
     }
 
@@ -183,10 +192,7 @@ private struct FieldStageView: View {
 
     @ViewBuilder
     private var overlayContent: some View {
-        if let namingProps = props.namingProps {
-            NamingOverlayPanel(props: namingProps)
-                .frame(width: 420)
-        } else if let shop = props.shop {
+        if let shop = props.shop {
             ShopOverlayPanel(shop: shop)
                 .frame(width: 420)
         } else if props.starterChoiceOptions.isEmpty == false {

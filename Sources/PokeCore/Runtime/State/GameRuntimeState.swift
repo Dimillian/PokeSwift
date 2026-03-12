@@ -118,6 +118,7 @@ enum RuntimeBattlePendingAction {
     case escape
     case captured
     case capturedNicknamePrompt
+    case capturedNicknameChoice
     case continueSwitchTurn
     case continueForcedSwitch
     case continueLevelUpResolution

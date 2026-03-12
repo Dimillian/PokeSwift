@@ -83,6 +83,10 @@ extension GameRuntime {
         switch state.completionAction {
         case .returnToFieldAfterCapture:
             applyNicknameToLastPartyMember(nickname)
+            if var gameplayState {
+                gameplayState.battle = nil
+                self.gameplayState = gameplayState
+            }
             namingState = nil
             scene = .field
             substate = "field"
@@ -119,7 +123,6 @@ extension GameRuntime {
         cancelBattlePresentation()
         guard var gameplayState else { return }
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
-        gameplayState.battle = nil
         self.gameplayState = gameplayState
 
         let speciesID = battle.enemyPokemon.speciesID
