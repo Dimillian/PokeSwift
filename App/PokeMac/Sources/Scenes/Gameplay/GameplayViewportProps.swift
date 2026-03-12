@@ -26,6 +26,7 @@ struct GameplayFieldViewportProps {
     let playerSpriteID: String
     let renderAssets: FieldRenderAssets?
     let fieldTransition: FieldTransitionTelemetry?
+    let fieldAlert: FieldAlertTelemetry?
     let dialogueLines: [String]?
     let fieldPrompt: FieldPromptTelemetry?
     let fieldHealing: FieldHealingTelemetry?

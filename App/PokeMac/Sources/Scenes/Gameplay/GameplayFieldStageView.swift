@@ -41,6 +41,7 @@ struct FieldStageView: View {
                 playerSpriteID: props.playerSpriteID,
                 renderAssets: props.renderAssets,
                 transition: props.fieldTransition,
+                alert: props.fieldAlert,
                 displayStyle: fieldDisplayStyle
             )
         } else {

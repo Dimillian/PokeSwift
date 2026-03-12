@@ -100,6 +100,10 @@ public struct LoadedContent: Sendable {
         gameplayManifest.trainerBattles.first { $0.trainerClass == trainerClass && $0.trainerNumber == trainerNumber }
     }
 
+    public func trainerEncounterAudioCueID(for battleID: String) -> String? {
+        trainerBattle(id: battleID)?.encounterAudioCueID
+    }
+
     public func trainerAIMoveChoiceModifications(trainerClass: String) -> TrainerAIMoveChoiceModificationManifest? {
         let normalizedClass = Self.normalizedTrainerAIClassKey(trainerClass)
         return gameplayManifest.trainerAIMoveChoiceModifications.first {

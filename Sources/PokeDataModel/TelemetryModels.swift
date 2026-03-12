@@ -65,6 +65,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
     public let activeScriptID: String?
     public let activeScriptStep: Int?
     public let renderMode: String
+    public let alert: FieldAlertTelemetry?
     public let transition: FieldTransitionTelemetry?
 
     public init(
@@ -77,6 +78,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         activeScriptID: String?,
         activeScriptStep: Int?,
         renderMode: String,
+        alert: FieldAlertTelemetry? = nil,
         transition: FieldTransitionTelemetry? = nil
     ) {
         self.mapID = mapID
@@ -88,6 +90,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
         self.renderMode = renderMode
+        self.alert = alert
         self.transition = transition
     }
 }
@@ -118,6 +121,20 @@ public struct FieldTransitionTelemetry: Codable, Equatable, Sendable {
     public init(kind: String, phase: String) {
         self.kind = kind
         self.phase = phase
+    }
+}
+
+public enum FieldAlertBubbleKind: String, Codable, Equatable, Sendable {
+    case exclamation
+}
+
+public struct FieldAlertTelemetry: Codable, Equatable, Sendable {
+    public let objectID: String
+    public let kind: FieldAlertBubbleKind
+
+    public init(objectID: String, kind: FieldAlertBubbleKind) {
+        self.objectID = objectID
+        self.kind = kind
     }
 }
 

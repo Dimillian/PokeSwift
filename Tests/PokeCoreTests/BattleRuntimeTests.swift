@@ -382,6 +382,101 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .trainer)
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 1)
     }
+
+    func testTrainerLossDoesNotSetCompletionFlag() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "CATERPIE", displayName: "Caterpie", baseHP: 45, baseAttack: 30, baseDefense: 35, baseSpeed: 45, baseSpecial: 20, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    maps: [
+                        .init(
+                            id: "VIRIDIAN_POKECENTER",
+                            displayName: "Viridian Pokecenter",
+                            defaultMusicID: "MUSIC_CITIES1",
+                            borderBlockID: 0,
+                            blockWidth: 2,
+                            blockHeight: 2,
+                            stepWidth: 8,
+                            stepHeight: 8,
+                            tileset: "POKECENTER",
+                            blockIDs: Array(repeating: 0, count: 4),
+                            stepCollisionTileIDs: Array(repeating: 1, count: 64),
+                            warps: [
+                                .init(
+                                    id: "viridian_pokecenter_warp_0",
+                                    origin: .init(x: 3, y: 7),
+                                    targetMapID: "VIRIDIAN_CITY",
+                                    targetPosition: .init(x: 23, y: 25),
+                                    targetFacing: .down
+                                ),
+                            ],
+                            backgroundEvents: [],
+                            objects: []
+                        ),
+                    ],
+                    tilesets: [
+                        .init(
+                            id: "POKECENTER",
+                            imagePath: "Assets/field/tilesets/pokecenter.png",
+                            blocksetPath: "Assets/field/blocksets/pokecenter.bst",
+                            sourceTileSize: 8,
+                            blockTileWidth: 4,
+                            blockTileHeight: 4,
+                            collision: .init(
+                                passableTileIDs: [1],
+                                warpTileIDs: [],
+                                doorTileIDs: [],
+                                tilePairCollisions: [],
+                                ledges: []
+                            )
+                        ),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_bug_catcher_1",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [.init(speciesID: "CATERPIE", level: 6)],
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_bug_catcher_1")
+        let battle = runtime.gameplayState?.battle
+
+        XCTAssertNotNil(battle)
+        if let battle {
+            runtime.finishBattle(battle: battle, won: false)
+        }
+
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_TEST") ?? true)
+    }
+
     func testBattleAdvancesAcrossExtractedEnemyParty() {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -407,8 +502,8 @@ extension PokeCoreTests {
                                 .init(speciesID: "BULBASAUR", level: 5),
                                 .init(speciesID: "SQUIRTLE", level: 5),
                             ],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
@@ -581,10 +676,12 @@ extension PokeCoreTests {
             completionFlagID: "",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            winDialogueID: "",
-            loseDialogueID: "",
+            playerWinDialogueID: "",
+            playerLoseDialogueID: "",
+            postBattleScriptID: nil,
             canRun: true,
             trainerClass: nil,
+            sourceTrainerObjectID: nil,
             playerPokemon: playerPokemon,
             enemyParty: [enemyPokemon],
             enemyActiveIndex: 0,
@@ -641,10 +738,12 @@ extension PokeCoreTests {
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            winDialogueID: "win",
-            loseDialogueID: "lose",
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
             canRun: false,
             trainerClass: "OPP_RIVAL1",
+            sourceTrainerObjectID: nil,
             playerPokemon: player,
             enemyParty: [enemy],
             enemyActiveIndex: 0,
@@ -699,10 +798,12 @@ extension PokeCoreTests {
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            winDialogueID: "win",
-            loseDialogueID: "lose",
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
             canRun: false,
             trainerClass: "OPP_BUG_CATCHER",
+            sourceTrainerObjectID: nil,
             playerPokemon: player,
             enemyParty: [enemy],
             enemyActiveIndex: 0,
@@ -756,10 +857,12 @@ extension PokeCoreTests {
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            winDialogueID: "win",
-            loseDialogueID: "lose",
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
             canRun: false,
             trainerClass: "OPP_BUG_CATCHER",
+            sourceTrainerObjectID: nil,
             playerPokemon: runtime.makePokemon(speciesID: "RATTATA", level: 5, nickname: "Rattata"),
             enemyParty: [
                 runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Pidgey"),
@@ -987,8 +1090,8 @@ extension PokeCoreTests {
                             trainerNumber: 1,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
@@ -1077,8 +1180,8 @@ extension PokeCoreTests {
                             trainerNumber: 1,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
@@ -1166,8 +1269,8 @@ extension PokeCoreTests {
                             trainerNumber: 1,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
@@ -1242,8 +1345,8 @@ extension PokeCoreTests {
                             trainerNumber: 1,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"

@@ -40,6 +40,7 @@ enum GameplayScenePropsFactory {
                         playerSpriteID: runtime.playerSpriteID,
                         renderAssets: makeFieldRenderAssets(runtime: runtime),
                         fieldTransition: fieldState.transition,
+                        fieldAlert: fieldState.fieldAlert,
                         dialogueLines: runtime.currentDialoguePage?.lines,
                         fieldPrompt: fieldState.fieldPrompt,
                         fieldHealing: fieldState.fieldHealing,

@@ -280,10 +280,12 @@ struct RuntimeBattleState {
     let completionFlagID: String
     let healsPartyAfterBattle: Bool
     let preventsBlackoutOnLoss: Bool
-    let winDialogueID: String
-    let loseDialogueID: String
+    let playerWinDialogueID: String
+    let playerLoseDialogueID: String
+    let postBattleScriptID: String?
     let canRun: Bool
     let trainerClass: String?
+    let sourceTrainerObjectID: String?
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
@@ -315,7 +317,13 @@ struct DialogueState {
         case healAndShow(dialogueID: String)
         case openStarterChoice(preselectedSpeciesID: String)
         case beginPostChoiceSequence
-        case startPostBattleDialogue(won: Bool)
+        case finishTrainerBattle(
+            won: Bool,
+            preventsBlackoutOnLoss: Bool,
+            postBattleScriptID: String?,
+            sourceTrainerObjectID: String?
+        )
+        case startBattle(battleID: String, sourceTrainerObjectID: String?)
         case showDialogue(dialogueID: String, completionAction: CompletionAction)
         case fieldPrompt(interactionID: String, completionAction: CompletionAction)
         case startFieldHealing(interactionID: String, completionAction: CompletionAction)
@@ -387,6 +395,11 @@ enum RuntimeFieldTransitionPhase: String {
 struct RuntimeFieldTransitionState: Equatable {
     var kind: RuntimeFieldTransitionKind
     var phase: RuntimeFieldTransitionPhase
+}
+
+struct RuntimeFieldAlertState: Equatable {
+    var objectID: String
+    var kind: FieldAlertBubbleKind
 }
 
 struct GameplayState {

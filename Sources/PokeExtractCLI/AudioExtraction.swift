@@ -24,6 +24,9 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
         .init(id: "oak_intro", assetID: "MUSIC_MEET_PROF_OAK"),
         .init(id: "rival_intro", assetID: "MUSIC_MEET_RIVAL"),
         .init(id: "rival_exit", assetID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"),
+        .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
+        .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
+        .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
         .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
         .init(
             id: "mom_heal",

@@ -46,8 +46,11 @@ extension GameRuntime {
         fieldInteractionTask?.cancel()
         fieldInteractionTask = nil
         fieldTransitionTask?.cancel()
+        trainerEngagementTask?.cancel()
+        trainerEngagementTask = nil
         scriptedMovementTask?.cancel()
         fieldTransitionState = nil
+        fieldAlertState = nil
         gameplayState = makeInitialGameplayState()
         playthroughID = UUID().uuidString
         reseedRuntimeRNG()

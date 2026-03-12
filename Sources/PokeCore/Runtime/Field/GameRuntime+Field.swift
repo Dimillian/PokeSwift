@@ -70,7 +70,9 @@ extension GameRuntime {
         substate = "field"
         evaluateMapScriptsIfNeeded()
         if isReadyForFreeFieldStep {
-            evaluateWildEncounterIfNeeded()
+            if evaluateTrainerSightIfNeeded() == false {
+                evaluateWildEncounterIfNeeded()
+            }
         }
     }
 
@@ -107,6 +109,14 @@ extension GameRuntime {
     func interact(with object: FieldRenderableObjectState) {
         guard let objectManifest = currentMapObjectManifest(id: object.id) else { return }
 
+        if handleVisiblePickupInteraction(with: objectManifest) {
+            return
+        }
+
+        if handleTrainerInteraction(with: object, manifest: objectManifest) {
+            return
+        }
+
         if let trigger = objectManifest.interactionTriggers.first(where: { trigger in
             trigger.conditions.allSatisfy { conditionMatches($0, blockedMoveFacing: nil) }
         }) {
@@ -134,6 +144,221 @@ extension GameRuntime {
         }
     }
 
+    func handleVisiblePickupInteraction(with objectManifest: MapObjectManifest) -> Bool {
+        guard let itemID = objectManifest.pickupItemID, var gameplayState else {
+            return false
+        }
+
+        if canAddItem(itemID, quantity: 1, to: gameplayState) {
+            addItem(itemID, quantity: 1, to: &gameplayState)
+            ensureObjectStateExists(objectManifest.id, in: &gameplayState)
+            gameplayState.objectStates[objectManifest.id]?.visible = false
+            self.gameplayState = gameplayState
+            traceEvent(
+                .inventoryChanged,
+                "Picked up \(itemID).",
+                mapID: gameplayState.mapID,
+                details: [
+                    "itemID": itemID,
+                    "quantity": "1",
+                    "operation": "pickup",
+                    "objectID": objectManifest.id,
+                ]
+            )
+            showDialogue(id: "pickup_found_\(itemID.lowercased())", completion: .returnToField)
+        } else {
+            showDialogue(id: "pickup_no_room", completion: .returnToField)
+        }
+        return true
+    }
+
+    func handleTrainerInteraction(with object: FieldRenderableObjectState, manifest: MapObjectManifest) -> Bool {
+        guard
+            let battleID = manifest.trainerBattleID,
+            let introDialogueID = manifest.trainerIntroDialogueID
+        else {
+            return false
+        }
+
+        if isTrainerDefeated(manifest) {
+            if let afterBattleDialogueID = manifest.trainerAfterBattleDialogueID {
+                showDialogue(id: afterBattleDialogueID, completion: .returnToField)
+                return true
+            }
+            return false
+        }
+
+        if var gameplayState {
+            gameplayState.objectStates[object.id]?.facing = oppositeFacingDirection(of: gameplayState.facing)
+            self.gameplayState = gameplayState
+        }
+        requestTrainerEncounterMusic(for: battleID)
+        showDialogue(
+            id: introDialogueID,
+            completion: .startBattle(battleID: battleID, sourceTrainerObjectID: object.id)
+        )
+        return true
+    }
+
+    func evaluateTrainerSightIfNeeded() -> Bool {
+        guard
+            trainerEngagementTask == nil,
+            scene == .field,
+            dialogueState == nil,
+            gameplayState?.activeScriptID == nil,
+            let gameplayState,
+            let map = currentMapManifest
+        else {
+            return false
+        }
+
+        for objectManifest in map.objects {
+            guard
+                objectManifest.trainerBattleID != nil,
+                objectManifest.trainerEngageDistance != nil,
+                isTrainerDefeated(objectManifest) == false,
+                let objectState = gameplayState.objectStates[objectManifest.id],
+                objectState.visible,
+                let engagementPath = trainerEngagementPath(for: objectManifest, objectState: objectState, map: map)
+            else {
+                continue
+            }
+
+            startTrainerEngagement(
+                objectID: objectManifest.id,
+                battleID: objectManifest.trainerBattleID,
+                introDialogueID: objectManifest.trainerIntroDialogueID,
+                path: engagementPath
+            )
+            return true
+        }
+
+        return false
+    }
+
+    func startTrainerEngagement(
+        objectID: String,
+        battleID: String?,
+        introDialogueID: String?,
+        path: [FacingDirection]
+    ) {
+        guard let battleID, let introDialogueID else { return }
+        trainerEngagementTask?.cancel()
+        trainerEngagementTask = Task { [weak self] in
+            await self?.runTrainerEngagement(
+                objectID: objectID,
+                battleID: battleID,
+                introDialogueID: introDialogueID,
+                path: path
+            )
+        }
+    }
+
+    func runTrainerEngagement(
+        objectID: String,
+        battleID: String,
+        introDialogueID: String,
+        path: [FacingDirection]
+    ) async {
+        defer {
+            clearFieldAlert()
+            trainerEngagementTask = nil
+        }
+
+        requestTrainerEncounterMusic(for: battleID)
+        await showTrainerSightAlert(objectID: objectID)
+        guard Task.isCancelled == false else { return }
+
+        if path.isEmpty == false {
+            await animateActors([.init(actorID: objectID, path: path, startPoint: nil)], mode: .scripted)
+        }
+        guard Task.isCancelled == false, var gameplayState else { return }
+        let trainerFacing = gameplayState.objectStates[objectID]?.facing ?? .down
+        gameplayState.facing = oppositeFacingDirection(of: trainerFacing)
+        self.gameplayState = gameplayState
+        showDialogue(
+            id: introDialogueID,
+            completion: .startBattle(battleID: battleID, sourceTrainerObjectID: objectID)
+        )
+    }
+
+    func showTrainerSightAlert(objectID: String) async {
+        fieldAlertState = .init(objectID: objectID, kind: .exclamation)
+        publishSnapshot()
+        try? await Task.sleep(for: .seconds(1))
+        guard Task.isCancelled == false else { return }
+        clearFieldAlert()
+    }
+
+    func clearFieldAlert() {
+        guard fieldAlertState != nil else { return }
+        fieldAlertState = nil
+        publishSnapshot()
+    }
+
+    func trainerEngagementPath(
+        for objectManifest: MapObjectManifest,
+        objectState: RuntimeObjectState,
+        map: MapManifest
+    ) -> [FacingDirection]? {
+        guard let engageDistance = objectManifest.trainerEngageDistance, let gameplayState else {
+            return nil
+        }
+
+        let playerPosition = gameplayState.playerPosition
+        let direction = objectState.facing
+        let distance: Int
+
+        switch direction {
+        case .up where playerPosition.x == objectState.position.x && playerPosition.y < objectState.position.y:
+            distance = objectState.position.y - playerPosition.y
+        case .down where playerPosition.x == objectState.position.x && playerPosition.y > objectState.position.y:
+            distance = playerPosition.y - objectState.position.y
+        case .left where playerPosition.y == objectState.position.y && playerPosition.x < objectState.position.x:
+            distance = objectState.position.x - playerPosition.x
+        case .right where playerPosition.y == objectState.position.y && playerPosition.x > objectState.position.x:
+            distance = playerPosition.x - objectState.position.x
+        default:
+            return nil
+        }
+
+        guard distance > 0, distance <= engageDistance else {
+            return nil
+        }
+
+        let occupiedTiles = occupiedTileSet(excludingObjectIDs: [objectManifest.id], excludingPlayer: true)
+        var current = objectState.position
+        var path: [FacingDirection] = []
+
+        for _ in 0..<max(0, distance - 1) {
+            let next = translated(current, by: direction)
+            guard canActorOccupy(next, from: current, in: map, facing: direction, occupiedTiles: occupiedTiles, reservedTiles: []) else {
+                return nil
+            }
+            path.append(direction)
+            current = next
+        }
+
+        return current == translated(gameplayState.playerPosition, by: oppositeFacingDirection(of: direction)) ? path : nil
+    }
+
+    func isTrainerDefeated(_ manifest: MapObjectManifest) -> Bool {
+        guard let battleID = manifest.trainerBattleID,
+              let completionFlagID = content.trainerBattle(id: battleID)?.completionFlagID else {
+            return false
+        }
+        return hasFlag(completionFlagID)
+    }
+
+    func oppositeFacingDirection(of direction: FacingDirection) -> FacingDirection {
+        switch direction {
+        case .up: return .down
+        case .down: return .up
+        case .left: return .right
+        case .right: return .left
+        }
+    }
+
     func chooseStarter(speciesID: String) {
         scene = .field
         substate = "field"
@@ -143,6 +368,38 @@ extension GameRuntime {
 
     func currentMapObjectManifest(id: String) -> MapObjectManifest? {
         currentMapManifest?.objects.first { $0.id == id }
+    }
+
+    func objectManifest(id: String) -> MapObjectManifest? {
+        content.gameplayManifest.maps.lazy
+            .flatMap(\.objects)
+            .first { $0.id == id }
+    }
+
+    func ensureObjectStateExists(_ objectID: String, in gameplayState: inout GameplayState) {
+        guard gameplayState.objectStates[objectID] == nil, let object = objectManifest(id: objectID) else {
+            return
+        }
+        gameplayState.objectStates[objectID] = RuntimeObjectState(
+            position: object.position,
+            facing: object.facing,
+            visible: object.visibleByDefault,
+            movementMode: nil,
+            idleStepIndex: 0
+        )
+    }
+
+    func resetObjectStateToManifest(_ objectID: String, in gameplayState: inout GameplayState) {
+        guard let object = objectManifest(id: objectID) else {
+            return
+        }
+        gameplayState.objectStates[objectID] = RuntimeObjectState(
+            position: object.position,
+            facing: object.facing,
+            visible: object.visibleByDefault,
+            movementMode: nil,
+            idleStepIndex: 0
+        )
     }
 
     func handleWarpIfNeeded() -> Bool {
@@ -457,7 +714,8 @@ extension GameRuntime {
             dialogueState == nil &&
             gameplayState?.battle == nil &&
             fieldTransitionState == nil &&
-            scriptedMovementTask == nil
+            scriptedMovementTask == nil &&
+            trainerEngagementTask == nil
     }
 
     func runIdleMovementLoop() async {

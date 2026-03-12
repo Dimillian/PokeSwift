@@ -198,10 +198,12 @@ extension GameRuntime {
                 }
             case "setObjectVisibility":
                 if let objectID = step.objectID, let visible = step.visible {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
                     gameplayState.objectStates[objectID]?.visible = visible
                 }
             case "faceObject":
                 if let objectID = step.objectID, let raw = step.stringValue {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
                     gameplayState.objectStates[objectID]?.facing = facingDirection(for: raw)
                 }
             case "facePlayer":

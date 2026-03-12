@@ -165,14 +165,19 @@ extension GameRuntime {
         fieldMovementTask?.cancel()
         scriptedMovementTask?.cancel()
         idleMovementTask?.cancel()
+        trainerEngagementTask?.cancel()
         fieldInteractionTask?.cancel()
 
         playthroughID = envelope.metadata.playthroughID
+        var mergedObjectStates = makeInitialGameplayState().objectStates
+        for (objectID, savedObjectState) in envelope.snapshot.objectStates {
+            mergedObjectStates[objectID] = makeRuntimeObjectState(from: savedObjectState)
+        }
         gameplayState = GameplayState(
             mapID: envelope.snapshot.mapID,
             playerPosition: envelope.snapshot.playerPosition,
             facing: envelope.snapshot.facing,
-            objectStates: envelope.snapshot.objectStates.mapValues { makeRuntimeObjectState(from: $0) },
+            objectStates: mergedObjectStates,
             activeFlags: Set(envelope.snapshot.activeFlags),
             money: envelope.snapshot.money,
             inventory: envelope.snapshot.inventory.map { .init(itemID: $0.itemID, quantity: $0.quantity) },
@@ -203,6 +208,7 @@ extension GameRuntime {
         deferredActions.removeAll()
         currentAudioState = nil
         fieldTransitionState = nil
+        fieldAlertState = nil
         starterChoiceFocusedIndex = 0
         placeholderTitle = nil
         scene = .field

@@ -536,6 +536,69 @@ extension PokeCoreTests {
         XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
     }
+    func testRepoGeneratedViridianForestSouthGateCenterAisleWalksNorthThroughEntrance() async throws {
+        let runtime = try makeRepoRuntime()
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST_SOUTH_GATE"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 4, y: 6)
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "VIRIDIAN_FOREST_SOUTH_GATE")
+        XCTAssertEqual(runtime.currentSnapshot().field?.playerPosition, .init(x: 4, y: 5))
+        XCTAssertEqual(runtime.currentSnapshot().field?.facing, .up)
+
+        try await Task.sleep(nanoseconds: UInt64((runtime.fieldAnimationStepDuration * 1.1) * 1_000_000_000))
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "VIRIDIAN_FOREST_SOUTH_GATE")
+        XCTAssertEqual(runtime.currentSnapshot().field?.playerPosition, .init(x: 4, y: 4))
+        XCTAssertEqual(runtime.currentSnapshot().field?.facing, .up)
+    }
+    func testRepoGeneratedViridianForestTrainerAutoEngagesOnLineOfSight() async throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 25, y: 33)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+
+        runtime.movePlayer(in: .right)
+
+        let alertSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
+            $0.field?.alert?.objectID == "viridian_forest_bug_catcher_1"
+        }
+
+        XCTAssertEqual(alertSnapshot.field?.alert, .init(objectID: "viridian_forest_bug_catcher_1", kind: .exclamation))
+        XCTAssertEqual(alertSnapshot.audio?.trackID, "MUSIC_MEET_MALE_TRAINER")
+        XCTAssertEqual(alertSnapshot.audio?.reason, "trainerEncounter")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"))
+
+        let snapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.dialogue?.dialogueID == "viridian_forest_youngster2_battle"
+        }
+
+        XCTAssertEqual(snapshot.dialogue?.dialogueID, "viridian_forest_youngster2_battle")
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertNil(snapshot.field?.alert)
+
+        runtime.handle(button: .confirm)
+
+        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
+            $0.battle?.battleID == "opp_bug_catcher_1"
+        }
+
+        XCTAssertEqual(battleSnapshot.audio?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(battleSnapshot.audio?.reason, "battle")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
+    }
     func testRepoGeneratedStairWarpUsesExactTileWithFadeAndNoStepOut() async throws {
         let runtime = try makeRepoRuntime()
         runtime.gameplayState = runtime.makeInitialGameplayState()

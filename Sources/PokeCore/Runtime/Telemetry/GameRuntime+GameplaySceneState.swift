@@ -6,6 +6,7 @@ public struct GameplayFieldSceneState: Equatable, Sendable {
     public let shop: ShopTelemetry?
     public let fieldPrompt: FieldPromptTelemetry?
     public let fieldHealing: FieldHealingTelemetry?
+    public let fieldAlert: FieldAlertTelemetry?
     public let transition: FieldTransitionTelemetry?
 
     public init(
@@ -14,6 +15,7 @@ public struct GameplayFieldSceneState: Equatable, Sendable {
         shop: ShopTelemetry?,
         fieldPrompt: FieldPromptTelemetry?,
         fieldHealing: FieldHealingTelemetry?,
+        fieldAlert: FieldAlertTelemetry?,
         transition: FieldTransitionTelemetry?
     ) {
         self.party = party
@@ -21,6 +23,7 @@ public struct GameplayFieldSceneState: Equatable, Sendable {
         self.shop = shop
         self.fieldPrompt = fieldPrompt
         self.fieldHealing = fieldHealing
+        self.fieldAlert = fieldAlert
         self.transition = transition
     }
 }
@@ -46,6 +49,7 @@ extension GameRuntime {
             shop: makeShopTelemetry(),
             fieldPrompt: makeFieldPromptTelemetry(),
             fieldHealing: makeFieldHealingTelemetry(),
+            fieldAlert: makeFieldAlertTelemetry(),
             transition: makeFieldTransitionTelemetry()
         )
     }
@@ -60,6 +64,12 @@ extension GameRuntime {
     func makeFieldTransitionTelemetry() -> FieldTransitionTelemetry? {
         fieldTransitionState.map {
             .init(kind: $0.kind.rawValue, phase: $0.phase.rawValue)
+        }
+    }
+
+    func makeFieldAlertTelemetry() -> FieldAlertTelemetry? {
+        fieldAlertState.map {
+            .init(objectID: $0.objectID, kind: $0.kind)
         }
     }
 }

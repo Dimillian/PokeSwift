@@ -60,6 +60,9 @@ enum PokeContentTestSupport {
                 mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
                 cues: [
                     .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+                    .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
+                    .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
+                    .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
                     .init(
                         id: "mom_heal",
                         assetID: "MUSIC_PKMN_HEALED",
@@ -79,6 +82,24 @@ enum PokeContentTestSupport {
                         sourceLabel: "Music_TitleScreen",
                         sourceFile: "audio/music/titlescreen.asm",
                         entries: [.init(id: "default", sourceLabel: "Music_TitleScreen_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
+                        id: "MUSIC_MEET_MALE_TRAINER",
+                        sourceLabel: "Music_MeetMaleTrainer",
+                        sourceFile: "audio/music/meettrainer.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_MeetMaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
+                        id: "MUSIC_MEET_FEMALE_TRAINER",
+                        sourceLabel: "Music_MeetFemaleTrainer",
+                        sourceFile: "audio/music/meettrainer.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_MeetFemaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
+                        id: "MUSIC_MEET_EVIL_TRAINER",
+                        sourceLabel: "Music_MeetEvilTrainer",
+                        sourceFile: "audio/music/meettrainer.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_MeetEvilTrainer_Ch1", playbackMode: .looping, channels: [])]
                     ),
                     .init(
                         id: "MUSIC_PALLET_TOWN",
@@ -235,8 +256,8 @@ enum PokeContentTestSupport {
                     trainerNumber: 2,
                     displayName: "BLUE",
                     party: [.init(speciesID: "BULBASAUR", level: 5)],
-                    winDialogueID: "hello",
-                    loseDialogueID: "hello",
+                    playerWinDialogueID: "hello",
+                    playerLoseDialogueID: "hello",
                     healsPartyAfterBattle: true,
                     preventsBlackoutOnLoss: true,
                     completionFlagID: "EVENT_GOT_STARTER"

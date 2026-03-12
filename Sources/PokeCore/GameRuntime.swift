@@ -30,6 +30,7 @@ public final class GameRuntime {
     var fieldMovementTask: Task<Void, Never>?
     var scriptedMovementTask: Task<Void, Never>?
     var idleMovementTask: Task<Void, Never>?
+    var trainerEngagementTask: Task<Void, Never>?
     var battlePresentationTask: Task<Void, Never>?
     var fieldInteractionTask: Task<Void, Never>?
     var hasStarted = false
@@ -44,6 +45,7 @@ public final class GameRuntime {
     var recentSoundEffects: [RuntimeSoundEffectState] = []
     public internal(set) var isMusicEnabled = true
     var fieldTransitionState: RuntimeFieldTransitionState?
+    var fieldAlertState: RuntimeFieldAlertState?
     var dialogueAudioRevision = 0
     var isDialogueAudioBlockingInput = false
     var collisionSoundInFlight = false
@@ -190,6 +192,7 @@ public final class GameRuntime {
         fieldTransitionState != nil ||
             fieldMovementTask != nil ||
             scriptedMovementTask != nil ||
+            trainerEngagementTask != nil ||
             fieldInteractionTask != nil ||
             fieldHealingState != nil ||
             shopState != nil
@@ -246,6 +249,7 @@ public final class GameRuntime {
             fieldHealingState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
+            trainerEngagementTask == nil &&
             gameplayState?.battle == nil
     }
 

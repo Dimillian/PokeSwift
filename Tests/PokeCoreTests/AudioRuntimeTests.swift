@@ -115,6 +115,27 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
     }
+    func testRepoGeneratedManualTrainerInteractionUsesEncounterMusicWithoutFieldAlert() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 29, y: 33)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_forest_youngster2_battle")
+        XCTAssertNil(runtime.currentSnapshot().field?.alert)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_MALE_TRAINER")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "trainerEncounter")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"))
+    }
     func testDialoguePageEventsBlockProgressUntilSoundCompletes() {
         let audioPlayer = RecordingAudioPlayer()
         let audioManifest = AudioManifest(
@@ -257,7 +278,12 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TRAINER_BATTLE")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "battle")
 
-        runtime.runPostBattleSequence(won: true)
+        runtime.completeTrainerBattleDialogue(
+            won: true,
+            preventsBlackoutOnLoss: true,
+            postBattleScriptID: "oaks_lab_rival_exit_after_battle",
+            sourceTrainerObjectID: nil
+        )
 
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_RIVAL")
         XCTAssertEqual(runtime.currentSnapshot().audio?.entryID, "alternateStart")
@@ -301,6 +327,74 @@ extension PokeCoreTests {
             message: "battle move did not request the extracted damage sound effect"
         )
     }
+
+    func testRepoGeneratedOrdinaryTrainerLossBlackoutsToViridianPokecenterAndRestartsMapMusic() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 29, y: 33)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_bug_catcher_1")
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.finishBattle(battle: battle, won: false)
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "VIRIDIAN_POKECENTER")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, TilePoint(x: 3, y: 7))
+        XCTAssertEqual(runtime.gameplayState?.facing, .down)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_POKECENTER")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_POKECENTER", entryID: "default"))
+        let lead = try XCTUnwrap(runtime.gameplayState?.playerParty.first)
+        XCTAssertEqual(lead.currentHP, lead.maxHP)
+    }
+
+    func testRepoGeneratedTrainerLossResetsAutoMovedTrainerBeforeBlackout() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 25, y: 33)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+
+        runtime.movePlayer(in: .right)
+
+        _ = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.dialogue?.dialogueID == "viridian_forest_youngster2_battle"
+        }
+
+        runtime.handle(button: .confirm)
+
+        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
+            $0.battle?.battleID == "opp_bug_catcher_1"
+        }
+        XCTAssertEqual(battleSnapshot.battle?.battleID, "opp_bug_catcher_1")
+
+        let displacedTrainer = try XCTUnwrap(runtime.gameplayState?.objectStates["viridian_forest_bug_catcher_1"])
+        XCTAssertEqual(displacedTrainer.position, TilePoint(x: 27, y: 33))
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.finishBattle(battle: battle, won: false)
+        advanceDialogueUntilComplete(runtime)
+
+        let resetTrainer = try XCTUnwrap(runtime.gameplayState?.objectStates["viridian_forest_bug_catcher_1"])
+        XCTAssertEqual(resetTrainer.position, TilePoint(x: 30, y: 33))
+        XCTAssertEqual(resetTrainer.facing, .left)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "VIRIDIAN_POKECENTER")
+    }
+
     func testBattleFinishStopsTrainerMusicBeforePostBattleDialogue() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = GameRuntime(
@@ -325,8 +419,8 @@ extension PokeCoreTests {
                             trainerNumber: 2,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"

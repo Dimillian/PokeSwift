@@ -122,6 +122,9 @@ func fixtureAudioManifest() -> AudioManifest {
         mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
         cues: [
             .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+            .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
+            .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
+            .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
             .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
             .init(
                 id: "mom_heal",
@@ -148,6 +151,24 @@ func fixtureAudioManifest() -> AudioManifest {
                 sourceLabel: "Music_PalletTown",
                 sourceFile: "audio/music/pallettown.asm",
                 entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_MEET_MALE_TRAINER",
+                sourceLabel: "Music_MeetMaleTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetMaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_MEET_FEMALE_TRAINER",
+                sourceLabel: "Music_MeetFemaleTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetFemaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_MEET_EVIL_TRAINER",
+                sourceLabel: "Music_MeetEvilTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetEvilTrainer_Ch1", playbackMode: .looping, channels: [])]
             ),
             .init(
                 id: "MUSIC_TRAINER_BATTLE",

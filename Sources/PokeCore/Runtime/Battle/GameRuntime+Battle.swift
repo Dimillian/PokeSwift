@@ -10,7 +10,9 @@ extension GameRuntime {
         gameplayState.activeFlags.insert("EVENT_GOT_STARTER")
         let rivalSpeciesID = rivalStarter(for: speciesID)
         gameplayState.rivalStarterSpeciesID = rivalSpeciesID
-        gameplayState.objectStates[selectedBallObjectID(for: speciesID)]?.visible = false
+        let ballObjectID = selectedBallObjectID(for: speciesID)
+        ensureObjectStateExists(ballObjectID, in: &gameplayState)
+        gameplayState.objectStates[ballObjectID]?.visible = false
         self.gameplayState = gameplayState
 
         showDialogue(id: "oaks_lab_received_mon_\(speciesID.lowercased())", completion: .returnToField)
@@ -25,7 +27,9 @@ extension GameRuntime {
         }
 
         guard var gameplayState else { return }
-        gameplayState.activeFlags.insert(battle.completionFlagID)
+        if won, battle.completionFlagID.isEmpty == false {
+            gameplayState.activeFlags.insert(battle.completionFlagID)
+        }
         gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
@@ -46,12 +50,36 @@ extension GameRuntime {
         // We do not have defeated-trainer music yet, but the trainer battle track
         // should not continue under the result dialogue.
         stopAllMusic()
-        showDialogue(id: won ? battle.winDialogueID : battle.loseDialogueID, completion: .startPostBattleDialogue(won: won))
+        showDialogue(
+            id: won ? battle.playerWinDialogueID : battle.playerLoseDialogueID,
+            completion: .finishTrainerBattle(
+                won: won,
+                preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
+                postBattleScriptID: battle.postBattleScriptID,
+                sourceTrainerObjectID: battle.sourceTrainerObjectID
+            )
+        )
     }
 
-    func runPostBattleSequence(won: Bool) {
-        let _ = won
-        beginScript(id: "oaks_lab_rival_exit_after_battle")
+    func completeTrainerBattleDialogue(
+        won: Bool,
+        preventsBlackoutOnLoss: Bool,
+        postBattleScriptID: String?,
+        sourceTrainerObjectID: String?
+    ) {
+        if let postBattleScriptID {
+            beginScript(id: postBattleScriptID)
+            return
+        }
+
+        if won == false, preventsBlackoutOnLoss == false {
+            recoverFromTrainerLoss(sourceTrainerObjectID: sourceTrainerObjectID)
+            return
+        }
+
+        scene = .field
+        substate = "field"
+        requestDefaultMapMusic()
     }
 
     func finishWildBattleEscape() {
@@ -128,7 +156,7 @@ extension GameRuntime {
         requestDefaultMapMusic()
     }
 
-    func startBattle(id: String) {
+    func startBattle(id: String, sourceTrainerObjectID: String? = nil) {
         guard var gameplayState,
               let chosenStarter = gameplayState.chosenStarterSpeciesID else {
             return
@@ -154,10 +182,12 @@ extension GameRuntime {
             completionFlagID: battleManifest.completionFlagID,
             healsPartyAfterBattle: battleManifest.healsPartyAfterBattle,
             preventsBlackoutOnLoss: battleManifest.preventsBlackoutOnLoss,
-            winDialogueID: battleManifest.winDialogueID,
-            loseDialogueID: battleManifest.loseDialogueID,
+            playerWinDialogueID: battleManifest.playerWinDialogueID,
+            playerLoseDialogueID: battleManifest.playerLoseDialogueID,
+            postBattleScriptID: battleManifest.postBattleScriptID,
             canRun: false,
             trainerClass: battleManifest.trainerClass,
+            sourceTrainerObjectID: sourceTrainerObjectID,
             playerPokemon: playerPokemon,
             enemyParty: enemyParty,
             enemyActiveIndex: 0,
@@ -236,10 +266,12 @@ extension GameRuntime {
             completionFlagID: "",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            winDialogueID: "",
-            loseDialogueID: "",
+            playerWinDialogueID: "",
+            playerLoseDialogueID: "",
+            postBattleScriptID: nil,
             canRun: true,
             trainerClass: nil,
+            sourceTrainerObjectID: nil,
             playerPokemon: playerPokemon,
             enemyParty: [enemyPokemon],
             enemyActiveIndex: 0,
@@ -313,6 +345,39 @@ extension GameRuntime {
             details: [
                 "partyCount": String(gameplayState.playerParty.count),
             ]
+        )
+    }
+
+    private func recoverFromTrainerLoss(sourceTrainerObjectID: String?) {
+        healParty()
+        guard var gameplayState else { return }
+        if let sourceTrainerObjectID {
+            resetObjectStateToManifest(sourceTrainerObjectID, in: &gameplayState)
+        }
+        if let recoveryDestination = defaultTrainerLossRecoveryDestination() {
+            gameplayState.mapID = recoveryDestination.mapID
+            gameplayState.playerPosition = recoveryDestination.position
+            gameplayState.facing = recoveryDestination.facing
+            gameplayState.activeMapScriptTriggerID = nil
+            gameplayState.activeScriptID = nil
+            gameplayState.activeScriptStep = nil
+            self.gameplayState = gameplayState
+        }
+        fieldAlertState = nil
+        scene = .field
+        substate = "field"
+        requestDefaultMapMusic()
+    }
+
+    private func defaultTrainerLossRecoveryDestination() -> (mapID: String, position: TilePoint, facing: FacingDirection)? {
+        guard let pokecenter = content.map(id: "VIRIDIAN_POKECENTER"),
+              let entranceWarp = pokecenter.warps.first else {
+            return nil
+        }
+        return (
+            mapID: pokecenter.id,
+            position: entranceWarp.origin,
+            facing: entranceWarp.targetFacing
         )
     }
 

@@ -7,6 +7,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let mapMusic = try parseMapMusic(repoRoot: source.repoRoot)
     let eventFlags = try parseEventFlags(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
+    let mapScriptMetadataByMapID = try parseSelectedMapScriptMetadata(repoRoot: source.repoRoot)
 
     let mapDrafts = try currentGameplaySliceMaps.map { definition in
         try makeMapManifestDraft(
@@ -16,7 +17,8 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             defaultMusicID: mapMusic[definition.mapID] ?? fallbackMusicID(for: definition.mapID),
             mapSizes: mapSizes,
             mapHeadersByID: mapHeadersByID,
-            tilesets: tilesets
+            tilesets: tilesets,
+            mapScriptMetadata: mapScriptMetadataByMapID[definition.mapID]
         )
     }
     let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
@@ -25,7 +27,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         maps: maps,
         tilesets: tilesets,
         overworldSprites: buildOverworldSprites(),
-        dialogues: try buildDialogues(repoRoot: source.repoRoot),
+        dialogues: try buildDialogues(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
         fieldInteractions: buildFieldInteractions(),
         eventFlags: EventFlagManifest(flags: eventFlags),
         mapScripts: buildMapScripts(),
@@ -37,7 +39,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         typeEffectiveness: try buildTypeEffectiveness(repoRoot: source.repoRoot),
         wildEncounterTables: try buildWildEncounterTables(repoRoot: source.repoRoot),
         trainerAIMoveChoiceModifications: try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot),
-        trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot),
+        trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
         playerStart: .init(
             mapID: "REDS_HOUSE_2F",
             position: .init(x: 4, y: 4),
@@ -77,6 +79,23 @@ private struct RawMapConnection {
     let offset: Int
 }
 
+private struct StandardTrainerHeaderMetadata {
+    let defeatFlagID: String
+    let engageDistance: Int
+    let battleTextLabel: String
+    let endBattleTextLabel: String
+    let afterBattleTextLabel: String
+}
+
+private struct MapScriptMetadata {
+    let textLabelByTextID: [String: String]
+    let pickupTextIDs: Set<String>
+    let farTextLabelByLocalLabel: [String: String]
+    let trainerHeadersByLabel: [String: StandardTrainerHeaderMetadata]
+    let trainerHeaderLabelByTextLabel: [String: String]
+    let usesStandardTrainerLoop: Bool
+}
+
 private func fallbackMapSize(for mapID: String) -> TileSize {
     switch mapID {
     case "REDS_HOUSE_2F", "REDS_HOUSE_1F", "VIRIDIAN_MART":
@@ -85,12 +104,18 @@ private func fallbackMapSize(for mapID: String) -> TileSize {
         return .init(width: 10, height: 9)
     case "ROUTE_1":
         return .init(width: 10, height: 18)
+    case "ROUTE_2":
+        return .init(width: 10, height: 36)
     case "VIRIDIAN_CITY":
         return .init(width: 20, height: 18)
     case "VIRIDIAN_POKECENTER":
         return .init(width: 7, height: 4)
     case "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
         return .init(width: 4, height: 4)
+    case "VIRIDIAN_FOREST_SOUTH_GATE", "VIRIDIAN_FOREST_NORTH_GATE":
+        return .init(width: 5, height: 4)
+    case "VIRIDIAN_FOREST":
+        return .init(width: 17, height: 24)
     case "OAKS_LAB":
         return .init(width: 5, height: 6)
     default:
@@ -102,12 +127,16 @@ private func fallbackMusicID(for mapID: String) -> String {
     switch mapID {
     case "PALLET_TOWN", "REDS_HOUSE_1F", "REDS_HOUSE_2F":
         return "MUSIC_PALLET_TOWN"
-    case "ROUTE_1":
+    case "ROUTE_1", "ROUTE_2":
         return "MUSIC_ROUTES1"
     case "VIRIDIAN_CITY", "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
         return "MUSIC_CITIES1"
     case "VIRIDIAN_POKECENTER", "VIRIDIAN_MART":
         return "MUSIC_POKECENTER"
+    case "VIRIDIAN_FOREST_SOUTH_GATE", "VIRIDIAN_FOREST_NORTH_GATE":
+        return "MUSIC_CITIES1"
+    case "VIRIDIAN_FOREST":
+        return "MUSIC_DUNGEON2"
     case "OAKS_LAB":
         return "MUSIC_OAKS_LAB"
     default:
@@ -169,6 +198,9 @@ private func parseEventFlags(repoRoot: URL) throws -> [EventFlagDefinition] {
         "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
         "EVENT_2ND_ROUTE22_RIVAL_BATTLE",
         "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
+        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
+        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
     ]
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/event_constants.asm"))
 
@@ -247,6 +279,159 @@ private func parseMapMusic(repoRoot: URL) throws -> [String: String] {
     return result
 }
 
+private func parseSelectedMapScriptMetadata(repoRoot: URL) throws -> [String: MapScriptMetadata] {
+    try currentGameplaySliceMaps.reduce(into: [:]) { result, definition in
+        let scriptPath = scriptPathForSliceMap(definition)
+        let scriptURL = repoRoot.appendingPathComponent(scriptPath)
+        guard FileManager.default.fileExists(atPath: scriptURL.path) else {
+            return
+        }
+        let contents = try String(contentsOf: scriptURL)
+        result[definition.mapID] = parseMapScriptMetadata(contents: contents)
+    }
+}
+
+private func scriptPathForSliceMap(_ definition: CurrentGameplaySliceMapDefinition) -> String {
+    let stem = URL(fileURLWithPath: definition.objectFile).deletingPathExtension().lastPathComponent
+    return "scripts/\(stem).asm"
+}
+
+private func parseMapScriptMetadata(contents: String) -> MapScriptMetadata {
+    let textLabelByTextID = parseMapTextPointerLabels(contents: contents)
+    let pickupTextIDs = Set(textLabelByTextID.compactMap { textID, label in
+        label == "PickUpItemText" ? textID : nil
+    })
+    let farTextLabelByLocalLabel = parseFarTextLabels(contents: contents)
+    let trainerHeadersByLabel = parseStandardTrainerHeaders(contents: contents)
+    let trainerHeaderLabelByTextLabel = parseTalkToTrainerBindings(contents: contents)
+    let usesStandardTrainerLoop =
+        contents.contains("CheckFightingMapTrainers") &&
+        contents.contains("DisplayEnemyTrainerTextAndStartBattle") &&
+        contents.contains("EndTrainerBattle") &&
+        contents.contains("TalkToTrainer")
+
+    return MapScriptMetadata(
+        textLabelByTextID: textLabelByTextID,
+        pickupTextIDs: pickupTextIDs,
+        farTextLabelByLocalLabel: farTextLabelByLocalLabel,
+        trainerHeadersByLabel: trainerHeadersByLabel,
+        trainerHeaderLabelByTextLabel: trainerHeaderLabelByTextLabel,
+        usesStandardTrainerLoop: usesStandardTrainerLoop
+    )
+}
+
+private func parseMapTextPointerLabels(contents: String) -> [String: String] {
+    let regex = try! NSRegularExpression(pattern: #"dw_const\s+([A-Za-z0-9_\.]+),\s+(TEXT_[A-Z0-9_]+)"#)
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return regex.matches(in: contents, range: nsRange).reduce(into: [:]) { result, match in
+        guard
+            let labelRange = Range(match.range(at: 1), in: contents),
+            let textIDRange = Range(match.range(at: 2), in: contents)
+        else {
+            return
+        }
+        result[String(contents[textIDRange])] = String(contents[labelRange])
+    }
+}
+
+private func parseFarTextLabels(contents: String) -> [String: String] {
+    let regex = try! NSRegularExpression(
+        pattern: #"(?ms)^\s*([A-Za-z0-9_\.]+):\s*\n\s*text_far\s+([A-Za-z0-9_\.]+)"#,
+        options: [.anchorsMatchLines]
+    )
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return regex.matches(in: contents, range: nsRange).reduce(into: [:]) { result, match in
+        guard
+            let localRange = Range(match.range(at: 1), in: contents),
+            let farRange = Range(match.range(at: 2), in: contents)
+        else {
+            return
+        }
+        result[String(contents[localRange])] = String(contents[farRange])
+    }
+}
+
+private func parseStandardTrainerHeaders(contents: String) -> [String: StandardTrainerHeaderMetadata] {
+    let regex = try! NSRegularExpression(
+        pattern: #"(?ms)^\s*([A-Za-z0-9_\.]+):\s*\n\s*trainer\s+([A-Z0-9_]+),\s+(\d+),\s+([A-Za-z0-9_\.]+),\s+([A-Za-z0-9_\.]+),\s+([A-Za-z0-9_\.]+)"#,
+        options: [.anchorsMatchLines]
+    )
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return regex.matches(in: contents, range: nsRange).reduce(into: [:]) { result, match in
+        guard
+            let headerRange = Range(match.range(at: 1), in: contents),
+            let flagRange = Range(match.range(at: 2), in: contents),
+            let distanceRange = Range(match.range(at: 3), in: contents),
+            let battleTextRange = Range(match.range(at: 4), in: contents),
+            let endBattleTextRange = Range(match.range(at: 5), in: contents),
+            let afterBattleTextRange = Range(match.range(at: 6), in: contents),
+            let engageDistance = Int(contents[distanceRange])
+        else {
+            return
+        }
+
+        result[String(contents[headerRange])] = StandardTrainerHeaderMetadata(
+            defeatFlagID: String(contents[flagRange]),
+            engageDistance: engageDistance,
+            battleTextLabel: String(contents[battleTextRange]),
+            endBattleTextLabel: String(contents[endBattleTextRange]),
+            afterBattleTextLabel: String(contents[afterBattleTextRange])
+        )
+    }
+}
+
+private func parseTalkToTrainerBindings(contents: String) -> [String: String] {
+    let lines = contents.split(separator: "\n", omittingEmptySubsequences: false)
+    var result: [String: String] = [:]
+    var index = 0
+
+    while index < lines.count {
+        let trimmedLine = lines[index].trimmingCharacters(in: .whitespaces)
+        guard trimmedLine.hasSuffix(":") else {
+            index += 1
+            continue
+        }
+
+        let textLabel = String(trimmedLine.dropLast())
+        var probe = index + 1
+        while probe < lines.count, lines[probe].trimmingCharacters(in: .whitespaces).isEmpty {
+            probe += 1
+        }
+
+        guard probe < lines.count, lines[probe].trimmingCharacters(in: .whitespaces) == "text_asm" else {
+            index += 1
+            continue
+        }
+
+        probe += 1
+        var headerLabel: String?
+        var foundTalkToTrainer = false
+
+        while probe < lines.count {
+            let candidate = lines[probe].trimmingCharacters(in: .whitespaces)
+            if candidate.hasSuffix(":") {
+                break
+            }
+            if headerLabel == nil,
+               let match = candidate.firstMatch(of: /^ld hl,\s*([A-Za-z0-9_\.]+)$/) {
+                headerLabel = String(match.output.1)
+            }
+            if candidate == "call TalkToTrainer" {
+                foundTalkToTrainer = true
+                break
+            }
+            probe += 1
+        }
+
+        if foundTalkToTrainer, let headerLabel {
+            result[textLabel] = headerLabel
+        }
+        index = probe
+    }
+
+    return result
+}
+
 private func parseCollisionSets(repoRoot: URL) throws -> [String: [Int]] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/tilesets/collision_tile_ids.asm"))
     let lines = contents.split(separator: "\n", omittingEmptySubsequences: false)
@@ -283,6 +468,8 @@ private func collisionKey(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1_Coll"
     case "REDS_HOUSE_2": return "RedsHouse2_Coll"
     case "DOJO": return "Dojo_Coll"
+    case "FOREST": return "Forest_Coll"
+    case "FOREST_GATE": return "ForestGate_Coll"
     case "HOUSE": return "House_Coll"
     case "MART": return "Mart_Coll"
     case "POKECENTER": return "Pokecenter_Coll"
@@ -296,6 +483,8 @@ private func tilesetLabel(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1"
     case "REDS_HOUSE_2": return "RedsHouse2"
     case "DOJO": return "Dojo"
+    case "FOREST": return "Forest"
+    case "FOREST_GATE": return "ForestGate"
     case "HOUSE": return "House"
     case "MART": return "Mart"
     case "POKECENTER": return "Pokecenter"
@@ -342,7 +531,8 @@ private func makeMapManifestDraft(
     defaultMusicID: String,
     mapSizes: [String: TileSize],
     mapHeadersByID: [String: ParsedMapHeader],
-    tilesets: [TilesetManifest]
+    tilesets: [TilesetManifest],
+    mapScriptMetadata: MapScriptMetadata?
  ) throws -> MapManifestDraft {
     let mapID = definition.mapID
     guard let mapHeader = mapHeadersByID[mapID] else {
@@ -391,7 +581,7 @@ private func makeMapManifestDraft(
         stepCollisionTileIDs: resolvedStepCollisionTileIDs,
         rawWarps: parseRawWarps(contents: contents),
         backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents),
-        objects: parseObjects(mapID: mapID, contents: contents),
+        objects: parseObjects(mapID: mapID, contents: contents, mapScriptMetadata: mapScriptMetadata),
         connections: connections
     )
 }
@@ -596,6 +786,24 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             collision: tilesetCollisionManifest(for: "DOJO", parsed: collisionData)
         ),
         .init(
+            id: "FOREST",
+            imagePath: "Assets/field/tilesets/forest.png",
+            blocksetPath: "Assets/field/blocksets/forest.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "FOREST", parsed: collisionData)
+        ),
+        .init(
+            id: "FOREST_GATE",
+            imagePath: "Assets/field/tilesets/gate.png",
+            blocksetPath: "Assets/field/blocksets/gate.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "FOREST_GATE", parsed: collisionData)
+        ),
+        .init(
             id: "HOUSE",
             imagePath: "Assets/field/tilesets/house.png",
             blocksetPath: "Assets/field/blocksets/house.bst",
@@ -726,7 +934,7 @@ private func resolveStepCollisionTileIDs(
     blockHeight: Int,
     blockIDs: [Int]
 ) throws -> [Int] {
-    let blocksetData = try Data(contentsOf: repoRoot.appendingPathComponent(blocksetSourcePath(for: tileset.id)))
+    let blocksetData = try Data(contentsOf: repoRoot.appendingPathComponent(tileset.blocksetPath.replacingOccurrences(of: "Assets/field/", with: "gfx/")))
     let blocks = stride(from: 0, to: blocksetData.count, by: 16).map { start in
         Array(blocksetData[start..<(start + 16)]).map(Int.init)
     }
@@ -759,16 +967,6 @@ private func resolveStepCollisionTileIDs(
         }
     }
     return result
-}
-
-private func blocksetSourcePath(for tileset: String) -> String {
-    switch tileset {
-    case "OVERWORLD": return "gfx/blocksets/overworld.bst"
-    case "DOJO": return "gfx/blocksets/gym.bst"
-    case "HOUSE": return "gfx/blocksets/house.bst"
-    case "MART", "POKECENTER": return "gfx/blocksets/pokecenter.bst"
-    default: return "gfx/blocksets/reds_house.bst"
-    }
 }
 
 private func buildOverworldSprites() -> [OverworldSpriteManifest] {
@@ -889,8 +1087,15 @@ private func parseBackgroundEvents(mapID: String, contents: String) -> [Backgrou
     }
 }
 
-private func parseObjects(mapID: String, contents: String) -> [MapObjectManifest] {
-    let regex = try! NSRegularExpression(pattern: #"object_event\s+(\d+),\s+(\d+),\s+([A-Z0-9_]+),\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z0-9_]+)(?:,\s+([A-Z0-9_]+),\s+(\d+))?"#)
+private func parseObjects(
+    mapID: String,
+    contents: String,
+    mapScriptMetadata: MapScriptMetadata?
+) -> [MapObjectManifest] {
+    let regex = try! NSRegularExpression(
+        pattern: #"(?m)^\s*object_event\s+(\d+),\s+(\d+),\s+([A-Z0-9_]+),\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z0-9_]+)(.*)$"#,
+        options: [.anchorsMatchLines]
+    )
     let nsrange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
     return regex.matches(in: contents, range: nsrange).enumerated().compactMap { index, match in
         guard
@@ -911,9 +1116,21 @@ private func parseObjects(mapID: String, contents: String) -> [MapObjectManifest
         let facing = facingDirection(from: String(contents[facingRange]))
         let textID = String(contents[textRange])
         let objectID = objectIDFor(mapID: mapID, index: index, textID: textID)
-        let trainerClass = Range(match.range(at: 7), in: contents).map { String(contents[$0]) }
-        let trainerNumber = Range(match.range(at: 8), in: contents).flatMap { Int(contents[$0]) }
+        let extraTokens = Range(match.range(at: 7), in: contents)
+            .map { parseObjectExtraTokens(from: String(contents[$0])) } ?? []
+        let trainerClass = extraTokens.count >= 2 ? extraTokens[0] : nil
+        let trainerNumber = extraTokens.count >= 2 ? Int(extraTokens[1]) : nil
         let trainerBattleID = trainerBattleIDFor(trainerClass: trainerClass, trainerNumber: trainerNumber)
+        let textLabel = mapScriptMetadata?.textLabelByTextID[textID]
+        let trainerHeader = textLabel
+            .flatMap { mapScriptMetadata?.trainerHeaderLabelByTextLabel[$0] }
+            .flatMap { mapScriptMetadata?.trainerHeadersByLabel[$0] }
+        let pickupItemID =
+            sprite == "SPRITE_POKE_BALL" &&
+            (mapScriptMetadata?.pickupTextIDs.contains(textID) ?? false) &&
+            extraTokens.isEmpty == false
+                ? extraTokens[0]
+                : nil
         let position = TilePoint(x: x, y: y)
 
         return MapObjectManifest(
@@ -934,9 +1151,58 @@ private func parseObjects(mapID: String, contents: String) -> [MapObjectManifest
             trainerBattleID: trainerBattleID,
             trainerClass: trainerClass,
             trainerNumber: trainerNumber,
+            trainerEngageDistance: trainerHeader?.engageDistance,
+            trainerIntroDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.battleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            trainerEndBattleDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.endBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            trainerAfterBattleDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.afterBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            pickupItemID: pickupItemID,
             visibleByDefault: defaultVisibility(for: objectID)
         )
     }
+}
+
+private func parseObjectExtraTokens(from suffix: String) -> [String] {
+    let trimmed = suffix
+        .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+        .first?
+        .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    guard trimmed.isEmpty == false else {
+        return []
+    }
+    return trimmed
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { $0.isEmpty == false }
+}
+
+private func dialogueID(forScriptLabel label: String, mapScriptMetadata: MapScriptMetadata?) -> String {
+    let resolvedLabel = mapScriptMetadata?.farTextLabelByLocalLabel[label] ?? label
+    return normalizedDialogueID(from: resolvedLabel)
+}
+
+private func normalizedDialogueID(from label: String) -> String {
+    let trimmed = label
+        .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+        .replacingOccurrences(of: ".", with: "_")
+    let withoutTextSuffix =
+        trimmed.hasSuffix("Text")
+            ? String(trimmed.dropLast(4))
+            : trimmed
+
+    return withoutTextSuffix
+        .unicodeScalars
+        .reduce(into: "") { partialResult, scalar in
+            let character = Character(scalar)
+            if CharacterSet.uppercaseLetters.contains(scalar), partialResult.isEmpty == false, partialResult.last != "_" {
+                partialResult.append("_")
+            }
+            if CharacterSet.alphanumerics.contains(scalar) {
+                partialResult.append(String(character).lowercased())
+            } else if partialResult.last != "_" {
+                partialResult.append("_")
+            }
+        }
+        .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
 }
 
 private func movementBehavior(
@@ -971,6 +1237,8 @@ private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
     case ("REDS_HOUSE_1F", "TEXT_REDSHOUSE1F_MOM"): return "reds_house_1f_mom"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER1"): return "route_1_youngster_1"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER2"): return "route_1_youngster_2"
+    case ("ROUTE_2", "TEXT_ROUTE2_MOON_STONE"): return "route_2_moon_stone"
+    case ("ROUTE_2", "TEXT_ROUTE2_HP_UP"): return "route_2_hp_up"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_OLD_MAN_SLEEPY"): return "viridian_city_old_man_sleepy"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_OLD_MAN"): return "viridian_city_old_man_awake"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_GIRL"): return "viridian_city_girl"
@@ -987,6 +1255,18 @@ private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_CLERK"): return "viridian_mart_clerk"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_YOUNGSTER"): return "viridian_mart_youngster"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_COOLTRAINER_M"): return "viridian_mart_cooltrainer"
+    case ("VIRIDIAN_FOREST_SOUTH_GATE", "TEXT_VIRIDIANFORESTSOUTHGATE_GIRL"): return "viridian_forest_south_gate_girl"
+    case ("VIRIDIAN_FOREST_SOUTH_GATE", "TEXT_VIRIDIANFORESTSOUTHGATE_LITTLE_GIRL"): return "viridian_forest_south_gate_little_girl"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER1"): return "viridian_forest_youngster_1"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER2"): return "viridian_forest_bug_catcher_1"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER3"): return "viridian_forest_bug_catcher_2"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER4"): return "viridian_forest_bug_catcher_3"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_ANTIDOTE"): return "viridian_forest_antidote"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_POTION"): return "viridian_forest_potion"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_POKE_BALL"): return "viridian_forest_poke_ball"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER5"): return "viridian_forest_youngster_5"
+    case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_SUPER_NERD"): return "viridian_forest_north_gate_super_nerd"
+    case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_GRAMPS"): return "viridian_forest_north_gate_gramps"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_NURSE"): return "viridian_pokecenter_nurse"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
@@ -1131,6 +1411,8 @@ private func displayNameForObject(objectID: String, textID: String) -> String {
     case "pallet_town_fisher": return "Fisher"
     case "reds_house_1f_mom": return "Mom"
     case "route_1_youngster_1", "route_1_youngster_2": return "Youngster"
+    case "route_2_moon_stone": return "Moon Stone"
+    case "route_2_hp_up": return "HP Up"
     case "viridian_city_old_man_sleepy", "viridian_city_old_man_awake": return "Old Man"
     case "viridian_city_girl": return "Girl"
     case "viridian_city_youngster_1", "viridian_city_youngster_2": return "Youngster"
@@ -1145,6 +1427,16 @@ private func displayNameForObject(objectID: String, textID: String) -> String {
     case "viridian_mart_clerk": return "Clerk"
     case "viridian_mart_youngster": return "Youngster"
     case "viridian_mart_cooltrainer": return "Cooltrainer"
+    case "viridian_forest_south_gate_girl": return "Girl"
+    case "viridian_forest_south_gate_little_girl": return "Little Girl"
+    case "viridian_forest_youngster_1", "viridian_forest_youngster_5": return "Youngster"
+    case "viridian_forest_bug_catcher_1", "viridian_forest_bug_catcher_2", "viridian_forest_bug_catcher_3":
+        return "Bug Catcher"
+    case "viridian_forest_antidote": return "Antidote"
+    case "viridian_forest_potion": return "Potion"
+    case "viridian_forest_poke_ball": return "Poke Ball"
+    case "viridian_forest_north_gate_super_nerd": return "Super Nerd"
+    case "viridian_forest_north_gate_gramps": return "Gramps"
     case "viridian_pokecenter_nurse": return "Nurse"
     case "viridian_pokecenter_gentleman": return "Gentleman"
     case "viridian_pokecenter_cooltrainer": return "Cooltrainer"
@@ -1187,6 +1479,8 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER1"): return "route_1_youngster_1_after_sample"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER2"): return "route_1_youngster_2"
     case ("ROUTE_1", "TEXT_ROUTE1_SIGN"): return "route_1_sign"
+    case ("ROUTE_2", "TEXT_ROUTE2_SIGN"): return "route_2_sign"
+    case ("ROUTE_2", "TEXT_ROUTE2_DIGLETTS_CAVE_SIGN"): return "route_2_digletts_cave_sign"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_YOUNGSTER1"): return "viridian_city_youngster_1"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_GAMBLER1"): return "viridian_city_gambler"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_YOUNGSTER2"): return "viridian_city_youngster_2_prompt"
@@ -1211,6 +1505,18 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_CLERK"): return "viridian_mart_clerk_after_parcel"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_YOUNGSTER"): return "viridian_mart_youngster"
     case ("VIRIDIAN_MART", "TEXT_VIRIDIANMART_COOLTRAINER_M"): return "viridian_mart_cooltrainer"
+    case ("VIRIDIAN_FOREST_SOUTH_GATE", "TEXT_VIRIDIANFORESTSOUTHGATE_GIRL"): return "viridian_forest_south_gate_girl"
+    case ("VIRIDIAN_FOREST_SOUTH_GATE", "TEXT_VIRIDIANFORESTSOUTHGATE_LITTLE_GIRL"): return "viridian_forest_south_gate_little_girl"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER1"): return "viridian_forest_youngster_1"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER5"): return "viridian_forest_youngster_5"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_TRAINER_TIPS1"): return "viridian_forest_trainer_tips_1"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_USE_ANTIDOTE_SIGN"): return "viridian_forest_use_antidote_sign"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_TRAINER_TIPS2"): return "viridian_forest_trainer_tips_2"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_TRAINER_TIPS3"): return "viridian_forest_trainer_tips_3"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_TRAINER_TIPS4"): return "viridian_forest_trainer_tips_4"
+    case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_LEAVING_SIGN"): return "viridian_forest_leaving_sign"
+    case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_SUPER_NERD"): return "viridian_forest_north_gate_super_nerd"
+    case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_GRAMPS"): return "viridian_forest_north_gate_gramps"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_LINK_RECEPTIONIST"): return "viridian_pokecenter_link_receptionist"
@@ -1232,22 +1538,31 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     }
 }
 
-private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
+private func buildDialogues(
+    repoRoot: URL,
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [DialogueManifest] {
     let scriptDialogueEvents = try buildScriptDialogueEvents(repoRoot: repoRoot)
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
     let route1 = try String(contentsOf: repoRoot.appendingPathComponent("text/Route1.asm"))
+    let route2 = try String(contentsOf: repoRoot.appendingPathComponent("text/Route2.asm"))
     let viridianCity = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianCity.asm"))
     let viridianSchoolHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianSchoolHouse.asm"))
     let viridianNicknameHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianNicknameHouse.asm"))
     let viridianMart = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianMart.asm"))
+    let viridianForestSouthGate = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForestSouthGate.asm"))
+    let viridianForest = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForest.asm"))
+    let viridianForestNorthGate = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForestNorthGate.asm"))
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
+    let text1 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_1.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
     let text4 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_4.asm"))
     let text6 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_6.asm"))
+    let itemNamesByID = try parseItemNames(repoRoot: repoRoot)
 
-    return [
+    var dialogues: [DialogueManifest] = [
         try extractDialogue(id: "pallet_town_oak_hey_wait", label: "_PalletTownOakHeyWaitDontGoOutText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOakHeyWaitDontGoOutText"] ?? []),
         try extractDialogue(id: "pallet_town_oak_its_unsafe", label: "_PalletTownOakItsUnsafeText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOakItsUnsafeText"] ?? []),
         try extractDialogue(id: "pallet_town_girl", label: "_PalletTownGirlText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownGirlText"] ?? []),
@@ -1266,6 +1581,8 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "route_1_youngster_1_no_room", label: "_Route1Youngster1NoRoomText", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster1NoRoomText"] ?? []),
         try extractDialogue(id: "route_1_youngster_2", label: "_Route1Youngster2Text", from: route1, extraEvents: scriptDialogueEvents["_Route1Youngster2Text"] ?? []),
         try extractDialogue(id: "route_1_sign", label: "_Route1SignText", from: route1, extraEvents: scriptDialogueEvents["_Route1SignText"] ?? []),
+        try extractDialogue(id: "route_2_sign", label: "_Route2SignText", from: route2),
+        try extractDialogue(id: "route_2_digletts_cave_sign", label: "_Route2DiglettsCaveSignText", from: route2),
         try extractDialogue(id: "viridian_city_youngster_1", label: "_ViridianCityYoungster1Text", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster1Text"] ?? []),
         try extractDialogue(id: "viridian_city_gambler", label: "_ViridianCityGambler1GymAlwaysClosedText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGambler1GymAlwaysClosedText"] ?? []),
         try extractDialogue(id: "viridian_city_youngster_2_prompt", label: "_ViridianCityYoungster2YouWantToKnowAboutText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster2YouWantToKnowAboutText"] ?? []),
@@ -1295,6 +1612,19 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "viridian_mart_clerk_after_parcel", label: "_ViridianMartClerkSayHiToOakText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartClerkSayHiToOakText"] ?? []),
         try extractDialogue(id: "viridian_mart_youngster", label: "_ViridianMartYoungsterText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartYoungsterText"] ?? []),
         try extractDialogue(id: "viridian_mart_cooltrainer", label: "_ViridianMartCooltrainerMText", from: viridianMart, extraEvents: scriptDialogueEvents["_ViridianMartCooltrainerMText"] ?? []),
+        try extractDialogue(id: "viridian_forest_south_gate_girl", label: "_ViridianForestSouthGateGirlText", from: viridianForestSouthGate),
+        try extractDialogue(id: "viridian_forest_south_gate_little_girl", label: "_ViridianForestSouthGateLittleGirlText", from: viridianForestSouthGate),
+        try extractDialogue(id: "viridian_forest_youngster_1", label: "_ViridianForestYoungster1Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_youngster_5", label: "_ViridianForestYoungster5Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_trainer_tips_1", label: "_ViridianForestTrainerTips1Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_use_antidote_sign", label: "_ViridianForestUseAntidoteSignText", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_trainer_tips_2", label: "_ViridianForestTrainerTips2Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_trainer_tips_3", label: "_ViridianForestTrainerTips3Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_trainer_tips_4", label: "_ViridianForestTrainerTips4Text", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_leaving_sign", label: "_ViridianForestLeavingSignText", from: viridianForest),
+        try extractDialogue(id: "viridian_forest_north_gate_super_nerd", label: "_ViridianForestNorthGateSuperNerdText", from: viridianForestNorthGate),
+        try extractDialogue(id: "viridian_forest_north_gate_gramps", label: "_ViridianForestNorthGateGrampsText", from: viridianForestNorthGate),
+        try extractDialogue(id: "pickup_no_room", label: "_NoMoreRoomForItemText", from: text1),
         try extractDialogue(id: "pokemart_greeting", label: "_PokemartGreetingText", from: text4),
         try extractDialogue(id: "pokemart_buying_greeting", label: "_PokemartBuyingGreetingText", from: text4),
         try extractDialogue(id: "pokemart_bought_item", label: "_PokemartBoughtItemText", from: text4),
@@ -1360,6 +1690,19 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "oaks_lab_rival_leave_it_all_to_me", label: "_OaksLabRivalLeaveItAllToMeText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalLeaveItAllToMeText"] ?? []),
         try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2, extraEvents: scriptDialogueEvents["_Rival1WinText"] ?? []),
     ]
+
+    dialogues.append(contentsOf: try buildStandardTrainerDialogues(
+        mapIDs: ["VIRIDIAN_FOREST"],
+        textContentsByMapID: [
+            "VIRIDIAN_FOREST": viridianForest,
+        ],
+        mapScriptMetadataByMapID: mapScriptMetadataByMapID
+    ))
+    dialogues.append(contentsOf: buildPickupFoundDialogues(
+        itemIDs: referencedVisiblePickupItemIDs(repoRoot: repoRoot),
+        itemNamesByID: itemNamesByID
+    ))
+    return dialogues
 }
 
 private func buildFieldInteractions() -> [FieldInteractionManifest] {
@@ -1488,6 +1831,83 @@ private func makeReceivedDialogue(id: String, speciesName: String, events: [Dial
 
 private func makeRivalReceivedDialogue(id: String, speciesName: String, events: [DialogueEvent] = []) -> DialogueManifest {
     DialogueManifest(id: id, pages: [.init(lines: ["<RIVAL> received", speciesName + "!"], waitsForPrompt: true, events: events)])
+}
+
+private func buildStandardTrainerDialogues(
+    mapIDs: [String],
+    textContentsByMapID: [String: String],
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [DialogueManifest] {
+    var dialogueByID: [String: DialogueManifest] = [:]
+
+    for mapID in mapIDs {
+        guard
+            let metadata = mapScriptMetadataByMapID[mapID],
+            metadata.usesStandardTrainerLoop,
+            let textContents = textContentsByMapID[mapID]
+        else {
+            continue
+        }
+
+        for trainerHeader in metadata.trainerHeadersByLabel.values {
+            for localLabel in [
+                trainerHeader.battleTextLabel,
+                trainerHeader.endBattleTextLabel,
+                trainerHeader.afterBattleTextLabel,
+            ] {
+                let farLabel = metadata.farTextLabelByLocalLabel[localLabel] ?? localLabel
+                let dialogueID = normalizedDialogueID(from: farLabel)
+                if dialogueByID[dialogueID] != nil {
+                    continue
+                }
+                dialogueByID[dialogueID] = try extractDialogue(id: dialogueID, label: farLabel, from: textContents)
+            }
+        }
+    }
+
+    return dialogueByID.values.sorted { $0.id < $1.id }
+}
+
+private func referencedVisiblePickupItemIDs(repoRoot: URL) -> [String] {
+    var itemIDs: Set<String> = []
+
+    for definition in currentGameplaySliceMaps {
+        let objectURL = repoRoot.appendingPathComponent(definition.objectFile)
+        guard let contents = try? String(contentsOf: objectURL) else { continue }
+        for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+                .trimmingCharacters(in: .whitespaces) ?? ""
+            guard line.hasPrefix("object_event"), line.contains("SPRITE_POKE_BALL") else { continue }
+            let tokens = line
+                .replacingOccurrences(of: "object_event", with: "")
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+            guard tokens.count >= 7 else { continue }
+            itemIDs.insert(tokens[6])
+        }
+    }
+
+    return itemIDs.sorted()
+}
+
+private func buildPickupFoundDialogues(
+    itemIDs: [String],
+    itemNamesByID: [String: String]
+) -> [DialogueManifest] {
+    itemIDs.map { itemID in
+        DialogueManifest(
+            id: pickupFoundDialogueID(for: itemID),
+            pages: [.init(
+                lines: ["<PLAYER> found", "\(itemNamesByID[itemID] ?? itemID)!"],
+                waitsForPrompt: true,
+                events: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")]
+            )]
+        )
+    }
+}
+
+private func pickupFoundDialogueID(for itemID: String) -> String {
+    "pickup_found_\(itemID.lowercased())"
 }
 
 private func dialogueEvent(for line: String) -> DialogueEvent? {
@@ -2772,26 +3192,67 @@ private func parseSignedHexOrDecimal(_ token: String) -> Int? {
     return Int(trimmed)
 }
 
-private func buildTrainerBattles(repoRoot: URL) throws -> [TrainerBattleManifest] {
-    let parties = try parseTrainerParties(repoRoot: repoRoot, label: "Rival1Data")
-    return try [1, 2, 3].map { trainerNumber in
-        guard parties.indices.contains(trainerNumber - 1) else {
+private func buildTrainerBattles(
+    repoRoot: URL,
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [TrainerBattleManifest] {
+    let trainerClassMetadataByID = try parseTrainerClassMetadata(repoRoot: repoRoot)
+    let trainerEncounterCueByClass = try parseTrainerEncounterCueIDs(repoRoot: repoRoot)
+    let rivalClassMetadata = try trainerClassMetadataByID
+        .value(for: "OPP_RIVAL1", missingMessage: "missing trainer metadata for OPP_RIVAL1")
+
+    var battlesByID: [String: TrainerBattleManifest] = [:]
+
+    for trainerNumber in 1...3 {
+        guard rivalClassMetadata.parties.indices.contains(trainerNumber - 1) else {
             throw ExtractorError.invalidArguments("missing Rival1 trainer party \(trainerNumber)")
         }
-        let party = parties[trainerNumber - 1]
-        return TrainerBattleManifest(
+        battlesByID["opp_rival1_\(trainerNumber)"] = TrainerBattleManifest(
             id: "opp_rival1_\(trainerNumber)",
             trainerClass: "OPP_RIVAL1",
             trainerNumber: trainerNumber,
             displayName: "BLUE",
-            party: party,
-            winDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
-            loseDialogueID: "oaks_lab_rival_am_i_great_or_what",
+            party: rivalClassMetadata.parties[trainerNumber - 1],
+            encounterAudioCueID: trainerEncounterCueByClass["OPP_RIVAL1"],
+            playerWinDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
+            playerLoseDialogueID: "oaks_lab_rival_am_i_great_or_what",
             healsPartyAfterBattle: true,
             preventsBlackoutOnLoss: true,
-            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
+            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+            postBattleScriptID: "oaks_lab_rival_exit_after_battle"
         )
     }
+
+    for reference in try referencedSliceTrainerBattles(
+        repoRoot: repoRoot,
+        mapScriptMetadataByMapID: mapScriptMetadataByMapID
+    ) {
+        guard battlesByID[reference.id] == nil else {
+            continue
+        }
+        let classMetadata = try trainerClassMetadataByID
+            .value(for: reference.trainerClass, missingMessage: "missing trainer metadata for \(reference.trainerClass)")
+        guard classMetadata.parties.indices.contains(reference.trainerNumber - 1) else {
+            throw ExtractorError.invalidArguments("missing trainer party \(reference.trainerClass) \(reference.trainerNumber)")
+        }
+
+        battlesByID[reference.id] = TrainerBattleManifest(
+            id: reference.id,
+            trainerClass: reference.trainerClass,
+            trainerNumber: reference.trainerNumber,
+            displayName: classMetadata.displayName,
+            party: classMetadata.parties[reference.trainerNumber - 1],
+            encounterAudioCueID: trainerEncounterCueByClass[reference.trainerClass],
+            playerWinDialogueID: reference.playerWinDialogueID,
+            playerLoseDialogueID: reference.playerLoseDialogueID,
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            completionFlagID: reference.completionFlagID,
+            postBattleScriptID: nil
+        )
+    }
+
+    return battlesByID.values.sorted { $0.id < $1.id }
 }
 
 private func buildTrainerAIMoveChoiceModifications(repoRoot: URL) throws -> [TrainerAIMoveChoiceModificationManifest] {
@@ -2826,8 +3287,128 @@ private func buildTrainerAIMoveChoiceModifications(repoRoot: URL) throws -> [Tra
         }
 }
 
-private func parseTrainerParties(repoRoot: URL, label: String) throws -> [[TrainerPokemonManifest]] {
+private struct TrainerClassMetadata {
+    let displayName: String
+    let parties: [[TrainerPokemonManifest]]
+}
+
+private struct ReferencedSliceTrainerBattle {
+    let id: String
+    let trainerClass: String
+    let trainerNumber: Int
+    let playerWinDialogueID: String
+    let playerLoseDialogueID: String
+    let completionFlagID: String
+}
+
+private func parseTrainerClassMetadata(repoRoot: URL) throws -> [String: TrainerClassMetadata] {
+    let trainerClassIDs = try parseTrainerClassIDs(repoRoot: repoRoot)
+    let displayNames = try parseTrainerDisplayNames(repoRoot: repoRoot)
+    let partyTableLabels = try parseTrainerPartyTableLabels(repoRoot: repoRoot)
+    let partiesContents = try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/parties.asm"))
+
+    guard trainerClassIDs.count == displayNames.count, displayNames.count == partyTableLabels.count else {
+        throw ExtractorError.invalidArguments("trainer class tables are out of sync")
+    }
+
+    return try Dictionary(uniqueKeysWithValues: zip(trainerClassIDs.indices, trainerClassIDs).map { index, trainerClassID in
+        (
+            "OPP_\(trainerClassID)",
+            TrainerClassMetadata(
+                displayName: displayNames[index],
+                parties: try parseTrainerParties(contents: partiesContents, label: partyTableLabels[index])
+            )
+        )
+    })
+}
+
+private func parseTrainerClassIDs(repoRoot: URL) throws -> [String] {
+    try String(contentsOf: repoRoot.appendingPathComponent("constants/trainer_constants.asm"))
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> String? in
+            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+                .trimmingCharacters(in: .whitespaces) ?? ""
+            guard line.hasPrefix("trainer_const ") else { return nil }
+            let trainerClassID = line.replacingOccurrences(of: "trainer_const", with: "").trimmingCharacters(in: .whitespaces)
+            return trainerClassID == "NOBODY" ? nil : trainerClassID
+        }
+}
+
+private func parseTrainerDisplayNames(repoRoot: URL) throws -> [String] {
+    try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/names.asm"))
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> String? in
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            guard line.hasPrefix("li \"") else { return nil }
+            return extractQuotedString(from: line)
+        }
+}
+
+private func parseTrainerPartyTableLabels(repoRoot: URL) throws -> [String] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/parties.asm"))
+    let regex = try NSRegularExpression(pattern: #"^\s*dw\s+([A-Za-z0-9_]+)$"#, options: [.anchorsMatchLines])
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return regex.matches(in: contents, range: nsRange).compactMap { match in
+        guard let labelRange = Range(match.range(at: 1), in: contents) else {
+            return nil
+        }
+        return String(contents[labelRange])
+    }
+}
+
+private func referencedSliceTrainerBattles(
+    repoRoot: URL,
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [ReferencedSliceTrainerBattle] {
+    let objectRegex = try NSRegularExpression(
+        pattern: #"(?m)^\s*object_event\s+\d+,\s+\d+,\s+[A-Z0-9_]+,\s+[A-Z_]+,\s+[A-Z_]+,\s+([A-Z0-9_]+)(.*)$"#,
+        options: [.anchorsMatchLines]
+    )
+    var referencesByID: [String: ReferencedSliceTrainerBattle] = [:]
+
+    for definition in currentGameplaySliceMaps {
+        guard let metadata = mapScriptMetadataByMapID[definition.mapID], metadata.usesStandardTrainerLoop else {
+            continue
+        }
+
+        let contents = try String(contentsOf: repoRoot.appendingPathComponent(definition.objectFile))
+        let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+        for match in objectRegex.matches(in: contents, range: nsRange) {
+            guard
+                let textIDRange = Range(match.range(at: 1), in: contents),
+                let extraRange = Range(match.range(at: 2), in: contents)
+            else {
+                continue
+            }
+
+            let textID = String(contents[textIDRange])
+            let extraTokens = parseObjectExtraTokens(from: String(contents[extraRange]))
+            guard
+                extraTokens.count >= 2,
+                let trainerNumber = Int(extraTokens[1]),
+                let battleID = trainerBattleIDFor(trainerClass: extraTokens[0], trainerNumber: trainerNumber),
+                let textLabel = metadata.textLabelByTextID[textID],
+                let trainerHeaderLabel = metadata.trainerHeaderLabelByTextLabel[textLabel],
+                let trainerHeader = metadata.trainerHeadersByLabel[trainerHeaderLabel]
+            else {
+                continue
+            }
+
+            referencesByID[battleID] = ReferencedSliceTrainerBattle(
+                id: battleID,
+                trainerClass: extraTokens[0],
+                trainerNumber: trainerNumber,
+                playerWinDialogueID: dialogueID(forScriptLabel: trainerHeader.endBattleTextLabel, mapScriptMetadata: metadata),
+                playerLoseDialogueID: dialogueID(forScriptLabel: trainerHeader.endBattleTextLabel, mapScriptMetadata: metadata),
+                completionFlagID: trainerHeader.defeatFlagID
+            )
+        }
+    }
+
+    return referencesByID.values.sorted { $0.id < $1.id }
+}
+
+private func parseTrainerParties(contents: String, label: String) throws -> [[TrainerPokemonManifest]] {
     guard let labelRange = contents.range(of: "\(label):") else {
         throw ExtractorError.invalidArguments("missing trainer party label \(label)")
     }
@@ -2875,6 +3456,91 @@ private func parseTrainerParties(repoRoot: URL, label: String) throws -> [[Train
     return parties
 }
 
+private func parseTrainerEncounterCueIDs(repoRoot: URL) throws -> [String: String] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/encounter_types.asm"))
+    let femaleTrainerClasses = try parseTrainerEncounterClassList(contents: contents, label: "FemaleTrainerList")
+    let evilTrainerClasses = try parseTrainerEncounterClassList(contents: contents, label: "EvilTrainerList")
+
+    return Dictionary(
+        uniqueKeysWithValues: try parseTrainerClassIDs(repoRoot: repoRoot).compactMap { classID in
+            let trainerClass = "OPP_\(classID)"
+            guard let cueID = trainerEncounterCueID(
+                for: trainerClass,
+                femaleTrainerClasses: femaleTrainerClasses,
+                evilTrainerClasses: evilTrainerClasses
+            ) else {
+                return nil
+            }
+            return (trainerClass, cueID)
+        }
+    )
+}
+
+private func parseTrainerEncounterClassList(contents: String, label: String) throws -> Set<String> {
+    guard let labelRange = contents.range(of: "\(label):") else {
+        throw ExtractorError.invalidArguments("missing trainer encounter list \(label)")
+    }
+
+    let tail = contents[labelRange.upperBound...]
+    var trainerClasses: Set<String> = []
+
+    for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        if line.hasPrefix("db -1") {
+            break
+        }
+        guard line.hasPrefix("db ") else {
+            continue
+        }
+
+        let trainerClass = line.replacingOccurrences(of: "db", with: "").trimmingCharacters(in: .whitespaces)
+        guard trainerClass.isEmpty == false else {
+            continue
+        }
+        trainerClasses.insert(trainerClass)
+    }
+
+    return trainerClasses
+}
+
+private func trainerEncounterCueID(
+    for trainerClass: String,
+    femaleTrainerClasses: Set<String>,
+    evilTrainerClasses: Set<String>
+) -> String? {
+    guard trainerEncounterMusicExcludedClasses.contains(trainerClass) == false else {
+        return nil
+    }
+    if evilTrainerClasses.contains(trainerClass) {
+        return "trainer_intro_evil"
+    }
+    if femaleTrainerClasses.contains(trainerClass) {
+        return "trainer_intro_female"
+    }
+    return "trainer_intro_male"
+}
+
+private let trainerEncounterMusicExcludedClasses: Set<String> = [
+    "OPP_RIVAL1",
+    "OPP_RIVAL2",
+    "OPP_RIVAL3",
+    "OPP_BROCK",
+    "OPP_MISTY",
+    "OPP_LT_SURGE",
+    "OPP_ERIKA",
+    "OPP_KOGA",
+    "OPP_BLAINE",
+    "OPP_SABRINA",
+    "OPP_GIOVANNI",
+    "OPP_LORELEI",
+    "OPP_BRUNO",
+    "OPP_AGATHA",
+    "OPP_LANCE",
+]
+
 private func facingDirection(from raw: String) -> FacingDirection {
     switch raw {
     case "UP", "PLAYER_DIR_UP", "SPRITE_FACING_UP": return .up
@@ -2888,5 +3554,14 @@ private func facingDirection(from raw: String) -> FacingDirection {
 private extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
+    }
+}
+
+private extension Dictionary {
+    func value(for key: Key, missingMessage: @autoclosure () -> String) throws -> Value {
+        guard let value = self[key] else {
+            throw ExtractorError.invalidArguments(missingMessage())
+        }
+        return value
     }
 }

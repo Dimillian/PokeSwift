@@ -57,6 +57,7 @@ extension GameRuntime {
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
             renderMode: currentFieldRenderMode,
+            alert: makeFieldAlertTelemetry(),
             transition: makeFieldTransitionTelemetry()
         )
     }

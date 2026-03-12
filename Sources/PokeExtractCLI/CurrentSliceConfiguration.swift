@@ -49,6 +49,14 @@ let currentGameplaySliceMaps: [CurrentGameplaySliceMapDefinition] = [
         isOutdoor: true
     ),
     .init(
+        mapID: "ROUTE_2",
+        displayName: "Route 2",
+        objectFile: "data/maps/objects/Route2.asm",
+        blockFile: "maps/Route2.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
         mapID: "VIRIDIAN_SCHOOL_HOUSE",
         displayName: "Viridian School House",
         objectFile: "data/maps/objects/ViridianSchoolHouse.asm",
@@ -81,6 +89,30 @@ let currentGameplaySliceMaps: [CurrentGameplaySliceMapDefinition] = [
         isOutdoor: false
     ),
     .init(
+        mapID: "VIRIDIAN_FOREST_SOUTH_GATE",
+        displayName: "Viridian Forest South Gate",
+        objectFile: "data/maps/objects/ViridianForestSouthGate.asm",
+        blockFile: "maps/ViridianForestSouthGate.blk",
+        parentMapID: "ROUTE_2",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "VIRIDIAN_FOREST",
+        displayName: "Viridian Forest",
+        objectFile: "data/maps/objects/ViridianForest.asm",
+        blockFile: "maps/ViridianForest.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "VIRIDIAN_FOREST_NORTH_GATE",
+        displayName: "Viridian Forest North Gate",
+        objectFile: "data/maps/objects/ViridianForestNorthGate.asm",
+        blockFile: "maps/ViridianForestNorthGate.blk",
+        parentMapID: "ROUTE_2",
+        isOutdoor: false
+    ),
+    .init(
         mapID: "OAKS_LAB",
         displayName: "Oak's Lab",
         objectFile: "data/maps/objects/OaksLab.asm",
@@ -98,6 +130,8 @@ let currentGameplaySliceItemIDs = [
     "ANTIDOTE",
     "PARLYZ_HEAL",
     "BURN_HEAL",
+    "MOON_STONE",
+    "HP_UP",
     "OAKS_PARCEL",
 ]
 
@@ -126,5 +160,13 @@ let currentGameplaySliceWildEncounterMaps: [CurrentGameplaySliceWildEncounterDef
     .init(
         mapID: "ROUTE_1",
         path: "data/wild/maps/Route1.asm"
+    ),
+    .init(
+        mapID: "ROUTE_2",
+        path: "data/wild/maps/Route2.asm"
+    ),
+    .init(
+        mapID: "VIRIDIAN_FOREST",
+        path: "data/wild/maps/ViridianForest.asm"
     ),
 ]

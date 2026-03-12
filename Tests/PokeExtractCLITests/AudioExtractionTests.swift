@@ -18,7 +18,11 @@ final class AudioExtractionTests: XCTestCase {
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
+                .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_FOREST_SOUTH_GATE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
                 .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
@@ -31,6 +35,9 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(cueByID["oak_intro"]?.trackID, "MUSIC_MEET_PROF_OAK")
         XCTAssertEqual(cueByID["rival_intro"]?.trackID, "MUSIC_MEET_RIVAL")
         XCTAssertEqual(cueByID["rival_exit"]?.entryID, "alternateStart")
+        XCTAssertEqual(cueByID["trainer_intro_male"]?.trackID, "MUSIC_MEET_MALE_TRAINER")
+        XCTAssertEqual(cueByID["trainer_intro_female"]?.trackID, "MUSIC_MEET_FEMALE_TRAINER")
+        XCTAssertEqual(cueByID["trainer_intro_evil"]?.trackID, "MUSIC_MEET_EVIL_TRAINER")
         XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
         XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
         XCTAssertEqual(cueByID["mom_heal"]?.waitForCompletion, true)
@@ -45,9 +52,13 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_OAKS_LAB",
             "MUSIC_ROUTES1",
             "MUSIC_CITIES1",
+            "MUSIC_DUNGEON2",
             "MUSIC_POKECENTER",
             "MUSIC_MEET_PROF_OAK",
             "MUSIC_MEET_RIVAL",
+            "MUSIC_MEET_MALE_TRAINER",
+            "MUSIC_MEET_FEMALE_TRAINER",
+            "MUSIC_MEET_EVIL_TRAINER",
             "MUSIC_TRAINER_BATTLE",
             "MUSIC_PKMN_HEALED",
         ]
@@ -198,9 +209,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 10)
-        XCTAssertEqual(decoded.cues.count, 7)
-        XCTAssertEqual(decoded.tracks.count, 10)
+        XCTAssertEqual(decoded.mapRoutes.count, 14)
+        XCTAssertEqual(decoded.cues.count, 10)
+        XCTAssertEqual(decoded.tracks.count, 14)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }

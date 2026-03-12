@@ -86,6 +86,11 @@ extension GameRuntime {
         requestAudioCue(id: "trainer_battle", reason: "battle")
     }
 
+    func requestTrainerEncounterMusic(for battleID: String) {
+        guard let cueID = content.trainerEncounterAudioCueID(for: battleID) else { return }
+        requestAudioCue(id: cueID, reason: "trainerEncounter")
+    }
+
     func requestRivalExitMusic() {
         requestAudioCue(id: "rival_exit", reason: "scriptOverride")
     }

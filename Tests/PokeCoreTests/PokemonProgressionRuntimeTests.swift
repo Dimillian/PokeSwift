@@ -521,8 +521,8 @@ extension PokeCoreTests {
                             trainerNumber: 1,
                             displayName: "BLUE",
                             party: [.init(speciesID: "BULBASAUR", level: 5)],
-                            winDialogueID: "win",
-                            loseDialogueID: "lose",
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: true,
                             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"

@@ -52,10 +52,19 @@ extension GameRuntime {
             scene = .field
             substate = "field"
             finalizeStarterChoiceSequence()
-        case let .startPostBattleDialogue(won):
+        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, sourceTrainerObjectID):
             scene = .field
             substate = "field"
-            runPostBattleSequence(won: won)
+            completeTrainerBattleDialogue(
+                won: won,
+                preventsBlackoutOnLoss: preventsBlackoutOnLoss,
+                postBattleScriptID: postBattleScriptID,
+                sourceTrainerObjectID: sourceTrainerObjectID
+            )
+        case let .startBattle(battleID, sourceTrainerObjectID):
+            scene = .field
+            substate = "field"
+            startBattle(id: battleID, sourceTrainerObjectID: sourceTrainerObjectID)
         case let .showDialogue(dialogueID, completionAction):
             scene = .field
             substate = "field"
@@ -155,7 +164,11 @@ extension GameRuntime {
                 beginScript(id: scriptID)
                 return
             case let .hideObject(objectID):
-                gameplayState?.objectStates[objectID]?.visible = false
+                if var gameplayState {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
+                    gameplayState.objectStates[objectID]?.visible = false
+                    self.gameplayState = gameplayState
+                }
                 scene = .field
                 substate = "field"
             case .restoreMapMusic:

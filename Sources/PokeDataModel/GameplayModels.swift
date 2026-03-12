@@ -180,6 +180,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
     public let trainerBattleID: String?
     public let trainerClass: String?
     public let trainerNumber: Int?
+    public let trainerEngageDistance: Int?
+    public let trainerIntroDialogueID: String?
+    public let trainerEndBattleDialogueID: String?
+    public let trainerAfterBattleDialogueID: String?
+    public let pickupItemID: String?
     public let visibleByDefault: Bool
 
     public init(
@@ -196,6 +201,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         trainerBattleID: String?,
         trainerClass: String? = nil,
         trainerNumber: Int? = nil,
+        trainerEngageDistance: Int? = nil,
+        trainerIntroDialogueID: String? = nil,
+        trainerEndBattleDialogueID: String? = nil,
+        trainerAfterBattleDialogueID: String? = nil,
+        pickupItemID: String? = nil,
         visibleByDefault: Bool
     ) {
         self.id = id
@@ -211,6 +221,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         self.trainerBattleID = trainerBattleID
         self.trainerClass = trainerClass
         self.trainerNumber = trainerNumber
+        self.trainerEngageDistance = trainerEngageDistance
+        self.trainerIntroDialogueID = trainerIntroDialogueID
+        self.trainerEndBattleDialogueID = trainerEndBattleDialogueID
+        self.trainerAfterBattleDialogueID = trainerAfterBattleDialogueID
+        self.pickupItemID = pickupItemID
         self.visibleByDefault = visibleByDefault
     }
 
@@ -238,6 +253,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         case trainerBattleID
         case trainerClass
         case trainerNumber
+        case trainerEngageDistance
+        case trainerIntroDialogueID
+        case trainerEndBattleDialogueID
+        case trainerAfterBattleDialogueID
+        case pickupItemID
         case visibleByDefault
     }
 
@@ -265,6 +285,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         trainerBattleID = try container.decodeIfPresent(String.self, forKey: .trainerBattleID)
         trainerClass = try container.decodeIfPresent(String.self, forKey: .trainerClass)
         trainerNumber = try container.decodeIfPresent(Int.self, forKey: .trainerNumber)
+        trainerEngageDistance = try container.decodeIfPresent(Int.self, forKey: .trainerEngageDistance)
+        trainerIntroDialogueID = try container.decodeIfPresent(String.self, forKey: .trainerIntroDialogueID)
+        trainerEndBattleDialogueID = try container.decodeIfPresent(String.self, forKey: .trainerEndBattleDialogueID)
+        trainerAfterBattleDialogueID = try container.decodeIfPresent(String.self, forKey: .trainerAfterBattleDialogueID)
+        pickupItemID = try container.decodeIfPresent(String.self, forKey: .pickupItemID)
         visibleByDefault = try container.decode(Bool.self, forKey: .visibleByDefault)
     }
 
@@ -283,6 +308,11 @@ public struct MapObjectManifest: Codable, Equatable, Sendable {
         try container.encodeIfPresent(trainerBattleID, forKey: .trainerBattleID)
         try container.encodeIfPresent(trainerClass, forKey: .trainerClass)
         try container.encodeIfPresent(trainerNumber, forKey: .trainerNumber)
+        try container.encodeIfPresent(trainerEngageDistance, forKey: .trainerEngageDistance)
+        try container.encodeIfPresent(trainerIntroDialogueID, forKey: .trainerIntroDialogueID)
+        try container.encodeIfPresent(trainerEndBattleDialogueID, forKey: .trainerEndBattleDialogueID)
+        try container.encodeIfPresent(trainerAfterBattleDialogueID, forKey: .trainerAfterBattleDialogueID)
+        try container.encodeIfPresent(pickupItemID, forKey: .pickupItemID)
         try container.encode(visibleByDefault, forKey: .visibleByDefault)
     }
 
@@ -1210,11 +1240,13 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
     public let trainerNumber: Int
     public let displayName: String
     public let party: [TrainerPokemonManifest]
-    public let winDialogueID: String
-    public let loseDialogueID: String
+    public let encounterAudioCueID: String?
+    public let playerWinDialogueID: String
+    public let playerLoseDialogueID: String
     public let healsPartyAfterBattle: Bool
     public let preventsBlackoutOnLoss: Bool
     public let completionFlagID: String
+    public let postBattleScriptID: String?
 
     public init(
         id: String,
@@ -1222,22 +1254,26 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         trainerNumber: Int,
         displayName: String,
         party: [TrainerPokemonManifest],
-        winDialogueID: String,
-        loseDialogueID: String,
+        encounterAudioCueID: String? = nil,
+        playerWinDialogueID: String,
+        playerLoseDialogueID: String,
         healsPartyAfterBattle: Bool,
         preventsBlackoutOnLoss: Bool,
-        completionFlagID: String
+        completionFlagID: String,
+        postBattleScriptID: String? = nil
     ) {
         self.id = id
         self.trainerClass = trainerClass
         self.trainerNumber = trainerNumber
         self.displayName = displayName
         self.party = party
-        self.winDialogueID = winDialogueID
-        self.loseDialogueID = loseDialogueID
+        self.encounterAudioCueID = encounterAudioCueID
+        self.playerWinDialogueID = playerWinDialogueID
+        self.playerLoseDialogueID = playerLoseDialogueID
         self.healsPartyAfterBattle = healsPartyAfterBattle
         self.preventsBlackoutOnLoss = preventsBlackoutOnLoss
         self.completionFlagID = completionFlagID
+        self.postBattleScriptID = postBattleScriptID
     }
 }
 
