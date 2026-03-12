@@ -104,6 +104,7 @@ extension GameRuntime {
         stage: BattlePresentationStage,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide?,
+        hidePlayerPokemon: Bool = false,
         meterAnimation: BattleMeterAnimationTelemetry?,
         transitionStyle: BattleTransitionStyle
     ) {
@@ -111,6 +112,7 @@ extension GameRuntime {
         battle.presentation.revision += 1
         battle.presentation.uiVisibility = uiVisibility
         battle.presentation.activeSide = activeSide
+        battle.presentation.hidePlayerPokemon = hidePlayerPokemon
         battle.presentation.meterAnimation = meterAnimation
         battle.presentation.transitionStyle = transitionStyle
     }
@@ -127,16 +129,36 @@ extension GameRuntime {
         guard beats.isEmpty == false else { return }
 
         battlePresentationTask = Task { [self] in
-            for beat in beats {
+            for (index, beat) in beats.enumerated() {
                 if beat.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(beat.delay * 1_000_000_000))
                 }
                 guard Task.isCancelled == false else { return }
                 applyBattlePresentationBeat(beat, battleID: battleID)
+
+                if beat.requiresConfirmAfterDisplay {
+                    let remainingBeats = Array(beats.dropFirst(index + 1))
+                    if remainingBeats.isEmpty == false {
+                        prependBattlePresentationBeats(remainingBeats, battleID: battleID)
+                    }
+                    battlePresentationTask = nil
+                    return
+                }
             }
 
             battlePresentationTask = nil
         }
+    }
+
+    func prependBattlePresentationBeats(_ beats: [RuntimeBattlePresentationBeat], battleID: String) {
+        guard var gameplayState, var battle = gameplayState.battle, battle.battleID == battleID else {
+            return
+        }
+
+        battle.pendingPresentationBatches.insert(beats, at: 0)
+        gameplayState.battle = battle
+        self.gameplayState = gameplayState
+        publishSnapshot()
     }
 
     func applyBattlePresentationBeat(_ beat: RuntimeBattlePresentationBeat, battleID: String) {
@@ -181,6 +203,7 @@ extension GameRuntime {
             stage: beat.stage,
             uiVisibility: beat.uiVisibility,
             activeSide: beat.activeSide,
+            hidePlayerPokemon: beat.hidePlayerPokemon,
             meterAnimation: beat.meterAnimation,
             transitionStyle: beat.transitionStyle
         )
@@ -203,7 +226,8 @@ extension GameRuntime {
     func makeIntroPresentationBeats(
         openingMessage: String,
         transitionStyle: BattleTransitionStyle,
-        requiresConfirmAfterReveal: Bool = false
+        requiresConfirmAfterReveal: Bool = false,
+        pendingActionAfterReveal: RuntimeBattlePendingAction? = nil
     ) -> [RuntimeBattlePresentationBeat] {
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
@@ -248,12 +272,12 @@ extension GameRuntime {
                 uiVisibility: .visible,
                 transitionStyle: transitionStyle,
                 message: openingMessage,
-                phase: requiresConfirmAfterReveal ? .turnText : .introText,
-                pendingAction: requiresConfirmAfterReveal ? .moveSelection : nil
+                phase: requiresConfirmAfterReveal || pendingActionAfterReveal != nil ? .turnText : .introText,
+                pendingAction: pendingActionAfterReveal ?? (requiresConfirmAfterReveal ? .moveSelection : nil)
             ),
         ]
 
-        if requiresConfirmAfterReveal == false {
+        if requiresConfirmAfterReveal == false && pendingActionAfterReveal == nil {
             beats.append(commandReadyBeat(delay: battlePresentationDelay(base: 0.18)))
         }
 
@@ -324,6 +348,7 @@ extension GameRuntime {
                 stage: .attackWindup,
                 uiVisibility: .visible,
                 activeSide: action.side,
+                requiresConfirmAfterDisplay: true,
                 message: action.messages.first,
                 phase: .turnText,
                 playerPokemon: attackerPokemon,
@@ -360,6 +385,7 @@ extension GameRuntime {
                     stage: .resultText,
                     uiVisibility: .visible,
                     activeSide: action.side == .player ? .enemy : .player,
+                    requiresConfirmAfterDisplay: statusMessage != nil,
                     message: statusMessage,
                     playerPokemon: defenderMutationPlayer,
                     enemyPokemon: defenderMutationEnemy
@@ -377,14 +403,21 @@ extension GameRuntime {
         }
 
         for message in remainingMessages {
-            let stage: BattlePresentationStage = message.contains("fainted!") ? .faint : .resultText
+            let isFaintMessage = message.contains("fainted!")
+            let stage: BattlePresentationStage = isFaintMessage ? .faint : .resultText
+            let displayMessage = isFaintMessage
+                ? (action.side == .player
+                    ? enemyFaintedText(for: action.updatedDefender)
+                    : playerFaintedText(for: action.updatedDefender))
+                : message
             beats.append(
                 .init(
                     delay: battlePresentationDelay(base: 0.24),
                     stage: stage,
                     uiVisibility: .visible,
                     activeSide: action.side == .player ? .enemy : .player,
-                    message: message
+                    requiresConfirmAfterDisplay: true,
+                    message: displayMessage
                 )
             )
         }
@@ -431,10 +464,11 @@ extension GameRuntime {
         phase: RuntimeBattlePhase = .turnText,
         pendingAction: RuntimeBattlePendingAction
     ) {
+        let pagedMessages = paginatedBattleMessages(messages)
         battle.pendingAction = pendingAction
         battle.phase = phase
-        battle.queuedMessages = messages
-        battle.message = messages.first ?? battlePrompt(for: .moveSelection)
+        battle.queuedMessages = pagedMessages
+        battle.message = pagedMessages.first ?? battlePrompt(for: .moveSelection)
         if battle.queuedMessages.isEmpty == false {
             battle.queuedMessages.removeFirst()
         }
@@ -449,6 +483,12 @@ extension GameRuntime {
 
         guard let pendingAction = battle.pendingAction else {
             returnToBattleMoveSelection(battle: &battle)
+            if battle.presentation.stage != .commandReady {
+                battle.presentation.stage = .commandReady
+                battle.presentation.revision += 1
+                battle.presentation.transitionStyle = .none
+                battle.presentation.uiVisibility = .visible
+            }
             return
         }
 
@@ -456,7 +496,7 @@ extension GameRuntime {
         switch pendingAction {
         case .moveSelection:
             returnToBattleMoveSelection(battle: &battle)
-            if battle.presentation.stage == .introReveal {
+            if battle.presentation.stage != .commandReady {
                 battle.presentation.stage = .commandReady
                 battle.presentation.revision += 1
                 battle.presentation.transitionStyle = .none
@@ -469,6 +509,10 @@ extension GameRuntime {
             finishWildBattleEscape()
         case .captured:
             finishWildBattleCapture(battle: battle)
+        case let .enterTrainerAboutToUseDecision(nextIndex):
+            enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
+        case let .completeTrainerVictory(payout):
+            completeTrainerVictory(battle: battle, payout: payout)
         case .continueSwitchTurn:
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:
@@ -515,7 +559,11 @@ extension GameRuntime {
         )
     }
 
-    func scheduleNextEnemySendOut(battle: inout RuntimeBattleState, nextIndex: Int) {
+    func scheduleNextEnemySendOut(
+        battle: inout RuntimeBattleState,
+        nextIndex: Int,
+        pendingAction: RuntimeBattlePendingAction = .moveSelection
+    ) {
         guard battle.enemyParty.indices.contains(nextIndex) else {
             returnToBattleMoveSelection(battle: &battle)
             return
@@ -536,16 +584,86 @@ extension GameRuntime {
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .enemy,
-                    message: "\(battle.trainerName) sent out \(nextEnemy.nickname)!",
+                    message: trainerSentOutText(trainerName: battle.trainerName, pokemon: nextEnemy),
+                    phase: .turnText,
+                    pendingAction: pendingAction,
                     enemyParty: battle.enemyParty,
                     enemyActiveIndex: nextIndex
-                ),
-                commandReadyBeat(
-                    delay: battlePresentationDelay(base: 0.26),
-                    playerPokemon: battle.playerPokemon
                 ),
             ],
             battleID: battle.battleID
         )
+    }
+
+    func makePlayerSendOutBatch(
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState
+    ) -> [RuntimeBattlePresentationBeat] {
+        [
+            .init(
+                delay: battlePresentationDelay(base: 0.34),
+                stage: .enemySendOut,
+                uiVisibility: .visible,
+                activeSide: .player,
+                message: playerSendOutText(for: playerPokemon, against: enemyPokemon),
+                phase: .turnText,
+                playerPokemon: playerPokemon
+            ),
+        ]
+    }
+
+    func makeTrainerOpeningSendOutBatches(
+        battle: RuntimeBattleState
+    ) -> [[RuntimeBattlePresentationBeat]] {
+        [
+            [
+            .init(
+                delay: battlePresentationDelay(base: 0.34),
+                    stage: .enemySendOut,
+                    uiVisibility: .visible,
+                    activeSide: .enemy,
+                    hidePlayerPokemon: true,
+                    message: trainerSentOutText(trainerName: battle.trainerName, pokemon: battle.enemyPokemon),
+                    phase: .turnText,
+                    enemyParty: battle.enemyParty,
+                enemyActiveIndex: battle.enemyActiveIndex
+            ),
+            ],
+            makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon
+            )
+        ]
+    }
+
+    func enterTrainerAboutToUseDecision(battle: inout RuntimeBattleState, nextIndex: Int) {
+        guard battle.enemyParty.indices.contains(nextIndex) else {
+            returnToBattleMoveSelection(battle: &battle)
+            return
+        }
+
+        let message = trainerAboutToUseMessages(
+            trainerName: battle.trainerName,
+            pokemon: battle.enemyParty[nextIndex]
+        ).last ?? trainerAboutToUseText(
+            trainerName: battle.trainerName,
+            pokemon: battle.enemyParty[nextIndex]
+        )
+        let previousMoveIndex = battle.focusedMoveIndex
+        battle.phase = .trainerAboutToUseDecision
+        battle.focusedMoveIndex = 1
+        battle.rewardContinuation = .aboutToUse(index: nextIndex, previousMoveIndex: previousMoveIndex)
+        battle.pendingAction = nil
+        battle.pendingPresentationBatches = []
+        battle.queuedMessages = []
+        battle.message = paginatedBattleMessage(message).last ?? message
+    }
+
+    func completeTrainerVictory(battle: RuntimeBattleState, payout: Int) {
+        if var gameplayState {
+            gameplayState.money += payout
+            self.gameplayState = gameplayState
+        }
+        finishBattle(battle: battle, won: true)
     }
 }

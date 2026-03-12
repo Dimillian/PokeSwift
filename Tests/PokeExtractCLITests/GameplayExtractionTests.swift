@@ -318,8 +318,21 @@ final class GameplayExtractionTests: XCTestCase {
             [.init(speciesID: "WEEDLE", level: 6), .init(speciesID: "CATERPIE", level: 6)]
         )
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.encounterAudioCueID, "trainer_intro_male")
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.trainerSpritePath,
+            "Assets/battle/trainers/bugcatcher.png"
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.baseRewardMoney, 10)
+        XCTAssertNil(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.playerLoseDialogueID)
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.party, [.init(speciesID: "SQUIRTLE", level: 5)])
         XCTAssertNil(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.encounterAudioCueID)
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.trainerSpritePath,
+            "Assets/battle/trainers/rival1.png"
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.baseRewardMoney, 35)
+        XCTAssertEqual(manifest.commonBattleText.wantsToFight, "{trainerName} wants to fight!")
+        XCTAssertEqual(manifest.commonBattleText.moneyForWinning, "{playerName} got ¥{money} for winning!")
         XCTAssertEqual(manifest.tilesets.first?.collision.passableTileIDs, [0x01, 0x02, 0x03, 0x11, 0x12, 0x13, 0x14, 0x1c, 0x1a])
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_2F" }?.warps.first?.targetPosition, .init(x: 7, y: 1))
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_1F" }?.warps.first?.targetPosition, .init(x: 5, y: 5))
@@ -540,6 +553,8 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" })
+        XCTAssertEqual(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.trainerSpritePath, "Assets/battle/trainers/bugcatcher.png")
+        XCTAssertEqual(decoded.commonBattleText.trainerSentOut, "{trainerName} sent out {enemyPokemon}!")
         XCTAssertGreaterThan(decoded.typeEffectiveness.count, 0)
         XCTAssertEqual(decoded.tilesets.first?.imagePath, "Assets/field/tilesets/reds_house.png")
         XCTAssertEqual(decoded.tilesets.first?.blocksetPath, "Assets/field/blocksets/reds_house.bst")

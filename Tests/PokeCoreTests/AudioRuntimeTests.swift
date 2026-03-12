@@ -115,7 +115,7 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
     }
-    func testRepoGeneratedManualTrainerInteractionUsesEncounterMusicWithoutFieldAlert() throws {
+    func testRepoGeneratedManualTrainerInteractionUsesEncounterMusicThenFieldIntroBeforeBattle() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
@@ -130,11 +130,42 @@ extension PokeCoreTests {
 
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_forest_youngster2_battle")
+        waitUntil(
+            runtime.currentSnapshot().dialogue != nil,
+            message: "manual trainer interaction did not show the field intro dialogue"
+        )
+
+        XCTAssertNil(runtime.currentSnapshot().battle)
         XCTAssertNil(runtime.currentSnapshot().field?.alert)
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_MEET_MALE_TRAINER")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "trainerEncounter")
-        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"))
+        XCTAssertEqual(
+            Array(audioPlayer.musicRequests.prefix(1)),
+            [
+                .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"),
+            ]
+        )
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .battle && $0.battle?.battleID == "opp_bug_catcher_1"
+        })
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleID == "opp_bug_catcher_1",
+            message: "manual trainer interaction did not start the battle"
+        )
+
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleID, "opp_bug_catcher_1")
+        XCTAssertNil(runtime.currentSnapshot().field?.alert)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "battle")
+        XCTAssertEqual(
+            Array(audioPlayer.musicRequests.prefix(2)),
+            [
+                .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"),
+                .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"),
+            ]
+        )
     }
     func testDialoguePageEventsBlockProgressUntilSoundCompletes() {
         let audioPlayer = RecordingAudioPlayer()
@@ -317,6 +348,7 @@ extension PokeCoreTests {
         drainBattleText(runtime)
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
+        advanceBattlePresentationBatch(runtime)
 
         waitUntil(
             audioPlayer.soundEffectRequests.contains {
@@ -371,13 +403,7 @@ extension PokeCoreTests {
 
         runtime.movePlayer(in: .right)
 
-        _ = try await waitForSnapshot(runtime, timeout: 2.0) {
-            $0.dialogue?.dialogueID == "viridian_forest_youngster2_battle"
-        }
-
-        runtime.handle(button: .confirm)
-
-        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
+        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
             $0.battle?.battleID == "opp_bug_catcher_1"
         }
         XCTAssertEqual(battleSnapshot.battle?.battleID, "opp_bug_catcher_1")

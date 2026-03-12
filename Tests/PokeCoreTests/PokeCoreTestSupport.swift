@@ -236,6 +236,9 @@ func advanceBattleTextUntilMoveSelection(_ runtime: GameRuntime, maxTicks: Int =
         if battle.phase == "moveSelection" {
             return
         }
+        if battle.phase == "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
+        }
         runtime.handle(button: .confirm)
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
     }
@@ -259,6 +262,9 @@ func advanceBattleUntilPhase(
         }
         if battle.phase == targetPhase {
             return
+        }
+        if battle.phase == "trainerAboutToUseDecision", targetPhase != "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
         }
         runtime.handle(button: .confirm)
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
@@ -284,6 +290,9 @@ func resolveBattleUntilComplete(
     while runtime.scene == .battle, Date() < deadline {
         if let battle = runtime.currentSnapshot().battle {
             observe?(battle)
+            if battle.phase == "trainerAboutToUseDecision" {
+                runtime.handle(button: .down)
+            }
             runtime.handle(button: .confirm)
         }
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))

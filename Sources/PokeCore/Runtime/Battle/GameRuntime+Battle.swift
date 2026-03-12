@@ -50,15 +50,25 @@ extension GameRuntime {
         // We do not have defeated-trainer music yet, but the trainer battle track
         // should not continue under the result dialogue.
         stopAllMusic()
-        showDialogue(
-            id: won ? battle.playerWinDialogueID : battle.playerLoseDialogueID,
-            completion: .finishTrainerBattle(
+        let followUpDialogueID = won ? battle.playerWinDialogueID : battle.playerLoseDialogueID
+        if let followUpDialogueID {
+            showDialogue(
+                id: followUpDialogueID,
+                completion: .finishTrainerBattle(
+                    won: won,
+                    preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
+                    postBattleScriptID: battle.postBattleScriptID,
+                    sourceTrainerObjectID: battle.sourceTrainerObjectID
+                )
+            )
+        } else {
+            completeTrainerBattleDialogue(
                 won: won,
                 preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
                 postBattleScriptID: battle.postBattleScriptID,
                 sourceTrainerObjectID: battle.sourceTrainerObjectID
             )
-        )
+        }
     }
 
     func completeTrainerBattleDialogue(
@@ -156,7 +166,11 @@ extension GameRuntime {
         requestDefaultMapMusic()
     }
 
-    func startBattle(id: String, sourceTrainerObjectID: String? = nil) {
+    func startBattle(
+        id: String,
+        sourceTrainerObjectID: String? = nil,
+        introDialogueID _: String? = nil
+    ) {
         guard var gameplayState,
               let chosenStarter = gameplayState.chosenStarterSpeciesID else {
             return
@@ -174,11 +188,14 @@ extension GameRuntime {
         }
         guard enemyParty.isEmpty == false else { return }
 
-        let openingMessage = "\(battleManifest.displayName) challenges you!"
-        let battle = RuntimeBattleState(
+        let wantsToFightMessage = trainerWantsToFightText(trainerName: battleManifest.displayName)
+
+        var battle = RuntimeBattleState(
             battleID: battleManifest.id,
             kind: .trainer,
             trainerName: battleManifest.displayName,
+            trainerSpritePath: battleManifest.trainerSpritePath,
+            baseRewardMoney: battleManifest.baseRewardMoney,
             completionFlagID: battleManifest.completionFlagID,
             healsPartyAfterBattle: battleManifest.healsPartyAfterBattle,
             preventsBlackoutOnLoss: battleManifest.preventsBlackoutOnLoss,
@@ -199,7 +216,7 @@ extension GameRuntime {
             partySelectionMode: .optionalSwitch,
             message: "",
             queuedMessages: [],
-            pendingAction: .moveSelection,
+            pendingAction: nil,
             lastCaptureResult: nil,
             pendingPresentationBatches: [],
             learnMoveState: nil,
@@ -211,6 +228,9 @@ extension GameRuntime {
                 activeSide: nil,
                 transitionStyle: .spiral
             )
+        )
+        battle.pendingPresentationBatches = makeTrainerOpeningSendOutBatches(
+            battle: battle
         )
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
@@ -234,8 +254,9 @@ extension GameRuntime {
         requestTrainerBattleMusic()
         scheduleBattlePresentation(
             makeIntroPresentationBeats(
-                openingMessage: openingMessage,
-                transitionStyle: .spiral
+                openingMessage: wantsToFightMessage,
+                transitionStyle: .spiral,
+                requiresConfirmAfterReveal: true
             ),
             battleID: battle.battleID
         )
@@ -259,15 +280,17 @@ extension GameRuntime {
         )
         let battleID = "wild_\(gameplayState.mapID.lowercased())_\(speciesID.lowercased())_\(level)"
 
-        let battle = RuntimeBattleState(
+        var battle = RuntimeBattleState(
             battleID: battleID,
             kind: .wild,
             trainerName: "Wild \(enemyPokemon.nickname)",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
             completionFlagID: "",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
             playerWinDialogueID: "",
-            playerLoseDialogueID: "",
+            playerLoseDialogueID: nil,
             postBattleScriptID: nil,
             canRun: true,
             trainerClass: nil,
@@ -296,6 +319,12 @@ extension GameRuntime {
                 transitionStyle: .spiral
             )
         )
+        battle.pendingPresentationBatches = [
+            makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon
+            ),
+        ]
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
         gameplayState.battle = battle
         self.gameplayState = gameplayState

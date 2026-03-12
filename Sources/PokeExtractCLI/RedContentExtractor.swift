@@ -263,7 +263,7 @@ public enum RedContentExtractor {
     }
 
     private static func battleAssetMap(from gameplayManifest: GameplayManifest) -> [(source: String, destination: String)] {
-        gameplayManifest.species
+        let pokemonAssets = gameplayManifest.species
             .flatMap { species -> [(source: String, destination: String)] in
                 guard let battleSprite = species.battleSprite else { return [] }
                 let frontFilename = URL(fileURLWithPath: battleSprite.frontImagePath).lastPathComponent
@@ -276,6 +276,16 @@ public enum RedContentExtractor {
                     ("gfx/pokemon/back/\(backFilename)", battleSprite.backImagePath),
                 ]
             }
+        let trainerAssets = Set(gameplayManifest.trainerBattles.compactMap(\.trainerSpritePath)).map { path in
+            let filename = URL(fileURLWithPath: path).lastPathComponent
+            return ("gfx/trainers/\(filename)", path)
+        }
+        let playerAssets = [
+            ("gfx/player/red.png", "Assets/battle/trainers/red.png"),
+            ("gfx/player/redb.png", "Assets/battle/trainers/redb.png"),
+        ]
+
+        return (pokemonAssets + trainerAssets + playerAssets)
             .sorted { lhs, rhs in lhs.destination < rhs.destination }
     }
 

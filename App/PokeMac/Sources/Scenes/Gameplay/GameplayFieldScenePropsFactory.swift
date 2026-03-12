@@ -87,6 +87,11 @@ enum GameplayScenePropsFactory {
             let enemySpriteURL = runtime.content.species(id: battle.enemyPokemon.speciesID)?
                 .battleSprite
                 .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
+            let trainerSpriteURL = battle.trainerSpritePath.map {
+                runtime.content.rootURL.appendingPathComponent($0)
+            }
+            let playerTrainerFrontSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/red.png")
+            let playerTrainerBackSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/redb.png")
             let promptText = GameplayBattlePrompts.promptText(
                 textLines: battle.textLines,
                 battleMessage: battle.battleMessage,
@@ -102,6 +107,9 @@ enum GameplayScenePropsFactory {
                         textLines: battle.textLines,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
+                        trainerSpriteURL: trainerSpriteURL,
+                        playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
+                        playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,
                         playerSpriteURL: playerSpriteURL,
                         enemySpriteURL: enemySpriteURL,
                         bagItems: battle.bagItems,

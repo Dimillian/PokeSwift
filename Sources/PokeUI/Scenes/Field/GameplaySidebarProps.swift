@@ -374,9 +374,26 @@ public struct BattleSidebarProps: Equatable, Sendable {
         return (
             phase == "moveSelection" ||
             phase == "bagSelection" ||
+            phase == "trainerAboutToUseDecision" ||
             phase == "learnMoveDecision" ||
             phase == "learnMoveSelection"
         )
+    }
+
+    public var attentionSection: GameplaySidebarExpandedSection? {
+        guard showsInterface else {
+            return nil
+        }
+
+        if party.mode == .battleSwitch {
+            return .party
+        }
+
+        if shouldForceCombatSectionOpen {
+            return .battleCombat
+        }
+
+        return nil
     }
 
     public var showsInterface: Bool {
@@ -420,6 +437,27 @@ public struct BattleSidebarProps: Equatable, Sendable {
                     )
                 }
             }
+        }
+
+        if phase == "trainerAboutToUseDecision" {
+            return [
+                BattleSidebarActionRowProps(
+                    id: "trainer-about-to-use-yes",
+                    title: "YES",
+                    detail: "Switch",
+                    isSelectable: true,
+                    isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 0,
+                    kind: .confirm
+                ),
+                BattleSidebarActionRowProps(
+                    id: "trainer-about-to-use-no",
+                    title: "NO",
+                    detail: "Stay in",
+                    isSelectable: true,
+                    isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 1,
+                    kind: .deny
+                ),
+            ]
         }
 
         let moveRows = moveSlots.enumerated().map { index, slot in
@@ -487,6 +525,8 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
         case learn
         case skip
         case forget
+        case confirm
+        case deny
     }
 
     public let id: String
@@ -554,10 +594,7 @@ public enum GameplaySidebarMode: Equatable, Sendable {
         case .fieldLike:
             return nil
         case let .battle(props):
-            if props.party.mode == .battleSwitch {
-                return .party
-            }
-            return props.shouldForceCombatSectionOpen ? .battleCombat : nil
+            return props.attentionSection
         }
     }
 

@@ -582,21 +582,15 @@ extension PokeCoreTests {
         XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"))
 
         let snapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
-            $0.dialogue?.dialogueID == "viridian_forest_youngster2_battle"
-        }
-
-        XCTAssertEqual(snapshot.dialogue?.dialogueID, "viridian_forest_youngster2_battle")
-        XCTAssertEqual(runtime.scene, .dialogue)
-        XCTAssertNil(snapshot.field?.alert)
-
-        runtime.handle(button: .confirm)
-
-        let battleSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
             $0.battle?.battleID == "opp_bug_catcher_1"
         }
 
-        XCTAssertEqual(battleSnapshot.audio?.trackID, "MUSIC_TRAINER_BATTLE")
-        XCTAssertEqual(battleSnapshot.audio?.reason, "battle")
+        XCTAssertEqual(snapshot.battle?.battleID, "opp_bug_catcher_1")
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertNil(snapshot.field?.alert)
+
+        XCTAssertEqual(snapshot.audio?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(snapshot.audio?.reason, "battle")
         XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
     }
     func testRepoGeneratedStairWarpUsesExactTileWithFadeAndNoStepOut() async throws {

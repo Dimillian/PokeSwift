@@ -81,6 +81,8 @@ extension GameRuntime {
                 battle.focusedBagItemIndex = max(0, battle.focusedBagItemIndex - 1)
             case .partySelection:
                 battle.focusedPartyIndex = max(0, battle.focusedPartyIndex - 1)
+            case .trainerAboutToUseDecision:
+                battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
             case .learnMoveDecision, .learnMoveSelection:
                 battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
             default:
@@ -97,6 +99,8 @@ extension GameRuntime {
                 battle.focusedBagItemIndex = min(max(0, currentBattleBagItems.count - 1), battle.focusedBagItemIndex + 1)
             case .partySelection:
                 battle.focusedPartyIndex = min(max(0, gameplayState.playerParty.count - 1), battle.focusedPartyIndex + 1)
+            case .trainerAboutToUseDecision:
+                battle.focusedMoveIndex = min(1, battle.focusedMoveIndex + 1)
             case .learnMoveDecision:
                 battle.focusedMoveIndex = min(1, battle.focusedMoveIndex + 1)
             case .learnMoveSelection:
@@ -125,6 +129,10 @@ extension GameRuntime {
                 guard battle.partySelectionMode == .optionalSwitch else { break }
                 playUIConfirmSound()
                 returnToBattleMoveSelection(battle: &battle)
+            case .trainerAboutToUseDecision:
+                playUIConfirmSound()
+                battle.focusedMoveIndex = 1
+                resolveTrainerAboutToUseDecision(battle: &battle, gameplayState: &gameplayState)
             case .learnMoveSelection:
                 playUIConfirmSound()
                 enterLearnMoveDecisionPrompt(battle: &battle)
@@ -152,6 +160,9 @@ extension GameRuntime {
             case .partySelection:
                 playUIConfirmSound()
                 resolveBattlePartySelection(battle: &battle, gameplayState: &gameplayState)
+            case .trainerAboutToUseDecision:
+                playUIConfirmSound()
+                resolveTrainerAboutToUseDecision(battle: &battle, gameplayState: &gameplayState)
             case .learnMoveDecision:
                 playUIConfirmSound()
                 resolveLearnMoveDecision(battle: &battle)
@@ -268,6 +279,29 @@ extension GameRuntime {
         } else {
             presentBattleMessages(messages, battle: &battle, pendingAction: .moveSelection)
         }
+    }
+
+    func resolveTrainerAboutToUseDecision(
+        battle: inout RuntimeBattleState,
+        gameplayState: inout GameplayState
+    ) {
+        guard battle.phase == .trainerAboutToUseDecision,
+              case let .aboutToUse(nextIndex, previousMoveIndex)? = battle.rewardContinuation else {
+            return
+        }
+
+        battle.rewardContinuation = nil
+        if battle.focusedMoveIndex == 0 {
+            enterBattleSwitchSelection(
+                battle: &battle,
+                gameplayState: gameplayState,
+                mode: .trainerShift(nextEnemyIndex: nextIndex)
+            )
+            return
+        }
+
+        battle.focusedMoveIndex = previousMoveIndex
+        scheduleNextEnemySendOut(battle: &battle, nextIndex: nextIndex)
     }
 
     func availableBattleActions(

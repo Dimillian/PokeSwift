@@ -106,6 +106,7 @@ extension GameRuntime {
             battleID: battle.battleID,
             kind: battle.kind,
             trainerName: battle.trainerName,
+            trainerSpritePath: battle.trainerSpritePath,
             playerPokemon: makePartyPokemonTelemetry(from: battle.playerPokemon),
             enemyPokemon: makePartyPokemonTelemetry(from: battle.enemyPokemon),
             enemyPartyCount: battle.enemyParty.count,
@@ -128,6 +129,7 @@ extension GameRuntime {
                 revision: battle.presentation.revision,
                 uiVisibility: battle.presentation.uiVisibility,
                 activeSide: battle.presentation.activeSide,
+                hidePlayerPokemon: battle.presentation.hidePlayerPokemon,
                 transitionStyle: battle.presentation.transitionStyle,
                 meterAnimation: battle.presentation.meterAnimation
             )

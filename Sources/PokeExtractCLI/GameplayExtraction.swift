@@ -40,6 +40,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         wildEncounterTables: try buildWildEncounterTables(repoRoot: source.repoRoot),
         trainerAIMoveChoiceModifications: try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot),
         trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
+        commonBattleText: try buildCommonBattleText(repoRoot: source.repoRoot),
         playerStart: .init(
             mapID: "REDS_HOUSE_2F",
             position: .init(x: 4, y: 4),
@@ -3213,6 +3214,8 @@ private func buildTrainerBattles(
             trainerNumber: trainerNumber,
             displayName: "BLUE",
             party: rivalClassMetadata.parties[trainerNumber - 1],
+            trainerSpritePath: rivalClassMetadata.trainerSpritePath,
+            baseRewardMoney: rivalClassMetadata.baseRewardMoney,
             encounterAudioCueID: trainerEncounterCueByClass["OPP_RIVAL1"],
             playerWinDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
             playerLoseDialogueID: "oaks_lab_rival_am_i_great_or_what",
@@ -3242,9 +3245,11 @@ private func buildTrainerBattles(
             trainerNumber: reference.trainerNumber,
             displayName: classMetadata.displayName,
             party: classMetadata.parties[reference.trainerNumber - 1],
+            trainerSpritePath: classMetadata.trainerSpritePath,
+            baseRewardMoney: classMetadata.baseRewardMoney,
             encounterAudioCueID: trainerEncounterCueByClass[reference.trainerClass],
             playerWinDialogueID: reference.playerWinDialogueID,
-            playerLoseDialogueID: reference.playerLoseDialogueID,
+            playerLoseDialogueID: nil,
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
             completionFlagID: reference.completionFlagID,
@@ -3290,6 +3295,8 @@ private func buildTrainerAIMoveChoiceModifications(repoRoot: URL) throws -> [Tra
 private struct TrainerClassMetadata {
     let displayName: String
     let parties: [[TrainerPokemonManifest]]
+    let trainerSpritePath: String?
+    let baseRewardMoney: Int
 }
 
 private struct ReferencedSliceTrainerBattle {
@@ -3297,7 +3304,6 @@ private struct ReferencedSliceTrainerBattle {
     let trainerClass: String
     let trainerNumber: Int
     let playerWinDialogueID: String
-    let playerLoseDialogueID: String
     let completionFlagID: String
 }
 
@@ -3305,9 +3311,12 @@ private func parseTrainerClassMetadata(repoRoot: URL) throws -> [String: Trainer
     let trainerClassIDs = try parseTrainerClassIDs(repoRoot: repoRoot)
     let displayNames = try parseTrainerDisplayNames(repoRoot: repoRoot)
     let partyTableLabels = try parseTrainerPartyTableLabels(repoRoot: repoRoot)
+    let rewardMetadata = try parseTrainerRewardMetadata(repoRoot: repoRoot)
     let partiesContents = try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/parties.asm"))
 
-    guard trainerClassIDs.count == displayNames.count, displayNames.count == partyTableLabels.count else {
+    guard trainerClassIDs.count == displayNames.count,
+          displayNames.count == partyTableLabels.count,
+          partyTableLabels.count == rewardMetadata.count else {
         throw ExtractorError.invalidArguments("trainer class tables are out of sync")
     }
 
@@ -3316,7 +3325,9 @@ private func parseTrainerClassMetadata(repoRoot: URL) throws -> [String: Trainer
             "OPP_\(trainerClassID)",
             TrainerClassMetadata(
                 displayName: displayNames[index],
-                parties: try parseTrainerParties(contents: partiesContents, label: partyTableLabels[index])
+                parties: try parseTrainerParties(contents: partiesContents, label: partyTableLabels[index]),
+                trainerSpritePath: rewardMetadata[index].trainerSpritePath,
+                baseRewardMoney: rewardMetadata[index].baseRewardMoney
             )
         )
     })
@@ -3399,13 +3410,230 @@ private func referencedSliceTrainerBattles(
                 trainerClass: extraTokens[0],
                 trainerNumber: trainerNumber,
                 playerWinDialogueID: dialogueID(forScriptLabel: trainerHeader.endBattleTextLabel, mapScriptMetadata: metadata),
-                playerLoseDialogueID: dialogueID(forScriptLabel: trainerHeader.endBattleTextLabel, mapScriptMetadata: metadata),
                 completionFlagID: trainerHeader.defeatFlagID
             )
         }
     }
 
     return referencesByID.values.sorted { $0.id < $1.id }
+}
+
+private struct TrainerRewardMetadata {
+    let trainerSpritePath: String?
+    let baseRewardMoney: Int
+}
+
+private func decodeTrainerBaseRewardMoney(_ encodedValue: Int) -> Int {
+    // `pic_pointers_money.asm` stores trainer class payout as a padded BCD literal
+    // (`3500` for Rival = 35 per level). Runtime money should use the decoded
+    // class value, not the literal token.
+    max(0, encodedValue / 100)
+}
+
+private func parseTrainerRewardMetadata(repoRoot: URL) throws -> [TrainerRewardMetadata] {
+    let spritePathBySymbol = try parseTrainerSpritePathBySymbol(repoRoot: repoRoot)
+
+    return try String(contentsOf: repoRoot.appendingPathComponent("data/trainers/pic_pointers_money.asm"))
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> TrainerRewardMetadata? in
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            guard let match = line.firstMatch(of: /pic_money\s+([A-Za-z0-9_.]+),\s+([0-9]+)/) else {
+                return nil
+            }
+
+            let spriteSymbol = String(match.output.1)
+            guard let trainerSpritePath = spritePathBySymbol[spriteSymbol] else {
+                throw ExtractorError.invalidArguments("missing trainer sprite for \(spriteSymbol)")
+            }
+
+            return TrainerRewardMetadata(
+                trainerSpritePath: trainerSpritePath,
+                baseRewardMoney: decodeTrainerBaseRewardMoney(Int(match.output.2) ?? 0)
+            )
+        }
+}
+
+private func parseTrainerSpritePathBySymbol(repoRoot: URL) throws -> [String: String] {
+    let spriteFilenames = Set(
+        try FileManager.default.contentsOfDirectory(
+            atPath: repoRoot.appendingPathComponent("gfx/trainers").path
+        )
+        .filter { $0.hasSuffix(".png") }
+    )
+    var spritePathBySymbol: [String: String] = [:]
+    var pendingSymbols: [String] = []
+    let picsContents = try String(contentsOf: repoRoot.appendingPathComponent("gfx/pics.asm"))
+
+    for rawLine in picsContents.split(separator: "\n", omittingEmptySubsequences: false) {
+        var line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        guard line.isEmpty == false else {
+            continue
+        }
+
+        while let range = line.range(of: "::") {
+            let label = line[..<range.lowerBound].trimmingCharacters(in: .whitespaces)
+            if label.isEmpty == false {
+                pendingSymbols.append(label)
+            }
+            line = String(line[range.upperBound...]).trimmingCharacters(in: .whitespaces)
+        }
+
+        guard let match = line.firstMatch(of: /INCBIN\s+"gfx\/trainers\/([^"]+)\.pic"/) else {
+            continue
+        }
+
+        let pngFilename = "\(match.output.1).png"
+        let spritePath = "Assets/battle/trainers/\(pngFilename)"
+        guard spriteFilenames.contains(pngFilename) else {
+            throw ExtractorError.invalidArguments("missing trainer sprite asset for \(pngFilename)")
+        }
+
+        for symbol in pendingSymbols {
+            spritePathBySymbol[symbol] = spritePath
+        }
+        pendingSymbols.removeAll(keepingCapacity: true)
+    }
+
+    return spritePathBySymbol
+}
+
+private func buildCommonBattleText(repoRoot: URL) throws -> BattleTextTemplateManifest {
+    let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
+
+    return BattleTextTemplateManifest(
+        wantsToFight: try extractBattleTextTemplate(
+            label: "_TrainerWantsToFightText",
+            from: text2,
+            placeholderMap: ["wTrainerName": "trainerName"]
+        ),
+        enemyFainted: try extractBattleTextTemplate(
+            label: "_EnemyMonFaintedText",
+            from: text2,
+            placeholderMap: ["wEnemyMonNick": "enemyPokemon"]
+        ),
+        playerFainted: try extractBattleTextTemplate(
+            label: "_PlayerMonFaintedText",
+            from: text2,
+            placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        ),
+        trainerDefeated: try extractBattleTextTemplate(
+            label: "_TrainerDefeatedText",
+            from: text2,
+            placeholderMap: ["wTrainerName": "trainerName", "<PLAYER>": "playerName"]
+        ),
+        moneyForWinning: try extractBattleTextTemplate(
+            label: "_MoneyForWinningText",
+            from: text2,
+            placeholderMap: ["wAmountMoneyWon": "money", "<PLAYER>": "playerName"]
+        ),
+        trainerAboutToUse: try extractBattleTextTemplate(
+            label: "_TrainerAboutToUseText",
+            from: text2,
+            placeholderMap: [
+                "wTrainerName": "trainerName",
+                "wEnemyMonNick": "enemyPokemon",
+                "<PLAYER>": "playerName",
+            ]
+        ),
+        trainerSentOut: try extractBattleTextTemplate(
+            label: "_TrainerSentOutText",
+            from: text2,
+            placeholderMap: [
+                "wTrainerName": "trainerName",
+                "wEnemyMonNick": "enemyPokemon",
+            ]
+        ),
+        playerSendOutGo: try extractBattleTextTemplate(
+            label: "_GoText",
+            from: text2,
+            placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        ),
+        playerSendOutDoIt: try extractBattleTextTemplate(
+            label: "_DoItText",
+            from: text2,
+            placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        ),
+        playerSendOutGetm: try extractBattleTextTemplate(
+            label: "_GetmText",
+            from: text2,
+            placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        ),
+        playerSendOutEnemyWeak: try extractBattleTextTemplate(
+            label: "_EnemysWeakText",
+            from: text2,
+            placeholderMap: ["wBattleMonNick": "playerPokemon"]
+        )
+    )
+}
+
+private func extractBattleTextTemplate(
+    label: String,
+    from contents: String,
+    placeholderMap: [String: String]
+) throws -> String {
+    guard let range = contents.range(of: "\(label)::") else {
+        throw ExtractorError.invalidArguments("missing battle text label \(label)")
+    }
+
+    let tail = contents[range.upperBound...]
+    var segments: [String] = []
+
+    for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        if line.hasSuffix("::"), line.hasPrefix("_"), line.hasPrefix(label) == false {
+            break
+        }
+
+        if line.hasPrefix("text \"") || line.hasPrefix("line \"") || line.hasPrefix("cont \"") || line.hasPrefix("para \"") {
+            let value = extractQuotedString(from: line)
+            segments.append(replacingBattleTemplateTokens(in: value, placeholderMap: placeholderMap))
+            continue
+        }
+
+        if line == "text_start" {
+            continue
+        }
+
+        if line.hasPrefix("text_ram ") {
+            let token = line.replacingOccurrences(of: "text_ram ", with: "").trimmingCharacters(in: .whitespaces)
+            let placeholder = placeholderMap[token] ?? token
+            segments.append("{\(placeholder)}")
+            continue
+        }
+
+        if line.hasPrefix("text_bcd ") {
+            let token = line
+                .replacingOccurrences(of: "text_bcd ", with: "")
+                .split(separator: ",", maxSplits: 1, omittingEmptySubsequences: true)
+                .first
+                .map { String($0).trimmingCharacters(in: .whitespaces) } ?? ""
+            let placeholder = placeholderMap[token] ?? token
+            segments.append("{\(placeholder)}")
+            continue
+        }
+
+        if line == "done" || line == "prompt" || line == "text_end" {
+            break
+        }
+    }
+
+    return segments
+        .joined(separator: " ")
+        .replacingOccurrences(of: "  ", with: " ")
+        .replacingOccurrences(of: " !", with: "!")
+        .replacingOccurrences(of: " ?", with: "?")
+        .replacingOccurrences(of: " .", with: ".")
+        .replacingOccurrences(of: " ,", with: ",")
+        .replacingOccurrences(of: " ¥ ", with: " ¥")
+        .replacingOccurrences(of: "¥ ", with: "¥")
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+}
+
+private func replacingBattleTemplateTokens(in value: String, placeholderMap: [String: String]) -> String {
+    placeholderMap.reduce(value) { partial, replacement in
+        partial.replacingOccurrences(of: replacement.key, with: "{\(replacement.value)}")
+    }
 }
 
 private func parseTrainerParties(contents: String, label: String) throws -> [[TrainerPokemonManifest]] {

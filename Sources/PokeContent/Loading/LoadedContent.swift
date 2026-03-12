@@ -104,6 +104,10 @@ public struct LoadedContent: Sendable {
         trainerBattle(id: battleID)?.encounterAudioCueID
     }
 
+    public var commonBattleText: BattleTextTemplateManifest {
+        gameplayManifest.commonBattleText
+    }
+
     public func trainerAIMoveChoiceModifications(trainerClass: String) -> TrainerAIMoveChoiceModificationManifest? {
         let normalizedClass = Self.normalizedTrainerAIClassKey(trainerClass)
         return gameplayManifest.trainerAIMoveChoiceModifications.first {

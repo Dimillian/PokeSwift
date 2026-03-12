@@ -216,11 +216,11 @@ extension PokeCoreTests {
         runtime.movePlayer(in: .right)
 
         let snapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
-            $0.dialogue?.dialogueID == "viridian_forest_youngster2_battle"
+            $0.battle?.battleID == "opp_bug_catcher_1"
         }
 
-        XCTAssertEqual(snapshot.dialogue?.dialogueID, "viridian_forest_youngster2_battle")
-        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(snapshot.battle?.battleID, "opp_bug_catcher_1")
+        XCTAssertEqual(runtime.scene, .battle)
     }
     func testContinueMissingObjectStatesStillHidesForestPickupAfterCollection() throws {
         let saveStore = InMemorySaveStore()

@@ -1111,6 +1111,46 @@ public struct TypeEffectivenessManifest: Codable, Equatable, Sendable {
     }
 }
 
+public struct BattleTextTemplateManifest: Codable, Equatable, Sendable {
+    public let wantsToFight: String
+    public let enemyFainted: String
+    public let playerFainted: String
+    public let trainerDefeated: String
+    public let moneyForWinning: String
+    public let trainerAboutToUse: String
+    public let trainerSentOut: String
+    public let playerSendOutGo: String
+    public let playerSendOutDoIt: String
+    public let playerSendOutGetm: String
+    public let playerSendOutEnemyWeak: String
+
+    public init(
+        wantsToFight: String,
+        enemyFainted: String,
+        playerFainted: String,
+        trainerDefeated: String,
+        moneyForWinning: String,
+        trainerAboutToUse: String,
+        trainerSentOut: String,
+        playerSendOutGo: String,
+        playerSendOutDoIt: String,
+        playerSendOutGetm: String,
+        playerSendOutEnemyWeak: String
+    ) {
+        self.wantsToFight = wantsToFight
+        self.enemyFainted = enemyFainted
+        self.playerFainted = playerFainted
+        self.trainerDefeated = trainerDefeated
+        self.moneyForWinning = moneyForWinning
+        self.trainerAboutToUse = trainerAboutToUse
+        self.trainerSentOut = trainerSentOut
+        self.playerSendOutGo = playerSendOutGo
+        self.playerSendOutDoIt = playerSendOutDoIt
+        self.playerSendOutGetm = playerSendOutGetm
+        self.playerSendOutEnemyWeak = playerSendOutEnemyWeak
+    }
+}
+
 public struct ItemManifest: Codable, Equatable, Sendable {
     public enum BattleUseKind: String, Codable, Equatable, Sendable {
         case none
@@ -1240,9 +1280,11 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
     public let trainerNumber: Int
     public let displayName: String
     public let party: [TrainerPokemonManifest]
+    public let trainerSpritePath: String?
+    public let baseRewardMoney: Int
     public let encounterAudioCueID: String?
     public let playerWinDialogueID: String
-    public let playerLoseDialogueID: String
+    public let playerLoseDialogueID: String?
     public let healsPartyAfterBattle: Bool
     public let preventsBlackoutOnLoss: Bool
     public let completionFlagID: String
@@ -1254,9 +1296,11 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         trainerNumber: Int,
         displayName: String,
         party: [TrainerPokemonManifest],
+        trainerSpritePath: String? = nil,
+        baseRewardMoney: Int = 0,
         encounterAudioCueID: String? = nil,
         playerWinDialogueID: String,
-        playerLoseDialogueID: String,
+        playerLoseDialogueID: String? = nil,
         healsPartyAfterBattle: Bool,
         preventsBlackoutOnLoss: Bool,
         completionFlagID: String,
@@ -1267,6 +1311,8 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         self.trainerNumber = trainerNumber
         self.displayName = displayName
         self.party = party
+        self.trainerSpritePath = trainerSpritePath
+        self.baseRewardMoney = max(0, baseRewardMoney)
         self.encounterAudioCueID = encounterAudioCueID
         self.playerWinDialogueID = playerWinDialogueID
         self.playerLoseDialogueID = playerLoseDialogueID
@@ -1274,6 +1320,41 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         self.preventsBlackoutOnLoss = preventsBlackoutOnLoss
         self.completionFlagID = completionFlagID
         self.postBattleScriptID = postBattleScriptID
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case trainerClass
+        case trainerNumber
+        case displayName
+        case party
+        case trainerSpritePath
+        case baseRewardMoney
+        case encounterAudioCueID
+        case playerWinDialogueID
+        case playerLoseDialogueID
+        case healsPartyAfterBattle
+        case preventsBlackoutOnLoss
+        case completionFlagID
+        case postBattleScriptID
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        trainerClass = try container.decode(String.self, forKey: .trainerClass)
+        trainerNumber = try container.decode(Int.self, forKey: .trainerNumber)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        party = try container.decode([TrainerPokemonManifest].self, forKey: .party)
+        trainerSpritePath = try container.decodeIfPresent(String.self, forKey: .trainerSpritePath)
+        baseRewardMoney = max(0, try container.decodeIfPresent(Int.self, forKey: .baseRewardMoney) ?? 0)
+        encounterAudioCueID = try container.decodeIfPresent(String.self, forKey: .encounterAudioCueID)
+        playerWinDialogueID = try container.decode(String.self, forKey: .playerWinDialogueID)
+        playerLoseDialogueID = try container.decodeIfPresent(String.self, forKey: .playerLoseDialogueID)
+        healsPartyAfterBattle = try container.decode(Bool.self, forKey: .healsPartyAfterBattle)
+        preventsBlackoutOnLoss = try container.decode(Bool.self, forKey: .preventsBlackoutOnLoss)
+        completionFlagID = try container.decode(String.self, forKey: .completionFlagID)
+        postBattleScriptID = try container.decodeIfPresent(String.self, forKey: .postBattleScriptID)
     }
 }
 
@@ -1312,6 +1393,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public let wildEncounterTables: [WildEncounterTableManifest]
     public let trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest]
     public let trainerBattles: [TrainerBattleManifest]
+    public let commonBattleText: BattleTextTemplateManifest
     public let playerStart: PlayerStartManifest
 
     public init(
@@ -1331,6 +1413,19 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         wildEncounterTables: [WildEncounterTableManifest] = [],
         trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest] = [],
         trainerBattles: [TrainerBattleManifest],
+        commonBattleText: BattleTextTemplateManifest = .init(
+            wantsToFight: "{trainerName} wants to fight!",
+            enemyFainted: "Enemy {enemyPokemon} fainted!",
+            playerFainted: "{playerPokemon} fainted!",
+            trainerDefeated: "{playerName} defeated {trainerName}!",
+            moneyForWinning: "{playerName} got ¥{money} for winning!",
+            trainerAboutToUse: "{trainerName} is about to use {enemyPokemon}! Will {playerName} change #MON?",
+            trainerSentOut: "{trainerName} sent out {enemyPokemon}!",
+            playerSendOutGo: "Go! {playerPokemon}!",
+            playerSendOutDoIt: "Do it! {playerPokemon}!",
+            playerSendOutGetm: "Get'm! {playerPokemon}!",
+            playerSendOutEnemyWeak: "The enemy's weak! Get'm! {playerPokemon}!"
+        ),
         playerStart: PlayerStartManifest
     ) {
         self.maps = maps
@@ -1349,6 +1444,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         self.wildEncounterTables = wildEncounterTables
         self.trainerAIMoveChoiceModifications = trainerAIMoveChoiceModifications
         self.trainerBattles = trainerBattles
+        self.commonBattleText = commonBattleText
         self.playerStart = playerStart
     }
 
@@ -1369,6 +1465,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         case wildEncounterTables
         case trainerAIMoveChoiceModifications
         case trainerBattles
+        case commonBattleText
         case playerStart
     }
 
@@ -1390,6 +1487,19 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         wildEncounterTables = try container.decodeIfPresent([WildEncounterTableManifest].self, forKey: .wildEncounterTables) ?? []
         trainerAIMoveChoiceModifications = try container.decodeIfPresent([TrainerAIMoveChoiceModificationManifest].self, forKey: .trainerAIMoveChoiceModifications) ?? []
         trainerBattles = try container.decode([TrainerBattleManifest].self, forKey: .trainerBattles)
+        commonBattleText = try container.decodeIfPresent(BattleTextTemplateManifest.self, forKey: .commonBattleText) ?? .init(
+            wantsToFight: "{trainerName} wants to fight!",
+            enemyFainted: "Enemy {enemyPokemon} fainted!",
+            playerFainted: "{playerPokemon} fainted!",
+            trainerDefeated: "{playerName} defeated {trainerName}!",
+            moneyForWinning: "{playerName} got ¥{money} for winning!",
+            trainerAboutToUse: "{trainerName} is about to use {enemyPokemon}! Will {playerName} change #MON?",
+            trainerSentOut: "{trainerName} sent out {enemyPokemon}!",
+            playerSendOutGo: "Go! {playerPokemon}!",
+            playerSendOutDoIt: "Do it! {playerPokemon}!",
+            playerSendOutGetm: "Get'm! {playerPokemon}!",
+            playerSendOutEnemyWeak: "The enemy's weak! Get'm! {playerPokemon}!"
+        )
         playerStart = try container.decode(PlayerStartManifest.self, forKey: .playerStart)
     }
 }

@@ -369,6 +369,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
     public let revision: Int
     public let uiVisibility: BattlePresentationUIVisibility
     public let activeSide: BattlePresentationSide?
+    public let hidePlayerPokemon: Bool
     public let transitionStyle: BattleTransitionStyle
     public let meterAnimation: BattleMeterAnimationTelemetry?
 
@@ -377,6 +378,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         revision: Int,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil
     ) {
@@ -384,6 +386,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         self.revision = revision
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
     }
@@ -504,6 +507,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let battleID: String
     public let kind: BattleKind
     public let trainerName: String
+    public let trainerSpritePath: String?
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
     public let enemyPartyCount: Int
@@ -527,6 +531,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         battleID: String,
         kind: BattleKind = .trainer,
         trainerName: String,
+        trainerSpritePath: String? = nil,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
         enemyPartyCount: Int,
@@ -553,6 +558,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         self.battleID = battleID
         self.kind = kind
         self.trainerName = trainerName
+        self.trainerSpritePath = trainerSpritePath
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.enemyPartyCount = enemyPartyCount
@@ -577,6 +583,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         case battleID
         case kind
         case trainerName
+        case trainerSpritePath
         case playerPokemon
         case enemyPokemon
         case enemyPartyCount
@@ -602,6 +609,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         battleID = try container.decode(String.self, forKey: .battleID)
         kind = try container.decodeIfPresent(BattleKind.self, forKey: .kind) ?? .trainer
         trainerName = try container.decode(String.self, forKey: .trainerName)
+        trainerSpritePath = try container.decodeIfPresent(String.self, forKey: .trainerSpritePath)
         playerPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .playerPokemon)
         enemyPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .enemyPokemon)
         enemyPartyCount = try container.decodeIfPresent(Int.self, forKey: .enemyPartyCount) ?? 1

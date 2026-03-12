@@ -1,4 +1,17 @@
 {
+  "commonBattleText" : {
+    "enemyFainted" : "Enemy {enemyPokemon} fainted!",
+    "moneyForWinning" : "{playerName} got ¥{money} for winning!",
+    "playerFainted" : "{playerPokemon} fainted!",
+    "playerSendOutDoIt" : "Do it!",
+    "playerSendOutEnemyWeak" : "The enemy's weak! Get'm!",
+    "playerSendOutGetm" : "Get'm!",
+    "playerSendOutGo" : "Go!",
+    "trainerAboutToUse" : "{trainerName} is about to use {enemyPokemon}! Will {playerName} change POKéMON?",
+    "trainerDefeated" : "{playerName} defeated {trainerName}!",
+    "trainerSentOut" : "{trainerName} sent out {enemyPokemon}!",
+    "wantsToFight" : "{trainerName} wants to fight!"
+  },
   "dialogues" : [
     {
       "id" : "pallet_town_oak_hey_wait",
@@ -29380,6 +29393,7 @@
   ],
   "trainerBattles" : [
     {
+      "baseRewardMoney" : 10,
       "completionFlagID" : "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
       "displayName" : "BUG CATCHER",
       "encounterAudioCueID" : "trainer_intro_male",
@@ -29395,13 +29409,14 @@
           "speciesID" : "CATERPIE"
         }
       ],
-      "playerLoseDialogueID" : "viridian_forest_youngster2_end_battle",
       "playerWinDialogueID" : "viridian_forest_youngster2_end_battle",
       "preventsBlackoutOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
-      "trainerNumber" : 1
+      "trainerNumber" : 1,
+      "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
     },
     {
+      "baseRewardMoney" : 10,
       "completionFlagID" : "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
       "displayName" : "BUG CATCHER",
       "encounterAudioCueID" : "trainer_intro_male",
@@ -29421,13 +29436,14 @@
           "speciesID" : "WEEDLE"
         }
       ],
-      "playerLoseDialogueID" : "viridian_forest_youngster3_end_battle",
       "playerWinDialogueID" : "viridian_forest_youngster3_end_battle",
       "preventsBlackoutOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
-      "trainerNumber" : 2
+      "trainerNumber" : 2,
+      "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
     },
     {
+      "baseRewardMoney" : 10,
       "completionFlagID" : "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
       "displayName" : "BUG CATCHER",
       "encounterAudioCueID" : "trainer_intro_male",
@@ -29439,13 +29455,14 @@
           "speciesID" : "WEEDLE"
         }
       ],
-      "playerLoseDialogueID" : "viridian_forest_youngster4_end_battle",
       "playerWinDialogueID" : "viridian_forest_youngster4_end_battle",
       "preventsBlackoutOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
-      "trainerNumber" : 3
+      "trainerNumber" : 3,
+      "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
     },
     {
+      "baseRewardMoney" : 35,
       "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
       "displayName" : "BLUE",
       "healsPartyAfterBattle" : true,
@@ -29461,9 +29478,11 @@
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
-      "trainerNumber" : 1
+      "trainerNumber" : 1,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
     },
     {
+      "baseRewardMoney" : 35,
       "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
       "displayName" : "BLUE",
       "healsPartyAfterBattle" : true,
@@ -29479,9 +29498,11 @@
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
-      "trainerNumber" : 2
+      "trainerNumber" : 2,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
     },
     {
+      "baseRewardMoney" : 35,
       "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
       "displayName" : "BLUE",
       "healsPartyAfterBattle" : true,
@@ -29497,7 +29518,8 @@
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
-      "trainerNumber" : 3
+      "trainerNumber" : 3,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
     }
   ],
   "typeEffectiveness" : [

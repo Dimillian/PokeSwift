@@ -33,6 +33,7 @@ extension GameRuntime {
                     stage: .experience,
                     uiVisibility: .visible,
                     activeSide: .player,
+                    requiresConfirmAfterDisplay: true,
                     meterAnimation: experienceMeterAnimation(from: previousPlayer, to: updatedPlayer),
                     message: experienceMessage,
                     playerPokemon: updatedPlayer
@@ -46,6 +47,7 @@ extension GameRuntime {
                         stage: .levelUp,
                         uiVisibility: .visible,
                         activeSide: .player,
+                        requiresConfirmAfterDisplay: true,
                         message: message
                     )
                 )
@@ -54,7 +56,13 @@ extension GameRuntime {
 
         let rewardContinuation: RuntimeBattleRewardContinuation
         if battle.enemyActiveIndex + 1 < battle.enemyParty.count {
-            rewardContinuation = .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+            rewardContinuation = battle.kind == .trainer
+                ? .aboutToUse(index: battle.enemyActiveIndex + 1, previousMoveIndex: battle.focusedMoveIndex)
+                : .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+        } else if battle.kind == .trainer {
+            rewardContinuation = .finishTrainerWin(
+                payout: trainerBattlePayoutAmount(battle: battle, defeatedEnemy: defeatedEnemy)
+            )
         } else {
             rewardContinuation = .finishWin
         }
@@ -315,12 +323,34 @@ extension GameRuntime {
 
         battle.rewardContinuation = nil
         switch rewardContinuation {
+        case let .aboutToUse(index, _):
+            presentBattleMessages(
+                trainerAboutToUseMessages(trainerName: battle.trainerName, pokemon: battle.enemyParty[index]),
+                battle: &battle,
+                pendingAction: .enterTrainerAboutToUseDecision(nextIndex: index)
+            )
         case let .sendNextEnemy(index):
             scheduleNextEnemySendOut(battle: &battle, nextIndex: index)
+        case let .finishTrainerWin(payout):
+            presentBattleMessages(
+                [
+                    trainerDefeatedText(trainerName: battle.trainerName),
+                    moneyForWinningText(amount: payout),
+                ],
+                battle: &battle,
+                pendingAction: .completeTrainerVictory(payout: payout)
+            )
         case .finishWin:
             battle.phase = .battleComplete
             finishBattle(battle: battle, won: true)
         }
+    }
+
+    func trainerBattlePayoutAmount(
+        battle: RuntimeBattleState,
+        defeatedEnemy: RuntimePokemonState
+    ) -> Int {
+        max(0, battle.baseRewardMoney * defeatedEnemy.level)
     }
 
     var hmMoveIDs: Set<String> {

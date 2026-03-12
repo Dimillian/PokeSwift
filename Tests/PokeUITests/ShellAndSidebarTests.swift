@@ -649,6 +649,128 @@ extension PokeUITests {
     XCTAssertTrue(props.actionRows[3].isFocused)
     XCTAssertFalse(props.actionRows[4].isFocused)
   }
+  func testBattleSidebarAttentionSectionTracksBlockingSidebarInput() {
+    let basePlayerPokemon = PartyPokemonTelemetry(
+      speciesID: "BULBASAUR",
+      displayName: "Bulbasaur",
+      level: 5,
+      currentHP: 19,
+      maxHP: 19,
+      attack: 11,
+      defense: 10,
+      speed: 9,
+      special: 12,
+      moves: ["TACKLE", "GROWL"]
+    )
+    let baseEnemyPokemon = PartyPokemonTelemetry(
+      speciesID: "PIDGEY",
+      displayName: "Pidgey",
+      level: 3,
+      currentHP: 12,
+      maxHP: 12,
+      attack: 8,
+      defense: 8,
+      speed: 10,
+      special: 7,
+      moves: ["TACKLE"]
+    )
+    let moveSlots = [
+      BattleMoveSlotTelemetry(
+        moveID: "TACKLE",
+        displayName: "Tackle",
+        currentPP: 35,
+        maxPP: 35,
+        isSelectable: true
+      ),
+      BattleMoveSlotTelemetry(
+        moveID: "GROWL",
+        displayName: "Growl",
+        currentPP: 40,
+        maxPP: 40,
+        isSelectable: true
+      ),
+    ]
+
+    let moveSelection = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "moveSelection",
+      promptText: "Pick the next move.",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(pokemon: [])
+    )
+    let trainerDecision = BattleSidebarProps(
+      trainerName: "BUG CATCHER",
+      kind: .trainer,
+      phase: "trainerAboutToUseDecision",
+      promptText: "Will RED change #MON?",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 1,
+      canRun: false,
+      party: .init(pokemon: [])
+    )
+    let partySelection = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "partySelection",
+      promptText: "Bring out which #MON?",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      canSwitch: true,
+      party: .init(
+        pokemon: [
+          .init(
+            id: "bulbasaur-0",
+            speciesID: "BULBASAUR",
+            displayName: "Bulbasaur",
+            level: 5,
+            currentHP: 19,
+            maxHP: 19,
+            isLead: true
+          ),
+          .init(
+            id: "pidgey-1",
+            speciesID: "PIDGEY",
+            displayName: "Pidgey",
+            level: 3,
+            currentHP: 12,
+            maxHP: 12,
+            isLead: false,
+            isSelectable: true,
+            isFocused: true
+          ),
+        ],
+        mode: .battleSwitch,
+        promptText: "Bring out which #MON?"
+      )
+    )
+    let turnText = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "turnText",
+      promptText: "Bulbasaur used Tackle!",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(pokemon: [])
+    )
+
+    XCTAssertEqual(moveSelection.attentionSection, .battleCombat)
+    XCTAssertEqual(trainerDecision.attentionSection, .battleCombat)
+    XCTAssertEqual(partySelection.attentionSection, .party)
+    XCTAssertNil(turnText.attentionSection)
+  }
   func testBattleSidebarModeForcesPartySectionDuringSwitchSelection() {
     let battleMode = GameplaySidebarMode.battle(
       BattleSidebarProps(

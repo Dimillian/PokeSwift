@@ -16,8 +16,12 @@ struct BattleStageView: View {
         BattleViewportStage(screenDisplayStyle: fieldDisplayStyle) {
             BattlePanel(
                 trainerName: props.trainerName,
+                kind: props.kind,
                 playerPokemon: props.playerPokemon,
                 enemyPokemon: props.enemyPokemon,
+                trainerSpriteURL: props.trainerSpriteURL,
+                playerTrainerFrontSpriteURL: props.playerTrainerFrontSpriteURL,
+                playerTrainerBackSpriteURL: props.playerTrainerBackSpriteURL,
                 playerSpriteURL: props.playerSpriteURL,
                 enemySpriteURL: props.enemySpriteURL,
                 presentation: props.presentation

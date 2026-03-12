@@ -105,6 +105,7 @@ enum RuntimeBattlePhase: String {
     case moveSelection
     case bagSelection
     case partySelection
+    case trainerAboutToUseDecision
     case learnMoveDecision
     case learnMoveSelection
     case resolvingTurn
@@ -124,14 +125,17 @@ enum RuntimeBattlePendingAction {
     case finish(won: Bool)
     case escape
     case captured
+    case enterTrainerAboutToUseDecision(nextIndex: Int)
+    case completeTrainerVictory(payout: Int)
     case continueSwitchTurn
     case continueForcedSwitch
     case continueLevelUpResolution
 }
 
-enum RuntimeBattlePartySelectionMode {
+enum RuntimeBattlePartySelectionMode: Equatable {
     case optionalSwitch
     case forcedReplacement
+    case trainerShift(nextEnemyIndex: Int)
 }
 
 struct RuntimeBattleLearnMoveState {
@@ -140,7 +144,9 @@ struct RuntimeBattleLearnMoveState {
 }
 
 enum RuntimeBattleRewardContinuation {
+    case aboutToUse(index: Int, previousMoveIndex: Int)
     case sendNextEnemy(index: Int)
+    case finishTrainerWin(payout: Int)
     case finishWin
 }
 
@@ -189,6 +195,7 @@ struct RuntimeBattlePresentationState {
     var revision: Int
     var uiVisibility: BattlePresentationUIVisibility
     var activeSide: BattlePresentationSide?
+    var hidePlayerPokemon: Bool
     var transitionStyle: BattleTransitionStyle
     var meterAnimation: BattleMeterAnimationTelemetry?
 
@@ -197,6 +204,7 @@ struct RuntimeBattlePresentationState {
         revision: Int = 0,
         uiVisibility: BattlePresentationUIVisibility = .visible,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil
     ) {
@@ -204,6 +212,7 @@ struct RuntimeBattlePresentationState {
         self.revision = revision
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
     }
@@ -214,6 +223,8 @@ struct RuntimeBattlePresentationBeat {
     let stage: BattlePresentationStage
     let uiVisibility: BattlePresentationUIVisibility
     let activeSide: BattlePresentationSide?
+    let hidePlayerPokemon: Bool
+    let requiresConfirmAfterDisplay: Bool
     let transitionStyle: BattleTransitionStyle
     let meterAnimation: BattleMeterAnimationTelemetry?
     let message: String?
@@ -235,6 +246,8 @@ struct RuntimeBattlePresentationBeat {
         stage: BattlePresentationStage,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
+        requiresConfirmAfterDisplay: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
         message: String? = nil,
@@ -255,6 +268,8 @@ struct RuntimeBattlePresentationBeat {
         self.stage = stage
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
+        self.requiresConfirmAfterDisplay = requiresConfirmAfterDisplay
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
         self.message = message
@@ -277,11 +292,13 @@ struct RuntimeBattleState {
     let battleID: String
     let kind: BattleKind
     let trainerName: String
+    let trainerSpritePath: String?
+    let baseRewardMoney: Int
     let completionFlagID: String
     let healsPartyAfterBattle: Bool
     let preventsBlackoutOnLoss: Bool
     let playerWinDialogueID: String
-    let playerLoseDialogueID: String
+    let playerLoseDialogueID: String?
     let postBattleScriptID: String?
     let canRun: Bool
     let trainerClass: String?

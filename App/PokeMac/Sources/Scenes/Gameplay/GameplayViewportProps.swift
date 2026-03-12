@@ -42,6 +42,9 @@ struct BattleViewportProps {
     let textLines: [String]
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let trainerSpriteURL: URL?
+    let playerTrainerFrontSpriteURL: URL?
+    let playerTrainerBackSpriteURL: URL?
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let bagItems: [InventoryItemTelemetry]

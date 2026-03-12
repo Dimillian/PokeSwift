@@ -25,28 +25,60 @@ extension GameRuntime {
         gameplayState.playerParty.swapAt(0, selectedIndex)
         battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[0])
         battle.phase = .resolvingTurn
-        battle.pendingAction = selectionMode == .forcedReplacement ? .moveSelection : .continueSwitchTurn
+        switch selectionMode {
+        case .forcedReplacement:
+            battle.pendingAction = .moveSelection
+        case .optionalSwitch:
+            battle.pendingAction = .continueSwitchTurn
+        case .trainerShift:
+            battle.pendingAction = nil
+        }
         battle.queuedMessages = []
         battle.pendingPresentationBatches = []
-        battle.message = "Go! \(battle.playerPokemon.nickname)!"
+        battle.message = playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon)
         battle.lastCaptureResult = nil
         battle.partySelectionMode = .optionalSwitch
 
         let replacementBeats: [RuntimeBattlePresentationBeat]
-        if selectionMode == .forcedReplacement {
+        switch selectionMode {
+        case .forcedReplacement:
             replacementBeats = [
                 .init(
                     delay: battlePresentationDelay(base: 0),
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .player,
-                    message: "Go! \(battle.playerPokemon.nickname)!",
+                    message: playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon),
                     phase: .turnText,
                     pendingAction: .moveSelection,
                     playerPokemon: battle.playerPokemon
                 ),
             ]
-        } else {
+        case let .trainerShift(nextEnemyIndex):
+            battle.pendingAction = nil
+            battle.pendingPresentationBatches = [
+                [
+                    .init(
+                        delay: battlePresentationDelay(base: 0.34),
+                        stage: .enemySendOut,
+                        uiVisibility: .visible,
+                        activeSide: .enemy,
+                        message: trainerSentOutText(
+                            trainerName: battle.trainerName,
+                            pokemon: battle.enemyParty[nextEnemyIndex]
+                        ),
+                        phase: .turnText,
+                        pendingAction: .moveSelection,
+                        enemyParty: battle.enemyParty,
+                        enemyActiveIndex: nextEnemyIndex
+                    ),
+                ],
+            ]
+            replacementBeats = makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyParty[nextEnemyIndex]
+            )
+        case .optionalSwitch:
             replacementBeats = [
                 .init(
                     delay: battlePresentationDelay(base: 0),
@@ -61,7 +93,7 @@ extension GameRuntime {
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .player,
-                    message: "Go! \(battle.playerPokemon.nickname)!",
+                    message: playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon),
                     phase: .turnText,
                     pendingAction: .continueSwitchTurn,
                     playerPokemon: battle.playerPokemon

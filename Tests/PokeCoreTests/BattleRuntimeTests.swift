@@ -155,7 +155,10 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 1)
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "turnText")
-        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "The #MON BOX is full! Can't use that item!")
+        XCTAssertEqual(
+            runtime.currentSnapshot().battle?.battleMessage,
+            runtime.paginatedBattleMessage("The #MON BOX is full! Can't use that item!").first
+        )
 
         advanceBattleTextUntilMoveSelection(runtime)
         XCTAssertEqual(runtime.gameplayState?.boxedPokemon[0].pokemon.count, GameRuntime.storageBoxCapacity)
@@ -383,6 +386,139 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 1)
     }
 
+    func testTrainerBattleIntroUsesSourceStyleWantsToFightAndSendOutCadence() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_rival1_1")
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .introReveal &&
+                runtime.currentSnapshot().battle?.battleMessage == "BLUE wants to fight!",
+            message: "trainer intro text did not appear",
+            maxTicks: 240
+        )
+
+        advanceBattlePresentationBatch(runtime)
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleMessage == "BLUE sent out Squirtle!",
+            message: "enemy send out text did not appear",
+            maxTicks: 240
+        )
+
+        advanceBattlePresentationBatch(runtime)
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
+                runtime.currentSnapshot().battle?.presentation.activeSide == .player,
+            message: "player send out presentation did not appear",
+            maxTicks: 240
+        )
+        let playerSendOutSnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(playerSendOutSnapshot.battleMessage, "Go!")
+
+        waitUntil(
+            runtime.battlePresentationTask == nil,
+            message: "player send out presentation did not settle",
+            maxTicks: 240
+        )
+        runtime.handle(button: .confirm)
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "moveSelection",
+            message: "trainer intro did not resolve to move selection",
+            maxTicks: 240
+        )
+    }
+
+    func testTrainerEngagementShowsFieldIntroDialogueBeforeBattleTransition() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(
+                            id: "trainer_intro",
+                            pages: [.init(lines: ["I like shorts!"], waitsForPrompt: true)]
+                        ),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_youngster_1",
+                            trainerClass: "OPP_YOUNGSTER",
+                            trainerNumber: 1,
+                            displayName: "YOUNGSTER",
+                            party: [.init(speciesID: "RATTATA", level: 5)],
+                            trainerSpritePath: "Assets/battle/trainers/youngster.png",
+                            baseRewardMoney: 1500,
+                            playerWinDialogueID: "trainer_intro",
+                            playerLoseDialogueID: nil,
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.objectStates["trainer_1"] = RuntimeObjectState(
+            position: .init(x: 4, y: 2),
+            facing: .down,
+            visible: true
+        )
+
+        runtime.startTrainerEngagement(
+            objectID: "trainer_1",
+            battleID: "opp_youngster_1",
+            introDialogueID: "trainer_intro",
+            path: []
+        )
+
+        waitUntil(
+            runtime.currentSnapshot().dialogue?.dialogueID == "trainer_intro",
+            message: "trainer engagement did not show the field intro dialogue",
+            maxTicks: 240
+        )
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertNil(runtime.currentSnapshot().battle)
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleID == "opp_youngster_1",
+            message: "trainer encounter did not start the battle after confirming the field intro",
+            maxTicks: 240
+        )
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .introReveal,
+            message: "trainer battle did not reach the opening reveal after the field intro",
+            maxTicks: 240
+        )
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "YOUNGSTER wants to fight!")
+    }
+
     func testTrainerLossDoesNotSetCompletionFlag() {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -449,7 +585,7 @@ extension PokeCoreTests {
                             displayName: "BUG CATCHER",
                             party: [.init(speciesID: "CATERPIE", level: 6)],
                             playerWinDialogueID: "win",
-                            playerLoseDialogueID: "lose",
+                            playerLoseDialogueID: nil,
                             healsPartyAfterBattle: false,
                             preventsBlackoutOnLoss: false,
                             completionFlagID: "EVENT_TEST"
@@ -530,11 +666,373 @@ extension PokeCoreTests {
         drainBattleText(runtime)
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattlePresentationBatch(runtime)
+        advanceBattleUntilPhase(runtime, phase: "trainerAboutToUseDecision")
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
         advanceBattleUntilPhase(runtime, phase: "moveSelection")
 
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyActiveIndex, 1)
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPartyCount, 2)
+    }
+
+    func testTrainerAboutToUsePromptPaginatesBeforeDecision() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                        .init(id: "lose", pages: [.init(lines: ["You lose"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseExp: 66, growthRate: .mediumSlow, baseHP: 44, baseAttack: 255, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "BULBASAUR", displayName: "Bulbasaur", baseExp: 64, growthRate: .mediumSlow, baseHP: 45, baseAttack: 30, baseDefense: 49, baseSpeed: 1, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 500, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_rival1_2",
+                            trainerClass: "OPP_RIVAL1",
+                            trainerNumber: 2,
+                            displayName: "BLUE",
+                            party: [
+                                .init(speciesID: "BULBASAUR", level: 5),
+                                .init(speciesID: "SQUIRTLE", level: 5),
+                            ],
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: "lose",
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: true,
+                            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_rival1_2")
+        drainBattleText(runtime)
+
+        var battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        runtime.presentBattleMessages(
+            runtime.trainerAboutToUseMessages(
+                trainerName: battle.trainerName,
+                pokemon: battle.enemyParty[1]
+            ),
+            battle: &battle,
+            pendingAction: .enterTrainerAboutToUseDecision(nextIndex: 1)
+        )
+
+        XCTAssertEqual(battle.phase, .turnText)
+        XCTAssertEqual(battle.message, "BLUE is about to\nuse Squirtle!")
+        XCTAssertEqual(battle.queuedMessages, ["Will RED change\n#MON?"])
+
+        runtime.advanceBattleText(battle: &battle)
+        XCTAssertEqual(battle.phase, .turnText)
+        XCTAssertEqual(battle.message, "Will RED change\n#MON?")
+        XCTAssertEqual(battle.queuedMessages, [])
+
+        runtime.advanceBattleText(battle: &battle)
+        XCTAssertEqual(battle.phase, .trainerAboutToUseDecision)
+        XCTAssertEqual(battle.message, "Will RED change\n#MON?")
+        XCTAssertEqual(battle.focusedMoveIndex, 1)
+    }
+
+    func testTrainerAboutToUseNoKeepsPlayerVisibleAndRestoresMoveCursor() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH", "GROWL", "LEER"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                        .init(
+                            id: "RATTATA",
+                            displayName: "Rattata",
+                            baseHP: 30,
+                            baseAttack: 56,
+                            baseDefense: 35,
+                            baseSpeed: 72,
+                            baseSpecial: 25,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "LEER", displayName: "LEER", power: 0, accuracy: 100, maxPP: 30, effect: "DEFENSE_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_test_trainer",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [
+                                .init(speciesID: "PIDGEY", level: 5),
+                                .init(speciesID: "RATTATA", level: 5),
+                            ],
+                            trainerSpritePath: "Assets/battle/trainers/bugcatcher.png",
+                            baseRewardMoney: 10,
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: nil,
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
+
+        runtime.startBattle(id: "opp_test_trainer")
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 2)
+
+        var gameplayState = try XCTUnwrap(runtime.gameplayState)
+        var battle = try XCTUnwrap(gameplayState.battle)
+        runtime.enterTrainerAboutToUseDecision(battle: &battle, nextIndex: 1)
+        gameplayState.battle = battle
+        runtime.gameplayState = gameplayState
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
+                runtime.currentSnapshot().battle?.presentation.activeSide == .enemy,
+            message: "trainer did not start the next enemy send out after choosing no",
+            maxTicks: 240
+        )
+
+        var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertFalse(snapshot.presentation.hidePlayerPokemon)
+
+        waitUntil(
+            runtime.battlePresentationTask == nil,
+            message: "enemy send out did not settle after choosing no",
+            maxTicks: 240
+        )
+
+        runtime.handle(button: .confirm)
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "moveSelection",
+            message: "battle did not return to move selection after choosing no",
+            maxTicks: 240
+        )
+
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.focusedMoveIndex, 2)
+    }
+
+    func testExperienceAndLevelUpMessagesRequireConfirm() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(
+                            id: "SQUIRTLE",
+                            displayName: "Squirtle",
+                            growthRate: .mediumSlow,
+                            baseHP: 44,
+                            baseAttack: 48,
+                            baseDefense: 65,
+                            baseSpeed: 43,
+                            baseSpecial: 50,
+                            startingMoves: ["TACKLE"]
+                        ),
+                        .init(
+                            id: "CATERPIE",
+                            displayName: "Caterpie",
+                            baseExp: 255,
+                            growthRate: .mediumFast,
+                            baseHP: 45,
+                            baseAttack: 30,
+                            baseDefense: 35,
+                            baseSpeed: 45,
+                            baseSpecial: 20,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_bug_catcher_1",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [.init(speciesID: "CATERPIE", level: 30)],
+                            trainerSpritePath: "Assets/battle/trainers/bugcatcher.png",
+                            baseRewardMoney: 10,
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: nil,
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        runtime.startBattle(id: "opp_bug_catcher_1")
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let resolution = runtime.makeEnemyDefeatResolution(
+            battle: battle,
+            defeatedEnemy: battle.enemyPokemon,
+            playerPokemon: battle.playerPokemon
+        )
+
+        XCTAssertEqual(resolution.beats.first?.stage, .experience)
+        XCTAssertEqual(resolution.beats.first?.requiresConfirmAfterDisplay, true)
+        XCTAssertTrue(
+            resolution.beats.contains(where: {
+                $0.stage == .levelUp && $0.requiresConfirmAfterDisplay
+            })
+        )
+    }
+
+    func testTrainerVictoryAwardsMoneyAfterWinningTextResolves() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseExp: 66, growthRate: .mediumSlow, baseHP: 44, baseAttack: 255, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "CATERPIE", displayName: "Caterpie", baseExp: 53, growthRate: .mediumFast, baseHP: 45, baseAttack: 30, baseDefense: 35, baseSpeed: 45, baseSpecial: 20, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 500, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_bug_catcher_1",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [.init(speciesID: "CATERPIE", level: 6)],
+                            trainerSpritePath: "Assets/battle/trainers/bugcatcher.png",
+                            baseRewardMoney: 10,
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: nil,
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.gameplayState?.money = 3000
+        runtime.scene = .battle
+        runtime.substate = "battle"
+
+        var battle = RuntimeBattleState(
+            battleID: "opp_bug_catcher_1",
+            kind: .trainer,
+            trainerName: "BUG CATCHER",
+            trainerSpritePath: "Assets/battle/trainers/bugcatcher.png",
+            baseRewardMoney: 10,
+            completionFlagID: "EVENT_TEST",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: nil,
+            postBattleScriptID: nil,
+            canRun: false,
+            trainerClass: "OPP_BUG_CATCHER",
+            sourceTrainerObjectID: nil,
+            playerPokemon: runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle"),
+            enemyParty: [runtime.makePokemon(speciesID: "CATERPIE", level: 6, nickname: "Caterpie")],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            phase: .turnText,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 0,
+            partySelectionMode: .optionalSwitch,
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
+            presentation: .init()
+        )
+        runtime.presentBattleMessages(
+            [
+                runtime.trainerDefeatedText(trainerName: "BUG CATCHER"),
+                runtime.moneyForWinningText(amount: 60),
+            ],
+            battle: &battle,
+            pendingAction: RuntimeBattlePendingAction.completeTrainerVictory(payout: 60)
+        )
+        runtime.gameplayState?.battle = battle
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "RED got ¥60 for\nwinning!")
+        XCTAssertEqual(runtime.playerMoney, 3000)
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.playerMoney, 3060)
     }
     func testApplyMoveRespectsAccuracyEvasionAndOnlyAppliesEffectOnHit() {
         let runtime = GameRuntime(
@@ -611,6 +1109,47 @@ extension PokeCoreTests {
         XCTAssertTrue(criticalMove.messages.contains("Critical hit!"))
     }
 
+    func testBattleActionResultMessagesRequireConfirm() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "CHARMANDER", displayName: "Charmander", primaryType: "FIRE", baseHP: 39, baseAttack: 52, baseDefense: 43, baseSpeed: 65, baseSpecial: 50, startingMoves: ["EMBER"]),
+                        .init(id: "BULBASAUR", displayName: "Bulbasaur", primaryType: "GRASS", secondaryType: "POISON", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "NO_ADDITIONAL_EFFECT", type: "FIRE"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ],
+                    typeEffectiveness: [
+                        .init(attackingType: "FIRE", defendingType: "GRASS", multiplier: 20),
+                        .init(attackingType: "FIRE", defendingType: "POISON", multiplier: 10),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")
+        let defender = runtime.makePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")
+        runtime.battleRandomOverrides = [0, 255]
+        let action = runtime.resolveBattleAction(
+            side: .player,
+            attacker: attacker,
+            defender: defender,
+            moveIndex: 0
+        )
+
+        let beats = runtime.makeBeats(for: action)
+        XCTAssertEqual(beats.first?.message, "Charmander used EMBER!")
+        XCTAssertEqual(beats.first?.requiresConfirmAfterDisplay, true)
+        XCTAssertTrue(
+            beats.contains(where: {
+                $0.message == "It's super effective!" && $0.requiresConfirmAfterDisplay
+            })
+        )
+    }
+
     func testSpecialStageChangesOnlySpecialDamageProjection() {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -673,11 +1212,13 @@ extension PokeCoreTests {
             battleID: "wild_test",
             kind: .wild,
             trainerName: "",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
             completionFlagID: "",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
             playerWinDialogueID: "",
-            playerLoseDialogueID: "",
+            playerLoseDialogueID: nil,
             postBattleScriptID: nil,
             canRun: true,
             trainerClass: nil,
@@ -735,6 +1276,8 @@ extension PokeCoreTests {
             battleID: "test",
             kind: .trainer,
             trainerName: "BLUE",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
@@ -795,6 +1338,8 @@ extension PokeCoreTests {
             battleID: "test",
             kind: .trainer,
             trainerName: "BUG CATCHER",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
@@ -854,6 +1399,8 @@ extension PokeCoreTests {
             battleID: "test",
             kind: .trainer,
             trainerName: "BUG CATCHER",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
             completionFlagID: "EVENT_TEST",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
@@ -891,7 +1438,7 @@ extension PokeCoreTests {
         XCTAssertEqual(battle.aiLayer2Encouragement, 0)
     }
 
-    func testBattleIntroPresentationAutoRevealsHudAndMoveSelection() throws {
+    func testBattleIntroPresentationPausesOnTrainerOpeningTextBeforeMoveSelection() throws {
         let runtime = try makeRepoRuntime()
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -909,12 +1456,20 @@ extension PokeCoreTests {
         XCTAssertEqual(introSnapshot.phase, "introText")
         XCTAssertEqual(introSnapshot.presentation.stage, .introFlash1)
         XCTAssertEqual(introSnapshot.presentation.uiVisibility, .hidden)
+        XCTAssertEqual(introSnapshot.battleMessage, "")
 
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "moveSelection",
-            message: "battle intro did not settle into move selection"
+            runtime.currentSnapshot().battle?.presentation.stage == .introReveal &&
+                runtime.currentSnapshot().battle?.battleMessage == "BLUE wants to fight!",
+            message: "trainer intro text did not pause on wants to fight"
         )
+        let textSnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(textSnapshot.phase, "turnText")
+        XCTAssertEqual(textSnapshot.presentation.stage, .introReveal)
+
+        drainBattleText(runtime)
         let readySnapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(readySnapshot.phase, "moveSelection")
         XCTAssertEqual(readySnapshot.presentation.stage, .commandReady)
         XCTAssertEqual(readySnapshot.presentation.uiVisibility, .visible)
     }
@@ -983,6 +1538,22 @@ extension PokeCoreTests {
         XCTAssertEqual(snapshot.presentation.uiVisibility, .visible)
         XCTAssertEqual(snapshot.textLines, ["Wild Pidgey appeared!"])
         XCTAssertEqual(snapshot.phase, "turnText")
+
+        advanceBattlePresentationBatch(runtime)
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
+                runtime.currentSnapshot().battle?.presentation.activeSide == .player,
+            message: "wild battle did not advance to the player send out presentation",
+            maxTicks: 240
+        )
+        snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
+        XCTAssertEqual(snapshot.battleMessage, "Go!")
+
+        waitUntil(
+            runtime.battlePresentationTask == nil,
+            message: "wild battle player send out did not settle",
+            maxTicks: 240
+        )
 
         advanceBattleTextUntilMoveSelection(runtime)
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
@@ -1128,6 +1699,7 @@ extension PokeCoreTests {
         XCTAssertNil(enemyWindupIndex, "enemy attack should wait for confirm after the player action")
 
         runtime.handle(button: .confirm)
+        advanceBattlePresentationBatch(runtime)
         let resumedTimeline = captureBattleTimeline(runtime)
         let resumedEnemyWindupIndex = resumedTimeline.firstIndex {
             $0.presentation.stage == .attackWindup &&
@@ -1139,17 +1711,19 @@ extension PokeCoreTests {
             "enemy attack did not start after confirming the next action"
         )
 
-        let enemyResultIndex = resumedTimeline.firstIndex {
+        runtime.handle(button: .confirm)
+        let enemyResultTimeline = captureBattleTimeline(runtime)
+        let resumedEnemyResultIndex = enemyResultTimeline.firstIndex {
             $0.presentation.stage == .resultText &&
                 $0.battleMessage == "Squirtle's Attack fell!"
         }
         XCTAssertNotNil(
-            enemyResultIndex,
+            resumedEnemyResultIndex,
             "enemy follow-up effect text did not appear"
         )
 
-        if let resumedEnemyWindupIndex, let enemyResultIndex {
-            XCTAssertGreaterThan(enemyResultIndex, resumedEnemyWindupIndex)
+        if let resumedEnemyWindupIndex, let resumedEnemyResultIndex {
+            XCTAssertGreaterThan(resumedEnemyResultIndex, resumedEnemyWindupIndex)
 
             let snapshotBeforeEnemyAction = resumedTimeline[resumedEnemyWindupIndex]
             XCTAssertEqual(snapshotBeforeEnemyAction.playerPokemon.currentHP, snapshotBeforeEnemyAction.playerPokemon.maxHP)
@@ -1202,6 +1776,7 @@ extension PokeCoreTests {
 
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
+        advanceBattlePresentationBatch(runtime)
         advanceBattlePresentationBatch(runtime)
 
         waitUntil(
@@ -1368,6 +1943,7 @@ extension PokeCoreTests {
         var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.phase, "introText")
         XCTAssertEqual(snapshot.textLines, [])
+        XCTAssertEqual(snapshot.battleMessage, "")
         XCTAssertEqual(snapshot.presentation.stage, .introFlash1)
         XCTAssertEqual(snapshot.presentation.uiVisibility, .hidden)
 
@@ -1398,6 +1974,7 @@ extension PokeCoreTests {
         )
 
         advanceBattlePresentationBatch(runtime)
+        advanceBattlePresentationBatch(runtime)
         waitUntil(
             runtime.currentSnapshot().battle?.presentation.stage == .attackWindup &&
                 runtime.currentSnapshot().battle?.presentation.activeSide == .enemy,
@@ -1406,6 +1983,7 @@ extension PokeCoreTests {
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.textLines, ["Bulbasaur used GROWL!"])
 
+        advanceBattlePresentationBatch(runtime)
         waitUntil(
             runtime.currentSnapshot().battle?.battleMessage == "Charmander's Attack fell!",
             message: "enemy effect text did not appear"

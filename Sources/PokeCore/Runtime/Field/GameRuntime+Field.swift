@@ -173,10 +173,7 @@ extension GameRuntime {
     }
 
     func handleTrainerInteraction(with object: FieldRenderableObjectState, manifest: MapObjectManifest) -> Bool {
-        guard
-            let battleID = manifest.trainerBattleID,
-            let introDialogueID = manifest.trainerIntroDialogueID
-        else {
+        guard let battleID = manifest.trainerBattleID else {
             return false
         }
 
@@ -192,10 +189,10 @@ extension GameRuntime {
             gameplayState.objectStates[object.id]?.facing = oppositeFacingDirection(of: gameplayState.facing)
             self.gameplayState = gameplayState
         }
-        requestTrainerEncounterMusic(for: battleID)
-        showDialogue(
-            id: introDialogueID,
-            completion: .startBattle(battleID: battleID, sourceTrainerObjectID: object.id)
+        beginTrainerEncounter(
+            battleID: battleID,
+            sourceTrainerObjectID: object.id,
+            introDialogueID: manifest.trainerIntroDialogueID
         )
         return true
     }
@@ -242,7 +239,7 @@ extension GameRuntime {
         introDialogueID: String?,
         path: [FacingDirection]
     ) {
-        guard let battleID, let introDialogueID else { return }
+        guard let battleID else { return }
         trainerEngagementTask?.cancel()
         trainerEngagementTask = Task { [weak self] in
             await self?.runTrainerEngagement(
@@ -257,7 +254,7 @@ extension GameRuntime {
     func runTrainerEngagement(
         objectID: String,
         battleID: String,
-        introDialogueID: String,
+        introDialogueID: String?,
         path: [FacingDirection]
     ) async {
         defer {
@@ -276,9 +273,33 @@ extension GameRuntime {
         let trainerFacing = gameplayState.objectStates[objectID]?.facing ?? .down
         gameplayState.facing = oppositeFacingDirection(of: trainerFacing)
         self.gameplayState = gameplayState
-        showDialogue(
-            id: introDialogueID,
-            completion: .startBattle(battleID: battleID, sourceTrainerObjectID: objectID)
+        beginTrainerEncounter(
+            battleID: battleID,
+            sourceTrainerObjectID: objectID,
+            introDialogueID: introDialogueID
+        )
+    }
+
+    func beginTrainerEncounter(
+        battleID: String,
+        sourceTrainerObjectID: String?,
+        introDialogueID: String?
+    ) {
+        requestTrainerEncounterMusic(for: battleID)
+        if let introDialogueID {
+            showDialogue(
+                id: introDialogueID,
+                completion: .startBattle(
+                    battleID: battleID,
+                    sourceTrainerObjectID: sourceTrainerObjectID
+                )
+            )
+            return
+        }
+
+        startBattle(
+            id: battleID,
+            sourceTrainerObjectID: sourceTrainerObjectID
         )
     }
 
