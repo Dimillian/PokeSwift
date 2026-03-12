@@ -64,7 +64,11 @@ extension GameRuntime {
         batches: inout [[RuntimeBattlePresentationBeat]]
     ) -> Bool {
         if simulatedPlayer.currentHP == 0 {
-            batches.append(losingBattleBatch())
+            batches.append(
+                playerDefeatResolutionBatch(
+                    faintedPlayer: simulatedPlayer
+                )
+            )
             return true
         }
 
@@ -82,6 +86,34 @@ extension GameRuntime {
         }
 
         return false
+    }
+
+    func playerDefeatResolutionBatch(
+        faintedPlayer: RuntimePokemonState
+    ) -> [RuntimeBattlePresentationBeat] {
+        let pendingAction: RuntimeBattlePendingAction = hasSwitchableBattleReplacement(
+            afterFainting: faintedPlayer
+        ) ? .continueForcedSwitch : .finish(won: false)
+
+        return [
+            .init(
+                delay: battlePresentationDelay(base: 0.18),
+                stage: .turnSettle,
+                uiVisibility: .visible,
+                phase: .turnText,
+                pendingAction: pendingAction,
+                playerPokemon: faintedPlayer
+            ),
+        ]
+    }
+
+    func hasSwitchableBattleReplacement(afterFainting faintedPlayer: RuntimePokemonState) -> Bool {
+        guard var gameplayState, gameplayState.playerParty.isEmpty == false else {
+            return false
+        }
+
+        gameplayState.playerParty[0] = faintedPlayer
+        return firstSwitchablePartyIndex(gameplayState: gameplayState) != nil
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
@@ -192,10 +224,11 @@ extension GameRuntime {
             battle.enemyParty = enemyParty
             battle.enemyActiveIndex = enemyActiveIndex
         }
-        if let moveAudioMoveID = beat.moveAudioMoveID,
-           let move = content.move(id: moveAudioMoveID),
-           let attackerSpeciesID = beat.moveAudioAttackerSpeciesID {
-            _ = playMoveAudio(for: move, attackerSpeciesID: attackerSpeciesID)
+        if let soundEffectRequest = beat.soundEffectRequest {
+            _ = playSoundEffect(
+                soundEffectRequest,
+                reason: "battlePresentation.\(beat.stage.rawValue)"
+            )
         }
 
         updateBattlePresentation(
@@ -227,7 +260,8 @@ extension GameRuntime {
         openingMessage: String,
         transitionStyle: BattleTransitionStyle,
         requiresConfirmAfterReveal: Bool = false,
-        pendingActionAfterReveal: RuntimeBattlePendingAction? = nil
+        pendingActionAfterReveal: RuntimeBattlePendingAction? = nil,
+        revealSoundEffectRequest: SoundEffectPlaybackRequest? = nil
     ) -> [RuntimeBattlePresentationBeat] {
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
@@ -273,7 +307,8 @@ extension GameRuntime {
                 transitionStyle: transitionStyle,
                 message: openingMessage,
                 phase: requiresConfirmAfterReveal || pendingActionAfterReveal != nil ? .turnText : .introText,
-                pendingAction: pendingActionAfterReveal ?? (requiresConfirmAfterReveal ? .moveSelection : nil)
+                pendingAction: pendingActionAfterReveal ?? (requiresConfirmAfterReveal ? .moveSelection : nil),
+                soundEffectRequest: revealSoundEffectRequest
             ),
         ]
 
@@ -342,6 +377,15 @@ extension GameRuntime {
         let enemyAttacker = action.side == .enemy ? action.updatedAttacker : nil
         let defenderMutationPlayer = action.side == .enemy ? action.updatedDefender : nil
         let defenderMutationEnemy = action.side == .player ? action.updatedDefender : nil
+        let moveAudioRequest: SoundEffectPlaybackRequest?
+        if let move = content.move(id: action.moveID) {
+            moveAudioRequest = moveSoundEffectRequest(
+                for: move,
+                attackerSpeciesID: action.attackerSpeciesID
+            )
+        } else {
+            moveAudioRequest = nil
+        }
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
@@ -359,8 +403,7 @@ extension GameRuntime {
                 stage: .attackImpact,
                 uiVisibility: .visible,
                 activeSide: action.side,
-                moveAudioMoveID: action.moveID,
-                moveAudioAttackerSpeciesID: action.attackerSpeciesID
+                soundEffectRequest: moveAudioRequest
             ),
         ]
 
@@ -404,18 +447,56 @@ extension GameRuntime {
 
         for message in remainingMessages {
             let isFaintMessage = message.contains("fainted!")
-            let stage: BattlePresentationStage = isFaintMessage ? .faint : .resultText
-            let displayMessage = isFaintMessage
-                ? (action.side == .player
-                    ? enemyFaintedText(for: action.updatedDefender)
-                    : playerFaintedText(for: action.updatedDefender))
-                : message
+            guard isFaintMessage else {
+                beats.append(
+                    .init(
+                        delay: battlePresentationDelay(base: 0.24),
+                        stage: .resultText,
+                        uiVisibility: .visible,
+                        activeSide: action.side == .player ? .enemy : .player,
+                        requiresConfirmAfterDisplay: true,
+                        message: message
+                    )
+                )
+                continue
+            }
+
+            let faintSide: BattlePresentationSide = action.side == .player ? .enemy : .player
+            let displayMessage = action.side == .player
+                ? enemyFaintedText(for: action.updatedDefender)
+                : playerFaintedText(for: action.updatedDefender)
+            let soundEffectRequests = action.side == .player
+                ? enemyFaintSoundEffectRequests()
+                : speciesCrySoundEffectRequest(speciesID: action.updatedDefender.speciesID).map { [$0] } ?? []
+
             beats.append(
                 .init(
                     delay: battlePresentationDelay(base: 0.24),
-                    stage: stage,
+                    stage: .faint,
                     uiVisibility: .visible,
-                    activeSide: action.side == .player ? .enemy : .player,
+                    activeSide: faintSide,
+                    soundEffectRequest: soundEffectRequests.first
+                )
+            )
+
+            for soundEffectRequest in soundEffectRequests.dropFirst() {
+                beats.append(
+                    .init(
+                        delay: battlePresentationDelay(base: 0.3),
+                        stage: .faint,
+                        uiVisibility: .visible,
+                        activeSide: faintSide,
+                        soundEffectRequest: soundEffectRequest
+                    )
+                )
+            }
+
+            beats.append(
+                .init(
+                    delay: battlePresentationDelay(base: 0.24),
+                    stage: .resultText,
+                    uiVisibility: .visible,
+                    activeSide: faintSide,
                     requiresConfirmAfterDisplay: true,
                     message: displayMessage
                 )
@@ -588,7 +669,8 @@ extension GameRuntime {
                     phase: .turnText,
                     pendingAction: pendingAction,
                     enemyParty: battle.enemyParty,
-                    enemyActiveIndex: nextIndex
+                    enemyActiveIndex: nextIndex,
+                    soundEffectRequest: speciesCrySoundEffectRequest(speciesID: nextEnemy.speciesID)
                 ),
             ],
             battleID: battle.battleID
@@ -597,7 +679,8 @@ extension GameRuntime {
 
     func makePlayerSendOutBatch(
         playerPokemon: RuntimePokemonState,
-        enemyPokemon: RuntimePokemonState
+        enemyPokemon: RuntimePokemonState,
+        pendingAction: RuntimeBattlePendingAction? = nil
     ) -> [RuntimeBattlePresentationBeat] {
         [
             .init(
@@ -607,7 +690,9 @@ extension GameRuntime {
                 activeSide: .player,
                 message: playerSendOutText(for: playerPokemon, against: enemyPokemon),
                 phase: .turnText,
-                playerPokemon: playerPokemon
+                pendingAction: pendingAction,
+                playerPokemon: playerPokemon,
+                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: playerPokemon.speciesID)
             ),
         ]
     }
@@ -626,7 +711,8 @@ extension GameRuntime {
                     message: trainerSentOutText(trainerName: battle.trainerName, pokemon: battle.enemyPokemon),
                     phase: .turnText,
                     enemyParty: battle.enemyParty,
-                enemyActiveIndex: battle.enemyActiveIndex
+                enemyActiveIndex: battle.enemyActiveIndex,
+                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: battle.enemyPokemon.speciesID)
             ),
             ],
             makePlayerSendOutBatch(

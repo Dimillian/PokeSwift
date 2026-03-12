@@ -42,18 +42,11 @@ extension GameRuntime {
         let replacementBeats: [RuntimeBattlePresentationBeat]
         switch selectionMode {
         case .forcedReplacement:
-            replacementBeats = [
-                .init(
-                    delay: battlePresentationDelay(base: 0),
-                    stage: .enemySendOut,
-                    uiVisibility: .visible,
-                    activeSide: .player,
-                    message: playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon),
-                    phase: .turnText,
-                    pendingAction: .moveSelection,
-                    playerPokemon: battle.playerPokemon
-                ),
-            ]
+            replacementBeats = makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon,
+                pendingAction: .moveSelection
+            )
         case let .trainerShift(nextEnemyIndex):
             battle.pendingAction = nil
             battle.pendingPresentationBatches = [
@@ -70,7 +63,10 @@ extension GameRuntime {
                         phase: .turnText,
                         pendingAction: .moveSelection,
                         enemyParty: battle.enemyParty,
-                        enemyActiveIndex: nextEnemyIndex
+                        enemyActiveIndex: nextEnemyIndex,
+                        soundEffectRequest: speciesCrySoundEffectRequest(
+                            speciesID: battle.enemyParty[nextEnemyIndex].speciesID
+                        )
                     ),
                 ],
             ]
@@ -96,7 +92,8 @@ extension GameRuntime {
                     message: playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon),
                     phase: .turnText,
                     pendingAction: .continueSwitchTurn,
-                    playerPokemon: battle.playerPokemon
+                    playerPokemon: battle.playerPokemon,
+                    soundEffectRequest: speciesCrySoundEffectRequest(speciesID: battle.playerPokemon.speciesID)
                 ),
             ]
         }

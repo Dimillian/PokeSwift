@@ -347,7 +347,8 @@ extension GameRuntime {
             makeIntroPresentationBeats(
                 openingMessage: "Wild \(enemyPokemon.nickname) appeared!",
                 transitionStyle: .spiral,
-                requiresConfirmAfterReveal: true
+                requiresConfirmAfterReveal: true,
+                revealSoundEffectRequest: speciesCrySoundEffectRequest(speciesID: enemyPokemon.speciesID)
             ),
             battleID: battle.battleID
         )

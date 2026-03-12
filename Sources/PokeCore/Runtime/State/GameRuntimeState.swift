@@ -236,8 +236,7 @@ struct RuntimeBattlePresentationBeat {
     let enemyPokemon: RuntimePokemonState?
     let enemyParty: [RuntimePokemonState]?
     let enemyActiveIndex: Int?
-    let moveAudioMoveID: String?
-    let moveAudioAttackerSpeciesID: String?
+    let soundEffectRequest: SoundEffectPlaybackRequest?
     let finishBattleWon: Bool?
     let escapeBattle: Bool
 
@@ -259,8 +258,7 @@ struct RuntimeBattlePresentationBeat {
         enemyPokemon: RuntimePokemonState? = nil,
         enemyParty: [RuntimePokemonState]? = nil,
         enemyActiveIndex: Int? = nil,
-        moveAudioMoveID: String? = nil,
-        moveAudioAttackerSpeciesID: String? = nil,
+        soundEffectRequest: SoundEffectPlaybackRequest? = nil,
         finishBattleWon: Bool? = nil,
         escapeBattle: Bool = false
     ) {
@@ -281,8 +279,7 @@ struct RuntimeBattlePresentationBeat {
         self.enemyPokemon = enemyPokemon
         self.enemyParty = enemyParty
         self.enemyActiveIndex = enemyActiveIndex
-        self.moveAudioMoveID = moveAudioMoveID
-        self.moveAudioAttackerSpeciesID = moveAudioAttackerSpeciesID
+        self.soundEffectRequest = soundEffectRequest
         self.finishBattleWon = finishBattleWon
         self.escapeBattle = escapeBattle
     }

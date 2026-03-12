@@ -361,6 +361,44 @@ func captureBattleTimeline(
 }
 
 @MainActor
+func driveBattleUntil(
+    _ runtime: GameRuntime,
+    maxTicks: Int = 240,
+    stopWhen predicate: (BattleTelemetry) -> Bool
+) -> [BattleTelemetry] {
+    let pollInterval = 0.01
+    let deadline = Date().addingTimeInterval(Double(maxTicks) * pollInterval)
+    var history: [BattleTelemetry] = []
+
+    while Date() < deadline {
+        guard let battle = runtime.currentSnapshot().battle else {
+            XCTFail("battle ended before reaching expected state")
+            return history
+        }
+        if history.last != battle {
+            history.append(battle)
+        }
+        if predicate(battle) {
+            return history
+        }
+        if battle.phase == "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
+        }
+        runtime.handle(button: .confirm)
+        RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
+    }
+
+    if let battle = runtime.currentSnapshot().battle, history.last != battle {
+        history.append(battle)
+    }
+    XCTAssertTrue(
+        runtime.currentSnapshot().battle.map(predicate) ?? false,
+        "battle did not reach expected state"
+    )
+    return history
+}
+
+@MainActor
 func advanceDialogueUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 8) {
     var remaining = maxInteractions
     while runtime.dialogueState != nil {

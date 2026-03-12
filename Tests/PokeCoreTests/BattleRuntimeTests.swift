@@ -1562,6 +1562,166 @@ extension PokeCoreTests {
         XCTAssertEqual(snapshot.presentation.uiVisibility, .visible)
     }
 
+    func testPlayerFaintPresentationShowsFaintBeatBeforeTextAndForcedSwitch() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "TESTMON",
+                            displayName: "Testmon",
+                            baseHP: 39,
+                            baseAttack: 12,
+                            baseDefense: 12,
+                            baseSpeed: 10,
+                            baseSpecial: 12,
+                            startingMoves: ["GROWL"]
+                        ),
+                        .init(
+                            id: "BACKMON",
+                            displayName: "Backmon",
+                            baseHP: 45,
+                            baseAttack: 20,
+                            baseDefense: 20,
+                            baseSpeed: 20,
+                            baseSpecial: 20,
+                            startingMoves: ["GROWL"]
+                        ),
+                        .init(
+                            id: "FOEMON",
+                            displayName: "Foemon",
+                            baseHP: 45,
+                            baseAttack: 255,
+                            baseDefense: 20,
+                            baseSpeed: 90,
+                            baseSpecial: 20,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 120, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "TESTMON"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "TESTMON", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "BACKMON", level: 5, nickname: "Backup"),
+        ]
+        runtime.gameplayState?.playerParty[0].currentHP = 1
+
+        runtime.startWildBattle(speciesID: "FOEMON", level: 5)
+        let history = driveBattleUntil(runtime) { $0.phase == "partySelection" }
+        let faintIndex = history.firstIndex {
+            $0.presentation.stage == .faint && $0.presentation.activeSide == .player
+        }
+        let faintTextIndex = history.firstIndex {
+            $0.presentation.stage == .resultText && $0.battleMessage == "Lead fainted!"
+        }
+
+        XCTAssertNotNil(faintIndex)
+        XCTAssertNotNil(faintTextIndex)
+        if let faintIndex, let faintTextIndex {
+            XCTAssertLessThan(faintIndex, faintTextIndex)
+        }
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Bring out which #MON?")
+    }
+
+    func testEnemyFaintPresentationShowsFaintBeatBeforeTextAndTrainerReplacementFlow() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: [
+                        .init(id: "win", pages: [.init(lines: ["You win"], waitsForPrompt: true)]),
+                    ],
+                    species: [
+                        .init(
+                            id: "TESTMON",
+                            displayName: "Testmon",
+                            baseHP: 39,
+                            baseAttack: 255,
+                            baseDefense: 12,
+                            baseSpeed: 90,
+                            baseSpecial: 12,
+                            startingMoves: ["TACKLE"]
+                        ),
+                        .init(
+                            id: "FOEMON",
+                            displayName: "Foemon",
+                            baseHP: 20,
+                            baseAttack: 12,
+                            baseDefense: 12,
+                            baseSpeed: 10,
+                            baseSpecial: 12,
+                            startingMoves: ["GROWL"]
+                        ),
+                        .init(
+                            id: "NEXTMON",
+                            displayName: "Nextmon",
+                            baseHP: 20,
+                            baseAttack: 12,
+                            baseDefense: 12,
+                            baseSpeed: 10,
+                            baseSpecial: 12,
+                            startingMoves: ["GROWL"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 120, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                    ],
+                    trainerBattles: [
+                        .init(
+                            id: "opp_test_trainer",
+                            trainerClass: "OPP_BUG_CATCHER",
+                            trainerNumber: 1,
+                            displayName: "BUG CATCHER",
+                            party: [
+                                .init(speciesID: "FOEMON", level: 5),
+                                .init(speciesID: "NEXTMON", level: 5),
+                            ],
+                            playerWinDialogueID: "win",
+                            playerLoseDialogueID: nil,
+                            healsPartyAfterBattle: false,
+                            preventsBlackoutOnLoss: false,
+                            completionFlagID: "EVENT_TEST"
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "TESTMON"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "TESTMON", level: 5, nickname: "Lead")]
+
+        runtime.startBattle(id: "opp_test_trainer")
+        let history = driveBattleUntil(runtime) { $0.phase == "trainerAboutToUseDecision" }
+        let faintIndex = history.firstIndex {
+            $0.presentation.stage == .faint && $0.presentation.activeSide == .enemy
+        }
+        let faintTextIndex = history.firstIndex {
+            $0.presentation.stage == .resultText && $0.battleMessage == "Enemy Foemon fainted!"
+        }
+
+        XCTAssertNotNil(faintIndex)
+        XCTAssertNotNil(faintTextIndex)
+        if let faintIndex, let faintTextIndex {
+            XCTAssertLessThan(faintIndex, faintTextIndex)
+        }
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Will RED change\n#MON?")
+    }
+
     func testWildBattleRNGDoesNotResetFromEncounterIdentity() {
         let content = fixtureContent(
             gameplayManifest: fixtureGameplayManifest(
