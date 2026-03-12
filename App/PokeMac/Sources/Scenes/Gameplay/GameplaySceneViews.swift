@@ -50,6 +50,7 @@ struct PlaceholderSceneProps {
 }
 
 struct GameplayScene: View {
+    @Environment(AppPreferences.self) private var preferences
     let props: GameplaySceneProps
     @State private var fieldDisplayStyle: FieldDisplayStyle
     @State private var isLoadConfirmationPresented = false
@@ -118,6 +119,21 @@ private extension GameplayScene {
             isLoadConfirmationPresented = true
             return
         }
+
+        switch actionID {
+        case "appearanceMode":
+            preferences.cycleAppearanceMode()
+            return
+        case "gameplayHDR":
+            preferences.toggleGameplayHDREnabled()
+            return
+        case "music":
+            preferences.toggleMusicEnabled()
+            return
+        default:
+            break
+        }
+
         props.onSidebarAction?(actionID)
     }
 }

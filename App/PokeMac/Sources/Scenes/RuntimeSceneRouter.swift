@@ -5,12 +5,8 @@ import PokeDataModel
 import PokeUI
 
 struct RuntimeSceneRouter: View {
+    @Environment(AppPreferences.self) private var preferences
     @Bindable var runtime: GameRuntime
-    let appearanceMode: AppAppearanceMode
-    let gameplayHDREnabled: Bool
-    let onCycleAppearanceMode: @MainActor () -> Void
-    let onToggleGameplayHDR: @MainActor () -> Void
-    let onToggleMusic: @MainActor () -> Void
 
     var body: some View {
         switch runtime.scene {
@@ -40,11 +36,8 @@ struct RuntimeSceneRouter: View {
         case .field, .dialogue, .scriptedSequence, .starterChoice, .battle:
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
-                appearanceMode: appearanceMode,
-                gameplayHDREnabled: gameplayHDREnabled,
-                onCycleAppearanceMode: onCycleAppearanceMode,
-                onToggleGameplayHDR: onToggleGameplayHDR,
-                onToggleMusic: onToggleMusic
+                appearanceMode: preferences.appearanceMode,
+                gameplayHDREnabled: preferences.gameplayHDREnabled
             ) {
                 GameplayScene(props: gameplaySceneProps)
             }

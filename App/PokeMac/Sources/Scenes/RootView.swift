@@ -5,6 +5,7 @@ import PokeUI
 
 struct RootView: View {
     private static let windowSize = CGSize(width: 1150, height: 800)
+    @Environment(AppPreferences.self) private var preferences
     @Bindable var coordinator: AppCoordinator
     private let lightPalette = PokeThemePalette.lightPalette
 
@@ -19,14 +20,7 @@ struct RootView: View {
                 .preferredColorScheme(.light)
                 .pokeAppearanceMode(.light)
             } else if let runtime = coordinator.runtime {
-                RuntimeSceneRouter(
-                    runtime: runtime,
-                    appearanceMode: coordinator.appearanceMode,
-                    gameplayHDREnabled: coordinator.gameplayHDREnabled,
-                    onCycleAppearanceMode: { coordinator.cycleAppearanceMode() },
-                    onToggleGameplayHDR: { coordinator.toggleGameplayHDREnabled() },
-                    onToggleMusic: { coordinator.toggleMusicEnabled() }
-                )
+                RuntimeSceneRouter(runtime: runtime)
             } else {
                 GameBoyScreen {
                     VStack(spacing: 16) {
@@ -41,9 +35,9 @@ struct RootView: View {
             }
         }
         .frame(width: Self.windowSize.width, height: Self.windowSize.height)
-        .preferredColorScheme(coordinator.appearanceMode.preferredColorSchemeOverride)
-        .pokeAppearanceMode(coordinator.appearanceMode)
-        .pokeGameplayHDREnabled(coordinator.gameplayHDREnabled)
+        .preferredColorScheme(preferences.appearanceMode.preferredColorSchemeOverride)
+        .pokeAppearanceMode(preferences.appearanceMode)
+        .pokeGameplayHDREnabled(preferences.gameplayHDREnabled)
         .toolbar {
             ToolbarItem {
                 Button("Debug") {

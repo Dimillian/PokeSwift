@@ -10,10 +10,7 @@ enum GameplayScenePropsFactory {
     static func make(
         runtime: GameRuntime,
         appearanceMode: AppAppearanceMode,
-        gameplayHDREnabled: Bool,
-        onCycleAppearanceMode: @escaping @MainActor () -> Void,
-        onToggleGameplayHDR: @escaping @MainActor () -> Void,
-        onToggleMusic: @escaping @MainActor () -> Void
+        gameplayHDREnabled: Bool
     ) -> GameplaySceneProps? {
         let snapshot = runtime.currentSnapshot()
         let manifestIndex = cachedManifestIndex(for: runtime)
@@ -66,12 +63,6 @@ enum GameplayScenePropsFactory {
                         _ = runtime.saveCurrentGame()
                     case "load":
                         _ = runtime.loadSavedGameFromSidebar()
-                    case "music":
-                        onToggleMusic()
-                    case "appearanceMode":
-                        onCycleAppearanceMode()
-                    case "gameplayHDR":
-                        onToggleGameplayHDR()
                     default:
                         break
                     }
