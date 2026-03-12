@@ -22,6 +22,11 @@ struct NamingOverlayProps {
     let maxLength: Int
 }
 
+struct NicknameConfirmationViewProps {
+    let speciesDisplayName: String
+    let focusedIndex: Int
+}
+
 struct GameplayFieldViewportProps {
     let map: MapManifest?
     let playerPosition: TilePoint?
@@ -36,6 +41,7 @@ struct GameplayFieldViewportProps {
     let starterChoiceOptions: [SpeciesManifest]
     let starterChoiceFocusedIndex: Int
     let namingProps: NamingOverlayProps?
+    let nicknameConfirmation: NicknameConfirmationViewProps?
 }
 
 struct BattleViewportProps {
@@ -50,6 +56,7 @@ struct BattleViewportProps {
     let bagItems: [InventoryItemTelemetry]
     let focusedBagItemIndex: Int
     let presentation: BattlePresentationTelemetry
+    let nicknameConfirmation: NicknameConfirmationViewProps?
 }
 
 struct PlaceholderSceneProps {
@@ -184,7 +191,9 @@ private struct FieldStageView: View {
 
     @ViewBuilder
     private var footerContent: some View {
-        if let dialogueLines = props.dialogueLines {
+        if let confirmation = props.nicknameConfirmation {
+            NicknameConfirmationFooter(confirmation: confirmation)
+        } else if let dialogueLines = props.dialogueLines {
             DialogueBoxView(lines: dialogueLines)
                 .frame(maxWidth: 760)
         }
@@ -225,14 +234,19 @@ private struct BattleStageView: View {
         }
     }
 
+    @ViewBuilder
     private var footerContent: some View {
-        DialogueBoxView(
-            title: "Battle",
-            lines: GameplayBattlePrompts.textLines(props.textLines, phase: props.phase)
-        )
-        .frame(maxWidth: 760)
-        .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)
-        .animation(.easeOut(duration: 0.18), value: props.presentation.revision)
+        if let confirmation = props.nicknameConfirmation {
+            NicknameConfirmationFooter(confirmation: confirmation)
+        } else {
+            DialogueBoxView(
+                title: "Battle",
+                lines: GameplayBattlePrompts.textLines(props.textLines, phase: props.phase)
+            )
+            .frame(maxWidth: 760)
+            .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)
+            .animation(.easeOut(duration: 0.18), value: props.presentation.revision)
+        }
     }
 
     @ViewBuilder
@@ -366,6 +380,40 @@ private struct BattleBagOverlayPanel: View {
                             .font(.system(size: 11, weight: .medium, design: .monospaced))
                     }
                     .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(index == focusedIndex ? 1 : 0.78))
+                }
+            }
+        }
+    }
+}
+
+private struct NicknameConfirmationFooter: View {
+    let confirmation: NicknameConfirmationViewProps
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            NicknameYesNoOverlay(focusedIndex: confirmation.focusedIndex)
+                .frame(width: 140)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            DialogueBoxView(lines: ["Give a nickname to", "\(confirmation.speciesDisplayName.uppercased())?"])
+        }
+        .frame(maxWidth: 760)
+    }
+}
+
+private struct NicknameYesNoOverlay: View {
+    let focusedIndex: Int
+
+    var body: some View {
+        GameplayHoverCardSurface {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(["YES", "NO"].enumerated()), id: \.offset) { index, label in
+                    HStack(spacing: 8) {
+                        Text(focusedIndex == index ? "▶" : " ")
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        Text(label)
+                            .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    }
+                    .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(focusedIndex == index ? 1 : 0.58))
                 }
             }
         }

@@ -25,6 +25,8 @@ enum GameplayScenePropsFactory {
             } ?? []
         )
 
+        let nicknameConfirmation = makeNicknameConfirmationProps(runtime: runtime)
+
         switch GameplaySidebarKind.forScene(runtime.scene) {
         case .fieldLike:
             return GameplaySceneProps(
@@ -42,7 +44,8 @@ enum GameplayScenePropsFactory {
                         shop: snapshot.shop,
                         starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
                         starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
-                        namingProps: makeNamingProps(runtime: runtime)
+                        namingProps: makeNamingProps(runtime: runtime),
+                        nicknameConfirmation: nicknameConfirmation
                     )
                 ),
                 sidebarMode: .fieldLike(
@@ -104,7 +107,8 @@ enum GameplayScenePropsFactory {
                         enemySpriteURL: enemySpriteURL,
                         bagItems: battle.bagItems,
                         focusedBagItemIndex: battle.focusedBagItemIndex,
-                        presentation: battle.presentation
+                        presentation: battle.presentation,
+                        nicknameConfirmation: nicknameConfirmation
                     )
                 ),
                 sidebarMode: .battle(
@@ -190,6 +194,14 @@ enum GameplayScenePropsFactory {
             speciesDisplayName: state.defaultName,
             enteredText: state.enteredText,
             maxLength: RuntimeNamingState.maxLength
+        )
+    }
+
+    private static func makeNicknameConfirmationProps(runtime: GameRuntime) -> NicknameConfirmationViewProps? {
+        guard let confirmation = runtime.nicknameConfirmation else { return nil }
+        return NicknameConfirmationViewProps(
+            speciesDisplayName: confirmation.defaultName,
+            focusedIndex: confirmation.focusedIndex
         )
     }
 

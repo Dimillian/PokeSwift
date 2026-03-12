@@ -37,6 +37,7 @@ public final class GameRuntime {
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
+    public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
     var recentSoundEffects: [RuntimeSoundEffectState] = []

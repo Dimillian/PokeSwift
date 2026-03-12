@@ -466,11 +466,7 @@ extension GameRuntime {
         case .captured:
             finishWildBattleCapture(battle: battle)
         case .capturedNicknamePrompt:
-            battle.message = "Give a nickname to \(battle.enemyPokemon.nickname)?"
-            battle.pendingAction = .capturedNicknameChoice
-            return
-        case .capturedNicknameChoice:
-            beginNamingAfterCapture(battle: battle)
+            beginNicknameConfirmationAfterCapture(battle: battle)
         case .continueSwitchTurn:
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:

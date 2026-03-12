@@ -118,7 +118,6 @@ enum RuntimeBattlePendingAction {
     case escape
     case captured
     case capturedNicknamePrompt
-    case capturedNicknameChoice
     case continueSwitchTurn
     case continueForcedSwitch
     case continueLevelUpResolution
@@ -361,27 +360,23 @@ enum RuntimeNamingCompletionAction {
     case returnToFieldAfterStarter
 }
 
+public struct RuntimeNicknameConfirmationState {
+    let speciesID: String
+    public let defaultName: String
+    public internal(set) var focusedIndex: Int
+    let completionAction: RuntimeNamingCompletionAction
+}
+
 public struct RuntimeNamingState {
     public static let maxLength = 10
-    public static let gridCharacters: [[Character]] = [
-        ["A","B","C","D","E","F","G","H","I"],
-        ["J","K","L","M","N","O","P","Q","R"],
-        ["S","T","U","V","W","X","Y","Z"," "],
-    ]
-    public static let endRow = 3
-    public static let validCharacters: Set<Character> = Set(gridCharacters.flatMap { $0 })
+    public static let validCharacters: Set<Character> = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZ ")
 
     let speciesID: String
     public let defaultName: String
     var enteredCharacters: [Character]
-    public var cursorRow: Int
-    public var cursorColumn: Int
     var completionAction: RuntimeNamingCompletionAction
 
     public var enteredText: String { String(enteredCharacters) }
-    public var isOnEnd: Bool { cursorRow == Self.endRow }
-    public var gridRowCount: Int { Self.gridCharacters.count + 1 }
-    public var gridColumnCount: Int { Self.gridCharacters.first?.count ?? 9 }
 }
 
 struct GameplayState {

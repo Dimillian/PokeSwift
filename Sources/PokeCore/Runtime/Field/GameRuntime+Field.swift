@@ -15,6 +15,10 @@ private struct ResolvedFieldStep {
 
 extension GameRuntime {
     func handleField(button: RuntimeButton) {
+        if nicknameConfirmation != nil {
+            handleNicknameConfirmation(button: button)
+            return
+        }
         if shopState != nil {
             handleShop(button: button)
             return

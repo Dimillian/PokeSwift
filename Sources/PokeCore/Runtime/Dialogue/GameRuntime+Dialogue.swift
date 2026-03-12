@@ -55,7 +55,9 @@ extension GameRuntime {
                 return
             }
             let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
-            beginNaming(
+            scene = .field
+            substate = "field"
+            beginNicknameConfirmation(
                 speciesID: speciesID,
                 defaultName: defaultName,
                 completion: .returnToFieldAfterStarter

@@ -1,6 +1,109 @@
 import PokeDataModel
 
 extension GameRuntime {
+
+    // MARK: - Nickname Confirmation (on-field Yes/No prompt)
+
+    func beginNicknameConfirmation(
+        speciesID: String,
+        defaultName: String,
+        completion: RuntimeNamingCompletionAction
+    ) {
+        nicknameConfirmation = RuntimeNicknameConfirmationState(
+            speciesID: speciesID,
+            defaultName: defaultName,
+            focusedIndex: 0,
+            completionAction: completion
+        )
+        publishSnapshot()
+    }
+
+    func handleNicknameConfirmation(button: RuntimeButton) {
+        guard var confirmation = nicknameConfirmation else { return }
+
+        switch button {
+        case .up:
+            guard confirmation.focusedIndex != 0 else { return }
+            confirmation.focusedIndex = 0
+        case .down:
+            guard confirmation.focusedIndex != 1 else { return }
+            confirmation.focusedIndex = 1
+        case .confirm, .start:
+            playUIConfirmSound()
+            if confirmation.focusedIndex == 0 {
+                let speciesID = confirmation.speciesID
+                let defaultName = confirmation.defaultName
+                let completionAction = confirmation.completionAction
+                nicknameConfirmation = nil
+                beginNaming(
+                    speciesID: speciesID,
+                    defaultName: defaultName,
+                    completion: completionAction
+                )
+            } else {
+                resolveNicknameConfirmationNo(confirmation)
+            }
+            return
+        default:
+            return
+        }
+
+        nicknameConfirmation = confirmation
+        publishSnapshot()
+    }
+
+    private func resolveNicknameConfirmationNo(_ confirmation: RuntimeNicknameConfirmationState) {
+        nicknameConfirmation = nil
+
+        switch confirmation.completionAction {
+        case .returnToFieldAfterCapture:
+            applyNicknameToLastPartyMember(confirmation.defaultName)
+            returnToFieldAfterCapture()
+            traceEvent(
+                .nicknameApplied,
+                "Named \(confirmation.speciesID) as \(confirmation.defaultName).",
+                details: [
+                    "speciesID": confirmation.speciesID,
+                    "nickname": confirmation.defaultName,
+                    "wasDefault": "true",
+                ]
+            )
+
+        case .returnToFieldAfterStarter:
+            finalizeStarterChoiceSequence(nickname: confirmation.defaultName)
+        }
+    }
+
+    func beginNicknameConfirmationAfterCapture(battle: RuntimeBattleState) {
+        cancelBattlePresentation()
+        guard var gameplayState else { return }
+        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        self.gameplayState = gameplayState
+
+        let speciesID = battle.enemyPokemon.speciesID
+        let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
+
+        traceEvent(
+            .battleEnded,
+            "Captured \(speciesID) in \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "outcome": "captured",
+                "speciesID": speciesID,
+            ]
+        )
+
+        beginNicknameConfirmation(
+            speciesID: speciesID,
+            defaultName: defaultName,
+            completion: .returnToFieldAfterCapture
+        )
+    }
+
+    // MARK: - Naming Screen (text input on black screen)
+
     func beginNaming(
         speciesID: String,
         defaultName: String,
@@ -10,8 +113,6 @@ extension GameRuntime {
             speciesID: speciesID,
             defaultName: defaultName,
             enteredCharacters: [],
-            cursorRow: 0,
-            cursorColumn: 0,
             completionAction: completion
         )
         scene = .naming
@@ -23,46 +124,15 @@ extension GameRuntime {
         guard var state = namingState else { return }
 
         switch button {
-        case .up:
-            if state.cursorRow > 0 {
-                state.cursorRow -= 1
-            }
-        case .down:
-            if state.cursorRow < state.gridRowCount - 1 {
-                state.cursorRow += 1
-                if state.isOnEnd {
-                    state.cursorColumn = 0
-                }
-            }
-        case .left:
-            if state.isOnEnd {
-                break
-            } else if state.cursorColumn > 0 {
-                state.cursorColumn -= 1
-            }
-        case .right:
-            if state.isOnEnd {
-                break
-            } else if state.cursorColumn < state.gridColumnCount - 1 {
-                state.cursorColumn += 1
-            }
-        case .confirm:
-            if state.isOnEnd {
-                finalizeNaming()
-                return
-            }
-            let row = RuntimeNamingState.gridCharacters[state.cursorRow]
-            let char = row[state.cursorColumn]
-            if state.enteredCharacters.count < RuntimeNamingState.maxLength {
-                state.enteredCharacters.append(char)
-            }
         case .cancel:
             if state.enteredCharacters.isEmpty == false {
                 state.enteredCharacters.removeLast()
             }
-        case .start:
+        case .confirm, .start:
             finalizeNaming()
             return
+        default:
+            break
         }
 
         namingState = state
@@ -83,15 +153,8 @@ extension GameRuntime {
         switch state.completionAction {
         case .returnToFieldAfterCapture:
             applyNicknameToLastPartyMember(nickname)
-            if var gameplayState {
-                gameplayState.battle = nil
-                self.gameplayState = gameplayState
-            }
             namingState = nil
-            scene = .field
-            substate = "field"
-            requestDefaultMapMusic()
-            publishSnapshot()
+            returnToFieldAfterCapture()
 
         case .returnToFieldAfterStarter:
             namingState = nil
@@ -119,32 +182,15 @@ extension GameRuntime {
         publishSnapshot()
     }
 
-    func beginNamingAfterCapture(battle: RuntimeBattleState) {
-        cancelBattlePresentation()
-        guard var gameplayState else { return }
-        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
-        self.gameplayState = gameplayState
-
-        let speciesID = battle.enemyPokemon.speciesID
-        let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
-
-        traceEvent(
-            .battleEnded,
-            "Captured \(speciesID) in \(battle.battleID).",
-            mapID: gameplayState.mapID,
-            battleID: battle.battleID,
-            battleKind: battle.kind,
-            details: [
-                "outcome": "captured",
-                "speciesID": speciesID,
-            ]
-        )
-
-        beginNaming(
-            speciesID: speciesID,
-            defaultName: defaultName,
-            completion: .returnToFieldAfterCapture
-        )
+    private func returnToFieldAfterCapture() {
+        if var gameplayState {
+            gameplayState.battle = nil
+            self.gameplayState = gameplayState
+        }
+        scene = .field
+        substate = "field"
+        requestDefaultMapMusic()
+        publishSnapshot()
     }
 
     private func applyNicknameToLastPartyMember(_ nickname: String) {
