@@ -26,6 +26,10 @@ extension GameRuntime {
         let experienceMessages = rewardResult.messages
 
         var beats: [RuntimeBattlePresentationBeat] = []
+        let wildVictoryCueID = battle.kind == .wild && battle.enemyActiveIndex + 1 >= battle.enemyParty.count
+            ? "wild_victory"
+            : nil
+
         if let experienceMessage = experienceMessages.first {
             beats.append(
                 .init(
@@ -36,11 +40,14 @@ extension GameRuntime {
                     requiresConfirmAfterDisplay: true,
                     meterAnimation: experienceMeterAnimation(from: previousPlayer, to: updatedPlayer),
                     message: experienceMessage,
-                    playerPokemon: updatedPlayer
+                    playerPokemon: updatedPlayer,
+                    audioCueID: wildVictoryCueID
                 )
             )
 
+            var levelUpSoundPending = true
             for message in experienceMessages.dropFirst() {
+                let shouldPlayLevelUpSound = levelUpSoundPending && message.contains("grew to Lv")
                 beats.append(
                     .init(
                         delay: battlePresentationDelay(base: 0.24),
@@ -48,9 +55,13 @@ extension GameRuntime {
                         uiVisibility: .visible,
                         activeSide: .player,
                         requiresConfirmAfterDisplay: true,
-                        message: message
+                        message: message,
+                        soundEffectRequest: shouldPlayLevelUpSound ? battleSoundEffectRequest(id: "SFX_LEVEL_UP") : nil
                     )
                 )
+                if shouldPlayLevelUpSound {
+                    levelUpSoundPending = false
+                }
             }
         }
 
@@ -343,7 +354,8 @@ extension GameRuntime {
                     moneyForWinningText(amount: payout),
                 ],
                 battle: &battle,
-                pendingAction: .completeTrainerVictory(payout: payout)
+                pendingAction: .completeTrainerVictory(payout: payout),
+                audioCueID: "trainer_victory"
             )
         case .finishWin:
             battle.phase = .battleComplete

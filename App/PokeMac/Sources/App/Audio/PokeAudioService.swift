@@ -59,6 +59,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
     private var musicCompletionWorkItem: DispatchWorkItem?
     private var soundEffectCompletionWorkItems: [Int: DispatchWorkItem] = [:]
     private var playbackRequestID = 0
+    private var activeMusicRequestID = 0
 
     init(manifest: AudioManifest) {
         self.manifest = manifest
@@ -85,11 +86,13 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let cacheKey = musicCacheKey(trackID: request.trackID, entryID: request.entryID)
         playbackRequestID += 1
         let requestID = playbackRequestID
+        activeMusicRequestID = requestID
 
         if let rendered = musicRenderCache[cacheKey] {
             pendingMusicPlayback = nil
             startMusicPlayback(
                 rendered,
+                requestID: requestID,
                 cacheKey: cacheKey,
                 playbackMode: entry.playbackMode,
                 completion: completion
@@ -162,6 +165,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     func stopAllMusic() {
         playbackRequestID += 1
+        activeMusicRequestID = playbackRequestID
         pendingMusicPlayback = nil
         musicCompletionWorkItem?.cancel()
         stopMusicPlayers()
@@ -236,6 +240,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 self.pendingMusicPlayback = nil
                 self.startMusicPlayback(
                     rendered,
+                    requestID: pendingMusicPlayback.requestID,
                     cacheKey: cacheKey,
                     playbackMode: pendingMusicPlayback.playbackMode,
                     completion: pendingMusicPlayback.completion
@@ -284,6 +289,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     private func startMusicPlayback(
         _ rendered: RenderedAudioAsset,
+        requestID: Int,
         cacheKey: String,
         playbackMode: AudioManifest.PlaybackMode,
         completion: (@MainActor () -> Void)?
@@ -299,6 +305,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
                     player.scheduleBuffer(prelude) { [weak self] in
                         Task { @MainActor [weak self] in
                             guard let self,
+                                  self.activeMusicRequestID == requestID,
                                   let loop = self.musicRenderCache[cacheKey]?.channels[hardwareChannel]?.loop,
                                   loop.frameLength > 0 else {
                                 return

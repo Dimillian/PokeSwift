@@ -86,6 +86,14 @@ extension GameRuntime {
         requestAudioCue(id: "trainer_battle", reason: "battle")
     }
 
+    func requestTrainerVictoryMusic(reason: String = "battleVictory") {
+        requestAudioCue(id: "trainer_victory", reason: reason)
+    }
+
+    func requestWildVictoryMusic(reason: String = "battleVictory") {
+        requestAudioCue(id: "wild_victory", reason: reason)
+    }
+
     func requestTrainerEncounterMusic(for battleID: String) {
         guard let cueID = content.trainerEncounterAudioCueID(for: battleID) else { return }
         requestAudioCue(id: cueID, reason: "trainerEncounter")

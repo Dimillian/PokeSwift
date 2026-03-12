@@ -138,6 +138,8 @@ func fixtureAudioManifest() -> AudioManifest {
             .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
             .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
             .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+            .init(id: "trainer_victory", assetID: "MUSIC_DEFEATED_TRAINER"),
+            .init(id: "wild_victory", assetID: "MUSIC_DEFEATED_WILD_MON"),
             .init(
                 id: "mom_heal",
                 assetID: "MUSIC_PKMN_HEALED",
@@ -189,6 +191,18 @@ func fixtureAudioManifest() -> AudioManifest {
                 entries: [.init(id: "default", sourceLabel: "Music_TrainerBattle_Ch1", playbackMode: .looping, channels: [])]
             ),
             .init(
+                id: "MUSIC_DEFEATED_TRAINER",
+                sourceLabel: "Music_DefeatedTrainer",
+                sourceFile: "audio/music/defeatedtrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_DefeatedTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_DEFEATED_WILD_MON",
+                sourceLabel: "Music_DefeatedWildMon",
+                sourceFile: "audio/music/defeatedwildmon.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_DefeatedWildMon_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
                 id: "MUSIC_PKMN_HEALED",
                 sourceLabel: "Music_PkmnHealed",
                 sourceFile: "audio/music/pkmnhealed.asm",
@@ -224,6 +238,16 @@ func fixtureAudioManifest() -> AudioManifest {
                 priority: 0,
                 order: 0,
                 requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_LEVEL_UP",
+                sourceLabel: "SFX_Level_Up",
+                sourceFile: "audio/sfx/level_up.asm",
+                bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5, 6, 7],
                 channels: []
             ),
         ]

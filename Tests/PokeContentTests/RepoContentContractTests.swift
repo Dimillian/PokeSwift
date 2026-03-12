@@ -30,6 +30,8 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.map(id: "OAKS_LAB")?.defaultMusicID, "MUSIC_OAKS_LAB")
         XCTAssertEqual(loaded.audioCue(id: "oak_intro")?.trackID, "MUSIC_MEET_PROF_OAK")
         XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
+        XCTAssertEqual(loaded.audioCue(id: "trainer_victory")?.trackID, "MUSIC_DEFEATED_TRAINER")
+        XCTAssertEqual(loaded.audioCue(id: "wild_victory")?.trackID, "MUSIC_DEFEATED_WILD_MON")
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.waitForCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.resumeMusicAfterCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.waitForCompletion, true)

@@ -145,10 +145,10 @@ extension GameRuntime {
                 break
             case .turnText, .resolvingTurn:
                 guard battlePresentationTask == nil else { break }
-                playUIConfirmSound()
                 if battle.pendingPresentationBatches.isEmpty == false {
                     advanceBattlePresentationBatch(battle: &battle)
                 } else {
+                    playUIConfirmSound()
                     advanceBattleText(battle: &battle)
                 }
             case .moveSelection:

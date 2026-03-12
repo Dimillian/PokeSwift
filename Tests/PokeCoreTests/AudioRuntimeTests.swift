@@ -796,7 +796,7 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.mapID, "VIRIDIAN_POKECENTER")
     }
 
-    func testBattleFinishStopsTrainerMusicBeforePostBattleDialogue() throws {
+    func testTrainerVictoryMusicStartsInBattleBeforePostBattleDialogue() {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -810,7 +810,7 @@ extension PokeCoreTests {
                         .init(id: "BULBASAUR", displayName: "Bulbasaur", baseExp: 64, growthRate: .mediumSlow, baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
                     ],
                     moves: [
-                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 500, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
                         .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
                     ],
                     trainerBattles: [
@@ -834,23 +834,64 @@ extension PokeCoreTests {
         )
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
-        runtime.scene = .field
-        runtime.substate = "field"
-        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
-        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Charmander")]
+        runtime.gameplayState?.money = 3000
+        runtime.scene = .battle
+        runtime.substate = "battle"
 
-        runtime.startBattle(id: "opp_rival1_2")
+        var battle = RuntimeBattleState(
+            battleID: "opp_rival1_2",
+            kind: .trainer,
+            trainerName: "BLUE",
+            trainerSpritePath: nil,
+            baseRewardMoney: 10,
+            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: true,
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
+            canRun: false,
+            trainerClass: "OPP_RIVAL1",
+            sourceTrainerObjectID: nil,
+            playerPokemon: runtime.makePokemon(speciesID: "CHARMANDER", level: 6, nickname: "Charmander"),
+            enemyParty: [runtime.makePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            phase: .turnText,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 0,
+            partySelectionMode: .optionalSwitch,
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: .finishTrainerWin(payout: 60),
+            presentation: .init()
+        )
+        runtime.gameplayState?.battle = battle
 
-        guard let battle = runtime.gameplayState?.battle else {
-            return XCTFail("expected active battle state")
-        }
+        runtime.resumeRewardContinuation(battle: &battle)
+        runtime.gameplayState?.battle = battle
 
-        runtime.finishBattle(battle: battle, won: true)
+        XCTAssertTrue(runtime.currentSnapshot().battle?.battleMessage.contains("defeated") == true)
+        XCTAssertTrue(runtime.currentSnapshot().battle?.battleMessage.contains("BLUE") == true)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_DEFEATED_TRAINER")
+        XCTAssertEqual(runtime.scene, .battle)
 
-        XCTAssertNil(runtime.currentSnapshot().audio)
-        XCTAssertEqual(audioPlayer.stopAllMusicCount, 1)
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_DEFEATED_TRAINER", entryID: "default"))
+        XCTAssertEqual(audioPlayer.stopAllMusicCount, 0)
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "RED got ¥60 for\nwinning!")
+
+        runtime.handle(button: .confirm)
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "win")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_DEFEATED_TRAINER")
     }
+
     func testMomHealJingleRestoresMapDefaultAfterCompletion() throws {
         let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
         let content = try FileSystemContentLoader(rootURL: contentRoot).load()
@@ -875,6 +916,115 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
         XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "reds_house_1f_mom_looking_great")
+    }
+
+    func testWildVictoryMusicStartsBeforeExperienceAndLevelUpSoundUsesLevelMessage() {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 255,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 64,
+                            growthRate: .mediumSlow,
+                            baseHP: 1,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["GUST"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 120, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GUST", displayName: "GUST", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "FLYING"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil,
+            audioPlayer: audioPlayer
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [runtime.makeConfiguredPokemon(
+            speciesID: "CHARMANDER",
+            nickname: "Charmander",
+            level: 5,
+            experience: 135,
+            dvs: .zero,
+            statExp: .zero,
+            currentHP: nil,
+            attackStage: 0,
+            defenseStage: 0,
+            speedStage: 0,
+            specialStage: 0,
+            accuracyStage: 0,
+            evasionStage: 0,
+            moves: nil
+        )]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 5)
+        drainBattleText(runtime)
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleMessage.contains("fainted") == true,
+            message: "wild battle did not reach the enemy faint text",
+            maxTicks: 240
+        )
+
+        let confirmCountBeforeRewardBatch = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleMessage.contains("gained") == true &&
+                runtime.currentSnapshot().battle?.battleMessage.contains("EXP") == true &&
+                runtime.currentSnapshot().audio?.trackID == "MUSIC_DEFEATED_WILD_MON" &&
+                runtime.scene == .battle,
+            message: "wild victory music did not start before the experience text",
+            maxTicks: 240
+        )
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_DEFEATED_WILD_MON", entryID: "default"))
+        XCTAssertEqual(
+            audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count,
+            confirmCountBeforeRewardBatch
+        )
+
+        let confirmCountBeforeLevelUpBeat = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.battleMessage.contains("grew to") == true &&
+                runtime.currentSnapshot().battle?.battleMessage.contains("Lv6") == true,
+            message: "battle reward did not reach the level-up message",
+            maxTicks: 240
+        )
+        XCTAssertEqual(audioPlayer.soundEffectRequests.last?.soundEffectID, "SFX_LEVEL_UP")
+        XCTAssertEqual(audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_LEVEL_UP" }.count, 1)
+        XCTAssertEqual(
+            audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count,
+            confirmCountBeforeLevelUpBeat
+        )
     }
 
     func testMusicToggleStopsPlaybackAndResumesCurrentTrack() {

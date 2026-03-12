@@ -47,9 +47,9 @@ extension GameRuntime {
                 "opponent": battle.trainerName,
             ]
         )
-        // We do not have defeated-trainer music yet, but the trainer battle track
-        // should not continue under the result dialogue.
-        stopAllMusic()
+        if won == false {
+            stopAllMusic()
+        }
         let followUpDialogueID = won ? battle.playerWinDialogueID : battle.playerLoseDialogueID
         if let followUpDialogueID {
             showDialogue(

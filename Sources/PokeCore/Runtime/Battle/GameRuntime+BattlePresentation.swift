@@ -254,6 +254,12 @@ extension GameRuntime {
                 reason: "battlePresentation.\(beat.stage.rawValue)"
             )
         }
+        if let audioCueID = beat.audioCueID {
+            requestAudioCue(
+                id: audioCueID,
+                reason: "battlePresentation.\(beat.stage.rawValue)"
+            )
+        }
 
         updateBattlePresentation(
             battle: &battle,
@@ -566,8 +572,12 @@ extension GameRuntime {
         _ messages: [String],
         battle: inout RuntimeBattleState,
         phase: RuntimeBattlePhase = .turnText,
-        pendingAction: RuntimeBattlePendingAction
+        pendingAction: RuntimeBattlePendingAction,
+        audioCueID: String? = nil
     ) {
+        if let audioCueID {
+            requestAudioCue(id: audioCueID, reason: "battleText")
+        }
         let pagedMessages = paginatedBattleMessages(messages)
         battle.pendingAction = pendingAction
         battle.phase = phase
