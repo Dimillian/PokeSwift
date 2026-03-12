@@ -135,6 +135,45 @@ public struct DialogueTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public struct FieldPromptTelemetry: Codable, Equatable, Sendable {
+    public let interactionID: String
+    public let kind: String
+    public let options: [String]
+    public let focusedIndex: Int
+
+    public init(interactionID: String, kind: String, options: [String], focusedIndex: Int) {
+        self.interactionID = interactionID
+        self.kind = kind
+        self.options = options
+        self.focusedIndex = focusedIndex
+    }
+}
+
+public struct FieldHealingTelemetry: Codable, Equatable, Sendable {
+    public let interactionID: String
+    public let phase: String
+    public let activeBallCount: Int
+    public let totalBallCount: Int
+    public let pulseStep: Int
+    public let nurseObjectID: String?
+
+    public init(
+        interactionID: String,
+        phase: String,
+        activeBallCount: Int,
+        totalBallCount: Int,
+        pulseStep: Int,
+        nurseObjectID: String? = nil
+    ) {
+        self.interactionID = interactionID
+        self.phase = phase
+        self.activeBallCount = activeBallCount
+        self.totalBallCount = totalBallCount
+        self.pulseStep = pulseStep
+        self.nurseObjectID = nurseObjectID
+    }
+}
+
 public struct PartyPokemonTelemetry: Codable, Equatable, Sendable {
     public let experience: ExperienceProgressTelemetry
     public let speciesID: String
@@ -749,6 +788,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let titleMenu: TitleMenuTelemetry?
     public let field: FieldTelemetry?
     public let dialogue: DialogueTelemetry?
+    public let fieldPrompt: FieldPromptTelemetry?
+    public let fieldHealing: FieldHealingTelemetry?
     public let starterChoice: StarterChoiceTelemetry?
     public let party: PartyTelemetry?
     public let inventory: InventoryTelemetry?
@@ -770,6 +811,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         titleMenu: TitleMenuTelemetry?,
         field: FieldTelemetry?,
         dialogue: DialogueTelemetry?,
+        fieldPrompt: FieldPromptTelemetry? = nil,
+        fieldHealing: FieldHealingTelemetry? = nil,
         starterChoice: StarterChoiceTelemetry?,
         party: PartyTelemetry?,
         inventory: InventoryTelemetry?,
@@ -790,6 +833,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.titleMenu = titleMenu
         self.field = field
         self.dialogue = dialogue
+        self.fieldPrompt = fieldPrompt
+        self.fieldHealing = fieldHealing
         self.starterChoice = starterChoice
         self.party = party
         self.inventory = inventory

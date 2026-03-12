@@ -66,6 +66,12 @@ enum PokeContentTestSupport {
                         waitForCompletion: true,
                         resumeMusicAfterCompletion: true
                     ),
+                    .init(
+                        id: "pokemon_center_healed",
+                        assetID: "MUSIC_PKMN_HEALED",
+                        waitForCompletion: true,
+                        resumeMusicAfterCompletion: true
+                    ),
                 ],
                 tracks: [
                     .init(
@@ -171,6 +177,7 @@ enum PokeContentTestSupport {
                 ),
             ],
             dialogues: [.init(id: "hello", pages: [.init(lines: ["Hi"], waitsForPrompt: true)])],
+            fieldInteractions: [],
             eventFlags: .init(flags: [.init(id: "EVENT_GOT_STARTER", sourceConstant: "EVENT_GOT_STARTER")]),
             mapScripts: [.init(mapID: "REDS_HOUSE_2F", triggers: [.init(id: "intro", scriptID: "oak_intro", conditions: [])])],
             scripts: [.init(id: "oak_intro", steps: [.init(action: "showDialogue", dialogueID: "hello")])],

@@ -31,9 +31,12 @@ public final class GameRuntime {
     var scriptedMovementTask: Task<Void, Never>?
     var idleMovementTask: Task<Void, Never>?
     var battlePresentationTask: Task<Void, Never>?
+    var fieldInteractionTask: Task<Void, Never>?
     var hasStarted = false
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
+    var fieldPromptState: RuntimeFieldPromptState?
+    var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     var deferredActions: [DeferredAction] = []
@@ -175,8 +178,21 @@ public final class GameRuntime {
         return content.dialogue(id: dialogueState.dialogueID)
     }
 
+    var currentFieldPromptState: RuntimeFieldPromptState? {
+        fieldPromptState
+    }
+
+    var currentFieldHealingState: RuntimeFieldHealingState? {
+        fieldHealingState
+    }
+
     var isFieldInputLocked: Bool {
-        fieldTransitionState != nil || fieldMovementTask != nil || scriptedMovementTask != nil || shopState != nil
+        fieldTransitionState != nil ||
+            fieldMovementTask != nil ||
+            scriptedMovementTask != nil ||
+            fieldInteractionTask != nil ||
+            fieldHealingState != nil ||
+            shopState != nil
     }
 
     var currentFieldRenderIssues: [String] {
@@ -226,6 +242,8 @@ public final class GameRuntime {
         gameplayState != nil &&
             scene == .field &&
             dialogueState == nil &&
+            fieldPromptState == nil &&
+            fieldHealingState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
             gameplayState?.battle == nil
@@ -284,7 +302,11 @@ public final class GameRuntime {
         case .field:
             handleField(button: button)
         case .dialogue:
-            handleDialogue(button: button)
+            if fieldPromptState != nil {
+                handleFieldPrompt(button: button)
+            } else {
+                handleDialogue(button: button)
+            }
         case .scriptedSequence:
             break
         case .starterChoice:

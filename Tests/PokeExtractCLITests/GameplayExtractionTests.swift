@@ -144,6 +144,29 @@ final class GameplayExtractionTests: XCTestCase {
             "oaks_lab_rival_exit_after_battle",
         ])
         XCTAssertEqual(
+            manifest.fieldInteractions,
+            [
+                .init(
+                    id: "pokemon_center_healing",
+                    kind: .pokemonCenterHealing,
+                    introDialogueID: "pokemon_center_welcome",
+                    prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
+                    acceptedDialogueID: "pokemon_center_need_your_pokemon",
+                    successDialogueID: "pokemon_center_fighting_fit",
+                    farewellDialogueID: "pokemon_center_farewell",
+                    healingSequence: .init(
+                        nurseObjectID: "viridian_pokecenter_nurse",
+                        machineSoundEffectID: "SFX_HEALING_MACHINE",
+                        healedAudioCueID: "pokemon_center_healed"
+                    )
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "viridian_pokecenter_nurse_heal" }?.steps,
+            [.init(action: "startFieldInteraction", fieldInteractionID: "pokemon_center_healing")]
+        )
+        XCTAssertEqual(
             oaksLab.objects.first { $0.id == "oaks_lab_object_8" }?.movementBehavior,
             .init(idleMode: .walk, axis: .upDown, home: .init(x: 1, y: 9))
         )
@@ -391,6 +414,11 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(oakDialogue.pages.first?.lines.first, "OAK: It's unsafe!")
         XCTAssertEqual(oakDialogue.pages.last?.lines.last, "me!")
         XCTAssertNotNil(manifest.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_welcome" }?.pages.first?.lines, ["Welcome to our", "POKéMON CENTER!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_shall_we_heal" }?.pages.first?.lines, ["Shall we heal your", "POKéMON?"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_need_your_pokemon" }?.pages.first?.lines, ["OK. We'll need", "your POKéMON."])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_fighting_fit" }?.pages.first?.lines, ["Thank you!", "Your POKéMON are", "fighting fit!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_farewell" }?.pages.first?.lines, ["We hope to see", "you again!"])
 
         let extractedDialogueIDs = Set(manifest.dialogues.map(\.id))
         let parcelHandoff = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_parcel_handoff" })
@@ -426,7 +454,8 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertGreaterThan(decoded.dialogues.count, 85)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
-        XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_pokecenter_nurse_heal" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "pokemon_center_welcome" })
+        XCTAssertNotNil(decoded.fieldInteractions.first { $0.id == "pokemon_center_healing" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "OAKS_LAB" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })

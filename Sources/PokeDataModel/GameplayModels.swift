@@ -603,6 +603,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
     public let flagID: String?
     public let objectID: String?
     public let dialogueID: String?
+    public let fieldInteractionID: String?
     public let battleID: String?
     public let trainerClass: String?
     public let trainerNumber: Int?
@@ -619,6 +620,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         flagID: String? = nil,
         objectID: String? = nil,
         dialogueID: String? = nil,
+        fieldInteractionID: String? = nil,
         battleID: String? = nil,
         trainerClass: String? = nil,
         trainerNumber: Int? = nil,
@@ -634,10 +636,79 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         self.flagID = flagID
         self.objectID = objectID
         self.dialogueID = dialogueID
+        self.fieldInteractionID = fieldInteractionID
         self.battleID = battleID
         self.trainerClass = trainerClass
         self.trainerNumber = trainerNumber
         self.visible = visible
+    }
+}
+
+public enum FieldInteractionKind: String, Codable, Equatable, Sendable {
+    case pokemonCenterHealing
+}
+
+public enum FieldPromptKind: String, Codable, Equatable, Sendable {
+    case yesNo
+}
+
+public struct FieldPromptManifest: Codable, Equatable, Sendable {
+    public let kind: FieldPromptKind
+    public let dialogueID: String
+
+    public init(kind: FieldPromptKind, dialogueID: String) {
+        self.kind = kind
+        self.dialogueID = dialogueID
+    }
+}
+
+public struct FieldHealingSequenceManifest: Codable, Equatable, Sendable {
+    public let nurseObjectID: String?
+    public let machineSoundEffectID: String
+    public let healedAudioCueID: String
+
+    public init(
+        nurseObjectID: String? = nil,
+        machineSoundEffectID: String,
+        healedAudioCueID: String
+    ) {
+        self.nurseObjectID = nurseObjectID
+        self.machineSoundEffectID = machineSoundEffectID
+        self.healedAudioCueID = healedAudioCueID
+    }
+}
+
+public struct FieldInteractionManifest: Codable, Equatable, Sendable {
+    public let id: String
+    public let kind: FieldInteractionKind
+    public let introDialogueID: String
+    public let prompt: FieldPromptManifest
+    public let acceptedDialogueID: String
+    public let successDialogueID: String
+    public let declinedDialogueID: String?
+    public let farewellDialogueID: String
+    public let healingSequence: FieldHealingSequenceManifest?
+
+    public init(
+        id: String,
+        kind: FieldInteractionKind,
+        introDialogueID: String,
+        prompt: FieldPromptManifest,
+        acceptedDialogueID: String,
+        successDialogueID: String,
+        declinedDialogueID: String? = nil,
+        farewellDialogueID: String,
+        healingSequence: FieldHealingSequenceManifest? = nil
+    ) {
+        self.id = id
+        self.kind = kind
+        self.introDialogueID = introDialogueID
+        self.prompt = prompt
+        self.acceptedDialogueID = acceptedDialogueID
+        self.successDialogueID = successDialogueID
+        self.declinedDialogueID = declinedDialogueID
+        self.farewellDialogueID = farewellDialogueID
+        self.healingSequence = healingSequence
     }
 }
 
@@ -1183,6 +1254,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public let tilesets: [TilesetManifest]
     public let overworldSprites: [OverworldSpriteManifest]
     public let dialogues: [DialogueManifest]
+    public let fieldInteractions: [FieldInteractionManifest]
     public let eventFlags: EventFlagManifest
     public let mapScripts: [MapScriptManifest]
     public let scripts: [ScriptManifest]
@@ -1200,6 +1272,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         tilesets: [TilesetManifest],
         overworldSprites: [OverworldSpriteManifest],
         dialogues: [DialogueManifest],
+        fieldInteractions: [FieldInteractionManifest] = [],
         eventFlags: EventFlagManifest,
         mapScripts: [MapScriptManifest],
         scripts: [ScriptManifest],
@@ -1216,6 +1289,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         self.tilesets = tilesets
         self.overworldSprites = overworldSprites
         self.dialogues = dialogues
+        self.fieldInteractions = fieldInteractions
         self.eventFlags = eventFlags
         self.mapScripts = mapScripts
         self.scripts = scripts
@@ -1234,6 +1308,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         case tilesets
         case overworldSprites
         case dialogues
+        case fieldInteractions
         case eventFlags
         case mapScripts
         case scripts
@@ -1253,6 +1328,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         tilesets = try container.decode([TilesetManifest].self, forKey: .tilesets)
         overworldSprites = try container.decode([OverworldSpriteManifest].self, forKey: .overworldSprites)
         dialogues = try container.decode([DialogueManifest].self, forKey: .dialogues)
+        fieldInteractions = try container.decodeIfPresent([FieldInteractionManifest].self, forKey: .fieldInteractions) ?? []
         eventFlags = try container.decode(EventFlagManifest.self, forKey: .eventFlags)
         mapScripts = try container.decode([MapScriptManifest].self, forKey: .mapScripts)
         scripts = try container.decode([ScriptManifest].self, forKey: .scripts)

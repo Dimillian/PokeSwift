@@ -41,6 +41,8 @@ enum GameplayScenePropsFactory {
                         renderAssets: makeFieldRenderAssets(runtime: runtime),
                         fieldTransition: fieldState.transition,
                         dialogueLines: runtime.currentDialoguePage?.lines,
+                        fieldPrompt: fieldState.fieldPrompt,
+                        fieldHealing: fieldState.fieldHealing,
                         shop: fieldState.shop,
                         starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
                         starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex

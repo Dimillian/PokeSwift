@@ -34,6 +34,7 @@ func fixtureContent(
 @MainActor
 func fixtureGameplayManifest(
     dialogues: [DialogueManifest] = [],
+    fieldInteractions: [FieldInteractionManifest] = [],
     scripts: [ScriptManifest] = [],
     species: [SpeciesManifest] = [],
     items: [ItemManifest] = [],
@@ -96,6 +97,7 @@ func fixtureGameplayManifest(
             ),
         ],
         dialogues: dialogues,
+        fieldInteractions: fieldInteractions,
         eventFlags: .init(flags: []),
         mapScripts: [],
         scripts: scripts,
@@ -121,6 +123,12 @@ func fixtureAudioManifest() -> AudioManifest {
             .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
             .init(
                 id: "mom_heal",
+                assetID: "MUSIC_PKMN_HEALED",
+                waitForCompletion: true,
+                resumeMusicAfterCompletion: true
+            ),
+            .init(
+                id: "pokemon_center_healed",
                 assetID: "MUSIC_PKMN_HEALED",
                 waitForCompletion: true,
                 resumeMusicAfterCompletion: true
@@ -168,6 +176,16 @@ func fixtureAudioManifest() -> AudioManifest {
                 sourceLabel: "SFX_Collision",
                 sourceFile: "audio/sfx/collision.asm",
                 bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_HEALING_MACHINE",
+                sourceLabel: "SFX_HealingMachine",
+                sourceFile: "audio/sfx/healing_machine_1.asm",
+                bank: 1,
                 priority: 0,
                 order: 0,
                 requestedChannels: [5],

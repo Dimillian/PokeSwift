@@ -26,6 +26,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         tilesets: tilesets,
         overworldSprites: buildOverworldSprites(),
         dialogues: try buildDialogues(repoRoot: source.repoRoot),
+        fieldInteractions: buildFieldInteractions(),
         eventFlags: EventFlagManifest(flags: eventFlags),
         mapScripts: buildMapScripts(),
         scripts: try buildScripts(repoRoot: source.repoRoot),
@@ -1303,20 +1304,16 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "pokemart_unsellable_item", label: "_PokemartUnsellableItemText", from: text4),
         try extractDialogue(id: "pokemart_thank_you", label: "_PokemartThankYouText", from: text4),
         try extractDialogue(id: "pokemart_anything_else", label: "_PokemartAnythingElseText", from: text4),
+        try extractDialogue(id: "pokemon_center_welcome", label: "_PokemonCenterWelcomeText", from: text4),
+        try extractDialogue(id: "pokemon_center_shall_we_heal", label: "_ShallWeHealYourPokemonText", from: text4),
+        try extractDialogue(id: "pokemon_center_need_your_pokemon", label: "_NeedYourPokemonText", from: text4),
+        try extractDialogue(id: "pokemon_center_fighting_fit", label: "_PokemonFightingFitText", from: text4),
+        try extractDialogue(id: "pokemon_center_farewell", label: "_PokemonCenterFarewellText", from: text4),
         try extractDialogue(id: "capture_uncatchable", label: "_ItemUseBallText00", from: text6),
         try extractDialogue(id: "capture_missed", label: "_ItemUseBallText01", from: text6),
         try extractDialogue(id: "capture_broke_free", label: "_ItemUseBallText02", from: text6),
         try extractDialogue(id: "capture_almost", label: "_ItemUseBallText03", from: text6),
         try extractDialogue(id: "capture_so_close", label: "_ItemUseBallText04", from: text6),
-        DialogueManifest(
-            id: "viridian_pokecenter_nurse_heal",
-            pages: [
-                .init(lines: ["Welcome to our", "#MON CENTER!", "We heal your", "#MON back to"], waitsForPrompt: true),
-                .init(lines: ["perfect health!"], waitsForPrompt: true),
-                .init(lines: ["OK. We'll need", "your #MON."], waitsForPrompt: true),
-                .init(lines: ["Thank you!", "Your #MON are", "fighting fit!"], waitsForPrompt: true),
-            ]
-        ),
         try extractDialogue(id: "viridian_pokecenter_gentleman", label: "_ViridianPokecenterGentlemanText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterGentlemanText"] ?? []),
         try extractDialogue(id: "viridian_pokecenter_cooltrainer", label: "_ViridianPokecenterCooltrainerMText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterCooltrainerMText"] ?? []),
         try extractDialogue(id: "oaks_lab_rival_gramps_isnt_around", label: "_OaksLabRivalGrampsIsntAroundText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalGrampsIsntAroundText"] ?? []),
@@ -1361,6 +1358,25 @@ private func buildDialogues(repoRoot: URL) throws -> [DialogueManifest] {
         try extractDialogue(id: "oaks_lab_oak_that_was_my_dream", label: "_OaksLabOakThatWasMyDreamText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabOakThatWasMyDreamText"] ?? []),
         try extractDialogue(id: "oaks_lab_rival_leave_it_all_to_me", label: "_OaksLabRivalLeaveItAllToMeText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalLeaveItAllToMeText"] ?? []),
         try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2, extraEvents: scriptDialogueEvents["_Rival1WinText"] ?? []),
+    ]
+}
+
+private func buildFieldInteractions() -> [FieldInteractionManifest] {
+    [
+        .init(
+            id: "pokemon_center_healing",
+            kind: .pokemonCenterHealing,
+            introDialogueID: "pokemon_center_welcome",
+            prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
+            acceptedDialogueID: "pokemon_center_need_your_pokemon",
+            successDialogueID: "pokemon_center_fighting_fit",
+            farewellDialogueID: "pokemon_center_farewell",
+            healingSequence: .init(
+                nurseObjectID: "viridian_pokecenter_nurse",
+                machineSoundEffectID: "SFX_HEALING_MACHINE",
+                healedAudioCueID: "pokemon_center_healed"
+            )
+        ),
     ]
 }
 
@@ -1635,8 +1651,7 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
         ScriptManifest(
             id: "viridian_pokecenter_nurse_heal",
             steps: [
-                .init(action: "healParty"),
-                .init(action: "showDialogue", dialogueID: "viridian_pokecenter_nurse_heal"),
+                .init(action: "startFieldInteraction", fieldInteractionID: "pokemon_center_healing"),
             ]
         ),
         ScriptManifest(

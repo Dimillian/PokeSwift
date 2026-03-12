@@ -32,6 +32,8 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.waitForCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.resumeMusicAfterCompletion, true)
+        XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.waitForCompletion, true)
+        XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.resumeMusicAfterCompletion, true)
         XCTAssertNotNil(loaded.audioTrack(id: "MUSIC_TITLE_SCREEN"))
         XCTAssertNotNil(loaded.audioEntry(trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"))
         XCTAssertEqual(
@@ -71,5 +73,20 @@ final class RepoContentContractTests: XCTestCase {
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
         )
+    }
+
+    func testLoaderReadsRepoGeneratedPokemonCenterInteractionContract() throws {
+        let root = PokeContentTestSupport.repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let loaded = try FileSystemContentLoader(rootURL: root).load()
+
+        let interaction = try XCTUnwrap(loaded.fieldInteraction(id: "pokemon_center_healing"))
+        XCTAssertEqual(interaction.kind, .pokemonCenterHealing)
+        XCTAssertEqual(interaction.introDialogueID, "pokemon_center_welcome")
+        XCTAssertEqual(interaction.prompt.dialogueID, "pokemon_center_shall_we_heal")
+        XCTAssertEqual(interaction.acceptedDialogueID, "pokemon_center_need_your_pokemon")
+        XCTAssertEqual(interaction.successDialogueID, "pokemon_center_fighting_fit")
+        XCTAssertEqual(interaction.farewellDialogueID, "pokemon_center_farewell")
+        XCTAssertEqual(interaction.healingSequence?.machineSoundEffectID, "SFX_HEALING_MACHINE")
+        XCTAssertEqual(interaction.healingSequence?.healedAudioCueID, "pokemon_center_healed")
     }
 }

@@ -1191,6 +1191,93 @@
       ]
     },
     {
+      "id" : "pokemon_center_welcome",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Welcome to our",
+            "POKéMON CENTER!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "We heal your",
+            "POKéMON back to",
+            "perfect health!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pokemon_center_shall_we_heal",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Shall we heal your",
+            "POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pokemon_center_need_your_pokemon",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "OK. We'll need",
+            "your POKéMON."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pokemon_center_fighting_fit",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Thank you!",
+            "Your POKéMON are",
+            "fighting fit!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pokemon_center_farewell",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "We hope to see",
+            "you again!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "capture_uncatchable",
       "pages" : [
         {
@@ -1270,53 +1357,6 @@
           "lines" : [
             "Shoot! It was so",
             "close too!"
-          ],
-          "waitsForPrompt" : true
-        }
-      ]
-    },
-    {
-      "id" : "viridian_pokecenter_nurse_heal",
-      "pages" : [
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "Welcome to our",
-            "#MON CENTER!",
-            "We heal your",
-            "#MON back to"
-          ],
-          "waitsForPrompt" : true
-        },
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "perfect health!"
-          ],
-          "waitsForPrompt" : true
-        },
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "OK. We'll need",
-            "your #MON."
-          ],
-          "waitsForPrompt" : true
-        },
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "Thank you!",
-            "Your #MON are",
-            "fighting fit!"
           ],
           "waitsForPrompt" : true
         }
@@ -2426,6 +2466,25 @@
       }
     ]
   },
+  "fieldInteractions" : [
+    {
+      "acceptedDialogueID" : "pokemon_center_need_your_pokemon",
+      "farewellDialogueID" : "pokemon_center_farewell",
+      "healingSequence" : {
+        "healedAudioCueID" : "pokemon_center_healed",
+        "machineSoundEffectID" : "SFX_HEALING_MACHINE",
+        "nurseObjectID" : "viridian_pokecenter_nurse"
+      },
+      "id" : "pokemon_center_healing",
+      "introDialogueID" : "pokemon_center_welcome",
+      "kind" : "pokemonCenterHealing",
+      "prompt" : {
+        "dialogueID" : "pokemon_center_shall_we_heal",
+        "kind" : "yesNo"
+      },
+      "successDialogueID" : "pokemon_center_fighting_fit"
+    }
+  ],
   "items" : [
     {
       "battleUse" : "ball",
@@ -13786,14 +13845,8 @@
       "id" : "viridian_pokecenter_nurse_heal",
       "steps" : [
         {
-          "action" : "healParty",
-          "path" : [
-
-          ]
-        },
-        {
-          "action" : "showDialogue",
-          "dialogueID" : "viridian_pokecenter_nurse_heal",
+          "action" : "startFieldInteraction",
+          "fieldInteractionID" : "pokemon_center_healing",
           "path" : [
 
           ]

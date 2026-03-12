@@ -52,6 +52,10 @@ public struct LoadedContent: Sendable {
         gameplayManifest.dialogues.first { $0.id == id }
     }
 
+    public func fieldInteraction(id: String) -> FieldInteractionManifest? {
+        gameplayManifest.fieldInteractions.first { $0.id == id }
+    }
+
     public func script(id: String) -> ScriptManifest? {
         gameplayManifest.scripts.first { $0.id == id }
     }

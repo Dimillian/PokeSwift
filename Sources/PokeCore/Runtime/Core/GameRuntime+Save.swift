@@ -165,6 +165,7 @@ extension GameRuntime {
         fieldMovementTask?.cancel()
         scriptedMovementTask?.cancel()
         idleMovementTask?.cancel()
+        fieldInteractionTask?.cancel()
 
         playthroughID = envelope.metadata.playthroughID
         gameplayState = GameplayState(
@@ -195,6 +196,8 @@ extension GameRuntime {
         )
         reseedRuntimeRNG()
         dialogueState = nil
+        fieldPromptState = nil
+        fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil
         deferredActions.removeAll()

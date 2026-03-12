@@ -31,6 +31,12 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
             waitForCompletion: true,
             resumeMusicAfterCompletion: true
         ),
+        .init(
+            id: "pokemon_center_healed",
+            assetID: "MUSIC_PKMN_HEALED",
+            waitForCompletion: true,
+            resumeMusicAfterCompletion: true
+        ),
     ]
 
     let requiredTrackIDs = Array(

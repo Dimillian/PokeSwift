@@ -261,18 +261,45 @@ struct RuntimeBattleState {
 }
 
 struct DialogueState {
-    enum CompletionAction {
+    indirect enum CompletionAction {
         case returnToField
         case continueScript
         case healAndShow(dialogueID: String)
         case openStarterChoice(preselectedSpeciesID: String)
         case beginPostChoiceSequence
         case startPostBattleDialogue(won: Bool)
+        case showDialogue(dialogueID: String, completionAction: CompletionAction)
+        case fieldPrompt(interactionID: String, completionAction: CompletionAction)
+        case startFieldHealing(interactionID: String, completionAction: CompletionAction)
     }
 
     let dialogueID: String
     var pageIndex: Int
     let completionAction: CompletionAction
+}
+
+struct RuntimeFieldPromptState {
+    let interactionID: String
+    let kind: FieldPromptKind
+    let completionAction: DialogueState.CompletionAction
+    var focusedIndex: Int
+}
+
+enum RuntimeFieldHealingPhase: String {
+    case priming
+    case machineActive
+    case healedJingle
+}
+
+struct RuntimeFieldHealingState {
+    let interactionID: String
+    let nurseObjectID: String?
+    let originalFacing: FacingDirection?
+    let completionAction: DialogueState.CompletionAction
+    var phase: RuntimeFieldHealingPhase
+    var activeBallCount: Int
+    var totalBallCount: Int
+    var pulseStep: Int
 }
 
 enum DeferredAction {

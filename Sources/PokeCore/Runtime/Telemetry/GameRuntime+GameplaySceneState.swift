@@ -4,17 +4,23 @@ public struct GameplayFieldSceneState: Equatable, Sendable {
     public let party: PartyTelemetry?
     public let inventory: InventoryTelemetry?
     public let shop: ShopTelemetry?
+    public let fieldPrompt: FieldPromptTelemetry?
+    public let fieldHealing: FieldHealingTelemetry?
     public let transition: FieldTransitionTelemetry?
 
     public init(
         party: PartyTelemetry?,
         inventory: InventoryTelemetry?,
         shop: ShopTelemetry?,
+        fieldPrompt: FieldPromptTelemetry?,
+        fieldHealing: FieldHealingTelemetry?,
         transition: FieldTransitionTelemetry?
     ) {
         self.party = party
         self.inventory = inventory
         self.shop = shop
+        self.fieldPrompt = fieldPrompt
+        self.fieldHealing = fieldHealing
         self.transition = transition
     }
 }
@@ -38,6 +44,8 @@ extension GameRuntime {
             party: makePartyTelemetry(),
             inventory: makeInventoryTelemetry(),
             shop: makeShopTelemetry(),
+            fieldPrompt: makeFieldPromptTelemetry(),
+            fieldHealing: makeFieldHealingTelemetry(),
             transition: makeFieldTransitionTelemetry()
         )
     }

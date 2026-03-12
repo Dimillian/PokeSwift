@@ -9,6 +9,11 @@ extension GameRuntime {
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             return
         }
+        let isFinalPage = dialogueState.pageIndex == dialogue.pages.count - 1
+        if case .fieldPrompt = dialogueState.completionAction, isFinalPage {
+            handleFieldPrompt(button: button)
+            return
+        }
         let currentPageHasBlockingEvents = dialogue.pages[dialogueState.pageIndex].events.contains(where: \.waitForCompletion)
         guard currentPageHasBlockingEvents == false || isDialogueAudioBlockingInput == false else {
             return
@@ -51,6 +56,21 @@ extension GameRuntime {
             scene = .field
             substate = "field"
             runPostBattleSequence(won: won)
+        case let .showDialogue(dialogueID, completionAction):
+            scene = .field
+            substate = "field"
+            showDialogue(id: dialogueID, completion: completionAction)
+        case let .fieldPrompt(interactionID, completionAction):
+            scene = .dialogue
+            substate = "dialogue_\(dialogue.id)_prompt"
+            fieldPromptState = .init(
+                interactionID: interactionID,
+                kind: content.fieldInteraction(id: interactionID)?.prompt.kind ?? .yesNo,
+                completionAction: completionAction,
+                focusedIndex: 0
+            )
+        case let .startFieldHealing(interactionID, completionAction):
+            startFieldHealing(interactionID: interactionID, completionAction: completionAction)
         }
     }
 
@@ -95,6 +115,16 @@ extension GameRuntime {
                 substate = "field"
             }
             return
+        }
+        if case let .fieldPrompt(interactionID, completionAction) = completion {
+            fieldPromptState = .init(
+                interactionID: interactionID,
+                kind: content.fieldInteraction(id: interactionID)?.prompt.kind ?? .yesNo,
+                completionAction: completionAction,
+                focusedIndex: 0
+            )
+        } else {
+            fieldPromptState = nil
         }
         dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)
         scene = .dialogue

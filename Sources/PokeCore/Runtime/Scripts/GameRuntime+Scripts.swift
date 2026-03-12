@@ -107,6 +107,10 @@ extension GameRuntime {
             guard let dialogueID = step.dialogueID else { return false }
             showDialogue(id: dialogueID, completion: .continueScript)
             return true
+        case "startFieldInteraction":
+            guard let fieldInteractionID = step.fieldInteractionID else { return false }
+            startFieldInteraction(id: fieldInteractionID, completionAction: .continueScript)
+            return true
         case "startStarterChoice":
             scene = .starterChoice
             substate = "starter_choice"
