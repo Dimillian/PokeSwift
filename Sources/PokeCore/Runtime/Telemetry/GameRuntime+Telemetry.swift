@@ -55,9 +55,7 @@ extension GameRuntime {
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
             renderMode: currentFieldRenderMode,
-            transition: fieldTransitionState.map {
-                .init(kind: $0.kind.rawValue, phase: $0.phase.rawValue)
-            }
+            transition: makeFieldTransitionTelemetry()
         )
     }
 

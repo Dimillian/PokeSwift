@@ -1,0 +1,57 @@
+import PokeDataModel
+
+public struct GameplayFieldSceneState: Equatable, Sendable {
+    public let party: PartyTelemetry?
+    public let inventory: InventoryTelemetry?
+    public let shop: ShopTelemetry?
+    public let transition: FieldTransitionTelemetry?
+
+    public init(
+        party: PartyTelemetry?,
+        inventory: InventoryTelemetry?,
+        shop: ShopTelemetry?,
+        transition: FieldTransitionTelemetry?
+    ) {
+        self.party = party
+        self.inventory = inventory
+        self.shop = shop
+        self.transition = transition
+    }
+}
+
+public struct GameplayBattleSceneState: Equatable, Sendable {
+    public let party: PartyTelemetry?
+    public let battle: BattleTelemetry?
+
+    public init(
+        party: PartyTelemetry?,
+        battle: BattleTelemetry?
+    ) {
+        self.party = party
+        self.battle = battle
+    }
+}
+
+extension GameRuntime {
+    public func currentFieldSceneState() -> GameplayFieldSceneState {
+        GameplayFieldSceneState(
+            party: makePartyTelemetry(),
+            inventory: makeInventoryTelemetry(),
+            shop: makeShopTelemetry(),
+            transition: makeFieldTransitionTelemetry()
+        )
+    }
+
+    public func currentBattleSceneState() -> GameplayBattleSceneState {
+        GameplayBattleSceneState(
+            party: makePartyTelemetry(),
+            battle: makeBattleTelemetry()
+        )
+    }
+
+    func makeFieldTransitionTelemetry() -> FieldTransitionTelemetry? {
+        fieldTransitionState.map {
+            .init(kind: $0.kind.rawValue, phase: $0.phase.rawValue)
+        }
+    }
+}
