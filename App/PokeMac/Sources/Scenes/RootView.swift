@@ -24,7 +24,8 @@ struct RootView: View {
                     appearanceMode: coordinator.appearanceMode,
                     gameplayHDREnabled: coordinator.gameplayHDREnabled,
                     onCycleAppearanceMode: { coordinator.cycleAppearanceMode() },
-                    onToggleGameplayHDR: { coordinator.toggleGameplayHDREnabled() }
+                    onToggleGameplayHDR: { coordinator.toggleGameplayHDREnabled() },
+                    onToggleMusic: { coordinator.toggleMusicEnabled() }
                 )
             } else {
                 GameBoyScreen {

@@ -452,6 +452,7 @@ When a blocker is discovered, add:
 - Restored the tinted LCD reflection band in the field shader for the stylized DMG preset while leaving the authentic preset path unchanged.
 - Removed the remaining LCD outline strokes in both the shared shell and field viewport overlays so light and dark gameplay rely on the clipped screen shape instead of an extra border.
 - Promoted gameplay HDR from a dark-only prototype into a persisted `HDR Effects` option, with shared light/dark tuning profiles that keep the window SDR while driving only the LCD glow, screen content, and battery LED through the macOS 26 EDR path when the display supports it.
+- Persisted the gameplay music toggle through the app settings store/coordinator path so audio starts in the user's last chosen state and the sidebar switch updates both runtime playback and stored preference together.
 - Removed the full-screen pixel-grid overlay from `GameBoyScreen` so gameplay and title surfaces read cleaner while keeping the shared Game Boy shell layout intact.
 - Reworked the gameplay host/sidebar chrome toward native macOS 26 Liquid Glass, using shared sidebar card/inset/chip surface primitives with retro-tinted materials instead of repeated hardcoded fills.
 - Split the monolithic gameplay sidebar view into focused field, battle, trainer, party, inventory/save/options, and shared-primitives files so future native UI iterations can stay scoped without changing gameplay/sidebar behavior contracts.

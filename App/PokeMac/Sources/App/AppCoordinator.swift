@@ -13,6 +13,7 @@ final class AppCoordinator {
     var showDebugPanel = false
     var appearanceMode: AppAppearanceMode
     var gameplayHDREnabled: Bool
+    var musicEnabled: Bool
 
     private var telemetryCoordinator: TelemetryCoordinator?
     private var telemetryServer: TelemetryControlServer?
@@ -25,6 +26,7 @@ final class AppCoordinator {
         self.settingsStore = settingsStore
         appearanceMode = settingsStore.appearanceMode
         gameplayHDREnabled = settingsStore.gameplayHDREnabled
+        musicEnabled = settingsStore.musicEnabled
         bootstrap()
     }
 
@@ -44,6 +46,7 @@ final class AppCoordinator {
                     audioPlayer: audioService,
                     saveStore: saveStore
                 )
+                runtime.setMusicEnabled(musicEnabled)
                 self.runtime = runtime
                 self.telemetryCoordinator = telemetry
                 self.audioService = audioService
@@ -105,6 +108,13 @@ final class AppCoordinator {
     func toggleGameplayHDREnabled() {
         gameplayHDREnabled.toggle()
         settingsStore.gameplayHDREnabled = gameplayHDREnabled
+    }
+
+    func toggleMusicEnabled() {
+        let nextValue = musicEnabled == false
+        musicEnabled = nextValue
+        settingsStore.musicEnabled = nextValue
+        runtime?.setMusicEnabled(nextValue)
     }
 
     func requestForegroundActivationIfNeeded() {

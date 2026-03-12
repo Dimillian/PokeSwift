@@ -12,7 +12,8 @@ enum GameplayScenePropsFactory {
         appearanceMode: AppAppearanceMode,
         gameplayHDREnabled: Bool,
         onCycleAppearanceMode: @escaping @MainActor () -> Void,
-        onToggleGameplayHDR: @escaping @MainActor () -> Void
+        onToggleGameplayHDR: @escaping @MainActor () -> Void,
+        onToggleMusic: @escaping @MainActor () -> Void
     ) -> GameplaySceneProps? {
         let snapshot = runtime.currentSnapshot()
         let manifestIndex = cachedManifestIndex(for: runtime)
@@ -66,7 +67,7 @@ enum GameplayScenePropsFactory {
                     case "load":
                         _ = runtime.loadSavedGameFromSidebar()
                     case "music":
-                        runtime.toggleMusicEnabled()
+                        onToggleMusic()
                     case "appearanceMode":
                         onCycleAppearanceMode()
                     case "gameplayHDR":

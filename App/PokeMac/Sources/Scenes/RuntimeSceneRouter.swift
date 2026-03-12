@@ -10,6 +10,7 @@ struct RuntimeSceneRouter: View {
     let gameplayHDREnabled: Bool
     let onCycleAppearanceMode: @MainActor () -> Void
     let onToggleGameplayHDR: @MainActor () -> Void
+    let onToggleMusic: @MainActor () -> Void
 
     var body: some View {
         switch runtime.scene {
@@ -42,7 +43,8 @@ struct RuntimeSceneRouter: View {
                 appearanceMode: appearanceMode,
                 gameplayHDREnabled: gameplayHDREnabled,
                 onCycleAppearanceMode: onCycleAppearanceMode,
-                onToggleGameplayHDR: onToggleGameplayHDR
+                onToggleGameplayHDR: onToggleGameplayHDR,
+                onToggleMusic: onToggleMusic
             ) {
                 GameplayScene(props: gameplaySceneProps)
             }
