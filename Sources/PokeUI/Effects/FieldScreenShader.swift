@@ -31,6 +31,9 @@ extension View {
 private struct FieldScreenEffectModifier: ViewModifier {
     let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         guard displayStyle != .rawGrayscale else {
@@ -47,6 +50,7 @@ private struct FieldScreenEffectModifier: ViewModifier {
                             .float(shaderViewportHeight),
                             .float(Float(max(1, displayScale))),
                             .float(displayStyle.shaderPresetValue),
+                            .float(shaderHDRBoost),
                         ]
                     )
                 )
@@ -61,6 +65,17 @@ private struct FieldScreenEffectModifier: ViewModifier {
     private var shaderViewportHeight: Float {
         Float(CGFloat(FieldSceneRenderer.viewportPixelSize.height) * displayScale)
     }
+
+    private var shaderHDRBoost: Float {
+        guard displayStyle == .dmgTinted else { return 0 }
+        return Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            ).fieldShaderBoost
+        )
+    }
 }
 
 private struct BattleScreenEffectModifier: ViewModifier {
@@ -69,6 +84,9 @@ private struct BattleScreenEffectModifier: ViewModifier {
     @State private var displayedIntroProgress: CGFloat = 1
     @State private var displayedIntroAmount: CGFloat = 0
     @State private var seededIntroRevision: Int?
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         content
@@ -82,6 +100,7 @@ private struct BattleScreenEffectModifier: ViewModifier {
                         .float(introStyleValue),
                         .float(Float(displayedIntroProgress)),
                         .float(Float(displayedIntroAmount)),
+                        .float(shaderHDRBoost),
                     ]
                 ),
                 maxSampleOffset: .init(width: maxSampleOffset, height: maxSampleOffset)
@@ -164,6 +183,16 @@ private struct BattleScreenEffectModifier: ViewModifier {
         default:
             return .easeInOut(duration: 0.2)
         }
+    }
+
+    private var shaderHDRBoost: Float {
+        Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            ).battleShaderBoost
+        )
     }
 }
 

@@ -53,6 +53,88 @@ public enum AppAppearanceMode: String, CaseIterable, Codable, Sendable {
     }
 }
 
+public struct GameplayHDRProfile: Equatable, Sendable {
+    public let isEnabled: Bool
+    public let outerGlowExposure: Double
+    public let outerGlowOpacity: Double
+    public let outerGlowPaddingMultiplier: Double
+    public let outerGlowBlurMultiplier: Double
+    public let innerGlowExposure: Double
+    public let innerGlowOpacity: Double
+    public let innerGlowPaddingMultiplier: Double
+    public let innerGlowBlurMultiplier: Double
+    public let glowHeadroom: Double
+    public let batteryExposure: Double
+    public let batteryShadowExposure: Double
+    public let batteryShadowOpacity: Double
+    public let batteryHeadroom: Double
+    public let contentHeadroom: Double
+    public let fieldShaderBoost: Double
+    public let battleShaderBoost: Double
+
+    public init(
+        isEnabled: Bool,
+        outerGlowExposure: Double,
+        outerGlowOpacity: Double,
+        outerGlowPaddingMultiplier: Double,
+        outerGlowBlurMultiplier: Double,
+        innerGlowExposure: Double,
+        innerGlowOpacity: Double,
+        innerGlowPaddingMultiplier: Double,
+        innerGlowBlurMultiplier: Double,
+        glowHeadroom: Double,
+        batteryExposure: Double,
+        batteryShadowExposure: Double,
+        batteryShadowOpacity: Double,
+        batteryHeadroom: Double,
+        contentHeadroom: Double,
+        fieldShaderBoost: Double,
+        battleShaderBoost: Double
+    ) {
+        self.isEnabled = isEnabled
+        self.outerGlowExposure = outerGlowExposure
+        self.outerGlowOpacity = outerGlowOpacity
+        self.outerGlowPaddingMultiplier = outerGlowPaddingMultiplier
+        self.outerGlowBlurMultiplier = outerGlowBlurMultiplier
+        self.innerGlowExposure = innerGlowExposure
+        self.innerGlowOpacity = innerGlowOpacity
+        self.innerGlowPaddingMultiplier = innerGlowPaddingMultiplier
+        self.innerGlowBlurMultiplier = innerGlowBlurMultiplier
+        self.glowHeadroom = glowHeadroom
+        self.batteryExposure = batteryExposure
+        self.batteryShadowExposure = batteryShadowExposure
+        self.batteryShadowOpacity = batteryShadowOpacity
+        self.batteryHeadroom = batteryHeadroom
+        self.contentHeadroom = contentHeadroom
+        self.fieldShaderBoost = fieldShaderBoost
+        self.battleShaderBoost = battleShaderBoost
+    }
+
+    public var rendersBloom: Bool {
+        isEnabled && (outerGlowOpacity > 0 || innerGlowOpacity > 0)
+    }
+
+    public static let disabled = GameplayHDRProfile(
+        isEnabled: false,
+        outerGlowExposure: 1,
+        outerGlowOpacity: 0,
+        outerGlowPaddingMultiplier: 0,
+        outerGlowBlurMultiplier: 0,
+        innerGlowExposure: 1,
+        innerGlowOpacity: 0,
+        innerGlowPaddingMultiplier: 0,
+        innerGlowBlurMultiplier: 0,
+        glowHeadroom: 0,
+        batteryExposure: 1,
+        batteryShadowExposure: 1,
+        batteryShadowOpacity: 0.35,
+        batteryHeadroom: 0,
+        contentHeadroom: 0,
+        fieldShaderBoost: 0,
+        battleShaderBoost: 0
+    )
+}
+
 public struct ThemeRGBA: Equatable, Sendable {
     public let red: Double
     public let green: Double
@@ -72,6 +154,18 @@ public struct ThemeRGBA: Equatable, Sendable {
 
     var nsColor: NSColor {
         NSColor(srgbRed: red, green: green, blue: blue, alpha: alpha)
+    }
+
+    public func hdrColor(linearExposure: Double) -> Color {
+        Color(
+            nsColor: NSColor(
+                red: red,
+                green: green,
+                blue: blue,
+                alpha: alpha,
+                linearExposure: max(1, linearExposure)
+            )
+        )
     }
 }
 
@@ -157,6 +251,57 @@ public enum PokeThemePalette {
             return .retroDark
         case .system:
             return .light
+        }
+    }
+
+    public static func gameplayHDRProfile(
+        appearanceMode: AppAppearanceMode,
+        colorScheme: ColorScheme,
+        isEnabled: Bool
+    ) -> GameplayHDRProfile {
+        guard isEnabled else { return .disabled }
+
+        switch appearanceMode.resolved(for: colorScheme) {
+        case .light, .system:
+            return GameplayHDRProfile(
+                isEnabled: true,
+                outerGlowExposure: 1.28,
+                outerGlowOpacity: 0.2,
+                outerGlowPaddingMultiplier: 0.6,
+                outerGlowBlurMultiplier: 3.0,
+                innerGlowExposure: 1.14,
+                innerGlowOpacity: 0.1,
+                innerGlowPaddingMultiplier: 0.75,
+                innerGlowBlurMultiplier: 1.5,
+                glowHeadroom: 1.45,
+                batteryExposure: 1.8,
+                batteryShadowExposure: 1.55,
+                batteryShadowOpacity: 0.5,
+                batteryHeadroom: 1.85,
+                contentHeadroom: 1.35,
+                fieldShaderBoost: 0.16,
+                battleShaderBoost: 0.12
+            )
+        case .retroDark:
+            return GameplayHDRProfile(
+                isEnabled: true,
+                outerGlowExposure: 2.2,
+                outerGlowOpacity: 0.72,
+                outerGlowPaddingMultiplier: 1.0,
+                outerGlowBlurMultiplier: 4.0,
+                innerGlowExposure: 1.9,
+                innerGlowOpacity: 0.5,
+                innerGlowPaddingMultiplier: 1.0,
+                innerGlowBlurMultiplier: 2.0,
+                glowHeadroom: 2.2,
+                batteryExposure: 2.8,
+                batteryShadowExposure: 2.1,
+                batteryShadowOpacity: 0.8,
+                batteryHeadroom: 2.8,
+                contentHeadroom: 1.8,
+                fieldShaderBoost: 0.42,
+                battleShaderBoost: 0.34
+            )
         }
     }
 
@@ -250,16 +395,29 @@ private struct PokeAppearanceModeKey: EnvironmentKey {
     static let defaultValue: AppAppearanceMode = .system
 }
 
+private struct PokeGameplayHDREnabledKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
 public extension EnvironmentValues {
     var pokeAppearanceMode: AppAppearanceMode {
         get { self[PokeAppearanceModeKey.self] }
         set { self[PokeAppearanceModeKey.self] = newValue }
+    }
+
+    var pokeGameplayHDREnabled: Bool {
+        get { self[PokeGameplayHDREnabledKey.self] }
+        set { self[PokeGameplayHDREnabledKey.self] = newValue }
     }
 }
 
 public extension View {
     func pokeAppearanceMode(_ appearanceMode: AppAppearanceMode) -> some View {
         environment(\.pokeAppearanceMode, appearanceMode)
+    }
+
+    func pokeGameplayHDREnabled(_ isEnabled: Bool) -> some View {
+        environment(\.pokeGameplayHDREnabled, isEnabled)
     }
 }
 
@@ -302,8 +460,8 @@ private extension PokeThemeResolvedPalette {
         screenLabel: .init(red: 1, green: 1, blue: 1, alpha: 0.78),
         batteryIndicator: .init(red: 0.96, green: 0.23, blue: 0.2),
         screenRim: .init(red: 0.18, green: 0.28, blue: 0.08),
-        screenGlow: .init(red: 0.48, green: 0.76, blue: 0.45, alpha: 0),
-        screenGlowInner: .init(red: 0.88, green: 0.97, blue: 0.8, alpha: 0),
+        screenGlow: .init(red: 0.52, green: 0.78, blue: 0.46, alpha: 0.22),
+        screenGlowInner: .init(red: 0.92, green: 0.98, blue: 0.84, alpha: 0.14),
         accentBarMagenta: .init(red: 0.42, green: 0.07, blue: 0.27),
         accentBarBlue: .init(red: 0.16, green: 0.17, blue: 0.55),
         battleEnemyTint: .init(red: 0.92, green: 0.96, blue: 0.84, alpha: 0.42),

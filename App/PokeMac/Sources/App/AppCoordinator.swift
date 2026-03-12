@@ -12,6 +12,7 @@ final class AppCoordinator {
     private(set) var bootError: String?
     var showDebugPanel = false
     var appearanceMode: AppAppearanceMode
+    var gameplayHDREnabled: Bool
 
     private var telemetryCoordinator: TelemetryCoordinator?
     private var telemetryServer: TelemetryControlServer?
@@ -23,6 +24,7 @@ final class AppCoordinator {
     init(settingsStore: AppSettingsStore = AppSettingsStore()) {
         self.settingsStore = settingsStore
         appearanceMode = settingsStore.appearanceMode
+        gameplayHDREnabled = settingsStore.gameplayHDREnabled
         bootstrap()
     }
 
@@ -98,6 +100,11 @@ final class AppCoordinator {
         let nextMode = appearanceMode.nextOptionMode
         appearanceMode = nextMode
         settingsStore.appearanceMode = nextMode
+    }
+
+    func toggleGameplayHDREnabled() {
+        gameplayHDREnabled.toggle()
+        settingsStore.gameplayHDREnabled = gameplayHDREnabled
     }
 
     func requestForegroundActivationIfNeeded() {

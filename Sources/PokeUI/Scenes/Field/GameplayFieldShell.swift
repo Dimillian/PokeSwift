@@ -204,6 +204,7 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
 
 private struct GameplayScreenWell<Content: View, Footer: View>: View {
     @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
     @Environment(\.colorScheme) private var colorScheme
 
     private let content: Content
@@ -223,6 +224,12 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
+            let resolvedPalette = PokeThemePalette.resolve(for: appearanceMode.resolved(for: colorScheme))
+            let hdrProfile = PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
             let headerTopPadding: CGFloat = 12
             let headerLabelHeight = max(12, size.width * 0.015)
             let screenVerticalGap = max(8, size.height * 0.012)
@@ -264,27 +271,39 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                 wellShape
                     .fill(PokeThemePalette.screenWellFill)
 
-                if appearanceMode.isDark(for: colorScheme) {
+                if hdrProfile.rendersBloom {
                     ZStack {
                         RoundedRectangle(cornerRadius: max(14, lcdScale * 3), style: .continuous)
-                            .fill(PokeThemePalette.screenGlow)
-                            .frame(
-                                width: screenRect.width + (outerGlowPadding * 2),
-                                height: screenRect.height + (outerGlowPadding * 2)
+                            .fill(
+                                resolvedPalette.screenGlow.hdrColor(
+                                    linearExposure: hdrProfile.outerGlowExposure
+                                )
                             )
-                            .blur(radius: max(22, lcdScale * 4))
-                            .opacity(0.72)
+                            .frame(
+                                width: screenRect.width + (outerGlowPadding * CGFloat(hdrProfile.outerGlowPaddingMultiplier) * 2),
+                                height: screenRect.height + (outerGlowPadding * CGFloat(hdrProfile.outerGlowPaddingMultiplier) * 2)
+                            )
+                            .blur(radius: max(12, lcdScale * CGFloat(hdrProfile.outerGlowBlurMultiplier)))
+                            .opacity(hdrProfile.outerGlowOpacity)
 
                         RoundedRectangle(cornerRadius: max(10, lcdScale * 2.4), style: .continuous)
-                            .fill(PokeThemePalette.screenGlowInner)
-                            .frame(
-                                width: screenRect.width + (innerGlowPadding * 2),
-                                height: screenRect.height + (innerGlowPadding * 2)
+                            .fill(
+                                resolvedPalette.screenGlowInner.hdrColor(
+                                    linearExposure: hdrProfile.innerGlowExposure
+                                )
                             )
-                            .blur(radius: max(10, lcdScale * 2))
-                            .opacity(0.5)
+                            .frame(
+                                width: screenRect.width + (innerGlowPadding * CGFloat(hdrProfile.innerGlowPaddingMultiplier) * 2),
+                                height: screenRect.height + (innerGlowPadding * CGFloat(hdrProfile.innerGlowPaddingMultiplier) * 2)
+                            )
+                            .blur(radius: max(6, lcdScale * CGFloat(hdrProfile.innerGlowBlurMultiplier)))
+                            .opacity(hdrProfile.innerGlowOpacity)
                     }
                     .blendMode(.plusLighter)
+                    .pokeExtendedDynamicRange(
+                        preferredDynamicRange: .high,
+                        contentsHeadroom: hdrProfile.glowHeadroom
+                    )
                     .position(x: screenRect.midX, y: screenRect.midY)
                 }
 
@@ -311,9 +330,25 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
                 VStack(spacing: 6) {
                     Circle()
-                        .fill(PokeThemePalette.batteryIndicator)
+                        .fill(
+                            hdrProfile.isEnabled
+                                ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryExposure)
+                                : PokeThemePalette.batteryIndicator
+                        )
                         .frame(width: 10, height: 10)
-                        .shadow(color: PokeThemePalette.batteryIndicator.opacity(appearanceMode.isDark(for: colorScheme) ? 0.8 : 0.35), radius: 6)
+                        .shadow(
+                            color: (
+                                hdrProfile.isEnabled
+                                    ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryShadowExposure)
+                                    : PokeThemePalette.batteryIndicator
+                            ).opacity(hdrProfile.isEnabled ? hdrProfile.batteryShadowOpacity : 0.35),
+                            radius: 6
+                        )
+                        .pokeExtendedDynamicRange(
+                            enabled: hdrProfile.isEnabled,
+                            preferredDynamicRange: .high,
+                            contentsHeadroom: hdrProfile.batteryHeadroom
+                        )
                     Text("BATTERY")
                         .font(
                             .system(
@@ -325,6 +360,11 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
                 content
                     .frame(width: screenRect.width, height: screenRect.height)
+                    .pokeExtendedDynamicRange(
+                        enabled: hdrProfile.isEnabled,
+                        preferredDynamicRange: .high,
+                        contentsHeadroom: hdrProfile.contentHeadroom
+                    )
                     .position(x: screenRect.midX, y: screenRect.midY)
 
                 if footerPlacement == .insideScreen {

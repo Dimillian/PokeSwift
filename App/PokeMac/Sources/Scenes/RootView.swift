@@ -22,7 +22,9 @@ struct RootView: View {
                 RuntimeSceneRouter(
                     runtime: runtime,
                     appearanceMode: coordinator.appearanceMode,
-                    onCycleAppearanceMode: { coordinator.cycleAppearanceMode() }
+                    gameplayHDREnabled: coordinator.gameplayHDREnabled,
+                    onCycleAppearanceMode: { coordinator.cycleAppearanceMode() },
+                    onToggleGameplayHDR: { coordinator.toggleGameplayHDREnabled() }
                 )
             } else {
                 GameBoyScreen {
@@ -40,6 +42,7 @@ struct RootView: View {
         .frame(width: Self.windowSize.width, height: Self.windowSize.height)
         .preferredColorScheme(coordinator.appearanceMode.preferredColorSchemeOverride)
         .pokeAppearanceMode(coordinator.appearanceMode)
+        .pokeGameplayHDREnabled(coordinator.gameplayHDREnabled)
         .toolbar {
             ToolbarItem {
                 Button("Debug") {

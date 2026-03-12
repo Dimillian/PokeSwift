@@ -7,7 +7,9 @@ import PokeUI
 struct RuntimeSceneRouter: View {
     @Bindable var runtime: GameRuntime
     let appearanceMode: AppAppearanceMode
+    let gameplayHDREnabled: Bool
     let onCycleAppearanceMode: @MainActor () -> Void
+    let onToggleGameplayHDR: @MainActor () -> Void
 
     var body: some View {
         switch runtime.scene {
@@ -38,7 +40,9 @@ struct RuntimeSceneRouter: View {
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
                 appearanceMode: appearanceMode,
-                onCycleAppearanceMode: onCycleAppearanceMode
+                gameplayHDREnabled: gameplayHDREnabled,
+                onCycleAppearanceMode: onCycleAppearanceMode,
+                onToggleGameplayHDR: onToggleGameplayHDR
             ) {
                 GameplayScene(props: gameplaySceneProps)
             }

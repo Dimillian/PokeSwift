@@ -62,7 +62,8 @@ extension PokeUITests {
         save: GameplaySidebarPropsBuilder.makeSaveSection(),
         options: GameplaySidebarPropsBuilder.makeOptionsSection(
           isMusicEnabled: true,
-          appearanceMode: .light
+          appearanceMode: .light,
+          gameplayHDREnabled: true
         )
       )
     )
@@ -921,16 +922,18 @@ extension PokeUITests {
     let save = GameplaySidebarPropsBuilder.makeSaveSection()
     let options = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .light
+      appearanceMode: .light,
+      gameplayHDREnabled: true
     )
 
     XCTAssertEqual(save.actions.map(\.title), ["Save Game", "Load Save"])
     XCTAssertTrue(save.actions.allSatisfy { $0.isEnabled == false })
     XCTAssertEqual(
-      options.rows.map(\.title), ["Appearance", "Text Speed", "Battle Scene", "Battle Style", "Music"])
-    XCTAssertEqual(options.rows.map(\.isEnabled), [true, false, false, false, true])
+      options.rows.map(\.title), ["Appearance", "HDR Effects", "Text Speed", "Battle Scene", "Battle Style", "Music"])
+    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, false, false, false, true])
     XCTAssertEqual(options.rows.last?.detail, "On")
     XCTAssertEqual(options.rows.first?.detail, "Light")
+    XCTAssertEqual(options.rows.dropFirst().first?.detail, "On")
   }
   func testThemePaletteResolvesDistinctLightAndDarkValues() {
     let light = PokeThemePalette.resolve(for: .light)
@@ -938,26 +941,32 @@ extension PokeUITests {
 
     XCTAssertNotEqual(light.primaryText, dark.primaryText)
     XCTAssertNotEqual(light.field.ink, dark.field.ink)
-    XCTAssertEqual(light.screenGlow.alpha, 0)
+    XCTAssertGreaterThan(light.screenGlow.alpha, 0)
     XCTAssertGreaterThan(dark.screenGlow.alpha, 0)
   }
   func testOptionsBuilderReflectsAppearanceWithoutChangingMusicState() {
     let systemOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .system
+      appearanceMode: .system,
+      gameplayHDREnabled: false
     )
     let lightOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .light
+      appearanceMode: .light,
+      gameplayHDREnabled: true
     )
     let darkOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .retroDark
+      appearanceMode: .retroDark,
+      gameplayHDREnabled: true
     )
 
     XCTAssertEqual(systemOptions.rows.first?.detail, "System")
     XCTAssertEqual(lightOptions.rows.first?.detail, "Light")
     XCTAssertEqual(darkOptions.rows.first?.detail, "Dark")
+    XCTAssertEqual(systemOptions.rows[1].detail, "Off")
+    XCTAssertEqual(lightOptions.rows[1].detail, "On")
+    XCTAssertEqual(darkOptions.rows[1].detail, "On")
     XCTAssertEqual(systemOptions.rows.last?.detail, "On")
     XCTAssertEqual(lightOptions.rows.last?.detail, "On")
     XCTAssertEqual(darkOptions.rows.last?.detail, "On")

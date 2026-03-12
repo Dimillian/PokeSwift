@@ -5,6 +5,7 @@ import PokeUI
 final class AppSettingsStore {
     private enum Keys {
         static let appearanceMode = "pokemac.appearanceMode"
+        static let gameplayHDREnabled = "pokemac.gameplayHDREnabled"
     }
 
     private let defaults: UserDefaults
@@ -23,6 +24,18 @@ final class AppSettingsStore {
         }
         set {
             defaults.set(newValue.rawValue, forKey: Keys.appearanceMode)
+        }
+    }
+
+    var gameplayHDREnabled: Bool {
+        get {
+            if defaults.object(forKey: Keys.gameplayHDREnabled) == nil {
+                return true
+            }
+            return defaults.bool(forKey: Keys.gameplayHDREnabled)
+        }
+        set {
+            defaults.set(newValue, forKey: Keys.gameplayHDREnabled)
         }
     }
 }

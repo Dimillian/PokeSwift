@@ -697,12 +697,14 @@ public enum GameplaySidebarPropsBuilder {
 
     public static func makeOptionsSection(
         isMusicEnabled: Bool,
-        appearanceMode: AppAppearanceMode
+        appearanceMode: AppAppearanceMode,
+        gameplayHDREnabled: Bool
     ) -> OptionsSidebarProps {
         OptionsSidebarProps(
             title: "Options",
             rows: [
                 .init(id: "appearanceMode", title: "Appearance", detail: appearanceMode.optionsLabel, isEnabled: true),
+                .init(id: "gameplayHDR", title: "HDR Effects", detail: gameplayHDREnabled ? "On" : "Off", isEnabled: true),
                 .init(id: "textSpeed", title: "Text Speed", detail: "Medium", isEnabled: false),
                 .init(id: "battleScene", title: "Battle Scene", detail: "On", isEnabled: false),
                 .init(id: "battleStyle", title: "Battle Style", detail: "Shift", isEnabled: false),

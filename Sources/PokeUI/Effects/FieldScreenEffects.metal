@@ -123,7 +123,8 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     float viewportWidth,
     float viewportHeight,
     float pixelScale,
-    float preset
+    float preset,
+    float hdrBoost
 ) {
     if (preset < 0.5 || currentColor.a <= 0.0h) {
         return currentColor;
@@ -142,7 +143,12 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
         shaded = applyTintedReflection(shaded, clamp(position / safeViewport, 0.0, 1.0));
     }
 
-    return half4(half3(clamp(shaded, 0.0, 1.0)), currentColor.a);
+    if (hdrBoost > 0.001) {
+        float emissiveWeight = hdrBoost * smoothstep(0.5, 1.0, luminance);
+        shaded *= 1.0 + (emissiveWeight * 1.4);
+    }
+
+    return half4(half3(max(shaded, 0.0)), currentColor.a);
 }
 
 [[ stitchable ]] half4 battleScreenEffect(
@@ -153,7 +159,8 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     float pixelScale,
     float introStyle,
     float introProgress,
-    float introAmount
+    float introAmount,
+    float hdrBoost
 ) {
     float2 safeViewport = max(float2(viewportWidth, viewportHeight), float2(1.0));
     float2 uv = clamp(position / safeViewport, 0.0, 1.0);
@@ -191,5 +198,11 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
         shaded += float3(0.18, 0.21, 0.14) * edgeGlow * effectAmount;
     }
 
-    return half4(half3(clamp(shaded, 0.0, 1.0)), sampledColor.a);
+    if (hdrBoost > 0.001) {
+        float luminance = clamp(dot(sourceColor, float3(0.299, 0.587, 0.114)), 0.0, 1.0);
+        float emissiveWeight = hdrBoost * smoothstep(0.52, 1.0, luminance);
+        shaded *= 1.0 + (emissiveWeight * 1.2);
+    }
+
+    return half4(half3(max(shaded, 0.0)), sampledColor.a);
 }
