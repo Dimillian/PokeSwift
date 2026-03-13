@@ -482,17 +482,7 @@ private struct PokedexDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                spriteAndIdentity
-                typeBadgesRow
-                if entry.speciesCategory != nil || entry.heightText != nil || entry.weightText != nil {
-                    physicalDataSection
-                }
-                baseStatsSection
-                if let description = entry.descriptionText {
-                    descriptionSection(description)
-                }
-            }
+            PokedexDetailContent(entry: entry)
         }
         .frame(maxHeight: 420)
         .scrollIndicators(.hidden)
@@ -501,6 +491,24 @@ private struct PokedexDetailView: View {
             insertion: .opacity.combined(with: .move(edge: .trailing)),
             removal: .opacity
         ))
+    }
+}
+
+private struct PokedexDetailContent: View {
+    let entry: PokedexSidebarEntryProps
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            spriteAndIdentity
+            typeBadgesRow
+            if entry.speciesCategory != nil || entry.heightText != nil || entry.weightText != nil {
+                physicalDataSection
+            }
+            baseStatsSection
+            if let description = entry.descriptionText {
+                descriptionSection(description)
+            }
+        }
     }
 
     private var spriteAndIdentity: some View {
@@ -668,33 +676,56 @@ private struct PokedexEntryRow: View {
     let entry: PokedexSidebarEntryProps
     let onTap: () -> Void
 
+    @State private var isHovered = false
+
     var body: some View {
-        Button(action: onTap) {
-            GameplaySidebarInsetSurface(
-                padding: EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10),
-                tint: entry.isOwned ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
-            ) {
-                HStack(spacing: 8) {
-                    dexNumber
+        HoverCardPresenter(
+            isPresented: showsHoverCard,
+            cardSide: .leading,
+            cardWidth: PokedexHoverCard.layoutWidth,
+            spacing: GameplayFieldMetrics.hoverCardSpacing
+        ) {
+            Button(action: onTap) {
+                GameplaySidebarInsetSurface(
+                    padding: EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10),
+                    tint: entry.isOwned ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+                ) {
+                    HStack(spacing: 8) {
+                        dexNumber
 
-                    spriteOrPlaceholder
-                        .frame(width: 32, height: 32)
+                        spriteOrPlaceholder
+                            .frame(width: 32, height: 32)
 
-                    speciesName
+                        speciesName
 
-                    Spacer(minLength: 4)
+                        Spacer(minLength: 4)
 
-                    if entry.isOwned || entry.isSeen {
-                        typeBadges
+                        if entry.isOwned || entry.isSeen {
+                            typeBadges
+                        }
+
+                        statusIndicator
                     }
-
-                    statusIndicator
                 }
+                .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.5))
             }
-            .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.5))
+            .buttonStyle(.plain)
+            .disabled(!entry.isOwned)
+            .onHover(perform: updateHoverState)
+        } hoverCard: {
+            PokedexHoverCard(entry: entry)
         }
-        .buttonStyle(.plain)
-        .disabled(!entry.isOwned)
+        .zIndex(showsHoverCard ? 1 : 0)
+    }
+
+    private var showsHoverCard: Bool {
+        isHovered && entry.isOwned
+    }
+
+    private func updateHoverState(_ hovering: Bool) {
+        withAnimation(.easeOut(duration: 0.14)) {
+            isHovered = hovering
+        }
     }
 
     private var dexNumber: some View {
@@ -766,41 +797,77 @@ private struct PokedexEntryRow: View {
     }
 }
 
+private struct PokedexHoverCard: View {
+    static let layoutWidth: CGFloat = 260
+
+    let entry: PokedexSidebarEntryProps
+
+    var body: some View {
+        GameplayHoverCardSurface {
+            PokedexDetailContent(entry: entry)
+        }
+        .frame(width: Self.layoutWidth, alignment: .leading)
+    }
+}
+
 private struct PokedexGridEntryCell: View {
     let entry: PokedexSidebarEntryProps
     let onTap: () -> Void
 
+    @State private var isHovered = false
+
     var body: some View {
-        Button(action: onTap) {
-            GameplaySidebarInsetSurface(
-                padding: EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6),
-                tint: entry.isOwned ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
-            ) {
-                VStack(spacing: 6) {
-                    HStack {
-                        Text(String(format: "%03d", entry.dexNumber))
+        HoverCardPresenter(
+            isPresented: showsHoverCard,
+            cardSide: .leading,
+            cardWidth: PokedexHoverCard.layoutWidth,
+            spacing: GameplayFieldMetrics.hoverCardSpacing
+        ) {
+            Button(action: onTap) {
+                GameplaySidebarInsetSurface(
+                    padding: EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6),
+                    tint: entry.isOwned ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+                ) {
+                    VStack(spacing: 6) {
+                        HStack {
+                            Text(String(format: "%03d", entry.dexNumber))
+                                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isSeen ? 0.62 : 0.4))
+                            Spacer(minLength: 0)
+                            statusIndicator
+                        }
+
+                        spriteOrPlaceholder
+                            .frame(width: 36, height: 36)
+
+                        Text(entry.isSeen ? entry.displayName.uppercased() : "-----")
                             .font(.system(size: 8, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isSeen ? 0.62 : 0.4))
-                        Spacer(minLength: 0)
-                        statusIndicator
+                            .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isOwned ? 0.84 : (entry.isSeen ? 0.54 : 0.32)))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.55)
+                            .frame(maxWidth: .infinity)
                     }
-
-                    spriteOrPlaceholder
-                        .frame(width: 36, height: 36)
-
-                    Text(entry.isSeen ? entry.displayName.uppercased() : "-----")
-                        .font(.system(size: 8, weight: .bold, design: .monospaced))
-                        .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isOwned ? 0.84 : (entry.isSeen ? 0.54 : 0.32)))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.55)
-                        .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
+                .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.52))
             }
-            .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.52))
+            .buttonStyle(.plain)
+            .disabled(!entry.isOwned)
+            .onHover(perform: updateHoverState)
+        } hoverCard: {
+            PokedexHoverCard(entry: entry)
         }
-        .buttonStyle(.plain)
-        .disabled(!entry.isOwned)
+        .zIndex(showsHoverCard ? 1 : 0)
+    }
+
+    private var showsHoverCard: Bool {
+        isHovered && entry.isOwned
+    }
+
+    private func updateHoverState(_ hovering: Bool) {
+        withAnimation(.easeOut(duration: 0.14)) {
+            isHovered = hovering
+        }
     }
 
     @ViewBuilder

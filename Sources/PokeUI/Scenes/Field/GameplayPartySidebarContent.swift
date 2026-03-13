@@ -65,7 +65,7 @@ struct PartySidebarRow: View {
 
     var body: some View {
         HoverCardPresenter(
-            isPresented: isHovered,
+            isPresented: showsHoverCard,
             cardSide: .leading,
             cardWidth: PartyPokemonHoverCard.layoutWidth,
             spacing: GameplayFieldMetrics.hoverCardSpacing
@@ -85,16 +85,22 @@ struct PartySidebarRow: View {
                 guard props.isSelectable else { return }
                 onSelect?(rowIndex)
             }
-            .onHover { hovering in
-                withAnimation(.easeOut(duration: 0.14)) {
-                    isHovered = hovering
-                }
-            }
+            .onHover(perform: updateHoverState)
         } hoverCard: {
             PartyPokemonHoverCard(props: props)
         }
         .opacity(props.isSelectable || props.selectionAnnotation != nil || props.isLead ? 1 : 0.92)
-        .zIndex(isHovered ? 1 : 0)
+        .zIndex(showsHoverCard ? 1 : 0)
+    }
+
+    private var showsHoverCard: Bool {
+        isHovered
+    }
+
+    private func updateHoverState(_ hovering: Bool) {
+        withAnimation(.easeOut(duration: 0.14)) {
+            isHovered = hovering
+        }
     }
 
     @ViewBuilder
@@ -475,14 +481,14 @@ struct PartyPokemonStatPill: View {
     }
 }
 
-struct HoverCardPresenter<Content: View, HoverCard: View>: View {
-    enum CardSide {
-        case leading
-        case trailing
-    }
+enum GameplayHoverCardSide {
+    case leading
+    case trailing
+}
 
+struct HoverCardPresenter<Content: View, HoverCard: View>: View {
     let isPresented: Bool
-    let cardSide: CardSide
+    let cardSide: GameplayHoverCardSide
     let cardWidth: CGFloat
     let spacing: CGFloat
     let content: Content
@@ -490,7 +496,7 @@ struct HoverCardPresenter<Content: View, HoverCard: View>: View {
 
     init(
         isPresented: Bool,
-        cardSide: CardSide,
+        cardSide: GameplayHoverCardSide,
         cardWidth: CGFloat,
         spacing: CGFloat,
         @ViewBuilder content: () -> Content,
@@ -506,33 +512,89 @@ struct HoverCardPresenter<Content: View, HoverCard: View>: View {
 
     var body: some View {
         content
-            .overlay(alignment: overlayAlignment) {
-                if isPresented {
-                    hoverCard
-                        .frame(width: cardWidth, alignment: .leading)
-                        .offset(x: horizontalOffset)
-                        .transition(.asymmetric(insertion: .scale(scale: 0.95).combined(with: .opacity), removal: .opacity))
-                        .allowsHitTesting(false)
+            .anchorPreference(key: GameplayHoverCardPreferenceKey.self, value: .bounds, transform: hoverCardPreference)
+            .animation(hoverCardPresentationAnimation, value: isPresented)
+    }
+
+    private func hoverCardPreference(for anchor: Anchor<CGRect>) -> GameplayHoverCardPreference? {
+        guard isPresented else { return nil }
+
+        return GameplayHoverCardPreference(
+            anchor: anchor,
+            cardSide: cardSide,
+            cardWidth: cardWidth,
+            spacing: spacing,
+            card: AnyView(
+                hoverCard
+                    .frame(width: cardWidth, alignment: .leading)
+                    .allowsHitTesting(false)
+            )
+        )
+    }
+}
+
+private struct GameplayHoverCardPreference {
+    let anchor: Anchor<CGRect>
+    let cardSide: GameplayHoverCardSide
+    let cardWidth: CGFloat
+    let spacing: CGFloat
+    let card: AnyView
+}
+
+private struct GameplayHoverCardPreferenceKey: PreferenceKey {
+    nonisolated(unsafe) static let defaultValue: GameplayHoverCardPreference? = nil
+
+    static func reduce(value: inout GameplayHoverCardPreference?, nextValue: () -> GameplayHoverCardPreference?) {
+        value = nextValue() ?? value
+    }
+}
+
+private struct GameplayHoverCardHostModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content.overlayPreferenceValue(GameplayHoverCardPreferenceKey.self) { preference in
+            GeometryReader { proxy in
+                if let preference {
+                    hoverCard(preference, in: proxy[preference.anchor])
                 }
             }
-            .animation(.easeOut(duration: 0.14), value: isPresented)
-    }
-
-    private var overlayAlignment: Alignment {
-        switch cardSide {
-        case .leading:
-            return .topLeading
-        case .trailing:
-            return .topTrailing
         }
     }
 
-    private var horizontalOffset: CGFloat {
-        switch cardSide {
+    @ViewBuilder
+    private func hoverCard(_ preference: GameplayHoverCardPreference, in bounds: CGRect) -> some View {
+        preference.card
+            .offset(
+                x: horizontalOffset(for: preference, bounds: bounds),
+                y: bounds.minY
+            )
+            .transition(hoverCardPresentationTransition)
+            .animation(hoverCardPresentationAnimation, value: bounds)
+            .zIndex(100)
+    }
+
+    private func horizontalOffset(for preference: GameplayHoverCardPreference, bounds: CGRect) -> CGFloat {
+        switch preference.cardSide {
         case .leading:
-            return -(cardWidth + spacing)
+            return bounds.minX - preference.cardWidth - preference.spacing
         case .trailing:
-            return spacing
+            return bounds.maxX + preference.spacing
         }
+    }
+}
+
+private var hoverCardPresentationAnimation: Animation {
+    .easeOut(duration: 0.14)
+}
+
+private var hoverCardPresentationTransition: AnyTransition {
+    .asymmetric(
+        insertion: .scale(scale: 0.95).combined(with: .opacity),
+        removal: .opacity
+    )
+}
+
+extension View {
+    func gameplayHoverCardHost() -> some View {
+        modifier(GameplayHoverCardHostModifier())
     }
 }

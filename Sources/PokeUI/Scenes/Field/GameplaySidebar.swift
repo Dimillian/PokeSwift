@@ -30,6 +30,7 @@ struct GameplaySidebar: View {
         GlassEffectContainer(spacing: GameplayFieldMetrics.glassMergeSpacing) {
             sidebarContent
         }
+        .gameplayHoverCardHost()
         .frame(maxHeight: .infinity, alignment: .top)
         .animation(.snappy(duration: 0.24, extraBounce: 0), value: expansionState.expandedSection)
         .onChange(of: mode) { _, updatedMode in
@@ -226,7 +227,6 @@ struct PartySidebarSectionContent: View {
                 .scrollIndicators(.hidden)
                 .scrollBounceBehavior(.basedOnSize)
                 .frame(maxHeight: GameplayFieldMetrics.partyExpandedMaxHeight, alignment: .top)
-                .clipped()
             } else {
                 PartySidebarRowsContent(props: props, onRowSelected: onRowSelected)
             }
