@@ -1,9 +1,54 @@
 import SwiftUI
 import PokeRender
 
+private enum PokedexSortMode: String, CaseIterable {
+    case dexNumber = "DEX #"
+    case name = "NAME"
+    case type = "TYPE"
+}
+
 struct PokedexSidebarContent: View {
     let props: PokedexSidebarProps
     @State private var selectedEntryID: String?
+    @State private var searchText = ""
+    @State private var sortMode: PokedexSortMode = .dexNumber
+    @State private var sortAscending = true
+
+    private var filteredEntries: [PokedexSidebarEntryProps] {
+        var entries = props.entries
+
+        if !searchText.isEmpty {
+            let query = searchText.lowercased()
+            entries = entries.filter { entry in
+                guard entry.isSeen else { return false }
+                return entry.displayName.lowercased().contains(query)
+                    || String(format: "%03d", entry.dexNumber).contains(query)
+                    || (entry.primaryType?.lowercased().contains(query) ?? false)
+                    || (entry.secondaryType?.lowercased().contains(query) ?? false)
+            }
+        }
+
+        entries.sort { a, b in
+            let result: Bool
+            switch sortMode {
+            case .dexNumber:
+                result = a.dexNumber < b.dexNumber
+            case .name:
+                result = a.displayName.localizedCaseInsensitiveCompare(b.displayName) == .orderedAscending
+            case .type:
+                let aType = a.primaryType ?? ""
+                let bType = b.primaryType ?? ""
+                if aType == bType {
+                    result = a.dexNumber < b.dexNumber
+                } else {
+                    result = aType.localizedCaseInsensitiveCompare(bType) == .orderedAscending
+                }
+            }
+            return sortAscending ? result : !result
+        }
+
+        return entries
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -18,6 +63,7 @@ struct PokedexSidebarContent: View {
                     }
                 }
             } else {
+                searchAndSortControls
                 pokedexList
             }
         }
@@ -69,6 +115,93 @@ struct PokedexSidebarContent: View {
         }
     }
 
+    private var searchAndSortControls: some View {
+        VStack(spacing: 6) {
+            // Search bar
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.42))
+
+                TextField("Search name, #, type\u{2026}", text: $searchText)
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.82))
+                    .textFieldStyle(.plain)
+
+                if !searchText.isEmpty {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.36))
+                        .frame(width: 20, height: 20)
+                        .contentShape(Rectangle())
+                        .onTapGesture { searchText = "" }
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(
+                FieldRetroPalette.slotFill.opacity(0.58),
+                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
+            }
+
+            // Sort controls
+            HStack(spacing: 4) {
+                ForEach(PokedexSortMode.allCases, id: \.rawValue) { mode in
+                    Button {
+                        withAnimation(.snappy(duration: 0.15)) {
+                            if sortMode == mode {
+                                sortAscending.toggle()
+                            } else {
+                                sortMode = mode
+                                sortAscending = true
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 2) {
+                            Text(mode.rawValue)
+                                .font(.system(size: 9, weight: .heavy, design: .monospaced))
+
+                            if sortMode == mode {
+                                Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 7, weight: .bold))
+                            }
+                        }
+                        .foregroundStyle(
+                            FieldRetroPalette.ink.opacity(sortMode == mode ? 0.82 : 0.42)
+                        )
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(
+                            sortMode == mode
+                                ? FieldRetroPalette.accentGlassTint.opacity(0.38)
+                                : Color.clear,
+                            in: Capsule(style: .continuous)
+                        )
+                        .overlay {
+                            if sortMode == mode {
+                                Capsule(style: .continuous)
+                                    .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Spacer()
+
+                if !searchText.isEmpty {
+                    Text("\(filteredEntries.count) found")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.42))
+                }
+            }
+        }
+    }
+
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 6) {
             GameBoyPixelText(
@@ -89,7 +222,7 @@ struct PokedexSidebarContent: View {
     private var pokedexList: some View {
         ScrollView {
             LazyVStack(spacing: 6) {
-                ForEach(props.entries) { entry in
+                ForEach(filteredEntries) { entry in
                     PokedexEntryRow(entry: entry) {
                         if entry.isOwned {
                             withAnimation(.snappy(duration: 0.2)) {

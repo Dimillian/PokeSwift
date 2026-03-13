@@ -2751,7 +2751,7 @@ private func parsePokedexText(repoRoot: URL) throws -> [String: String] {
                 }
             }
             textByKey[key] = joined
-                .replacingOccurrences(of: "# ", with: "POKé")
+                .replacingOccurrences(of: "# ", with: "POKé ")
                 .replacingOccurrences(of: "#", with: "POKé")
         }
     }
