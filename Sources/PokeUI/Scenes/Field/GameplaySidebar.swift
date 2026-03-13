@@ -225,8 +225,8 @@ struct PartySidebarSectionContent: View {
                 }
                 .scrollIndicators(.hidden)
                 .scrollBounceBehavior(.basedOnSize)
-                .scrollClipDisabled()
                 .frame(maxHeight: GameplayFieldMetrics.partyExpandedMaxHeight, alignment: .top)
+                .clipped()
             } else {
                 PartySidebarRowsContent(props: props, onRowSelected: onRowSelected)
             }

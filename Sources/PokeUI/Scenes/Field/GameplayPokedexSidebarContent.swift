@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import PokeRender
 
@@ -11,6 +12,7 @@ struct PokedexSidebarContent: View {
     let props: PokedexSidebarProps
     @State private var selectedEntryID: String?
     @State private var searchText = ""
+    @State private var isSearchFocused = false
     @State private var sortMode: PokedexSortMode = .dexNumber
     @State private var sortAscending = true
     @State private var displayMode: PokedexDisplayMode = .list
@@ -161,21 +163,21 @@ struct PokedexSidebarContent: View {
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(FieldRetroPalette.ink.opacity(0.46))
 
-                TextField("Search Pok\u{00E9}mon", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                    .foregroundStyle(FieldRetroPalette.ink)
-
-                if searchText.isEmpty == false {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.34))
-                    }
-                    .buttonStyle(.plain)
+                PokedexSearchField(
+                    text: $searchText,
+                    isFocused: $isSearchFocused
+                ) {
+                    dismissSearchField()
                 }
+                .frame(maxWidth: .infinity)
+
+                Button(action: clearAndDismissSearchField) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(isSearchFocused ? 0.42 : 0.22))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss search")
             }
         }
         .frame(maxWidth: .infinity)
@@ -313,6 +315,15 @@ struct PokedexSidebarContent: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private func dismissSearchField() {
+        isSearchFocused = false
+    }
+
+    private func clearAndDismissSearchField() {
+        searchText = ""
+        dismissSearchField()
+    }
+
     private func matchesSearch(_ entry: PokedexSidebarEntryProps) -> Bool {
         guard searchQuery.isEmpty == false else { return true }
 
@@ -357,6 +368,89 @@ struct PokedexSidebarContent: View {
         }
 
         return sortAscending ? result : !result
+    }
+}
+
+private struct PokedexSearchField: NSViewRepresentable {
+    @Binding var text: String
+    @Binding var isFocused: Bool
+    let onEmptyDelete: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    func makeNSView(context: Context) -> NSTextField {
+        let textField = NSTextField()
+        textField.delegate = context.coordinator
+        textField.isBordered = false
+        textField.isBezeled = false
+        textField.drawsBackground = false
+        textField.focusRingType = .none
+        textField.placeholderString = "Search Pok\u{00E9}mon"
+        textField.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
+        textField.textColor = .labelColor
+        textField.lineBreakMode = .byTruncatingTail
+        return textField
+    }
+
+    func updateNSView(_ textField: NSTextField, context: Context) {
+        context.coordinator.parent = self
+
+        if textField.stringValue != text {
+            textField.stringValue = text
+        }
+
+        guard let window = textField.window else { return }
+        let firstResponder = window.firstResponder
+        let isFirstResponder = firstResponder === textField || firstResponder === window.fieldEditor(false, for: textField)
+
+        if isFocused, isFirstResponder == false {
+            window.makeFirstResponder(textField)
+        } else if isFocused == false, isFirstResponder {
+            window.makeFirstResponder(nil)
+        }
+    }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: PokedexSearchField
+
+        init(parent: PokedexSearchField) {
+            self.parent = parent
+        }
+
+        func controlTextDidBeginEditing(_ notification: Notification) {
+            guard parent.isFocused == false else { return }
+            DispatchQueue.main.async {
+                self.parent.isFocused = true
+            }
+        }
+
+        func controlTextDidEndEditing(_ notification: Notification) {
+            guard parent.isFocused else { return }
+            DispatchQueue.main.async {
+                self.parent.isFocused = false
+            }
+        }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let textField = notification.object as? NSTextField else { return }
+            let updatedText = textField.stringValue
+            guard parent.text != updatedText else { return }
+            DispatchQueue.main.async {
+                self.parent.text = updatedText
+            }
+        }
+
+        func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+            guard commandSelector == #selector(NSResponder.deleteBackward(_:)),
+                  parent.text.isEmpty else {
+                return false
+            }
+
+            parent.onEmptyDelete()
+            return true
+        }
     }
 }
 
