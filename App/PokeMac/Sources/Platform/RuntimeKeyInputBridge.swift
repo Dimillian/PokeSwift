@@ -4,6 +4,8 @@ import PokeDataModel
 
 @MainActor
 final class RuntimeKeyInputBridge {
+    private static let directionalRepeatAvailabilityPollInterval: TimeInterval = 1.0 / 240.0
+
     private var keyMonitor: Any?
     private var repeatingDirectionalTask: Task<Void, Never>?
     private var repeatingDirectionalKeyCode: UInt16?
@@ -81,9 +83,23 @@ final class RuntimeKeyInputBridge {
         stopDirectionalRepeat()
         repeatingDirectionalKeyCode = keyCode
         repeatingDirectionalTask = Task { [weak self] in
+            guard let self else { return }
+
+            let initialDelay = await MainActor.run { () -> TimeInterval in
+                guard self.repeatingDirectionalKeyCode == keyCode,
+                      let runtime = runtimeProvider(),
+                      runtime.scene == .field else {
+                    self.stopDirectionalRepeat()
+                    return 0
+                }
+
+                return runtime.fieldAnimationStepDuration
+            }
+            guard initialDelay > 0 else { return }
+            try? await Task.sleep(nanoseconds: Self.sleepNanoseconds(for: initialDelay))
+
             while Task.isCancelled == false {
-                guard let self else { return }
-                let pollInterval = await MainActor.run { () -> TimeInterval in
+                let nextDelay = await MainActor.run { () -> TimeInterval in
                     guard self.repeatingDirectionalKeyCode == keyCode,
                           let runtime = runtimeProvider(),
                           runtime.scene == .field else {
@@ -91,13 +107,15 @@ final class RuntimeKeyInputBridge {
                         return 0
                     }
 
-                    if runtime.canAcceptFieldDirectionalInput {
-                        runtime.handle(button: button)
+                    guard runtime.canAcceptFieldDirectionalInput else {
+                        return Self.directionalRepeatAvailabilityPollInterval
                     }
-                    return max(1.0 / 240.0, runtime.fieldAnimationStepDuration / 8.0)
+
+                    runtime.handle(button: button)
+                    return runtime.fieldAnimationStepDuration
                 }
-                guard pollInterval > 0 else { return }
-                try? await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
+                guard nextDelay > 0 else { return }
+                try? await Task.sleep(nanoseconds: Self.sleepNanoseconds(for: nextDelay))
             }
         }
     }
@@ -106,6 +124,10 @@ final class RuntimeKeyInputBridge {
         repeatingDirectionalTask?.cancel()
         repeatingDirectionalTask = nil
         repeatingDirectionalKeyCode = nil
+    }
+
+    private static func sleepNanoseconds(for duration: TimeInterval) -> UInt64 {
+        UInt64(max(0, duration) * 1_000_000_000)
     }
 
     private func shouldAllowTextInput(for event: NSEvent) -> Bool {
