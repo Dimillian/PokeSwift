@@ -567,6 +567,27 @@ func waitForSnapshot(
     }
     throw XCTSkip("timed out waiting for expected runtime snapshot")
 }
+
+@MainActor
+func completeOakIntro(
+    _ runtime: GameRuntime,
+    playerName: String = "RED",
+    rivalName: String = "BLUE"
+) {
+    runtime.oakIntroState = OakIntroState(
+        phase: .finalSpeech,
+        currentPageIndex: 1,
+        enteredCharacters: [],
+        playerName: playerName,
+        rivalName: rivalName,
+        namePresetFocusedIndex: 0,
+        isTypingCustomName: false
+    )
+    runtime.scene = .oakIntro
+    runtime.substate = "oak_intro"
+    runtime.handle(button: .confirm)
+}
+
 @MainActor
 final class RecordingAudioPlayer: RuntimeAudioPlaying {
     private(set) var musicRequests: [MusicPlaybackRequest] = []

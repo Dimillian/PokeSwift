@@ -14,6 +14,7 @@ extension PokeCoreTests {
         try? await Task.sleep(for: .milliseconds(1700))
         runtime.handle(button: .start)
         runtime.handle(button: .confirm)
+        completeOakIntro(runtime)
 
         let snapshot = runtime.currentSnapshot()
         XCTAssertEqual(snapshot.scene, .field)

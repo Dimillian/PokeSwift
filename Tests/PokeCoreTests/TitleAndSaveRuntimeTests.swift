@@ -38,6 +38,7 @@ extension PokeCoreTests {
         runtime.handle(button: .start)
         await waitForScene(.titleMenu, in: runtime, message: "title flow did not reach the menu")
         runtime.handle(button: .confirm)
+        completeOakIntro(runtime)
 
         let snapshot = runtime.currentSnapshot()
         XCTAssertEqual(snapshot.scene, .field)
@@ -50,6 +51,7 @@ extension PokeCoreTests {
         let saveStore = InMemorySaveStore()
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
         runtime.beginNewGame()
+        completeOakIntro(runtime)
 
         runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
         runtime.gameplayState?.playerPosition = TilePoint(x: 2, y: 3)
@@ -356,6 +358,7 @@ extension PokeCoreTests {
         let saveStore = InMemorySaveStore()
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
         runtime.beginNewGame()
+        completeOakIntro(runtime)
 
         XCTAssertTrue(runtime.saveCurrentGame())
 
@@ -450,6 +453,7 @@ extension PokeCoreTests {
         )
 
         runtime.beginNewGame()
+        completeOakIntro(runtime)
 
         XCTAssertEqual(runtime.scene, .field)
         XCTAssertEqual(runtime.nextAcquisitionRandomByte(), expectedRuntimeRandomByte(afterSeedingWith: expectedSeed))
