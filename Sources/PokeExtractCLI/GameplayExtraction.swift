@@ -2740,7 +2740,17 @@ private func parsePokedexText(repoRoot: URL) throws -> [String: String] {
         }
 
         if !textParts.isEmpty {
-            textByKey[key] = textParts.joined(separator: " ")
+            var joined = ""
+            for part in textParts {
+                if joined.hasSuffix("-") {
+                    joined += part
+                } else if !joined.isEmpty {
+                    joined += " " + part
+                } else {
+                    joined = part
+                }
+            }
+            textByKey[key] = joined
                 .replacingOccurrences(of: "# ", with: "POKé")
                 .replacingOccurrences(of: "#", with: "POKé")
         }
