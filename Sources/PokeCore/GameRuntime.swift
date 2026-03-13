@@ -275,6 +275,18 @@ public final class GameRuntime {
         isSaveableFieldGameplay && saveMetadata != nil
     }
 
+    public var namingCharacterHandler: ((Character) -> Void)? {
+        if scene == .naming {
+            return { [self] char in self.typeNamingCharacter(char) }
+        }
+        if scene == .oakIntro,
+           let phase = oakIntroState?.phase,
+           phase == .namingPlayer || phase == .namingRival {
+            return { [self] char in self.typeOakIntroCharacter(char) }
+        }
+        return nil
+    }
+
     public func typeOakIntroCharacter(_ character: Character) {
         guard var state = oakIntroState,
               state.phase == .namingPlayer || state.phase == .namingRival else { return }

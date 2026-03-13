@@ -2,61 +2,11 @@ import PokeDataModel
 
 extension GameRuntime {
 
-    // MARK: - Dialogue builders
-
-    private static func oakAppearsDialogue() -> [[String]] {
-        [
-            ["Hello there!", "Welcome to the world", "of POKéMON!"],
-            ["My name is OAK!", "People call me the", "POKéMON PROF!"],
-        ]
-    }
-
-    private static func nidorinoAppearsDialogue() -> [[String]] {
-        [
-            ["This world is", "inhabited by creatures", "called POKéMON!"],
-            ["For some people,", "POKéMON are pets.", "Others use them for fights."],
-            ["Myself…", "I study POKéMON", "as a profession."],
-        ]
-    }
-
-    private static func playerAppearsDialogue() -> [[String]] {
-        [
-            ["First, what is", "your name?"],
-        ]
-    }
-
-    private static func playerNamedDialogue(name: String) -> [[String]] {
-        [
-            ["Right! So your", "name is \(name)!"],
-        ]
-    }
-
-    private static func rivalAppearsDialogue() -> [[String]] {
-        [
-            ["This is my grand-", "son. He's been your rival", "since you were a baby."],
-            ["…Erm, what is", "his name again?"],
-        ]
-    }
-
-    private static func rivalNamedDialogue(name: String) -> [[String]] {
-        [
-            ["That's right!", "I remember now!", "His name is \(name)!"],
-        ]
-    }
-
-    private static func finalSpeechDialogue(playerName: String) -> [[String]] {
-        [
-            ["\(playerName)!", "Your very own", "POKéMON legend is", "about to unfold!"],
-            ["A world of dreams", "and adventures with", "POKéMON awaits!", "Let's go!"],
-        ]
-    }
-
     // MARK: - Begin
 
     func beginOakIntro() {
         oakIntroState = OakIntroState(
             phase: .oakAppears,
-            dialoguePages: Self.oakAppearsDialogue(),
             currentPageIndex: 0,
             enteredCharacters: [],
             playerName: nil,
@@ -80,13 +30,13 @@ extension GameRuntime {
         }
 
         oakIntroState = state
-        publishSnapshot()
     }
 
     private func handleOakIntroDialogue(button: RuntimeButton, state: inout OakIntroState) {
         guard button == .confirm || button == .start else { return }
 
-        if state.currentPageIndex + 1 < state.dialoguePages.count {
+        let pages = state.dialoguePages
+        if state.currentPageIndex + 1 < pages.count {
             state.currentPageIndex += 1
             return
         }
@@ -113,18 +63,15 @@ extension GameRuntime {
         switch state.phase {
         case .oakAppears:
             state.phase = .nidorinoAppears
-            state.dialoguePages = Self.nidorinoAppearsDialogue()
             state.currentPageIndex = 0
 
         case .nidorinoAppears:
             state.phase = .playerAppears
-            state.dialoguePages = Self.playerAppearsDialogue()
             state.currentPageIndex = 0
 
         case .playerAppears:
             state.phase = .namingPlayer
             state.enteredCharacters = []
-            state.dialoguePages = []
             state.currentPageIndex = 0
 
         case .namingPlayer:
@@ -132,22 +79,18 @@ extension GameRuntime {
 
         case .playerNamed:
             state.phase = .rivalAppears
-            state.dialoguePages = Self.rivalAppearsDialogue()
             state.currentPageIndex = 0
 
         case .rivalAppears:
             state.phase = .namingRival
             state.enteredCharacters = []
-            state.dialoguePages = []
             state.currentPageIndex = 0
 
         case .namingRival:
             break
 
         case .rivalNamed:
-            let playerName = state.playerName ?? "RED"
             state.phase = .finalSpeech
-            state.dialoguePages = Self.finalSpeechDialogue(playerName: playerName)
             state.currentPageIndex = 0
 
         case .finalSpeech:
@@ -162,7 +105,7 @@ extension GameRuntime {
     // MARK: - Naming finalization
 
     private func finalizeOakIntroNaming(state: inout OakIntroState) {
-        let enteredText = String(state.enteredCharacters)
+        let enteredText = state.enteredText
             .trimmingCharacters(in: .whitespaces)
 
         switch state.phase {
@@ -170,7 +113,6 @@ extension GameRuntime {
             let name = enteredText.isEmpty ? "RED" : enteredText
             state.playerName = name
             state.phase = .playerNamed
-            state.dialoguePages = Self.playerNamedDialogue(name: name)
             state.currentPageIndex = 0
             state.enteredCharacters = []
 
@@ -178,7 +120,6 @@ extension GameRuntime {
             let name = enteredText.isEmpty ? "BLUE" : enteredText
             state.rivalName = name
             state.phase = .rivalNamed
-            state.dialoguePages = Self.rivalNamedDialogue(name: name)
             state.currentPageIndex = 0
             state.enteredCharacters = []
 
@@ -201,6 +142,5 @@ extension GameRuntime {
         substate = "field"
         restartGameplayClock()
         requestDefaultMapMusic()
-        publishSnapshot()
     }
 }
