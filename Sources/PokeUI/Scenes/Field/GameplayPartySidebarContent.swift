@@ -394,6 +394,8 @@ struct PartyPokemonHoverCard: View {
 struct PartyPokemonMoveSection: View {
     let moves: [PartySidebarMoveProps]
 
+    private let cardPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("MOVES")
@@ -402,7 +404,7 @@ struct PartyPokemonMoveSection: View {
 
             if moves.isEmpty {
                 GameplaySidebarInsetSurface(
-                    padding: EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8),
+                    padding: cardPadding,
                     tint: FieldRetroPalette.interactiveGlassTint
                 ) {
                     Text("No moves known")
@@ -423,9 +425,11 @@ struct PartyPokemonMoveSection: View {
 struct PartyPokemonMoveRow: View {
     let props: PartySidebarMoveProps
 
+    private let cardPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
+
     var body: some View {
         GameplaySidebarInsetSurface(
-            padding: EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8),
+            padding: cardPadding,
             tint: rowTint
         ) {
             VStack(alignment: .leading, spacing: 5) {
