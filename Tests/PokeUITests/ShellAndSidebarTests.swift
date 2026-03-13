@@ -213,6 +213,60 @@ extension PokeUITests {
     XCTAssertEqual(entry.detailFields.last?.label, "ENCOUNTERS")
     XCTAssertEqual(entry.detailFields.last?.value, "3")
   }
+
+  func testGameBoyUppercasedLabelPreservesPokemonAccentConvention() {
+    XCTAssertEqual(gameBoyUppercasedLabel("Trainer"), "TRAINER")
+    XCTAssertEqual(gameBoyUppercasedLabel("Pokédex"), "POKéDEX")
+  }
+
+  func testPokedexSidebarBuilderKeepsSeenSpritesWithoutOwnedOnlyDetails() {
+    let spriteURL = URL(fileURLWithPath: "/tmp/pidgey.png")
+    let props = GameplaySidebarPropsBuilder.makePokedex(
+      allSpecies: [
+        .init(
+          id: "PIDGEY",
+          dexNumber: 16,
+          displayName: "Pidgey",
+          primaryType: "NORMAL",
+          secondaryType: "FLYING",
+          spriteURL: spriteURL,
+          speciesCategory: "Tiny Bird",
+          heightText: "1'00\"",
+          weightText: "4.0 LB",
+          descriptionText: "A common sight in forests and woods.",
+          baseHP: 40,
+          baseAttack: 45,
+          baseDefense: 40,
+          baseSpeed: 56,
+          baseSpecial: 35
+        )
+      ],
+      ownedSpeciesIDs: [],
+      seenSpeciesIDs: ["PIDGEY"],
+      speciesEncounterCounts: ["PIDGEY": 3]
+    )
+
+    guard let entry = props.entries.first else {
+      XCTFail("Expected a Pokedex entry")
+      return
+    }
+
+    XCTAssertEqual(props.ownedCount, 0)
+    XCTAssertEqual(props.seenCount, 1)
+    XCTAssertEqual(entry.spriteURL, spriteURL)
+    XCTAssertTrue(entry.isSeen)
+    XCTAssertFalse(entry.isOwned)
+    XCTAssertNil(entry.speciesCategory)
+    XCTAssertNil(entry.heightText)
+    XCTAssertNil(entry.weightText)
+    XCTAssertNil(entry.descriptionText)
+    XCTAssertTrue(entry.detailFields.isEmpty)
+    XCTAssertEqual(entry.baseHP, 0)
+    XCTAssertEqual(entry.baseAttack, 0)
+    XCTAssertEqual(entry.baseDefense, 0)
+    XCTAssertEqual(entry.baseSpeed, 0)
+    XCTAssertEqual(entry.baseSpecial, 0)
+  }
   func testGameplaySidebarKindMapsRuntimeScenesForGameplayLayout() {
     XCTAssertEqual(GameplaySidebarKind.forScene(.field), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.dialogue), .fieldLike)

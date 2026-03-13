@@ -827,7 +827,7 @@ public enum GameplaySidebarPropsBuilder {
                 displayName: species.displayName,
                 isOwned: isOwned,
                 isSeen: isSeen,
-                spriteURL: isOwned ? species.spriteURL : nil,
+                spriteURL: (isOwned || isSeen) ? species.spriteURL : nil,
                 primaryType: (isOwned || isSeen) ? species.primaryType : nil,
                 secondaryType: (isOwned || isSeen) ? species.secondaryType : nil,
                 speciesCategory: isOwned ? species.speciesCategory : nil,
