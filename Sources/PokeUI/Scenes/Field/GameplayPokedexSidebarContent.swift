@@ -13,42 +13,7 @@ struct PokedexSidebarContent: View {
     @State private var searchText = ""
     @State private var sortMode: PokedexSortMode = .dexNumber
     @State private var sortAscending = true
-
-    private var filteredEntries: [PokedexSidebarEntryProps] {
-        var entries = props.entries
-
-        if !searchText.isEmpty {
-            let query = searchText.lowercased()
-            entries = entries.filter { entry in
-                guard entry.isSeen else { return false }
-                return entry.displayName.lowercased().contains(query)
-                    || String(format: "%03d", entry.dexNumber).contains(query)
-                    || (entry.primaryType?.lowercased().contains(query) ?? false)
-                    || (entry.secondaryType?.lowercased().contains(query) ?? false)
-            }
-        }
-
-        entries.sort { a, b in
-            let result: Bool
-            switch sortMode {
-            case .dexNumber:
-                result = a.dexNumber < b.dexNumber
-            case .name:
-                result = a.displayName.localizedCaseInsensitiveCompare(b.displayName) == .orderedAscending
-            case .type:
-                let aType = a.primaryType ?? ""
-                let bType = b.primaryType ?? ""
-                if aType == bType {
-                    result = a.dexNumber < b.dexNumber
-                } else {
-                    result = aType.localizedCaseInsensitiveCompare(bType) == .orderedAscending
-                }
-            }
-            return sortAscending ? result : !result
-        }
-
-        return entries
-    }
+    @State private var displayMode: PokedexDisplayMode = .list
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -63,8 +28,13 @@ struct PokedexSidebarContent: View {
                     }
                 }
             } else {
-                searchAndSortControls
-                pokedexList
+                controlsSection
+
+                if filteredEntries.isEmpty {
+                    emptySearchState
+                } else {
+                    entriesContent
+                }
             }
         }
     }
@@ -115,84 +85,63 @@ struct PokedexSidebarContent: View {
         }
     }
 
-    private var searchAndSortControls: some View {
+    private var controlsSection: some View {
         VStack(spacing: 6) {
-            // Search bar
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.42))
-
-                TextField("Search name, #, type\u{2026}", text: $searchText)
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.82))
-                    .textFieldStyle(.plain)
-
-                if !searchText.isEmpty {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.36))
-                        .frame(width: 20, height: 20)
-                        .contentShape(Rectangle())
-                        .onTapGesture { searchText = "" }
-                }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(
-                FieldRetroPalette.slotFill.opacity(0.58),
-                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
+            HStack(alignment: .center, spacing: 8) {
+                searchField
+                compactDisplayModePicker
             }
 
-            // Sort controls
-            HStack(spacing: 4) {
-                ForEach(PokedexSortMode.allCases, id: \.rawValue) { mode in
-                    Button {
-                        withAnimation(.snappy(duration: 0.15)) {
-                            if sortMode == mode {
-                                sortAscending.toggle()
-                            } else {
-                                sortMode = mode
-                                sortAscending = true
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: 2) {
-                            Text(mode.rawValue)
-                                .font(.system(size: 9, weight: .heavy, design: .monospaced))
+            sortControls
+        }
+    }
 
-                            if sortMode == mode {
-                                Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
-                                    .font(.system(size: 7, weight: .bold))
-                            }
-                        }
-                        .foregroundStyle(
-                            FieldRetroPalette.ink.opacity(sortMode == mode ? 0.82 : 0.42)
-                        )
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(
-                            sortMode == mode
-                                ? FieldRetroPalette.accentGlassTint.opacity(0.38)
-                                : Color.clear,
-                            in: Capsule(style: .continuous)
-                        )
-                        .overlay {
-                            if sortMode == mode {
-                                Capsule(style: .continuous)
-                                    .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
-                            }
+    private var sortControls: some View {
+        HStack(spacing: 4) {
+            ForEach(PokedexSortMode.allCases, id: \.rawValue) { mode in
+                Button {
+                    withAnimation(.snappy(duration: 0.15)) {
+                        if sortMode == mode {
+                            sortAscending.toggle()
+                        } else {
+                            sortMode = mode
+                            sortAscending = true
                         }
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    HStack(spacing: 2) {
+                        Text(mode.rawValue)
+                            .font(.system(size: 9, weight: .heavy, design: .monospaced))
+
+                        if sortMode == mode {
+                            Image(systemName: sortAscending ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 7, weight: .bold))
+                        }
+                    }
+                    .foregroundStyle(
+                        FieldRetroPalette.ink.opacity(sortMode == mode ? 0.82 : 0.42)
+                    )
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(
+                        sortMode == mode
+                            ? FieldRetroPalette.accentGlassTint.opacity(0.38)
+                            : Color.clear,
+                        in: Capsule(style: .continuous)
+                    )
+                    .overlay {
+                        if sortMode == mode {
+                            Capsule(style: .continuous)
+                                .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
+                        }
+                    }
                 }
+                .buttonStyle(.plain)
+            }
 
-                Spacer()
+            Spacer()
 
+            HStack(spacing: 4) {
                 if !searchText.isEmpty {
                     Text("\(filteredEntries.count) found")
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
@@ -200,6 +149,73 @@ struct PokedexSidebarContent: View {
                 }
             }
         }
+    }
+
+    private var searchField: some View {
+        GameplaySidebarInsetSurface(
+            padding: EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10),
+            tint: FieldRetroPalette.accentGlassTint
+        ) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.46))
+
+                TextField("Search Pok\u{00E9}mon", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink)
+
+                if searchText.isEmpty == false {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.34))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var compactDisplayModePicker: some View {
+        HStack(spacing: 8) {
+            ForEach(PokedexDisplayMode.allCases) { mode in
+                Button {
+                    withAnimation(.snappy(duration: 0.2)) {
+                        displayMode = mode
+                    }
+                } label: {
+                    ZStack {
+                        Capsule(style: .continuous)
+                            .fill(displayMode == mode ? FieldRetroPalette.slotFill.opacity(0.92) : .clear)
+
+                        Image(systemName: mode.iconName)
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(displayMode == mode ? 0.88 : 0.58))
+                    .frame(width: 28, height: 28)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(
+            Capsule(style: .continuous)
+                .fill(FieldRetroPalette.slotFill.opacity(0.38))
+        )
+        .overlay {
+            Capsule(style: .continuous)
+                .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
+        }
+        .glassEffect(
+            .regular.tint(FieldRetroPalette.interactiveGlassTint),
+            in: Capsule(style: .continuous)
+        )
+        .fixedSize()
     }
 
     private var emptyState: some View {
@@ -219,16 +235,35 @@ struct PokedexSidebarContent: View {
         .padding(.vertical, 6)
     }
 
+    private var filteredEntries: [PokedexSidebarEntryProps] {
+        props.entries
+            .filter(matchesSearch)
+            .sorted(by: isOrderedBefore)
+    }
+
+    private var emptySearchState: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            GameBoyPixelText(
+                "NO MATCH",
+                scale: 1.5,
+                color: FieldRetroPalette.ink,
+                fallbackFont: .system(size: 18, weight: .bold, design: .monospaced)
+            )
+            Text("No Pok\u{00E9}mon match \"\(searchText)\".")
+                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 6)
+    }
+
     private var pokedexList: some View {
         ScrollView {
             LazyVStack(spacing: 6) {
                 ForEach(filteredEntries) { entry in
                     PokedexEntryRow(entry: entry) {
-                        if entry.isOwned {
-                            withAnimation(.snappy(duration: 0.2)) {
-                                selectedEntryID = entry.id
-                            }
-                        }
+                        select(entry)
                     }
                 }
             }
@@ -236,6 +271,92 @@ struct PokedexSidebarContent: View {
         .frame(maxHeight: 380)
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize)
+    }
+
+    @ViewBuilder
+    private var entriesContent: some View {
+        switch displayMode {
+        case .list:
+            pokedexList
+        case .grid:
+            pokedexGrid
+        }
+    }
+
+    private var pokedexGrid: some View {
+        ScrollView {
+            LazyVGrid(columns: gridColumns, spacing: 8) {
+                ForEach(filteredEntries) { entry in
+                    PokedexGridEntryCell(entry: entry) {
+                        select(entry)
+                    }
+                }
+            }
+        }
+        .frame(maxHeight: 380)
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
+    }
+
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 8), count: 4)
+    }
+
+    private func select(_ entry: PokedexSidebarEntryProps) {
+        guard entry.isOwned else { return }
+        withAnimation(.snappy(duration: 0.2)) {
+            selectedEntryID = entry.id
+        }
+    }
+
+    private var searchQuery: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func matchesSearch(_ entry: PokedexSidebarEntryProps) -> Bool {
+        guard searchQuery.isEmpty == false else { return true }
+
+        if "\(entry.dexNumber)".localizedStandardContains(searchQuery) {
+            return true
+        }
+
+        if entry.isSeen, entry.displayName.localizedStandardContains(searchQuery) {
+            return true
+        }
+
+        if entry.isSeen,
+           let primaryType = entry.primaryType,
+           primaryType.localizedStandardContains(searchQuery) {
+            return true
+        }
+
+        if entry.isSeen,
+           let secondaryType = entry.secondaryType,
+           secondaryType.localizedStandardContains(searchQuery) {
+            return true
+        }
+
+        return false
+    }
+
+    private func isOrderedBefore(_ lhs: PokedexSidebarEntryProps, _ rhs: PokedexSidebarEntryProps) -> Bool {
+        let result: Bool
+        switch sortMode {
+        case .dexNumber:
+            result = lhs.dexNumber < rhs.dexNumber
+        case .name:
+            result = lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+        case .type:
+            let lhsType = lhs.primaryType ?? ""
+            let rhsType = rhs.primaryType ?? ""
+            if lhsType == rhsType {
+                result = lhs.dexNumber < rhs.dexNumber
+            } else {
+                result = lhsType.localizedCaseInsensitiveCompare(rhsType) == .orderedAscending
+            }
+        }
+
+        return sortAscending ? result : !result
     }
 }
 
@@ -531,7 +652,103 @@ private struct PokedexEntryRow: View {
     }
 }
 
+private struct PokedexGridEntryCell: View {
+    let entry: PokedexSidebarEntryProps
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            GameplaySidebarInsetSurface(
+                padding: EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6),
+                tint: entry.isOwned ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+            ) {
+                VStack(spacing: 6) {
+                    HStack {
+                        Text(String(format: "%03d", entry.dexNumber))
+                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                            .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isSeen ? 0.62 : 0.4))
+                        Spacer(minLength: 0)
+                        statusIndicator
+                    }
+
+                    spriteOrPlaceholder
+                        .frame(width: 36, height: 36)
+
+                    Text(entry.isSeen ? entry.displayName.uppercased() : "-----")
+                        .font(.system(size: 8, weight: .bold, design: .monospaced))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(entry.isOwned ? 0.84 : (entry.isSeen ? 0.54 : 0.32)))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.55)
+                        .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.52))
+        }
+        .buttonStyle(.plain)
+        .disabled(!entry.isOwned)
+    }
+
+    @ViewBuilder
+    private var spriteOrPlaceholder: some View {
+        if let spriteURL = entry.spriteURL {
+            PixelAssetView(url: spriteURL, label: entry.displayName, whiteIsTransparent: true)
+                .aspectRatio(contentMode: .fit)
+        } else if entry.isSeen {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(FieldRetroPalette.slotFill.opacity(0.4))
+                .overlay {
+                    Image(systemName: "eye.fill")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.22))
+                }
+        } else {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(FieldRetroPalette.slotFill.opacity(0.5))
+                .overlay {
+                    Text("?")
+                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.22))
+                }
+        }
+    }
+
+    private var statusIndicator: some View {
+        Group {
+            if entry.isOwned {
+                Circle()
+                    .fill(Color(red: 0.47, green: 0.67, blue: 0.33))
+                    .frame(width: 7, height: 7)
+            } else if entry.isSeen {
+                Image(systemName: "eye")
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.34))
+            } else {
+                Circle()
+                    .stroke(FieldRetroPalette.ink.opacity(0.18), lineWidth: 1)
+                    .frame(width: 7, height: 7)
+            }
+        }
+    }
+}
+
 // MARK: - Type Badges
+
+private enum PokedexDisplayMode: String, CaseIterable, Identifiable {
+    case list
+    case grid
+
+    var id: String { rawValue }
+
+    var iconName: String {
+        switch self {
+        case .list:
+            return "list.bullet"
+        case .grid:
+            return "square.grid.2x2"
+        }
+    }
+}
 
 private struct PokedexTypeBadge: View {
     let typeLabel: String
