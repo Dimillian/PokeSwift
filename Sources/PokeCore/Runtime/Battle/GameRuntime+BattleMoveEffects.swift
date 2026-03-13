@@ -267,10 +267,15 @@ extension GameRuntime {
     }
 
     private func applySleep(move: MoveManifest, defender: inout RuntimePokemonState) -> [String] {
-        guard defender.majorStatus == .none else {
-            return defender.majorStatus == .sleep
-                ? ["\(defender.nickname) is already asleep!"]
-                : ["But it failed!"]
+        let bypassStatusAndAccuracyChecks = defender.battleEffects.needsRecharge
+        defender.battleEffects.needsRecharge = false
+
+        if bypassStatusAndAccuracyChecks == false {
+            guard defender.majorStatus == .none else {
+                return defender.majorStatus == .sleep
+                    ? ["\(defender.nickname) is already asleep!"]
+                    : ["But it failed!"]
+            }
         }
         var sleepTurns = 0
         repeat {
@@ -278,7 +283,6 @@ extension GameRuntime {
         } while sleepTurns == 0
         defender.majorStatus = .sleep
         defender.statusCounter = sleepTurns
-        defender.battleEffects.needsRecharge = false
         return ["\(defender.nickname) fell asleep!"]
     }
 
@@ -474,8 +478,8 @@ extension GameRuntime {
             (defender.majorStatus == .sleep || defender.majorStatus == .freeze)
         resetBattleStages(for: &attacker)
         resetBattleStages(for: &defender)
-        clearVolatileBattleState(for: &attacker)
-        clearVolatileBattleState(for: &defender)
+        clearHazeVolatileBattleState(for: &attacker)
+        clearHazeVolatileBattleState(for: &defender)
         attacker.isBadlyPoisoned = false
         attacker.battleEffects.toxicCounter = 0
         defender.majorStatus = .none
@@ -484,6 +488,17 @@ extension GameRuntime {
         defender.battleEffects.toxicCounter = 0
         defender.battleEffects.skipTurnOnce = curedSleepOrFreeze
         return ["All status changes were eliminated!"]
+    }
+
+    private func clearHazeVolatileBattleState(for pokemon: inout RuntimePokemonState) {
+        pokemon.battleEffects.confusionTurnsRemaining = 0
+        pokemon.battleEffects.disabledMoveID = nil
+        pokemon.battleEffects.disabledTurnsRemaining = 0
+        pokemon.battleEffects.isProtectedByMist = false
+        pokemon.battleEffects.hasLightScreen = false
+        pokemon.battleEffects.hasReflect = false
+        pokemon.battleEffects.isGettingPumped = false
+        pokemon.battleEffects.isSeeded = false
     }
 
     private func applyLeechSeed(to defender: inout RuntimePokemonState) -> [String] {

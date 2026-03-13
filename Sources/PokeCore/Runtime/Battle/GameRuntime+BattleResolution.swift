@@ -171,7 +171,9 @@ extension GameRuntime {
             )
         }
 
-        let skipsAccuracy = skipAccuracy || move.effect == "SWIFT_EFFECT"
+        let skipsAccuracy = skipAccuracy ||
+            move.effect == "SWIFT_EFFECT" ||
+            (move.effect == "SLEEP_EFFECT" && defender.battleEffects.needsRecharge)
         if skipsAccuracy == false, move.accuracy > 0 {
             let hitChance = scaledAccuracy(
                 baseAccuracyPercent: move.accuracy,

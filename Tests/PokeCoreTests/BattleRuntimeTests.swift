@@ -1541,6 +1541,248 @@ extension PokeCoreTests {
         XCTAssertNil(pendingAction)
     }
 
+    func testApplyMoveEffectSleepOverridesExistingStatusWhenTargetNeedsRecharge() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "JIGGLYPUFF", displayName: "Jigglypuff", primaryType: "NORMAL", baseHP: 115, baseAttack: 45, baseDefense: 20, baseSpeed: 20, baseSpecial: 25, startingMoves: ["SING"]),
+                        .init(id: "SNORLAX", displayName: "Snorlax", primaryType: "NORMAL", baseHP: 160, baseAttack: 110, baseDefense: 65, baseSpeed: 30, baseSpecial: 65, startingMoves: ["HYPER_BEAM"]),
+                    ],
+                    moves: [
+                        .init(id: "SING", displayName: "SING", power: 0, accuracy: 55, maxPP: 15, effect: "SLEEP_EFFECT", type: "NORMAL"),
+                        .init(id: "HYPER_BEAM", displayName: "HYPER BEAM", power: 150, accuracy: 90, maxPP: 5, effect: "HYPER_BEAM_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var jigglypuff = runtime.makePokemon(speciesID: "JIGGLYPUFF", level: 20, nickname: "Jigglypuff")
+        var snorlax = runtime.makePokemon(speciesID: "SNORLAX", level: 20, nickname: "Snorlax")
+        snorlax.majorStatus = .burn
+        snorlax.battleEffects.needsRecharge = true
+        var pendingAction: RuntimeBattlePendingAction?
+        let sing = try XCTUnwrap(runtime.content.move(id: "SING"))
+
+        runtime.battleRandomOverrides = [3]
+        let messages = runtime.applyMoveEffect(
+            sing,
+            moveIndex: 0,
+            dealtDamage: 0,
+            attacker: &jigglypuff,
+            defender: &snorlax,
+            defenderCanActLaterInTurn: false,
+            pendingAction: &pendingAction
+        )
+
+        XCTAssertEqual(messages, ["Snorlax fell asleep!"])
+        XCTAssertEqual(snorlax.majorStatus, .sleep)
+        XCTAssertEqual(snorlax.statusCounter, 3)
+        XCTAssertFalse(snorlax.battleEffects.needsRecharge)
+        XCTAssertNil(pendingAction)
+    }
+
+    func testApplyMoveEffectParalyzeDirectMoveCanHitMatchingType() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "ARBOK", displayName: "Arbok", primaryType: "POISON", baseHP: 60, baseAttack: 95, baseDefense: 69, baseSpeed: 80, baseSpecial: 65, startingMoves: ["GLARE"]),
+                        .init(id: "CHANSEY", displayName: "Chansey", primaryType: "NORMAL", baseHP: 250, baseAttack: 5, baseDefense: 5, baseSpeed: 50, baseSpecial: 105, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "GLARE", displayName: "GLARE", power: 0, accuracy: 75, maxPP: 30, effect: "PARALYZE_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var arbok = runtime.makePokemon(speciesID: "ARBOK", level: 25, nickname: "Arbok")
+        var chansey = runtime.makePokemon(speciesID: "CHANSEY", level: 25, nickname: "Chansey")
+        var pendingAction: RuntimeBattlePendingAction?
+        let glare = try XCTUnwrap(runtime.content.move(id: "GLARE"))
+
+        let messages = runtime.applyMoveEffect(
+            glare,
+            moveIndex: 0,
+            dealtDamage: 0,
+            attacker: &arbok,
+            defender: &chansey,
+            defenderCanActLaterInTurn: false,
+            pendingAction: &pendingAction
+        )
+
+        XCTAssertEqual(messages, ["Chansey may not attack!"])
+        XCTAssertEqual(chansey.majorStatus, .paralysis)
+        XCTAssertNil(pendingAction)
+    }
+
+    func testApplyMoveEffectParalyzeSideEffectRespectsSameTypeImmunity() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "SNORLAX", displayName: "Snorlax", primaryType: "NORMAL", baseHP: 160, baseAttack: 110, baseDefense: 65, baseSpeed: 30, baseSpecial: 65, startingMoves: ["BODY_SLAM"]),
+                        .init(id: "CHANSEY", displayName: "Chansey", primaryType: "NORMAL", baseHP: 250, baseAttack: 5, baseDefense: 5, baseSpeed: 50, baseSpecial: 105, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "BODY_SLAM", displayName: "BODY SLAM", power: 85, accuracy: 100, maxPP: 15, effect: "PARALYZE_SIDE_EFFECT2", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var snorlax = runtime.makePokemon(speciesID: "SNORLAX", level: 30, nickname: "Snorlax")
+        var chansey = runtime.makePokemon(speciesID: "CHANSEY", level: 30, nickname: "Chansey")
+        var pendingAction: RuntimeBattlePendingAction?
+        let bodySlam = try XCTUnwrap(runtime.content.move(id: "BODY_SLAM"))
+
+        runtime.battleRandomOverrides = [0]
+        let messages = runtime.applyMoveEffect(
+            bodySlam,
+            moveIndex: 0,
+            dealtDamage: 20,
+            attacker: &snorlax,
+            defender: &chansey,
+            defenderCanActLaterInTurn: false,
+            pendingAction: &pendingAction
+        )
+
+        XCTAssertEqual(messages, [])
+        XCTAssertEqual(chansey.majorStatus, .none)
+        XCTAssertNil(pendingAction)
+    }
+
+    func testSleepMoveAgainstRechargingTargetBypassesAccuracyAndExistingStatusChecks() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "JIGGLYPUFF", displayName: "Jigglypuff", primaryType: "NORMAL", baseHP: 115, baseAttack: 45, baseDefense: 20, baseSpeed: 20, baseSpecial: 25, startingMoves: ["SING"]),
+                        .init(id: "SNORLAX", displayName: "Snorlax", primaryType: "NORMAL", baseHP: 160, baseAttack: 110, baseDefense: 65, baseSpeed: 30, baseSpecial: 65, startingMoves: ["HYPER_BEAM"]),
+                    ],
+                    moves: [
+                        .init(id: "SING", displayName: "SING", power: 0, accuracy: 55, maxPP: 15, effect: "SLEEP_EFFECT", type: "NORMAL"),
+                        .init(id: "HYPER_BEAM", displayName: "HYPER BEAM", power: 150, accuracy: 90, maxPP: 5, effect: "HYPER_BEAM_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var jigglypuff = runtime.makePokemon(speciesID: "JIGGLYPUFF", level: 20, nickname: "Jigglypuff")
+        var snorlax = runtime.makePokemon(speciesID: "SNORLAX", level: 20, nickname: "Snorlax")
+        snorlax.majorStatus = .burn
+        snorlax.battleEffects.needsRecharge = true
+
+        runtime.battleRandomOverrides = [255]
+        let result = runtime.resolveBattleAction(
+            side: .player,
+            attacker: jigglypuff,
+            defender: snorlax,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+
+        XCTAssertTrue(result.didExecuteMove)
+        XCTAssertEqual(result.updatedDefender.majorStatus, .sleep)
+        XCTAssertEqual(result.updatedDefender.statusCounter, 7)
+        XCTAssertFalse(result.updatedDefender.battleEffects.needsRecharge)
+        XCTAssertEqual(
+            result.messages.suffix(2),
+            ["Jigglypuff used SING!", "Snorlax fell asleep!"]
+        )
+    }
+
+    func testApplyMoveEffectHazePreservesRechargeWhileClearingTrackedVolatiles() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "KOFFING", displayName: "Koffing", primaryType: "POISON", baseHP: 40, baseAttack: 65, baseDefense: 95, baseSpeed: 35, baseSpecial: 60, startingMoves: ["HAZE"]),
+                        .init(id: "SHELLDER", displayName: "Shellder", primaryType: "WATER", baseHP: 30, baseAttack: 65, baseDefense: 100, baseSpeed: 40, baseSpecial: 45, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "HAZE", displayName: "HAZE", power: 0, accuracy: 100, maxPP: 30, effect: "HAZE_EFFECT", type: "ICE"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var koffing = runtime.makePokemon(speciesID: "KOFFING", level: 22, nickname: "Koffing")
+        var shellder = runtime.makePokemon(speciesID: "SHELLDER", level: 22, nickname: "Shellder")
+        koffing.attackStage = 3
+        koffing.battleEffects.confusionTurnsRemaining = 2
+        koffing.battleEffects.disabledMoveID = "HAZE"
+        koffing.battleEffects.disabledTurnsRemaining = 4
+        koffing.battleEffects.isProtectedByMist = true
+        koffing.battleEffects.hasLightScreen = true
+        koffing.battleEffects.hasReflect = true
+        koffing.battleEffects.isGettingPumped = true
+        koffing.battleEffects.isSeeded = true
+        koffing.battleEffects.needsRecharge = true
+        koffing.battleEffects.isFlinched = true
+
+        shellder.defenseStage = -2
+        shellder.majorStatus = .sleep
+        shellder.statusCounter = 3
+        shellder.battleEffects.confusionTurnsRemaining = 3
+        shellder.battleEffects.disabledMoveID = "TACKLE"
+        shellder.battleEffects.disabledTurnsRemaining = 2
+        shellder.battleEffects.isProtectedByMist = true
+        shellder.battleEffects.hasLightScreen = true
+        shellder.battleEffects.hasReflect = true
+        shellder.battleEffects.isGettingPumped = true
+        shellder.battleEffects.isSeeded = true
+
+        var pendingAction: RuntimeBattlePendingAction?
+        let haze = try XCTUnwrap(runtime.content.move(id: "HAZE"))
+
+        let messages = runtime.applyMoveEffect(
+            haze,
+            moveIndex: 0,
+            dealtDamage: 0,
+            attacker: &koffing,
+            defender: &shellder,
+            defenderCanActLaterInTurn: true,
+            pendingAction: &pendingAction
+        )
+
+        XCTAssertEqual(messages, ["All status changes were eliminated!"])
+        XCTAssertEqual(koffing.attackStage, 0)
+        XCTAssertEqual(koffing.battleEffects.confusionTurnsRemaining, 0)
+        XCTAssertNil(koffing.battleEffects.disabledMoveID)
+        XCTAssertEqual(koffing.battleEffects.disabledTurnsRemaining, 0)
+        XCTAssertFalse(koffing.battleEffects.isProtectedByMist)
+        XCTAssertFalse(koffing.battleEffects.hasLightScreen)
+        XCTAssertFalse(koffing.battleEffects.hasReflect)
+        XCTAssertFalse(koffing.battleEffects.isGettingPumped)
+        XCTAssertFalse(koffing.battleEffects.isSeeded)
+        XCTAssertTrue(koffing.battleEffects.needsRecharge)
+        XCTAssertTrue(koffing.battleEffects.isFlinched)
+
+        XCTAssertEqual(shellder.defenseStage, 0)
+        XCTAssertEqual(shellder.majorStatus, .none)
+        XCTAssertEqual(shellder.statusCounter, 0)
+        XCTAssertEqual(shellder.battleEffects.confusionTurnsRemaining, 0)
+        XCTAssertNil(shellder.battleEffects.disabledMoveID)
+        XCTAssertEqual(shellder.battleEffects.disabledTurnsRemaining, 0)
+        XCTAssertFalse(shellder.battleEffects.isProtectedByMist)
+        XCTAssertFalse(shellder.battleEffects.hasLightScreen)
+        XCTAssertFalse(shellder.battleEffects.hasReflect)
+        XCTAssertFalse(shellder.battleEffects.isGettingPumped)
+        XCTAssertFalse(shellder.battleEffects.isSeeded)
+        XCTAssertTrue(shellder.battleEffects.skipTurnOnce)
+        XCTAssertNil(pendingAction)
+    }
+
     func testSelectEnemyMoveIndexUsesForcedMoveBeforeOtherChoices() {
         let runtime = GameRuntime(
             content: fixtureContent(
