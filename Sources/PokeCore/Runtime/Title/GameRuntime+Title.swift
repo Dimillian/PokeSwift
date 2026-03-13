@@ -59,10 +59,7 @@ extension GameRuntime {
         fieldHealingState = nil
         placeholderTitle = nil
         starterChoiceFocusedIndex = 0
-        scene = .field
-        substate = "field"
-        restartGameplayClock()
-        requestDefaultMapMusic()
+        beginOakIntro()
     }
 
     func scheduleTitleFlow() {

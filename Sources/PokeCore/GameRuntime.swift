@@ -42,6 +42,7 @@ public final class GameRuntime {
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
+    public internal(set) var oakIntroState: OakIntroState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
     var recentSoundEffects: [RuntimeSoundEffectState] = []
@@ -269,6 +270,17 @@ public final class GameRuntime {
         isSaveableFieldGameplay && saveMetadata != nil
     }
 
+    public func typeOakIntroCharacter(_ character: Character) {
+        guard var state = oakIntroState,
+              state.phase == .namingPlayer || state.phase == .namingRival else { return }
+        let upper = Character(character.uppercased())
+        guard RuntimeNamingState.validCharacters.contains(upper) else { return }
+        guard state.enteredCharacters.count < RuntimeNamingState.maxLength else { return }
+        state.enteredCharacters.append(upper)
+        oakIntroState = state
+        publishSnapshot()
+    }
+
     public func setAcquisitionRandomOverrides(_ values: [Int]) {
         acquisitionRandomOverrides = values
     }
@@ -321,6 +333,8 @@ public final class GameRuntime {
             handleBattle(button: button)
         case .naming:
             handleNaming(button: button)
+        case .oakIntro:
+            handleOakIntro(button: button)
         case .placeholder:
             if button == .cancel {
                 scene = .titleMenu

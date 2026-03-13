@@ -176,12 +176,18 @@ struct TrainerPortraitTile: View {
     }
 }
 
-struct PixelSpriteFrameView: View {
-    let url: URL
-    let frame: PixelRect
-    let label: String
+public struct PixelSpriteFrameView: View {
+    public let url: URL
+    public let frame: PixelRect
+    public let label: String
 
-    var body: some View {
+    public init(url: URL, frame: PixelRect, label: String) {
+        self.url = url
+        self.frame = frame
+        self.label = label
+    }
+
+    public var body: some View {
         Group {
             if let image = croppedFrameImage {
                 Image(decorative: image, scale: 1)

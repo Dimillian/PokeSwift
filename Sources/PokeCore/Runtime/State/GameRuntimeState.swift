@@ -441,6 +441,28 @@ public struct RuntimeNamingState {
     public var enteredText: String { String(enteredCharacters) }
 }
 
+public enum OakIntroPhase: String {
+    case oakAppears
+    case nidorinoAppears
+    case playerAppears
+    case namingPlayer
+    case playerNamed
+    case rivalAppears
+    case namingRival
+    case rivalNamed
+    case finalSpeech
+    case fadeOut
+}
+
+public struct OakIntroState {
+    public var phase: OakIntroPhase
+    public var dialoguePages: [[String]]
+    public var currentPageIndex: Int
+    public var enteredCharacters: [Character]
+    public var playerName: String?
+    public var rivalName: String?
+}
+
 struct RuntimeFieldAlertState: Equatable {
     var objectID: String
     var kind: FieldAlertBubbleKind
