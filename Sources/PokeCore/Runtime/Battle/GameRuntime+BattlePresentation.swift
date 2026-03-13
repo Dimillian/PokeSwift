@@ -247,6 +247,7 @@ extension GameRuntime {
         if let enemyParty = beat.enemyParty, let enemyActiveIndex = beat.enemyActiveIndex {
             battle.enemyParty = enemyParty
             battle.enemyActiveIndex = enemyActiveIndex
+            gameplayState.seenSpeciesIDs.insert(enemyParty[enemyActiveIndex].speciesID)
         }
         if let soundEffectRequest = beat.soundEffectRequest {
             _ = playSoundEffect(

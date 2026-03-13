@@ -136,6 +136,7 @@ extension GameRuntime {
                 )
             },
             ownedSpeciesIDs: gameplayState.ownedSpeciesIDs.sorted(),
+            seenSpeciesIDs: gameplayState.seenSpeciesIDs.sorted(),
             earnedBadgeIDs: gameplayState.earnedBadgeIDs.sorted(),
             playerName: gameplayState.playerName,
             rivalName: gameplayState.rivalName,
@@ -186,6 +187,7 @@ extension GameRuntime {
             currentBoxIndex: envelope.snapshot.currentBoxIndex,
             boxedPokemon: normalizedBoxes(from: envelope.snapshot.boxedPokemon),
             ownedSpeciesIDs: Set(envelope.snapshot.ownedSpeciesIDs),
+            seenSpeciesIDs: Set(envelope.snapshot.seenSpeciesIDs),
             earnedBadgeIDs: Set(envelope.snapshot.earnedBadgeIDs),
             gotStarterBit: envelope.snapshot.chosenStarterSpeciesID != nil,
             playerName: envelope.snapshot.playerName,

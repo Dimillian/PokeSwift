@@ -3,6 +3,7 @@ import PokeDataModel
 
 public enum GameplaySidebarExpandedSection: String, Equatable, Sendable, CaseIterable {
     case trainer
+    case pokedex
     case battleCombat
     case party
     case bag
@@ -282,8 +283,86 @@ public struct OptionsSidebarProps: Equatable, Sendable {
     }
 }
 
+public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let dexNumber: Int
+    public let displayName: String
+    public let isOwned: Bool
+    public let isSeen: Bool
+    public let spriteURL: URL?
+    public let primaryType: String?
+    public let secondaryType: String?
+    public let speciesCategory: String?
+    public let heightText: String?
+    public let weightText: String?
+    public let descriptionText: String?
+    public let baseHP: Int
+    public let baseAttack: Int
+    public let baseDefense: Int
+    public let baseSpeed: Int
+    public let baseSpecial: Int
+
+    public init(
+        id: String,
+        dexNumber: Int,
+        displayName: String,
+        isOwned: Bool,
+        isSeen: Bool = false,
+        spriteURL: URL?,
+        primaryType: String?,
+        secondaryType: String?,
+        speciesCategory: String? = nil,
+        heightText: String? = nil,
+        weightText: String? = nil,
+        descriptionText: String? = nil,
+        baseHP: Int = 0,
+        baseAttack: Int = 0,
+        baseDefense: Int = 0,
+        baseSpeed: Int = 0,
+        baseSpecial: Int = 0
+    ) {
+        self.id = id
+        self.dexNumber = dexNumber
+        self.displayName = displayName
+        self.isOwned = isOwned
+        self.isSeen = isSeen || isOwned
+        self.spriteURL = spriteURL
+        self.primaryType = primaryType
+        self.secondaryType = secondaryType
+        self.speciesCategory = speciesCategory
+        self.heightText = heightText
+        self.weightText = weightText
+        self.descriptionText = descriptionText
+        self.baseHP = baseHP
+        self.baseAttack = baseAttack
+        self.baseDefense = baseDefense
+        self.baseSpeed = baseSpeed
+        self.baseSpecial = baseSpecial
+    }
+}
+
+public struct PokedexSidebarProps: Equatable, Sendable {
+    public let entries: [PokedexSidebarEntryProps]
+    public let ownedCount: Int
+    public let seenCount: Int
+    public let totalCount: Int
+
+    public init(
+        entries: [PokedexSidebarEntryProps],
+        ownedCount: Int,
+        seenCount: Int,
+        totalCount: Int
+    ) {
+        self.entries = entries
+        self.ownedCount = ownedCount
+        self.seenCount = seenCount
+        self.totalCount = totalCount
+    }
+}
+
 public struct GameplayFieldSidebarProps: Equatable, Sendable {
     public let profile: TrainerProfileProps
+    public let pokedex: PokedexSidebarProps
     public let party: PartySidebarProps
     public let inventory: InventorySidebarProps
     public let save: SaveSidebarProps
@@ -291,12 +370,14 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
 
     public init(
         profile: TrainerProfileProps,
+        pokedex: PokedexSidebarProps,
         party: PartySidebarProps,
         inventory: InventorySidebarProps,
         save: SaveSidebarProps,
         options: OptionsSidebarProps
     ) {
         self.profile = profile
+        self.pokedex = pokedex
         self.party = party
         self.inventory = inventory
         self.save = save
@@ -602,7 +683,7 @@ public enum GameplaySidebarMode: Equatable, Sendable {
         switch self {
         case .fieldLike:
             switch section {
-            case .trainer, .party, .bag, .save, .options:
+            case .trainer, .pokedex, .party, .bag, .save, .options:
                 return true
             case .battleCombat:
                 return false
@@ -611,7 +692,7 @@ public enum GameplaySidebarMode: Equatable, Sendable {
             switch section {
             case .battleCombat, .party:
                 return true
-            case .trainer, .bag, .save, .options:
+            case .trainer, .pokedex, .bag, .save, .options:
                 return false
             }
         }
@@ -710,6 +791,89 @@ public enum GameplaySidebarPropsBuilder {
             mode: mode,
             promptText: promptText
         )
+    }
+
+    public static func makePokedex(
+        allSpecies: [PokedexSpeciesData],
+        ownedSpeciesIDs: Set<String>,
+        seenSpeciesIDs: Set<String>
+    ) -> PokedexSidebarProps {
+        var ownedCount = 0
+        var seenCount = 0
+        let entries = allSpecies.map { species -> PokedexSidebarEntryProps in
+            let isOwned = ownedSpeciesIDs.contains(species.id)
+            let isSeen = seenSpeciesIDs.contains(species.id)
+            if isOwned { ownedCount += 1 }
+            if isSeen || isOwned { seenCount += 1 }
+            return PokedexSidebarEntryProps(
+                id: species.id,
+                dexNumber: species.dexNumber,
+                displayName: species.displayName,
+                isOwned: isOwned,
+                isSeen: isSeen,
+                spriteURL: isOwned ? species.spriteURL : nil,
+                primaryType: (isOwned || isSeen) ? species.primaryType : nil,
+                secondaryType: (isOwned || isSeen) ? species.secondaryType : nil,
+                speciesCategory: isOwned ? species.speciesCategory : nil,
+                heightText: isOwned ? species.heightText : nil,
+                weightText: isOwned ? species.weightText : nil,
+                descriptionText: isOwned ? species.descriptionText : nil,
+                baseHP: isOwned ? species.baseHP : 0,
+                baseAttack: isOwned ? species.baseAttack : 0,
+                baseDefense: isOwned ? species.baseDefense : 0,
+                baseSpeed: isOwned ? species.baseSpeed : 0,
+                baseSpecial: isOwned ? species.baseSpecial : 0
+            )
+        }
+
+        return PokedexSidebarProps(
+            entries: entries,
+            ownedCount: ownedCount,
+            seenCount: seenCount,
+            totalCount: entries.count
+        )
+    }
+
+    public struct PokedexSpeciesData: Sendable {
+        public let id: String
+        public let dexNumber: Int
+        public let displayName: String
+        public let primaryType: String
+        public let secondaryType: String?
+        public let spriteURL: URL?
+        public let speciesCategory: String?
+        public let heightText: String?
+        public let weightText: String?
+        public let descriptionText: String?
+        public let baseHP: Int
+        public let baseAttack: Int
+        public let baseDefense: Int
+        public let baseSpeed: Int
+        public let baseSpecial: Int
+
+        public init(
+            id: String, dexNumber: Int, displayName: String,
+            primaryType: String, secondaryType: String?, spriteURL: URL?,
+            speciesCategory: String?, heightText: String?, weightText: String?,
+            descriptionText: String?,
+            baseHP: Int, baseAttack: Int, baseDefense: Int, baseSpeed: Int, baseSpecial: Int
+        ) {
+            self.id = id
+            self.dexNumber = dexNumber
+            self.displayName = displayName
+            self.primaryType = primaryType
+            self.secondaryType = secondaryType
+            self.spriteURL = spriteURL
+            self.speciesCategory = speciesCategory
+            self.heightText = heightText
+            self.weightText = weightText
+            self.descriptionText = descriptionText
+            self.baseHP = baseHP
+            self.baseAttack = baseAttack
+            self.baseDefense = baseDefense
+            self.baseSpeed = baseSpeed
+            self.baseSpecial = baseSpecial
+        }
     }
 
     public static func makeInventory(items: [InventorySidebarItemProps] = []) -> InventorySidebarProps {

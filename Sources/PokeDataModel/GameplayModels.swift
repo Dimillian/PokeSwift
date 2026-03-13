@@ -997,6 +997,12 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let crySoundEffectID: String?
     public let cryPitch: Int?
     public let cryLength: Int?
+    public let dexNumber: Int?
+    public let speciesCategory: String?
+    public let heightFeet: Int?
+    public let heightInches: Int?
+    public let weightTenths: Int?
+    public let pokedexEntryText: String?
 
     public init(
         id: String,
@@ -1016,7 +1022,13 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         levelUpLearnset: [LevelUpMoveManifest] = [],
         crySoundEffectID: String? = nil,
         cryPitch: Int? = nil,
-        cryLength: Int? = nil
+        cryLength: Int? = nil,
+        dexNumber: Int? = nil,
+        speciesCategory: String? = nil,
+        heightFeet: Int? = nil,
+        heightInches: Int? = nil,
+        weightTenths: Int? = nil,
+        pokedexEntryText: String? = nil
     ) {
         self.id = id
         self.displayName = displayName
@@ -1036,6 +1048,12 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.crySoundEffectID = crySoundEffectID
         self.cryPitch = cryPitch
         self.cryLength = cryLength
+        self.dexNumber = dexNumber
+        self.speciesCategory = speciesCategory
+        self.heightFeet = heightFeet
+        self.heightInches = heightInches
+        self.weightTenths = weightTenths
+        self.pokedexEntryText = pokedexEntryText
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -1057,6 +1075,12 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case crySoundEffectID
         case cryPitch
         case cryLength
+        case dexNumber
+        case speciesCategory
+        case heightFeet
+        case heightInches
+        case weightTenths
+        case pokedexEntryText
     }
 
     public init(from decoder: Decoder) throws {
@@ -1079,6 +1103,12 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
         cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
         cryLength = try container.decodeIfPresent(Int.self, forKey: .cryLength)
+        dexNumber = try container.decodeIfPresent(Int.self, forKey: .dexNumber)
+        speciesCategory = try container.decodeIfPresent(String.self, forKey: .speciesCategory)
+        heightFeet = try container.decodeIfPresent(Int.self, forKey: .heightFeet)
+        heightInches = try container.decodeIfPresent(Int.self, forKey: .heightInches)
+        weightTenths = try container.decodeIfPresent(Int.self, forKey: .weightTenths)
+        pokedexEntryText = try container.decodeIfPresent(String.self, forKey: .pokedexEntryText)
     }
 }
 

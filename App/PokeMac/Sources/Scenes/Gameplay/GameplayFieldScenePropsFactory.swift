@@ -29,6 +29,12 @@ enum GameplayScenePropsFactory {
                 } ?? []
             )
 
+            let pokedexSidebar = GameplaySidebarPropsBuilder.makePokedex(
+                allSpecies: manifestIndex.pokedexSpeciesList,
+                ownedSpeciesIDs: runtime.ownedSpeciesIDs,
+                seenSpeciesIDs: runtime.seenSpeciesIDs
+            )
+
             return GameplaySceneProps(
                 viewport: .field(
                     GameplayFieldViewportProps(
@@ -52,6 +58,7 @@ enum GameplayScenePropsFactory {
                 sidebarMode: .fieldLike(
                     GameplayFieldSidebarProps(
                         profile: makeTrainerProfile(runtime: runtime),
+                        pokedex: pokedexSidebar,
                         party: makeFieldPartySidebar(runtime: runtime, party: fieldState.party, manifestIndex: manifestIndex),
                         inventory: sidebarInventory,
                         save: saveSidebar,
@@ -227,6 +234,7 @@ enum GameplayScenePropsFactory {
 struct GameplaySidebarManifestIndex {
     let speciesDetailsByID: [String: PartySidebarSpeciesDetails]
     let moveDisplayNamesByID: [String: String]
+    let pokedexSpeciesList: [GameplaySidebarPropsBuilder.PokedexSpeciesData]
 
     init(runtime: GameRuntime) {
         speciesDetailsByID = Dictionary(
@@ -247,5 +255,38 @@ struct GameplaySidebarManifestIndex {
                 (move.id, move.displayName)
             }
         )
+
+        pokedexSpeciesList = runtime.content.gameplayManifest.species.compactMap { species -> GameplaySidebarPropsBuilder.PokedexSpeciesData? in
+            guard let dexNumber = species.dexNumber else { return nil }
+            let heightText: String?
+            if let ft = species.heightFeet, let inches = species.heightInches {
+                heightText = "\(ft)'\(String(format: "%02d", inches))\""
+            } else {
+                heightText = nil
+            }
+            let weightText: String?
+            if let wt = species.weightTenths {
+                weightText = String(format: "%.1f lbs", Double(wt) / 10.0)
+            } else {
+                weightText = nil
+            }
+            return GameplaySidebarPropsBuilder.PokedexSpeciesData(
+                id: species.id,
+                dexNumber: dexNumber,
+                displayName: species.displayName,
+                primaryType: species.primaryType,
+                secondaryType: species.secondaryType,
+                spriteURL: species.battleSprite.map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) },
+                speciesCategory: species.speciesCategory,
+                heightText: heightText,
+                weightText: weightText,
+                descriptionText: species.pokedexEntryText,
+                baseHP: species.baseHP,
+                baseAttack: species.baseAttack,
+                baseDefense: species.baseDefense,
+                baseSpeed: species.baseSpeed,
+                baseSpecial: species.baseSpecial
+            )
+        }.sorted { $0.dexNumber < $1.dexNumber }
     }
 }

@@ -2587,16 +2587,166 @@ private func directionToken(_ token: String) -> FacingDirection? {
 private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
     let speciesDefinitions = try parseCanonicalSpeciesDefinitions(repoRoot: repoRoot)
     let levelUpLearnsetsByID = try parseLevelUpLearnsets(repoRoot: repoRoot)
+    let dexNumbersByID = try parsePokedexNumbers(repoRoot: repoRoot)
+    let dexEntriesByKey = try parsePokedexEntries(repoRoot: repoRoot)
+    let dexTextByKey = try parsePokedexText(repoRoot: repoRoot)
+
     return try speciesDefinitions.map { definition in
-        try parseSpecies(
+        let dexKey = definition.id.replacingOccurrences(of: "_", with: "").lowercased()
+        let dexEntry = dexEntriesByKey[dexKey]
+        let pokedexData = dexNumbersByID[definition.id].map { dexNumber in
+            PokedexData(
+                dexNumber: dexNumber,
+                category: dexEntry?.category,
+                heightFeet: dexEntry?.heightFeet,
+                heightInches: dexEntry?.heightInches,
+                weightTenths: dexEntry?.weightTenths,
+                entryText: dexTextByKey[dexKey]
+            )
+        }
+
+        return try parseSpecies(
             repoRoot: repoRoot,
             file: definition.file,
             id: definition.id,
             displayName: definition.displayName,
             cryData: definition.cryData,
-            levelUpLearnset: levelUpLearnsetsByID[definition.id] ?? []
+            levelUpLearnset: levelUpLearnsetsByID[definition.id] ?? [],
+            pokedexData: pokedexData
         )
     }
+}
+
+private func parsePokedexNumbers(repoRoot: URL) throws -> [String: Int] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/pokedex_constants.asm"))
+    var numbersByID: [String: Int] = [:]
+    var currentNumber = 0
+
+    for rawLine in contents.split(separator: "\n") {
+        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        if line.hasPrefix("const_def") {
+            if let match = line.firstMatch(of: /const_def\s+(\d+)/) {
+                currentNumber = Int(match.output.1) ?? 1
+            } else {
+                currentNumber = 0
+            }
+            continue
+        }
+        guard let match = line.firstMatch(of: /const\s+DEX_([A-Z0-9_]+)/) else {
+            continue
+        }
+        let speciesID = String(match.output.1)
+        numbersByID[speciesID] = currentNumber
+        currentNumber += 1
+    }
+
+    return numbersByID
+}
+
+private struct PokedexData {
+    let dexNumber: Int
+    let category: String?
+    let heightFeet: Int?
+    let heightInches: Int?
+    let weightTenths: Int?
+    let entryText: String?
+}
+
+private struct PokedexEntryData {
+    let category: String
+    let heightFeet: Int
+    let heightInches: Int
+    let weightTenths: Int
+}
+
+private func parsePokedexEntries(repoRoot: URL) throws -> [String: PokedexEntryData] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/dex_entries.asm"))
+    var entriesByKey: [String: PokedexEntryData] = [:]
+
+    let lines = contents.split(separator: "\n", omittingEmptySubsequences: false).map { String($0) }
+    var index = 0
+
+    while index < lines.count {
+        let line = lines[index].trimmingCharacters(in: .whitespaces)
+
+        guard let labelMatch = line.firstMatch(of: /^([A-Za-z]+)DexEntry:/) else {
+            index += 1
+            continue
+        }
+
+        let key = String(labelMatch.output.1).lowercased()
+
+        var category: String?
+        var heightFeet: Int?
+        var heightInches: Int?
+        var weightTenths: Int?
+
+        for offset in 1...4 where (index + offset) < lines.count {
+            let dataLine = lines[index + offset].trimmingCharacters(in: .whitespaces)
+
+            if category == nil, let catMatch = dataLine.firstMatch(of: /db\s+"([^"]+)@?"/) {
+                category = String(catMatch.output.1).replacingOccurrences(of: "@", with: "")
+            } else if heightFeet == nil, let heightMatch = dataLine.firstMatch(of: /db\s+(\d+),\s*(\d+)/) {
+                heightFeet = Int(heightMatch.output.1)
+                heightInches = Int(heightMatch.output.2)
+            } else if weightTenths == nil, let weightMatch = dataLine.firstMatch(of: /dw\s+(\d+)/) {
+                weightTenths = Int(weightMatch.output.1)
+            }
+        }
+
+        if let category, let heightFeet, let heightInches, let weightTenths {
+            entriesByKey[key] = PokedexEntryData(
+                category: category,
+                heightFeet: heightFeet,
+                heightInches: heightInches,
+                weightTenths: weightTenths
+            )
+        }
+
+        index += 1
+    }
+
+    return entriesByKey
+}
+
+private func parsePokedexText(repoRoot: URL) throws -> [String: String] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/dex_text.asm"))
+    var textByKey: [String: String] = [:]
+
+    let lines = contents.split(separator: "\n", omittingEmptySubsequences: false).map { String($0) }
+    var index = 0
+
+    while index < lines.count {
+        let line = lines[index].trimmingCharacters(in: .whitespaces)
+
+        guard let labelMatch = line.firstMatch(of: /^_([A-Za-z]+)DexEntry::/) else {
+            index += 1
+            continue
+        }
+
+        let key = String(labelMatch.output.1).lowercased()
+        var textParts: [String] = []
+
+        index += 1
+        while index < lines.count {
+            let dataLine = lines[index].trimmingCharacters(in: .whitespaces)
+            if dataLine == "dex" || dataLine.hasPrefix("_") {
+                break
+            }
+            if let textMatch = dataLine.firstMatch(of: /(?:text|next|page)\s+"([^"]*)"/) {
+                textParts.append(String(textMatch.output.1))
+            }
+            index += 1
+        }
+
+        if !textParts.isEmpty {
+            textByKey[key] = textParts.joined(separator: " ")
+                .replacingOccurrences(of: "# ", with: "POKé")
+                .replacingOccurrences(of: "#", with: "POKé")
+        }
+    }
+
+    return textByKey
 }
 
 private struct CanonicalSpeciesDefinition {
@@ -2833,7 +2983,8 @@ private func parseSpecies(
     id: String,
     displayName: String,
     cryData: (soundEffectID: String?, pitch: Int?, length: Int?),
-    levelUpLearnset: [LevelUpMoveManifest]
+    levelUpLearnset: [LevelUpMoveManifest],
+    pokedexData: PokedexData? = nil
 ) throws -> SpeciesManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(file))
     guard let statsMatch = contents.firstMatch(of: /db\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+),\s+(\d+)\s*\n\s*;\s*hp\s+atk\s+def\s+spd\s+spc/),
@@ -2892,7 +3043,13 @@ private func parseSpecies(
         levelUpLearnset: levelUpLearnset,
         crySoundEffectID: cryData.soundEffectID,
         cryPitch: cryData.pitch,
-        cryLength: cryData.length
+        cryLength: cryData.length,
+        dexNumber: pokedexData?.dexNumber,
+        speciesCategory: pokedexData?.category,
+        heightFeet: pokedexData?.heightFeet,
+        heightInches: pokedexData?.heightInches,
+        weightTenths: pokedexData?.weightTenths,
+        pokedexEntryText: pokedexData?.entryText
     )
 }
 

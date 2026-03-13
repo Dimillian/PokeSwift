@@ -21430,8 +21430,11 @@
       "cryLength" : 1,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 1,
       "displayName" : "Bulbasaur",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "BULBASAUR",
       "levelUpLearnset" : [
         {
@@ -21463,12 +21466,15 @@
           "moveID" : "SOLARBEAM"
         }
       ],
+      "pokedexEntryText" : "A strange seed was planted on its back at birth. The plant sprouts and grows with this POKéMON",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "SEED",
       "startingMoves" : [
         "TACKLE",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 150
     },
     {
       "baseAttack" : 62,
@@ -21485,8 +21491,11 @@
       "cryLength" : 128,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 2,
       "displayName" : "Ivysaur",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "IVYSAUR",
       "levelUpLearnset" : [
         {
@@ -21518,13 +21527,16 @@
           "moveID" : "SOLARBEAM"
         }
       ],
+      "pokedexEntryText" : "When the bulb on its back grows large, it appears to lose the ability to stand on its hind legs",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "SEED",
       "startingMoves" : [
         "TACKLE",
         "GROWL",
         "LEECH_SEED"
-      ]
+      ],
+      "weightTenths" : 290
     },
     {
       "baseAttack" : 82,
@@ -21541,8 +21553,11 @@
       "cryLength" : 192,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 3,
       "displayName" : "Venusaur",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 7,
       "id" : "VENUSAUR",
       "levelUpLearnset" : [
         {
@@ -21574,14 +21589,17 @@
           "moveID" : "SOLARBEAM"
         }
       ],
+      "pokedexEntryText" : "The plant blooms when it is absorbing solar energy. It stays on the move to seek sunlight",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "SEED",
       "startingMoves" : [
         "TACKLE",
         "GROWL",
         "LEECH_SEED",
         "VINE_WHIP"
-      ]
+      ],
+      "weightTenths" : 2210
     },
     {
       "baseAttack" : 52,
@@ -21598,8 +21616,11 @@
       "cryLength" : 64,
       "cryPitch" : 96,
       "crySoundEffectID" : "SFX_CRY_04",
+      "dexNumber" : 4,
       "displayName" : "Charmander",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "CHARMANDER",
       "levelUpLearnset" : [
         {
@@ -21627,11 +21648,14 @@
           "moveID" : "FIRE_SPIN"
         }
       ],
+      "pokedexEntryText" : "Obviously prefers hot places. When it rains, steam is said to spout from the tip of its tail",
       "primaryType" : "FIRE",
+      "speciesCategory" : "LIZARD",
       "startingMoves" : [
         "SCRATCH",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 190
     },
     {
       "baseAttack" : 64,
@@ -21648,8 +21672,11 @@
       "cryLength" : 64,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_04",
+      "dexNumber" : 5,
       "displayName" : "Charmeleon",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "CHARMELEON",
       "levelUpLearnset" : [
         {
@@ -21677,12 +21704,15 @@
           "moveID" : "FIRE_SPIN"
         }
       ],
+      "pokedexEntryText" : "When it swings its burning tail, it elevates the temperature to unbearably high levels",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FLAME",
       "startingMoves" : [
         "SCRATCH",
         "GROWL",
         "EMBER"
-      ]
+      ],
+      "weightTenths" : 420
     },
     {
       "baseAttack" : 84,
@@ -21699,8 +21729,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_04",
+      "dexNumber" : 6,
       "displayName" : "Charizard",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "CHARIZARD",
       "levelUpLearnset" : [
         {
@@ -21728,14 +21761,17 @@
           "moveID" : "FIRE_SPIN"
         }
       ],
+      "pokedexEntryText" : "Spits fire that is hot enough to melt boulders. Known to cause forest fires unintentionally",
       "primaryType" : "FIRE",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "FLAME",
       "startingMoves" : [
         "SCRATCH",
         "GROWL",
         "EMBER",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 2000
     },
     {
       "baseAttack" : 48,
@@ -21752,8 +21788,11 @@
       "cryLength" : 64,
       "cryPitch" : 96,
       "crySoundEffectID" : "SFX_CRY_1D",
+      "dexNumber" : 7,
       "displayName" : "Squirtle",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "SQUIRTLE",
       "levelUpLearnset" : [
         {
@@ -21781,11 +21820,14 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "After birth, its back swells and hardens into a shell. Powerfully sprays foam from its mouth",
       "primaryType" : "WATER",
+      "speciesCategory" : "TINYTURTLE",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP"
-      ]
+      ],
+      "weightTenths" : 200
     },
     {
       "baseAttack" : 63,
@@ -21802,8 +21844,11 @@
       "cryLength" : 64,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_1D",
+      "dexNumber" : 8,
       "displayName" : "Wartortle",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "WARTORTLE",
       "levelUpLearnset" : [
         {
@@ -21831,12 +21876,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Often hides in water to stalk unwary prey. For swimming fast, it moves its ears to maintain balance",
       "primaryType" : "WATER",
+      "speciesCategory" : "TURTLE",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP",
         "BUBBLE"
-      ]
+      ],
+      "weightTenths" : 500
     },
     {
       "baseAttack" : 83,
@@ -21853,8 +21901,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_13",
+      "dexNumber" : 9,
       "displayName" : "Blastoise",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "BLASTOISE",
       "levelUpLearnset" : [
         {
@@ -21882,13 +21933,16 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "A brutal POKéMON with pressurized water jets on its shell. They are used for high speed tackles",
       "primaryType" : "WATER",
+      "speciesCategory" : "SHELLFISH",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP",
         "BUBBLE",
         "WATER_GUN"
-      ]
+      ],
+      "weightTenths" : 1890
     },
     {
       "baseAttack" : 30,
@@ -21905,17 +21959,23 @@
       "cryLength" : 32,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 10,
       "displayName" : "Caterpie",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "CATERPIE",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Its short feet are tipped with suction pads that enable it to tirelessly climb slopes and walls",
       "primaryType" : "BUG",
+      "speciesCategory" : "WORM",
       "startingMoves" : [
         "TACKLE",
         "STRING_SHOT"
-      ]
+      ],
+      "weightTenths" : 60
     },
     {
       "baseAttack" : 20,
@@ -21932,16 +21992,22 @@
       "cryLength" : 1,
       "cryPitch" : 204,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 11,
       "displayName" : "Metapod",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "METAPOD",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "This POKéMON is vulnerable to attack while its shell is soft, exposing its weak and tender body",
       "primaryType" : "BUG",
+      "speciesCategory" : "COCOON",
       "startingMoves" : [
         "HARDEN"
-      ]
+      ],
+      "weightTenths" : 220
     },
     {
       "baseAttack" : 45,
@@ -21958,8 +22024,11 @@
       "cryLength" : 64,
       "cryPitch" : 119,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 12,
       "displayName" : "Butterfree",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "BUTTERFREE",
       "levelUpLearnset" : [
         {
@@ -21991,11 +22060,14 @@
           "moveID" : "PSYBEAM"
         }
       ],
+      "pokedexEntryText" : "In battle, it flaps its wings at high speed to release highly toxic dust into the air",
       "primaryType" : "BUG",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BUTTERFLY",
       "startingMoves" : [
         "CONFUSION"
-      ]
+      ],
+      "weightTenths" : 710
     },
     {
       "baseAttack" : 35,
@@ -22012,18 +22084,24 @@
       "cryLength" : 1,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_15",
+      "dexNumber" : 13,
       "displayName" : "Weedle",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "WEEDLE",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Often found in forests, eating leaves. It has a sharp venomous stinger on its head",
       "primaryType" : "BUG",
       "secondaryType" : "POISON",
+      "speciesCategory" : "HAIRY BUG",
       "startingMoves" : [
         "POISON_STING",
         "STRING_SHOT"
-      ]
+      ],
+      "weightTenths" : 70
     },
     {
       "baseAttack" : 25,
@@ -22040,17 +22118,23 @@
       "cryLength" : 1,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_13",
+      "dexNumber" : 14,
       "displayName" : "Kakuna",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "KAKUNA",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Almost incapable of moving, this POKéMON can only harden its shell to protect itself from predators",
       "primaryType" : "BUG",
       "secondaryType" : "POISON",
+      "speciesCategory" : "COCOON",
       "startingMoves" : [
         "HARDEN"
-      ]
+      ],
+      "weightTenths" : 220
     },
     {
       "baseAttack" : 80,
@@ -22067,8 +22151,11 @@
       "cryLength" : 128,
       "cryPitch" : 96,
       "crySoundEffectID" : "SFX_CRY_13",
+      "dexNumber" : 15,
       "displayName" : "Beedrill",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "BEEDRILL",
       "levelUpLearnset" : [
         {
@@ -22096,11 +22183,14 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Flies at high speed and attacks using its large venomous stingers on its forelegs and tail",
       "primaryType" : "BUG",
       "secondaryType" : "POISON",
+      "speciesCategory" : "POISON BEE",
       "startingMoves" : [
         "FURY_ATTACK"
-      ]
+      ],
+      "weightTenths" : 650
     },
     {
       "baseAttack" : 45,
@@ -22117,8 +22207,11 @@
       "cryLength" : 4,
       "cryPitch" : 223,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 16,
       "displayName" : "Pidgey",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "PIDGEY",
       "levelUpLearnset" : [
         {
@@ -22146,11 +22239,14 @@
           "moveID" : "MIRROR_MOVE"
         }
       ],
+      "pokedexEntryText" : "A common sight in forests and woods. It flaps its wings at ground level to kick up blinding sand",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "TINY BIRD",
       "startingMoves" : [
         "GUST"
-      ]
+      ],
+      "weightTenths" : 40
     },
     {
       "baseAttack" : 60,
@@ -22167,8 +22263,11 @@
       "cryLength" : 192,
       "cryPitch" : 40,
       "crySoundEffectID" : "SFX_CRY_14",
+      "dexNumber" : 17,
       "displayName" : "Pidgeotto",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "PIDGEOTTO",
       "levelUpLearnset" : [
         {
@@ -22196,12 +22295,15 @@
           "moveID" : "MIRROR_MOVE"
         }
       ],
+      "pokedexEntryText" : "Very protective of its sprawling territorial area, this POKéMON will fiercely peck at any intruder",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BIRD",
       "startingMoves" : [
         "GUST",
         "SAND_ATTACK"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 80,
@@ -22218,8 +22320,11 @@
       "cryLength" : 255,
       "cryPitch" : 17,
       "crySoundEffectID" : "SFX_CRY_14",
+      "dexNumber" : 18,
       "displayName" : "Pidgeot",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "PIDGEOT",
       "levelUpLearnset" : [
         {
@@ -22247,13 +22352,16 @@
           "moveID" : "MIRROR_MOVE"
         }
       ],
+      "pokedexEntryText" : "When hunting, it skims the surface of water at high speed to pick off unwary prey such as MAGIKARP",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BIRD",
       "startingMoves" : [
         "GUST",
         "SAND_ATTACK",
         "QUICK_ATTACK"
-      ]
+      ],
+      "weightTenths" : 870
     },
     {
       "baseAttack" : 56,
@@ -22270,8 +22378,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_22",
+      "dexNumber" : 19,
       "displayName" : "Rattata",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "RATTATA",
       "levelUpLearnset" : [
         {
@@ -22291,11 +22402,14 @@
           "moveID" : "SUPER_FANG"
         }
       ],
+      "pokedexEntryText" : "Bites anything when it attacks. Small and very quick, it is a common sight in many places",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "RAT",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP"
-      ]
+      ],
+      "weightTenths" : 80
     },
     {
       "baseAttack" : 81,
@@ -22312,8 +22426,11 @@
       "cryLength" : 255,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_22",
+      "dexNumber" : 20,
       "displayName" : "Raticate",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "RATICATE",
       "levelUpLearnset" : [
         {
@@ -22333,12 +22450,15 @@
           "moveID" : "SUPER_FANG"
         }
       ],
+      "pokedexEntryText" : "It uses its whis- kers to maintain its balance. It apparently slows down if they are cut off",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "RAT",
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP",
         "QUICK_ATTACK"
-      ]
+      ],
+      "weightTenths" : 410
     },
     {
       "baseAttack" : 60,
@@ -22355,8 +22475,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_10",
+      "dexNumber" : 21,
       "displayName" : "Spearow",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "SPEAROW",
       "levelUpLearnset" : [
         {
@@ -22380,12 +22503,15 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Eats bugs in grassy areas. It has to flap its short wings at high speed to stay airborne",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "TINY BIRD",
       "startingMoves" : [
         "PECK",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 40
     },
     {
       "baseAttack" : 90,
@@ -22402,8 +22528,11 @@
       "cryLength" : 160,
       "cryPitch" : 64,
       "crySoundEffectID" : "SFX_CRY_18",
+      "dexNumber" : 22,
       "displayName" : "Fearow",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "FEAROW",
       "levelUpLearnset" : [
         {
@@ -22427,13 +22556,16 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "With its huge and magnificent wings, it can keep aloft without ever having to land for rest",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BEAK",
       "startingMoves" : [
         "PECK",
         "GROWL",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 840
     },
     {
       "baseAttack" : 60,
@@ -22450,8 +22582,11 @@
       "cryLength" : 64,
       "cryPitch" : 18,
       "crySoundEffectID" : "SFX_CRY_17",
+      "dexNumber" : 23,
       "displayName" : "Ekans",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 6,
+      "heightInches" : 7,
       "id" : "EKANS",
       "levelUpLearnset" : [
         {
@@ -22475,11 +22610,14 @@
           "moveID" : "ACID"
         }
       ],
+      "pokedexEntryText" : "Moves silently and stealthily. Eats the eggs of birds, such as PIDGEY and SPEAROW, whole",
       "primaryType" : "POISON",
+      "speciesCategory" : "SNAKE",
       "startingMoves" : [
         "WRAP",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 150
     },
     {
       "baseAttack" : 85,
@@ -22496,8 +22634,11 @@
       "cryLength" : 16,
       "cryPitch" : 224,
       "crySoundEffectID" : "SFX_CRY_17",
+      "dexNumber" : 24,
       "displayName" : "Arbok",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 11,
+      "heightInches" : 6,
       "id" : "ARBOK",
       "levelUpLearnset" : [
         {
@@ -22521,12 +22662,15 @@
           "moveID" : "ACID"
         }
       ],
+      "pokedexEntryText" : "It is rumored that the ferocious warning markings on its belly differ from area to area",
       "primaryType" : "POISON",
+      "speciesCategory" : "COBRA",
       "startingMoves" : [
         "WRAP",
         "LEER",
         "POISON_STING"
-      ]
+      ],
+      "weightTenths" : 1430
     },
     {
       "baseAttack" : 55,
@@ -22543,8 +22687,11 @@
       "cryLength" : 1,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 25,
       "displayName" : "Pikachu",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "PIKACHU",
       "levelUpLearnset" : [
         {
@@ -22568,11 +22715,14 @@
           "moveID" : "THUNDER"
         }
       ],
+      "pokedexEntryText" : "When several of these POKéMON gather, their electricity could build and cause lightning storms",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "MOUSE",
       "startingMoves" : [
         "THUNDERSHOCK",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 130
     },
     {
       "baseAttack" : 90,
@@ -22589,18 +22739,24 @@
       "cryLength" : 8,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_09",
+      "dexNumber" : 26,
       "displayName" : "Raichu",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "RAICHU",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Its long tail serves as a ground to protect itself from its own high voltage power",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "MOUSE",
       "startingMoves" : [
         "THUNDERSHOCK",
         "GROWL",
         "THUNDER_WAVE"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 75,
@@ -22617,8 +22773,11 @@
       "cryLength" : 64,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_00",
+      "dexNumber" : 27,
       "displayName" : "Sandshrew",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "SANDSHREW",
       "levelUpLearnset" : [
         {
@@ -22642,10 +22801,13 @@
           "moveID" : "FURY_SWIPES"
         }
       ],
+      "pokedexEntryText" : "Burrows deep underground in arid locations far from water. It only emerges to hunt for food",
       "primaryType" : "GROUND",
+      "speciesCategory" : "MOUSE",
       "startingMoves" : [
         "SCRATCH"
-      ]
+      ],
+      "weightTenths" : 260
     },
     {
       "baseAttack" : 100,
@@ -22662,8 +22824,11 @@
       "cryLength" : 255,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_00",
+      "dexNumber" : 28,
       "displayName" : "Sandslash",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "SANDSLASH",
       "levelUpLearnset" : [
         {
@@ -22687,11 +22852,14 @@
           "moveID" : "FURY_SWIPES"
         }
       ],
+      "pokedexEntryText" : "Curls up into a spiny ball when threatened. It can roll while curled up to attack or escape",
       "primaryType" : "GROUND",
+      "speciesCategory" : "MOUSE",
       "startingMoves" : [
         "SCRATCH",
         "SAND_ATTACK"
-      ]
+      ],
+      "weightTenths" : 650
     },
     {
       "baseAttack" : 47,
@@ -22708,8 +22876,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_01",
+      "dexNumber" : 29,
       "displayName" : "Nidoran F",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "NIDORAN_F",
       "levelUpLearnset" : [
         {
@@ -22737,11 +22908,14 @@
           "moveID" : "DOUBLE_KICK"
         }
       ],
+      "pokedexEntryText" : "Although small, its venomous barbs render this POKéMON dangerous. The female has smaller horns",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON PIN",
       "startingMoves" : [
         "GROWL",
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 150
     },
     {
       "baseAttack" : 62,
@@ -22758,8 +22932,11 @@
       "cryLength" : 224,
       "cryPitch" : 44,
       "crySoundEffectID" : "SFX_CRY_01",
+      "dexNumber" : 30,
       "displayName" : "Nidorina",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "NIDORINA",
       "levelUpLearnset" : [
         {
@@ -22787,12 +22964,15 @@
           "moveID" : "DOUBLE_KICK"
         }
       ],
+      "pokedexEntryText" : "The female's horn develops slowly. Prefers physical attacks such as clawing and biting",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON PIN",
       "startingMoves" : [
         "GROWL",
         "TACKLE",
         "SCRATCH"
-      ]
+      ],
+      "weightTenths" : 440
     },
     {
       "baseAttack" : 82,
@@ -22809,8 +22989,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0A",
+      "dexNumber" : 31,
       "displayName" : "Nidoqueen",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "NIDOQUEEN",
       "levelUpLearnset" : [
         {
@@ -22826,14 +23009,17 @@
           "moveID" : "BODY_SLAM"
         }
       ],
+      "pokedexEntryText" : "Its hard scales provide strong protection. It uses its hefty bulk to execute powerful moves",
       "primaryType" : "POISON",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "DRILL",
       "startingMoves" : [
         "TACKLE",
         "SCRATCH",
         "TAIL_WHIP",
         "BODY_SLAM"
-      ]
+      ],
+      "weightTenths" : 1320
     },
     {
       "baseAttack" : 57,
@@ -22850,8 +23036,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_00",
+      "dexNumber" : 32,
       "displayName" : "Nidoran M",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "NIDORAN_M",
       "levelUpLearnset" : [
         {
@@ -22879,11 +23068,14 @@
           "moveID" : "DOUBLE_KICK"
         }
       ],
+      "pokedexEntryText" : "Stiffens its ears to sense danger. The larger its horns, the more powerful its secreted venom",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON PIN",
       "startingMoves" : [
         "LEER",
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 200
     },
     {
       "baseAttack" : 72,
@@ -22900,8 +23092,11 @@
       "cryLength" : 192,
       "cryPitch" : 44,
       "crySoundEffectID" : "SFX_CRY_00",
+      "dexNumber" : 33,
       "displayName" : "Nidorino",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "NIDORINO",
       "levelUpLearnset" : [
         {
@@ -22929,12 +23124,15 @@
           "moveID" : "DOUBLE_KICK"
         }
       ],
+      "pokedexEntryText" : "An aggressive POKéMON that is quick to attack. The horn on its head secretes a powerful venom",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON PIN",
       "startingMoves" : [
         "LEER",
         "TACKLE",
         "HORN_ATTACK"
-      ]
+      ],
+      "weightTenths" : 430
     },
     {
       "baseAttack" : 92,
@@ -22951,8 +23149,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_09",
+      "dexNumber" : 34,
       "displayName" : "Nidoking",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "NIDOKING",
       "levelUpLearnset" : [
         {
@@ -22968,14 +23169,17 @@
           "moveID" : "THRASH"
         }
       ],
+      "pokedexEntryText" : "It uses its powerful tail in battle to smash, constrict, then break the prey's bones",
       "primaryType" : "POISON",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "DRILL",
       "startingMoves" : [
         "TACKLE",
         "HORN_ATTACK",
         "POISON_STING",
         "THRASH"
-      ]
+      ],
+      "weightTenths" : 1370
     },
     {
       "baseAttack" : 45,
@@ -22992,8 +23196,11 @@
       "cryLength" : 1,
       "cryPitch" : 204,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 35,
       "displayName" : "Clefairy",
       "growthRate" : "GROWTH_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "CLEFAIRY",
       "levelUpLearnset" : [
         {
@@ -23021,11 +23228,14 @@
           "moveID" : "LIGHT_SCREEN"
         }
       ],
+      "pokedexEntryText" : "Its magical and cute appeal has many admirers. It is rare and found only in certain areas",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "FAIRY",
       "startingMoves" : [
         "POUND",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 170
     },
     {
       "baseAttack" : 70,
@@ -23042,19 +23252,25 @@
       "cryLength" : 32,
       "cryPitch" : 170,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 36,
       "displayName" : "Clefable",
       "growthRate" : "GROWTH_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "CLEFABLE",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "A timid fairy POKéMON that is rarely seen. It will run and hide the moment it senses people",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "FAIRY",
       "startingMoves" : [
         "SING",
         "DOUBLESLAP",
         "MINIMIZE",
         "METRONOME"
-      ]
+      ],
+      "weightTenths" : 880
     },
     {
       "baseAttack" : 41,
@@ -23071,8 +23287,11 @@
       "cryLength" : 16,
       "cryPitch" : 79,
       "crySoundEffectID" : "SFX_CRY_24",
+      "dexNumber" : 37,
       "displayName" : "Vulpix",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "VULPIX",
       "levelUpLearnset" : [
         {
@@ -23096,11 +23315,14 @@
           "moveID" : "FIRE_SPIN"
         }
       ],
+      "pokedexEntryText" : "At the time of birth, it has just one tail. The tail splits from its tip as it grows older",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FOX",
       "startingMoves" : [
         "EMBER",
         "TAIL_WHIP"
-      ]
+      ],
+      "weightTenths" : 220
     },
     {
       "baseAttack" : 76,
@@ -23117,19 +23339,25 @@
       "cryLength" : 96,
       "cryPitch" : 136,
       "crySoundEffectID" : "SFX_CRY_24",
+      "dexNumber" : 38,
       "displayName" : "Ninetales",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "NINETALES",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Very smart and very vengeful. Grabbing one of its many tails could result in a 1000-year curse",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FOX",
       "startingMoves" : [
         "EMBER",
         "TAIL_WHIP",
         "QUICK_ATTACK",
         "ROAR"
-      ]
+      ],
+      "weightTenths" : 440
     },
     {
       "baseAttack" : 45,
@@ -23146,8 +23374,11 @@
       "cryLength" : 53,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 39,
       "displayName" : "Jigglypuff",
       "growthRate" : "GROWTH_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "JIGGLYPUFF",
       "levelUpLearnset" : [
         {
@@ -23179,10 +23410,13 @@
           "moveID" : "DOUBLE_EDGE"
         }
       ],
+      "pokedexEntryText" : "When its huge eyes light up, it sings a mysteriously soothing melody that lulls its enemies to sleep",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "BALLOON",
       "startingMoves" : [
         "SING"
-      ]
+      ],
+      "weightTenths" : 120
     },
     {
       "baseAttack" : 70,
@@ -23199,19 +23433,25 @@
       "cryLength" : 96,
       "cryPitch" : 104,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 40,
       "displayName" : "Wigglytuff",
       "growthRate" : "GROWTH_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "WIGGLYTUFF",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "The body is soft and rubbery. When angered, it will suck in air and inflate itself to an enormous size",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "BALLOON",
       "startingMoves" : [
         "SING",
         "DISABLE",
         "DEFENSE_CURL",
         "DOUBLESLAP"
-      ]
+      ],
+      "weightTenths" : 260
     },
     {
       "baseAttack" : 45,
@@ -23228,8 +23468,11 @@
       "cryLength" : 128,
       "cryPitch" : 224,
       "crySoundEffectID" : "SFX_CRY_1D",
+      "dexNumber" : 41,
       "displayName" : "Zubat",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "ZUBAT",
       "levelUpLearnset" : [
         {
@@ -23253,11 +23496,14 @@
           "moveID" : "HAZE"
         }
       ],
+      "pokedexEntryText" : "Forms colonies in perpetually dark places. Uses ultrasonic waves to identify and approach targets",
       "primaryType" : "POISON",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BAT",
       "startingMoves" : [
         "LEECH_LIFE"
-      ]
+      ],
+      "weightTenths" : 170
     },
     {
       "baseAttack" : 80,
@@ -23274,8 +23520,11 @@
       "cryLength" : 128,
       "cryPitch" : 250,
       "crySoundEffectID" : "SFX_CRY_1D",
+      "dexNumber" : 42,
       "displayName" : "Golbat",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "GOLBAT",
       "levelUpLearnset" : [
         {
@@ -23299,13 +23548,16 @@
           "moveID" : "HAZE"
         }
       ],
+      "pokedexEntryText" : "Once it strikes, it will not stop draining energy from the victim even if it gets too heavy to fly",
       "primaryType" : "POISON",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "BAT",
       "startingMoves" : [
         "LEECH_LIFE",
         "SCREECH",
         "BITE"
-      ]
+      ],
+      "weightTenths" : 1210
     },
     {
       "baseAttack" : 50,
@@ -23322,8 +23574,11 @@
       "cryLength" : 1,
       "cryPitch" : 221,
       "crySoundEffectID" : "SFX_CRY_08",
+      "dexNumber" : 43,
       "displayName" : "Oddish",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "ODDISH",
       "levelUpLearnset" : [
         {
@@ -23351,11 +23606,14 @@
           "moveID" : "SOLARBEAM"
         }
       ],
+      "pokedexEntryText" : "During the day, it keeps its face buried in the ground. At night, it wanders around sowing its seeds",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "WEED",
       "startingMoves" : [
         "ABSORB"
-      ]
+      ],
+      "weightTenths" : 120
     },
     {
       "baseAttack" : 65,
@@ -23372,8 +23630,11 @@
       "cryLength" : 64,
       "cryPitch" : 170,
       "crySoundEffectID" : "SFX_CRY_08",
+      "dexNumber" : 44,
       "displayName" : "Gloom",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "GLOOM",
       "levelUpLearnset" : [
         {
@@ -23401,13 +23662,16 @@
           "moveID" : "SOLARBEAM"
         }
       ],
+      "pokedexEntryText" : "The fluid that oozes from its mouth isn't drool. It is a nectar that is used to attract prey",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "WEED",
       "startingMoves" : [
         "ABSORB",
         "POISONPOWDER",
         "STUN_SPORE"
-      ]
+      ],
+      "weightTenths" : 190
     },
     {
       "baseAttack" : 80,
@@ -23424,8 +23688,11 @@
       "cryLength" : 255,
       "cryPitch" : 34,
       "crySoundEffectID" : "SFX_CRY_23",
+      "dexNumber" : 45,
       "displayName" : "Vileplume",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "VILEPLUME",
       "levelUpLearnset" : [
         {
@@ -23441,14 +23708,17 @@
           "moveID" : "SLEEP_POWDER"
         }
       ],
+      "pokedexEntryText" : "The larger its petals, the more toxic pollen it contains. Its big head is heavy and hard to hold up",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "FLOWER",
       "startingMoves" : [
         "STUN_SPORE",
         "SLEEP_POWDER",
         "ACID",
         "PETAL_DANCE"
-      ]
+      ],
+      "weightTenths" : 410
     },
     {
       "baseAttack" : 70,
@@ -23465,8 +23735,11 @@
       "cryLength" : 224,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 46,
       "displayName" : "Paras",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "PARAS",
       "levelUpLearnset" : [
         {
@@ -23490,11 +23763,14 @@
           "moveID" : "GROWTH"
         }
       ],
+      "pokedexEntryText" : "Burrows to suck tree roots. The mushrooms on its back grow by draw- ing nutrients from the bug host",
       "primaryType" : "BUG",
       "secondaryType" : "GRASS",
+      "speciesCategory" : "MUSHROOM",
       "startingMoves" : [
         "SCRATCH"
-      ]
+      ],
+      "weightTenths" : 120
     },
     {
       "baseAttack" : 95,
@@ -23511,8 +23787,11 @@
       "cryLength" : 255,
       "cryPitch" : 66,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 47,
       "displayName" : "Parasect",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "PARASECT",
       "levelUpLearnset" : [
         {
@@ -23536,13 +23815,16 @@
           "moveID" : "GROWTH"
         }
       ],
+      "pokedexEntryText" : "A host-parasite pair in which the parasite mushroom has taken over the host bug. Prefers damp places",
       "primaryType" : "BUG",
       "secondaryType" : "GRASS",
+      "speciesCategory" : "MUSHROOM",
       "startingMoves" : [
         "SCRATCH",
         "STUN_SPORE",
         "LEECH_LIFE"
-      ]
+      ],
+      "weightTenths" : 650
     },
     {
       "baseAttack" : 55,
@@ -23559,8 +23841,11 @@
       "cryLength" : 64,
       "cryPitch" : 68,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 48,
       "displayName" : "Venonat",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "VENONAT",
       "levelUpLearnset" : [
         {
@@ -23588,12 +23873,15 @@
           "moveID" : "PSYCHIC_M"
         }
       ],
+      "pokedexEntryText" : "Lives in the shadows of tall trees where it eats insects. It is attracted by light at night",
       "primaryType" : "BUG",
       "secondaryType" : "POISON",
+      "speciesCategory" : "INSECT",
       "startingMoves" : [
         "TACKLE",
         "DISABLE"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 65,
@@ -23610,8 +23898,11 @@
       "cryLength" : 128,
       "cryPitch" : 41,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 49,
       "displayName" : "Venomoth",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "VENOMOTH",
       "levelUpLearnset" : [
         {
@@ -23639,14 +23930,17 @@
           "moveID" : "PSYCHIC_M"
         }
       ],
+      "pokedexEntryText" : "The dust-like scales covering its wings are color coded to indicate the kinds of poison it has",
       "primaryType" : "BUG",
       "secondaryType" : "POISON",
+      "speciesCategory" : "POISONMOTH",
       "startingMoves" : [
         "TACKLE",
         "DISABLE",
         "POISONPOWDER",
         "LEECH_LIFE"
-      ]
+      ],
+      "weightTenths" : 280
     },
     {
       "baseAttack" : 55,
@@ -23663,8 +23957,11 @@
       "cryLength" : 1,
       "cryPitch" : 170,
       "crySoundEffectID" : "SFX_CRY_0B",
+      "dexNumber" : 50,
       "displayName" : "Diglett",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 0,
+      "heightInches" : 8,
       "id" : "DIGLETT",
       "levelUpLearnset" : [
         {
@@ -23688,10 +23985,13 @@
           "moveID" : "EARTHQUAKE"
         }
       ],
+      "pokedexEntryText" : "Lives about one yard underground where it feeds on plant roots. It sometimes appears above ground",
       "primaryType" : "GROUND",
+      "speciesCategory" : "MOLE",
       "startingMoves" : [
         "SCRATCH"
-      ]
+      ],
+      "weightTenths" : 20
     },
     {
       "baseAttack" : 80,
@@ -23708,8 +24008,11 @@
       "cryLength" : 16,
       "cryPitch" : 42,
       "crySoundEffectID" : "SFX_CRY_0B",
+      "dexNumber" : 51,
       "displayName" : "Dugtrio",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "DUGTRIO",
       "levelUpLearnset" : [
         {
@@ -23733,12 +24036,15 @@
           "moveID" : "EARTHQUAKE"
         }
       ],
+      "pokedexEntryText" : "A team of DIGLETT triplets. It triggers huge earthquakes by burrowing 60 miles underground",
       "primaryType" : "GROUND",
+      "speciesCategory" : "MOLE",
       "startingMoves" : [
         "SCRATCH",
         "GROWL",
         "DIG"
-      ]
+      ],
+      "weightTenths" : 730
     },
     {
       "baseAttack" : 45,
@@ -23755,8 +24061,11 @@
       "cryLength" : 16,
       "cryPitch" : 119,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 52,
       "displayName" : "Meowth",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "MEOWTH",
       "levelUpLearnset" : [
         {
@@ -23780,11 +24089,14 @@
           "moveID" : "SLASH"
         }
       ],
+      "pokedexEntryText" : "Adores circular objects. Wanders the streets on a nightly basis to look for dropped loose change",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "SCRATCHCAT",
       "startingMoves" : [
         "SCRATCH",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 90
     },
     {
       "baseAttack" : 70,
@@ -23801,8 +24113,11 @@
       "cryLength" : 255,
       "cryPitch" : 153,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 53,
       "displayName" : "Persian",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "PERSIAN",
       "levelUpLearnset" : [
         {
@@ -23826,13 +24141,16 @@
           "moveID" : "SLASH"
         }
       ],
+      "pokedexEntryText" : "Although its fur has many admirers, it is tough to raise as a pet because of its fickle meanness",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "CLASSY CAT",
       "startingMoves" : [
         "SCRATCH",
         "GROWL",
         "BITE",
         "SCREECH"
-      ]
+      ],
+      "weightTenths" : 710
     },
     {
       "baseAttack" : 52,
@@ -23849,8 +24167,11 @@
       "cryLength" : 96,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_21",
+      "dexNumber" : 54,
       "displayName" : "Psyduck",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "PSYDUCK",
       "levelUpLearnset" : [
         {
@@ -23874,10 +24195,13 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "While lulling its enemies with its vacant look, this wily POKéMON will use psychokinetic powers",
       "primaryType" : "WATER",
+      "speciesCategory" : "DUCK",
       "startingMoves" : [
         "SCRATCH"
-      ]
+      ],
+      "weightTenths" : 430
     },
     {
       "baseAttack" : 82,
@@ -23894,8 +24218,11 @@
       "cryLength" : 64,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_21",
+      "dexNumber" : 55,
       "displayName" : "Golduck",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "GOLDUCK",
       "levelUpLearnset" : [
         {
@@ -23919,12 +24246,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Often seen swim- ming elegantly by lake shores. It is often mistaken for the Japanese monster, Kappa",
       "primaryType" : "WATER",
+      "speciesCategory" : "DUCK",
       "startingMoves" : [
         "SCRATCH",
         "TAIL_WHIP",
         "DISABLE"
-      ]
+      ],
+      "weightTenths" : 1690
     },
     {
       "baseAttack" : 80,
@@ -23941,8 +24271,11 @@
       "cryLength" : 96,
       "cryPitch" : 221,
       "crySoundEffectID" : "SFX_CRY_0A",
+      "dexNumber" : 56,
       "displayName" : "Mankey",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "MANKEY",
       "levelUpLearnset" : [
         {
@@ -23966,11 +24299,14 @@
           "moveID" : "THRASH"
         }
       ],
+      "pokedexEntryText" : "Extremely quick to anger. It could be docile one moment then thrashing away the next instant",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "PIG MONKEY",
       "startingMoves" : [
         "SCRATCH",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 620
     },
     {
       "baseAttack" : 105,
@@ -23987,8 +24323,11 @@
       "cryLength" : 64,
       "cryPitch" : 175,
       "crySoundEffectID" : "SFX_CRY_0A",
+      "dexNumber" : 57,
       "displayName" : "Primeape",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "PRIMEAPE",
       "levelUpLearnset" : [
         {
@@ -24012,13 +24351,16 @@
           "moveID" : "THRASH"
         }
       ],
+      "pokedexEntryText" : "Always furious and tenacious to boot. It will not abandon chasing its quarry until it is caught",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "PIG MONKEY",
       "startingMoves" : [
         "SCRATCH",
         "LEER",
         "KARATE_CHOP",
         "FURY_SWIPES"
-      ]
+      ],
+      "weightTenths" : 710
     },
     {
       "baseAttack" : 70,
@@ -24035,8 +24377,11 @@
       "cryLength" : 64,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 58,
       "displayName" : "Growlithe",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "GROWLITHE",
       "levelUpLearnset" : [
         {
@@ -24060,11 +24405,14 @@
           "moveID" : "FLAMETHROWER"
         }
       ],
+      "pokedexEntryText" : "Very protective of its territory. It will bark and bite to repel intruders from its space",
       "primaryType" : "FIRE",
+      "speciesCategory" : "PUPPY",
       "startingMoves" : [
         "BITE",
         "ROAR"
-      ]
+      ],
+      "weightTenths" : 420
     },
     {
       "baseAttack" : 110,
@@ -24081,19 +24429,25 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_15",
+      "dexNumber" : 59,
       "displayName" : "Arcanine",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 3,
       "id" : "ARCANINE",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "A POKéMON that has been admired since the past for its beauty. It runs agilely as if on wings",
       "primaryType" : "FIRE",
+      "speciesCategory" : "LEGENDARY",
       "startingMoves" : [
         "ROAR",
         "EMBER",
         "LEER",
         "TAKE_DOWN"
-      ]
+      ],
+      "weightTenths" : 3420
     },
     {
       "baseAttack" : 50,
@@ -24110,8 +24464,11 @@
       "cryLength" : 255,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 60,
       "displayName" : "Poliwag",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "POLIWAG",
       "levelUpLearnset" : [
         {
@@ -24139,10 +24496,13 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Its newly grown legs prevent it from running. It appears to prefer swimming than trying to stand",
       "primaryType" : "WATER",
+      "speciesCategory" : "TADPOLE",
       "startingMoves" : [
         "BUBBLE"
-      ]
+      ],
+      "weightTenths" : 270
     },
     {
       "baseAttack" : 65,
@@ -24159,8 +24519,11 @@
       "cryLength" : 96,
       "cryPitch" : 119,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 61,
       "displayName" : "Poliwhirl",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "POLIWHIRL",
       "levelUpLearnset" : [
         {
@@ -24188,12 +24551,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Capable of living in or out of water. When out of water, it sweats to keep its body slimy",
       "primaryType" : "WATER",
+      "speciesCategory" : "TADPOLE",
       "startingMoves" : [
         "BUBBLE",
         "HYPNOSIS",
         "WATER_GUN"
-      ]
+      ],
+      "weightTenths" : 440
     },
     {
       "baseAttack" : 85,
@@ -24210,8 +24576,11 @@
       "cryLength" : 255,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 62,
       "displayName" : "Poliwrath",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "POLIWRATH",
       "levelUpLearnset" : [
         {
@@ -24223,14 +24592,17 @@
           "moveID" : "WATER_GUN"
         }
       ],
+      "pokedexEntryText" : "An adept swimmer at both the front crawl and breast stroke. Easily overtakes the best human swimmers",
       "primaryType" : "WATER",
       "secondaryType" : "FIGHTING",
+      "speciesCategory" : "TADPOLE",
       "startingMoves" : [
         "HYPNOSIS",
         "WATER_GUN",
         "DOUBLESLAP",
         "BODY_SLAM"
-      ]
+      ],
+      "weightTenths" : 1190
     },
     {
       "baseAttack" : 20,
@@ -24247,16 +24619,22 @@
       "cryLength" : 1,
       "cryPitch" : 192,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 63,
       "displayName" : "Abra",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "ABRA",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Using its ability to read minds, it will identify impending danger and TELEPORT to safety",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "PSI",
       "startingMoves" : [
         "TELEPORT"
-      ]
+      ],
+      "weightTenths" : 430
     },
     {
       "baseAttack" : 35,
@@ -24273,8 +24651,11 @@
       "cryLength" : 192,
       "cryPitch" : 168,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 64,
       "displayName" : "Kadabra",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "KADABRA",
       "levelUpLearnset" : [
         {
@@ -24302,12 +24683,15 @@
           "moveID" : "REFLECT"
         }
       ],
+      "pokedexEntryText" : "It emits special alpha waves from its body that induce headaches just by being close by",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "PSI",
       "startingMoves" : [
         "TELEPORT",
         "CONFUSION",
         "DISABLE"
-      ]
+      ],
+      "weightTenths" : 1250
     },
     {
       "baseAttack" : 50,
@@ -24324,8 +24708,11 @@
       "cryLength" : 255,
       "cryPitch" : 152,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 65,
       "displayName" : "Alakazam",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "ALAKAZAM",
       "levelUpLearnset" : [
         {
@@ -24353,12 +24740,15 @@
           "moveID" : "REFLECT"
         }
       ],
+      "pokedexEntryText" : "Its brain can out- perform a super- computer. Its intelligence quotient is said to be 5,000",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "PSI",
       "startingMoves" : [
         "TELEPORT",
         "CONFUSION",
         "DISABLE"
-      ]
+      ],
+      "weightTenths" : 1060
     },
     {
       "baseAttack" : 80,
@@ -24375,8 +24765,11 @@
       "cryLength" : 1,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 66,
       "displayName" : "Machop",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "MACHOP",
       "levelUpLearnset" : [
         {
@@ -24400,10 +24793,13 @@
           "moveID" : "SUBMISSION"
         }
       ],
+      "pokedexEntryText" : "Loves to build its muscles. It trains in all styles of martial arts to become even stronger",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "SUPERPOWER",
       "startingMoves" : [
         "KARATE_CHOP"
-      ]
+      ],
+      "weightTenths" : 430
     },
     {
       "baseAttack" : 100,
@@ -24420,8 +24816,11 @@
       "cryLength" : 96,
       "cryPitch" : 72,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 67,
       "displayName" : "Machoke",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "MACHOKE",
       "levelUpLearnset" : [
         {
@@ -24445,12 +24844,15 @@
           "moveID" : "SUBMISSION"
         }
       ],
+      "pokedexEntryText" : "Its muscular body is so powerful, it must wear a power save belt to be able to regulate its motions",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "SUPERPOWER",
       "startingMoves" : [
         "KARATE_CHOP",
         "LOW_KICK",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 1550
     },
     {
       "baseAttack" : 130,
@@ -24467,8 +24869,11 @@
       "cryLength" : 192,
       "cryPitch" : 8,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 68,
       "displayName" : "Machamp",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "MACHAMP",
       "levelUpLearnset" : [
         {
@@ -24492,12 +24897,15 @@
           "moveID" : "SUBMISSION"
         }
       ],
+      "pokedexEntryText" : "Using its heavy muscles, it throws powerful punches that can send the victim clear over the horizon",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "SUPERPOWER",
       "startingMoves" : [
         "KARATE_CHOP",
         "LOW_KICK",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 2870
     },
     {
       "baseAttack" : 75,
@@ -24514,8 +24922,11 @@
       "cryLength" : 1,
       "cryPitch" : 85,
       "crySoundEffectID" : "SFX_CRY_21",
+      "dexNumber" : 69,
       "displayName" : "Bellsprout",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 4,
       "id" : "BELLSPROUT",
       "levelUpLearnset" : [
         {
@@ -24547,12 +24958,15 @@
           "moveID" : "SLAM"
         }
       ],
+      "pokedexEntryText" : "A carnivorous POKéMON that traps and eats bugs. It uses its root feet to soak up needed moisture",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "FLOWER",
       "startingMoves" : [
         "VINE_WHIP",
         "GROWTH"
-      ]
+      ],
+      "weightTenths" : 90
     },
     {
       "baseAttack" : 90,
@@ -24569,8 +24983,11 @@
       "cryLength" : 32,
       "cryPitch" : 68,
       "crySoundEffectID" : "SFX_CRY_25",
+      "dexNumber" : 70,
       "displayName" : "Weepinbell",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "WEEPINBELL",
       "levelUpLearnset" : [
         {
@@ -24602,13 +25019,16 @@
           "moveID" : "SLAM"
         }
       ],
+      "pokedexEntryText" : "It spits out POISONPOWDER to immobilize the enemy and then finishes it with a spray of ACID",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "FLYCATCHER",
       "startingMoves" : [
         "VINE_WHIP",
         "GROWTH",
         "WRAP"
-      ]
+      ],
+      "weightTenths" : 140
     },
     {
       "baseAttack" : 105,
@@ -24625,8 +25045,11 @@
       "cryLength" : 204,
       "cryPitch" : 102,
       "crySoundEffectID" : "SFX_CRY_25",
+      "dexNumber" : 71,
       "displayName" : "Victreebel",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "VICTREEBEL",
       "levelUpLearnset" : [
         {
@@ -24642,14 +25065,17 @@
           "moveID" : "SLEEP_POWDER"
         }
       ],
+      "pokedexEntryText" : "Said to live in huge colonies deep in jungles, although no one has ever returned from there",
       "primaryType" : "GRASS",
       "secondaryType" : "POISON",
+      "speciesCategory" : "FLYCATCHER",
       "startingMoves" : [
         "SLEEP_POWDER",
         "STUN_SPORE",
         "ACID",
         "RAZOR_LEAF"
-      ]
+      ],
+      "weightTenths" : 340
     },
     {
       "baseAttack" : 40,
@@ -24666,8 +25092,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 72,
       "displayName" : "Tentacool",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "TENTACOOL",
       "levelUpLearnset" : [
         {
@@ -24703,11 +25132,14 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Drifts in shallow seas. Anglers who hook them by accident are often punished by its stinging acid",
       "primaryType" : "WATER",
       "secondaryType" : "POISON",
+      "speciesCategory" : "JELLYFISH",
       "startingMoves" : [
         "ACID"
-      ]
+      ],
+      "weightTenths" : 1000
     },
     {
       "baseAttack" : 70,
@@ -24724,8 +25156,11 @@
       "cryLength" : 255,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 73,
       "displayName" : "Tentacruel",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "TENTACRUEL",
       "levelUpLearnset" : [
         {
@@ -24761,13 +25196,16 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "The tentacles are normally kept short. On hunts, they are extended to ensnare and immobilize prey",
       "primaryType" : "WATER",
       "secondaryType" : "POISON",
+      "speciesCategory" : "JELLYFISH",
       "startingMoves" : [
         "ACID",
         "SUPERSONIC",
         "WRAP"
-      ]
+      ],
+      "weightTenths" : 1210
     },
     {
       "baseAttack" : 80,
@@ -24784,8 +25222,11 @@
       "cryLength" : 16,
       "cryPitch" : 240,
       "crySoundEffectID" : "SFX_CRY_24",
+      "dexNumber" : 74,
       "displayName" : "Geodude",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "GEODUDE",
       "levelUpLearnset" : [
         {
@@ -24813,11 +25254,14 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Found in fields and mountains. Mistaking them for boulders, people often step or trip on them",
       "primaryType" : "ROCK",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "ROCK",
       "startingMoves" : [
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 440
     },
     {
       "baseAttack" : 95,
@@ -24834,8 +25278,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_24",
+      "dexNumber" : 75,
       "displayName" : "Graveler",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "GRAVELER",
       "levelUpLearnset" : [
         {
@@ -24863,12 +25310,15 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Rolls down slopes to move. It rolls over any obstacle without slowing or changing its direction",
       "primaryType" : "ROCK",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "ROCK",
       "startingMoves" : [
         "TACKLE",
         "DEFENSE_CURL"
-      ]
+      ],
+      "weightTenths" : 2320
     },
     {
       "baseAttack" : 110,
@@ -24885,8 +25335,11 @@
       "cryLength" : 64,
       "cryPitch" : 224,
       "crySoundEffectID" : "SFX_CRY_12",
+      "dexNumber" : 76,
       "displayName" : "Golem",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "GOLEM",
       "levelUpLearnset" : [
         {
@@ -24914,12 +25367,15 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Its boulder-like body is extremely hard. It can easily withstand dynamite blasts without damage",
       "primaryType" : "ROCK",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "MEGATON",
       "startingMoves" : [
         "TACKLE",
         "DEFENSE_CURL"
-      ]
+      ],
+      "weightTenths" : 6620
     },
     {
       "baseAttack" : 85,
@@ -24936,8 +25392,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_25",
+      "dexNumber" : 77,
       "displayName" : "Ponyta",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "PONYTA",
       "levelUpLearnset" : [
         {
@@ -24965,10 +25424,13 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Its hooves are 10 times harder than diamonds. It can trample anything completely flat in little time",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FIRE HORSE",
       "startingMoves" : [
         "EMBER"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 100,
@@ -24985,8 +25447,11 @@
       "cryLength" : 192,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_25",
+      "dexNumber" : 78,
       "displayName" : "Rapidash",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "RAPIDASH",
       "levelUpLearnset" : [
         {
@@ -25014,13 +25479,16 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Very competitive, this POKéMON will chase anything that moves fast in the hopes of racing it",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FIRE HORSE",
       "startingMoves" : [
         "EMBER",
         "TAIL_WHIP",
         "STOMP",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 2090
     },
     {
       "baseAttack" : 65,
@@ -25037,8 +25505,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_02",
+      "dexNumber" : 79,
       "displayName" : "Slowpoke",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "SLOWPOKE",
       "levelUpLearnset" : [
         {
@@ -25066,11 +25537,14 @@
           "moveID" : "PSYCHIC_M"
         }
       ],
+      "pokedexEntryText" : "Incredibly slow and dopey. It takes 5 seconds for it to feel pain when under attack",
       "primaryType" : "WATER",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "DOPEY",
       "startingMoves" : [
         "CONFUSION"
-      ]
+      ],
+      "weightTenths" : 790
     },
     {
       "baseAttack" : 75,
@@ -25087,8 +25561,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 80,
       "displayName" : "Slowbro",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "SLOWBRO",
       "levelUpLearnset" : [
         {
@@ -25120,13 +25597,16 @@
           "moveID" : "PSYCHIC_M"
         }
       ],
+      "pokedexEntryText" : "The SHELLDER that is latched onto SLOWPOKE's tail is said to feed on the host's left over scraps",
       "primaryType" : "WATER",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "HERMITCRAB",
       "startingMoves" : [
         "CONFUSION",
         "DISABLE",
         "HEADBUTT"
-      ]
+      ],
+      "weightTenths" : 1730
     },
     {
       "baseAttack" : 35,
@@ -25143,8 +25623,11 @@
       "cryLength" : 96,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 81,
       "displayName" : "Magnemite",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "MAGNEMITE",
       "levelUpLearnset" : [
         {
@@ -25172,10 +25655,13 @@
           "moveID" : "SCREECH"
         }
       ],
+      "pokedexEntryText" : "Uses anti-gravity to stay suspended. Appears without warning and uses THUNDER WAVE and similar moves",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "MAGNET",
       "startingMoves" : [
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 130
     },
     {
       "baseAttack" : 60,
@@ -25192,8 +25678,11 @@
       "cryLength" : 192,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 82,
       "displayName" : "Magneton",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "MAGNETON",
       "levelUpLearnset" : [
         {
@@ -25221,12 +25710,15 @@
           "moveID" : "SCREECH"
         }
       ],
+      "pokedexEntryText" : "Formed by several MAGNEMITEs linked together. They frequently appear when sunspots flare up",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "MAGNET",
       "startingMoves" : [
         "TACKLE",
         "SONICBOOM",
         "THUNDERSHOCK"
-      ]
+      ],
+      "weightTenths" : 1320
     },
     {
       "baseAttack" : 65,
@@ -25243,8 +25735,11 @@
       "cryLength" : 1,
       "cryPitch" : 221,
       "crySoundEffectID" : "SFX_CRY_10",
+      "dexNumber" : 83,
       "displayName" : "Farfetch'd",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "FARFETCHD",
       "levelUpLearnset" : [
         {
@@ -25268,12 +25763,15 @@
           "moveID" : "SLASH"
         }
       ],
+      "pokedexEntryText" : "The sprig of green onions it holds is its weapon. It is used much like a metal sword",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "WILD DUCK",
       "startingMoves" : [
         "PECK",
         "SAND_ATTACK"
-      ]
+      ],
+      "weightTenths" : 330
     },
     {
       "baseAttack" : 85,
@@ -25290,8 +25788,11 @@
       "cryLength" : 1,
       "cryPitch" : 187,
       "crySoundEffectID" : "SFX_CRY_0B",
+      "dexNumber" : 84,
       "displayName" : "Doduo",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "DODUO",
       "levelUpLearnset" : [
         {
@@ -25319,11 +25820,14 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "A bird that makes up for its poor flying with its fast foot speed. Leaves giant footprints",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "TWIN BIRD",
       "startingMoves" : [
         "PECK"
-      ]
+      ],
+      "weightTenths" : 860
     },
     {
       "baseAttack" : 110,
@@ -25340,8 +25844,11 @@
       "cryLength" : 32,
       "cryPitch" : 153,
       "crySoundEffectID" : "SFX_CRY_0B",
+      "dexNumber" : 85,
       "displayName" : "Dodrio",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 11,
       "id" : "DODRIO",
       "levelUpLearnset" : [
         {
@@ -25369,13 +25876,16 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Uses its three brains to execute complex plans. While two heads sleep, one head stays awake",
       "primaryType" : "NORMAL",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "TRIPLEBIRD",
       "startingMoves" : [
         "PECK",
         "GROWL",
         "FURY_ATTACK"
-      ]
+      ],
+      "weightTenths" : 1880
     },
     {
       "baseAttack" : 45,
@@ -25392,8 +25902,11 @@
       "cryLength" : 192,
       "cryPitch" : 136,
       "crySoundEffectID" : "SFX_CRY_0C",
+      "dexNumber" : 86,
       "displayName" : "Seel",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "SEEL",
       "levelUpLearnset" : [
         {
@@ -25417,10 +25930,13 @@
           "moveID" : "ICE_BEAM"
         }
       ],
+      "pokedexEntryText" : "The protruding horn on its head is very hard. It is used for bashing through thick ice",
       "primaryType" : "WATER",
+      "speciesCategory" : "SEA LION",
       "startingMoves" : [
         "HEADBUTT"
-      ]
+      ],
+      "weightTenths" : 1980
     },
     {
       "baseAttack" : 70,
@@ -25437,8 +25953,11 @@
       "cryLength" : 255,
       "cryPitch" : 35,
       "crySoundEffectID" : "SFX_CRY_0C",
+      "dexNumber" : 87,
       "displayName" : "Dewgong",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "DEWGONG",
       "levelUpLearnset" : [
         {
@@ -25462,13 +25981,16 @@
           "moveID" : "ICE_BEAM"
         }
       ],
+      "pokedexEntryText" : "Stores thermal energy in its body. Swims at a steady 8 knots even in intensely cold waters",
       "primaryType" : "WATER",
       "secondaryType" : "ICE",
+      "speciesCategory" : "SEA LION",
       "startingMoves" : [
         "HEADBUTT",
         "GROWL",
         "AURORA_BEAM"
-      ]
+      ],
+      "weightTenths" : 2650
     },
     {
       "baseAttack" : 80,
@@ -25485,8 +26007,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_05",
+      "dexNumber" : 88,
       "displayName" : "Grimer",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "GRIMER",
       "levelUpLearnset" : [
         {
@@ -25514,11 +26039,14 @@
           "moveID" : "ACID_ARMOR"
         }
       ],
+      "pokedexEntryText" : "Appears in filthy areas. Thrives by sucking up polluted sludge that is pumped out of factories",
       "primaryType" : "POISON",
+      "speciesCategory" : "SLUDGE",
       "startingMoves" : [
         "POUND",
         "DISABLE"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 105,
@@ -25535,8 +26063,11 @@
       "cryLength" : 255,
       "cryPitch" : 239,
       "crySoundEffectID" : "SFX_CRY_07",
+      "dexNumber" : 89,
       "displayName" : "Muk",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "MUK",
       "levelUpLearnset" : [
         {
@@ -25564,12 +26095,15 @@
           "moveID" : "ACID_ARMOR"
         }
       ],
+      "pokedexEntryText" : "Thickly covered with a filthy, vile sludge. It is so toxic, even its footprints contain poison",
       "primaryType" : "POISON",
+      "speciesCategory" : "SLUDGE",
       "startingMoves" : [
         "POUND",
         "DISABLE",
         "POISON_GAS"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 65,
@@ -25586,8 +26120,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_18",
+      "dexNumber" : 90,
       "displayName" : "Shellder",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "SHELLDER",
       "levelUpLearnset" : [
         {
@@ -25611,11 +26148,14 @@
           "moveID" : "ICE_BEAM"
         }
       ],
+      "pokedexEntryText" : "Its hard shell repels any kind of attack. It is vulnerable only when its shell is open",
       "primaryType" : "WATER",
+      "speciesCategory" : "BIVALVE",
       "startingMoves" : [
         "TACKLE",
         "WITHDRAW"
-      ]
+      ],
+      "weightTenths" : 90
     },
     {
       "baseAttack" : 95,
@@ -25632,8 +26172,11 @@
       "cryLength" : 224,
       "cryPitch" : 111,
       "crySoundEffectID" : "SFX_CRY_18",
+      "dexNumber" : 91,
       "displayName" : "Cloyster",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "CLOYSTER",
       "levelUpLearnset" : [
         {
@@ -25641,14 +26184,17 @@
           "moveID" : "SPIKE_CANNON"
         }
       ],
+      "pokedexEntryText" : "When attacked, it launches its horns in quick volleys. Its innards have never been seen",
       "primaryType" : "WATER",
       "secondaryType" : "ICE",
+      "speciesCategory" : "BIVALVE",
       "startingMoves" : [
         "WITHDRAW",
         "SUPERSONIC",
         "CLAMP",
         "AURORA_BEAM"
-      ]
+      ],
+      "weightTenths" : 2920
     },
     {
       "baseAttack" : 35,
@@ -25665,8 +26211,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 92,
       "displayName" : "Gastly",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "GASTLY",
       "levelUpLearnset" : [
         {
@@ -25678,13 +26227,16 @@
           "moveID" : "DREAM_EATER"
         }
       ],
+      "pokedexEntryText" : "Almost invisible, this gaseous POKéMON cloaks the target and puts it to sleep without notice",
       "primaryType" : "GHOST",
       "secondaryType" : "POISON",
+      "speciesCategory" : "GAS",
       "startingMoves" : [
         "LICK",
         "CONFUSE_RAY",
         "NIGHT_SHADE"
-      ]
+      ],
+      "weightTenths" : 2
     },
     {
       "baseAttack" : 50,
@@ -25701,8 +26253,11 @@
       "cryLength" : 64,
       "cryPitch" : 48,
       "crySoundEffectID" : "SFX_CRY_1C",
+      "dexNumber" : 93,
       "displayName" : "Haunter",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "HAUNTER",
       "levelUpLearnset" : [
         {
@@ -25714,13 +26269,16 @@
           "moveID" : "DREAM_EATER"
         }
       ],
+      "pokedexEntryText" : "Because of its ability to slip through block walls, it is said to be from an- other dimension",
       "primaryType" : "GHOST",
       "secondaryType" : "POISON",
+      "speciesCategory" : "GAS",
       "startingMoves" : [
         "LICK",
         "CONFUSE_RAY",
         "NIGHT_SHADE"
-      ]
+      ],
+      "weightTenths" : 2
     },
     {
       "baseAttack" : 65,
@@ -25737,8 +26295,11 @@
       "cryLength" : 255,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_07",
+      "dexNumber" : 94,
       "displayName" : "Gengar",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "GENGAR",
       "levelUpLearnset" : [
         {
@@ -25750,13 +26311,16 @@
           "moveID" : "DREAM_EATER"
         }
       ],
+      "pokedexEntryText" : "Under a full moon, this POKéMON likes to mimic the shadows of people and laugh at their fright",
       "primaryType" : "GHOST",
       "secondaryType" : "POISON",
+      "speciesCategory" : "SHADOW",
       "startingMoves" : [
         "LICK",
         "CONFUSE_RAY",
         "NIGHT_SHADE"
-      ]
+      ],
+      "weightTenths" : 890
     },
     {
       "baseAttack" : 45,
@@ -25773,8 +26337,11 @@
       "cryLength" : 192,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_17",
+      "dexNumber" : 95,
       "displayName" : "Onix",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 28,
+      "heightInches" : 10,
       "id" : "ONIX",
       "levelUpLearnset" : [
         {
@@ -25798,12 +26365,15 @@
           "moveID" : "HARDEN"
         }
       ],
+      "pokedexEntryText" : "As it grows, the stone portions of its body harden to become similar to a diamond, but colored black",
       "primaryType" : "ROCK",
       "secondaryType" : "GROUND",
+      "speciesCategory" : "ROCK SNAKE",
       "startingMoves" : [
         "TACKLE",
         "SCREECH"
-      ]
+      ],
+      "weightTenths" : 4630
     },
     {
       "baseAttack" : 48,
@@ -25820,8 +26390,11 @@
       "cryLength" : 32,
       "cryPitch" : 136,
       "crySoundEffectID" : "SFX_CRY_0D",
+      "dexNumber" : 96,
       "displayName" : "Drowzee",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "DROWZEE",
       "levelUpLearnset" : [
         {
@@ -25849,11 +26422,14 @@
           "moveID" : "MEDITATE"
         }
       ],
+      "pokedexEntryText" : "Puts enemies to sleep then eats their dreams. Occasionally gets sick from eating bad dreams",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "HYPNOSIS",
       "startingMoves" : [
         "POUND",
         "HYPNOSIS"
-      ]
+      ],
+      "weightTenths" : 710
     },
     {
       "baseAttack" : 73,
@@ -25870,8 +26446,11 @@
       "cryLength" : 64,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_0D",
+      "dexNumber" : 97,
       "displayName" : "Hypno",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "HYPNO",
       "levelUpLearnset" : [
         {
@@ -25899,13 +26478,16 @@
           "moveID" : "MEDITATE"
         }
       ],
+      "pokedexEntryText" : "When it locks eyes with an enemy, it will use a mix of PSI moves such as HYPNOSIS and CONFUSION",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "HYPNOSIS",
       "startingMoves" : [
         "POUND",
         "HYPNOSIS",
         "DISABLE",
         "CONFUSION"
-      ]
+      ],
+      "weightTenths" : 1670
     },
     {
       "baseAttack" : 105,
@@ -25922,8 +26504,11 @@
       "cryLength" : 224,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_20",
+      "dexNumber" : 98,
       "displayName" : "Krabby",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "KRABBY",
       "levelUpLearnset" : [
         {
@@ -25947,11 +26532,14 @@
           "moveID" : "HARDEN"
         }
       ],
+      "pokedexEntryText" : "Its pincers are not only powerful weapons, they are used for balance when walking sideways",
       "primaryType" : "WATER",
+      "speciesCategory" : "RIVER CRAB",
       "startingMoves" : [
         "BUBBLE",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 140
     },
     {
       "baseAttack" : 130,
@@ -25968,8 +26556,11 @@
       "cryLength" : 224,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_20",
+      "dexNumber" : 99,
       "displayName" : "Kingler",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "KINGLER",
       "levelUpLearnset" : [
         {
@@ -25993,12 +26584,15 @@
           "moveID" : "HARDEN"
         }
       ],
+      "pokedexEntryText" : "The large pincer has 10000 hp of crushing power. However, its huge size makes it unwieldy to use",
       "primaryType" : "WATER",
+      "speciesCategory" : "PINCER",
       "startingMoves" : [
         "BUBBLE",
         "LEER",
         "VICEGRIP"
-      ]
+      ],
+      "weightTenths" : 1320
     },
     {
       "baseAttack" : 30,
@@ -26015,8 +26609,11 @@
       "cryLength" : 128,
       "cryPitch" : 237,
       "crySoundEffectID" : "SFX_CRY_06",
+      "dexNumber" : 100,
       "displayName" : "Voltorb",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "VOLTORB",
       "levelUpLearnset" : [
         {
@@ -26040,11 +26637,14 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Usually found in power plants. Easily mistaken for a POKéBALL, they have zapped many people",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "BALL",
       "startingMoves" : [
         "TACKLE",
         "SCREECH"
-      ]
+      ],
+      "weightTenths" : 230
     },
     {
       "baseAttack" : 50,
@@ -26061,8 +26661,11 @@
       "cryLength" : 144,
       "cryPitch" : 168,
       "crySoundEffectID" : "SFX_CRY_06",
+      "dexNumber" : 101,
       "displayName" : "Electrode",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "ELECTRODE",
       "levelUpLearnset" : [
         {
@@ -26086,12 +26689,15 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "It stores electric energy under very high pressure. It often explodes with little or no provocation",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "BALL",
       "startingMoves" : [
         "TACKLE",
         "SCREECH",
         "SONICBOOM"
-      ]
+      ],
+      "weightTenths" : 1470
     },
     {
       "baseAttack" : 40,
@@ -26108,8 +26714,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0B",
+      "dexNumber" : 102,
       "displayName" : "Exeggcute",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "EXEGGCUTE",
       "levelUpLearnset" : [
         {
@@ -26137,12 +26746,15 @@
           "moveID" : "SLEEP_POWDER"
         }
       ],
+      "pokedexEntryText" : "Often mistaken for eggs. When disturbed, they quickly gather and attack in swarms",
       "primaryType" : "GRASS",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "EGG",
       "startingMoves" : [
         "BARRAGE",
         "HYPNOSIS"
-      ]
+      ],
+      "weightTenths" : 60
     },
     {
       "baseAttack" : 95,
@@ -26159,8 +26771,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0D",
+      "dexNumber" : 103,
       "displayName" : "Exeggutor",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 7,
       "id" : "EXEGGUTOR",
       "levelUpLearnset" : [
         {
@@ -26168,12 +26783,15 @@
           "moveID" : "STOMP"
         }
       ],
+      "pokedexEntryText" : "Legend has it that on rare occasions, one of its heads will drop off and continue on as an EXEGGCUTE",
       "primaryType" : "GRASS",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "COCONUT",
       "startingMoves" : [
         "BARRAGE",
         "HYPNOSIS"
-      ]
+      ],
+      "weightTenths" : 2650
     },
     {
       "baseAttack" : 50,
@@ -26190,8 +26808,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 104,
       "displayName" : "Cubone",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "CUBONE",
       "levelUpLearnset" : [
         {
@@ -26215,11 +26836,14 @@
           "moveID" : "RAGE"
         }
       ],
+      "pokedexEntryText" : "Because it never removes its skull helmet, no one has ever seen this POKéMON's real face",
       "primaryType" : "GROUND",
+      "speciesCategory" : "LONELY",
       "startingMoves" : [
         "BONE_CLUB",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 140
     },
     {
       "baseAttack" : 80,
@@ -26236,8 +26860,11 @@
       "cryLength" : 96,
       "cryPitch" : 79,
       "crySoundEffectID" : "SFX_CRY_08",
+      "dexNumber" : 105,
       "displayName" : "Marowak",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "MAROWAK",
       "levelUpLearnset" : [
         {
@@ -26261,13 +26888,16 @@
           "moveID" : "RAGE"
         }
       ],
+      "pokedexEntryText" : "The bone it holds is its key weapon. It throws the bone skillfully like a boomerang to KO targets",
       "primaryType" : "GROUND",
+      "speciesCategory" : "BONEKEEPER",
       "startingMoves" : [
         "BONE_CLUB",
         "GROWL",
         "LEER",
         "FOCUS_ENERGY"
-      ]
+      ],
+      "weightTenths" : 990
     },
     {
       "baseAttack" : 120,
@@ -26284,8 +26914,11 @@
       "cryLength" : 192,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_12",
+      "dexNumber" : 106,
       "displayName" : "Hitmonlee",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "HITMONLEE",
       "levelUpLearnset" : [
         {
@@ -26309,11 +26942,14 @@
           "moveID" : "MEGA_KICK"
         }
       ],
+      "pokedexEntryText" : "When in a hurry, its legs lengthen progressively. It runs smoothly with extra long, loping strides",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "KICKING",
       "startingMoves" : [
         "DOUBLE_KICK",
         "MEDITATE"
-      ]
+      ],
+      "weightTenths" : 1100
     },
     {
       "baseAttack" : 105,
@@ -26330,8 +26966,11 @@
       "cryLength" : 192,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_0C",
+      "dexNumber" : 107,
       "displayName" : "Hitmonchan",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "HITMONCHAN",
       "levelUpLearnset" : [
         {
@@ -26355,11 +26994,14 @@
           "moveID" : "COUNTER"
         }
       ],
+      "pokedexEntryText" : "While apparently doing nothing, it fires punches in lightning fast volleys that are impossible to see",
       "primaryType" : "FIGHTING",
+      "speciesCategory" : "PUNCHING",
       "startingMoves" : [
         "COMET_PUNCH",
         "AGILITY"
-      ]
+      ],
+      "weightTenths" : 1110
     },
     {
       "baseAttack" : 55,
@@ -26376,8 +27018,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_0C",
+      "dexNumber" : 108,
       "displayName" : "Lickitung",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "LICKITUNG",
       "levelUpLearnset" : [
         {
@@ -26401,11 +27046,14 @@
           "moveID" : "SCREECH"
         }
       ],
+      "pokedexEntryText" : "Its tongue can be extended like a chameleon's. It leaves a tingling sensation when it licks enemies",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "LICKING",
       "startingMoves" : [
         "WRAP",
         "SUPERSONIC"
-      ]
+      ],
+      "weightTenths" : 1440
     },
     {
       "baseAttack" : 65,
@@ -26422,8 +27070,11 @@
       "cryLength" : 221,
       "cryPitch" : 230,
       "crySoundEffectID" : "SFX_CRY_12",
+      "dexNumber" : 109,
       "displayName" : "Koffing",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "KOFFING",
       "levelUpLearnset" : [
         {
@@ -26447,11 +27098,14 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Because it stores several kinds of toxic gases in its body, it is prone to exploding without warning",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON GAS",
       "startingMoves" : [
         "TACKLE",
         "SMOG"
-      ]
+      ],
+      "weightTenths" : 20
     },
     {
       "baseAttack" : 90,
@@ -26468,8 +27122,11 @@
       "cryLength" : 255,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_12",
+      "dexNumber" : 110,
       "displayName" : "Weezing",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "WEEZING",
       "levelUpLearnset" : [
         {
@@ -26493,12 +27150,15 @@
           "moveID" : "EXPLOSION"
         }
       ],
+      "pokedexEntryText" : "Where two kinds of poison gases meet, 2 KOFFINGs can fuse into a WEEZING over many years",
       "primaryType" : "POISON",
+      "speciesCategory" : "POISON GAS",
       "startingMoves" : [
         "TACKLE",
         "SMOG",
         "SLUDGE"
-      ]
+      ],
+      "weightTenths" : 210
     },
     {
       "baseAttack" : 85,
@@ -26515,8 +27175,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_04",
+      "dexNumber" : 111,
       "displayName" : "Rhyhorn",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "RHYHORN",
       "levelUpLearnset" : [
         {
@@ -26544,11 +27207,14 @@
           "moveID" : "TAKE_DOWN"
         }
       ],
+      "pokedexEntryText" : "Its massive bones are 1000 times harder than human bones. It can easily knock a trailer flying",
       "primaryType" : "GROUND",
       "secondaryType" : "ROCK",
+      "speciesCategory" : "SPIKES",
       "startingMoves" : [
         "HORN_ATTACK"
-      ]
+      ],
+      "weightTenths" : 2540
     },
     {
       "baseAttack" : 130,
@@ -26565,8 +27231,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_11",
+      "dexNumber" : 112,
       "displayName" : "Rhydon",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 3,
       "id" : "RHYDON",
       "levelUpLearnset" : [
         {
@@ -26594,14 +27263,17 @@
           "moveID" : "TAKE_DOWN"
         }
       ],
+      "pokedexEntryText" : "Protected by an armor-like hide, it is capable of living in molten lava of 3,600 degrees",
       "primaryType" : "GROUND",
       "secondaryType" : "ROCK",
+      "speciesCategory" : "DRILL",
       "startingMoves" : [
         "HORN_ATTACK",
         "STOMP",
         "TAIL_WHIP",
         "FURY_ATTACK"
-      ]
+      ],
+      "weightTenths" : 2650
     },
     {
       "baseAttack" : 5,
@@ -26618,8 +27290,11 @@
       "cryLength" : 192,
       "cryPitch" : 10,
       "crySoundEffectID" : "SFX_CRY_14",
+      "dexNumber" : 113,
       "displayName" : "Chansey",
       "growthRate" : "GROWTH_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "CHANSEY",
       "levelUpLearnset" : [
         {
@@ -26647,11 +27322,14 @@
           "moveID" : "DOUBLE_EDGE"
         }
       ],
+      "pokedexEntryText" : "A rare and elusive POKéMON that is said to bring happiness to those who manage to get it",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "EGG",
       "startingMoves" : [
         "POUND",
         "DOUBLESLAP"
-      ]
+      ],
+      "weightTenths" : 760
     },
     {
       "baseAttack" : 55,
@@ -26668,8 +27346,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_12",
+      "dexNumber" : 114,
       "displayName" : "Tangela",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "TANGELA",
       "levelUpLearnset" : [
         {
@@ -26697,11 +27378,14 @@
           "moveID" : "GROWTH"
         }
       ],
+      "pokedexEntryText" : "The whole body is swathed with wide vines that are similar to sea- weed. Its vines shake as it walks",
       "primaryType" : "GRASS",
+      "speciesCategory" : "VINE",
       "startingMoves" : [
         "CONSTRICT",
         "BIND"
-      ]
+      ],
+      "weightTenths" : 770
     },
     {
       "baseAttack" : 95,
@@ -26718,8 +27402,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_03",
+      "dexNumber" : 115,
       "displayName" : "Kangaskhan",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 7,
+      "heightInches" : 3,
       "id" : "KANGASKHAN",
       "levelUpLearnset" : [
         {
@@ -26743,11 +27430,14 @@
           "moveID" : "DIZZY_PUNCH"
         }
       ],
+      "pokedexEntryText" : "The infant rarely ventures out of its mother's protective pouch until it is 3 years old",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "PARENT",
       "startingMoves" : [
         "COMET_PUNCH",
         "RAGE"
-      ]
+      ],
+      "weightTenths" : 1760
     },
     {
       "baseAttack" : 40,
@@ -26764,8 +27454,11 @@
       "cryLength" : 16,
       "cryPitch" : 153,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 116,
       "displayName" : "Horsea",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "HORSEA",
       "levelUpLearnset" : [
         {
@@ -26789,10 +27482,13 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Known to shoot down flying bugs with precision blasts of ink from the surface of the water",
       "primaryType" : "WATER",
+      "speciesCategory" : "DRAGON",
       "startingMoves" : [
         "BUBBLE"
-      ]
+      ],
+      "weightTenths" : 180
     },
     {
       "baseAttack" : 65,
@@ -26809,8 +27505,11 @@
       "cryLength" : 1,
       "cryPitch" : 60,
       "crySoundEffectID" : "SFX_CRY_19",
+      "dexNumber" : 117,
       "displayName" : "Seadra",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 11,
       "id" : "SEADRA",
       "levelUpLearnset" : [
         {
@@ -26834,11 +27533,14 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Capable of swim- ming backwards by rapidly flapping its wing-like pectoral fins and stout tail",
       "primaryType" : "WATER",
+      "speciesCategory" : "DRAGON",
       "startingMoves" : [
         "BUBBLE",
         "SMOKESCREEN"
-      ]
+      ],
+      "weightTenths" : 550
     },
     {
       "baseAttack" : 67,
@@ -26855,8 +27557,11 @@
       "cryLength" : 64,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 118,
       "displayName" : "Goldeen",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 0,
       "id" : "GOLDEEN",
       "levelUpLearnset" : [
         {
@@ -26884,11 +27589,14 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "Its tail fin billows like an elegant ballroom dress, giving it the nickname of the Water Queen",
       "primaryType" : "WATER",
+      "speciesCategory" : "GOLDFISH",
       "startingMoves" : [
         "PECK",
         "TAIL_WHIP"
-      ]
+      ],
+      "weightTenths" : 330
     },
     {
       "baseAttack" : 92,
@@ -26905,8 +27613,11 @@
       "cryLength" : 255,
       "cryPitch" : 16,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 119,
       "displayName" : "Seaking",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "SEAKING",
       "levelUpLearnset" : [
         {
@@ -26934,12 +27645,15 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "In the autumn spawning season, they can be seen swimming power- fully up rivers and creeks",
       "primaryType" : "WATER",
+      "speciesCategory" : "GOLDFISH",
       "startingMoves" : [
         "PECK",
         "TAIL_WHIP",
         "SUPERSONIC"
-      ]
+      ],
+      "weightTenths" : 860
     },
     {
       "baseAttack" : 45,
@@ -26956,8 +27670,11 @@
       "cryLength" : 32,
       "cryPitch" : 2,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 120,
       "displayName" : "Staryu",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "STARYU",
       "levelUpLearnset" : [
         {
@@ -26989,10 +27706,13 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "An enigmatic POKéMON that can effortlessly regenerate any appendage it loses in battle",
       "primaryType" : "WATER",
+      "speciesCategory" : "STARSHAPE",
       "startingMoves" : [
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 760
     },
     {
       "baseAttack" : 75,
@@ -27009,19 +27729,25 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 121,
       "displayName" : "Starmie",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "STARMIE",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Its central core glows with the seven colors of the rainbow. Some people value the core as a gem",
       "primaryType" : "WATER",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "MYSTERIOUS",
       "startingMoves" : [
         "TACKLE",
         "WATER_GUN",
         "HARDEN"
-      ]
+      ],
+      "weightTenths" : 1760
     },
     {
       "baseAttack" : 45,
@@ -27038,8 +27764,11 @@
       "cryLength" : 64,
       "cryPitch" : 8,
       "crySoundEffectID" : "SFX_CRY_20",
+      "dexNumber" : 122,
       "displayName" : "Mr. Mime",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "MR_MIME",
       "levelUpLearnset" : [
         {
@@ -27063,11 +27792,14 @@
           "moveID" : "SUBSTITUTE"
         }
       ],
+      "pokedexEntryText" : "If interrupted while it is miming, it will slap around the offender with its broad hands",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "BARRIER",
       "startingMoves" : [
         "CONFUSION",
         "BARRIER"
-      ]
+      ],
+      "weightTenths" : 1200
     },
     {
       "baseAttack" : 110,
@@ -27084,8 +27816,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 123,
       "displayName" : "Scyther",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "SCYTHER",
       "levelUpLearnset" : [
         {
@@ -27113,11 +27848,14 @@
           "moveID" : "AGILITY"
         }
       ],
+      "pokedexEntryText" : "With ninja-like agility and speed, it can create the illusion that there is more than one",
       "primaryType" : "BUG",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "MANTIS",
       "startingMoves" : [
         "QUICK_ATTACK"
-      ]
+      ],
+      "weightTenths" : 1230
     },
     {
       "baseAttack" : 50,
@@ -27134,8 +27872,11 @@
       "cryLength" : 255,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_0D",
+      "dexNumber" : 124,
       "displayName" : "Jynx",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "JYNX",
       "levelUpLearnset" : [
         {
@@ -27163,12 +27904,15 @@
           "moveID" : "BLIZZARD"
         }
       ],
+      "pokedexEntryText" : "It seductively wiggles its hips as it walks. It can cause people to dance in unison with it",
       "primaryType" : "ICE",
       "secondaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "HUMANSHAPE",
       "startingMoves" : [
         "POUND",
         "LOVELY_KISS"
-      ]
+      ],
+      "weightTenths" : 900
     },
     {
       "baseAttack" : 83,
@@ -27185,8 +27929,11 @@
       "cryLength" : 255,
       "cryPitch" : 143,
       "crySoundEffectID" : "SFX_CRY_06",
+      "dexNumber" : 125,
       "displayName" : "Electabuzz",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 7,
       "id" : "ELECTABUZZ",
       "levelUpLearnset" : [
         {
@@ -27210,11 +27957,14 @@
           "moveID" : "THUNDER"
         }
       ],
+      "pokedexEntryText" : "Normally found near power plants, they can wander away and cause major blackouts in cities",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "ELECTRIC",
       "startingMoves" : [
         "QUICK_ATTACK",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 660
     },
     {
       "baseAttack" : 95,
@@ -27231,8 +27981,11 @@
       "cryLength" : 48,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_04",
+      "dexNumber" : 126,
       "displayName" : "Magmar",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "MAGMAR",
       "levelUpLearnset" : [
         {
@@ -27260,10 +28013,13 @@
           "moveID" : "FLAMETHROWER"
         }
       ],
+      "pokedexEntryText" : "Its body always burns with an orange glow that enables it to hide perfectly among flames",
       "primaryType" : "FIRE",
+      "speciesCategory" : "SPITFIRE",
       "startingMoves" : [
         "EMBER"
-      ]
+      ],
+      "weightTenths" : 980
     },
     {
       "baseAttack" : 125,
@@ -27280,8 +28036,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_14",
+      "dexNumber" : 127,
       "displayName" : "Pinsir",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 11,
       "id" : "PINSIR",
       "levelUpLearnset" : [
         {
@@ -27309,10 +28068,13 @@
           "moveID" : "SWORDS_DANCE"
         }
       ],
+      "pokedexEntryText" : "If it fails to crush the victim in its pincers, it will swing it around and toss it hard",
       "primaryType" : "BUG",
+      "speciesCategory" : "STAGBEETLE",
       "startingMoves" : [
         "VICEGRIP"
-      ]
+      ],
+      "weightTenths" : 1210
     },
     {
       "baseAttack" : 100,
@@ -27329,8 +28091,11 @@
       "cryLength" : 64,
       "cryPitch" : 17,
       "crySoundEffectID" : "SFX_CRY_1D",
+      "dexNumber" : 128,
       "displayName" : "Tauros",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 4,
+      "heightInches" : 7,
       "id" : "TAUROS",
       "levelUpLearnset" : [
         {
@@ -27354,10 +28119,13 @@
           "moveID" : "TAKE_DOWN"
         }
       ],
+      "pokedexEntryText" : "When it targets an enemy, it charges furiously while whipping its body with its long tails",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "WILD BULL",
       "startingMoves" : [
         "TACKLE"
-      ]
+      ],
+      "weightTenths" : 1950
     },
     {
       "baseAttack" : 10,
@@ -27374,8 +28142,11 @@
       "cryLength" : 0,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_17",
+      "dexNumber" : 129,
       "displayName" : "Magikarp",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "MAGIKARP",
       "levelUpLearnset" : [
         {
@@ -27383,10 +28154,13 @@
           "moveID" : "TACKLE"
         }
       ],
+      "pokedexEntryText" : "In the distant past, it was somewhat stronger than the horribly weak descendants that exist today",
       "primaryType" : "WATER",
+      "speciesCategory" : "FISH",
       "startingMoves" : [
         "SPLASH"
-      ]
+      ],
+      "weightTenths" : 220
     },
     {
       "baseAttack" : 125,
@@ -27403,8 +28177,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_17",
+      "dexNumber" : 130,
       "displayName" : "Gyarados",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 21,
+      "heightInches" : 4,
       "id" : "GYARADOS",
       "levelUpLearnset" : [
         {
@@ -27428,14 +28205,17 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "Rarely seen in the wild. Huge and vicious, it is capable of destroying entire cities in a rage",
       "primaryType" : "WATER",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "ATROCIOUS",
       "startingMoves" : [
         "BITE",
         "DRAGON_RAGE",
         "LEER",
         "HYDRO_PUMP"
-      ]
+      ],
+      "weightTenths" : 5180
     },
     {
       "baseAttack" : 85,
@@ -27452,8 +28232,11 @@
       "cryLength" : 128,
       "cryPitch" : 0,
       "crySoundEffectID" : "SFX_CRY_1B",
+      "dexNumber" : 131,
       "displayName" : "Lapras",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 8,
+      "heightInches" : 2,
       "id" : "LAPRAS",
       "levelUpLearnset" : [
         {
@@ -27481,12 +28264,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "A POKéMON that has been over- hunted almost to extinction. It can ferry people across the water",
       "primaryType" : "WATER",
       "secondaryType" : "ICE",
+      "speciesCategory" : "TRANSPORT",
       "startingMoves" : [
         "WATER_GUN",
         "GROWL"
-      ]
+      ],
+      "weightTenths" : 4850
     },
     {
       "baseAttack" : 48,
@@ -27503,16 +28289,22 @@
       "cryLength" : 255,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_0E",
+      "dexNumber" : 132,
       "displayName" : "Ditto",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "DITTO",
       "levelUpLearnset" : [
 
       ],
+      "pokedexEntryText" : "Capable of copying an enemy's genetic code to instantly transform itself into a duplicate of the enemy",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "TRANSFORM",
       "startingMoves" : [
         "TRANSFORM"
-      ]
+      ],
+      "weightTenths" : 90
     },
     {
       "baseAttack" : 55,
@@ -27529,8 +28321,11 @@
       "cryLength" : 96,
       "cryPitch" : 136,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 133,
       "displayName" : "Eevee",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 0,
       "id" : "EEVEE",
       "levelUpLearnset" : [
         {
@@ -27550,11 +28345,14 @@
           "moveID" : "TAKE_DOWN"
         }
       ],
+      "pokedexEntryText" : "Its genetic code is irregular. It may mutate if it is exposed to radiation from element STONEs",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "EVOLUTION",
       "startingMoves" : [
         "TACKLE",
         "SAND_ATTACK"
-      ]
+      ],
+      "weightTenths" : 140
     },
     {
       "baseAttack" : 65,
@@ -27571,8 +28369,11 @@
       "cryLength" : 255,
       "cryPitch" : 170,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 134,
       "displayName" : "Vaporeon",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "VAPOREON",
       "levelUpLearnset" : [
         {
@@ -27608,13 +28409,16 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Lives close to water. Its long tail is ridged with a fin which is often mistaken for a mermaid's",
       "primaryType" : "WATER",
+      "speciesCategory" : "BUBBLE JET",
       "startingMoves" : [
         "TACKLE",
         "SAND_ATTACK",
         "QUICK_ATTACK",
         "WATER_GUN"
-      ]
+      ],
+      "weightTenths" : 640
     },
     {
       "baseAttack" : 65,
@@ -27631,8 +28435,11 @@
       "cryLength" : 128,
       "cryPitch" : 61,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 135,
       "displayName" : "Jolteon",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "JOLTEON",
       "levelUpLearnset" : [
         {
@@ -27668,13 +28475,16 @@
           "moveID" : "THUNDER"
         }
       ],
+      "pokedexEntryText" : "It accumulates negative ions in the atmosphere to blast out 10000- volt lightning bolts",
       "primaryType" : "ELECTRIC",
+      "speciesCategory" : "LIGHTNING",
       "startingMoves" : [
         "TACKLE",
         "SAND_ATTACK",
         "QUICK_ATTACK",
         "THUNDERSHOCK"
-      ]
+      ],
+      "weightTenths" : 540
     },
     {
       "baseAttack" : 130,
@@ -27691,8 +28501,11 @@
       "cryLength" : 32,
       "cryPitch" : 16,
       "crySoundEffectID" : "SFX_CRY_1A",
+      "dexNumber" : 136,
       "displayName" : "Flareon",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 11,
       "id" : "FLAREON",
       "levelUpLearnset" : [
         {
@@ -27728,13 +28541,16 @@
           "moveID" : "FLAMETHROWER"
         }
       ],
+      "pokedexEntryText" : "When storing thermal energy in its body, its temperature could soar to over 1600 degrees",
       "primaryType" : "FIRE",
+      "speciesCategory" : "FLAME",
       "startingMoves" : [
         "TACKLE",
         "SAND_ATTACK",
         "QUICK_ATTACK",
         "EMBER"
-      ]
+      ],
+      "weightTenths" : 550
     },
     {
       "baseAttack" : 60,
@@ -27751,8 +28567,11 @@
       "cryLength" : 255,
       "cryPitch" : 170,
       "crySoundEffectID" : "SFX_CRY_25",
+      "dexNumber" : 137,
       "displayName" : "Porygon",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 2,
+      "heightInches" : 7,
       "id" : "PORYGON",
       "levelUpLearnset" : [
         {
@@ -27772,12 +28591,15 @@
           "moveID" : "TRI_ATTACK"
         }
       ],
+      "pokedexEntryText" : "A POKéMON that consists entirely of programming code. Capable of moving freely in cyberspace",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "VIRTUAL",
       "startingMoves" : [
         "TACKLE",
         "SHARPEN",
         "CONVERSION"
-      ]
+      ],
+      "weightTenths" : 800
     },
     {
       "baseAttack" : 40,
@@ -27794,8 +28616,11 @@
       "cryLength" : 1,
       "cryPitch" : 240,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 138,
       "displayName" : "Omanyte",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "OMANYTE",
       "levelUpLearnset" : [
         {
@@ -27815,12 +28640,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Although long extinct, in rare cases, it can be genetically resurrected from fossils",
       "primaryType" : "ROCK",
       "secondaryType" : "WATER",
+      "speciesCategory" : "SPIRAL",
       "startingMoves" : [
         "WATER_GUN",
         "WITHDRAW"
-      ]
+      ],
+      "weightTenths" : 170
     },
     {
       "baseAttack" : 60,
@@ -27837,8 +28665,11 @@
       "cryLength" : 64,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_1F",
+      "dexNumber" : 139,
       "displayName" : "Omastar",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 3,
+      "heightInches" : 3,
       "id" : "OMASTAR",
       "levelUpLearnset" : [
         {
@@ -27858,13 +28689,16 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "A prehistoric POKéMON that died out when its heavy shell made it impossible to catch prey",
       "primaryType" : "ROCK",
       "secondaryType" : "WATER",
+      "speciesCategory" : "SPIRAL",
       "startingMoves" : [
         "WATER_GUN",
         "WITHDRAW",
         "HORN_ATTACK"
-      ]
+      ],
+      "weightTenths" : 770
     },
     {
       "baseAttack" : 80,
@@ -27881,8 +28715,11 @@
       "cryLength" : 64,
       "cryPitch" : 187,
       "crySoundEffectID" : "SFX_CRY_16",
+      "dexNumber" : 140,
       "displayName" : "Kabuto",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 1,
+      "heightInches" : 8,
       "id" : "KABUTO",
       "levelUpLearnset" : [
         {
@@ -27902,12 +28739,15 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "A POKéMON that was resurrected from a fossil found in what was once the ocean floor eons ago",
       "primaryType" : "ROCK",
       "secondaryType" : "WATER",
+      "speciesCategory" : "SHELLFISH",
       "startingMoves" : [
         "SCRATCH",
         "HARDEN"
-      ]
+      ],
+      "weightTenths" : 250
     },
     {
       "baseAttack" : 115,
@@ -27924,8 +28764,11 @@
       "cryLength" : 1,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_18",
+      "dexNumber" : 141,
       "displayName" : "Kabutops",
       "growthRate" : "GROWTH_MEDIUM_FAST",
+      "heightFeet" : 4,
+      "heightInches" : 3,
       "id" : "KABUTOPS",
       "levelUpLearnset" : [
         {
@@ -27945,13 +28788,16 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
+      "pokedexEntryText" : "Its sleek shape is perfect for swim- ming. It slashes prey with its claws and drains the body fluids",
       "primaryType" : "ROCK",
       "secondaryType" : "WATER",
+      "speciesCategory" : "SHELLFISH",
       "startingMoves" : [
         "SCRATCH",
         "HARDEN",
         "ABSORB"
-      ]
+      ],
+      "weightTenths" : 890
     },
     {
       "baseAttack" : 105,
@@ -27968,8 +28814,11 @@
       "cryLength" : 240,
       "cryPitch" : 32,
       "crySoundEffectID" : "SFX_CRY_23",
+      "dexNumber" : 142,
       "displayName" : "Aerodactyl",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 11,
       "id" : "AERODACTYL",
       "levelUpLearnset" : [
         {
@@ -27989,12 +28838,15 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "A ferocious, pre- historic POKéMON that goes for the enemy's throat with its serrated saw-like fangs",
       "primaryType" : "ROCK",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "FOSSIL",
       "startingMoves" : [
         "WING_ATTACK",
         "AGILITY"
-      ]
+      ],
+      "weightTenths" : 1300
     },
     {
       "baseAttack" : 110,
@@ -28011,8 +28863,11 @@
       "cryLength" : 1,
       "cryPitch" : 85,
       "crySoundEffectID" : "SFX_CRY_05",
+      "dexNumber" : 143,
       "displayName" : "Snorlax",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 11,
       "id" : "SNORLAX",
       "levelUpLearnset" : [
         {
@@ -28032,12 +28887,15 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "Very lazy. Just eats and sleeps. As its rotund bulk builds, it becomes steadily more slothful",
       "primaryType" : "NORMAL",
+      "speciesCategory" : "SLEEPING",
       "startingMoves" : [
         "HEADBUTT",
         "AMNESIA",
         "REST"
-      ]
+      ],
+      "weightTenths" : 10140
     },
     {
       "baseAttack" : 85,
@@ -28054,8 +28912,11 @@
       "cryLength" : 64,
       "cryPitch" : 128,
       "crySoundEffectID" : "SFX_CRY_09",
+      "dexNumber" : 144,
       "displayName" : "Articuno",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 7,
       "id" : "ARTICUNO",
       "levelUpLearnset" : [
         {
@@ -28071,12 +28932,15 @@
           "moveID" : "MIST"
         }
       ],
+      "pokedexEntryText" : "A legendary bird POKéMON that is said to appear to doomed people who are lost in icy mountains",
       "primaryType" : "ICE",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "FREEZE",
       "startingMoves" : [
         "PECK",
         "ICE_BEAM"
-      ]
+      ],
+      "weightTenths" : 1220
     },
     {
       "baseAttack" : 90,
@@ -28093,8 +28957,11 @@
       "cryLength" : 128,
       "cryPitch" : 255,
       "crySoundEffectID" : "SFX_CRY_18",
+      "dexNumber" : 145,
       "displayName" : "Zapdos",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 3,
       "id" : "ZAPDOS",
       "levelUpLearnset" : [
         {
@@ -28110,12 +28977,15 @@
           "moveID" : "LIGHT_SCREEN"
         }
       ],
+      "pokedexEntryText" : "A legendary bird POKéMON that is said to appear from clouds while dropping enormous lightning bolts",
       "primaryType" : "ELECTRIC",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "ELECTRIC",
       "startingMoves" : [
         "THUNDERSHOCK",
         "DRILL_PECK"
-      ]
+      ],
+      "weightTenths" : 1160
     },
     {
       "baseAttack" : 100,
@@ -28132,8 +29002,11 @@
       "cryLength" : 64,
       "cryPitch" : 248,
       "crySoundEffectID" : "SFX_CRY_09",
+      "dexNumber" : 146,
       "displayName" : "Moltres",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 7,
       "id" : "MOLTRES",
       "levelUpLearnset" : [
         {
@@ -28149,12 +29022,15 @@
           "moveID" : "SKY_ATTACK"
         }
       ],
+      "pokedexEntryText" : "Known as the legendary bird of fire. Every flap of its wings creates a dazzling flash of flames",
       "primaryType" : "FIRE",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "FLAME",
       "startingMoves" : [
         "PECK",
         "FIRE_SPIN"
-      ]
+      ],
+      "weightTenths" : 1320
     },
     {
       "baseAttack" : 64,
@@ -28171,8 +29047,11 @@
       "cryLength" : 64,
       "cryPitch" : 96,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 147,
       "displayName" : "Dratini",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 5,
+      "heightInches" : 11,
       "id" : "DRATINI",
       "levelUpLearnset" : [
         {
@@ -28196,11 +29075,14 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "Long considered a mythical POKéMON until recently when a small colony was found living underwater",
       "primaryType" : "DRAGON",
+      "speciesCategory" : "DRAGON",
       "startingMoves" : [
         "WRAP",
         "LEER"
-      ]
+      ],
+      "weightTenths" : 70
     },
     {
       "baseAttack" : 84,
@@ -28217,8 +29099,11 @@
       "cryLength" : 128,
       "cryPitch" : 64,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 148,
       "displayName" : "Dragonair",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 13,
+      "heightInches" : 1,
       "id" : "DRAGONAIR",
       "levelUpLearnset" : [
         {
@@ -28242,12 +29127,15 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "A mystical POKéMON that exudes a gentle aura. Has the ability to change climate conditions",
       "primaryType" : "DRAGON",
+      "speciesCategory" : "DRAGON",
       "startingMoves" : [
         "WRAP",
         "LEER",
         "THUNDER_WAVE"
-      ]
+      ],
+      "weightTenths" : 360
     },
     {
       "baseAttack" : 134,
@@ -28264,8 +29152,11 @@
       "cryLength" : 192,
       "cryPitch" : 60,
       "crySoundEffectID" : "SFX_CRY_0F",
+      "dexNumber" : 149,
       "displayName" : "Dragonite",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 7,
+      "heightInches" : 3,
       "id" : "DRAGONITE",
       "levelUpLearnset" : [
         {
@@ -28289,14 +29180,17 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
+      "pokedexEntryText" : "An extremely rarely seen marine POKéMON. Its intelligence is said to match that of humans",
       "primaryType" : "DRAGON",
       "secondaryType" : "FLYING",
+      "speciesCategory" : "DRAGON",
       "startingMoves" : [
         "WRAP",
         "LEER",
         "THUNDER_WAVE",
         "AGILITY"
-      ]
+      ],
+      "weightTenths" : 4630
     },
     {
       "baseAttack" : 110,
@@ -28313,8 +29207,11 @@
       "cryLength" : 255,
       "cryPitch" : 153,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 150,
       "displayName" : "Mewtwo",
       "growthRate" : "GROWTH_SLOW",
+      "heightFeet" : 6,
+      "heightInches" : 7,
       "id" : "MEWTWO",
       "levelUpLearnset" : [
         {
@@ -28338,13 +29235,16 @@
           "moveID" : "AMNESIA"
         }
       ],
+      "pokedexEntryText" : "It was created by a scientist after years of horrific gene splicing and DNA engineering experiments",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "GENETIC",
       "startingMoves" : [
         "CONFUSION",
         "DISABLE",
         "SWIFT",
         "PSYCHIC_M"
-      ]
+      ],
+      "weightTenths" : 2690
     },
     {
       "baseAttack" : 100,
@@ -28361,8 +29261,11 @@
       "cryLength" : 255,
       "cryPitch" : 238,
       "crySoundEffectID" : "SFX_CRY_1E",
+      "dexNumber" : 151,
       "displayName" : "Mew",
       "growthRate" : "GROWTH_MEDIUM_SLOW",
+      "heightFeet" : 1,
+      "heightInches" : 4,
       "id" : "MEW",
       "levelUpLearnset" : [
         {
@@ -28382,10 +29285,13 @@
           "moveID" : "PSYCHIC_M"
         }
       ],
+      "pokedexEntryText" : "So rare that it is still said to be a mirage by many experts. Only a few people have seen it worldwide",
       "primaryType" : "PSYCHIC_TYPE",
+      "speciesCategory" : "NEW SPECIE",
       "startingMoves" : [
         "POUND"
-      ]
+      ],
+      "weightTenths" : 90
     }
   ],
   "tilesets" : [

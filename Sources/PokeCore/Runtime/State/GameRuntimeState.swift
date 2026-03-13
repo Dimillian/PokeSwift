@@ -432,6 +432,7 @@ struct GameplayState {
     var currentBoxIndex: Int
     var boxedPokemon: [RuntimePokemonBoxState]
     var ownedSpeciesIDs: Set<String>
+    var seenSpeciesIDs: Set<String>
     var earnedBadgeIDs: Set<String>
     var gotStarterBit: Bool
     var playerName: String

@@ -89,6 +89,16 @@ private struct FieldModeSidebarContent: View {
             }
 
             AccordionSidebarCard(
+                title: "Pokédex",
+                summary: "\(props.pokedex.ownedCount)/\(props.pokedex.totalCount)",
+                isExpanded: expansionState.expandedSection == .pokedex
+            ) {
+                onActivateSection(.pokedex)
+            } content: {
+                PokedexSidebarContent(props: props.pokedex)
+            }
+
+            AccordionSidebarCard(
                 title: "Party",
                 summary: "\(props.party.pokemon.count)/\(props.party.totalSlots)",
                 isExpanded: expansionState.expandedSection == .party

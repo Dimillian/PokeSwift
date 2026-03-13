@@ -141,6 +141,14 @@ public final class GameRuntime {
         gameplayState?.earnedBadgeIDs ?? []
     }
 
+    public var ownedSpeciesIDs: Set<String> {
+        gameplayState?.ownedSpeciesIDs ?? []
+    }
+
+    public var seenSpeciesIDs: Set<String> {
+        gameplayState?.seenSpeciesIDs ?? []
+    }
+
     var currentInventoryItems: [RuntimeInventoryItemState] {
         gameplayState?.inventory.sorted { $0.itemID < $1.itemID } ?? []
     }

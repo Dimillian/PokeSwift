@@ -53,6 +53,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let currentBoxIndex: Int
     public let boxedPokemon: [GameSavePokemonBox]
     public let ownedSpeciesIDs: [String]
+    public let seenSpeciesIDs: [String]
     public let earnedBadgeIDs: [String]
     public let playerName: String
     public let rivalName: String
@@ -78,6 +79,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         currentBoxIndex: Int = 0,
         boxedPokemon: [GameSavePokemonBox] = [],
         ownedSpeciesIDs: [String] = [],
+        seenSpeciesIDs: [String] = [],
         earnedBadgeIDs: [String],
         playerName: String,
         rivalName: String,
@@ -102,6 +104,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.currentBoxIndex = currentBoxIndex
         self.boxedPokemon = boxedPokemon
         self.ownedSpeciesIDs = ownedSpeciesIDs
+        self.seenSpeciesIDs = seenSpeciesIDs
         self.earnedBadgeIDs = earnedBadgeIDs
         self.playerName = playerName
         self.rivalName = rivalName
@@ -128,6 +131,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         case currentBoxIndex
         case boxedPokemon
         case ownedSpeciesIDs
+        case seenSpeciesIDs
         case earnedBadgeIDs
         case playerName
         case rivalName
@@ -159,6 +163,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         rivalName = try container.decode(String.self, forKey: .rivalName)
         playerParty = try container.decode([GameSavePokemon].self, forKey: .playerParty)
         ownedSpeciesIDs = try container.decodeIfPresent([String].self, forKey: .ownedSpeciesIDs) ?? playerParty.map(\.speciesID)
+        seenSpeciesIDs = try container.decodeIfPresent([String].self, forKey: .seenSpeciesIDs) ?? ownedSpeciesIDs
         chosenStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .chosenStarterSpeciesID)
         rivalStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .rivalStarterSpeciesID)
         pendingStarterSpeciesID = try container.decodeIfPresent(String.self, forKey: .pendingStarterSpeciesID)

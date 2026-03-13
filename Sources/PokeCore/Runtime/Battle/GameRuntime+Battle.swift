@@ -7,6 +7,8 @@ extension GameRuntime {
         gameplayState.gotStarterBit = true
         gameplayState.chosenStarterSpeciesID = speciesID
         gameplayState.playerParty = [makePokemon(speciesID: speciesID, level: 5, nickname: speciesID.capitalized)]
+        gameplayState.ownedSpeciesIDs.insert(speciesID)
+        gameplayState.seenSpeciesIDs.insert(speciesID)
         gameplayState.activeFlags.insert("EVENT_GOT_STARTER")
         let rivalSpeciesID = rivalStarter(for: speciesID)
         gameplayState.rivalStarterSpeciesID = rivalSpeciesID
@@ -286,6 +288,7 @@ extension GameRuntime {
         )
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.seenSpeciesIDs.insert(battle.enemyPokemon.speciesID)
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
@@ -378,6 +381,7 @@ extension GameRuntime {
             ),
         ]
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
+        gameplayState.seenSpeciesIDs.insert(battle.enemyPokemon.speciesID)
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         scene = .battle
