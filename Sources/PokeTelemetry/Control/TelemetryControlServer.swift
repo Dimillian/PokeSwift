@@ -5,6 +5,7 @@ import PokeDataModel
 public final class TelemetryControlServer: @unchecked Sendable {
     private let listener: NWListener
     private let snapshotProvider: @Sendable () async -> RuntimeTelemetrySnapshot?
+    private let mapProvider: @Sendable () async -> MapStateTelemetry?
     private let inputHandler: @Sendable (RuntimeButton) async -> Bool
     private let saveHandler: @Sendable () async -> Bool
     private let loadHandler: @Sendable () async -> Bool
@@ -15,6 +16,7 @@ public final class TelemetryControlServer: @unchecked Sendable {
     public init(
         port: UInt16,
         snapshotProvider: @escaping @Sendable () async -> RuntimeTelemetrySnapshot?,
+        mapProvider: @escaping @Sendable () async -> MapStateTelemetry?,
         inputHandler: @escaping @Sendable (RuntimeButton) async -> Bool,
         saveHandler: @escaping @Sendable () async -> Bool,
         loadHandler: @escaping @Sendable () async -> Bool,
@@ -26,6 +28,7 @@ public final class TelemetryControlServer: @unchecked Sendable {
 
         self.listener = try NWListener(using: .tcp, on: endpointPort)
         self.snapshotProvider = snapshotProvider
+        self.mapProvider = mapProvider
         self.inputHandler = inputHandler
         self.saveHandler = saveHandler
         self.loadHandler = loadHandler
@@ -90,6 +93,12 @@ public final class TelemetryControlServer: @unchecked Sendable {
             guard let snapshot = await snapshotProvider(),
                   let payload = try? encoder.encode(snapshot) else {
                 return jsonResponse(status: "404 Not Found", object: ["error": "no snapshot yet"])
+            }
+            return response(status: "200 OK", body: payload)
+        case ("GET", "/map/current"):
+            guard let mapState = await mapProvider(),
+                  let payload = try? encoder.encode(mapState) else {
+                return jsonResponse(status: "404 Not Found", object: ["error": "no map loaded"])
             }
             return response(status: "200 OK", body: payload)
         case ("POST", "/input"):
