@@ -34,7 +34,8 @@ enum GameplayScenePropsFactory {
             let pokedexSidebar = GameplaySidebarPropsBuilder.makePokedex(
                 allSpecies: manifestIndex.pokedexSpeciesList,
                 ownedSpeciesIDs: runtime.ownedSpeciesIDs,
-                seenSpeciesIDs: runtime.seenSpeciesIDs
+                seenSpeciesIDs: runtime.seenSpeciesIDs,
+                speciesEncounterCounts: runtime.encounterCountsBySpeciesID
             )
 
             return GameplaySceneProps(

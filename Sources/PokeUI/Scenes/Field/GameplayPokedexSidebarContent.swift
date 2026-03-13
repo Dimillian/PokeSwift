@@ -501,8 +501,8 @@ private struct PokedexDetailContent: View {
         VStack(alignment: .leading, spacing: 12) {
             spriteAndIdentity
             typeBadgesRow
-            if entry.speciesCategory != nil || entry.heightText != nil || entry.weightText != nil {
-                physicalDataSection
+            if entry.detailFields.isEmpty == false {
+                detailFieldsSection
             }
             baseStatsSection
             if let description = entry.descriptionText {
@@ -558,32 +558,26 @@ private struct PokedexDetailContent: View {
         }
     }
 
-    private var physicalDataSection: some View {
+    private var detailFieldsSection: some View {
         GameplaySidebarInsetSurface(
             padding: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
         ) {
-            HStack(spacing: 0) {
-                if let height = entry.heightText {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("HT")
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
-                        Text(height)
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("FIELD DATA")
+                    .font(.system(size: 9, weight: .bold, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
+
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(minimum: 0), spacing: 8),
+                        GridItem(.flexible(minimum: 0), spacing: 8),
+                    ],
+                    alignment: .leading,
+                    spacing: 8
+                ) {
+                    ForEach(entry.detailFields) { field in
+                        PokedexDetailFieldCard(field: field)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                if let weight = entry.weightText {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("WT")
-                            .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
-                        Text(weight)
-                            .font(.system(size: 13, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
@@ -666,6 +660,35 @@ private struct PokedexStatRow: View {
                 }
             }
             .frame(height: 6)
+        }
+    }
+}
+
+private struct PokedexDetailFieldCard: View {
+    let field: PokedexSidebarDetailFieldProps
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(field.label)
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
+
+            Text(field.value)
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(FieldRetroPalette.slotFill.opacity(0.45))
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
         }
     }
 }

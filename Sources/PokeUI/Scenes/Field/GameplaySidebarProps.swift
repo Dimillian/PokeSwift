@@ -296,6 +296,7 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
     public let heightText: String?
     public let weightText: String?
     public let descriptionText: String?
+    public let detailFields: [PokedexSidebarDetailFieldProps]
     public let baseHP: Int
     public let baseAttack: Int
     public let baseDefense: Int
@@ -315,6 +316,7 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
         heightText: String? = nil,
         weightText: String? = nil,
         descriptionText: String? = nil,
+        detailFields: [PokedexSidebarDetailFieldProps] = [],
         baseHP: Int = 0,
         baseAttack: Int = 0,
         baseDefense: Int = 0,
@@ -333,11 +335,24 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
         self.heightText = heightText
         self.weightText = weightText
         self.descriptionText = descriptionText
+        self.detailFields = detailFields
         self.baseHP = baseHP
         self.baseAttack = baseAttack
         self.baseDefense = baseDefense
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
+    }
+}
+
+public struct PokedexSidebarDetailFieldProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let label: String
+    public let value: String
+
+    public init(id: String, label: String, value: String) {
+        self.id = id
+        self.label = label
+        self.value = value
     }
 }
 
@@ -796,7 +811,8 @@ public enum GameplaySidebarPropsBuilder {
     public static func makePokedex(
         allSpecies: [PokedexSpeciesData],
         ownedSpeciesIDs: Set<String>,
-        seenSpeciesIDs: Set<String>
+        seenSpeciesIDs: Set<String>,
+        speciesEncounterCounts: [String: Int] = [:]
     ) -> PokedexSidebarProps {
         var ownedCount = 0
         var seenCount = 0
@@ -818,6 +834,13 @@ public enum GameplaySidebarPropsBuilder {
                 heightText: isOwned ? species.heightText : nil,
                 weightText: isOwned ? species.weightText : nil,
                 descriptionText: isOwned ? species.descriptionText : nil,
+                detailFields: isOwned
+                    ? pokedexDetailFields(
+                        heightText: species.heightText,
+                        weightText: species.weightText,
+                        encounterCount: speciesEncounterCounts[species.id] ?? 0
+                    )
+                    : [],
                 baseHP: isOwned ? species.baseHP : 0,
                 baseAttack: isOwned ? species.baseAttack : 0,
                 baseDefense: isOwned ? species.baseDefense : 0,
@@ -832,6 +855,22 @@ public enum GameplaySidebarPropsBuilder {
             seenCount: seenCount,
             totalCount: entries.count
         )
+    }
+
+    private static func pokedexDetailFields(
+        heightText: String?,
+        weightText: String?,
+        encounterCount: Int
+    ) -> [PokedexSidebarDetailFieldProps] {
+        var fields: [PokedexSidebarDetailFieldProps] = []
+        if let heightText {
+            fields.append(.init(id: "height", label: "HT", value: heightText))
+        }
+        if let weightText {
+            fields.append(.init(id: "weight", label: "WT", value: weightText))
+        }
+        fields.append(.init(id: "encounters", label: "ENCOUNTERS", value: "\(max(0, encounterCount))"))
+        return fields
     }
 
     public struct PokedexSpeciesData: Sendable {

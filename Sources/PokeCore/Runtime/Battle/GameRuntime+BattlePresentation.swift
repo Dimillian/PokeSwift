@@ -245,9 +245,14 @@ extension GameRuntime {
             battle.enemyPokemon = enemyPokemon
         }
         if let enemyParty = beat.enemyParty, let enemyActiveIndex = beat.enemyActiveIndex {
+            let previousEnemyIndex = battle.enemyActiveIndex
+            let previousSpeciesID = battle.enemyPokemon.speciesID
             battle.enemyParty = enemyParty
             battle.enemyActiveIndex = enemyActiveIndex
-            gameplayState.seenSpeciesIDs.insert(enemyParty[enemyActiveIndex].speciesID)
+            let nextSpeciesID = enemyParty[enemyActiveIndex].speciesID
+            if previousEnemyIndex != enemyActiveIndex || previousSpeciesID != nextSpeciesID {
+                recordSpeciesEncounter(nextSpeciesID, in: &gameplayState)
+            }
         }
         if let soundEffectRequest = beat.soundEffectRequest {
             _ = playSoundEffect(

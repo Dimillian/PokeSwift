@@ -292,6 +292,7 @@ extension GameRuntime {
             boxedPokemon: (0..<Self.storageBoxCount).map { RuntimePokemonBoxState(index: $0, pokemon: []) },
             ownedSpeciesIDs: [],
             seenSpeciesIDs: [],
+            speciesEncounterCounts: [:],
             earnedBadgeIDs: [],
             gotStarterBit: false,
             playerName: start.playerName,
