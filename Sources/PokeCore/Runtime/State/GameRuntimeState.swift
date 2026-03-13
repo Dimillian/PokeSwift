@@ -24,8 +24,125 @@ struct RuntimeObjectState {
 }
 
 struct RuntimeMoveState {
-    let id: String
+    var id: String
     var currentPP: Int
+}
+
+struct RuntimeMimicState {
+    var slotIndex: Int
+    var originalMove: RuntimeMoveState
+}
+
+struct RuntimeTransformState {
+    var originalSpeciesID: String
+    var originalAttack: Int
+    var originalDefense: Int
+    var originalSpeed: Int
+    var originalSpecial: Int
+    var originalAttackStage: Int
+    var originalDefenseStage: Int
+    var originalSpeedStage: Int
+    var originalSpecialStage: Int
+    var originalAccuracyStage: Int
+    var originalEvasionStage: Int
+    var originalMoves: [RuntimeMoveState]
+}
+
+struct RuntimePokemonBattleEffectsState {
+    var toxicCounter: Int
+    var confusionTurnsRemaining: Int
+    var disabledMoveID: String?
+    var disabledTurnsRemaining: Int
+    var isProtectedByMist: Bool
+    var hasLightScreen: Bool
+    var hasReflect: Bool
+    var isGettingPumped: Bool
+    var isSeeded: Bool
+    var needsRecharge: Bool
+    var isFlinched: Bool
+    var lastMoveID: String?
+    var bideTurnsRemaining: Int
+    var bideAccumulatedDamage: Int
+    var pendingBideDamage: Int?
+    var thrashTurnsRemaining: Int
+    var thrashMoveID: String?
+    var chargingMoveID: String?
+    var isInvulnerable: Bool
+    var trappingTurnsRemaining: Int
+    var trappingMoveID: String?
+    var trappingDamage: Int
+    var isUsingRage: Bool
+    var hasSubstitute: Bool
+    var substituteHP: Int
+    var transformedState: RuntimeTransformState?
+    var transformedSpeciesID: String?
+    var typeOverridePrimary: String?
+    var typeOverrideSecondary: String?
+    var mimicState: RuntimeMimicState?
+
+    init(
+        toxicCounter: Int = 0,
+        confusionTurnsRemaining: Int = 0,
+        disabledMoveID: String? = nil,
+        disabledTurnsRemaining: Int = 0,
+        isProtectedByMist: Bool = false,
+        hasLightScreen: Bool = false,
+        hasReflect: Bool = false,
+        isGettingPumped: Bool = false,
+        isSeeded: Bool = false,
+        needsRecharge: Bool = false,
+        isFlinched: Bool = false,
+        lastMoveID: String? = nil,
+        bideTurnsRemaining: Int = 0,
+        bideAccumulatedDamage: Int = 0,
+        pendingBideDamage: Int? = nil,
+        thrashTurnsRemaining: Int = 0,
+        thrashMoveID: String? = nil,
+        chargingMoveID: String? = nil,
+        isInvulnerable: Bool = false,
+        trappingTurnsRemaining: Int = 0,
+        trappingMoveID: String? = nil,
+        trappingDamage: Int = 0,
+        isUsingRage: Bool = false,
+        hasSubstitute: Bool = false,
+        substituteHP: Int = 0,
+        transformedState: RuntimeTransformState? = nil,
+        transformedSpeciesID: String? = nil,
+        typeOverridePrimary: String? = nil,
+        typeOverrideSecondary: String? = nil,
+        mimicState: RuntimeMimicState? = nil
+    ) {
+        self.toxicCounter = toxicCounter
+        self.confusionTurnsRemaining = confusionTurnsRemaining
+        self.disabledMoveID = disabledMoveID
+        self.disabledTurnsRemaining = disabledTurnsRemaining
+        self.isProtectedByMist = isProtectedByMist
+        self.hasLightScreen = hasLightScreen
+        self.hasReflect = hasReflect
+        self.isGettingPumped = isGettingPumped
+        self.isSeeded = isSeeded
+        self.needsRecharge = needsRecharge
+        self.isFlinched = isFlinched
+        self.lastMoveID = lastMoveID
+        self.bideTurnsRemaining = bideTurnsRemaining
+        self.bideAccumulatedDamage = bideAccumulatedDamage
+        self.pendingBideDamage = pendingBideDamage
+        self.thrashTurnsRemaining = thrashTurnsRemaining
+        self.thrashMoveID = thrashMoveID
+        self.chargingMoveID = chargingMoveID
+        self.isInvulnerable = isInvulnerable
+        self.trappingTurnsRemaining = trappingTurnsRemaining
+        self.trappingMoveID = trappingMoveID
+        self.trappingDamage = trappingDamage
+        self.isUsingRage = isUsingRage
+        self.hasSubstitute = hasSubstitute
+        self.substituteHP = substituteHP
+        self.transformedState = transformedState
+        self.transformedSpeciesID = transformedSpeciesID
+        self.typeOverridePrimary = typeOverridePrimary
+        self.typeOverrideSecondary = typeOverrideSecondary
+        self.mimicState = mimicState
+    }
 }
 
 struct RuntimeInventoryItemState {
@@ -34,7 +151,7 @@ struct RuntimeInventoryItemState {
 }
 
 struct RuntimePokemonState {
-    let speciesID: String
+    var speciesID: String
     var nickname: String
     let level: Int
     let experience: Int
@@ -42,10 +159,10 @@ struct RuntimePokemonState {
     let statExp: PokemonStatExp
     let maxHP: Int
     var currentHP: Int
-    let attack: Int
-    let defense: Int
-    let speed: Int
-    let special: Int
+    var attack: Int
+    var defense: Int
+    var speed: Int
+    var special: Int
     var attackStage: Int
     var defenseStage: Int
     var speedStage: Int
@@ -53,7 +170,10 @@ struct RuntimePokemonState {
     var accuracyStage: Int
     var evasionStage: Int
     var majorStatus: MajorStatusCondition
+    var statusCounter: Int
+    var isBadlyPoisoned: Bool
     var moves: [RuntimeMoveState]
+    var battleEffects: RuntimePokemonBattleEffectsState
 
     init(
         speciesID: String,
@@ -75,7 +195,10 @@ struct RuntimePokemonState {
         accuracyStage: Int = 0,
         evasionStage: Int = 0,
         majorStatus: MajorStatusCondition = .none,
-        moves: [RuntimeMoveState]
+        statusCounter: Int = 0,
+        isBadlyPoisoned: Bool = false,
+        moves: [RuntimeMoveState],
+        battleEffects: RuntimePokemonBattleEffectsState = .init()
     ) {
         self.speciesID = speciesID
         self.nickname = nickname
@@ -96,7 +219,10 @@ struct RuntimePokemonState {
         self.accuracyStage = accuracyStage
         self.evasionStage = evasionStage
         self.majorStatus = majorStatus
+        self.statusCounter = statusCounter
+        self.isBadlyPoisoned = isBadlyPoisoned
         self.moves = moves
+        self.battleEffects = battleEffects
     }
 }
 
@@ -231,7 +357,7 @@ struct RuntimeBattlePresentationBeat {
     let meterAnimation: BattleMeterAnimationTelemetry?
     let message: String?
     let phase: RuntimeBattlePhase?
-    let pendingAction: RuntimeBattlePendingAction?
+    var pendingAction: RuntimeBattlePendingAction?
     let learnMoveState: RuntimeBattleLearnMoveState?
     let rewardContinuation: RuntimeBattleRewardContinuation?
     let playerPokemon: RuntimePokemonState?
@@ -309,6 +435,7 @@ struct RuntimeBattleState {
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
     var aiLayer2Encouragement: Int
+    var payDayMoney: Int
     var phase: RuntimeBattlePhase
     var focusedMoveIndex: Int
     var focusedBagItemIndex: Int

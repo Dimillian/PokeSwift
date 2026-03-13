@@ -857,6 +857,7 @@ extension PokeCoreTests {
             enemyParty: [runtime.makePokemon(speciesID: "BULBASAUR", level: 5, nickname: "Bulbasaur")],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .turnText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,

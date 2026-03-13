@@ -59,6 +59,8 @@ extension GameRuntime {
         accuracyStage: Int,
         evasionStage: Int,
         majorStatus: MajorStatusCondition = .none,
+        statusCounter: Int = 0,
+        isBadlyPoisoned: Bool = false,
         moves: [RuntimeMoveState]?
     ) -> RuntimePokemonState {
         guard let species = content.species(id: speciesID) else {
@@ -82,6 +84,8 @@ extension GameRuntime {
                 accuracyStage: accuracyStage,
                 evasionStage: evasionStage,
                 majorStatus: majorStatus,
+                statusCounter: statusCounter,
+                isBadlyPoisoned: isBadlyPoisoned,
                 moves: moves ?? []
             )
         }
@@ -110,6 +114,8 @@ extension GameRuntime {
             accuracyStage: accuracyStage,
             evasionStage: evasionStage,
             majorStatus: majorStatus,
+            statusCounter: statusCounter,
+            isBadlyPoisoned: isBadlyPoisoned,
             moves: resolvedMoves
         )
     }

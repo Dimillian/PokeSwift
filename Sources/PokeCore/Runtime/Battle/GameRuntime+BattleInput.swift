@@ -196,6 +196,29 @@ extension GameRuntime {
             return
         }
 
+        if let forcedMoveIndex = forcedMoveIndex(for: battle.playerPokemon) {
+            battle.focusedMoveIndex = forcedMoveIndex
+            battle.phase = .resolvingTurn
+            battle.pendingAction = nil
+            battle.queuedMessages = []
+            battle.pendingPresentationBatches = []
+            battle.message = ""
+            updateBattlePresentation(
+                battle: &battle,
+                stage: .attackWindup,
+                uiVisibility: .visible,
+                activeSide: nil,
+                meterAnimation: nil,
+                transitionStyle: .none
+            )
+
+            let batches = makeTurnPresentationBatches(for: &battle)
+            guard let firstBatch = batches.first else { return }
+            battle.pendingPresentationBatches = Array(batches.dropFirst())
+            scheduleBattlePresentation(firstBatch, battleID: battle.battleID)
+            return
+        }
+
         guard let selectedAction = focusedBattleAction(for: battle, gameplayState: gameplayState) else {
             return
         }

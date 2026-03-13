@@ -264,6 +264,7 @@ extension GameRuntime {
             enemyParty: enemyParty,
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .introText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -355,6 +356,7 @@ extension GameRuntime {
             enemyParty: [enemyPokemon],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .introText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -530,13 +532,44 @@ extension GameRuntime {
     }
 
     func clearBattleStatStages(_ pokemon: RuntimePokemonState) -> RuntimePokemonState {
-        var cleared = pokemon
+        var cleared = restoreBattleSpecificPokemonMutations(pokemon)
         cleared.attackStage = 0
         cleared.defenseStage = 0
         cleared.speedStage = 0
         cleared.specialStage = 0
         cleared.accuracyStage = 0
         cleared.evasionStage = 0
+        if cleared.majorStatus != .sleep {
+            cleared.statusCounter = 0
+        }
+        cleared.isBadlyPoisoned = false
+        cleared.battleEffects = .init()
         return cleared
+    }
+
+    func restoreBattleSpecificPokemonMutations(_ pokemon: RuntimePokemonState) -> RuntimePokemonState {
+        var restored = pokemon
+
+        if let mimicState = restored.battleEffects.mimicState,
+           restored.moves.indices.contains(mimicState.slotIndex) {
+            restored.moves[mimicState.slotIndex] = mimicState.originalMove
+        }
+
+        if let transformedState = restored.battleEffects.transformedState {
+            restored.speciesID = transformedState.originalSpeciesID
+            restored.attack = transformedState.originalAttack
+            restored.defense = transformedState.originalDefense
+            restored.speed = transformedState.originalSpeed
+            restored.special = transformedState.originalSpecial
+            restored.attackStage = transformedState.originalAttackStage
+            restored.defenseStage = transformedState.originalDefenseStage
+            restored.speedStage = transformedState.originalSpeedStage
+            restored.specialStage = transformedState.originalSpecialStage
+            restored.accuracyStage = transformedState.originalAccuracyStage
+            restored.evasionStage = transformedState.originalEvasionStage
+            restored.moves = transformedState.originalMoves
+        }
+
+        return restored
     }
 }

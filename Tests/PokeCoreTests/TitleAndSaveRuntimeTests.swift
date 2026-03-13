@@ -96,6 +96,7 @@ extension PokeCoreTests {
                 accuracyStage: 0,
                 evasionStage: 0,
                 majorStatus: .sleep,
+                statusCounter: 2,
                 moves: []
             )
         ]
@@ -111,6 +112,7 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.currentBoxIndex, 1)
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
+        XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.statusCounter, 2)
         XCTAssertEqual(saveStore.envelope?.snapshot.ownedSpeciesIDs.sorted(), ["PIDGEY", "SQUIRTLE"])
         XCTAssertEqual(
             saveStore.envelope?.snapshot.blackoutCheckpoint,
@@ -137,6 +139,7 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.gameplayState?.currentBoxIndex, 1)
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
+        XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.statusCounter, 2)
         XCTAssertEqual(resumed.gameplayState?.ownedSpeciesIDs, Set(["SQUIRTLE", "PIDGEY"]))
         XCTAssertEqual(
             resumed.gameplayState?.blackoutCheckpoint,

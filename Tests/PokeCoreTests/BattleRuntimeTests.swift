@@ -996,6 +996,7 @@ extension PokeCoreTests {
             enemyParty: [runtime.makePokemon(speciesID: "CATERPIE", level: 6, nickname: "Caterpie")],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .turnText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -1130,7 +1131,8 @@ extension PokeCoreTests {
             side: .player,
             attacker: attacker,
             defender: defender,
-            moveIndex: 0
+            moveIndex: 0,
+            defenderCanActLaterInTurn: true
         )
 
         let beats = runtime.makeBeats(for: action)
@@ -1182,6 +1184,567 @@ extension PokeCoreTests {
         )
     }
 
+    func testSleepEffectPreventsTurnAndWakeConsumesTurn() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "ODDISH", displayName: "Oddish", primaryType: "GRASS", secondaryType: "POISON", baseHP: 45, baseAttack: 50, baseDefense: 55, baseSpeed: 30, baseSpecial: 75, startingMoves: ["SLEEP_POWDER"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "SLEEP_POWDER", displayName: "SLEEP POWDER", power: 0, accuracy: 75, maxPP: 15, effect: "SLEEP_EFFECT", type: "GRASS"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var oddish = runtime.makePokemon(speciesID: "ODDISH", level: 10, nickname: "Oddish")
+        var pidgey = runtime.makePokemon(speciesID: "PIDGEY", level: 10, nickname: "Pidgey")
+
+        runtime.battleRandomOverrides = [0, 3]
+        let result = runtime.applyMove(attacker: &oddish, defender: &pidgey, moveIndex: 0)
+
+        XCTAssertEqual(pidgey.majorStatus, .sleep)
+        XCTAssertEqual(pidgey.statusCounter, 3)
+        XCTAssertTrue(result.messages.contains("Pidgey fell asleep!"))
+
+        let sleepingAction = runtime.resolveBattleAction(
+            side: .enemy,
+            attacker: pidgey,
+            defender: oddish,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertFalse(sleepingAction.didExecuteMove)
+        XCTAssertEqual(sleepingAction.messages, ["Pidgey is fast asleep!"])
+
+        var wakingPidgey = pidgey
+        wakingPidgey.statusCounter = 1
+        let wakingAction = runtime.resolveBattleAction(
+            side: .enemy,
+            attacker: wakingPidgey,
+            defender: oddish,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertFalse(wakingAction.didExecuteMove)
+        XCTAssertEqual(wakingAction.updatedAttacker.majorStatus, .none)
+        XCTAssertEqual(wakingAction.updatedAttacker.statusCounter, 0)
+        XCTAssertEqual(wakingAction.messages, ["Pidgey woke up!"])
+    }
+
+    func testDisableBlocksSelectedMoveUntilCounterExpires() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "GASTLY", displayName: "Gastly", primaryType: "GHOST", secondaryType: "POISON", baseHP: 30, baseAttack: 35, baseDefense: 30, baseSpeed: 80, baseSpecial: 100, startingMoves: ["DISABLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "DISABLE", displayName: "DISABLE", power: 0, accuracy: 55, maxPP: 20, effect: "DISABLE_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var gastly = runtime.makePokemon(speciesID: "GASTLY", level: 10, nickname: "Gastly")
+        var pidgey = runtime.makePokemon(speciesID: "PIDGEY", level: 10, nickname: "Pidgey")
+
+        runtime.battleRandomOverrides = [0, 0, 2]
+        let result = runtime.applyMove(attacker: &gastly, defender: &pidgey, moveIndex: 0)
+        XCTAssertEqual(result.messages, ["Gastly used DISABLE!", "TACKLE was disabled!"])
+        XCTAssertEqual(pidgey.battleEffects.disabledMoveID, "TACKLE")
+        XCTAssertEqual(pidgey.battleEffects.disabledTurnsRemaining, 3)
+
+        let blockedAction = runtime.resolveBattleAction(
+            side: .enemy,
+            attacker: pidgey,
+            defender: gastly,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertFalse(blockedAction.didExecuteMove)
+        XCTAssertEqual(blockedAction.messages, ["TACKLE is disabled!"])
+
+        var expiringPidgey = pidgey
+        expiringPidgey.battleEffects.disabledTurnsRemaining = 1
+        let expiryAction = runtime.resolveBattleAction(
+            side: .enemy,
+            attacker: expiringPidgey,
+            defender: gastly,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertTrue(expiryAction.didExecuteMove)
+        XCTAssertEqual(expiryAction.updatedAttacker.battleEffects.disabledTurnsRemaining, 0)
+        XCTAssertNil(expiryAction.updatedAttacker.battleEffects.disabledMoveID)
+        XCTAssertEqual(
+            expiryAction.messages.prefix(2),
+            ["Pidgey's disabled move is no longer disabled!", "Pidgey used TACKLE!"]
+        )
+    }
+
+    func testFlyTeleportAndPayDayFamiliesUseBattleState() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["FLY"]),
+                        .init(id: "ABRA", displayName: "Abra", primaryType: "PSYCHIC_TYPE", baseHP: 25, baseAttack: 20, baseDefense: 15, baseSpeed: 90, baseSpecial: 105, startingMoves: ["TELEPORT"]),
+                        .init(id: "MEOWTH", displayName: "Meowth", primaryType: "NORMAL", baseHP: 40, baseAttack: 45, baseDefense: 35, baseSpeed: 90, baseSpecial: 40, startingMoves: ["PAY_DAY"]),
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "FLY", displayName: "FLY", power: 70, accuracy: 95, maxPP: 15, effect: "FLY_EFFECT", type: "FLYING"),
+                        .init(id: "TELEPORT", displayName: "TELEPORT", power: 0, accuracy: 100, maxPP: 20, effect: "SWITCH_AND_TELEPORT_EFFECT", type: "PSYCHIC_TYPE"),
+                        .init(id: "PAY_DAY", displayName: "PAY DAY", power: 40, accuracy: 100, maxPP: 20, effect: "PAY_DAY_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var pidgey = runtime.makePokemon(speciesID: "PIDGEY", level: 12, nickname: "Pidgey")
+        var rattata = runtime.makePokemon(speciesID: "RATTATA", level: 10, nickname: "Rattata")
+        let firstFlyTurn = runtime.applyMove(attacker: &pidgey, defender: &rattata, moveIndex: 0)
+        XCTAssertEqual(firstFlyTurn.dealtDamage, 0)
+        XCTAssertEqual(pidgey.battleEffects.chargingMoveID, "FLY")
+        XCTAssertTrue(pidgey.battleEffects.isInvulnerable)
+        XCTAssertTrue(firstFlyTurn.messages.contains("Flew up high!"))
+
+        let blockedAction = runtime.resolveBattleAction(
+            side: .enemy,
+            attacker: rattata,
+            defender: pidgey,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertEqual(blockedAction.messages, ["Rattata used TACKLE!", "But it missed!"])
+
+        runtime.battleRandomOverrides = [0, 255]
+        let secondFlyTurn = runtime.resolveBattleAction(
+            side: .player,
+            attacker: pidgey,
+            defender: rattata,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertTrue(secondFlyTurn.didExecuteMove)
+        XCTAssertNil(secondFlyTurn.updatedAttacker.battleEffects.chargingMoveID)
+        XCTAssertFalse(secondFlyTurn.updatedAttacker.battleEffects.isInvulnerable)
+        XCTAssertGreaterThan(secondFlyTurn.dealtDamage, 0)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var wildBattle = RuntimeBattleState(
+            battleID: "wild_test",
+            kind: .wild,
+            trainerName: "",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
+            completionFlagID: "",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            playerWinDialogueID: "",
+            playerLoseDialogueID: nil,
+            postBattleScriptID: nil,
+            canRun: true,
+            trainerClass: nil,
+            sourceTrainerObjectID: nil,
+            playerPokemon: runtime.makePokemon(speciesID: "ABRA", level: 20, nickname: "Abra"),
+            enemyParty: [runtime.makePokemon(speciesID: "RATTATA", level: 10, nickname: "Rattata")],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            payDayMoney: 0,
+            phase: .moveSelection,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 0,
+            partySelectionMode: .optionalSwitch,
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
+            presentation: .init()
+        )
+        runtime.gameplayState?.battle = wildBattle
+        var teleportAttacker = wildBattle.playerPokemon
+        var teleportDefender = wildBattle.enemyPokemon
+        let teleportResult = runtime.applyMove(attacker: &teleportAttacker, defender: &teleportDefender, moveIndex: 0)
+        if case .escape? = teleportResult.pendingAction {
+            XCTAssertTrue(true)
+        } else {
+            XCTFail("Expected TELEPORT to escape from a wild battle")
+        }
+        XCTAssertTrue(teleportResult.messages.contains("Ran from battle!"))
+
+        var meowth = runtime.makePokemon(speciesID: "MEOWTH", level: 11, nickname: "Meowth")
+        var payDayTarget = runtime.makePokemon(speciesID: "RATTATA", level: 10, nickname: "Rattata")
+        runtime.battleRandomOverrides = [0, 255]
+        let payDayResult = runtime.applyMove(attacker: &meowth, defender: &payDayTarget, moveIndex: 0)
+        XCTAssertEqual(payDayResult.payDayMoneyGain, 22)
+
+        runtime.gameplayState?.playerName = "RED"
+        wildBattle.payDayMoney = payDayResult.payDayMoneyGain
+        let awarded = runtime.awardPayDayIfNeeded(battle: &wildBattle, pendingAction: .escape)
+        XCTAssertTrue(awarded)
+        XCTAssertEqual(runtime.gameplayState?.money, runtime.makeInitialGameplayState().money + 22)
+        XCTAssertEqual(wildBattle.payDayMoney, 0)
+        if case .escape? = wildBattle.pendingAction {
+            XCTAssertTrue(true)
+        } else {
+            XCTFail("Expected Pay Day award flow to preserve the original pending action")
+        }
+    }
+
+    func testBideAndThrashUseForcedTurnState() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "SLOWBRO", displayName: "Slowbro", primaryType: "WATER", secondaryType: "PSYCHIC_TYPE", baseHP: 95, baseAttack: 75, baseDefense: 110, baseSpeed: 30, baseSpecial: 80, startingMoves: ["BIDE", "THRASH"]),
+                        .init(id: "TARGET", displayName: "Target", primaryType: "NORMAL", baseHP: 75, baseAttack: 50, baseDefense: 55, baseSpeed: 40, baseSpecial: 45, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "BIDE", displayName: "BIDE", power: 0, accuracy: 100, maxPP: 10, effect: "BIDE_EFFECT", type: "NORMAL"),
+                        .init(id: "THRASH", displayName: "THRASH", power: 90, accuracy: 100, maxPP: 20, effect: "THRASH_PETAL_DANCE_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var bider = runtime.makePokemon(speciesID: "SLOWBRO", level: 18, nickname: "Slowbro")
+        var target = runtime.makePokemon(speciesID: "TARGET", level: 18, nickname: "Target")
+        runtime.battleRandomOverrides = [0]
+        _ = runtime.applyMove(attacker: &bider, defender: &target, moveIndex: 0)
+        XCTAssertEqual(bider.battleEffects.bideTurnsRemaining, 2)
+
+        bider.battleEffects.bideTurnsRemaining = 1
+        bider.battleEffects.bideAccumulatedDamage = 12
+        let release = runtime.resolveBattleAction(
+            side: .player,
+            attacker: bider,
+            defender: target,
+            moveIndex: 0,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertTrue(release.didExecuteMove)
+        XCTAssertTrue(release.messages.contains("Slowbro unleashed energy!"))
+        XCTAssertEqual(release.dealtDamage, 24)
+        XCTAssertNil(release.updatedAttacker.battleEffects.pendingBideDamage)
+
+        var thrasher = runtime.makePokemon(speciesID: "SLOWBRO", level: 18, nickname: "Slowbro")
+        var thrashTarget = runtime.makePokemon(speciesID: "TARGET", level: 18, nickname: "Target")
+        runtime.battleRandomOverrides = [0, 255, 0]
+        _ = runtime.applyMove(attacker: &thrasher, defender: &thrashTarget, moveIndex: 1)
+        XCTAssertEqual(thrasher.battleEffects.thrashTurnsRemaining, 1)
+
+        runtime.battleRandomOverrides = [0, 0, 255]
+        let continuedThrash = runtime.resolveBattleAction(
+            side: .player,
+            attacker: thrasher,
+            defender: thrashTarget,
+            moveIndex: 1,
+            defenderCanActLaterInTurn: false
+        )
+        XCTAssertTrue(continuedThrash.didExecuteMove)
+        XCTAssertTrue(continuedThrash.messages.contains("Slowbro is thrashing about!"))
+        XCTAssertEqual(continuedThrash.updatedAttacker.battleEffects.thrashTurnsRemaining, 0)
+        XCTAssertGreaterThan(continuedThrash.updatedAttacker.battleEffects.confusionTurnsRemaining, 0)
+    }
+
+    func testSubstituteRageTransformAndConversionMutateBattleState() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "DITTO", displayName: "Ditto", primaryType: "NORMAL", baseHP: 48, baseAttack: 48, baseDefense: 48, baseSpeed: 48, baseSpecial: 48, startingMoves: ["TRANSFORM", "SUBSTITUTE", "CONVERSION"]),
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["RAGE", "TACKLE"]),
+                        .init(id: "GASTLY", displayName: "Gastly", primaryType: "GHOST", secondaryType: "POISON", baseHP: 30, baseAttack: 35, baseDefense: 30, baseSpeed: 80, baseSpecial: 100, startingMoves: ["LICK"]),
+                    ],
+                    moves: [
+                        .init(id: "TRANSFORM", displayName: "TRANSFORM", power: 0, accuracy: 100, maxPP: 10, effect: "TRANSFORM_EFFECT", type: "NORMAL"),
+                        .init(id: "SUBSTITUTE", displayName: "SUBSTITUTE", power: 0, accuracy: 100, maxPP: 10, effect: "SUBSTITUTE_EFFECT", type: "NORMAL"),
+                        .init(id: "CONVERSION", displayName: "CONVERSION", power: 0, accuracy: 100, maxPP: 30, effect: "CONVERSION_EFFECT", type: "NORMAL"),
+                        .init(id: "RAGE", displayName: "RAGE", power: 20, accuracy: 100, maxPP: 20, effect: "RAGE_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "LICK", displayName: "LICK", power: 20, accuracy: 100, maxPP: 30, effect: "NO_ADDITIONAL_EFFECT", type: "GHOST"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var ditto = runtime.makePokemon(speciesID: "DITTO", level: 20, nickname: "Ditto")
+        var rattata = runtime.makePokemon(speciesID: "RATTATA", level: 20, nickname: "Rattata")
+        _ = runtime.applyMove(attacker: &ditto, defender: &rattata, moveIndex: 1)
+        XCTAssertTrue(ditto.battleEffects.hasSubstitute)
+        let hpAfterSubstitute = ditto.currentHP
+
+        runtime.battleRandomOverrides = [0, 255]
+        _ = runtime.applyMove(attacker: &rattata, defender: &ditto, moveIndex: 1)
+        XCTAssertEqual(ditto.currentHP, hpAfterSubstitute)
+        XCTAssertLessThan(ditto.battleEffects.substituteHP, max(1, ditto.maxHP / 4))
+
+        runtime.battleRandomOverrides = [0, 255]
+        _ = runtime.applyMove(attacker: &rattata, defender: &ditto, moveIndex: 0)
+        XCTAssertTrue(rattata.battleEffects.isUsingRage)
+
+        var gastly = runtime.makePokemon(speciesID: "GASTLY", level: 20, nickname: "Gastly")
+        runtime.battleRandomOverrides = [0, 255]
+        let rageTrigger = runtime.applyMove(attacker: &gastly, defender: &rattata, moveIndex: 0)
+        XCTAssertTrue(rageTrigger.messages.contains("Rattata's Rage is building!"))
+        XCTAssertEqual(rattata.attackStage, 1)
+
+        runtime.battleRandomOverrides = [0]
+        _ = runtime.applyMove(attacker: &ditto, defender: &gastly, moveIndex: 2)
+        XCTAssertEqual(ditto.battleEffects.typeOverridePrimary, "GHOST")
+        XCTAssertEqual(ditto.battleEffects.typeOverrideSecondary, "POISON")
+
+        runtime.battleRandomOverrides = [0, 255]
+        _ = runtime.applyMove(attacker: &ditto, defender: &rattata, moveIndex: 0)
+        XCTAssertEqual(ditto.speciesID, "RATTATA")
+        XCTAssertEqual(ditto.moves.map(\.id), rattata.moves.map(\.id))
+        XCTAssertNotNil(ditto.battleEffects.transformedState)
+    }
+
+    func testMimicMirrorMoveAndMetronomeCopyMoves() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "BIRD", displayName: "Bird", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["MIRROR_MOVE", "MIMIC", "METRONOME"]),
+                        .init(id: "TARGET", displayName: "Target", primaryType: "NORMAL", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE", "GROWL"]),
+                    ],
+                    moves: [
+                        .init(id: "MIRROR_MOVE", displayName: "MIRROR MOVE", power: 0, accuracy: 100, maxPP: 20, effect: "MIRROR_MOVE_EFFECT", type: "FLYING"),
+                        .init(id: "MIMIC", displayName: "MIMIC", power: 0, accuracy: 100, maxPP: 10, effect: "MIMIC_EFFECT", type: "NORMAL"),
+                        .init(id: "METRONOME", displayName: "METRONOME", power: 0, accuracy: 100, maxPP: 10, effect: "METRONOME_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var bird = runtime.makePokemon(speciesID: "BIRD", level: 15, nickname: "Bird")
+        var target = runtime.makePokemon(speciesID: "TARGET", level: 15, nickname: "Target")
+
+        runtime.battleRandomOverrides = [1]
+        _ = runtime.applyMove(attacker: &bird, defender: &target, moveIndex: 1)
+        XCTAssertNotEqual(bird.moves[1].id, "MIMIC")
+        XCTAssertTrue(["TACKLE", "GROWL"].contains(bird.moves[1].id))
+        XCTAssertNotNil(bird.battleEffects.mimicState)
+
+        target.battleEffects.lastMoveID = "TACKLE"
+        runtime.battleRandomOverrides = [0, 255]
+        let mirrorMove = runtime.applyMove(attacker: &bird, defender: &target, moveIndex: 0)
+        XCTAssertEqual(mirrorMove.messages.first, "Bird used TACKLE!")
+        XCTAssertGreaterThan(mirrorMove.dealtDamage, 0)
+
+        runtime.battleRandomOverrides = [0, 0, 255]
+        let metronome = runtime.applyMove(attacker: &bird, defender: &target, moveIndex: 2)
+        XCTAssertNotEqual(metronome.messages.first, "Bird used METRONOME!")
+        XCTAssertNotEqual(bird.battleEffects.lastMoveID, "METRONOME")
+        XCTAssertNotEqual(bird.battleEffects.lastMoveID, "STRUGGLE")
+    }
+
+    func testFixedDamageDrainAndRecoilEffectsUseGBSemantics() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "ODDISH", displayName: "Oddish", primaryType: "GRASS", secondaryType: "POISON", baseHP: 45, baseAttack: 50, baseDefense: 55, baseSpeed: 30, baseSpecial: 75, startingMoves: ["MEGA_DRAIN"]),
+                        .init(id: "VOLTORB", displayName: "Voltorb", primaryType: "ELECTRIC", baseHP: 40, baseAttack: 30, baseDefense: 50, baseSpeed: 100, baseSpecial: 55, startingMoves: ["SONICBOOM"]),
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TAKE_DOWN"]),
+                        .init(id: "SANDSHREW", displayName: "Sandshrew", primaryType: "GROUND", baseHP: 50, baseAttack: 75, baseDefense: 85, baseSpeed: 40, baseSpecial: 30, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "MEGA_DRAIN", displayName: "MEGA DRAIN", power: 40, accuracy: 100, maxPP: 10, effect: "DRAIN_HP_EFFECT", type: "GRASS"),
+                        .init(id: "SONICBOOM", displayName: "SONICBOOM", power: 1, accuracy: 90, maxPP: 20, effect: "SPECIAL_DAMAGE_EFFECT", type: "NORMAL"),
+                        .init(id: "TAKE_DOWN", displayName: "TAKE DOWN", power: 90, accuracy: 85, maxPP: 20, effect: "RECOIL_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var voltorb = runtime.makePokemon(speciesID: "VOLTORB", level: 10, nickname: "Voltorb")
+        var sandshrew = runtime.makePokemon(speciesID: "SANDSHREW", level: 10, nickname: "Sandshrew")
+        runtime.battleRandomOverrides = [0]
+        let sonicBoom = runtime.applyMove(attacker: &voltorb, defender: &sandshrew, moveIndex: 0)
+        XCTAssertEqual(sonicBoom.dealtDamage, 20)
+
+        var oddish = runtime.makePokemon(speciesID: "ODDISH", level: 10, nickname: "Oddish")
+        oddish.currentHP = max(1, oddish.currentHP - 10)
+        var drainTarget = runtime.makePokemon(speciesID: "SANDSHREW", level: 10, nickname: "Sandshrew")
+        runtime.battleRandomOverrides = [0, 255]
+        let drainResult = runtime.applyMove(attacker: &oddish, defender: &drainTarget, moveIndex: 0)
+        XCTAssertGreaterThan(oddish.currentHP, oddish.maxHP - 10)
+        XCTAssertTrue(drainResult.messages.contains(where: { $0.contains("Sucked health from") }))
+
+        var rattata = runtime.makePokemon(speciesID: "RATTATA", level: 10, nickname: "Rattata")
+        let recoilHPBefore = rattata.currentHP
+        var recoilTarget = runtime.makePokemon(speciesID: "SANDSHREW", level: 10, nickname: "Sandshrew")
+        runtime.battleRandomOverrides = [0, 255]
+        let recoilResult = runtime.applyMove(attacker: &rattata, defender: &recoilTarget, moveIndex: 0)
+        XCTAssertLessThan(rattata.currentHP, recoilHPBefore)
+        XCTAssertTrue(recoilResult.messages.contains("Rattata is hit with recoil!"))
+    }
+
+    func testMultiHitMovesUseGBHitCountsAndProjectedDamage() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "MULTI", displayName: "Multi", primaryType: "NORMAL", baseHP: 60, baseAttack: 75, baseDefense: 60, baseSpeed: 70, baseSpecial: 40, startingMoves: ["DOUBLE_KICK", "FURY_ATTACK"]),
+                        .init(id: "WALL", displayName: "Wall", primaryType: "NORMAL", baseHP: 90, baseAttack: 50, baseDefense: 55, baseSpeed: 30, baseSpecial: 40, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "DOUBLE_KICK", displayName: "DOUBLE KICK", power: 30, accuracy: 100, maxPP: 30, effect: "ATTACK_TWICE_EFFECT", type: "FIGHTING"),
+                        .init(id: "FURY_ATTACK", displayName: "FURY ATTACK", power: 15, accuracy: 100, maxPP: 20, effect: "TWO_TO_FIVE_ATTACKS_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "MULTI", level: 18, nickname: "Multi")
+        let defender = runtime.makePokemon(speciesID: "WALL", level: 18, nickname: "Wall")
+
+        let doubleKick = try! XCTUnwrap(runtime.content.move(id: "DOUBLE_KICK"))
+        let doubleKickPerHit = runtime.resolvedMoveDamage(
+            move: doubleKick,
+            attacker: attacker,
+            defender: defender,
+            adjustedAttack: runtime.adjustedOffenseStat(for: attacker, moveType: doubleKick.type, criticalHit: false),
+            adjustedDefense: max(1, runtime.adjustedDefenseStat(for: defender, moveType: doubleKick.type, moveEffect: doubleKick.effect, criticalHit: false)),
+            typeMultiplier: runtime.totalTypeMultiplier(for: doubleKick.type, defender: defender),
+            criticalHit: false
+        )
+        XCTAssertEqual(
+            runtime.projectedDamage(move: doubleKick, attacker: attacker, defender: defender),
+            doubleKickPerHit * 2
+        )
+
+        var doubleKickAttacker = attacker
+        var doubleKickDefender = defender
+        runtime.battleRandomOverrides = [0, 255]
+        let doubleKickResult = runtime.applyMove(attacker: &doubleKickAttacker, defender: &doubleKickDefender, moveIndex: 0)
+        XCTAssertEqual(doubleKickResult.dealtDamage, doubleKickPerHit * 2)
+        XCTAssertTrue(doubleKickResult.messages.contains("Hit 2 times!"))
+
+        let furyAttack = try! XCTUnwrap(runtime.content.move(id: "FURY_ATTACK"))
+        let furyAttackPerHit = runtime.resolvedMoveDamage(
+            move: furyAttack,
+            attacker: attacker,
+            defender: defender,
+            adjustedAttack: runtime.adjustedOffenseStat(for: attacker, moveType: furyAttack.type, criticalHit: false),
+            adjustedDefense: max(1, runtime.adjustedDefenseStat(for: defender, moveType: furyAttack.type, moveEffect: furyAttack.effect, criticalHit: false)),
+            typeMultiplier: runtime.totalTypeMultiplier(for: furyAttack.type, defender: defender),
+            criticalHit: false
+        )
+        XCTAssertEqual(
+            runtime.projectedDamage(move: furyAttack, attacker: attacker, defender: defender),
+            furyAttackPerHit * 3
+        )
+
+        var furyAttackAttacker = attacker
+        var furyAttackDefender = defender
+        runtime.battleRandomOverrides = [0, 2, 3, 255]
+        let furyAttackResult = runtime.applyMove(attacker: &furyAttackAttacker, defender: &furyAttackDefender, moveIndex: 1)
+        XCTAssertEqual(furyAttackResult.dealtDamage, furyAttackPerHit * 5)
+        XCTAssertTrue(furyAttackResult.messages.contains("Hit 5 times!"))
+    }
+
+    func testTwineedlePoisonsAfterMultiHitResolution() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "STINGER", displayName: "Stinger", primaryType: "BUG", baseHP: 65, baseAttack: 70, baseDefense: 60, baseSpeed: 75, baseSpecial: 45, startingMoves: ["TWINEEDLE"]),
+                        .init(id: "TARGET", displayName: "Target", primaryType: "NORMAL", baseHP: 75, baseAttack: 50, baseDefense: 55, baseSpeed: 40, baseSpecial: 45, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TWINEEDLE", displayName: "TWINEEDLE", power: 25, accuracy: 100, maxPP: 20, effect: "TWINEEDLE_EFFECT", type: "BUG"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var attacker = runtime.makePokemon(speciesID: "STINGER", level: 20, nickname: "Stinger")
+        var defender = runtime.makePokemon(speciesID: "TARGET", level: 20, nickname: "Target")
+
+        runtime.battleRandomOverrides = [0, 255, 0]
+        let result = runtime.applyMove(attacker: &attacker, defender: &defender, moveIndex: 0)
+
+        XCTAssertEqual(defender.majorStatus, .poison)
+        XCTAssertTrue(result.messages.contains("Hit 2 times!"))
+        XCTAssertTrue(result.messages.contains("Target was poisoned!"))
+        XCTAssertTrue(runtime.battleRandomOverrides.isEmpty)
+    }
+
+    func testReflectAndResidualEffectsUseBattleState() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "ABRA", displayName: "Abra", primaryType: "PSYCHIC_TYPE", baseHP: 25, baseAttack: 20, baseDefense: 15, baseSpeed: 90, baseSpecial: 105, startingMoves: ["REFLECT"]),
+                        .init(id: "SANDSHREW", displayName: "Sandshrew", primaryType: "GROUND", baseHP: 50, baseAttack: 75, baseDefense: 85, baseSpeed: 40, baseSpecial: 30, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "REFLECT", displayName: "REFLECT", power: 0, accuracy: 100, maxPP: 20, effect: "REFLECT_EFFECT", type: "PSYCHIC_TYPE"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let tackle = try! XCTUnwrap(runtime.content.move(id: "TACKLE"))
+        let attacker = runtime.makePokemon(speciesID: "SANDSHREW", level: 12, nickname: "Sandshrew")
+        let plainDefender = runtime.makePokemon(speciesID: "ABRA", level: 12, nickname: "Abra")
+        var reflectDefender = plainDefender
+        reflectDefender.battleEffects.hasReflect = true
+
+        XCTAssertLessThan(
+            runtime.projectedDamage(move: tackle, attacker: attacker, defender: reflectDefender),
+            runtime.projectedDamage(move: tackle, attacker: attacker, defender: plainDefender)
+        )
+
+        var poisonedSeeded = runtime.makePokemon(speciesID: "ABRA", level: 12, nickname: "Abra")
+        poisonedSeeded.currentHP = 24
+        poisonedSeeded.majorStatus = .poison
+        poisonedSeeded.isBadlyPoisoned = true
+        poisonedSeeded.battleEffects.isSeeded = true
+        var drainingTarget = runtime.makePokemon(speciesID: "SANDSHREW", level: 12, nickname: "Sandshrew")
+        drainingTarget.currentHP = max(1, drainingTarget.currentHP - 12)
+        let hpBefore = poisonedSeeded.currentHP
+        let targetHPBefore = drainingTarget.currentHP
+
+        let messages = runtime.applyResidualBattleEffects(to: &poisonedSeeded, opponent: &drainingTarget)
+
+        XCTAssertEqual(messages, ["Abra is hurt by poison!", "Abra is drained by Leech Seed!"])
+        XCTAssertLessThan(poisonedSeeded.currentHP, hpBefore)
+        XCTAssertGreaterThan(drainingTarget.currentHP, targetHPBefore)
+    }
+
     func testSpeedStageChangesTurnOrderForPresentationBatches() {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -1220,6 +1783,7 @@ extension PokeCoreTests {
             enemyParty: [enemyPokemon],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .moveSelection,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -1284,6 +1848,7 @@ extension PokeCoreTests {
             enemyParty: [enemy],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 1,
+            payDayMoney: 0,
             phase: .moveSelection,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -1346,6 +1911,7 @@ extension PokeCoreTests {
             enemyParty: [enemy],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 0,
+            payDayMoney: 0,
             phase: .moveSelection,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,
@@ -1410,6 +1976,7 @@ extension PokeCoreTests {
             ],
             enemyActiveIndex: 0,
             aiLayer2Encouragement: 1,
+            payDayMoney: 0,
             phase: .turnText,
             focusedMoveIndex: 0,
             focusedBagItemIndex: 0,

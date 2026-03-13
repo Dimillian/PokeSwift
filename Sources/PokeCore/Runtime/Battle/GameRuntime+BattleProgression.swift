@@ -140,6 +140,9 @@ extension GameRuntime {
                 recalculatedPokemon.maxHP,
                 max(0, pokemon.currentHP + gainedMaxHP)
             )
+            leveledPokemon.statusCounter = pokemon.statusCounter
+            leveledPokemon.isBadlyPoisoned = pokemon.isBadlyPoisoned
+            leveledPokemon.battleEffects = pokemon.battleEffects
             pokemon = leveledPokemon
         } else {
             pokemon = RuntimePokemonState(
@@ -162,7 +165,10 @@ extension GameRuntime {
                 accuracyStage: pokemon.accuracyStage,
                 evasionStage: pokemon.evasionStage,
                 majorStatus: pokemon.majorStatus,
-                moves: pokemon.moves
+                statusCounter: pokemon.statusCounter,
+                isBadlyPoisoned: pokemon.isBadlyPoisoned,
+                moves: pokemon.moves,
+                battleEffects: pokemon.battleEffects
             )
         }
 

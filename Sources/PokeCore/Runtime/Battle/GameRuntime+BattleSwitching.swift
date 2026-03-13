@@ -110,7 +110,9 @@ extension GameRuntime {
         battle.enemyPokemon = enemyPokemon
         battle.playerPokemon = playerPokemon
 
-        if playerPokemon.currentHP == 0 {
+        if let pendingAction = enemyMove.pendingAction {
+            presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: pendingAction)
+        } else if playerPokemon.currentHP == 0 {
             let hasReplacement = gameplayState.map { firstSwitchablePartyIndex(gameplayState: $0) != nil } ?? false
             presentBattleMessages(
                 enemyMove.messages,

@@ -37,9 +37,10 @@ extension GameRuntime {
         playerPokemon: RuntimePokemonState,
         enemyPokemon: RuntimePokemonState
     ) -> Int {
-        side == .player
-            ? battle.focusedMoveIndex
-            : selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+        if side == .player {
+            return forcedMoveIndex(for: playerPokemon) ?? battle.focusedMoveIndex
+        }
+        return selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
     }
 
     func applyResolvedBattleAction(
@@ -86,6 +87,80 @@ extension GameRuntime {
         }
 
         return false
+    }
+
+    func appendResidualResolutionIfNeeded(
+        actingSide: BattlePresentationSide,
+        battle: RuntimeBattleState,
+        simulatedPlayer: inout RuntimePokemonState,
+        simulatedEnemy: inout RuntimePokemonState,
+        batches: inout [[RuntimeBattlePresentationBeat]]
+    ) -> Bool {
+        var actingPokemon = actingSide == .player ? simulatedPlayer : simulatedEnemy
+        var opposingPokemon = actingSide == .player ? simulatedEnemy : simulatedPlayer
+        let messages = applyResidualBattleEffects(to: &actingPokemon, opponent: &opposingPokemon)
+
+        if actingSide == .player {
+            simulatedPlayer = actingPokemon
+            simulatedEnemy = opposingPokemon
+        } else {
+            simulatedEnemy = actingPokemon
+            simulatedPlayer = opposingPokemon
+        }
+
+        guard messages.isEmpty == false else {
+            return false
+        }
+
+        batches.append(
+            makeResidualMessageBatch(
+                actingSide: actingSide,
+                messages: messages,
+                playerPokemon: simulatedPlayer,
+                enemyPokemon: simulatedEnemy
+            )
+        )
+
+        if simulatedPlayer.currentHP == 0 {
+            batches.append(playerDefeatResolutionBatch(faintedPlayer: simulatedPlayer))
+            return true
+        }
+
+        if simulatedEnemy.currentHP == 0 {
+            let resolution = makeEnemyDefeatResolution(
+                battle: battle,
+                defeatedEnemy: simulatedEnemy,
+                playerPokemon: simulatedPlayer
+            )
+            simulatedPlayer = resolution.updatedPlayer
+            if resolution.beats.isEmpty == false {
+                batches.append(resolution.beats)
+            }
+            return true
+        }
+
+        return false
+    }
+
+    func makeResidualMessageBatch(
+        actingSide: BattlePresentationSide,
+        messages: [String],
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState
+    ) -> [RuntimeBattlePresentationBeat] {
+        messages.enumerated().map { index, message in
+            .init(
+                delay: battlePresentationDelay(base: index == 0 ? 0.22 : 0.18),
+                stage: .resultText,
+                uiVisibility: .visible,
+                activeSide: actingSide,
+                requiresConfirmAfterDisplay: true,
+                message: message,
+                phase: .turnText,
+                playerPokemon: index == 0 ? playerPokemon : nil,
+                enemyPokemon: index == 0 ? enemyPokemon : nil
+            )
+        }
     }
 
     func playerDefeatResolutionBatch(
@@ -369,9 +444,15 @@ extension GameRuntime {
                 side: side,
                 attacker: side == .player ? simulatedPlayer : simulatedEnemy,
                 defender: side == .player ? simulatedEnemy : simulatedPlayer,
-                moveIndex: moveIndex
+                moveIndex: moveIndex,
+                defenderCanActLaterInTurn: side != actionSides.last
             )
-            batches.append(makeBeats(for: action))
+            var actionBeats = makeBeats(for: action)
+            if let pendingAction = action.pendingAction,
+               actionBeats.isEmpty == false {
+                actionBeats[actionBeats.count - 1].pendingAction = pendingAction
+            }
+            batches.append(actionBeats)
             applyResolvedBattleAction(
                 action,
                 side: side,
@@ -379,14 +460,32 @@ extension GameRuntime {
                 simulatedEnemy: &simulatedEnemy
             )
 
+            if side == .player, action.payDayMoneyGain > 0 {
+                battle.payDayMoney += action.payDayMoneyGain
+            }
+
             if side == .enemy {
                 battle.aiLayer2Encouragement += 1
+            }
+
+            if action.pendingAction != nil {
+                return batches
             }
 
             if appendPostActionResolutionIfNeeded(
                 battle: battle,
                 simulatedPlayer: &simulatedPlayer,
                 simulatedEnemy: simulatedEnemy,
+                batches: &batches
+            ) {
+                return batches
+            }
+
+            if appendResidualResolutionIfNeeded(
+                actingSide: side,
+                battle: battle,
+                simulatedPlayer: &simulatedPlayer,
+                simulatedEnemy: &simulatedEnemy,
                 batches: &batches
             ) {
                 return batches
@@ -408,6 +507,23 @@ extension GameRuntime {
         let enemyAttacker = action.side == .enemy ? action.updatedAttacker : nil
         let defenderMutationPlayer = action.side == .enemy ? action.updatedDefender : nil
         let defenderMutationEnemy = action.side == .player ? action.updatedDefender : nil
+
+        if action.didExecuteMove == false {
+            return action.messages.enumerated().map { index, message in
+                .init(
+                    delay: battlePresentationDelay(base: index == 0 ? 0 : 0.18),
+                    stage: .resultText,
+                    uiVisibility: .visible,
+                    activeSide: action.side,
+                    requiresConfirmAfterDisplay: true,
+                    message: message,
+                    phase: .turnText,
+                    playerPokemon: index == 0 ? (action.side == .player ? action.updatedAttacker : action.updatedDefender) : nil,
+                    enemyPokemon: index == 0 ? (action.side == .enemy ? action.updatedAttacker : action.updatedDefender) : nil
+                )
+            }
+        }
+
         let moveAudioRequest: SoundEffectPlaybackRequest?
         if let move = content.move(id: action.moveID) {
             moveAudioRequest = moveSoundEffectRequest(
@@ -618,6 +734,9 @@ extension GameRuntime {
                 battle.presentation.uiVisibility = .visible
             }
         case let .finish(won):
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .finish(won: won)) {
+                break
+            }
             if won == false, shouldBlackoutOnLoss(for: battle) {
                 beginBlackoutSequence(battle: &battle)
             } else {
@@ -627,10 +746,19 @@ extension GameRuntime {
         case let .performBlackout(sourceTrainerObjectID):
             performBlackout(sourceTrainerObjectID: sourceTrainerObjectID)
         case .escape:
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .escape) {
+                break
+            }
             finishWildBattleEscape()
         case .captured:
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .captured) {
+                break
+            }
             finishWildBattleCapture(battle: battle)
         case .capturedNicknamePrompt:
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .capturedNicknamePrompt) {
+                break
+            }
             beginNicknameConfirmationAfterCapture(battle: battle)
         case let .enterTrainerAboutToUseDecision(nextIndex):
             enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
@@ -650,6 +778,27 @@ extension GameRuntime {
         case .continueLevelUpResolution:
             continueLevelUpResolution(battle: &battle)
         }
+    }
+
+    func awardPayDayIfNeeded(
+        battle: inout RuntimeBattleState,
+        pendingAction: RuntimeBattlePendingAction
+    ) -> Bool {
+        guard battle.payDayMoney > 0,
+              var gameplayState else {
+            return false
+        }
+
+        let amount = battle.payDayMoney
+        battle.payDayMoney = 0
+        gameplayState.money += amount
+        self.gameplayState = gameplayState
+        presentBattleMessages(
+            ["\(gameplayState.playerName) picked up ¥\(amount)!"],
+            battle: &battle,
+            pendingAction: pendingAction
+        )
+        return true
     }
 
     func attemptBattleEscape(battle: inout RuntimeBattleState) {
