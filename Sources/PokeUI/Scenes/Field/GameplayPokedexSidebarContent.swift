@@ -59,31 +59,51 @@ struct PokedexSidebarContent: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text("OWNED")
-                            .font(.system(size: 11, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
-                        Text("\(props.ownedCount)")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.74))
-                    }
-                    HStack(spacing: 6) {
-                        Text("SEEN")
-                            .font(.system(size: 11, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
-                        Text("\(props.seenCount)")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
-                    }
+                HStack(spacing: 10) {
+                    pokedexHeaderStat(
+                        iconName: "checkmark.circle.fill",
+                        label: "OWNED",
+                        value: props.ownedCount,
+                        tint: FieldRetroPalette.ink.opacity(0.74),
+                        labelOpacity: 0.58
+                    )
+
+                    Capsule(style: .continuous)
+                        .fill(FieldRetroPalette.outline.opacity(0.14))
+                        .frame(width: 3, height: 18)
+
+                    pokedexHeaderStat(
+                        iconName: "eye.fill",
+                        label: "SEEN",
+                        value: props.seenCount,
+                        tint: FieldRetroPalette.ink.opacity(0.6),
+                        labelOpacity: 0.44
+                    )
                 }
             }
             Spacer(minLength: 4)
-            if selectedEntryID == nil {
-                Text("\(props.ownedCount)/\(props.totalCount)")
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.74))
-            }
+        }
+    }
+
+    private func pokedexHeaderStat(
+        iconName: String,
+        label: String,
+        value: Int,
+        tint: Color,
+        labelOpacity: Double
+    ) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: iconName)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(tint)
+
+            Text(label)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(labelOpacity))
+
+            Text("\(value)")
+                .font(.system(size: 12, weight: .bold, design: .monospaced))
+                .foregroundStyle(tint)
         }
     }
 
