@@ -87,11 +87,15 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         drainBattleUntilComplete(runtime)
 
-        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.scene, .naming)
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 0)
         XCTAssertEqual(runtime.gameplayState?.playerParty.count, 2)
         XCTAssertEqual(runtime.gameplayState?.playerParty.last?.speciesID, "PIDGEY")
         XCTAssertTrue(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? false)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.scene, .field)
     }
 
     func testWildBattleEncounterCountIncrementsOncePerEncounter() throws {
