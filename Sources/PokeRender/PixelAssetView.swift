@@ -22,8 +22,8 @@ public struct PixelAssetView: View {
                     .interpolation(.none)
                     .antialiased(false)
                     .aspectRatio(contentMode: .fit)
-            } else if let fallbackImage {
-                Image(nsImage: fallbackImage)
+            } else if let syncImage = syncProcessedImage {
+                Image(decorative: syncImage, scale: 1)
                     .resizable()
                     .interpolation(.none)
                     .antialiased(false)
@@ -44,9 +44,6 @@ public struct PixelAssetView: View {
         }
         .accessibilityLabel(label)
         .task(id: taskID) {
-            renderedImage = nil
-            didAttemptLoad = false
-
             let image = await PixelAssetImageRepository.shared.image(
                 for: url,
                 whiteIsTransparent: whiteIsTransparent
@@ -61,7 +58,14 @@ public struct PixelAssetView: View {
         "\(url.standardizedFileURL.path)|\(whiteIsTransparent)"
     }
 
-    private var fallbackImage: NSImage? {
-        NSImage(contentsOf: url)
+    private var syncProcessedImage: CGImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return nil
+        }
+        if whiteIsTransparent {
+            return PixelAssetMasking.applyWhiteTransparencyMask(to: image)
+        }
+        return image
     }
 }

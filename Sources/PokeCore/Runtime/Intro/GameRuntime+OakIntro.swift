@@ -10,7 +10,9 @@ extension GameRuntime {
             currentPageIndex: 0,
             enteredCharacters: [],
             playerName: nil,
-            rivalName: nil
+            rivalName: nil,
+            namePresetFocusedIndex: 0,
+            isTypingCustomName: false
         )
         scene = .oakIntro
         substate = "oak_intro"
@@ -45,9 +47,50 @@ extension GameRuntime {
     }
 
     private func handleOakIntroNaming(button: RuntimeButton, state: inout OakIntroState) {
+        if state.isTypingCustomName {
+            handleOakIntroCustomNameInput(button: button, state: &state)
+        } else {
+            handleOakIntroPresetSelection(button: button, state: &state)
+        }
+    }
+
+    private func handleOakIntroPresetSelection(button: RuntimeButton, state: inout OakIntroState) {
+        let presets = state.currentPresets
+        guard presets.isEmpty == false else { return }
+
+        switch button {
+        case .up:
+            if state.namePresetFocusedIndex > 0 {
+                state.namePresetFocusedIndex -= 1
+            }
+        case .down:
+            if state.namePresetFocusedIndex < presets.count - 1 {
+                state.namePresetFocusedIndex += 1
+            }
+        case .confirm, .start:
+            if state.namePresetFocusedIndex == 0 {
+                // "NEW NAME" — switch to custom text input
+                state.isTypingCustomName = true
+                state.enteredCharacters = []
+            } else {
+                // Preset name selected — apply directly
+                let chosenName = presets[state.namePresetFocusedIndex]
+                applyOakIntroName(chosenName, state: &state)
+            }
+        case .cancel:
+            break
+        default:
+            break
+        }
+    }
+
+    private func handleOakIntroCustomNameInput(button: RuntimeButton, state: inout OakIntroState) {
         switch button {
         case .cancel:
-            if state.enteredCharacters.isEmpty == false {
+            if state.enteredCharacters.isEmpty {
+                // Go back to preset selection
+                state.isTypingCustomName = false
+            } else {
                 state.enteredCharacters.removeLast()
             }
         case .confirm, .start:
@@ -73,6 +116,8 @@ extension GameRuntime {
             state.phase = .namingPlayer
             state.enteredCharacters = []
             state.currentPageIndex = 0
+            state.namePresetFocusedIndex = 0
+            state.isTypingCustomName = false
 
         case .namingPlayer:
             break
@@ -85,6 +130,8 @@ extension GameRuntime {
             state.phase = .namingRival
             state.enteredCharacters = []
             state.currentPageIndex = 0
+            state.namePresetFocusedIndex = 0
+            state.isTypingCustomName = false
 
         case .namingRival:
             break
@@ -103,6 +150,23 @@ extension GameRuntime {
     }
 
     // MARK: - Naming finalization
+
+    private func applyOakIntroName(_ name: String, state: inout OakIntroState) {
+        switch state.phase {
+        case .namingPlayer:
+            state.playerName = name
+            state.phase = .playerNamed
+            state.currentPageIndex = 0
+            state.enteredCharacters = []
+        case .namingRival:
+            state.rivalName = name
+            state.phase = .rivalNamed
+            state.currentPageIndex = 0
+            state.enteredCharacters = []
+        default:
+            break
+        }
+    }
 
     private func finalizeOakIntroNaming(state: inout OakIntroState) {
         let enteredText = state.enteredText

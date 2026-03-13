@@ -280,8 +280,9 @@ public final class GameRuntime {
             return { [self] char in self.typeNamingCharacter(char) }
         }
         if scene == .oakIntro,
-           let phase = oakIntroState?.phase,
-           phase == .namingPlayer || phase == .namingRival {
+           let state = oakIntroState,
+           (state.phase == .namingPlayer || state.phase == .namingRival),
+           state.isTypingCustomName {
             return { [self] char in self.typeOakIntroCharacter(char) }
         }
         return nil

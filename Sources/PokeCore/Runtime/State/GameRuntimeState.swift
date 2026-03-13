@@ -489,16 +489,29 @@ public enum OakIntroPhase: String {
 }
 
 public struct OakIntroState {
+    public static let playerNamePresets = ["NEW NAME", "RED", "ASH", "JACK"]
+    public static let rivalNamePresets = ["NEW NAME", "BLUE", "GARY", "JOHN"]
+
     public internal(set) var phase: OakIntroPhase
     public internal(set) var currentPageIndex: Int
     public internal(set) var enteredCharacters: [Character]
     public internal(set) var playerName: String?
     public internal(set) var rivalName: String?
+    public internal(set) var namePresetFocusedIndex: Int
+    public internal(set) var isTypingCustomName: Bool
 
     public var enteredText: String { String(enteredCharacters) }
 
     public var dialoguePages: [[String]] {
         phase.dialoguePages(playerName: playerName, rivalName: rivalName)
+    }
+
+    public var currentPresets: [String] {
+        switch phase {
+        case .namingPlayer: return Self.playerNamePresets
+        case .namingRival: return Self.rivalNamePresets
+        default: return []
+        }
     }
 }
 

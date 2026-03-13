@@ -27,6 +27,11 @@ struct OakIntroScene: View {
         }
     }
 
+    private var isPresetSelection: Bool {
+        guard let state else { return false }
+        return (state.phase == .namingPlayer || state.phase == .namingRival) && !state.isTypingCustomName
+    }
+
     var body: some View {
         GameBoyScreen {
             ZStack {
@@ -48,6 +53,10 @@ struct OakIntroScene: View {
                         .padding(.horizontal, 32)
                         .padding(.bottom, 40)
                 }
+                .opacity(isPresetSelection ? 0 : 1)
+
+                presetSelectionLayout
+                    .opacity(isPresetSelection ? 1 : 0)
             }
         }
         .preferredColorScheme(.dark)
@@ -110,9 +119,17 @@ struct OakIntroScene: View {
         if let state {
             switch state.phase {
             case .namingPlayer:
-                introNamingPanel(prompt: "YOUR NAME?", characters: state.enteredCharacters)
+                if state.isTypingCustomName {
+                    introNamingPanel(prompt: "YOUR NAME?", characters: state.enteredCharacters)
+                } else {
+                    EmptyView()
+                }
             case .namingRival:
-                introNamingPanel(prompt: "RIVAL'S NAME?", characters: state.enteredCharacters)
+                if state.isTypingCustomName {
+                    introNamingPanel(prompt: "RIVAL'S NAME?", characters: state.enteredCharacters)
+                } else {
+                    EmptyView()
+                }
             default:
                 if state.dialoguePages.indices.contains(state.currentPageIndex) {
                     DialogueBoxView(lines: state.dialoguePages[state.currentPageIndex])
@@ -151,6 +168,115 @@ struct OakIntroScene: View {
                             ))
                             .frame(height: 2)
                     }
+            }
+        }
+    }
+
+    // MARK: - Preset name selection
+
+    private var presetSelectionLayout: some View {
+        VStack(spacing: 0) {
+            // Top panel: name options + sprite
+            presetSelectionPanel
+                .frame(maxWidth: 560)
+                .padding(.horizontal, 32)
+                .padding(.top, 40)
+
+            Spacer()
+
+            // Bottom dialogue
+            presetDialogueView
+                .frame(maxWidth: 560)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
+        }
+    }
+
+    private var presetSelectionPanel: some View {
+        GameBoyPanel {
+            VStack(alignment: .leading, spacing: 0) {
+                // "NAME" title
+                GameBoyPixelText(
+                    "NAME",
+                    scale: 2,
+                    color: PokeThemePalette.primaryText,
+                    fallbackFont: .system(size: 20, weight: .bold, design: .monospaced)
+                )
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.bottom, 16)
+
+                HStack(alignment: .top, spacing: 16) {
+                    // Left: name options
+                    presetOptionsList
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Right: character sprite
+                    presetSprite
+                        .frame(width: 120, height: 120)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var presetOptionsList: some View {
+        if let state {
+            let presets = state.currentPresets
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(presets.enumerated()), id: \.offset) { index, name in
+                    HStack(spacing: 8) {
+                        GameBoyPixelText(
+                            index == state.namePresetFocusedIndex ? "▶" : " ",
+                            scale: 2,
+                            color: PokeThemePalette.primaryText,
+                            fallbackFont: .system(size: 18, weight: .bold, design: .monospaced)
+                        )
+                        .frame(width: 20, alignment: .leading)
+
+                        GameBoyPixelText(
+                            name,
+                            scale: 2,
+                            color: PokeThemePalette.primaryText,
+                            fallbackFont: .system(size: 18, weight: .bold, design: .monospaced)
+                        )
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        index == state.namePresetFocusedIndex
+                            ? PokeThemePalette.menuFocusFill
+                            : Color.clear,
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    )
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var presetSprite: some View {
+        if let phase = state?.phase {
+            switch phase {
+            case .namingPlayer:
+                playerSprite
+            case .namingRival:
+                rivalSprite
+            default:
+                EmptyView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var presetDialogueView: some View {
+        if let phase = state?.phase {
+            switch phase {
+            case .namingPlayer:
+                DialogueBoxView(lines: ["First, what is", "your name?"])
+            case .namingRival:
+                DialogueBoxView(lines: ["…Erm, what is", "his name again?"])
+            default:
+                EmptyView()
             }
         }
     }
