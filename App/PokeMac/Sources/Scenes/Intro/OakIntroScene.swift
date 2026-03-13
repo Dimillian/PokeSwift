@@ -11,6 +11,22 @@ struct OakIntroScene: View {
         runtime.oakIntroState
     }
 
+    private var spriteGroupKey: String {
+        guard let phase = state?.phase else { return "none" }
+        switch phase {
+        case .oakAppears:
+            return "oak"
+        case .nidorinoAppears:
+            return "nidorino"
+        case .playerAppears, .namingPlayer, .playerNamed:
+            return "player"
+        case .rivalAppears, .namingRival, .rivalNamed:
+            return "rival"
+        case .finalSpeech, .fadeOut:
+            return "player_final"
+        }
+    }
+
     var body: some View {
         GameBoyScreen {
             ZStack {
@@ -21,7 +37,9 @@ struct OakIntroScene: View {
 
                     spriteView
                         .frame(height: 200)
-                        .animation(.snappy, value: state?.phase.rawValue)
+                        .id(spriteGroupKey)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.4), value: spriteGroupKey)
 
                     Spacer()
 
@@ -33,6 +51,8 @@ struct OakIntroScene: View {
             }
         }
         .preferredColorScheme(.dark)
+        .opacity(state?.phase == .fadeOut ? 0 : 1)
+        .animation(.easeOut(duration: 0.6), value: state?.phase == .fadeOut)
     }
 
     // MARK: - Sprite display
@@ -55,13 +75,10 @@ struct OakIntroScene: View {
         }
     }
 
-    @ViewBuilder
     private var oakSprite: some View {
-        if let sprite = runtime.content.overworldSprite(id: "SPRITE_OAK") {
-            let url = runtime.content.rootURL.appendingPathComponent(sprite.imagePath)
-            PixelSpriteFrameView(url: url, frame: sprite.facingFrames.down, label: "Prof. Oak")
-                .frame(width: 128, height: 128)
-        }
+        let url = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/prof.oak.png")
+        return PixelAssetView(url: url, label: "Prof. Oak", whiteIsTransparent: true)
+            .frame(width: 160, height: 160)
     }
 
     @ViewBuilder
@@ -69,23 +86,21 @@ struct OakIntroScene: View {
         if let frontPath = runtime.content.species(id: "NIDORINO")?.battleSprite?.frontImagePath {
             let url = runtime.content.rootURL.appendingPathComponent(frontPath)
             PixelAssetView(url: url, label: "Nidorino", whiteIsTransparent: true)
+                .scaleEffect(x: -1, y: 1)
                 .frame(width: 160, height: 160)
         }
     }
 
     private var playerSprite: some View {
         let url = runtime.content.rootURL.appendingPathComponent("Assets/title/player.png")
-        return PixelAssetView(url: url, label: "Player")
+        return PixelAssetView(url: url, label: "Player", whiteIsTransparent: true)
             .frame(width: 160, height: 160)
     }
 
-    @ViewBuilder
     private var rivalSprite: some View {
-        if let sprite = runtime.content.overworldSprite(id: "SPRITE_BLUE") {
-            let url = runtime.content.rootURL.appendingPathComponent(sprite.imagePath)
-            PixelSpriteFrameView(url: url, frame: sprite.facingFrames.down, label: "Rival")
-                .frame(width: 128, height: 128)
-        }
+        let url = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/rival1.png")
+        return PixelAssetView(url: url, label: "Rival", whiteIsTransparent: true)
+            .frame(width: 160, height: 160)
     }
 
     // MARK: - Dialogue / naming

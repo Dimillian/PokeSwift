@@ -212,7 +212,12 @@ public final class GameRuntime {
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             return nil
         }
-        return dialogue.pages[dialogueState.pageIndex]
+        let page = dialogue.pages[dialogueState.pageIndex]
+        let substitutedLines = page.lines.map {
+            $0.replacingOccurrences(of: "<PLAYER>", with: playerName)
+              .replacingOccurrences(of: "<RIVAL>", with: gameplayState?.rivalName ?? "BLUE")
+        }
+        return DialoguePage(lines: substitutedLines, waitsForPrompt: page.waitsForPrompt, events: page.events)
     }
 
     public var starterChoiceOptions: [SpeciesManifest] {
