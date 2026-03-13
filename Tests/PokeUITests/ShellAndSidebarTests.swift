@@ -178,6 +178,41 @@ extension PokeUITests {
     XCTAssertTrue(party.pokemon.isEmpty)
     XCTAssertEqual(inventory.emptyStateTitle, "No items yet")
   }
+  func testPokedexSidebarBuilderIncludesStructuredDetailFields() {
+    let props = GameplaySidebarPropsBuilder.makePokedex(
+      allSpecies: [
+        .init(
+          id: "PIDGEY",
+          dexNumber: 16,
+          displayName: "Pidgey",
+          primaryType: "NORMAL",
+          secondaryType: "FLYING",
+          spriteURL: nil,
+          speciesCategory: "Tiny Bird",
+          heightText: "1'00\"",
+          weightText: "4.0 LB",
+          descriptionText: "A common sight in forests and woods.",
+          baseHP: 40,
+          baseAttack: 45,
+          baseDefense: 40,
+          baseSpeed: 56,
+          baseSpecial: 35
+        )
+      ],
+      ownedSpeciesIDs: ["PIDGEY"],
+      seenSpeciesIDs: ["PIDGEY"],
+      speciesEncounterCounts: ["PIDGEY": 3]
+    )
+
+    guard let entry = props.entries.first else {
+      XCTFail("Expected a Pokedex entry")
+      return
+    }
+
+    XCTAssertEqual(entry.detailFields.map(\.id), ["height", "weight", "encounters"])
+    XCTAssertEqual(entry.detailFields.last?.label, "ENCOUNTERS")
+    XCTAssertEqual(entry.detailFields.last?.value, "3")
+  }
   func testGameplaySidebarKindMapsRuntimeScenesForGameplayLayout() {
     XCTAssertEqual(GameplaySidebarKind.forScene(.field), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.dialogue), .fieldLike)

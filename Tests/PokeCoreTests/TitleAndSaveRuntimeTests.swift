@@ -57,6 +57,8 @@ extension PokeCoreTests {
         runtime.gameplayState?.money = 4242
         runtime.gameplayState?.earnedBadgeIDs = ["BOULDER"]
         runtime.gameplayState?.ownedSpeciesIDs = ["SQUIRTLE", "PIDGEY"]
+        runtime.gameplayState?.seenSpeciesIDs = ["SQUIRTLE", "PIDGEY", "RATTATA"]
+        runtime.gameplayState?.speciesEncounterCounts = ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7, "MISSINGNO": 0]
         runtime.gameplayState?.currentBoxIndex = 1
         runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
         runtime.gameplayState?.blackoutCheckpoint = .init(
@@ -103,7 +105,7 @@ extension PokeCoreTests {
 
         XCTAssertTrue(runtime.saveCurrentGame())
         XCTAssertNotNil(saveStore.envelope)
-        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 7)
+        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 8)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.experience, 202)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.dvs, savedPokemon?.dvs)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.statExp, savedPokemon?.statExp)
@@ -112,6 +114,8 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
         XCTAssertEqual(saveStore.envelope?.snapshot.ownedSpeciesIDs.sorted(), ["PIDGEY", "SQUIRTLE"])
+        XCTAssertEqual(saveStore.envelope?.snapshot.seenSpeciesIDs.sorted(), ["PIDGEY", "RATTATA", "SQUIRTLE"])
+        XCTAssertEqual(saveStore.envelope?.snapshot.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
         XCTAssertEqual(
             saveStore.envelope?.snapshot.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -138,6 +142,8 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
         XCTAssertEqual(resumed.gameplayState?.ownedSpeciesIDs, Set(["SQUIRTLE", "PIDGEY"]))
+        XCTAssertEqual(resumed.gameplayState?.seenSpeciesIDs, Set(["SQUIRTLE", "PIDGEY", "RATTATA"]))
+        XCTAssertEqual(resumed.gameplayState?.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
         XCTAssertEqual(
             resumed.gameplayState?.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -242,12 +248,26 @@ extension PokeCoreTests {
 
         let saveStore = InMemorySaveStore()
         saveStore.envelope = envelope
-
+ 
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
 
         XCTAssertTrue(runtime.continueFromTitleMenu())
         XCTAssertEqual(runtime.gameplayState?.playTimeSeconds, 0)
         XCTAssertEqual(runtime.currentSaveMetadata?.playTimeSeconds, 0)
+    }
+
+    func testSchemaSevenSaveDefaultsSpeciesEncounterCountsToZero() throws {
+        let saveStore = InMemorySaveStore()
+        saveStore.envelope = try decodeLegacySaveEnvelope(
+            schemaVersion: 7,
+            acquisitionRNGState: 1
+        )
+ 
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts, [:])
+        XCTAssertEqual(runtime.encounterCountsBySpeciesID["SQUIRTLE"] ?? 0, 0)
     }
     func testContinueMergesDefaultObjectStatesSoForestTrainerSightStillWorks() async throws {
         let saveStore = InMemorySaveStore()

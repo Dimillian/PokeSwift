@@ -87,11 +87,46 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         drainBattleUntilComplete(runtime)
 
-        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.scene, .naming)
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 0)
         XCTAssertEqual(runtime.gameplayState?.playerParty.count, 2)
         XCTAssertEqual(runtime.gameplayState?.playerParty.last?.speciesID, "PIDGEY")
         XCTAssertTrue(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? false)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.scene, .field)
+    }
+
+    func testWildBattleEncounterCountIncrementsOncePerEncounter() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+
+        XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts["PIDGEY"], 1)
+
+        drainBattleText(runtime)
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([0, 0])
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts["PIDGEY"], 1)
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 4)
+        XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts["PIDGEY"], 2)
     }
 
     func testWildBattleCaptureSendsPokemonToCurrentBoxWhenPartyIsFull() throws {
