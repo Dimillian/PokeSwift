@@ -12,6 +12,10 @@ final class RuntimeKeyInputBridge {
         guard keyMonitor == nil else { return }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
             guard let self else { return event }
+            if self.shouldAllowTextInput(for: event) {
+                self.stopDirectionalRepeat()
+                return event
+            }
             guard let runtime = runtimeProvider() else { return event }
 
             switch event.type {
@@ -102,6 +106,14 @@ final class RuntimeKeyInputBridge {
         repeatingDirectionalTask?.cancel()
         repeatingDirectionalTask = nil
         repeatingDirectionalKeyCode = nil
+    }
+
+    private func shouldAllowTextInput(for event: NSEvent) -> Bool {
+        guard let responder = (event.window ?? NSApp.keyWindow)?.firstResponder as? NSTextView else {
+            return false
+        }
+
+        return responder.isEditable
     }
 }
 
