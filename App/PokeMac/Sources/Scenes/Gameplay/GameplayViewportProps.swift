@@ -33,6 +33,8 @@ struct GameplayFieldViewportProps {
     let shop: ShopTelemetry?
     let starterChoiceOptions: [SpeciesManifest]
     let starterChoiceFocusedIndex: Int
+    let namingProps: NamingOverlayProps?
+    let nicknameConfirmation: NicknameConfirmationViewProps?
 }
 
 struct BattleViewportProps {
@@ -50,6 +52,18 @@ struct BattleViewportProps {
     let bagItems: [InventoryItemTelemetry]
     let focusedBagItemIndex: Int
     let presentation: BattlePresentationTelemetry
+    let nicknameConfirmation: NicknameConfirmationViewProps?
+}
+
+struct NamingOverlayProps {
+    let speciesDisplayName: String
+    let enteredText: String
+    let maxLength: Int
+}
+
+struct NicknameConfirmationViewProps {
+    let speciesDisplayName: String
+    let focusedIndex: Int
 }
 
 struct PlaceholderSceneProps {

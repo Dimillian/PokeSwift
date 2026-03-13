@@ -70,6 +70,10 @@ extension GameRuntime {
     }
 
     func handleBattle(button: RuntimeButton) {
+        if nicknameConfirmation != nil {
+            handleNicknameConfirmation(button: button)
+            return
+        }
         guard var gameplayState, var battle = gameplayState.battle else { return }
 
         switch button {

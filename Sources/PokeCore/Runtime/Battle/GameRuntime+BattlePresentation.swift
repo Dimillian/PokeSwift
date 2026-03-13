@@ -630,6 +630,8 @@ extension GameRuntime {
             finishWildBattleEscape()
         case .captured:
             finishWildBattleCapture(battle: battle)
+        case .capturedNicknamePrompt:
+            beginNicknameConfirmationAfterCapture(battle: battle)
         case let .enterTrainerAboutToUseDecision(nextIndex):
             enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
         case let .completeTrainerVictory(payout):

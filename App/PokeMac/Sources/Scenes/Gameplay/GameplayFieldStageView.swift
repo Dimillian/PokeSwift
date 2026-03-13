@@ -19,12 +19,21 @@ struct FieldStageView: View {
     let fieldDisplayStyle: FieldDisplayStyle
 
     var body: some View {
-        FieldMapStage(screenDisplayStyle: fieldDisplayStyle) {
-            mapContent
-        } footer: {
-            footerContent
-        } overlayContent: {
-            overlayContent
+        ZStack {
+            FieldMapStage(screenDisplayStyle: fieldDisplayStyle) {
+                mapContent
+            } footer: {
+                footerContent
+            } overlayContent: {
+                overlayContent
+            }
+
+            if let namingProps = props.namingProps {
+                Color.black
+                    .ignoresSafeArea()
+                NamingOverlayPanel(props: namingProps)
+                    .frame(width: 420)
+            }
         }
     }
 
@@ -59,7 +68,9 @@ struct FieldStageView: View {
 
     @ViewBuilder
     private var footerContent: some View {
-        if let dialogueLines = props.dialogueLines {
+        if let confirmation = props.nicknameConfirmation {
+            NicknameConfirmationFooter(confirmation: confirmation)
+        } else if let dialogueLines = props.dialogueLines {
             DialogueBoxView(lines: dialogueLines)
                 .frame(maxWidth: GameplayFieldStageLayout.dialogueMaxWidth)
         }

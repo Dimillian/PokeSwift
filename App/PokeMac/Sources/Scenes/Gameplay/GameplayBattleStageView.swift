@@ -33,14 +33,19 @@ struct BattleStageView: View {
         }
     }
 
+    @ViewBuilder
     private var footerContent: some View {
-        DialogueBoxView(
-            title: "Battle",
-            lines: GameplayBattlePrompts.textLines(props.textLines, phase: props.phase)
-        )
-        .frame(maxWidth: GameplayBattleStageLayout.dialogueMaxWidth)
-        .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)
-        .animation(.easeOut(duration: 0.18), value: props.presentation.revision)
+        if let confirmation = props.nicknameConfirmation {
+            NicknameConfirmationFooter(confirmation: confirmation)
+        } else {
+            DialogueBoxView(
+                title: "Battle",
+                lines: GameplayBattlePrompts.textLines(props.textLines, phase: props.phase)
+            )
+            .frame(maxWidth: GameplayBattleStageLayout.dialogueMaxWidth)
+            .opacity(props.presentation.uiVisibility == .visible ? 1 : 0)
+            .animation(.easeOut(duration: 0.18), value: props.presentation.revision)
+        }
     }
 
     @ViewBuilder

@@ -33,7 +33,7 @@ struct RuntimeSceneRouter: View {
             )
             .preferredColorScheme(.light)
             .pokeAppearanceMode(.light)
-        case .field, .dialogue, .scriptedSequence, .starterChoice, .battle:
+        case .field, .dialogue, .scriptedSequence, .starterChoice, .battle, .naming:
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
                 appearanceMode: preferences.appearanceMode,

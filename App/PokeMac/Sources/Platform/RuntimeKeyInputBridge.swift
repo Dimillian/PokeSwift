@@ -16,6 +16,20 @@ final class RuntimeKeyInputBridge {
 
             switch event.type {
             case .keyDown:
+                if runtime.scene == .naming, !event.isARepeat {
+                    if event.keyCode == 36 {
+                        runtime.handle(button: .start)
+                        return nil
+                    }
+                    if let chars = event.charactersIgnoringModifiers,
+                       chars.count == 1,
+                       let char = chars.first,
+                       char.isLetter || char == " " {
+                        runtime.typeNamingCharacter(char)
+                        return nil
+                    }
+                }
+
                 guard let button = RuntimeButton(keyEvent: event, scene: runtime.scene) else {
                     return event
                 }

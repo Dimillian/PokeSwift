@@ -35,7 +35,7 @@ struct RuntimeInventoryItemState {
 
 struct RuntimePokemonState {
     let speciesID: String
-    let nickname: String
+    var nickname: String
     let level: Int
     let experience: Int
     let dvs: PokemonDVs
@@ -126,6 +126,7 @@ enum RuntimeBattlePendingAction {
     case performBlackout(sourceTrainerObjectID: String?)
     case escape
     case captured
+    case capturedNicknamePrompt
     case enterTrainerAboutToUseDecision(nextIndex: Int)
     case completeTrainerVictory(payout: Int)
     case continueSwitchTurn
@@ -335,6 +336,7 @@ struct DialogueState {
         case healAndShow(dialogueID: String)
         case openStarterChoice(preselectedSpeciesID: String)
         case beginPostChoiceSequence
+        case beginPostChoiceNaming
         case finishTrainerBattle(
             won: Bool,
             preventsBlackoutOnLoss: Bool,
@@ -413,6 +415,30 @@ enum RuntimeFieldTransitionPhase: String {
 struct RuntimeFieldTransitionState: Equatable {
     var kind: RuntimeFieldTransitionKind
     var phase: RuntimeFieldTransitionPhase
+}
+
+enum RuntimeNamingCompletionAction {
+    case returnToFieldAfterCapture
+    case returnToFieldAfterStarter
+}
+
+public struct RuntimeNicknameConfirmationState {
+    let speciesID: String
+    public let defaultName: String
+    public internal(set) var focusedIndex: Int
+    let completionAction: RuntimeNamingCompletionAction
+}
+
+public struct RuntimeNamingState {
+    public static let maxLength = 10
+    public static let validCharacters: Set<Character> = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZ ")
+
+    let speciesID: String
+    public let defaultName: String
+    var enteredCharacters: [Character]
+    var completionAction: RuntimeNamingCompletionAction
+
+    public var enteredText: String { String(enteredCharacters) }
 }
 
 struct RuntimeFieldAlertState: Equatable {

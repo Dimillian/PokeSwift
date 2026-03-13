@@ -15,6 +15,10 @@ private struct ResolvedFieldStep {
 
 extension GameRuntime {
     func handleField(button: RuntimeButton) {
+        if nicknameConfirmation != nil {
+            handleNicknameConfirmation(button: button)
+            return
+        }
         if shopState != nil {
             handleShop(button: button)
             return
@@ -384,7 +388,7 @@ extension GameRuntime {
         scene = .field
         substate = "field"
         gameplayState?.pendingStarterSpeciesID = speciesID
-        showDialogue(id: "oaks_lab_mon_energetic", completion: .beginPostChoiceSequence)
+        showDialogue(id: "oaks_lab_mon_energetic", completion: .beginPostChoiceNaming)
     }
 
     func currentMapObjectManifest(id: String) -> MapObjectManifest? {

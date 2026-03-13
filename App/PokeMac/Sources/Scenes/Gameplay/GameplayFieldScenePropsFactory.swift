@@ -16,6 +16,8 @@ enum GameplayScenePropsFactory {
         let manifestIndex = cachedManifestIndex(for: runtime)
         let saveSidebar = makeSaveSidebar(runtime: runtime)
 
+        let nicknameConfirmation = makeNicknameConfirmationProps(runtime: runtime)
+
         switch GameplaySidebarKind.forScene(runtime.scene) {
         case .fieldLike:
             let fieldState = runtime.currentFieldSceneState()
@@ -52,7 +54,9 @@ enum GameplayScenePropsFactory {
                         fieldHealing: fieldState.fieldHealing,
                         shop: fieldState.shop,
                         starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
-                        starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex
+                        starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
+                        namingProps: makeNamingProps(runtime: runtime),
+                        nicknameConfirmation: nicknameConfirmation
                     )
                 ),
                 sidebarMode: .fieldLike(
@@ -121,7 +125,8 @@ enum GameplayScenePropsFactory {
                         enemySpriteURL: enemySpriteURL,
                         bagItems: battle.bagItems,
                         focusedBagItemIndex: battle.focusedBagItemIndex,
-                        presentation: battle.presentation
+                        presentation: battle.presentation,
+                        nicknameConfirmation: nicknameConfirmation
                     )
                 ),
                 sidebarMode: .battle(
@@ -198,6 +203,23 @@ enum GameplayScenePropsFactory {
             label: runtime.playerName,
             spriteURL: runtime.content.rootURL.appendingPathComponent(sprite.imagePath),
             spriteFrame: spriteFrame
+        )
+    }
+
+    private static func makeNamingProps(runtime: GameRuntime) -> NamingOverlayProps? {
+        guard let state = runtime.namingState else { return nil }
+        return NamingOverlayProps(
+            speciesDisplayName: state.defaultName,
+            enteredText: state.enteredText,
+            maxLength: RuntimeNamingState.maxLength
+        )
+    }
+
+    private static func makeNicknameConfirmationProps(runtime: GameRuntime) -> NicknameConfirmationViewProps? {
+        guard let confirmation = runtime.nicknameConfirmation else { return nil }
+        return NicknameConfirmationViewProps(
+            speciesDisplayName: confirmation.defaultName,
+            focusedIndex: confirmation.focusedIndex
         )
     }
 
