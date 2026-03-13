@@ -61,6 +61,7 @@ struct RuntimePokemonBattleEffectsState {
     var needsRecharge: Bool
     var isFlinched: Bool
     var lastMoveID: String?
+    var lastDamageTaken: Int
     var bideTurnsRemaining: Int
     var bideAccumulatedDamage: Int
     var pendingBideDamage: Int?
@@ -93,6 +94,7 @@ struct RuntimePokemonBattleEffectsState {
         needsRecharge: Bool = false,
         isFlinched: Bool = false,
         lastMoveID: String? = nil,
+        lastDamageTaken: Int = 0,
         bideTurnsRemaining: Int = 0,
         bideAccumulatedDamage: Int = 0,
         pendingBideDamage: Int? = nil,
@@ -124,6 +126,7 @@ struct RuntimePokemonBattleEffectsState {
         self.needsRecharge = needsRecharge
         self.isFlinched = isFlinched
         self.lastMoveID = lastMoveID
+        self.lastDamageTaken = lastDamageTaken
         self.bideTurnsRemaining = bideTurnsRemaining
         self.bideAccumulatedDamage = bideAccumulatedDamage
         self.pendingBideDamage = pendingBideDamage

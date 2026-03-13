@@ -72,6 +72,7 @@ private struct BattleTurnPreparationResult {
 
 private struct ResolvedMultiHitMove {
     let dealtDamage: Int
+    let lastHitDamage: Int
     let messages: [String]
 }
 
@@ -272,6 +273,7 @@ extension GameRuntime {
         }
 
         attacker.battleEffects.lastMoveID = move.id
+        defender.battleEffects.lastDamageTaken = 0
 
         var messages = ["\(attacker.nickname) used \(move.displayName)!"]
         if playsAudio {
@@ -350,7 +352,8 @@ extension GameRuntime {
 
         var dealtDamage = 0
         var shouldApplyEffect = skipEffect == false
-        let typeMultiplier = totalTypeMultiplier(for: move.type, defender: defender)
+        let isCounterMove = move.id == "COUNTER"
+        let typeMultiplier = isCounterMove ? 10 : totalTypeMultiplier(for: move.type, defender: defender)
 
         if let plannedHits = rolledMultiHitCount(for: move.effect) {
             let isCriticalHit = isCriticalHit(for: attacker)
@@ -370,36 +373,54 @@ extension GameRuntime {
                 criticalHit: isCriticalHit
             )
             dealtDamage = multiHitResult.dealtDamage
+            defender.battleEffects.lastDamageTaken = multiHitResult.lastHitDamage
             messages.append(contentsOf: multiHitResult.messages)
         } else if move.power > 0 || forcedDamage != nil {
-            let isCriticalHit = isCriticalHit(for: attacker)
-            let adjustedAttack = adjustedOffenseStat(for: attacker, moveType: move.type, criticalHit: isCriticalHit)
-            let adjustedDefense = max(
-                1,
-                adjustedDefenseStat(for: defender, moveType: move.type, moveEffect: move.effect, criticalHit: isCriticalHit)
-            )
-            var damage = resolvedMoveDamage(
-                move: move,
-                attacker: attacker,
-                defender: defender,
-                adjustedAttack: adjustedAttack,
-                adjustedDefense: adjustedDefense,
-                typeMultiplier: typeMultiplier,
-                criticalHit: isCriticalHit,
-                forcedDamage: forcedDamage
-            )
+            let isCriticalHit = isCounterMove ? false : isCriticalHit(for: attacker)
+            let damage: Int
+            if isCounterMove {
+                guard let counterDamage = resolvedCounterDamage(attacker: attacker, defender: defender) else {
+                    messages.append("But it failed!")
+                    return ResolvedBattleMove(
+                        messages: messages,
+                        dealtDamage: 0,
+                        typeMultiplier: 10,
+                        pendingAction: nil,
+                        payDayMoneyGain: 0
+                    )
+                }
+                damage = counterDamage
+            } else {
+                let adjustedAttack = adjustedOffenseStat(for: attacker, moveType: move.type, criticalHit: isCriticalHit)
+                let adjustedDefense = max(
+                    1,
+                    adjustedDefenseStat(for: defender, moveType: move.type, moveEffect: move.effect, criticalHit: isCriticalHit)
+                )
+                damage = resolvedMoveDamage(
+                    move: move,
+                    attacker: attacker,
+                    defender: defender,
+                    adjustedAttack: adjustedAttack,
+                    adjustedDefense: adjustedDefense,
+                    typeMultiplier: typeMultiplier,
+                    criticalHit: isCriticalHit,
+                    forcedDamage: forcedDamage
+                )
+            }
+            var appliedDamage = damage
             let substituteResult = applyDamageToSubstituteIfNeeded(
                 move: move,
-                dealtDamage: damage,
+                dealtDamage: appliedDamage,
                 defender: &defender
             )
             dealtDamage = substituteResult.appliedDamage
             messages.append(contentsOf: substituteResult.messages)
 
             if substituteResult.hitSubstitute == false {
-                defender.currentHP = max(0, defender.currentHP - damage)
+                defender.currentHP = max(0, defender.currentHP - appliedDamage)
+                defender.battleEffects.lastDamageTaken = appliedDamage
             } else {
-                damage = substituteResult.appliedDamage
+                appliedDamage = substituteResult.appliedDamage
                 shouldApplyEffect = false
             }
 
@@ -972,7 +993,7 @@ extension GameRuntime {
         criticalHit: Bool
     ) -> ResolvedMultiHitMove {
         guard typeMultiplier > 0 else {
-            return .init(dealtDamage: 0, messages: ["It doesn't affect \(defender.nickname)!"])
+            return .init(dealtDamage: 0, lastHitDamage: 0, messages: ["It doesn't affect \(defender.nickname)!"])
         }
 
         let damagePerHit = resolvedMoveDamage(
@@ -987,11 +1008,13 @@ extension GameRuntime {
 
         var totalDamage = 0
         var actualHits = 0
+        var lastHitDamage = 0
         for _ in 0..<plannedHits where defender.currentHP > 0 {
             let appliedDamage = min(defender.currentHP, damagePerHit)
             defender.currentHP -= appliedDamage
             totalDamage += appliedDamage
             actualHits += 1
+            lastHitDamage = appliedDamage
         }
 
         var messages: [String] = []
@@ -1009,7 +1032,20 @@ extension GameRuntime {
             messages.append("Hit \(actualHits) times!")
         }
 
-        return .init(dealtDamage: totalDamage, messages: messages)
+        return .init(dealtDamage: totalDamage, lastHitDamage: lastHitDamage, messages: messages)
+    }
+
+    func resolvedCounterDamage(attacker: RuntimePokemonState, defender: RuntimePokemonState) -> Int? {
+        guard let lastMoveID = defender.battleEffects.lastMoveID,
+              lastMoveID != "COUNTER",
+              let lastMove = content.move(id: lastMoveID),
+              lastMove.power > 0,
+              lastMove.type == "NORMAL" || lastMove.type == "FIGHTING",
+              attacker.battleEffects.lastDamageTaken > 0 else {
+            return nil
+        }
+
+        return attacker.battleEffects.lastDamageTaken * 2
     }
 
     func applyNonStatMoveEffect(

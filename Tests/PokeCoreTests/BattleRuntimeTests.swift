@@ -1325,6 +1325,126 @@ extension PokeCoreTests {
         )
     }
 
+    func testCounterUsesLastCounterableDamageInsteadOfGenericFightingDamage() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "COUNTERMON", displayName: "Countermon", primaryType: "FIGHTING", baseHP: 60, baseAttack: 70, baseDefense: 60, baseSpeed: 90, baseSpecial: 50, startingMoves: ["COUNTER"]),
+                        .init(id: "TARGET", displayName: "Target", primaryType: "NORMAL", baseHP: 60, baseAttack: 65, baseDefense: 55, baseSpeed: 35, baseSpecial: 40, startingMoves: ["TACKLE"]),
+                        .init(id: "MAGE", displayName: "Mage", primaryType: "FIRE", baseHP: 60, baseAttack: 50, baseDefense: 50, baseSpeed: 35, baseSpecial: 70, startingMoves: ["EMBER"]),
+                    ],
+                    moves: [
+                        .init(id: "COUNTER", displayName: "COUNTER", power: 1, accuracy: 100, maxPP: 20, effect: "NO_ADDITIONAL_EFFECT", type: "FIGHTING"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "EMBER", power: 40, accuracy: 100, maxPP: 25, effect: "NO_ADDITIONAL_EFFECT", type: "FIRE"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var countermon = runtime.makePokemon(speciesID: "COUNTERMON", level: 20, nickname: "Countermon")
+        var target = runtime.makePokemon(speciesID: "TARGET", level: 20, nickname: "Target")
+        runtime.battleRandomOverrides = [0, 255]
+        let tackleResult = runtime.applyMove(attacker: &target, defender: &countermon, moveIndex: 0)
+        XCTAssertEqual(countermon.battleEffects.lastDamageTaken, tackleResult.dealtDamage)
+        let expectedCounterDamage = tackleResult.dealtDamage * 2
+
+        runtime.battleRandomOverrides = [0]
+        let counterResult = runtime.applyMove(attacker: &countermon, defender: &target, moveIndex: 0)
+        XCTAssertEqual(counterResult.dealtDamage, expectedCounterDamage)
+        XCTAssertFalse(counterResult.messages.contains("It's super effective!"))
+        XCTAssertFalse(counterResult.messages.contains("Critical hit!"))
+
+        var mage = runtime.makePokemon(speciesID: "MAGE", level: 20, nickname: "Mage")
+        countermon.battleEffects.lastDamageTaken = 18
+        mage.battleEffects.lastMoveID = "EMBER"
+        runtime.battleRandomOverrides = [0]
+        let failedCounter = runtime.applyMove(attacker: &countermon, defender: &mage, moveIndex: 0)
+        XCTAssertEqual(failedCounter.dealtDamage, 0)
+        XCTAssertEqual(failedCounter.messages.suffix(1), ["But it failed!"])
+    }
+
+    func testCounterMovesAfterOpposingMoveEvenWhenUserIsFaster() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "COUNTERMON", displayName: "Countermon", primaryType: "FIGHTING", baseHP: 60, baseAttack: 70, baseDefense: 60, baseSpeed: 90, baseSpecial: 50, startingMoves: ["COUNTER"]),
+                        .init(id: "TARGET", displayName: "Target", primaryType: "NORMAL", baseHP: 60, baseAttack: 65, baseDefense: 55, baseSpeed: 35, baseSpecial: 40, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "COUNTER", displayName: "COUNTER", power: 1, accuracy: 100, maxPP: 20, effect: "NO_ADDITIONAL_EFFECT", type: "FIGHTING"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let playerPokemon = runtime.makePokemon(speciesID: "COUNTERMON", level: 20, nickname: "Countermon")
+        let enemyPokemon = runtime.makePokemon(speciesID: "TARGET", level: 20, nickname: "Target")
+
+        var battle = RuntimeBattleState(
+            battleID: "counter_priority",
+            kind: .wild,
+            trainerName: "Wild Target",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
+            completionFlagID: "",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            playerWinDialogueID: "",
+            playerLoseDialogueID: nil,
+            postBattleScriptID: nil,
+            canRun: true,
+            trainerClass: nil,
+            sourceTrainerObjectID: nil,
+            playerPokemon: playerPokemon,
+            enemyParty: [enemyPokemon],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            payDayMoney: 0,
+            phase: .moveSelection,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 0,
+            partySelectionMode: .optionalSwitch,
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
+            presentation: .init()
+        )
+
+        var expectedCounterUser = playerPokemon
+        var expectedAttacker = enemyPokemon
+        runtime.battleRandomOverrides = [0, 255, 0]
+        _ = runtime.selectEnemyMoveIndex(
+            battle: battle,
+            enemyPokemon: expectedAttacker,
+            playerPokemon: expectedCounterUser
+        )
+        _ = runtime.applyMove(attacker: &expectedAttacker, defender: &expectedCounterUser, moveIndex: 0)
+        let expectedCounterDamage = expectedCounterUser.battleEffects.lastDamageTaken * 2
+
+        runtime.battleRandomOverrides = [0, 255, 0]
+        let batches = runtime.makeTurnPresentationBatches(for: &battle)
+        let firstBatchMessages = batches[0].compactMap(\.message)
+        let secondBatchMessages = batches[1].compactMap(\.message)
+        XCTAssertEqual(firstBatchMessages.first, "Target used TACKLE!")
+        XCTAssertEqual(secondBatchMessages.first, "Countermon used COUNTER!")
+        guard let counterBeat = batches[1].last else {
+            XCTFail("Expected Counter action batch to include a terminal beat")
+            return
+        }
+        XCTAssertEqual(counterBeat.enemyPokemon?.currentHP, enemyPokemon.currentHP - expectedCounterDamage)
+    }
+
     func testFlyTeleportAndPayDayFamiliesUseBattleState() {
         let runtime = GameRuntime(
             content: fixtureContent(

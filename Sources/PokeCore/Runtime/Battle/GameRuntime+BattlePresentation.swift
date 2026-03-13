@@ -43,6 +43,47 @@ extension GameRuntime {
         return selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
     }
 
+    func peekActionMoveIndex(
+        for side: BattlePresentationSide,
+        battle: RuntimeBattleState,
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState
+    ) -> Int {
+        let savedBattleRandomOverrides = battleRandomOverrides
+        let savedRuntimeRNGState = runtimeRNGState
+        let moveIndex = resolveActionMoveIndex(
+            for: side,
+            battle: battle,
+            playerPokemon: playerPokemon,
+            enemyPokemon: enemyPokemon
+        )
+        battleRandomOverrides = savedBattleRandomOverrides
+        runtimeRNGState = savedRuntimeRNGState
+        return moveIndex
+    }
+
+    func turnActionOrder(
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState,
+        playerMoveIndex: Int,
+        enemyMoveIndex: Int
+    ) -> [BattlePresentationSide] {
+        let playerMoveID = playerPokemon.moves.indices.contains(playerMoveIndex) ? playerPokemon.moves[playerMoveIndex].id : nil
+        let enemyMoveID = enemyPokemon.moves.indices.contains(enemyMoveIndex) ? enemyPokemon.moves[enemyMoveIndex].id : nil
+
+        if playerMoveID == "COUNTER", enemyMoveID != "COUNTER" {
+            return [.enemy, .player]
+        }
+
+        if enemyMoveID == "COUNTER", playerMoveID != "COUNTER" {
+            return [.player, .enemy]
+        }
+
+        return adjustedSpeedStat(for: playerPokemon) >= adjustedSpeedStat(for: enemyPokemon)
+            ? [.player, .enemy]
+            : [.enemy, .player]
+    }
+
     func applyResolvedBattleAction(
         _ action: ResolvedBattleAction,
         side: BattlePresentationSide,
@@ -434,17 +475,34 @@ extension GameRuntime {
         var simulatedPlayer = battle.playerPokemon
         var simulatedEnemy = battle.enemyPokemon
         var batches: [[RuntimeBattlePresentationBeat]] = []
-        let actionSides: [BattlePresentationSide] = adjustedSpeedStat(for: simulatedPlayer) >= adjustedSpeedStat(for: simulatedEnemy)
-            ? [.player, .enemy]
-            : [.enemy, .player]
+        let playerMoveIndex = resolveActionMoveIndex(
+            for: .player,
+            battle: battle,
+            playerPokemon: simulatedPlayer,
+            enemyPokemon: simulatedEnemy
+        )
+        let enemyMoveIndexForOrdering = peekActionMoveIndex(
+            for: .enemy,
+            battle: battle,
+            playerPokemon: simulatedPlayer,
+            enemyPokemon: simulatedEnemy
+        )
+        let actionSides = turnActionOrder(
+            playerPokemon: simulatedPlayer,
+            enemyPokemon: simulatedEnemy,
+            playerMoveIndex: playerMoveIndex,
+            enemyMoveIndex: enemyMoveIndexForOrdering
+        )
 
         for side in actionSides {
-            let moveIndex = resolveActionMoveIndex(
-                for: side,
-                battle: battle,
-                playerPokemon: simulatedPlayer,
-                enemyPokemon: simulatedEnemy
-            )
+            let moveIndex = side == .player
+                ? playerMoveIndex
+                : resolveActionMoveIndex(
+                    for: .enemy,
+                    battle: battle,
+                    playerPokemon: simulatedPlayer,
+                    enemyPokemon: simulatedEnemy
+                )
             let action = resolveBattleAction(
                 side: side,
                 attacker: side == .player ? simulatedPlayer : simulatedEnemy,
