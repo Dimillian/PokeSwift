@@ -522,6 +522,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
     public let canUseBag: Bool
     public let canSwitch: Bool
     public let bagItemCount: Int
+    public let moveDetailsByID: [String: PartySidebarMoveDetails]
     public let party: PartySidebarProps
     public let capture: BattleCaptureTelemetry?
     public let presentation: BattlePresentationTelemetry
@@ -540,6 +541,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
         canUseBag: Bool = false,
         canSwitch: Bool = false,
         bagItemCount: Int = 0,
+        moveDetailsByID: [String: PartySidebarMoveDetails] = [:],
         party: PartySidebarProps,
         capture: BattleCaptureTelemetry? = nil,
         presentation: BattlePresentationTelemetry = .init(
@@ -561,6 +563,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
         self.canUseBag = canUseBag
         self.canSwitch = canSwitch
         self.bagItemCount = bagItemCount
+        self.moveDetailsByID = moveDetailsByID
         self.party = party
         self.capture = capture
         self.presentation = presentation
@@ -637,7 +640,8 @@ public struct BattleSidebarProps: Equatable, Sendable {
                         detail: "\(slot.currentPP)/\(slot.maxPP)",
                         isSelectable: slot.isSelectable,
                         isFocused: shouldForceCombatSectionOpen && index == focusedMoveIndex,
-                        kind: .forget
+                        kind: .forget,
+                        slotIndex: index
                     )
                 }
             }
@@ -671,7 +675,8 @@ public struct BattleSidebarProps: Equatable, Sendable {
                 detail: "\(slot.currentPP)/\(slot.maxPP)",
                 isSelectable: slot.isSelectable,
                 isFocused: shouldForceCombatSectionOpen && index == focusedMoveIndex,
-                kind: .move
+                kind: .move,
+                slotIndex: index
             )
         }
 
@@ -718,6 +723,25 @@ public struct BattleSidebarProps: Equatable, Sendable {
 
         return rows
     }
+
+    public func moveCardProps(for actionRow: BattleSidebarActionRowProps) -> PartySidebarMoveProps? {
+        guard let slotIndex = actionRow.slotIndex, moveSlots.indices.contains(slotIndex) else {
+            return nil
+        }
+
+        let slot = moveSlots[slotIndex]
+        let moveDetails = moveDetailsByID[slot.moveID]
+        return PartySidebarMoveProps(
+            id: actionRow.id,
+            moveID: slot.moveID,
+            displayName: moveDetails?.displayName ?? slot.displayName,
+            typeLabel: moveDetails?.typeLabel,
+            currentPP: slot.currentPP,
+            maxPP: moveDetails?.maxPP ?? slot.maxPP,
+            power: moveDetails?.power,
+            accuracy: moveDetails?.accuracy
+        )
+    }
 }
 
 public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
@@ -739,6 +763,7 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
     public let isSelectable: Bool
     public let isFocused: Bool
     public let kind: Kind
+    public let slotIndex: Int?
 
     public init(
         id: String,
@@ -746,7 +771,8 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
         detail: String?,
         isSelectable: Bool,
         isFocused: Bool,
-        kind: Kind
+        kind: Kind,
+        slotIndex: Int? = nil
     ) {
         self.id = id
         self.title = title
@@ -754,6 +780,7 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
         self.isSelectable = isSelectable
         self.isFocused = isFocused
         self.kind = kind
+        self.slotIndex = slotIndex
     }
 }
 

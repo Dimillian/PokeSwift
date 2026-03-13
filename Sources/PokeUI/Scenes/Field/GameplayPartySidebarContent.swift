@@ -394,8 +394,6 @@ struct PartyPokemonHoverCard: View {
 struct PartyPokemonMoveSection: View {
     let moves: [PartySidebarMoveProps]
 
-    private let cardPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
-
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("MOVES")
@@ -403,10 +401,7 @@ struct PartyPokemonMoveSection: View {
                 .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
 
             if moves.isEmpty {
-                GameplaySidebarInsetSurface(
-                    padding: cardPadding,
-                    tint: FieldRetroPalette.interactiveGlassTint
-                ) {
+                GameplayMoveCardEmptyState {
                     Text("No moves known")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
@@ -425,6 +420,17 @@ struct PartyPokemonMoveSection: View {
 struct PartyPokemonMoveRow: View {
     let props: PartySidebarMoveProps
 
+    var body: some View {
+        GameplayMoveCard(props: props)
+    }
+}
+
+struct GameplayMoveCard: View {
+    let props: PartySidebarMoveProps
+    var isSelectable = true
+    var isFocused = false
+    var showsFocusIndicator = false
+
     private let cardPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
 
     var body: some View {
@@ -434,9 +440,16 @@ struct PartyPokemonMoveRow: View {
         ) {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    if showsFocusIndicator {
+                        Text(isFocused ? "▶" : " ")
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundStyle(textColor.opacity(0.92))
+                            .frame(width: 10, alignment: .leading)
+                    }
+
                     Text(props.displayName.uppercased())
                         .font(.system(size: 11, weight: .bold, design: .monospaced))
-                        .foregroundStyle(FieldRetroPalette.ink)
+                        .foregroundStyle(textColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
 
@@ -449,7 +462,7 @@ struct PartyPokemonMoveRow: View {
                         ) {
                             Text(typeChipText)
                                 .font(.system(size: 9, weight: .bold, design: .monospaced))
-                                .foregroundStyle(FieldRetroPalette.ink.opacity(0.82))
+                                .foregroundStyle(textColor.opacity(0.82))
                         }
                     }
                 }
@@ -463,6 +476,13 @@ struct PartyPokemonMoveRow: View {
                 }
             }
         }
+        .opacity(isSelectable ? 1 : 0.72)
+        .overlay {
+            if isFocused {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(FieldRetroPalette.outline.opacity(0.18), lineWidth: 1.5)
+            }
+        }
     }
 
     private var rowTint: Color {
@@ -470,6 +490,29 @@ struct PartyPokemonMoveRow: View {
             return FieldRetroPalette.accentGlassTint
         }
         return FieldRetroPalette.pokemonTypeGlassTint(for: typeLabel)
+    }
+
+    private var textColor: Color {
+        isSelectable ? FieldRetroPalette.ink : FieldRetroPalette.ink.opacity(0.44)
+    }
+}
+
+struct GameplayMoveCardEmptyState<Content: View>: View {
+    let content: Content
+
+    private let cardPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        GameplaySidebarInsetSurface(
+            padding: cardPadding,
+            tint: FieldRetroPalette.interactiveGlassTint
+        ) {
+            content
+        }
     }
 }
 

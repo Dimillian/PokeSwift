@@ -95,12 +95,21 @@ struct BattleActionContent: View {
                         BattleActionDivider()
                     }
 
-                    BattleActionSidebarRow(
-                        title: action.title,
-                        detail: action.detail,
-                        isSelectable: action.isSelectable,
-                        isFocused: action.isFocused
-                    )
+                    if let moveCardProps = props.moveCardProps(for: action) {
+                        GameplayMoveCard(
+                            props: moveCardProps,
+                            isSelectable: action.isSelectable,
+                            isFocused: action.isFocused,
+                            showsFocusIndicator: true
+                        )
+                    } else {
+                        BattleActionSidebarRow(
+                            title: action.title,
+                            detail: action.detail,
+                            isSelectable: action.isSelectable,
+                            isFocused: action.isFocused
+                        )
+                    }
                 }
             }
         }

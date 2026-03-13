@@ -485,6 +485,61 @@ extension PokeUITests {
     XCTAssertEqual(props.actionRows[1].isFocused, true)
     XCTAssertEqual(props.actionRows.last?.isSelectable, true)
   }
+  func testBattleSidebarMoveCardPropsUseDetailedMoveMetadata() throws {
+    let props = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "moveSelection",
+      promptText: "Pick the next move.",
+      playerPokemon: .init(
+        speciesID: "PIKACHU",
+        displayName: "Pikachu",
+        level: 12,
+        currentHP: 32,
+        maxHP: 32,
+        attack: 18,
+        defense: 14,
+        speed: 24,
+        special: 19,
+        moves: ["THUNDERBOLT"]
+      ),
+      enemyPokemon: .init(
+        speciesID: "PIDGEY",
+        displayName: "Pidgey",
+        level: 9,
+        currentHP: 20,
+        maxHP: 20,
+        attack: 13,
+        defense: 12,
+        speed: 15,
+        special: 10,
+        moves: ["TACKLE"]
+      ),
+      moveSlots: [
+        .init(moveID: "THUNDERBOLT", displayName: "Thunderbolt", currentPP: 15, maxPP: 15, isSelectable: true)
+      ],
+      focusedMoveIndex: 0,
+      canRun: true,
+      moveDetailsByID: [
+        "THUNDERBOLT": .init(
+          displayName: "Thunderbolt",
+          typeLabel: "ELECTRIC",
+          maxPP: 15,
+          power: 95,
+          accuracy: 100
+        )
+      ],
+      party: .init(pokemon: [])
+    )
+
+    let moveAction = try XCTUnwrap(props.actionRows.first)
+    let moveCard = try XCTUnwrap(props.moveCardProps(for: moveAction))
+
+    XCTAssertEqual(moveCard.displayName, "Thunderbolt")
+    XCTAssertEqual(moveCard.typeChipText, "ELECTRIC")
+    XCTAssertEqual(moveCard.metadataChips.map(\.displayText), ["PP 15/15", "POW 95", "ACC 100"])
+    XCTAssertNil(props.moveCardProps(for: props.actionRows.last!))
+  }
   func testBattleSidebarPropsHideCombatUiDuringIntroPresentation() {
     let props = BattleSidebarProps(
       trainerName: "BLUE",

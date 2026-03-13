@@ -145,6 +145,7 @@ enum GameplayScenePropsFactory {
                         canUseBag: battle.canUseBag,
                         canSwitch: battle.canSwitch,
                         bagItemCount: battle.bagItems.count,
+                        moveDetailsByID: manifestIndex.moveDetailsByID,
                         party: makeBattlePartySidebar(party: battleState.party, manifestIndex: manifestIndex, battle: battle),
                         capture: battle.capture,
                         presentation: battle.presentation
