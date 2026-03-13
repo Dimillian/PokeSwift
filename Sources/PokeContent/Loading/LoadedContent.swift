@@ -52,6 +52,10 @@ public struct LoadedContent: Sendable {
         gameplayManifest.dialogues.first { $0.id == id }
     }
 
+    public func fieldInteraction(id: String) -> FieldInteractionManifest? {
+        gameplayManifest.fieldInteractions.first { $0.id == id }
+    }
+
     public func script(id: String) -> ScriptManifest? {
         gameplayManifest.scripts.first { $0.id == id }
     }
@@ -96,6 +100,21 @@ public struct LoadedContent: Sendable {
         gameplayManifest.trainerBattles.first { $0.trainerClass == trainerClass && $0.trainerNumber == trainerNumber }
     }
 
+    public func trainerEncounterAudioCueID(for battleID: String) -> String? {
+        trainerBattle(id: battleID)?.encounterAudioCueID
+    }
+
+    public var commonBattleText: BattleTextTemplateManifest {
+        gameplayManifest.commonBattleText
+    }
+
+    public func trainerAIMoveChoiceModifications(trainerClass: String) -> TrainerAIMoveChoiceModificationManifest? {
+        let normalizedClass = Self.normalizedTrainerAIClassKey(trainerClass)
+        return gameplayManifest.trainerAIMoveChoiceModifications.first {
+            Self.normalizedTrainerAIClassKey($0.trainerClass) == normalizedClass
+        }
+    }
+
     public func audioTrack(id: String) -> AudioManifest.Track? {
         audioManifest.tracks.first { $0.id == id }
     }
@@ -110,5 +129,12 @@ public struct LoadedContent: Sendable {
 
     public func soundEffect(id: String) -> AudioManifest.SoundEffect? {
         audioManifest.soundEffects.first { $0.id == id }
+    }
+
+    static func normalizedTrainerAIClassKey(_ trainerClass: String) -> String {
+        trainerClass
+            .replacingOccurrences(of: "OPP_", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .replacingOccurrences(of: " ", with: "")
     }
 }

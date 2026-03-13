@@ -1,4 +1,5 @@
 import SwiftUI
+import PokeRender
 
 struct GameplaySidebar: View {
     let mode: GameplaySidebarMode
@@ -150,7 +151,8 @@ private struct BattleModeSidebarContent: View {
             AccordionSidebarCard(
                 title: "Combat",
                 summary: battleSummaryLabel,
-                isExpanded: expansionState.expandedSection == .battleCombat
+                isExpanded: expansionState.expandedSection == .battleCombat,
+                isHighlighted: props.attentionSection == .battleCombat
             ) {
                 onActivateSection(.battleCombat)
             } content: {
@@ -163,7 +165,8 @@ private struct BattleModeSidebarContent: View {
             AccordionSidebarCard(
                 title: "Party",
                 summary: "\(props.party.pokemon.count)/\(props.party.totalSlots)",
-                isExpanded: expansionState.expandedSection == .party
+                isExpanded: expansionState.expandedSection == .party,
+                isHighlighted: props.attentionSection == .party
             ) {
                 onActivateSection(.party)
             } content: {
@@ -183,6 +186,8 @@ private struct BattleModeSidebarContent: View {
             return "Moves"
         case "partySelection":
             return "Party"
+        case "trainerAboutToUseDecision":
+            return "Shift"
         case "resolvingTurn":
             return "Resolving"
         case "turnText":

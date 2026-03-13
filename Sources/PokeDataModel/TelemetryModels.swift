@@ -66,6 +66,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
     public let activeScriptID: String?
     public let activeScriptStep: Int?
     public let renderMode: String
+    public let alert: FieldAlertTelemetry?
     public let transition: FieldTransitionTelemetry?
 
     public init(
@@ -78,6 +79,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         activeScriptID: String?,
         activeScriptStep: Int?,
         renderMode: String,
+        alert: FieldAlertTelemetry? = nil,
         transition: FieldTransitionTelemetry? = nil
     ) {
         self.mapID = mapID
@@ -89,6 +91,7 @@ public struct FieldTelemetry: Codable, Equatable, Sendable {
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
         self.renderMode = renderMode
+        self.alert = alert
         self.transition = transition
     }
 }
@@ -122,6 +125,20 @@ public struct FieldTransitionTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public enum FieldAlertBubbleKind: String, Codable, Equatable, Sendable {
+    case exclamation
+}
+
+public struct FieldAlertTelemetry: Codable, Equatable, Sendable {
+    public let objectID: String
+    public let kind: FieldAlertBubbleKind
+
+    public init(objectID: String, kind: FieldAlertBubbleKind) {
+        self.objectID = objectID
+        self.kind = kind
+    }
+}
+
 public struct DialogueTelemetry: Codable, Equatable, Sendable {
     public let dialogueID: String
     public let pageIndex: Int
@@ -133,6 +150,45 @@ public struct DialogueTelemetry: Codable, Equatable, Sendable {
         self.pageIndex = pageIndex
         self.pageCount = pageCount
         self.lines = lines
+    }
+}
+
+public struct FieldPromptTelemetry: Codable, Equatable, Sendable {
+    public let interactionID: String
+    public let kind: String
+    public let options: [String]
+    public let focusedIndex: Int
+
+    public init(interactionID: String, kind: String, options: [String], focusedIndex: Int) {
+        self.interactionID = interactionID
+        self.kind = kind
+        self.options = options
+        self.focusedIndex = focusedIndex
+    }
+}
+
+public struct FieldHealingTelemetry: Codable, Equatable, Sendable {
+    public let interactionID: String
+    public let phase: String
+    public let activeBallCount: Int
+    public let totalBallCount: Int
+    public let pulseStep: Int
+    public let nurseObjectID: String?
+
+    public init(
+        interactionID: String,
+        phase: String,
+        activeBallCount: Int,
+        totalBallCount: Int,
+        pulseStep: Int,
+        nurseObjectID: String? = nil
+    ) {
+        self.interactionID = interactionID
+        self.phase = phase
+        self.activeBallCount = activeBallCount
+        self.totalBallCount = totalBallCount
+        self.pulseStep = pulseStep
+        self.nurseObjectID = nurseObjectID
     }
 }
 
@@ -314,6 +370,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
     public let revision: Int
     public let uiVisibility: BattlePresentationUIVisibility
     public let activeSide: BattlePresentationSide?
+    public let hidePlayerPokemon: Bool
     public let transitionStyle: BattleTransitionStyle
     public let meterAnimation: BattleMeterAnimationTelemetry?
 
@@ -322,6 +379,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         revision: Int,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil
     ) {
@@ -329,6 +387,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         self.revision = revision
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
     }
@@ -449,6 +508,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let battleID: String
     public let kind: BattleKind
     public let trainerName: String
+    public let trainerSpritePath: String?
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
     public let enemyPartyCount: Int
@@ -472,6 +532,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         battleID: String,
         kind: BattleKind = .trainer,
         trainerName: String,
+        trainerSpritePath: String? = nil,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
         enemyPartyCount: Int,
@@ -498,6 +559,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         self.battleID = battleID
         self.kind = kind
         self.trainerName = trainerName
+        self.trainerSpritePath = trainerSpritePath
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.enemyPartyCount = enemyPartyCount
@@ -522,6 +584,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         case battleID
         case kind
         case trainerName
+        case trainerSpritePath
         case playerPokemon
         case enemyPokemon
         case enemyPartyCount
@@ -547,6 +610,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         battleID = try container.decode(String.self, forKey: .battleID)
         kind = try container.decodeIfPresent(BattleKind.self, forKey: .kind) ?? .trainer
         trainerName = try container.decode(String.self, forKey: .trainerName)
+        trainerSpritePath = try container.decodeIfPresent(String.self, forKey: .trainerSpritePath)
         playerPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .playerPokemon)
         enemyPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .enemyPokemon)
         enemyPartyCount = try container.decodeIfPresent(Int.self, forKey: .enemyPartyCount) ?? 1
@@ -750,6 +814,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
     public let titleMenu: TitleMenuTelemetry?
     public let field: FieldTelemetry?
     public let dialogue: DialogueTelemetry?
+    public let fieldPrompt: FieldPromptTelemetry?
+    public let fieldHealing: FieldHealingTelemetry?
     public let starterChoice: StarterChoiceTelemetry?
     public let party: PartyTelemetry?
     public let inventory: InventoryTelemetry?
@@ -771,6 +837,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         titleMenu: TitleMenuTelemetry?,
         field: FieldTelemetry?,
         dialogue: DialogueTelemetry?,
+        fieldPrompt: FieldPromptTelemetry? = nil,
+        fieldHealing: FieldHealingTelemetry? = nil,
         starterChoice: StarterChoiceTelemetry?,
         party: PartyTelemetry?,
         inventory: InventoryTelemetry?,
@@ -791,6 +859,8 @@ public struct RuntimeTelemetrySnapshot: Codable, Equatable, Sendable {
         self.titleMenu = titleMenu
         self.field = field
         self.dialogue = dialogue
+        self.fieldPrompt = fieldPrompt
+        self.fieldHealing = fieldHealing
         self.starterChoice = starterChoice
         self.party = party
         self.inventory = inventory
@@ -816,6 +886,7 @@ public enum RuntimeSessionEventKind: String, Codable, Equatable, Sendable {
     case encounterTriggered
     case battleStarted
     case battleEnded
+    case blackout
     case shopOpened
     case shopClosed
     case shopPurchase

@@ -87,7 +87,101 @@ extension PokeCoreTests {
             XCTAssertEqual(encounter?.level, expectedSlot + 2, "roll \(roll) should preserve the slot level")
         }
     }
-    func testRepoGeneratedViridianPokecenterNurseHealsParty() throws {
+    func testRepoGeneratedViridianPokecenterNurseHealingFlowMatchesPromptAndFarewell() async throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_POKECENTER"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.playerParty[0].currentHP = 7
+        runtime.requestDefaultMapMusic()
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_welcome")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_welcome")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_shall_we_heal")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.focusedIndex, 0)
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_need_your_pokemon")
+
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.fieldHealing?.phase == "healedJingle"
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, runtime.gameplayState?.playerParty.first?.maxHP)
+        XCTAssertEqual(audioPlayer.soundEffectRequests.map(\.soundEffectID).last, "SFX_HEALING_MACHINE")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_PKMN_HEALED", entryID: "default"))
+        XCTAssertEqual(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" }?.facing, .right)
+
+        audioPlayer.completePendingPlayback()
+        _ = try await waitForSnapshot(runtime) {
+            $0.dialogue?.dialogueID == "pokemon_center_fighting_fit"
+        }
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_farewell")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.currentSnapshot().dialogue)
+        XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
+        XCTAssertNil(runtime.currentSnapshot().fieldHealing)
+        XCTAssertEqual(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" }?.facing, .down)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_POKECENTER")
+        XCTAssertEqual(runtime.currentSnapshot().audio?.reason, "mapDefault")
+    }
+
+    func testRepoGeneratedViridianPokecenterHealingUpdatesBlackoutCheckpointOnAcceptance() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_POKECENTER"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.fieldHealing?.phase == "priming" || $0.fieldHealing?.phase == "machineActive"
+        }
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_CITY", position: .init(x: 23, y: 26), facing: .down)
+        )
+    }
+
+    func testRepoGeneratedViridianPokecenterNoChoiceSkipsHealing() throws {
         let runtime = try makeRepoRuntime()
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -102,9 +196,22 @@ extension PokeCoreTests {
 
         let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_pokecenter_nurse" })
         runtime.interact(with: nurse)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .right)
+        runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, runtime.gameplayState?.playerParty.first?.maxHP)
-        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_pokecenter_nurse_heal")
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_farewell")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, 7)
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
+        XCTAssertNil(runtime.currentSnapshot().fieldHealing)
     }
     func testRepoGeneratedViridianInteriorsLoadNpcDialogue() throws {
         let runtime = try makeRepoRuntime()
@@ -466,6 +573,63 @@ extension PokeCoreTests {
         XCTAssertTrue(sawDoorTransition)
         XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
+    }
+    func testRepoGeneratedViridianForestSouthGateCenterAisleWalksNorthThroughEntrance() async throws {
+        let runtime = try makeRepoRuntime()
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST_SOUTH_GATE"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 4, y: 6)
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "VIRIDIAN_FOREST_SOUTH_GATE")
+        XCTAssertEqual(runtime.currentSnapshot().field?.playerPosition, .init(x: 4, y: 5))
+        XCTAssertEqual(runtime.currentSnapshot().field?.facing, .up)
+
+        try await Task.sleep(nanoseconds: UInt64((runtime.fieldAnimationStepDuration * 1.1) * 1_000_000_000))
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "VIRIDIAN_FOREST_SOUTH_GATE")
+        XCTAssertEqual(runtime.currentSnapshot().field?.playerPosition, .init(x: 4, y: 4))
+        XCTAssertEqual(runtime.currentSnapshot().field?.facing, .up)
+    }
+    func testRepoGeneratedViridianForestTrainerAutoEngagesOnLineOfSight() async throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_FOREST"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 25, y: 33)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 8, nickname: "Squirtle")]
+
+        runtime.movePlayer(in: .right)
+
+        let alertSnapshot = try await waitForSnapshot(runtime, timeout: 0.5) {
+            $0.field?.alert?.objectID == "viridian_forest_bug_catcher_1"
+        }
+
+        XCTAssertEqual(alertSnapshot.field?.alert, .init(objectID: "viridian_forest_bug_catcher_1", kind: .exclamation))
+        XCTAssertEqual(alertSnapshot.audio?.trackID, "MUSIC_MEET_MALE_TRAINER")
+        XCTAssertEqual(alertSnapshot.audio?.reason, "trainerEncounter")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_MEET_MALE_TRAINER", entryID: "default"))
+
+        let snapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.battle?.battleID == "opp_bug_catcher_1"
+        }
+
+        XCTAssertEqual(snapshot.battle?.battleID, "opp_bug_catcher_1")
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertNil(snapshot.field?.alert)
+
+        XCTAssertEqual(snapshot.audio?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(snapshot.audio?.reason, "battle")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_TRAINER_BATTLE", entryID: "default"))
     }
     func testRepoGeneratedStairWarpUsesExactTileWithFadeAndNoStepOut() async throws {
         let runtime = try makeRepoRuntime()

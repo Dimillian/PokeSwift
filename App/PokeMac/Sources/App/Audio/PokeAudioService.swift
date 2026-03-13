@@ -59,6 +59,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
     private var musicCompletionWorkItem: DispatchWorkItem?
     private var soundEffectCompletionWorkItems: [Int: DispatchWorkItem] = [:]
     private var playbackRequestID = 0
+    private var activeMusicRequestID = 0
 
     init(manifest: AudioManifest) {
         self.manifest = manifest
@@ -85,11 +86,13 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let cacheKey = musicCacheKey(trackID: request.trackID, entryID: request.entryID)
         playbackRequestID += 1
         let requestID = playbackRequestID
+        activeMusicRequestID = requestID
 
         if let rendered = musicRenderCache[cacheKey] {
             pendingMusicPlayback = nil
             startMusicPlayback(
                 rendered,
+                requestID: requestID,
                 cacheKey: cacheKey,
                 playbackMode: entry.playbackMode,
                 completion: completion
@@ -152,12 +155,17 @@ final class PokeAudioService: RuntimeAudioPlaying {
             replacedSoundEffectID: replacedID,
             completion: completion
         )
-        scheduleSoundEffectRenderIfNeeded(cacheKey: cacheKey, soundEffect: soundEffect)
+        scheduleSoundEffectRenderIfNeeded(
+            cacheKey: cacheKey,
+            soundEffect: soundEffect,
+            request: request
+        )
         return .init(soundEffectID: request.soundEffectID, status: .started, replacedSoundEffectID: replacedID)
     }
 
     func stopAllMusic() {
         playbackRequestID += 1
+        activeMusicRequestID = playbackRequestID
         pendingMusicPlayback = nil
         musicCompletionWorkItem?.cancel()
         stopMusicPlayers()
@@ -232,6 +240,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 self.pendingMusicPlayback = nil
                 self.startMusicPlayback(
                     rendered,
+                    requestID: pendingMusicPlayback.requestID,
                     cacheKey: cacheKey,
                     playbackMode: pendingMusicPlayback.playbackMode,
                     completion: pendingMusicPlayback.completion
@@ -240,16 +249,21 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    private func scheduleSoundEffectRenderIfNeeded(cacheKey: String, soundEffect: AudioManifest.SoundEffect) {
+    private func scheduleSoundEffectRenderIfNeeded(
+        cacheKey: String,
+        soundEffect: AudioManifest.SoundEffect,
+        request: SoundEffectPlaybackRequest
+    ) {
         guard soundEffectRenderCache[cacheKey] == nil, rendersInFlight.contains(cacheKey) == false else { return }
         rendersInFlight.insert(cacheKey)
 
         let sampleRate = format.sampleRate
-        renderQueue.async { [channels = soundEffect.channels] in
+        renderQueue.async { [channels = soundEffect.channels, request] in
             let rendered = Self.renderedAudioAsset(
                 playbackMode: .oneShot,
                 channels: channels,
-                sampleRate: sampleRate
+                sampleRate: sampleRate,
+                soundEffectRequest: request
             )
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -275,6 +289,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     private func startMusicPlayback(
         _ rendered: RenderedAudioAsset,
+        requestID: Int,
         cacheKey: String,
         playbackMode: AudioManifest.PlaybackMode,
         completion: (@MainActor () -> Void)?
@@ -290,6 +305,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
                     player.scheduleBuffer(prelude) { [weak self] in
                         Task { @MainActor [weak self] in
                             guard let self,
+                                  self.activeMusicRequestID == requestID,
                                   let loop = self.musicRenderCache[cacheKey]?.channels[hardwareChannel]?.loop,
                                   loop.frameLength > 0 else {
                                 return
@@ -384,7 +400,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
     nonisolated private static func renderedAudioAsset(
         playbackMode: AudioManifest.PlaybackMode,
         channels: [AudioManifest.ChannelProgram],
-        sampleRate: Double
+        sampleRate: Double,
+        soundEffectRequest: SoundEffectPlaybackRequest? = nil
     ) -> RenderedAudioAsset {
         var renderedChannels: [Int: RenderedChannelBuffers] = [:]
         var maxDuration = 0.0
@@ -392,10 +409,28 @@ final class PokeAudioService: RuntimeAudioPlaying {
         for channel in channels {
             let hardwareChannel = hardwareChannelIndex(forSoftwareChannel: channel.channelNumber)
                 ?? max(0, min(3, channel.channelNumber - 1))
-            let preludeSamples = renderSegment(events: channel.prelude, sampleRate: sampleRate, seed: UInt64(channel.channelNumber * 7919))
-            let loopSamples = renderSegment(events: channel.loop, sampleRate: sampleRate, seed: UInt64(channel.channelNumber * 7919))
-            let preludeDuration = renderedDuration(for: channel.prelude)
-            let loopDuration = renderedDuration(for: channel.loop)
+            let preludeEvents = adjusted(
+                events: channel.prelude,
+                for: soundEffectRequest,
+                channelNumber: channel.channelNumber
+            )
+            let loopEvents = adjusted(
+                events: channel.loop,
+                for: soundEffectRequest,
+                channelNumber: channel.channelNumber
+            )
+            let preludeSamples = renderSegment(
+                events: preludeEvents,
+                sampleRate: sampleRate,
+                seed: UInt64(channel.channelNumber * 7919)
+            )
+            let loopSamples = renderSegment(
+                events: loopEvents,
+                sampleRate: sampleRate,
+                seed: UInt64(channel.channelNumber * 7919)
+            )
+            let preludeDuration = renderedDuration(for: preludeEvents)
+            let loopDuration = renderedDuration(for: loopEvents)
             let duration = max(preludeDuration, loopDuration)
             maxDuration = max(maxDuration, duration)
             renderedChannels[hardwareChannel] = RenderedChannelBuffers(
@@ -410,6 +445,84 @@ final class PokeAudioService: RuntimeAudioPlaying {
             playbackMode: playbackMode,
             maxDuration: maxDuration
         )
+    }
+
+    nonisolated private static func adjusted(
+        events: [AudioManifest.Event],
+        for request: SoundEffectPlaybackRequest?,
+        channelNumber: Int
+    ) -> [AudioManifest.Event] {
+        guard let request else { return events }
+        let tempoScale = tempoScale(for: request.tempoModifier, channelNumber: channelNumber)
+        return events.map {
+            adjusted(
+                event: $0,
+                frequencyModifier: request.frequencyModifier,
+                tempoScale: tempoScale
+            )
+        }
+    }
+
+    nonisolated private static func adjusted(
+        event: AudioManifest.Event,
+        frequencyModifier: Int?,
+        tempoScale: Double
+    ) -> AudioManifest.Event {
+        let adjustedRegister = adjustedFrequencyRegister(
+            event.frequencyRegister,
+            modifier: frequencyModifier
+        )
+        let adjustedTargetRegister = adjustedFrequencyRegister(
+            event.pitchSlideTargetRegister,
+            modifier: frequencyModifier
+        )
+        let adjustedFrequencyHz = adjustedRegister.map {
+            frequencyHz(forRegister: $0, waveform: event.waveform)
+        } ?? event.frequencyHz
+        let adjustedTargetHz = adjustedTargetRegister.map {
+            frequencyHz(forRegister: $0, waveform: event.waveform)
+        } ?? event.pitchSlideTargetHz
+
+        return .init(
+            startTime: event.startTime * tempoScale,
+            duration: event.duration * tempoScale,
+            frequencyHz: adjustedFrequencyHz,
+            frequencyRegister: adjustedRegister,
+            amplitude: event.amplitude,
+            dutyCycle: event.dutyCycle,
+            envelopeStepDuration: event.envelopeStepDuration,
+            envelopeDirection: event.envelopeDirection,
+            waveSamples: event.waveSamples,
+            vibratoDelaySeconds: event.vibratoDelaySeconds,
+            vibratoDepthSemitones: event.vibratoDepthSemitones,
+            vibratoRateHz: event.vibratoRateHz,
+            pitchSlideTargetHz: adjustedTargetHz,
+            pitchSlideTargetRegister: adjustedTargetRegister,
+            pitchSlideFrameCount: event.pitchSlideFrameCount,
+            noiseShortMode: event.noiseShortMode,
+            waveform: event.waveform
+        )
+    }
+
+    nonisolated private static func adjustedFrequencyRegister(
+        _ register: Int?,
+        modifier: Int?
+    ) -> Int? {
+        guard let register, let modifier else { return register }
+        let lowByte = register & 0xff
+        let highByte = register & 0x700
+        let summedLowByte = lowByte + (modifier & 0xff)
+        let adjustedHighByte = min(0x700, highByte + ((summedLowByte >> 8) << 8))
+        return adjustedHighByte | (summedLowByte & 0xff)
+    }
+
+    nonisolated private static func tempoScale(
+        for modifier: Int?,
+        channelNumber: Int
+    ) -> Double {
+        guard let modifier else { return 1 }
+        guard channelNumber != 8 else { return 1 }
+        return Double(0x80 + (modifier & 0xff)) / Double(0x100)
     }
 
     nonisolated private static func hardwareChannelIndex(forSoftwareChannel channelNumber: Int) -> Int? {

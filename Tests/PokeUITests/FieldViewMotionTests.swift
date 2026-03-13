@@ -1,6 +1,6 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
@@ -17,51 +17,6 @@ extension PokeUITests {
     XCTAssertEqual(FieldDisplayStyle.dmgAuthentic.sidebarOptionTitle, "Authentic DMG")
     XCTAssertEqual(FieldDisplayStyle.dmgTinted.sidebarOptionTitle, "Tinted")
     XCTAssertEqual(FieldDisplayStyle.rawGrayscale.sidebarOptionTitle, "Raw Gray")
-  }
-  func testFieldSceneRenderTaskIdentityIgnoresDisplayStyle() {
-    let map = makePaletteMap(blockWidth: 2, blockHeight: 2)
-    let root = repoRoot()
-    let assets = FieldRenderAssets(
-      tileset: .init(
-        id: "OVERWORLD",
-        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
-        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
-      ),
-      overworldSprites: [
-        "SPRITE_RED": spriteDefinition(id: "SPRITE_RED", filename: "red.png"),
-        "SPRITE_OAK": spriteDefinition(id: "SPRITE_OAK", filename: "oak.png"),
-      ]
-    )
-    let objects = [
-      FieldObjectRenderState(
-        id: "oak",
-        displayName: "Oak",
-        sprite: "SPRITE_OAK",
-        position: .init(x: 1, y: 1),
-        facing: .left,
-        interactionDialogueID: nil,
-        trainerBattleID: nil
-      )
-    ]
-
-    let tintedIdentity = FieldMapView.sceneRenderTaskIdentity(
-      map: map,
-      playerFacing: .down,
-      playerSpriteID: "SPRITE_RED",
-      objects: objects,
-      renderAssets: assets,
-      displayStyle: .dmgTinted
-    )
-    let authenticIdentity = FieldMapView.sceneRenderTaskIdentity(
-      map: map,
-      playerFacing: .down,
-      playerSpriteID: "SPRITE_RED",
-      objects: objects,
-      renderAssets: assets,
-      displayStyle: .dmgAuthentic
-    )
-
-    XCTAssertEqual(tintedIdentity, authenticIdentity)
   }
   func testFieldSceneMetricsUseFixedGameplayViewportPadding() {
     let metrics = FieldSceneRenderer.sceneMetrics(

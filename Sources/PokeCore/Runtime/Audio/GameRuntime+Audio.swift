@@ -86,6 +86,19 @@ extension GameRuntime {
         requestAudioCue(id: "trainer_battle", reason: "battle")
     }
 
+    func requestTrainerVictoryMusic(reason: String = "battleVictory") {
+        requestAudioCue(id: "trainer_victory", reason: reason)
+    }
+
+    func requestWildVictoryMusic(reason: String = "battleVictory") {
+        requestAudioCue(id: "wild_victory", reason: reason)
+    }
+
+    func requestTrainerEncounterMusic(for battleID: String) {
+        guard let cueID = content.trainerEncounterAudioCueID(for: battleID) else { return }
+        requestAudioCue(id: cueID, reason: "trainerEncounter")
+    }
+
     func requestRivalExitMusic() {
         requestAudioCue(id: "rival_exit", reason: "scriptOverride")
     }
@@ -107,30 +120,66 @@ extension GameRuntime {
         collisionSoundInFlight = result.status == .started
     }
 
-    @discardableResult
-    func playMoveAudio(for move: MoveManifest, attackerSpeciesID: String, reason: String = "battleMove") -> SoundEffectPlaybackResult? {
+    func battleSoundEffectRequest(
+        id: String,
+        frequencyModifier: Int? = nil,
+        tempoModifier: Int? = nil
+    ) -> SoundEffectPlaybackRequest? {
+        guard content.soundEffect(id: id) != nil else { return nil }
+        return .init(
+            soundEffectID: id,
+            frequencyModifier: frequencyModifier,
+            tempoModifier: tempoModifier
+        )
+    }
+
+    func speciesCrySoundEffectRequest(
+        speciesID: String,
+        frequencyModifier: Int? = nil,
+        tempoModifier: Int? = nil
+    ) -> SoundEffectPlaybackRequest? {
+        guard let species = content.species(id: speciesID),
+              let soundEffectID = species.crySoundEffectID else {
+            return nil
+        }
+
+        return battleSoundEffectRequest(
+            id: soundEffectID,
+            frequencyModifier: frequencyModifier ?? species.cryPitch,
+            tempoModifier: tempoModifier ?? species.cryLength
+        )
+    }
+
+    func enemyFaintSoundEffectRequests() -> [SoundEffectPlaybackRequest] {
+        ["SFX_FAINT_FALL", "SFX_FAINT_THUD"].compactMap { battleSoundEffectRequest(id: $0) }
+    }
+
+    func moveSoundEffectRequest(
+        for move: MoveManifest,
+        attackerSpeciesID: String
+    ) -> SoundEffectPlaybackRequest? {
         guard let battleAudio = move.battleAudio else { return nil }
         switch battleAudio.kind {
         case .soundEffect:
             guard let soundEffectID = battleAudio.soundEffectID else { return nil }
-            return playSoundEffect(
+            return battleSoundEffectRequest(
                 id: soundEffectID,
-                reason: reason,
                 frequencyModifier: battleAudio.frequencyModifier,
                 tempoModifier: battleAudio.tempoModifier
             )
         case .cry:
-            guard let species = content.species(id: attackerSpeciesID),
-                  let soundEffectID = species.crySoundEffectID else {
-                return nil
-            }
-            return playSoundEffect(
-                id: soundEffectID,
-                reason: reason,
-                frequencyModifier: battleAudio.frequencyModifier ?? species.cryPitch,
-                tempoModifier: battleAudio.tempoModifier ?? species.cryLength
+            return speciesCrySoundEffectRequest(
+                speciesID: attackerSpeciesID,
+                frequencyModifier: battleAudio.frequencyModifier,
+                tempoModifier: battleAudio.tempoModifier
             )
         }
+    }
+
+    @discardableResult
+    func playMoveAudio(for move: MoveManifest, attackerSpeciesID: String, reason: String = "battleMove") -> SoundEffectPlaybackResult? {
+        guard let request = moveSoundEffectRequest(for: move, attackerSpeciesID: attackerSpeciesID) else { return nil }
+        return playSoundEffect(request, reason: reason)
     }
 
     func executeDialoguePageEventsIfNeeded() {
@@ -176,15 +225,8 @@ extension GameRuntime {
             }
         case .cry:
             if let speciesID = event.speciesID,
-               let species = content.species(id: speciesID),
-               let soundEffectID = species.crySoundEffectID {
-                _ = playSoundEffect(
-                    id: soundEffectID,
-                    reason: "dialogueCommand",
-                    frequencyModifier: species.cryPitch,
-                    tempoModifier: species.cryLength,
-                    completion: completion
-                )
+               let request = speciesCrySoundEffectRequest(speciesID: speciesID) {
+                _ = playSoundEffect(request, reason: "dialogueCommand", completion: completion)
             } else {
                 completion?()
             }
@@ -241,6 +283,21 @@ extension GameRuntime {
         audioPlayer.playMusic(request: .init(trackID: trackID, entryID: entryID)) {
             completion?()
         }
+    }
+
+    @discardableResult
+    func playSoundEffect(
+        _ request: SoundEffectPlaybackRequest,
+        reason: String,
+        completion: (() -> Void)? = nil
+    ) -> SoundEffectPlaybackResult {
+        playSoundEffect(
+            id: request.soundEffectID,
+            reason: reason,
+            frequencyModifier: request.frequencyModifier,
+            tempoModifier: request.tempoModifier,
+            completion: completion
+        )
     }
 
     @discardableResult

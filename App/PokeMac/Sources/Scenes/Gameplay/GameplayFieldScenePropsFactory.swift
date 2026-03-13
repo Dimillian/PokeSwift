@@ -1,6 +1,7 @@
 import Foundation
 import PokeCore
 import PokeDataModel
+import PokeRender
 import PokeUI
 
 @MainActor
@@ -10,25 +11,26 @@ enum GameplayScenePropsFactory {
     static func make(
         runtime: GameRuntime,
         appearanceMode: AppAppearanceMode,
-        onCycleAppearanceMode: @escaping @MainActor () -> Void
+        gameplayHDREnabled: Bool
     ) -> GameplaySceneProps? {
-        let snapshot = runtime.currentSnapshot()
         let manifestIndex = cachedManifestIndex(for: runtime)
         let saveSidebar = makeSaveSidebar(runtime: runtime)
-        let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
-            items: snapshot.inventory?.items.map {
-                InventorySidebarItemProps(
-                    id: $0.itemID,
-                    name: $0.displayName,
-                    quantityText: "x\($0.quantity)"
-                )
-            } ?? []
-        )
 
         let nicknameConfirmation = makeNicknameConfirmationProps(runtime: runtime)
 
         switch GameplaySidebarKind.forScene(runtime.scene) {
         case .fieldLike:
+            let fieldState = runtime.currentFieldSceneState()
+            let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
+                items: fieldState.inventory?.items.map {
+                    InventorySidebarItemProps(
+                        id: $0.itemID,
+                        name: $0.displayName,
+                        quantityText: "x\($0.quantity)"
+                    )
+                } ?? []
+            )
+
             return GameplaySceneProps(
                 viewport: .field(
                     GameplayFieldViewportProps(
@@ -39,9 +41,12 @@ enum GameplayScenePropsFactory {
                         objects: runtime.currentFieldObjects,
                         playerSpriteID: runtime.playerSpriteID,
                         renderAssets: makeFieldRenderAssets(runtime: runtime),
-                        fieldTransition: snapshot.field?.transition,
+                        fieldTransition: fieldState.transition,
+                        fieldAlert: fieldState.fieldAlert,
                         dialogueLines: runtime.currentDialoguePage?.lines,
-                        shop: snapshot.shop,
+                        fieldPrompt: fieldState.fieldPrompt,
+                        fieldHealing: fieldState.fieldHealing,
+                        shop: fieldState.shop,
                         starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
                         starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
                         namingProps: makeNamingProps(runtime: runtime),
@@ -51,12 +56,13 @@ enum GameplayScenePropsFactory {
                 sidebarMode: .fieldLike(
                     GameplayFieldSidebarProps(
                         profile: makeTrainerProfile(runtime: runtime),
-                        party: makeFieldPartySidebar(runtime: runtime, snapshot: snapshot, manifestIndex: manifestIndex),
+                        party: makeFieldPartySidebar(runtime: runtime, party: fieldState.party, manifestIndex: manifestIndex),
                         inventory: sidebarInventory,
                         save: saveSidebar,
                         options: GameplaySidebarPropsBuilder.makeOptionsSection(
                             isMusicEnabled: runtime.isMusicEnabled,
-                            appearanceMode: appearanceMode
+                            appearanceMode: appearanceMode,
+                            gameplayHDREnabled: gameplayHDREnabled
                         )
                     )
                 ),
@@ -66,10 +72,6 @@ enum GameplayScenePropsFactory {
                         _ = runtime.saveCurrentGame()
                     case "load":
                         _ = runtime.loadSavedGameFromSidebar()
-                    case "music":
-                        runtime.toggleMusicEnabled()
-                    case "appearanceMode":
-                        onCycleAppearanceMode()
                     default:
                         break
                     }
@@ -80,7 +82,8 @@ enum GameplayScenePropsFactory {
                 initialFieldDisplayStyle: .defaultGameplayStyle
             )
         case .battle:
-            guard let battle = snapshot.battle else { return nil }
+            let battleState = runtime.currentBattleSceneState()
+            guard let battle = battleState.battle else { return nil }
 
             let playerSpriteURL = runtime.content.species(id: battle.playerPokemon.speciesID)?
                 .battleSprite
@@ -88,6 +91,11 @@ enum GameplayScenePropsFactory {
             let enemySpriteURL = runtime.content.species(id: battle.enemyPokemon.speciesID)?
                 .battleSprite
                 .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
+            let trainerSpriteURL = battle.trainerSpritePath.map {
+                runtime.content.rootURL.appendingPathComponent($0)
+            }
+            let playerTrainerFrontSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/red.png")
+            let playerTrainerBackSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/redb.png")
             let promptText = GameplayBattlePrompts.promptText(
                 textLines: battle.textLines,
                 battleMessage: battle.battleMessage,
@@ -103,6 +111,9 @@ enum GameplayScenePropsFactory {
                         textLines: battle.textLines,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
+                        trainerSpriteURL: trainerSpriteURL,
+                        playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
+                        playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,
                         playerSpriteURL: playerSpriteURL,
                         enemySpriteURL: enemySpriteURL,
                         bagItems: battle.bagItems,
@@ -126,7 +137,7 @@ enum GameplayScenePropsFactory {
                         canUseBag: battle.canUseBag,
                         canSwitch: battle.canSwitch,
                         bagItemCount: battle.bagItems.count,
-                        party: makeBattlePartySidebar(runtime: runtime, snapshot: snapshot, manifestIndex: manifestIndex, battle: battle),
+                        party: makeBattlePartySidebar(party: battleState.party, manifestIndex: manifestIndex, battle: battle),
                         capture: battle.capture,
                         presentation: battle.presentation
                     )

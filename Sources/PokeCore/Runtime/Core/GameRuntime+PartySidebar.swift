@@ -3,9 +3,12 @@ import Foundation
 extension GameRuntime {
     func canHandleFieldPartySidebarSelection(index: Int, gameplayState: GameplayState) -> Bool {
         dialogueState == nil &&
+            fieldPromptState == nil &&
+            fieldHealingState == nil &&
             shopState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
+            trainerEngagementTask == nil &&
             gameplayState.playerParty.indices.contains(index) &&
             gameplayState.playerParty.count > 1
     }

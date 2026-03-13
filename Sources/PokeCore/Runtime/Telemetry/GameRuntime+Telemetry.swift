@@ -11,6 +11,8 @@ extension GameRuntime {
             titleMenu: scene == .titleMenu ? TitleMenuTelemetry(entries: menuEntries, focusedIndex: focusedIndex) : nil,
             field: makeFieldTelemetry(),
             dialogue: makeDialogueTelemetry(),
+            fieldPrompt: makeFieldPromptTelemetry(),
+            fieldHealing: makeFieldHealingTelemetry(),
             starterChoice: makeStarterChoiceTelemetry(),
             party: makePartyTelemetry(),
             inventory: makeInventoryTelemetry(),
@@ -55,9 +57,8 @@ extension GameRuntime {
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
             renderMode: currentFieldRenderMode,
-            transition: fieldTransitionState.map {
-                .init(kind: $0.kind.rawValue, phase: $0.phase.rawValue)
-            }
+            alert: makeFieldAlertTelemetry(),
+            transition: makeFieldTransitionTelemetry()
         )
     }
 
@@ -65,6 +66,28 @@ extension GameRuntime {
         guard let dialogueState, let dialogue = content.dialogue(id: dialogueState.dialogueID) else { return nil }
         let page = dialogue.pages[dialogueState.pageIndex]
         return DialogueTelemetry(dialogueID: dialogue.id, pageIndex: dialogueState.pageIndex, pageCount: dialogue.pages.count, lines: page.lines)
+    }
+
+    func makeFieldPromptTelemetry() -> FieldPromptTelemetry? {
+        guard let fieldPromptState else { return nil }
+        return FieldPromptTelemetry(
+            interactionID: fieldPromptState.interactionID,
+            kind: fieldPromptState.kind.rawValue,
+            options: fieldPromptOptions(for: fieldPromptState.kind),
+            focusedIndex: fieldPromptState.focusedIndex
+        )
+    }
+
+    func makeFieldHealingTelemetry() -> FieldHealingTelemetry? {
+        guard let fieldHealingState else { return nil }
+        return FieldHealingTelemetry(
+            interactionID: fieldHealingState.interactionID,
+            phase: fieldHealingState.phase.rawValue,
+            activeBallCount: fieldHealingState.activeBallCount,
+            totalBallCount: fieldHealingState.totalBallCount,
+            pulseStep: fieldHealingState.pulseStep,
+            nurseObjectID: fieldHealingState.nurseObjectID
+        )
     }
 
     func makeStarterChoiceTelemetry() -> StarterChoiceTelemetry? {
@@ -83,6 +106,7 @@ extension GameRuntime {
             battleID: battle.battleID,
             kind: battle.kind,
             trainerName: battle.trainerName,
+            trainerSpritePath: battle.trainerSpritePath,
             playerPokemon: makePartyPokemonTelemetry(from: battle.playerPokemon),
             enemyPokemon: makePartyPokemonTelemetry(from: battle.enemyPokemon),
             enemyPartyCount: battle.enemyParty.count,
@@ -105,6 +129,7 @@ extension GameRuntime {
                 revision: battle.presentation.revision,
                 uiVisibility: battle.presentation.uiVisibility,
                 activeSide: battle.presentation.activeSide,
+                hidePlayerPokemon: battle.presentation.hidePlayerPokemon,
                 transitionStyle: battle.presentation.transitionStyle,
                 meterAnimation: battle.presentation.meterAnimation
             )

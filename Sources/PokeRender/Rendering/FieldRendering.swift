@@ -2,7 +2,6 @@ import Foundation
 import SwiftUI
 import CoreGraphics
 import ImageIO
-import PokeCore
 import PokeDataModel
 
 public enum FieldDisplayStyle: Equatable, Hashable, Sendable {
@@ -160,32 +159,52 @@ struct FieldBlockset: Equatable {
     }
 }
 
-struct FieldPixelPoint: Equatable, Hashable, Sendable {
-    let x: Int
-    let y: Int
+public struct FieldPixelPoint: Equatable, Hashable, Sendable {
+    public let x: Int
+    public let y: Int
+
+    public init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
 }
 
-struct FieldPixelSize: Equatable, Hashable, Sendable {
-    let width: Int
-    let height: Int
+public struct FieldPixelSize: Equatable, Hashable, Sendable {
+    public let width: Int
+    public let height: Int
+
+    public init(width: Int, height: Int) {
+        self.width = width
+        self.height = height
+    }
 }
 
-struct FieldSceneMetrics: Equatable, Hashable, Sendable {
-    let mapPixelSize: FieldPixelSize
-    let paddingPixels: FieldPixelSize
-    let contentPixelSize: FieldPixelSize
+public struct FieldSceneMetrics: Equatable, Hashable, Sendable {
+    public let mapPixelSize: FieldPixelSize
+    public let paddingPixels: FieldPixelSize
+    public let contentPixelSize: FieldPixelSize
+
+    public init(
+        mapPixelSize: FieldPixelSize,
+        paddingPixels: FieldPixelSize,
+        contentPixelSize: FieldPixelSize
+    ) {
+        self.mapPixelSize = mapPixelSize
+        self.paddingPixels = paddingPixels
+        self.contentPixelSize = contentPixelSize
+    }
 }
 
-struct FieldCameraState: Equatable, Hashable, Sendable {
-    let origin: FieldPixelPoint
-    let viewportSize: FieldPixelSize
+public struct FieldCameraState: Equatable, Hashable, Sendable {
+    public let origin: FieldPixelPoint
+    public let viewportSize: FieldPixelSize
 
-    init(origin: FieldPixelPoint, viewportSize: FieldPixelSize = FieldSceneRenderer.viewportPixelSize) {
+    public init(origin: FieldPixelPoint, viewportSize: FieldPixelSize = FieldSceneRenderer.viewportPixelSize) {
         self.origin = origin
         self.viewportSize = viewportSize
     }
 
-    static func target(
+    public static func target(
         playerWorldPosition: FieldPixelPoint,
         contentPixelSize: FieldPixelSize,
         viewportSize: FieldPixelSize = FieldSceneRenderer.viewportPixelSize
@@ -205,26 +224,56 @@ struct FieldCameraState: Equatable, Hashable, Sendable {
     }
 }
 
-enum FieldRenderedActorRole: Sendable {
+public enum FieldRenderedActorRole: Sendable {
     case player
     case object
 }
 
-struct FieldRenderedActor: Identifiable, @unchecked Sendable {
-    let id: String
-    let role: FieldRenderedActorRole
-    let image: CGImage
-    let walkingImage: CGImage?
-    let worldPosition: FieldPixelPoint
-    let size: FieldPixelSize
-    let flippedHorizontally: Bool
+public struct FieldRenderedActor: Identifiable, @unchecked Sendable {
+    public let id: String
+    public let role: FieldRenderedActorRole
+    public let image: CGImage
+    public let walkingImage: CGImage?
+    public let worldPosition: FieldPixelPoint
+    public let size: FieldPixelSize
+    public let flippedHorizontally: Bool
+
+    public init(
+        id: String,
+        role: FieldRenderedActorRole,
+        image: CGImage,
+        walkingImage: CGImage?,
+        worldPosition: FieldPixelPoint,
+        size: FieldPixelSize,
+        flippedHorizontally: Bool
+    ) {
+        self.id = id
+        self.role = role
+        self.image = image
+        self.walkingImage = walkingImage
+        self.worldPosition = worldPosition
+        self.size = size
+        self.flippedHorizontally = flippedHorizontally
+    }
 }
 
-struct FieldRenderedScene: @unchecked Sendable {
-    let mapID: String
-    let metrics: FieldSceneMetrics
-    let backgroundImage: CGImage
-    let actors: [FieldRenderedActor]
+public struct FieldRenderedScene: @unchecked Sendable {
+    public let mapID: String
+    public let metrics: FieldSceneMetrics
+    public let backgroundImage: CGImage
+    public let actors: [FieldRenderedActor]
+
+    public init(
+        mapID: String,
+        metrics: FieldSceneMetrics,
+        backgroundImage: CGImage,
+        actors: [FieldRenderedActor]
+    ) {
+        self.mapID = mapID
+        self.metrics = metrics
+        self.backgroundImage = backgroundImage
+        self.actors = actors
+    }
 }
 
 struct FieldRenderSignature: Hashable, Sendable {
@@ -233,7 +282,7 @@ struct FieldRenderSignature: Hashable, Sendable {
         let position: TilePoint
         let facingRawValue: String
 
-        init(object: FieldObjectRenderState) {
+        init(object: FieldRenderableObjectState) {
             spriteID = object.sprite
             position = object.position
             facingRawValue = object.facing.rawValue
@@ -323,7 +372,7 @@ struct FieldRenderSignature: Hashable, Sendable {
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerSpriteID: String,
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         assets: FieldRenderAssets
     ) {
         mapID = map.id
@@ -336,6 +385,42 @@ struct FieldRenderSignature: Hashable, Sendable {
         self.playerSpriteID = playerSpriteID
         objectStates = objects.map(ObjectSignature.init(object:))
         assetSignature = AssetSignature(assets: assets)
+    }
+}
+
+public struct FieldSceneRenderIdentity: Equatable {
+    public struct ObjectVisualSignature: Equatable {
+        public let id: String
+        public let spriteID: String
+        public let facingRawValue: String
+
+        public init(object: FieldRenderableObjectState) {
+            id = object.id
+            spriteID = object.sprite
+            facingRawValue = object.facing.rawValue
+        }
+    }
+
+    public let map: MapManifest
+    public let playerFacing: FacingDirection
+    public let playerSpriteID: String
+    public let objectVisuals: [ObjectVisualSignature]
+    public let assets: FieldRenderAssets
+
+    public init(
+        map: MapManifest,
+        playerFacing: FacingDirection,
+        playerSpriteID: String,
+        objects: [FieldRenderableObjectState],
+        assets: FieldRenderAssets
+    ) {
+        self.map = map
+        self.playerFacing = playerFacing
+        self.playerSpriteID = playerSpriteID
+        objectVisuals = objects
+            .map(ObjectVisualSignature.init(object:))
+            .sorted { lhs, rhs in lhs.id < rhs.id }
+        self.assets = assets
     }
 }
 
@@ -545,15 +630,15 @@ private final class FieldRendererCaches: @unchecked Sendable {
     }
 }
 
-struct FieldSceneRenderer {
-    static let tilePixelSize = 8
-    static let blockTileWidth = 4
-    static let blockTileHeight = 4
-    static let stepPixelSize = 16
-    static let blockPixelSize = tilePixelSize * blockTileWidth
-    static let viewportPixelSize = FieldPixelSize(width: 160, height: 144)
+public struct FieldSceneRenderer {
+    public static let tilePixelSize = 8
+    public static let blockTileWidth = 4
+    public static let blockTileHeight = 4
+    public static let stepPixelSize = 16
+    public static let blockPixelSize = tilePixelSize * blockTileWidth
+    public static let viewportPixelSize = FieldPixelSize(width: 160, height: 144)
 
-    static func sceneMetrics(for map: MapManifest) -> FieldSceneMetrics {
+    public static func sceneMetrics(for map: MapManifest) -> FieldSceneMetrics {
         let paddingBlocks = FieldPixelSize(
             width: max(1, Int(ceil(Double(viewportPixelSize.width) / Double(blockPixelSize)))),
             height: max(1, Int(ceil(Double(viewportPixelSize.height) / Double(blockPixelSize))))
@@ -578,19 +663,19 @@ struct FieldSceneRenderer {
         )
     }
 
-    static func playerWorldPosition(for position: TilePoint, metrics: FieldSceneMetrics) -> FieldPixelPoint {
+    public static func playerWorldPosition(for position: TilePoint, metrics: FieldSceneMetrics) -> FieldPixelPoint {
         FieldPixelPoint(
             x: (position.x * stepPixelSize) + metrics.paddingPixels.width,
             y: (position.y * stepPixelSize) + metrics.paddingPixels.height
         )
     }
 
-    static func renderScene(
+    public static func renderScene(
         map: MapManifest,
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerSpriteID: String,
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         assets: FieldRenderAssets
     ) throws -> FieldRenderedScene {
         let atlas = try FieldRendererCaches.shared.preparedAtlas(for: assets.tileset)
@@ -631,16 +716,16 @@ struct FieldSceneRenderer {
             mapID: map.id,
             metrics: metrics,
             backgroundImage: backgroundImage,
-            actors: actors
+            actors: sortedActorsForPresentation(actors)
         )
     }
 
-    static func render(
+    public static func render(
         map: MapManifest,
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerSpriteID: String,
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         assets: FieldRenderAssets
     ) throws -> CGImage {
         let renderSignature = FieldRenderSignature(
@@ -732,7 +817,7 @@ struct FieldSceneRenderer {
     }
 
     private static func renderedActors(
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerSpriteID: String,
@@ -769,6 +854,15 @@ struct FieldSceneRenderer {
         }
 
         return actors
+    }
+
+    private static func sortedActorsForPresentation(_ actors: [FieldRenderedActor]) -> [FieldRenderedActor] {
+        actors.sorted { lhs, rhs in
+            if lhs.worldPosition.y == rhs.worldPosition.y {
+                return lhs.id < rhs.id
+            }
+            return lhs.worldPosition.y < rhs.worldPosition.y
+        }
     }
 
     private static func renderedActor(
@@ -894,7 +988,7 @@ struct FieldSceneRenderer {
     }
 
     private static func drawActors(
-        objects: [FieldObjectRenderState],
+        objects: [FieldRenderableObjectState],
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerSpriteID: String,

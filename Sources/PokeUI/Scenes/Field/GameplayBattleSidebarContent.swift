@@ -15,6 +15,8 @@ struct BattleSummaryContent: View {
             return "Move Select"
         case "partySelection":
             return "Party"
+        case "trainerAboutToUseDecision":
+            return "Shift"
         case "resolvingTurn":
             return "Resolving"
         case "turnText":

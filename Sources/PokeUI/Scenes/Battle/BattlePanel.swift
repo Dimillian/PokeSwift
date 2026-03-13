@@ -1,25 +1,42 @@
 import SwiftUI
 import PokeDataModel
+import PokeRender
 
 public struct BattlePanel: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
+    @Environment(\.colorScheme) private var colorScheme
+
     let trainerName: String
+    let kind: BattleKind
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let trainerSpriteURL: URL?
+    let playerTrainerFrontSpriteURL: URL?
+    let playerTrainerBackSpriteURL: URL?
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let presentation: BattlePresentationTelemetry
 
     public init(
         trainerName: String,
+        kind: BattleKind,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
+        trainerSpriteURL: URL?,
+        playerTrainerFrontSpriteURL: URL?,
+        playerTrainerBackSpriteURL: URL?,
         playerSpriteURL: URL?,
         enemySpriteURL: URL?,
         presentation: BattlePresentationTelemetry
     ) {
         self.trainerName = trainerName
+        self.kind = kind
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
+        self.trainerSpriteURL = trainerSpriteURL
+        self.playerTrainerFrontSpriteURL = playerTrainerFrontSpriteURL
+        self.playerTrainerBackSpriteURL = playerTrainerBackSpriteURL
         self.playerSpriteURL = playerSpriteURL
         self.enemySpriteURL = enemySpriteURL
         self.presentation = presentation
@@ -34,14 +51,22 @@ public struct BattlePanel: View {
             )
 
             BattleViewportCanvas(
+                kind: kind,
                 playerPokemon: playerPokemon,
                 enemyPokemon: enemyPokemon,
+                trainerSpriteURL: trainerSpriteURL,
+                playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
+                playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,
                 playerSpriteURL: playerSpriteURL,
                 enemySpriteURL: enemySpriteURL,
                 presentation: presentation
             )
             .frame(width: viewportSize.width, height: viewportSize.height)
-            .battleScreenEffect(displayScale: scale, presentation: presentation)
+            .battleScreenEffect(
+                displayScale: scale,
+                presentation: presentation,
+                hdrBoost: battleShaderHDRBoost
+            )
             .overlay {
                 BattleIntroFlashOverlay(presentation: presentation)
             }
@@ -66,6 +91,17 @@ public struct BattlePanel: View {
             return max(1, floor(rawScale))
         }
         return rawScale
+    }
+
+    private var battleShaderHDRBoost: Float {
+        Float(
+            PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
+            .battleShaderBoost
+        )
     }
 }
 

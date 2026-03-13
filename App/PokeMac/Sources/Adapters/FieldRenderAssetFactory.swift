@@ -1,6 +1,6 @@
 import PokeCore
 import PokeDataModel
-import PokeUI
+import PokeRender
 
 @MainActor
 func makeFieldRenderAssets(runtime: GameRuntime) -> FieldRenderAssets? {

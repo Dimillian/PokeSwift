@@ -24,9 +24,20 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
         .init(id: "oak_intro", assetID: "MUSIC_MEET_PROF_OAK"),
         .init(id: "rival_intro", assetID: "MUSIC_MEET_RIVAL"),
         .init(id: "rival_exit", assetID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"),
+        .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
+        .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
+        .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
         .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+        .init(id: "trainer_victory", assetID: "MUSIC_DEFEATED_TRAINER"),
+        .init(id: "wild_victory", assetID: "MUSIC_DEFEATED_WILD_MON"),
         .init(
             id: "mom_heal",
+            assetID: "MUSIC_PKMN_HEALED",
+            waitForCompletion: true,
+            resumeMusicAfterCompletion: true
+        ),
+        .init(
+            id: "pokemon_center_healed",
             assetID: "MUSIC_PKMN_HEALED",
             waitForCompletion: true,
             resumeMusicAfterCompletion: true
@@ -574,15 +585,7 @@ private func renderTrackEntry(
         parser: parser
     )
     let channelPrograms = try channelEntries.map { header in
-        let waveform: AudioManifest.Waveform
-        switch header.channelNumber {
-        case 1, 2:
-            waveform = .square
-        case 3:
-            waveform = .wave
-        default:
-            waveform = .noise
-        }
+        let waveform = waveform(for: header.channelNumber)
         let result = try renderChannelEntry(
             label: header.label,
             parser: parser,
@@ -610,6 +613,19 @@ private func renderTrackEntry(
         playbackMode: playbackMode,
         channels: channelPrograms
     )
+}
+
+private func waveform(for channelNumber: Int) -> AudioManifest.Waveform {
+    switch channelNumber {
+    case 1, 2, 5, 6:
+        return .square
+    case 3, 7:
+        return .wave
+    case 4, 8:
+        return .noise
+    default:
+        return .noise
+    }
 }
 
 private func resolveTrackGlobalAudioState(entryLabel: String, parser: ParsedMusicFile) -> TrackGlobalAudioState {

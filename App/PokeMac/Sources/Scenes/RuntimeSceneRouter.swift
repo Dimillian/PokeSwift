@@ -5,9 +5,8 @@ import PokeDataModel
 import PokeUI
 
 struct RuntimeSceneRouter: View {
+    @Environment(AppPreferences.self) private var preferences
     @Bindable var runtime: GameRuntime
-    let appearanceMode: AppAppearanceMode
-    let onCycleAppearanceMode: @MainActor () -> Void
 
     var body: some View {
         switch runtime.scene {
@@ -37,8 +36,8 @@ struct RuntimeSceneRouter: View {
         case .field, .dialogue, .scriptedSequence, .starterChoice, .battle, .naming:
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
-                appearanceMode: appearanceMode,
-                onCycleAppearanceMode: onCycleAppearanceMode
+                appearanceMode: preferences.appearanceMode,
+                gameplayHDREnabled: preferences.gameplayHDREnabled
             ) {
                 GameplayScene(props: gameplaySceneProps)
             }

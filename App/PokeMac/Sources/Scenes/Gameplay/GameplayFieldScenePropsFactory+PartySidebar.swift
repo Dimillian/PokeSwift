@@ -21,13 +21,13 @@ extension GameplayScenePropsFactory {
 
     static func makeFieldPartySidebar(
         runtime: GameRuntime,
-        snapshot: RuntimeTelemetrySnapshot,
+        party: PartyTelemetry?,
         manifestIndex: GameplaySidebarManifestIndex
     ) -> PartySidebarProps {
-        let configuration = fieldPartySidebarConfiguration(runtime: runtime, snapshot: snapshot)
+        let configuration = fieldPartySidebarConfiguration(runtime: runtime, party: party)
 
         return GameplaySidebarPropsBuilder.makeParty(
-            from: snapshot.party,
+            from: party,
             speciesDetailsByID: manifestIndex.speciesDetailsByID,
             moveDisplayNamesByID: manifestIndex.moveDisplayNamesByID,
             mode: configuration.mode,
@@ -40,15 +40,14 @@ extension GameplayScenePropsFactory {
     }
 
     static func makeBattlePartySidebar(
-        runtime: GameRuntime,
-        snapshot: RuntimeTelemetrySnapshot,
+        party: PartyTelemetry?,
         manifestIndex: GameplaySidebarManifestIndex,
         battle: BattleTelemetry
     ) -> PartySidebarProps {
-        let configuration = battlePartySidebarConfiguration(snapshot: snapshot, battle: battle)
+        let configuration = battlePartySidebarConfiguration(party: party, battle: battle)
 
         return GameplaySidebarPropsBuilder.makeParty(
-            from: snapshot.party,
+            from: party,
             speciesDetailsByID: manifestIndex.speciesDetailsByID,
             moveDisplayNamesByID: manifestIndex.moveDisplayNamesByID,
             mode: configuration.mode,
@@ -61,10 +60,10 @@ extension GameplayScenePropsFactory {
 
     private static func fieldPartySidebarConfiguration(
         runtime: GameRuntime,
-        snapshot: RuntimeTelemetrySnapshot
+        party: PartyTelemetry?
     ) -> FieldPartySidebarConfiguration {
         let reorderSelectionIndex = runtime.fieldPartyReorderSelectionIndex
-        let selectableIndices = fieldPartySelectableIndices(runtime: runtime, snapshot: snapshot)
+        let selectableIndices = fieldPartySelectableIndices(runtime: runtime, party: party)
 
         if selectableIndices.isEmpty {
             return FieldPartySidebarConfiguration(
@@ -96,10 +95,10 @@ extension GameplayScenePropsFactory {
     }
 
     private static func battlePartySidebarConfiguration(
-        snapshot: RuntimeTelemetrySnapshot,
+        party: PartyTelemetry?,
         battle: BattleTelemetry
     ) -> BattlePartySidebarConfiguration {
-        let partyPokemon = snapshot.party?.pokemon ?? []
+        let partyPokemon = party?.pokemon ?? []
         let isSelecting = battle.phase == "partySelection"
         return BattlePartySidebarConfiguration(
             mode: isSelecting ? .battleSwitch : .passive,
@@ -112,9 +111,9 @@ extension GameplayScenePropsFactory {
 
     private static func fieldPartySelectableIndices(
         runtime: GameRuntime,
-        snapshot: RuntimeTelemetrySnapshot
+        party: PartyTelemetry?
     ) -> Set<Int> {
-        guard runtime.scene == .field, let partyPokemon = snapshot.party?.pokemon, partyPokemon.count > 1 else {
+        guard runtime.scene == .field, let partyPokemon = party?.pokemon, partyPokemon.count > 1 else {
             return []
         }
         return Set(partyPokemon.indices)

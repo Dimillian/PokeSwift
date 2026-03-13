@@ -1,4 +1,5 @@
 import SwiftUI
+import PokeRender
 
 public enum GameplayFooterPlacement {
     case insideScreen
@@ -49,13 +50,16 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
     private let footer: Footer
     private let overlayContent: OverlayContent
     private let footerPlacement: GameplayFooterPlacement
+    private let screenDisplayStyle: FieldDisplayStyle
 
     public init(
+        screenDisplayStyle: FieldDisplayStyle = .defaultGameplayStyle,
         footerPlacement: GameplayFooterPlacement = .insideScreen,
         @ViewBuilder screenContent: () -> ScreenContent,
         @ViewBuilder footer: () -> Footer,
         @ViewBuilder overlayContent: () -> OverlayContent
     ) {
+        self.screenDisplayStyle = screenDisplayStyle
         self.footerPlacement = footerPlacement
         self.screenContent = screenContent()
         self.footer = footer()
@@ -64,7 +68,7 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
 
     public var body: some View {
         ZStack(alignment: .topTrailing) {
-            GameplayDisplayShell {
+            GameplayDisplayShell(screenDisplayStyle: screenDisplayStyle) {
                 screenContent
             } footer: {
                 footer
@@ -108,19 +112,22 @@ public struct FieldMapStage<MapContent: View, Footer: View, OverlayContent: View
     private let mapContent: MapContent
     private let footer: Footer
     private let overlayContent: OverlayContent
+    private let screenDisplayStyle: FieldDisplayStyle
 
     public init(
+        screenDisplayStyle: FieldDisplayStyle = .defaultGameplayStyle,
         @ViewBuilder mapContent: () -> MapContent,
         @ViewBuilder footer: () -> Footer,
         @ViewBuilder overlayContent: () -> OverlayContent
     ) {
+        self.screenDisplayStyle = screenDisplayStyle
         self.mapContent = mapContent()
         self.footer = footer()
         self.overlayContent = overlayContent()
     }
 
     public var body: some View {
-        GameplayShellStage {
+        GameplayShellStage(screenDisplayStyle: screenDisplayStyle) {
             mapContent
         } footer: {
             footer
@@ -134,19 +141,22 @@ public struct BattleViewportStage<Content: View, Footer: View, OverlayContent: V
     private let content: Content
     private let footer: Footer
     private let overlayContent: OverlayContent
+    private let screenDisplayStyle: FieldDisplayStyle
 
     public init(
+        screenDisplayStyle: FieldDisplayStyle = .defaultGameplayStyle,
         @ViewBuilder content: () -> Content,
         @ViewBuilder footer: () -> Footer,
         @ViewBuilder overlayContent: () -> OverlayContent
     ) {
+        self.screenDisplayStyle = screenDisplayStyle
         self.content = content()
         self.footer = footer()
         self.overlayContent = overlayContent()
     }
 
     public var body: some View {
-        GameplayShellStage {
+        GameplayShellStage(screenDisplayStyle: screenDisplayStyle) {
             content
         } footer: {
             footer
@@ -157,15 +167,18 @@ public struct BattleViewportStage<Content: View, Footer: View, OverlayContent: V
 }
 
 private struct GameplayDisplayShell<Content: View, Footer: View>: View {
+    private let screenDisplayStyle: FieldDisplayStyle
     private let content: Content
     private let footer: Footer
     private let footerPlacement: GameplayFooterPlacement
 
     init(
+        screenDisplayStyle: FieldDisplayStyle,
         @ViewBuilder content: () -> Content,
         @ViewBuilder footer: () -> Footer,
         footerPlacement: @escaping () -> GameplayFooterPlacement
     ) {
+        self.screenDisplayStyle = screenDisplayStyle
         self.content = content()
         self.footer = footer()
         self.footerPlacement = footerPlacement()
@@ -173,7 +186,7 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            GameplayScreenWell {
+            GameplayScreenWell(displayStyle: screenDisplayStyle) {
                 content
             } footer: {
                 footer
@@ -204,17 +217,21 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
 
 private struct GameplayScreenWell<Content: View, Footer: View>: View {
     @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
     @Environment(\.colorScheme) private var colorScheme
 
+    private let displayStyle: FieldDisplayStyle
     private let content: Content
     private let footer: Footer
     private let footerPlacement: GameplayFooterPlacement
 
     init(
+        displayStyle: FieldDisplayStyle,
         @ViewBuilder content: () -> Content,
         @ViewBuilder footer: () -> Footer,
         footerPlacement: @escaping () -> GameplayFooterPlacement
     ) {
+        self.displayStyle = displayStyle
         self.content = content()
         self.footer = footer()
         self.footerPlacement = footerPlacement()
@@ -223,6 +240,17 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
+            let resolvedPalette = PokeThemePalette.resolve(for: appearanceMode.resolved(for: colorScheme))
+            let glowPalette = PokeThemePalette.gameplayScreenGlowPalette(
+                displayStyle: displayStyle,
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme
+            )
+            let hdrProfile = PokeThemePalette.gameplayHDRProfile(
+                appearanceMode: appearanceMode,
+                colorScheme: colorScheme,
+                isEnabled: gameplayHDREnabled
+            )
             let headerTopPadding: CGFloat = 12
             let headerLabelHeight = max(12, size.width * 0.015)
             let screenVerticalGap = max(8, size.height * 0.012)
@@ -264,27 +292,39 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                 wellShape
                     .fill(PokeThemePalette.screenWellFill)
 
-                if appearanceMode.isDark(for: colorScheme) {
+                if hdrProfile.rendersBloom {
                     ZStack {
                         RoundedRectangle(cornerRadius: max(14, lcdScale * 3), style: .continuous)
-                            .fill(PokeThemePalette.screenGlow)
-                            .frame(
-                                width: screenRect.width + (outerGlowPadding * 2),
-                                height: screenRect.height + (outerGlowPadding * 2)
+                            .fill(
+                                glowPalette.outer.hdrColor(
+                                    linearExposure: hdrProfile.outerGlowExposure
+                                )
                             )
-                            .blur(radius: max(22, lcdScale * 4))
-                            .opacity(0.72)
+                            .frame(
+                                width: screenRect.width + (outerGlowPadding * CGFloat(hdrProfile.outerGlowPaddingMultiplier) * 2),
+                                height: screenRect.height + (outerGlowPadding * CGFloat(hdrProfile.outerGlowPaddingMultiplier) * 2)
+                            )
+                            .blur(radius: max(12, lcdScale * CGFloat(hdrProfile.outerGlowBlurMultiplier)))
+                            .opacity(hdrProfile.outerGlowOpacity)
 
                         RoundedRectangle(cornerRadius: max(10, lcdScale * 2.4), style: .continuous)
-                            .fill(PokeThemePalette.screenGlowInner)
-                            .frame(
-                                width: screenRect.width + (innerGlowPadding * 2),
-                                height: screenRect.height + (innerGlowPadding * 2)
+                            .fill(
+                                glowPalette.inner.hdrColor(
+                                    linearExposure: hdrProfile.innerGlowExposure
+                                )
                             )
-                            .blur(radius: max(10, lcdScale * 2))
-                            .opacity(0.5)
+                            .frame(
+                                width: screenRect.width + (innerGlowPadding * CGFloat(hdrProfile.innerGlowPaddingMultiplier) * 2),
+                                height: screenRect.height + (innerGlowPadding * CGFloat(hdrProfile.innerGlowPaddingMultiplier) * 2)
+                            )
+                            .blur(radius: max(6, lcdScale * CGFloat(hdrProfile.innerGlowBlurMultiplier)))
+                            .opacity(hdrProfile.innerGlowOpacity)
                     }
                     .blendMode(.plusLighter)
+                    .pokeExtendedDynamicRange(
+                        preferredDynamicRange: .high,
+                        contentsHeadroom: hdrProfile.glowHeadroom
+                    )
                     .position(x: screenRect.midX, y: screenRect.midY)
                 }
 
@@ -311,9 +351,25 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
                 VStack(spacing: 6) {
                     Circle()
-                        .fill(PokeThemePalette.batteryIndicator)
+                        .fill(
+                            hdrProfile.isEnabled
+                                ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryExposure)
+                                : PokeThemePalette.batteryIndicator
+                        )
                         .frame(width: 10, height: 10)
-                        .shadow(color: PokeThemePalette.batteryIndicator.opacity(appearanceMode.isDark(for: colorScheme) ? 0.8 : 0.35), radius: 6)
+                        .shadow(
+                            color: (
+                                hdrProfile.isEnabled
+                                    ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryShadowExposure)
+                                    : PokeThemePalette.batteryIndicator
+                            ).opacity(hdrProfile.isEnabled ? hdrProfile.batteryShadowOpacity : 0.35),
+                            radius: 6
+                        )
+                        .pokeExtendedDynamicRange(
+                            enabled: hdrProfile.isEnabled,
+                            preferredDynamicRange: .high,
+                            contentsHeadroom: hdrProfile.batteryHeadroom
+                        )
                     Text("BATTERY")
                         .font(
                             .system(
@@ -325,6 +381,11 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
                 content
                     .frame(width: screenRect.width, height: screenRect.height)
+                    .pokeExtendedDynamicRange(
+                        enabled: hdrProfile.isEnabled,
+                        preferredDynamicRange: .high,
+                        contentsHeadroom: hdrProfile.contentHeadroom
+                    )
                     .position(x: screenRect.midX, y: screenRect.midY)
 
                 if footerPlacement == .insideScreen {

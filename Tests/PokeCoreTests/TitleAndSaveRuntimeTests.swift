@@ -59,6 +59,11 @@ extension PokeCoreTests {
         runtime.gameplayState?.ownedSpeciesIDs = ["SQUIRTLE", "PIDGEY"]
         runtime.gameplayState?.currentBoxIndex = 1
         runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.blackoutCheckpoint = .init(
+            mapID: "VIRIDIAN_POKECENTER",
+            position: .init(x: 3, y: 7),
+            facing: .down
+        )
         runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
         let savedPokemon = runtime.gameplayState?.playerParty.first
         let savedMoves = runtime.gameplayState?.playerParty.first?.moves ?? []
@@ -98,7 +103,7 @@ extension PokeCoreTests {
 
         XCTAssertTrue(runtime.saveCurrentGame())
         XCTAssertNotNil(saveStore.envelope)
-        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 6)
+        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 7)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.experience, 202)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.dvs, savedPokemon?.dvs)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.statExp, savedPokemon?.statExp)
@@ -107,6 +112,10 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(saveStore.envelope?.snapshot.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
         XCTAssertEqual(saveStore.envelope?.snapshot.ownedSpeciesIDs.sorted(), ["PIDGEY", "SQUIRTLE"])
+        XCTAssertEqual(
+            saveStore.envelope?.snapshot.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
+        )
         let encodedSave = try XCTUnwrap(try? JSONEncoder().encode(saveStore.envelope))
         XCTAssertFalse(String(decoding: encodedSave, as: UTF8.self).contains("acquisitionRNGState"))
 
@@ -129,6 +138,10 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.nickname, "BoxedMon")
         XCTAssertEqual(resumed.gameplayState?.boxedPokemon[1].pokemon.first?.majorStatus, .sleep)
         XCTAssertEqual(resumed.gameplayState?.ownedSpeciesIDs, Set(["SQUIRTLE", "PIDGEY"]))
+        XCTAssertEqual(
+            resumed.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
+        )
         XCTAssertEqual(snapshot.eventFlags?.activeFlags, [])
         XCTAssertEqual(resumed.playerMoney, 4242)
         XCTAssertEqual(resumed.earnedBadgeIDs, Set(["BOULDER"]))
@@ -150,6 +163,162 @@ extension PokeCoreTests {
         XCTAssertTrue(runtime.gameplayState?.boxedPokemon.allSatisfy { $0.pokemon.isEmpty } ?? false)
         XCTAssertEqual(runtime.gameplayState?.ownedSpeciesIDs, Set(["SQUIRTLE"]))
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.majorStatus, MajorStatusCondition.none)
+    }
+
+    func testSchemaSixSaveDefaultsBlackoutCheckpointFromPlayerStart() throws {
+        let saveStore = InMemorySaveStore()
+        saveStore.envelope = try decodeLegacySaveEnvelope(
+            schemaVersion: 6,
+            acquisitionRNGState: 1
+        )
+
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down)
+        )
+    }
+    func testContinueMergesDefaultObjectStatesSoForestTrainerSightStillWorks() async throws {
+        let saveStore = InMemorySaveStore()
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+
+        saveStore.envelope = GameSaveEnvelope(
+            metadata: .init(
+                schemaVersion: GameRuntime.saveSchemaVersion,
+                variant: .red,
+                playthroughID: "forest-los",
+                playerName: "RED",
+                locationName: "Viridian Forest",
+                badgeCount: 0,
+                playTimeSeconds: 120,
+                savedAt: "2026-03-12T10:00:00Z"
+            ),
+            snapshot: .init(
+                mapID: "VIRIDIAN_FOREST",
+                playerPosition: .init(x: 25, y: 33),
+                facing: .right,
+                objectStates: [:],
+                activeFlags: [],
+                money: 3000,
+                inventory: [],
+                earnedBadgeIDs: [],
+                playerName: "RED",
+                rivalName: "BLUE",
+                playerParty: [
+                    .init(
+                        speciesID: "SQUIRTLE",
+                        nickname: "Squirtle",
+                        level: 8,
+                        experience: 560,
+                        dvs: .zero,
+                        statExp: .zero,
+                        maxHP: 24,
+                        currentHP: 24,
+                        attack: 13,
+                        defense: 15,
+                        speed: 12,
+                        special: 13,
+                        attackStage: 0,
+                        defenseStage: 0,
+                        accuracyStage: 0,
+                        evasionStage: 0,
+                        moves: [.init(id: "TACKLE", currentPP: 35)]
+                    ),
+                ],
+                chosenStarterSpeciesID: "SQUIRTLE",
+                rivalStarterSpeciesID: "BULBASAUR",
+                pendingStarterSpeciesID: nil,
+                activeMapScriptTriggerID: nil,
+                activeScriptID: nil,
+                activeScriptStep: nil,
+                encounterStepCounter: 0,
+                playTimeSeconds: 120
+            )
+        )
+
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        runtime.movePlayer(in: .right)
+
+        let snapshot = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.battle?.battleID == "opp_bug_catcher_1"
+        }
+
+        XCTAssertEqual(snapshot.battle?.battleID, "opp_bug_catcher_1")
+        XCTAssertEqual(runtime.scene, .battle)
+    }
+    func testContinueMissingObjectStatesStillHidesForestPickupAfterCollection() throws {
+        let saveStore = InMemorySaveStore()
+        let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let content = try FileSystemContentLoader(rootURL: contentRoot).load()
+
+        saveStore.envelope = GameSaveEnvelope(
+            metadata: .init(
+                schemaVersion: GameRuntime.saveSchemaVersion,
+                variant: .red,
+                playthroughID: "forest-pickup",
+                playerName: "RED",
+                locationName: "Viridian Forest",
+                badgeCount: 0,
+                playTimeSeconds: 120,
+                savedAt: "2026-03-12T10:05:00Z"
+            ),
+            snapshot: .init(
+                mapID: "VIRIDIAN_FOREST",
+                playerPosition: .init(x: 25, y: 12),
+                facing: .up,
+                objectStates: [:],
+                activeFlags: [],
+                money: 3000,
+                inventory: [],
+                earnedBadgeIDs: [],
+                playerName: "RED",
+                rivalName: "BLUE",
+                playerParty: [
+                    .init(
+                        speciesID: "SQUIRTLE",
+                        nickname: "Squirtle",
+                        level: 8,
+                        experience: 560,
+                        dvs: .zero,
+                        statExp: .zero,
+                        maxHP: 24,
+                        currentHP: 24,
+                        attack: 13,
+                        defense: 15,
+                        speed: 12,
+                        special: 13,
+                        attackStage: 0,
+                        defenseStage: 0,
+                        accuracyStage: 0,
+                        evasionStage: 0,
+                        moves: [.init(id: "TACKLE", currentPP: 35)]
+                    ),
+                ],
+                chosenStarterSpeciesID: "SQUIRTLE",
+                rivalStarterSpeciesID: "BULBASAUR",
+                pendingStarterSpeciesID: nil,
+                activeMapScriptTriggerID: nil,
+                activeScriptID: nil,
+                activeScriptStep: nil,
+                encounterStepCounter: 0,
+                playTimeSeconds: 120
+            )
+        )
+
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        let antidote = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_forest_antidote" })
+        runtime.interact(with: antidote)
+
+        XCTAssertEqual(runtime.itemQuantity("ANTIDOTE"), 1)
+        XCTAssertFalse(runtime.currentFieldObjects.contains { $0.id == "viridian_forest_antidote" })
+        XCTAssertFalse(runtime.gameplayState?.objectStates["viridian_forest_antidote"]?.visible ?? true)
     }
     func testUnreadableSaveDisablesContinueAndSurfacesError() {
         let saveStore = InMemorySaveStore()

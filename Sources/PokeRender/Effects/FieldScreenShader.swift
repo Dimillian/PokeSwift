@@ -3,34 +3,52 @@ import PokeDataModel
 
 private enum FieldScreenShader {
     static let function = ShaderFunction(
-        library: .bundle(PokeUIResources.bundle),
+        library: .bundle(PokeRenderResources.bundle),
         name: "fieldScreenEffect"
     )
 }
 
 private enum BattleScreenShader {
     static let function = ShaderFunction(
-        library: .bundle(PokeUIResources.bundle),
+        library: .bundle(PokeRenderResources.bundle),
         name: "battleScreenEffect"
     )
 }
 
 extension View {
-    func fieldScreenEffect(displayStyle: FieldDisplayStyle, displayScale: CGFloat) -> some View {
-        modifier(FieldScreenEffectModifier(displayStyle: displayStyle, displayScale: displayScale))
+    public func fieldScreenEffect(
+        displayStyle: FieldDisplayStyle,
+        displayScale: CGFloat,
+        hdrBoost: Float = 0
+    ) -> some View {
+        modifier(
+            FieldScreenEffectModifier(
+                displayStyle: displayStyle,
+                displayScale: displayScale,
+                hdrBoost: hdrBoost
+            )
+        )
     }
 
-    func battleScreenEffect(
+    public func battleScreenEffect(
         displayScale: CGFloat,
-        presentation: BattlePresentationTelemetry
+        presentation: BattlePresentationTelemetry,
+        hdrBoost: Float = 0
     ) -> some View {
-        modifier(BattleScreenEffectModifier(displayScale: displayScale, presentation: presentation))
+        modifier(
+            BattleScreenEffectModifier(
+                displayScale: displayScale,
+                presentation: presentation,
+                hdrBoost: hdrBoost
+            )
+        )
     }
 }
 
 private struct FieldScreenEffectModifier: ViewModifier {
     let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
+    let hdrBoost: Float
 
     func body(content: Content) -> some View {
         guard displayStyle != .rawGrayscale else {
@@ -47,6 +65,7 @@ private struct FieldScreenEffectModifier: ViewModifier {
                             .float(shaderViewportHeight),
                             .float(Float(max(1, displayScale))),
                             .float(displayStyle.shaderPresetValue),
+                            .float(hdrBoost),
                         ]
                     )
                 )
@@ -66,6 +85,7 @@ private struct FieldScreenEffectModifier: ViewModifier {
 private struct BattleScreenEffectModifier: ViewModifier {
     let displayScale: CGFloat
     let presentation: BattlePresentationTelemetry
+    let hdrBoost: Float
     @State private var displayedIntroProgress: CGFloat = 1
     @State private var displayedIntroAmount: CGFloat = 0
     @State private var seededIntroRevision: Int?
@@ -82,6 +102,7 @@ private struct BattleScreenEffectModifier: ViewModifier {
                         .float(introStyleValue),
                         .float(Float(displayedIntroProgress)),
                         .float(Float(displayedIntroAmount)),
+                        .float(hdrBoost),
                     ]
                 ),
                 maxSampleOffset: .init(width: maxSampleOffset, height: maxSampleOffset)

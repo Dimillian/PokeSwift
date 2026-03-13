@@ -6,7 +6,7 @@ import PokeDataModel
 @MainActor
 @Observable
 public final class GameRuntime {
-    nonisolated public static let saveSchemaVersion = 6
+    nonisolated public static let saveSchemaVersion = 7
 
     public let content: LoadedContent
 
@@ -30,10 +30,14 @@ public final class GameRuntime {
     var fieldMovementTask: Task<Void, Never>?
     var scriptedMovementTask: Task<Void, Never>?
     var idleMovementTask: Task<Void, Never>?
+    var trainerEngagementTask: Task<Void, Never>?
     var battlePresentationTask: Task<Void, Never>?
+    var fieldInteractionTask: Task<Void, Never>?
     var hasStarted = false
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
+    var fieldPromptState: RuntimeFieldPromptState?
+    var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
@@ -43,6 +47,7 @@ public final class GameRuntime {
     var recentSoundEffects: [RuntimeSoundEffectState] = []
     public internal(set) var isMusicEnabled = true
     var fieldTransitionState: RuntimeFieldTransitionState?
+    var fieldAlertState: RuntimeFieldAlertState?
     var dialogueAudioRevision = 0
     var isDialogueAudioBlockingInput = false
     var collisionSoundInFlight = false
@@ -156,22 +161,18 @@ public final class GameRuntime {
         gameplayState?.chosenStarterSpeciesID
     }
 
-    public var currentFieldObjects: [FieldObjectRenderState] {
+    public var currentFieldObjects: [FieldRenderableObjectState] {
         guard let gameplayState, let map = currentMapManifest else { return [] }
         return map.objects.compactMap { object in
             let state = gameplayState.objectStates[object.id]
             let visible = state?.visible ?? object.visibleByDefault
             guard visible else { return nil }
-            return FieldObjectRenderState(
+            return FieldRenderableObjectState(
                 id: object.id,
-                displayName: object.displayName,
                 sprite: object.sprite,
                 position: state?.position ?? object.position,
                 facing: state?.facing ?? object.facing,
-                movementBehavior: object.movementBehavior,
-                movementMode: state?.movementMode,
-                interactionDialogueID: object.interactionDialogueID,
-                trainerBattleID: object.trainerBattleID
+                movementMode: state?.movementMode
             )
         }
     }
@@ -181,8 +182,22 @@ public final class GameRuntime {
         return content.dialogue(id: dialogueState.dialogueID)
     }
 
+    var currentFieldPromptState: RuntimeFieldPromptState? {
+        fieldPromptState
+    }
+
+    var currentFieldHealingState: RuntimeFieldHealingState? {
+        fieldHealingState
+    }
+
     var isFieldInputLocked: Bool {
-        fieldTransitionState != nil || fieldMovementTask != nil || scriptedMovementTask != nil || shopState != nil
+        fieldTransitionState != nil ||
+            fieldMovementTask != nil ||
+            scriptedMovementTask != nil ||
+            trainerEngagementTask != nil ||
+            fieldInteractionTask != nil ||
+            fieldHealingState != nil ||
+            shopState != nil
     }
 
     var currentFieldRenderIssues: [String] {
@@ -232,8 +247,11 @@ public final class GameRuntime {
         gameplayState != nil &&
             scene == .field &&
             dialogueState == nil &&
+            fieldPromptState == nil &&
+            fieldHealingState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
+            trainerEngagementTask == nil &&
             gameplayState?.battle == nil
     }
 
@@ -290,7 +308,11 @@ public final class GameRuntime {
         case .field:
             handleField(button: button)
         case .dialogue:
-            handleDialogue(button: button)
+            if fieldPromptState != nil {
+                handleFieldPrompt(button: button)
+            } else {
+                handleDialogue(button: button)
+            }
         case .scriptedSequence:
             break
         case .starterChoice:

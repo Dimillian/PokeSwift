@@ -43,13 +43,20 @@ extension GameRuntime {
         deferredActions.removeAll()
         battlePresentationTask?.cancel()
         battlePresentationTask = nil
+        fieldInteractionTask?.cancel()
+        fieldInteractionTask = nil
         fieldTransitionTask?.cancel()
+        trainerEngagementTask?.cancel()
+        trainerEngagementTask = nil
         scriptedMovementTask?.cancel()
         fieldTransitionState = nil
+        fieldAlertState = nil
         gameplayState = makeInitialGameplayState()
         playthroughID = UUID().uuidString
         reseedRuntimeRNG()
         dialogueState = nil
+        fieldPromptState = nil
+        fieldHealingState = nil
         placeholderTitle = nil
         starterChoiceFocusedIndex = 0
         scene = .field

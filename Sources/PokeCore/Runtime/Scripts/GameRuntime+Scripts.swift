@@ -107,6 +107,10 @@ extension GameRuntime {
             guard let dialogueID = step.dialogueID else { return false }
             showDialogue(id: dialogueID, completion: .continueScript)
             return true
+        case "startFieldInteraction":
+            guard let fieldInteractionID = step.fieldInteractionID else { return false }
+            startFieldInteraction(id: fieldInteractionID, completionAction: .continueScript)
+            return true
         case "startStarterChoice":
             scene = .starterChoice
             substate = "starter_choice"
@@ -194,10 +198,12 @@ extension GameRuntime {
                 }
             case "setObjectVisibility":
                 if let objectID = step.objectID, let visible = step.visible {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
                     gameplayState.objectStates[objectID]?.visible = visible
                 }
             case "faceObject":
                 if let objectID = step.objectID, let raw = step.stringValue {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
                     gameplayState.objectStates[objectID]?.facing = facingDirection(for: raw)
                 }
             case "facePlayer":
@@ -277,6 +283,7 @@ extension GameRuntime {
             mapID: start.mapID,
             playerPosition: start.position,
             facing: start.facing,
+            blackoutCheckpoint: start.defaultBlackoutCheckpoint,
             objectStates: objectStates,
             activeFlags: Set(start.initialFlags),
             money: 3000,

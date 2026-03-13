@@ -13,6 +13,8 @@ extension GameRuntime {
             currentHP: nil,
             attackStage: 0,
             defenseStage: 0,
+            speedStage: 0,
+            specialStage: 0,
             accuracyStage: 0,
             evasionStage: 0,
             moves: nil
@@ -30,6 +32,8 @@ extension GameRuntime {
             currentHP: nil,
             attackStage: 0,
             defenseStage: 0,
+            speedStage: 0,
+            specialStage: 0,
             accuracyStage: 0,
             evasionStage: 0,
             moves: nil
@@ -50,6 +54,8 @@ extension GameRuntime {
         currentHP: Int?,
         attackStage: Int,
         defenseStage: Int,
+        speedStage: Int = 0,
+        specialStage: Int = 0,
         accuracyStage: Int,
         evasionStage: Int,
         majorStatus: MajorStatusCondition = .none,
@@ -71,6 +77,8 @@ extension GameRuntime {
                 special: 10,
                 attackStage: attackStage,
                 defenseStage: defenseStage,
+                speedStage: speedStage,
+                specialStage: specialStage,
                 accuracyStage: accuracyStage,
                 evasionStage: evasionStage,
                 majorStatus: majorStatus,
@@ -78,10 +86,7 @@ extension GameRuntime {
             )
         }
 
-        let resolvedMoves = moves ?? species.startingMoves.compactMap { moveID -> RuntimeMoveState? in
-            guard moveID != "NO_MOVE", let move = content.move(id: moveID) else { return nil }
-            return RuntimeMoveState(id: move.id, currentPP: move.maxPP)
-        }
+        let resolvedMoves = moves ?? defaultMoveSet(for: species, level: level)
 
         let calculatedStats = calculatedStats(for: species, level: level, dvs: dvs, statExp: statExp)
 
@@ -100,6 +105,8 @@ extension GameRuntime {
             special: calculatedStats.special,
             attackStage: attackStage,
             defenseStage: defenseStage,
+            speedStage: speedStage,
+            specialStage: specialStage,
             accuracyStage: accuracyStage,
             evasionStage: evasionStage,
             majorStatus: majorStatus,
@@ -115,6 +122,36 @@ extension GameRuntime {
             speed: calculatedStat(baseStat: species.baseSpeed, level: level, dv: dvs.speed, statExp: statExp.speed, isHP: false),
             special: calculatedStat(baseStat: species.baseSpecial, level: level, dv: dvs.special, statExp: statExp.special, isHP: false)
         )
+    }
+
+    func defaultMoveSet(for species: SpeciesManifest, level: Int) -> [RuntimeMoveState] {
+        var knownMoveIDs: [String] = []
+
+        func learn(_ moveID: String) {
+            guard moveID != "NO_MOVE",
+                  content.move(id: moveID) != nil,
+                  knownMoveIDs.contains(moveID) == false else {
+                return
+            }
+
+            knownMoveIDs.append(moveID)
+            if knownMoveIDs.count > 4 {
+                knownMoveIDs.removeFirst()
+            }
+        }
+
+        for moveID in species.startingMoves {
+            learn(moveID)
+        }
+
+        for learnsetEntry in species.levelUpLearnset where learnsetEntry.level <= level {
+            learn(learnsetEntry.moveID)
+        }
+
+        return knownMoveIDs.compactMap { moveID in
+            guard let move = content.move(id: moveID) else { return nil }
+            return RuntimeMoveState(id: move.id, currentPP: move.maxPP)
+        }
     }
 
     func calculatedStat(baseStat: Int, level: Int, dv: Int, statExp: Int, isHP: Bool) -> Int {

@@ -1,14 +1,14 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
 
-@testable import PokeUI
+@testable import PokeRender
 
 @MainActor
-extension PokeUITests {
+extension PokeRenderTests {
   func testPixelAssetMaskKeepsInteriorWhiteHighlightsOpaque() throws {
     let image = try makeRGBAImage(
       width: 5,
@@ -24,7 +24,7 @@ extension PokeUITests {
       ]
     )
 
-    guard let maskedImage = PixelAssetView.applyWhiteTransparencyMask(to: image) else {
+    guard let maskedImage = PixelAssetMasking.applyWhiteTransparencyMask(to: image) else {
       return XCTFail("Expected white background masking to succeed")
     }
 

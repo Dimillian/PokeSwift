@@ -55,6 +55,17 @@ let project = Project(
             ]
         ),
         .target(
+            name: "PokeRender",
+            destinations: .macOS,
+            product: .staticFramework,
+            bundleId: "com.dimillian.PokeSwift.PokeRender",
+            deploymentTargets: .macOS("26.0"),
+            sources: ["Sources/PokeRender/**"],
+            dependencies: [
+                .target(name: "PokeDataModel"),
+            ]
+        ),
+        .target(
             name: "PokeUI",
             destinations: .macOS,
             product: .staticFramework,
@@ -62,9 +73,9 @@ let project = Project(
             deploymentTargets: .macOS("26.0"),
             sources: ["Sources/PokeUI/**"],
             dependencies: [
-                .target(name: "PokeCore"),
                 .target(name: "PokeContent"),
                 .target(name: "PokeDataModel"),
+                .target(name: "PokeRender"),
             ]
         ),
         .target(
@@ -98,6 +109,7 @@ let project = Project(
                 .target(name: "PokeUI"),
                 .target(name: "PokeContent"),
                 .target(name: "PokeDataModel"),
+                .target(name: "PokeRender"),
                 .target(name: "PokeTelemetry"),
             ]
         ),
@@ -172,7 +184,24 @@ let project = Project(
             deploymentTargets: .macOS("26.0"),
             sources: ["Tests/PokeUITests/**"],
             dependencies: [
+                .target(name: "PokeCore"),
+                .target(name: "PokeRender"),
                 .target(name: "PokeUI"),
+                .target(name: "PokeDataModel"),
+            ]
+        ),
+        .target(
+            name: "PokeRenderTests",
+            destinations: .macOS,
+            product: .unitTests,
+            bundleId: "com.dimillian.PokeSwift.PokeRenderTests",
+            deploymentTargets: .macOS("26.0"),
+            sources: [
+                "Tests/PokeRenderTests/**",
+                "Tests/PokeUITests/PokeUITestSupport.swift",
+            ],
+            dependencies: [
+                .target(name: "PokeRender"),
                 .target(name: "PokeDataModel"),
             ]
         ),

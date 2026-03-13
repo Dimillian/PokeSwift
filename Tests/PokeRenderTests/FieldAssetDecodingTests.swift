@@ -1,14 +1,14 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
 
-@testable import PokeUI
+@testable import PokeRender
 
 @MainActor
-extension PokeUITests {
+extension PokeRenderTests {
   func testBlocksetDecoderBuilds4x4BlocksFromRepoData() throws {
     let blocksetURL = repoRoot().appendingPathComponent("gfx/blocksets/overworld.bst")
     let data = try Data(contentsOf: blocksetURL)

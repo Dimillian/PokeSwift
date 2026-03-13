@@ -6,7 +6,9 @@ public enum RedContentExtractor {
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
+        ("gfx/tilesets/forest.png", "Assets/field/tilesets/forest.png"),
         ("gfx/tilesets/gym.png", "Assets/field/tilesets/gym.png"),
+        ("gfx/tilesets/gate.png", "Assets/field/tilesets/gate.png"),
         ("gfx/tilesets/house.png", "Assets/field/tilesets/house.png"),
         ("gfx/tilesets/pokecenter.png", "Assets/field/tilesets/pokecenter.png"),
         ("gfx/sprites/red.png", "Assets/field/sprites/red.png"),
@@ -34,7 +36,9 @@ public enum RedContentExtractor {
         ("gfx/sprites/pokedex.png", "Assets/field/sprites/pokedex.png"),
         ("gfx/blocksets/reds_house.bst", "Assets/field/blocksets/reds_house.bst"),
         ("gfx/blocksets/overworld.bst", "Assets/field/blocksets/overworld.bst"),
+        ("gfx/blocksets/forest.bst", "Assets/field/blocksets/forest.bst"),
         ("gfx/blocksets/gym.bst", "Assets/field/blocksets/gym.bst"),
+        ("gfx/blocksets/gate.bst", "Assets/field/blocksets/gate.bst"),
         ("gfx/blocksets/house.bst", "Assets/field/blocksets/house.bst"),
         ("gfx/blocksets/pokecenter.bst", "Assets/field/blocksets/pokecenter.bst"),
     ]
@@ -100,7 +104,9 @@ public enum RedContentExtractor {
             "Assets/splash/gamefreak_logo.png",
             "Assets/field/tilesets/reds_house.png",
             "Assets/field/tilesets/overworld.png",
+            "Assets/field/tilesets/forest.png",
             "Assets/field/tilesets/gym.png",
+            "Assets/field/tilesets/gate.png",
             "Assets/field/tilesets/house.png",
             "Assets/field/tilesets/pokecenter.png",
             "Assets/field/sprites/red.png",
@@ -128,7 +134,9 @@ public enum RedContentExtractor {
             "Assets/field/sprites/pokedex.png",
             "Assets/field/blocksets/reds_house.bst",
             "Assets/field/blocksets/overworld.bst",
+            "Assets/field/blocksets/forest.bst",
             "Assets/field/blocksets/gym.bst",
+            "Assets/field/blocksets/gate.bst",
             "Assets/field/blocksets/house.bst",
             "Assets/field/blocksets/pokecenter.bst",
         ]
@@ -255,7 +263,7 @@ public enum RedContentExtractor {
     }
 
     private static func battleAssetMap(from gameplayManifest: GameplayManifest) -> [(source: String, destination: String)] {
-        gameplayManifest.species
+        let pokemonAssets = gameplayManifest.species
             .flatMap { species -> [(source: String, destination: String)] in
                 guard let battleSprite = species.battleSprite else { return [] }
                 let frontFilename = URL(fileURLWithPath: battleSprite.frontImagePath).lastPathComponent
@@ -268,6 +276,16 @@ public enum RedContentExtractor {
                     ("gfx/pokemon/back/\(backFilename)", battleSprite.backImagePath),
                 ]
             }
+        let trainerAssets = Set(gameplayManifest.trainerBattles.compactMap(\.trainerSpritePath)).map { path in
+            let filename = URL(fileURLWithPath: path).lastPathComponent
+            return ("gfx/trainers/\(filename)", path)
+        }
+        let playerAssets = [
+            ("gfx/player/red.png", "Assets/battle/trainers/red.png"),
+            ("gfx/player/redb.png", "Assets/battle/trainers/redb.png"),
+        ]
+
+        return (pokemonAssets + trainerAssets + playerAssets)
             .sorted { lhs, rhs in lhs.destination < rhs.destination }
     }
 

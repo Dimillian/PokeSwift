@@ -11,18 +11,16 @@ final class AppCoordinator {
     private(set) var runtime: GameRuntime?
     private(set) var bootError: String?
     var showDebugPanel = false
-    var appearanceMode: AppAppearanceMode
 
     private var telemetryCoordinator: TelemetryCoordinator?
     private var telemetryServer: TelemetryControlServer?
     private var audioService: PokeAudioService?
     private let keyInputBridge = RuntimeKeyInputBridge()
     private var hasRequestedForegroundActivation = false
-    private let settingsStore: AppSettingsStore
+    private let preferences: AppPreferences
 
-    init(settingsStore: AppSettingsStore = AppSettingsStore()) {
-        self.settingsStore = settingsStore
-        appearanceMode = settingsStore.appearanceMode
+    init(preferences: AppPreferences) {
+        self.preferences = preferences
         bootstrap()
     }
 
@@ -42,6 +40,7 @@ final class AppCoordinator {
                     audioPlayer: audioService,
                     saveStore: saveStore
                 )
+                preferences.attachRuntime(runtime)
                 self.runtime = runtime
                 self.telemetryCoordinator = telemetry
                 self.audioService = audioService
@@ -88,16 +87,11 @@ final class AppCoordinator {
         telemetryServer?.stop()
         audioService?.stopAllMusic()
         keyInputBridge.remove()
+        preferences.attachRuntime(nil)
     }
 
     func toggleDebugPanel() {
         showDebugPanel.toggle()
-    }
-
-    func cycleAppearanceMode() {
-        let nextMode = appearanceMode.nextOptionMode
-        appearanceMode = nextMode
-        settingsStore.appearanceMode = nextMode
     }
 
     func requestForegroundActivationIfNeeded() {

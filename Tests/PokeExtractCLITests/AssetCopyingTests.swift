@@ -36,6 +36,10 @@ final class AssetCopyingTests: XCTestCase {
             "Assets/battle/pokemon/back/bulbasaur.png",
             "Assets/battle/pokemon/back/mr.mime.png",
             "Assets/battle/pokemon/back/farfetchd.png",
+            "Assets/battle/trainers/rival1.png",
+            "Assets/battle/trainers/bugcatcher.png",
+            "Assets/battle/trainers/red.png",
+            "Assets/battle/trainers/redb.png",
         ]
 
         for relativePath in expectedFieldAssets {

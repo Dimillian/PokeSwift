@@ -1,59 +1,8 @@
-import AppKit
+import CoreGraphics
+import Foundation
 import ImageIO
-import SwiftUI
 
-public struct PixelAssetView: View {
-    private let url: URL
-    private let label: String
-    private let whiteIsTransparent: Bool
-
-    public init(url: URL, label: String, whiteIsTransparent: Bool = false) {
-        self.url = url
-        self.label = label
-        self.whiteIsTransparent = whiteIsTransparent
-    }
-
-    public var body: some View {
-        Group {
-            if let image = renderedImage {
-                Image(decorative: image, scale: 1)
-                    .resizable()
-                    .interpolation(.none)
-                    .antialiased(false)
-                    .aspectRatio(contentMode: .fit)
-            } else if let image = NSImage(contentsOf: url) {
-                Image(nsImage: image)
-                    .resizable()
-                    .interpolation(.none)
-                    .antialiased(false)
-                    .aspectRatio(contentMode: .fit)
-            } else {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.black.opacity(0.24))
-                    .overlay {
-                        VStack(spacing: 8) {
-                            Image(systemName: "photo")
-                            Text(label)
-                                .font(.system(.caption, design: .monospaced))
-                        }
-                        .foregroundStyle(.secondary)
-                        .padding(8)
-                    }
-            }
-        }
-        .accessibilityLabel(label)
-    }
-
-    private var renderedImage: CGImage? {
-        guard whiteIsTransparent,
-              let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
-              let maskedImage = Self.applyWhiteTransparencyMask(to: image) else {
-            return nil
-        }
-        return maskedImage
-    }
-
+enum PixelAssetMasking {
     static func applyWhiteTransparencyMask(to image: CGImage) -> CGImage? {
         let width = image.width
         let height = image.height
@@ -128,7 +77,6 @@ public struct PixelAssetView: View {
         }
 
         let rgbaData = Data(rgbaBytes) as CFData
-
         guard let provider = CGDataProvider(data: rgbaData) else {
             return nil
         }
@@ -146,5 +94,67 @@ public struct PixelAssetView: View {
             shouldInterpolate: false,
             intent: .defaultIntent
         )
+    }
+}
+
+actor PixelAssetImageRepository {
+    enum CacheKey: Hashable {
+        case direct(path: String)
+        case whiteMasked(path: String)
+
+        init(url: URL, whiteIsTransparent: Bool) {
+            let path = url.standardizedFileURL.path
+            self = whiteIsTransparent ? .whiteMasked(path: path) : .direct(path: path)
+        }
+    }
+
+    private enum CachedImage {
+        case image(CGImage)
+        case missing
+    }
+
+    static let shared = PixelAssetImageRepository()
+
+    private var cachedImages: [CacheKey: CachedImage] = [:]
+    private var inFlightLoads: [CacheKey: Task<CGImage?, Never>] = [:]
+
+    func image(for url: URL, whiteIsTransparent: Bool) async -> CGImage? {
+        let key = CacheKey(url: url, whiteIsTransparent: whiteIsTransparent)
+
+        if let cached = cachedImages[key] {
+            switch cached {
+            case let .image(image):
+                return image
+            case .missing:
+                return nil
+            }
+        }
+
+        if let existingTask = inFlightLoads[key] {
+            return await existingTask.value
+        }
+
+        let task = Task.detached(priority: .userInitiated) {
+            Self.loadImage(for: url, whiteIsTransparent: whiteIsTransparent)
+        }
+        inFlightLoads[key] = task
+
+        let image = await task.value
+        cachedImages[key] = image.map(CachedImage.image) ?? .missing
+        inFlightLoads[key] = nil
+        return image
+    }
+
+    nonisolated private static func loadImage(for url: URL, whiteIsTransparent: Bool) -> CGImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return nil
+        }
+
+        guard whiteIsTransparent else {
+            return image
+        }
+
+        return PixelAssetMasking.applyWhiteTransparencyMask(to: image)
     }
 }

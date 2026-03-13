@@ -9,6 +9,11 @@ extension GameRuntime {
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             return
         }
+        let isFinalPage = dialogueState.pageIndex == dialogue.pages.count - 1
+        if case .fieldPrompt = dialogueState.completionAction, isFinalPage {
+            handleFieldPrompt(button: button)
+            return
+        }
         let currentPageHasBlockingEvents = dialogue.pages[dialogueState.pageIndex].events.contains(where: \.waitForCompletion)
         guard currentPageHasBlockingEvents == false || isDialogueAudioBlockingInput == false else {
             return
@@ -62,10 +67,34 @@ extension GameRuntime {
                 defaultName: defaultName,
                 completion: .returnToFieldAfterStarter
             )
-        case let .startPostBattleDialogue(won):
+        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, sourceTrainerObjectID):
             scene = .field
             substate = "field"
-            runPostBattleSequence(won: won)
+            completeTrainerBattleDialogue(
+                won: won,
+                preventsBlackoutOnLoss: preventsBlackoutOnLoss,
+                postBattleScriptID: postBattleScriptID,
+                sourceTrainerObjectID: sourceTrainerObjectID
+            )
+        case let .startBattle(battleID, sourceTrainerObjectID):
+            scene = .field
+            substate = "field"
+            startBattle(id: battleID, sourceTrainerObjectID: sourceTrainerObjectID)
+        case let .showDialogue(dialogueID, completionAction):
+            scene = .field
+            substate = "field"
+            showDialogue(id: dialogueID, completion: completionAction)
+        case let .fieldPrompt(interactionID, completionAction):
+            scene = .dialogue
+            substate = "dialogue_\(dialogue.id)_prompt"
+            fieldPromptState = .init(
+                interactionID: interactionID,
+                kind: content.fieldInteraction(id: interactionID)?.prompt.kind ?? .yesNo,
+                completionAction: completionAction,
+                focusedIndex: 0
+            )
+        case let .startFieldHealing(interactionID, completionAction):
+            startFieldHealing(interactionID: interactionID, completionAction: completionAction)
         }
     }
 
@@ -111,6 +140,16 @@ extension GameRuntime {
             }
             return
         }
+        if case let .fieldPrompt(interactionID, completionAction) = completion {
+            fieldPromptState = .init(
+                interactionID: interactionID,
+                kind: content.fieldInteraction(id: interactionID)?.prompt.kind ?? .yesNo,
+                completionAction: completionAction,
+                focusedIndex: 0
+            )
+        } else {
+            fieldPromptState = nil
+        }
         dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)
         scene = .dialogue
         substate = "dialogue_\(id)"
@@ -140,7 +179,11 @@ extension GameRuntime {
                 beginScript(id: scriptID)
                 return
             case let .hideObject(objectID):
-                gameplayState?.objectStates[objectID]?.visible = false
+                if var gameplayState {
+                    ensureObjectStateExists(objectID, in: &gameplayState)
+                    gameplayState.objectStates[objectID]?.visible = false
+                    self.gameplayState = gameplayState
+                }
                 scene = .field
                 substate = "field"
             case .restoreMapMusic:

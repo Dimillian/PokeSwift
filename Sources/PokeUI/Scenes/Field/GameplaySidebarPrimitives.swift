@@ -4,19 +4,25 @@ struct AccordionSidebarCard<Content: View>: View {
     let title: String
     let summary: String?
     let isExpanded: Bool
+    let isHighlighted: Bool
     let action: () -> Void
     let content: Content
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var highlightPulse = false
 
     init(
         title: String,
         summary: String? = nil,
         isExpanded: Bool,
+        isHighlighted: Bool = false,
         action: @escaping () -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.summary = summary
         self.isExpanded = isExpanded
+        self.isHighlighted = isHighlighted
         self.action = action
         self.content = content()
     }
@@ -24,7 +30,7 @@ struct AccordionSidebarCard<Content: View>: View {
     var body: some View {
         GameplaySidebarCardSurface(
             padding: isExpanded ? 18 : 16,
-            tint: isExpanded ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.glassTint
+            tint: surfaceTint
         ) {
             VStack(alignment: .leading, spacing: isExpanded ? 14 : 0) {
                 headerButton
@@ -35,6 +41,38 @@ struct AccordionSidebarCard<Content: View>: View {
                 }
             }
         }
+        .background {
+            if isHighlighted {
+                cardShape
+                    .fill(highlightWash)
+                    .padding(-4)
+                    .blur(radius: reduceMotion ? 10 : 16)
+            }
+        }
+        .overlay {
+            if isHighlighted {
+                ZStack {
+                    cardShape
+                        .stroke(highlightOuterStrokeColor, lineWidth: isExpanded ? 4 : 3)
+                        .blur(radius: reduceMotion ? 0 : 2)
+
+                    cardShape
+                        .stroke(highlightStrokeColor, lineWidth: isExpanded ? 2.5 : 2)
+
+                    innerCardShape
+                        .stroke(highlightInnerStrokeColor, lineWidth: 1.2)
+                        .padding(5)
+                }
+            }
+        }
+        .shadow(color: highlightShadowColor, radius: highlightShadowRadius, y: 0)
+        .shadow(color: highlightOuterShadowColor, radius: highlightOuterShadowRadius, y: 0)
+        .onAppear {
+            updateHighlightAnimation(isActive: isHighlighted)
+        }
+        .onChange(of: isHighlighted) { _, isActive in
+            updateHighlightAnimation(isActive: isActive)
+        }
     }
 
     private var headerButton: some View {
@@ -43,7 +81,7 @@ struct AccordionSidebarCard<Content: View>: View {
                 GameBoyPixelText(
                     title.uppercased(),
                     scale: 1.5,
-                    color: FieldRetroPalette.ink.opacity(0.6),
+                    color: FieldRetroPalette.ink.opacity(isHighlighted ? 0.82 : 0.6),
                     fallbackFont: .system(size: 12, weight: .bold, design: .rounded)
                 )
 
@@ -53,20 +91,20 @@ struct AccordionSidebarCard<Content: View>: View {
                     HStack(spacing: 8) {
                         if let summary {
                             GameplaySidebarChipSurface(
-                                tint: isExpanded ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+                                tint: chipTint
                             ) {
                                 Text(summary.uppercased())
                                     .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.62))
+                                    .foregroundStyle(FieldRetroPalette.ink.opacity(isHighlighted ? 0.74 : 0.62))
                             }
                         }
 
                         GameplaySidebarChipSurface(
-                            tint: isExpanded ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+                            tint: chipTint
                         ) {
                             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
+                                .foregroundStyle(FieldRetroPalette.ink.opacity(isHighlighted ? 0.68 : 0.56))
                         }
                     }
                 }
@@ -75,6 +113,85 @@ struct AccordionSidebarCard<Content: View>: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    private var surfaceTint: Color {
+        (isExpanded || isHighlighted) ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.glassTint
+    }
+
+    private var cardShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+    }
+
+    private var innerCardShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 19, style: .continuous)
+    }
+
+    private var chipTint: Color {
+        (isExpanded || isHighlighted) ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
+    }
+
+    private var highlightIntensity: Double {
+        guard isHighlighted else { return 0 }
+        guard reduceMotion == false else { return 0.82 }
+        return highlightPulse ? 1 : 0.68
+    }
+
+    private var highlightWash: LinearGradient {
+        LinearGradient(
+            colors: [
+                attentionColor.opacity(0.1 + (0.08 * highlightIntensity)),
+                attentionColor.opacity(0.04 + (0.05 * highlightIntensity)),
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var attentionColor: Color {
+        Color(red: 0.72, green: 0.9, blue: 0.48)
+    }
+
+    private var highlightOuterStrokeColor: Color {
+        attentionColor.opacity(0.24 + (0.18 * highlightIntensity))
+    }
+
+    private var highlightStrokeColor: Color {
+        attentionColor.opacity(0.52 + (0.22 * highlightIntensity))
+    }
+
+    private var highlightInnerStrokeColor: Color {
+        .white.opacity(0.22 + (0.18 * highlightIntensity))
+    }
+
+    private var highlightShadowColor: Color {
+        attentionColor.opacity(0.14 + (0.18 * highlightIntensity))
+    }
+
+    private var highlightOuterShadowColor: Color {
+        attentionColor.opacity(0.08 + (0.12 * highlightIntensity))
+    }
+
+    private var highlightShadowRadius: CGFloat {
+        isHighlighted ? (reduceMotion ? 24 : (highlightPulse ? 30 : 22)) : 0
+    }
+
+    private var highlightOuterShadowRadius: CGFloat {
+        isHighlighted ? (reduceMotion ? 34 : (highlightPulse ? 42 : 30)) : 0
+    }
+
+    private func updateHighlightAnimation(isActive: Bool) {
+        guard isActive else {
+            highlightPulse = false
+            return
+        }
+
+        highlightPulse = false
+        guard reduceMotion == false else { return }
+
+        withAnimation(.easeInOut(duration: 1.08).repeatForever(autoreverses: true)) {
+            highlightPulse = true
+        }
     }
 }
 

@@ -26,6 +26,10 @@ extension GameRuntime {
         let experienceMessages = rewardResult.messages
 
         var beats: [RuntimeBattlePresentationBeat] = []
+        let wildVictoryCueID = battle.kind == .wild && battle.enemyActiveIndex + 1 >= battle.enemyParty.count
+            ? "wild_victory"
+            : nil
+
         if let experienceMessage = experienceMessages.first {
             beats.append(
                 .init(
@@ -33,28 +37,43 @@ extension GameRuntime {
                     stage: .experience,
                     uiVisibility: .visible,
                     activeSide: .player,
+                    requiresConfirmAfterDisplay: true,
                     meterAnimation: experienceMeterAnimation(from: previousPlayer, to: updatedPlayer),
                     message: experienceMessage,
-                    playerPokemon: updatedPlayer
+                    playerPokemon: updatedPlayer,
+                    audioCueID: wildVictoryCueID
                 )
             )
 
+            var levelUpSoundPending = true
             for message in experienceMessages.dropFirst() {
+                let shouldPlayLevelUpSound = levelUpSoundPending && message.contains("grew to Lv")
                 beats.append(
                     .init(
                         delay: battlePresentationDelay(base: 0.24),
                         stage: .levelUp,
                         uiVisibility: .visible,
                         activeSide: .player,
-                        message: message
+                        requiresConfirmAfterDisplay: true,
+                        message: message,
+                        soundEffectRequest: shouldPlayLevelUpSound ? battleSoundEffectRequest(id: "SFX_LEVEL_UP") : nil
                     )
                 )
+                if shouldPlayLevelUpSound {
+                    levelUpSoundPending = false
+                }
             }
         }
 
         let rewardContinuation: RuntimeBattleRewardContinuation
         if battle.enemyActiveIndex + 1 < battle.enemyParty.count {
-            rewardContinuation = .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+            rewardContinuation = battle.kind == .trainer
+                ? .aboutToUse(index: battle.enemyActiveIndex + 1, previousMoveIndex: battle.focusedMoveIndex)
+                : .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+        } else if battle.kind == .trainer {
+            rewardContinuation = .finishTrainerWin(
+                payout: trainerBattlePayoutAmount(battle: battle, defeatedEnemy: defeatedEnemy)
+            )
         } else {
             rewardContinuation = .finishWin
         }
@@ -108,6 +127,8 @@ extension GameRuntime {
                 currentHP: nil,
                 attackStage: pokemon.attackStage,
                 defenseStage: pokemon.defenseStage,
+                speedStage: pokemon.speedStage,
+                specialStage: pokemon.specialStage,
                 accuracyStage: pokemon.accuracyStage,
                 evasionStage: pokemon.evasionStage,
                 majorStatus: pokemon.majorStatus,
@@ -136,6 +157,8 @@ extension GameRuntime {
                 special: pokemon.special,
                 attackStage: pokemon.attackStage,
                 defenseStage: pokemon.defenseStage,
+                speedStage: pokemon.speedStage,
+                specialStage: pokemon.specialStage,
                 accuracyStage: pokemon.accuracyStage,
                 evasionStage: pokemon.evasionStage,
                 majorStatus: pokemon.majorStatus,
@@ -311,12 +334,40 @@ extension GameRuntime {
 
         battle.rewardContinuation = nil
         switch rewardContinuation {
+        case let .aboutToUse(index, _):
+            let messages = trainerAboutToUseMessages(trainerName: battle.trainerName, pokemon: battle.enemyParty[index])
+            if messages.count > 1 {
+                presentBattleMessages(
+                    [messages[0]],
+                    battle: &battle,
+                    pendingAction: .enterTrainerAboutToUseDecision(nextIndex: index)
+                )
+            } else {
+                enterTrainerAboutToUseDecision(battle: &battle, nextIndex: index)
+            }
         case let .sendNextEnemy(index):
             scheduleNextEnemySendOut(battle: &battle, nextIndex: index)
+        case let .finishTrainerWin(payout):
+            presentBattleMessages(
+                [
+                    trainerDefeatedText(trainerName: battle.trainerName),
+                    moneyForWinningText(amount: payout),
+                ],
+                battle: &battle,
+                pendingAction: .completeTrainerVictory(payout: payout),
+                audioCueID: "trainer_victory"
+            )
         case .finishWin:
             battle.phase = .battleComplete
             finishBattle(battle: battle, won: true)
         }
+    }
+
+    func trainerBattlePayoutAmount(
+        battle: RuntimeBattleState,
+        defeatedEnemy: RuntimePokemonState
+    ) -> Int {
+        max(0, battle.baseRewardMoney * defeatedEnemy.level)
     }
 
     var hmMoveIDs: Set<String> {

@@ -1,14 +1,14 @@
 import ImageIO
-import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
 
-@testable import PokeUI
+@testable import PokeRender
 
 @MainActor
-extension PokeUITests {
+extension PokeRenderTests {
   func testRendererCanCompositeRealFieldAssets() throws {
     let root = repoRoot()
     let assets = FieldRenderAssets(
@@ -39,14 +39,12 @@ extension PokeUITests {
       objects: []
     )
     let objects = [
-      FieldObjectRenderState(
+      FieldRenderableObjectState(
         id: "oak",
-        displayName: "Oak",
         sprite: "SPRITE_OAK",
         position: .init(x: 1, y: 1),
         facing: .left,
-        interactionDialogueID: nil,
-        trainerBattleID: nil
+        movementMode: nil
       )
     ]
 
@@ -92,14 +90,12 @@ extension PokeUITests {
       objects: []
     )
     let objects = [
-      FieldObjectRenderState(
+      FieldRenderableObjectState(
         id: "oak",
-        displayName: "Oak",
         sprite: "SPRITE_OAK",
         position: .init(x: 1, y: 1),
         facing: .left,
-        interactionDialogueID: nil,
-        trainerBattleID: nil
+        movementMode: nil
       )
     ]
 
@@ -172,6 +168,166 @@ extension PokeUITests {
       scene.actors.first?.worldPosition,
       FieldSceneRenderer.playerWorldPosition(for: .init(x: 0, y: 0), metrics: scene.metrics))
     XCTAssertEqual(grayscaleValues(in: scene.backgroundImage), Set([85]))
+  }
+  func testFieldSceneRenderIdentityIgnoresPurePositionChanges() {
+    let map = makePaletteMap(blockWidth: 2, blockHeight: 2)
+    let root = repoRoot()
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "OVERWORLD",
+        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
+        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
+      ),
+      overworldSprites: [
+        "SPRITE_RED": spriteDefinition(id: "SPRITE_RED", filename: "red.png"),
+        "SPRITE_OAK": spriteDefinition(id: "SPRITE_OAK", filename: "oak.png"),
+      ]
+    )
+    let objects = [
+      FieldRenderableObjectState(
+        id: "oak",
+        sprite: "SPRITE_OAK",
+        position: .init(x: 1, y: 1),
+        facing: .left,
+        movementMode: nil
+      )
+    ]
+    let movedObjects = [
+      FieldRenderableObjectState(
+        id: "oak",
+        sprite: "SPRITE_OAK",
+        position: .init(x: 0, y: 0),
+        facing: .left,
+        movementMode: nil
+      )
+    ]
+
+    XCTAssertEqual(
+      FieldSceneRenderIdentity(
+        map: map,
+        playerFacing: .down,
+        playerSpriteID: "SPRITE_RED",
+        objects: objects,
+        assets: assets
+      ),
+      FieldSceneRenderIdentity(
+        map: map,
+        playerFacing: .down,
+        playerSpriteID: "SPRITE_RED",
+        objects: movedObjects,
+        assets: assets
+      )
+    )
+  }
+  func testFieldSceneRenderIdentityTracksFacingChanges() {
+    let map = makePaletteMap(blockWidth: 2, blockHeight: 2)
+    let root = repoRoot()
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "OVERWORLD",
+        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
+        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
+      ),
+      overworldSprites: [
+        "SPRITE_RED": spriteDefinition(id: "SPRITE_RED", filename: "red.png"),
+        "SPRITE_OAK": spriteDefinition(id: "SPRITE_OAK", filename: "oak.png"),
+      ]
+    )
+    let objects = [
+      FieldRenderableObjectState(
+        id: "oak",
+        sprite: "SPRITE_OAK",
+        position: .init(x: 1, y: 1),
+        facing: .left,
+        movementMode: nil
+      )
+    ]
+
+    XCTAssertNotEqual(
+      FieldSceneRenderIdentity(
+        map: map,
+        playerFacing: .down,
+        playerSpriteID: "SPRITE_RED",
+        objects: objects,
+        assets: assets
+      ),
+      FieldSceneRenderIdentity(
+        map: map,
+        playerFacing: .up,
+        playerSpriteID: "SPRITE_RED",
+        objects: objects,
+        assets: assets
+      )
+    )
+  }
+  func testRenderScenePreSortsActorsForStablePresentationOrder() throws {
+    let fixtureRoot = try makeSyntheticFieldFixture(tileValue: 85, spriteBodyValue: 170)
+    defer { try? FileManager.default.removeItem(at: fixtureRoot) }
+
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "TEST",
+        imageURL: fixtureRoot.appendingPathComponent("tileset.png"),
+        blocksetURL: fixtureRoot.appendingPathComponent("test.bst")
+      ),
+      overworldSprites: [
+        "SPRITE_RED": FieldSpriteDefinition(
+          id: "SPRITE_RED",
+          imageURL: fixtureRoot.appendingPathComponent("sprite.png"),
+          facingFrames: [
+            .down: .init(x: 0, y: 0, width: 16, height: 16),
+            .up: .init(x: 0, y: 0, width: 16, height: 16),
+            .left: .init(x: 0, y: 0, width: 16, height: 16),
+            .right: .init(x: 0, y: 0, width: 16, height: 16),
+          ]
+        ),
+        "SPRITE_OAK": FieldSpriteDefinition(
+          id: "SPRITE_OAK",
+          imageURL: fixtureRoot.appendingPathComponent("sprite.png"),
+          facingFrames: [
+            .down: .init(x: 0, y: 0, width: 16, height: 16),
+            .up: .init(x: 0, y: 0, width: 16, height: 16),
+            .left: .init(x: 0, y: 0, width: 16, height: 16),
+            .right: .init(x: 0, y: 0, width: 16, height: 16),
+          ]
+        ),
+      ]
+    )
+    let map = MapManifest(
+      id: "TEST_MAP",
+      displayName: "Test Map",
+      defaultMusicID: "MUSIC_PALLET_TOWN",
+      borderBlockID: 0,
+      blockWidth: 1,
+      blockHeight: 1,
+      stepWidth: 2,
+      stepHeight: 2,
+      tileset: "TEST",
+      blockIDs: [0],
+      stepCollisionTileIDs: Array(repeating: 0x00, count: 4),
+      warps: [],
+      backgroundEvents: [],
+      objects: []
+    )
+
+    let scene = try FieldSceneRenderer.renderScene(
+      map: map,
+      playerPosition: .init(x: 0, y: 0),
+      playerFacing: .down,
+      playerSpriteID: "SPRITE_RED",
+      objects: [
+        .init(
+          id: "oak",
+          sprite: "SPRITE_OAK",
+          position: .init(x: 0, y: 1),
+          facing: .left,
+          movementMode: nil
+        )
+      ],
+      assets: assets
+    )
+
+    XCTAssertEqual(scene.actors.map(\.id), ["player", "oak"])
   }
   func testRenderSceneOverlaysConnectedMapStripsInsideBorderPadding() throws {
     let fixtureRoot = try makeSyntheticPaletteFixture(tileValues: [10, 80, 160])

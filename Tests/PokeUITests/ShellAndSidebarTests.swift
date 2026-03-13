@@ -2,6 +2,7 @@ import AppKit
 import ImageIO
 import PokeCore
 import PokeDataModel
+import PokeRender
 import SwiftUI
 import UniformTypeIdentifiers
 import XCTest
@@ -62,7 +63,8 @@ extension PokeUITests {
         save: GameplaySidebarPropsBuilder.makeSaveSection(),
         options: GameplaySidebarPropsBuilder.makeOptionsSection(
           isMusicEnabled: true,
-          appearanceMode: .light
+          appearanceMode: .light,
+          gameplayHDREnabled: true
         )
       )
     )
@@ -647,6 +649,128 @@ extension PokeUITests {
     XCTAssertTrue(props.actionRows[3].isFocused)
     XCTAssertFalse(props.actionRows[4].isFocused)
   }
+  func testBattleSidebarAttentionSectionTracksBlockingSidebarInput() {
+    let basePlayerPokemon = PartyPokemonTelemetry(
+      speciesID: "BULBASAUR",
+      displayName: "Bulbasaur",
+      level: 5,
+      currentHP: 19,
+      maxHP: 19,
+      attack: 11,
+      defense: 10,
+      speed: 9,
+      special: 12,
+      moves: ["TACKLE", "GROWL"]
+    )
+    let baseEnemyPokemon = PartyPokemonTelemetry(
+      speciesID: "PIDGEY",
+      displayName: "Pidgey",
+      level: 3,
+      currentHP: 12,
+      maxHP: 12,
+      attack: 8,
+      defense: 8,
+      speed: 10,
+      special: 7,
+      moves: ["TACKLE"]
+    )
+    let moveSlots = [
+      BattleMoveSlotTelemetry(
+        moveID: "TACKLE",
+        displayName: "Tackle",
+        currentPP: 35,
+        maxPP: 35,
+        isSelectable: true
+      ),
+      BattleMoveSlotTelemetry(
+        moveID: "GROWL",
+        displayName: "Growl",
+        currentPP: 40,
+        maxPP: 40,
+        isSelectable: true
+      ),
+    ]
+
+    let moveSelection = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "moveSelection",
+      promptText: "Pick the next move.",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(pokemon: [])
+    )
+    let trainerDecision = BattleSidebarProps(
+      trainerName: "BUG CATCHER",
+      kind: .trainer,
+      phase: "trainerAboutToUseDecision",
+      promptText: "Will RED change #MON?",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 1,
+      canRun: false,
+      party: .init(pokemon: [])
+    )
+    let partySelection = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "partySelection",
+      promptText: "Bring out which #MON?",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      canSwitch: true,
+      party: .init(
+        pokemon: [
+          .init(
+            id: "bulbasaur-0",
+            speciesID: "BULBASAUR",
+            displayName: "Bulbasaur",
+            level: 5,
+            currentHP: 19,
+            maxHP: 19,
+            isLead: true
+          ),
+          .init(
+            id: "pidgey-1",
+            speciesID: "PIDGEY",
+            displayName: "Pidgey",
+            level: 3,
+            currentHP: 12,
+            maxHP: 12,
+            isLead: false,
+            isSelectable: true,
+            isFocused: true
+          ),
+        ],
+        mode: .battleSwitch,
+        promptText: "Bring out which #MON?"
+      )
+    )
+    let turnText = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "turnText",
+      promptText: "Bulbasaur used Tackle!",
+      playerPokemon: basePlayerPokemon,
+      enemyPokemon: baseEnemyPokemon,
+      moveSlots: moveSlots,
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(pokemon: [])
+    )
+
+    XCTAssertEqual(moveSelection.attentionSection, .battleCombat)
+    XCTAssertEqual(trainerDecision.attentionSection, .battleCombat)
+    XCTAssertEqual(partySelection.attentionSection, .party)
+    XCTAssertNil(turnText.attentionSection)
+  }
   func testBattleSidebarModeForcesPartySectionDuringSwitchSelection() {
     let battleMode = GameplaySidebarMode.battle(
       BattleSidebarProps(
@@ -921,16 +1045,18 @@ extension PokeUITests {
     let save = GameplaySidebarPropsBuilder.makeSaveSection()
     let options = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .light
+      appearanceMode: .light,
+      gameplayHDREnabled: true
     )
 
     XCTAssertEqual(save.actions.map(\.title), ["Save Game", "Load Save"])
     XCTAssertTrue(save.actions.allSatisfy { $0.isEnabled == false })
     XCTAssertEqual(
-      options.rows.map(\.title), ["Appearance", "Text Speed", "Battle Scene", "Battle Style", "Music"])
-    XCTAssertEqual(options.rows.map(\.isEnabled), [true, false, false, false, true])
+      options.rows.map(\.title), ["Appearance", "HDR Effects", "Text Speed", "Battle Scene", "Battle Style", "Music"])
+    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, false, false, false, true])
     XCTAssertEqual(options.rows.last?.detail, "On")
     XCTAssertEqual(options.rows.first?.detail, "Light")
+    XCTAssertEqual(options.rows.dropFirst().first?.detail, "On")
   }
   func testThemePaletteResolvesDistinctLightAndDarkValues() {
     let light = PokeThemePalette.resolve(for: .light)
@@ -938,26 +1064,59 @@ extension PokeUITests {
 
     XCTAssertNotEqual(light.primaryText, dark.primaryText)
     XCTAssertNotEqual(light.field.ink, dark.field.ink)
-    XCTAssertEqual(light.screenGlow.alpha, 0)
+    XCTAssertGreaterThan(light.screenGlow.alpha, 0)
     XCTAssertGreaterThan(dark.screenGlow.alpha, 0)
+  }
+  func testGameplayScreenGlowPaletteTracksDisplayStyle() {
+    let tinted = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgTinted,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+    let raw = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .rawGrayscale,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+    let authentic = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgAuthentic,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+    let dark = PokeThemePalette.resolve(for: .retroDark)
+
+    XCTAssertEqual(tinted.outer, dark.screenGlow)
+    XCTAssertEqual(tinted.inner, dark.screenGlowInner)
+    XCTAssertEqual(raw.outer.red, raw.outer.green)
+    XCTAssertEqual(raw.outer.green, raw.outer.blue)
+    XCTAssertEqual(raw.inner.red, raw.inner.green)
+    XCTAssertEqual(raw.inner.green, raw.inner.blue)
+    XCTAssertNotEqual(raw.outer, tinted.outer)
+    XCTAssertNotEqual(authentic.outer, tinted.outer)
   }
   func testOptionsBuilderReflectsAppearanceWithoutChangingMusicState() {
     let systemOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .system
+      appearanceMode: .system,
+      gameplayHDREnabled: false
     )
     let lightOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .light
+      appearanceMode: .light,
+      gameplayHDREnabled: true
     )
     let darkOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
-      appearanceMode: .retroDark
+      appearanceMode: .retroDark,
+      gameplayHDREnabled: true
     )
 
     XCTAssertEqual(systemOptions.rows.first?.detail, "System")
     XCTAssertEqual(lightOptions.rows.first?.detail, "Light")
     XCTAssertEqual(darkOptions.rows.first?.detail, "Dark")
+    XCTAssertEqual(systemOptions.rows[1].detail, "Off")
+    XCTAssertEqual(lightOptions.rows[1].detail, "On")
+    XCTAssertEqual(darkOptions.rows[1].detail, "On")
     XCTAssertEqual(systemOptions.rows.last?.detail, "On")
     XCTAssertEqual(lightOptions.rows.last?.detail, "On")
     XCTAssertEqual(darkOptions.rows.last?.detail, "On")

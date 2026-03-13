@@ -34,6 +34,7 @@ func fixtureContent(
 @MainActor
 func fixtureGameplayManifest(
     dialogues: [DialogueManifest] = [],
+    fieldInteractions: [FieldInteractionManifest] = [],
     scripts: [ScriptManifest] = [],
     species: [SpeciesManifest] = [],
     items: [ItemManifest] = [],
@@ -42,6 +43,7 @@ func fixtureGameplayManifest(
     wildEncounterTables: [WildEncounterTableManifest] = [],
     maps: [MapManifest]? = nil,
     tilesets: [TilesetManifest]? = nil,
+    trainerAIMoveChoiceModifications: [TrainerAIMoveChoiceModificationManifest] = [],
     trainerBattles: [TrainerBattleManifest] = [],
     marts: [MartManifest] = []
 ) -> GameplayManifest {
@@ -96,6 +98,7 @@ func fixtureGameplayManifest(
             ),
         ],
         dialogues: dialogues,
+        fieldInteractions: fieldInteractions,
         eventFlags: .init(flags: []),
         mapScripts: [],
         scripts: scripts,
@@ -105,8 +108,21 @@ func fixtureGameplayManifest(
         moves: moves,
         typeEffectiveness: typeEffectiveness,
         wildEncounterTables: wildEncounterTables,
+        trainerAIMoveChoiceModifications: trainerAIMoveChoiceModifications,
         trainerBattles: trainerBattles,
-        playerStart: .init(mapID: "REDS_HOUSE_2F", position: .init(x: 4, y: 4), facing: .down, playerName: "RED", rivalName: "BLUE", initialFlags: [])
+        playerStart: .init(
+            mapID: "REDS_HOUSE_2F",
+            position: .init(x: 4, y: 4),
+            facing: .down,
+            playerName: "RED",
+            rivalName: "BLUE",
+            initialFlags: [],
+            defaultBlackoutCheckpoint: .init(
+                mapID: "REDS_HOUSE_2F",
+                position: .init(x: 4, y: 4),
+                facing: .down
+            )
+        )
     )
 }
 
@@ -118,9 +134,20 @@ func fixtureAudioManifest() -> AudioManifest {
         mapRoutes: [.init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN")],
         cues: [
             .init(id: "title_default", assetID: "MUSIC_TITLE_SCREEN"),
+            .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
+            .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
+            .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
             .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
+            .init(id: "trainer_victory", assetID: "MUSIC_DEFEATED_TRAINER"),
+            .init(id: "wild_victory", assetID: "MUSIC_DEFEATED_WILD_MON"),
             .init(
                 id: "mom_heal",
+                assetID: "MUSIC_PKMN_HEALED",
+                waitForCompletion: true,
+                resumeMusicAfterCompletion: true
+            ),
+            .init(
+                id: "pokemon_center_healed",
                 assetID: "MUSIC_PKMN_HEALED",
                 waitForCompletion: true,
                 resumeMusicAfterCompletion: true
@@ -140,10 +167,40 @@ func fixtureAudioManifest() -> AudioManifest {
                 entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
             ),
             .init(
+                id: "MUSIC_MEET_MALE_TRAINER",
+                sourceLabel: "Music_MeetMaleTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetMaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_MEET_FEMALE_TRAINER",
+                sourceLabel: "Music_MeetFemaleTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetFemaleTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_MEET_EVIL_TRAINER",
+                sourceLabel: "Music_MeetEvilTrainer",
+                sourceFile: "audio/music/meettrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_MeetEvilTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
                 id: "MUSIC_TRAINER_BATTLE",
                 sourceLabel: "Music_TrainerBattle",
                 sourceFile: "audio/music/trainerbattle.asm",
                 entries: [.init(id: "default", sourceLabel: "Music_TrainerBattle_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_DEFEATED_TRAINER",
+                sourceLabel: "Music_DefeatedTrainer",
+                sourceFile: "audio/music/defeatedtrainer.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_DefeatedTrainer_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
+                id: "MUSIC_DEFEATED_WILD_MON",
+                sourceLabel: "Music_DefeatedWildMon",
+                sourceFile: "audio/music/defeatedwildmon.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_DefeatedWildMon_Ch1", playbackMode: .looping, channels: [])]
             ),
             .init(
                 id: "MUSIC_PKMN_HEALED",
@@ -173,6 +230,26 @@ func fixtureAudioManifest() -> AudioManifest {
                 requestedChannels: [5],
                 channels: []
             ),
+            .init(
+                id: "SFX_HEALING_MACHINE",
+                sourceLabel: "SFX_HealingMachine",
+                sourceFile: "audio/sfx/healing_machine_1.asm",
+                bank: 1,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_LEVEL_UP",
+                sourceLabel: "SFX_Level_Up",
+                sourceFile: "audio/sfx/level_up.asm",
+                bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5, 6, 7],
+                channels: []
+            ),
         ]
     )
 }
@@ -194,6 +271,9 @@ func advanceBattleTextUntilMoveSelection(_ runtime: GameRuntime, maxTicks: Int =
         }
         if battle.phase == "moveSelection" {
             return
+        }
+        if battle.phase == "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
         }
         runtime.handle(button: .confirm)
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
@@ -219,6 +299,9 @@ func advanceBattleUntilPhase(
         if battle.phase == targetPhase {
             return
         }
+        if battle.phase == "trainerAboutToUseDecision", targetPhase != "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
+        }
         runtime.handle(button: .confirm)
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
     }
@@ -243,6 +326,9 @@ func resolveBattleUntilComplete(
     while runtime.scene == .battle, Date() < deadline {
         if let battle = runtime.currentSnapshot().battle {
             observe?(battle)
+            if battle.phase == "trainerAboutToUseDecision" {
+                runtime.handle(button: .down)
+            }
             runtime.handle(button: .confirm)
         }
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
@@ -311,6 +397,44 @@ func captureBattleTimeline(
 }
 
 @MainActor
+func driveBattleUntil(
+    _ runtime: GameRuntime,
+    maxTicks: Int = 240,
+    stopWhen predicate: (BattleTelemetry) -> Bool
+) -> [BattleTelemetry] {
+    let pollInterval = 0.01
+    let deadline = Date().addingTimeInterval(Double(maxTicks) * pollInterval)
+    var history: [BattleTelemetry] = []
+
+    while Date() < deadline {
+        guard let battle = runtime.currentSnapshot().battle else {
+            XCTFail("battle ended before reaching expected state")
+            return history
+        }
+        if history.last != battle {
+            history.append(battle)
+        }
+        if predicate(battle) {
+            return history
+        }
+        if battle.phase == "trainerAboutToUseDecision" {
+            runtime.handle(button: .down)
+        }
+        runtime.handle(button: .confirm)
+        RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
+    }
+
+    if let battle = runtime.currentSnapshot().battle, history.last != battle {
+        history.append(battle)
+    }
+    XCTAssertTrue(
+        runtime.currentSnapshot().battle.map(predicate) ?? false,
+        "battle did not reach expected state"
+    )
+    return history
+}
+
+@MainActor
 func advanceDialogueUntilComplete(_ runtime: GameRuntime, maxInteractions: Int = 8) {
     var remaining = maxInteractions
     while runtime.dialogueState != nil {
@@ -357,6 +481,10 @@ actor RecordingTelemetryPublisher: TelemetryPublisher {
             try? await Task.sleep(nanoseconds: 5_000_000)
         }
     }
+
+    func recordedEvents() -> [RuntimeSessionEvent] {
+        events
+    }
 }
 
 @MainActor
@@ -368,10 +496,13 @@ func repoRoot() -> URL {
 }
 
 @MainActor
-func makeRepoRuntime(audioPlayer: RuntimeAudioPlaying? = nil) throws -> GameRuntime {
+func makeRepoRuntime(
+    telemetryPublisher: (any TelemetryPublisher)? = nil,
+    audioPlayer: RuntimeAudioPlaying? = nil
+) throws -> GameRuntime {
     let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
     let content = try FileSystemContentLoader(rootURL: contentRoot).load()
-    return GameRuntime(content: content, telemetryPublisher: nil, audioPlayer: audioPlayer)
+    return GameRuntime(content: content, telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
 }
 
 @MainActor

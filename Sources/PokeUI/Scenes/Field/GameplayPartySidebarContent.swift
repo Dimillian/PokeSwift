@@ -1,5 +1,6 @@
 import SwiftUI
 import PokeDataModel
+import PokeRender
 
 struct PartySidebarContent: View {
     let props: PartySidebarProps

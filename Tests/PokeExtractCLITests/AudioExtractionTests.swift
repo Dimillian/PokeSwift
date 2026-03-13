@@ -18,7 +18,11 @@ final class AudioExtractionTests: XCTestCase {
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
+                .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "VIRIDIAN_FOREST_SOUTH_GATE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
                 .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
@@ -31,10 +35,18 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(cueByID["oak_intro"]?.trackID, "MUSIC_MEET_PROF_OAK")
         XCTAssertEqual(cueByID["rival_intro"]?.trackID, "MUSIC_MEET_RIVAL")
         XCTAssertEqual(cueByID["rival_exit"]?.entryID, "alternateStart")
+        XCTAssertEqual(cueByID["trainer_intro_male"]?.trackID, "MUSIC_MEET_MALE_TRAINER")
+        XCTAssertEqual(cueByID["trainer_intro_female"]?.trackID, "MUSIC_MEET_FEMALE_TRAINER")
+        XCTAssertEqual(cueByID["trainer_intro_evil"]?.trackID, "MUSIC_MEET_EVIL_TRAINER")
         XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
+        XCTAssertEqual(cueByID["trainer_victory"]?.trackID, "MUSIC_DEFEATED_TRAINER")
+        XCTAssertEqual(cueByID["wild_victory"]?.trackID, "MUSIC_DEFEATED_WILD_MON")
         XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
         XCTAssertEqual(cueByID["mom_heal"]?.waitForCompletion, true)
         XCTAssertEqual(cueByID["mom_heal"]?.resumeMusicAfterCompletion, true)
+        XCTAssertEqual(cueByID["pokemon_center_healed"]?.trackID, "MUSIC_PKMN_HEALED")
+        XCTAssertEqual(cueByID["pokemon_center_healed"]?.waitForCompletion, true)
+        XCTAssertEqual(cueByID["pokemon_center_healed"]?.resumeMusicAfterCompletion, true)
 
         let requiredTrackIDs: Set<String> = [
             "MUSIC_TITLE_SCREEN",
@@ -42,10 +54,16 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_OAKS_LAB",
             "MUSIC_ROUTES1",
             "MUSIC_CITIES1",
+            "MUSIC_DUNGEON2",
             "MUSIC_POKECENTER",
             "MUSIC_MEET_PROF_OAK",
             "MUSIC_MEET_RIVAL",
+            "MUSIC_MEET_MALE_TRAINER",
+            "MUSIC_MEET_FEMALE_TRAINER",
+            "MUSIC_MEET_EVIL_TRAINER",
             "MUSIC_TRAINER_BATTLE",
+            "MUSIC_DEFEATED_TRAINER",
+            "MUSIC_DEFEATED_WILD_MON",
             "MUSIC_PKMN_HEALED",
         ]
         XCTAssertTrue(requiredTrackIDs.isSubset(of: Set(manifest.tracks.map(\.id))))
@@ -177,6 +195,22 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(frequency, 368.179_775_280_898_87, accuracy: 0.000_001)
     }
 
+    func testAudioExtractorMapsLevelUpSFXChannelsToToneHardware() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: PokeExtractCLITestSupport.repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let levelUp = try XCTUnwrap(manifest.soundEffects.first { $0.id == "SFX_LEVEL_UP" })
+        let channelFive = try XCTUnwrap(levelUp.channels.first { $0.channelNumber == 5 })
+        let channelSix = try XCTUnwrap(levelUp.channels.first { $0.channelNumber == 6 })
+        let channelSeven = try XCTUnwrap(levelUp.channels.first { $0.channelNumber == 7 })
+
+        XCTAssertEqual(channelFive.prelude.first?.waveform, .square)
+        XCTAssertEqual(channelSix.prelude.first?.waveform, .square)
+        XCTAssertEqual(channelSeven.prelude.first?.waveform, .wave)
+    }
+
     func testExtractorWritesDeterministicAudioManifestJSON() throws {
         let repoRoot = PokeExtractCLITestSupport.repoRoot()
         let firstOutputRoot = try PokeExtractCLITestSupport.temporaryDirectory()
@@ -195,9 +229,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 10)
-        XCTAssertEqual(decoded.cues.count, 6)
-        XCTAssertEqual(decoded.tracks.count, 10)
+        XCTAssertEqual(decoded.mapRoutes.count, 14)
+        XCTAssertEqual(decoded.cues.count, 12)
+        XCTAssertEqual(decoded.tracks.count, 16)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }

@@ -11,17 +11,21 @@ final class GameplayExtractionTests: XCTestCase {
             "PALLET_TOWN",
             "ROUTE_1",
             "VIRIDIAN_CITY",
+            "ROUTE_2",
             "VIRIDIAN_SCHOOL_HOUSE",
             "VIRIDIAN_NICKNAME_HOUSE",
             "VIRIDIAN_POKECENTER",
             "VIRIDIAN_MART",
+            "VIRIDIAN_FOREST_SOUTH_GATE",
+            "VIRIDIAN_FOREST",
+            "VIRIDIAN_FOREST_NORTH_GATE",
             "OAKS_LAB",
         ])
         XCTAssertEqual(manifest.playerStart.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(manifest.playerStart.position, .init(x: 4, y: 4))
         XCTAssertEqual(manifest.playerStart.playerName, "RED")
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
-        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "HOUSE", "MART", "POKECENTER"])
+        XCTAssertEqual(manifest.tilesets.map(\.id), ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "FOREST", "FOREST_GATE", "HOUSE", "MART", "POKECENTER"])
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.imagePath, "Assets/field/tilesets/house.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.overworldSprites.map(\.id), [
@@ -120,6 +124,9 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
                 "EVENT_2ND_ROUTE22_RIVAL_BATTLE",
                 "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+                "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
+                "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
+                "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
             ]
         )
         XCTAssertEqual(manifest.scripts.map(\.id), [
@@ -144,6 +151,34 @@ final class GameplayExtractionTests: XCTestCase {
             "oaks_lab_rival_exit_after_battle",
         ])
         XCTAssertEqual(
+            manifest.fieldInteractions,
+            [
+                .init(
+                    id: "pokemon_center_healing",
+                    kind: .pokemonCenterHealing,
+                    introDialogueID: "pokemon_center_welcome",
+                    prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
+                    acceptedDialogueID: "pokemon_center_need_your_pokemon",
+                    successDialogueID: "pokemon_center_fighting_fit",
+                    farewellDialogueID: "pokemon_center_farewell",
+                    healingSequence: .init(
+                        nurseObjectID: "viridian_pokecenter_nurse",
+                        machineSoundEffectID: "SFX_HEALING_MACHINE",
+                        healedAudioCueID: "pokemon_center_healed",
+                        blackoutCheckpoint: .init(
+                            mapID: "VIRIDIAN_CITY",
+                            position: .init(x: 23, y: 26),
+                            facing: .down
+                        )
+                    )
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "viridian_pokecenter_nurse_heal" }?.steps,
+            [.init(action: "startFieldInteraction", fieldInteractionID: "pokemon_center_healing")]
+        )
+        XCTAssertEqual(
             oaksLab.objects.first { $0.id == "oaks_lab_object_8" }?.movementBehavior,
             .init(idleMode: .walk, axis: .upDown, home: .init(x: 1, y: 9))
         )
@@ -164,6 +199,14 @@ final class GameplayExtractionTests: XCTestCase {
         let rivalExitScript = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_rival_exit_after_battle" })
         XCTAssertEqual(rivalExitScript.steps.compactMap(\.movement?.kind), [.fixedPath])
         XCTAssertEqual(rivalExitScript.steps.last?.action, "restoreMapMusic")
+        XCTAssertEqual(
+            manifest.trainerAIMoveChoiceModifications.first { $0.trainerClass == "RIVAL1" }?.modifications,
+            [1]
+        )
+        XCTAssertEqual(
+            manifest.trainerAIMoveChoiceModifications.first { $0.trainerClass == "LORELEI" }?.modifications,
+            [1, 2, 3]
+        )
         XCTAssertEqual(manifest.species.count, 151)
         XCTAssertEqual(manifest.species.prefix(10).map(\.id), [
             "BULBASAUR",
@@ -249,7 +292,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "SURF" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "THUNDERBOLT" })
-        XCTAssertEqual(manifest.items.map(\.id), ["POKE_BALL", "POTION", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL", "OAKS_PARCEL"])
+        XCTAssertEqual(manifest.items.map(\.id), ["POKE_BALL", "POTION", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL", "MOON_STONE", "HP_UP", "OAKS_PARCEL"])
         XCTAssertEqual(manifest.items.first?.displayName, "POKé BALL")
         XCTAssertEqual(manifest.items.first?.price, 200)
         XCTAssertEqual(manifest.items.first?.battleUse, .ball)
@@ -268,11 +311,41 @@ final class GameplayExtractionTests: XCTestCase {
             0
         )
         XCTAssertEqual(manifest.trainerBattles.map(\.id), [
+            "opp_bug_catcher_1",
+            "opp_bug_catcher_2",
+            "opp_bug_catcher_3",
             "opp_rival1_1",
             "opp_rival1_2",
             "opp_rival1_3",
         ])
-        XCTAssertEqual(manifest.trainerBattles.first?.party, [.init(speciesID: "SQUIRTLE", level: 5)])
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.party,
+            [.init(speciesID: "WEEDLE", level: 6), .init(speciesID: "CATERPIE", level: 6)]
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.encounterAudioCueID, "trainer_intro_male")
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.trainerSpritePath,
+            "Assets/battle/trainers/bugcatcher.png"
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.baseRewardMoney, 10)
+        XCTAssertNil(manifest.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.playerLoseDialogueID)
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.party, [.init(speciesID: "SQUIRTLE", level: 5)])
+        XCTAssertNil(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.encounterAudioCueID)
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.trainerSpritePath,
+            "Assets/battle/trainers/rival1.png"
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.baseRewardMoney, 35)
+        XCTAssertEqual(manifest.commonBattleText.wantsToFight, "{trainerName} wants to fight!")
+        XCTAssertEqual(manifest.commonBattleText.moneyForWinning, "{playerName} got ¥{money} for winning!")
+        XCTAssertEqual(
+            manifest.commonBattleText.playerBlackedOut,
+            "{playerName} is out of useable POKéMON! {playerName} blacked out!"
+        )
+        XCTAssertEqual(
+            manifest.playerStart.defaultBlackoutCheckpoint,
+            .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
+        )
         XCTAssertEqual(manifest.tilesets.first?.collision.passableTileIDs, [0x01, 0x02, 0x03, 0x11, 0x12, 0x13, 0x14, 0x1c, 0x1a])
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_2F" }?.warps.first?.targetPosition, .init(x: 7, y: 1))
         XCTAssertEqual(manifest.maps.first { $0.id == "REDS_HOUSE_1F" }?.warps.first?.targetPosition, .init(x: 5, y: 5))
@@ -290,6 +363,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(route1.defaultMusicID, "MUSIC_ROUTES1")
         XCTAssertEqual(route1.connections.map(\.targetMapID), ["VIRIDIAN_CITY", "PALLET_TOWN"])
         XCTAssertEqual(route1.objects.map(\.id), ["route_1_youngster_1", "route_1_youngster_2"])
+
+        let route2 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_2" })
+        XCTAssertEqual(route2.defaultMusicID, "MUSIC_ROUTES1")
+        XCTAssertEqual(route2.connections.map(\.targetMapID), ["PEWTER_CITY", "VIRIDIAN_CITY"])
+        XCTAssertEqual(route2.objects.map(\.id), ["route_2_moon_stone", "route_2_hp_up"])
+        XCTAssertEqual(route2.objects.map(\.pickupItemID), ["MOON_STONE", "HP_UP"])
+        XCTAssertEqual(route2.warps.first { $0.origin == .init(x: 3, y: 43) }?.targetMapID, "VIRIDIAN_FOREST_SOUTH_GATE")
+        XCTAssertEqual(route2.warps.first { $0.origin == .init(x: 3, y: 11) }?.targetMapID, "VIRIDIAN_FOREST_NORTH_GATE")
 
         let viridianCity = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_CITY" })
         XCTAssertEqual(viridianCity.defaultMusicID, "MUSIC_CITIES1")
@@ -373,12 +454,58 @@ final class GameplayExtractionTests: XCTestCase {
             ]
         )
 
+        let viridianForestSouthGate = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_FOREST_SOUTH_GATE" })
+        XCTAssertEqual(viridianForestSouthGate.objects.map(\.id), [
+            "viridian_forest_south_gate_girl",
+            "viridian_forest_south_gate_little_girl",
+        ])
+
+        let viridianForest = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_FOREST" })
+        XCTAssertEqual(viridianForest.defaultMusicID, "MUSIC_DUNGEON2")
+        XCTAssertEqual(viridianForest.objects.map(\.id), [
+            "viridian_forest_youngster_1",
+            "viridian_forest_bug_catcher_1",
+            "viridian_forest_bug_catcher_2",
+            "viridian_forest_bug_catcher_3",
+            "viridian_forest_antidote",
+            "viridian_forest_potion",
+            "viridian_forest_poke_ball",
+            "viridian_forest_youngster_5",
+        ])
+        XCTAssertEqual(viridianForest.objects.first { $0.id == "viridian_forest_antidote" }?.pickupItemID, "ANTIDOTE")
+        XCTAssertEqual(viridianForest.objects.first { $0.id == "viridian_forest_bug_catcher_1" }?.trainerEngageDistance, 4)
+        XCTAssertEqual(viridianForest.objects.first { $0.id == "viridian_forest_bug_catcher_1" }?.trainerIntroDialogueID, "viridian_forest_youngster2_battle")
+        XCTAssertEqual(viridianForest.objects.first { $0.id == "viridian_forest_bug_catcher_1" }?.trainerEndBattleDialogueID, "viridian_forest_youngster2_end_battle")
+        XCTAssertEqual(viridianForest.objects.first { $0.id == "viridian_forest_bug_catcher_1" }?.trainerAfterBattleDialogueID, "viridian_forest_youngster2_after_battle")
+        XCTAssertEqual(viridianForest.backgroundEvents.map(\.dialogueID), [
+            "viridian_forest_trainer_tips_1",
+            "viridian_forest_use_antidote_sign",
+            "viridian_forest_trainer_tips_2",
+            "viridian_forest_trainer_tips_3",
+            "viridian_forest_trainer_tips_4",
+            "viridian_forest_leaving_sign",
+        ])
+
+        let viridianForestNorthGate = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_FOREST_NORTH_GATE" })
+        XCTAssertEqual(viridianForestNorthGate.objects.map(\.id), [
+            "viridian_forest_north_gate_super_nerd",
+            "viridian_forest_north_gate_gramps",
+        ])
+
         let route1Encounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "ROUTE_1" })
         XCTAssertEqual(route1Encounters.grassEncounterRate, 25)
         XCTAssertEqual(route1Encounters.waterEncounterRate, 0)
         XCTAssertEqual(route1Encounters.grassSlots.first, .init(speciesID: "PIDGEY", level: 3))
         XCTAssertEqual(route1Encounters.grassSlots.last, .init(speciesID: "PIDGEY", level: 5))
         XCTAssertEqual(Set(route1Encounters.grassSlots.map(\.speciesID)), Set(["PIDGEY", "RATTATA"]))
+
+        let route2Encounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "ROUTE_2" })
+        XCTAssertEqual(route2Encounters.grassEncounterRate, 25)
+        XCTAssertEqual(Set(route2Encounters.grassSlots.map(\.speciesID)), Set(["PIDGEY", "RATTATA", "WEEDLE", "CATERPIE"]))
+
+        let viridianForestEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "VIRIDIAN_FOREST" })
+        XCTAssertEqual(viridianForestEncounters.grassEncounterRate, 8)
+        XCTAssertTrue(Set(viridianForestEncounters.grassSlots.map(\.speciesID)).isSuperset(of: Set(["WEEDLE", "CATERPIE", "KAKUNA", "METAPOD", "PIKACHU"])))
 
         let redSprite = try XCTUnwrap(manifest.overworldSprites.first { $0.id == "SPRITE_RED" })
         XCTAssertEqual(redSprite.walkingFrames?.down, .init(x: 0, y: 48, width: 16, height: 16))
@@ -391,6 +518,11 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(oakDialogue.pages.first?.lines.first, "OAK: It's unsafe!")
         XCTAssertEqual(oakDialogue.pages.last?.lines.last, "me!")
         XCTAssertNotNil(manifest.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_welcome" }?.pages.first?.lines, ["Welcome to our", "POKéMON CENTER!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_shall_we_heal" }?.pages.first?.lines, ["Shall we heal your", "POKéMON?"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_need_your_pokemon" }?.pages.first?.lines, ["OK. We'll need", "your POKéMON."])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_fighting_fit" }?.pages.first?.lines, ["Thank you!", "Your POKéMON are", "fighting fit!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_farewell" }?.pages.first?.lines, ["We hope to see", "you again!"])
 
         let extractedDialogueIDs = Set(manifest.dialogues.map(\.id))
         let parcelHandoff = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_parcel_handoff" })
@@ -417,19 +549,25 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(first, second)
 
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
-        XCTAssertEqual(decoded.maps.count, 10)
-        XCTAssertEqual(decoded.tilesets.count, 7)
+        XCTAssertEqual(decoded.maps.count, 14)
+        XCTAssertEqual(decoded.tilesets.count, 9)
         XCTAssertEqual(decoded.overworldSprites.count, 23)
-        XCTAssertEqual(decoded.items.count, 6)
+        XCTAssertEqual(decoded.items.count, 8)
         XCTAssertEqual(decoded.marts.count, 1)
-        XCTAssertEqual(decoded.wildEncounterTables.count, 1)
-        XCTAssertGreaterThan(decoded.dialogues.count, 85)
+        XCTAssertEqual(decoded.wildEncounterTables.count, 3)
+        XCTAssertGreaterThan(decoded.dialogues.count, 100)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
-        XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_pokecenter_nurse_heal" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "pokemon_center_welcome" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_forest_youngster2_battle" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "pickup_found_moon_stone" })
+        XCTAssertNotNil(decoded.fieldInteractions.first { $0.id == "pokemon_center_healing" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "OAKS_LAB" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })
+        XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" })
+        XCTAssertEqual(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.trainerSpritePath, "Assets/battle/trainers/bugcatcher.png")
+        XCTAssertEqual(decoded.commonBattleText.trainerSentOut, "{trainerName} sent out {enemyPokemon}!")
         XCTAssertGreaterThan(decoded.typeEffectiveness.count, 0)
         XCTAssertEqual(decoded.tilesets.first?.imagePath, "Assets/field/tilesets/reds_house.png")
         XCTAssertEqual(decoded.tilesets.first?.blocksetPath, "Assets/field/blocksets/reds_house.bst")

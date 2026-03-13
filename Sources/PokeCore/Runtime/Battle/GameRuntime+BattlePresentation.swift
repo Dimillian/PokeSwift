@@ -39,7 +39,7 @@ extension GameRuntime {
     ) -> Int {
         side == .player
             ? battle.focusedMoveIndex
-            : selectEnemyMoveIndex(enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
+            : selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
     }
 
     func applyResolvedBattleAction(
@@ -64,7 +64,11 @@ extension GameRuntime {
         batches: inout [[RuntimeBattlePresentationBeat]]
     ) -> Bool {
         if simulatedPlayer.currentHP == 0 {
-            batches.append(losingBattleBatch())
+            batches.append(
+                playerDefeatResolutionBatch(
+                    faintedPlayer: simulatedPlayer
+                )
+            )
             return true
         }
 
@@ -82,6 +86,34 @@ extension GameRuntime {
         }
 
         return false
+    }
+
+    func playerDefeatResolutionBatch(
+        faintedPlayer: RuntimePokemonState
+    ) -> [RuntimeBattlePresentationBeat] {
+        let pendingAction: RuntimeBattlePendingAction = hasSwitchableBattleReplacement(
+            afterFainting: faintedPlayer
+        ) ? .continueForcedSwitch : .finish(won: false)
+
+        return [
+            .init(
+                delay: battlePresentationDelay(base: 0.18),
+                stage: .turnSettle,
+                uiVisibility: .visible,
+                phase: .turnText,
+                pendingAction: pendingAction,
+                playerPokemon: faintedPlayer
+            ),
+        ]
+    }
+
+    func hasSwitchableBattleReplacement(afterFainting faintedPlayer: RuntimePokemonState) -> Bool {
+        guard var gameplayState, gameplayState.playerParty.isEmpty == false else {
+            return false
+        }
+
+        gameplayState.playerParty[0] = faintedPlayer
+        return firstSwitchablePartyIndex(gameplayState: gameplayState) != nil
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
@@ -104,6 +136,7 @@ extension GameRuntime {
         stage: BattlePresentationStage,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide?,
+        hidePlayerPokemon: Bool = false,
         meterAnimation: BattleMeterAnimationTelemetry?,
         transitionStyle: BattleTransitionStyle
     ) {
@@ -111,6 +144,7 @@ extension GameRuntime {
         battle.presentation.revision += 1
         battle.presentation.uiVisibility = uiVisibility
         battle.presentation.activeSide = activeSide
+        battle.presentation.hidePlayerPokemon = hidePlayerPokemon
         battle.presentation.meterAnimation = meterAnimation
         battle.presentation.transitionStyle = transitionStyle
     }
@@ -127,16 +161,60 @@ extension GameRuntime {
         guard beats.isEmpty == false else { return }
 
         battlePresentationTask = Task { [self] in
-            for beat in beats {
+            for (index, beat) in beats.enumerated() {
                 if beat.delay > 0 {
                     try? await Task.sleep(nanoseconds: UInt64(beat.delay * 1_000_000_000))
                 }
                 guard Task.isCancelled == false else { return }
                 applyBattlePresentationBeat(beat, battleID: battleID)
+
+                if beat.requiresConfirmAfterDisplay {
+                    let remainingBeats = Array(beats.dropFirst(index + 1))
+                    if remainingBeats.isEmpty == false {
+                        prependBattlePresentationBeats(remainingBeats, battleID: battleID)
+                    }
+                    battlePresentationTask = nil
+                    return
+                }
             }
 
             battlePresentationTask = nil
+            autoAdvanceBattlePresentationIfNeeded(battleID: battleID)
         }
+    }
+
+    func autoAdvanceBattlePresentationIfNeeded(battleID: String) {
+        guard var gameplayState,
+              var battle = gameplayState.battle,
+              battle.battleID == battleID,
+              battle.pendingPresentationBatches.isEmpty == false,
+              battle.pendingAction == nil,
+              battle.phase != .moveSelection,
+              battle.phase != .bagSelection,
+              battle.phase != .partySelection,
+              battle.phase != .trainerAboutToUseDecision,
+              battle.phase != .learnMoveDecision,
+              battle.phase != .learnMoveSelection,
+              battle.phase != .battleComplete else {
+            return
+        }
+
+        let nextBatch = battle.pendingPresentationBatches.removeFirst()
+        battle.phase = .resolvingTurn
+        gameplayState.battle = battle
+        self.gameplayState = gameplayState
+        scheduleBattlePresentation(nextBatch, battleID: battleID)
+    }
+
+    func prependBattlePresentationBeats(_ beats: [RuntimeBattlePresentationBeat], battleID: String) {
+        guard var gameplayState, var battle = gameplayState.battle, battle.battleID == battleID else {
+            return
+        }
+
+        battle.pendingPresentationBatches.insert(beats, at: 0)
+        gameplayState.battle = battle
+        self.gameplayState = gameplayState
+        publishSnapshot()
     }
 
     func applyBattlePresentationBeat(_ beat: RuntimeBattlePresentationBeat, battleID: String) {
@@ -170,10 +248,17 @@ extension GameRuntime {
             battle.enemyParty = enemyParty
             battle.enemyActiveIndex = enemyActiveIndex
         }
-        if let moveAudioMoveID = beat.moveAudioMoveID,
-           let move = content.move(id: moveAudioMoveID),
-           let attackerSpeciesID = beat.moveAudioAttackerSpeciesID {
-            _ = playMoveAudio(for: move, attackerSpeciesID: attackerSpeciesID)
+        if let soundEffectRequest = beat.soundEffectRequest {
+            _ = playSoundEffect(
+                soundEffectRequest,
+                reason: "battlePresentation.\(beat.stage.rawValue)"
+            )
+        }
+        if let audioCueID = beat.audioCueID {
+            requestAudioCue(
+                id: audioCueID,
+                reason: "battlePresentation.\(beat.stage.rawValue)"
+            )
         }
 
         updateBattlePresentation(
@@ -181,6 +266,7 @@ extension GameRuntime {
             stage: beat.stage,
             uiVisibility: beat.uiVisibility,
             activeSide: beat.activeSide,
+            hidePlayerPokemon: beat.hidePlayerPokemon,
             meterAnimation: beat.meterAnimation,
             transitionStyle: beat.transitionStyle
         )
@@ -203,7 +289,9 @@ extension GameRuntime {
     func makeIntroPresentationBeats(
         openingMessage: String,
         transitionStyle: BattleTransitionStyle,
-        requiresConfirmAfterReveal: Bool = false
+        requiresConfirmAfterReveal: Bool = false,
+        pendingActionAfterReveal: RuntimeBattlePendingAction? = nil,
+        revealSoundEffectRequest: SoundEffectPlaybackRequest? = nil
     ) -> [RuntimeBattlePresentationBeat] {
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
@@ -248,23 +336,24 @@ extension GameRuntime {
                 uiVisibility: .visible,
                 transitionStyle: transitionStyle,
                 message: openingMessage,
-                phase: requiresConfirmAfterReveal ? .turnText : .introText,
-                pendingAction: requiresConfirmAfterReveal ? .moveSelection : nil
+                phase: requiresConfirmAfterReveal || pendingActionAfterReveal != nil ? .turnText : .introText,
+                pendingAction: pendingActionAfterReveal ?? (requiresConfirmAfterReveal ? .moveSelection : nil),
+                soundEffectRequest: revealSoundEffectRequest
             ),
         ]
 
-        if requiresConfirmAfterReveal == false {
+        if requiresConfirmAfterReveal == false && pendingActionAfterReveal == nil {
             beats.append(commandReadyBeat(delay: battlePresentationDelay(base: 0.18)))
         }
 
         return beats
     }
 
-    func makeTurnPresentationBatches(for battle: RuntimeBattleState) -> [[RuntimeBattlePresentationBeat]] {
+    func makeTurnPresentationBatches(for battle: inout RuntimeBattleState) -> [[RuntimeBattlePresentationBeat]] {
         var simulatedPlayer = battle.playerPokemon
         var simulatedEnemy = battle.enemyPokemon
         var batches: [[RuntimeBattlePresentationBeat]] = []
-        let actionSides: [BattlePresentationSide] = simulatedPlayer.speed >= simulatedEnemy.speed
+        let actionSides: [BattlePresentationSide] = adjustedSpeedStat(for: simulatedPlayer) >= adjustedSpeedStat(for: simulatedEnemy)
             ? [.player, .enemy]
             : [.enemy, .player]
 
@@ -288,6 +377,10 @@ extension GameRuntime {
                 simulatedPlayer: &simulatedPlayer,
                 simulatedEnemy: &simulatedEnemy
             )
+
+            if side == .enemy {
+                battle.aiLayer2Encouragement += 1
+            }
 
             if appendPostActionResolutionIfNeeded(
                 battle: battle,
@@ -314,6 +407,15 @@ extension GameRuntime {
         let enemyAttacker = action.side == .enemy ? action.updatedAttacker : nil
         let defenderMutationPlayer = action.side == .enemy ? action.updatedDefender : nil
         let defenderMutationEnemy = action.side == .player ? action.updatedDefender : nil
+        let moveAudioRequest: SoundEffectPlaybackRequest?
+        if let move = content.move(id: action.moveID) {
+            moveAudioRequest = moveSoundEffectRequest(
+                for: move,
+                attackerSpeciesID: action.attackerSpeciesID
+            )
+        } else {
+            moveAudioRequest = nil
+        }
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
@@ -330,8 +432,7 @@ extension GameRuntime {
                 stage: .attackImpact,
                 uiVisibility: .visible,
                 activeSide: action.side,
-                moveAudioMoveID: action.moveID,
-                moveAudioAttackerSpeciesID: action.attackerSpeciesID
+                soundEffectRequest: moveAudioRequest
             ),
         ]
 
@@ -356,6 +457,7 @@ extension GameRuntime {
                     stage: .resultText,
                     uiVisibility: .visible,
                     activeSide: action.side == .player ? .enemy : .player,
+                    requiresConfirmAfterDisplay: statusMessage != nil,
                     message: statusMessage,
                     playerPokemon: defenderMutationPlayer,
                     enemyPokemon: defenderMutationEnemy
@@ -373,14 +475,59 @@ extension GameRuntime {
         }
 
         for message in remainingMessages {
-            let stage: BattlePresentationStage = message.contains("fainted!") ? .faint : .resultText
+            let isFaintMessage = message.contains("fainted!")
+            guard isFaintMessage else {
+                beats.append(
+                    .init(
+                        delay: battlePresentationDelay(base: 0.24),
+                        stage: .resultText,
+                        uiVisibility: .visible,
+                        activeSide: action.side == .player ? .enemy : .player,
+                        requiresConfirmAfterDisplay: true,
+                        message: message
+                    )
+                )
+                continue
+            }
+
+            let faintSide: BattlePresentationSide = action.side == .player ? .enemy : .player
+            let displayMessage = action.side == .player
+                ? enemyFaintedText(for: action.updatedDefender)
+                : playerFaintedText(for: action.updatedDefender)
+            let soundEffectRequests = action.side == .player
+                ? enemyFaintSoundEffectRequests()
+                : speciesCrySoundEffectRequest(speciesID: action.updatedDefender.speciesID).map { [$0] } ?? []
+
             beats.append(
                 .init(
                     delay: battlePresentationDelay(base: 0.24),
-                    stage: stage,
+                    stage: .faint,
                     uiVisibility: .visible,
-                    activeSide: action.side == .player ? .enemy : .player,
-                    message: message
+                    activeSide: faintSide,
+                    soundEffectRequest: soundEffectRequests.first
+                )
+            )
+
+            for soundEffectRequest in soundEffectRequests.dropFirst() {
+                beats.append(
+                    .init(
+                        delay: battlePresentationDelay(base: 0.3),
+                        stage: .faint,
+                        uiVisibility: .visible,
+                        activeSide: faintSide,
+                        soundEffectRequest: soundEffectRequest
+                    )
+                )
+            }
+
+            beats.append(
+                .init(
+                    delay: battlePresentationDelay(base: 0.24),
+                    stage: .resultText,
+                    uiVisibility: .visible,
+                    activeSide: faintSide,
+                    requiresConfirmAfterDisplay: true,
+                    message: displayMessage
                 )
             )
         }
@@ -425,12 +572,17 @@ extension GameRuntime {
         _ messages: [String],
         battle: inout RuntimeBattleState,
         phase: RuntimeBattlePhase = .turnText,
-        pendingAction: RuntimeBattlePendingAction
+        pendingAction: RuntimeBattlePendingAction,
+        audioCueID: String? = nil
     ) {
+        if let audioCueID {
+            requestAudioCue(id: audioCueID, reason: "battleText")
+        }
+        let pagedMessages = paginatedBattleMessages(messages)
         battle.pendingAction = pendingAction
         battle.phase = phase
-        battle.queuedMessages = messages
-        battle.message = messages.first ?? battlePrompt(for: .moveSelection)
+        battle.queuedMessages = pagedMessages
+        battle.message = pagedMessages.first ?? battlePrompt(for: .moveSelection)
         if battle.queuedMessages.isEmpty == false {
             battle.queuedMessages.removeFirst()
         }
@@ -445,6 +597,12 @@ extension GameRuntime {
 
         guard let pendingAction = battle.pendingAction else {
             returnToBattleMoveSelection(battle: &battle)
+            if battle.presentation.stage != .commandReady {
+                battle.presentation.stage = .commandReady
+                battle.presentation.revision += 1
+                battle.presentation.transitionStyle = .none
+                battle.presentation.uiVisibility = .visible
+            }
             return
         }
 
@@ -452,21 +610,31 @@ extension GameRuntime {
         switch pendingAction {
         case .moveSelection:
             returnToBattleMoveSelection(battle: &battle)
-            if battle.presentation.stage == .introReveal {
+            if battle.presentation.stage != .commandReady {
                 battle.presentation.stage = .commandReady
                 battle.presentation.revision += 1
                 battle.presentation.transitionStyle = .none
                 battle.presentation.uiVisibility = .visible
             }
         case let .finish(won):
-            battle.phase = .battleComplete
-            finishBattle(battle: battle, won: won)
+            if won == false, shouldBlackoutOnLoss(for: battle) {
+                beginBlackoutSequence(battle: &battle)
+            } else {
+                battle.phase = .battleComplete
+                finishBattle(battle: battle, won: won)
+            }
+        case let .performBlackout(sourceTrainerObjectID):
+            performBlackout(sourceTrainerObjectID: sourceTrainerObjectID)
         case .escape:
             finishWildBattleEscape()
         case .captured:
             finishWildBattleCapture(battle: battle)
         case .capturedNicknamePrompt:
             beginNicknameConfirmationAfterCapture(battle: battle)
+        case let .enterTrainerAboutToUseDecision(nextIndex):
+            enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
+        case let .completeTrainerVictory(payout):
+            completeTrainerVictory(battle: battle, payout: payout)
         case .continueSwitchTurn:
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:
@@ -513,7 +681,11 @@ extension GameRuntime {
         )
     }
 
-    func scheduleNextEnemySendOut(battle: inout RuntimeBattleState, nextIndex: Int) {
+    func scheduleNextEnemySendOut(
+        battle: inout RuntimeBattleState,
+        nextIndex: Int,
+        pendingAction: RuntimeBattlePendingAction = .moveSelection
+    ) {
         guard battle.enemyParty.indices.contains(nextIndex) else {
             returnToBattleMoveSelection(battle: &battle)
             return
@@ -525,6 +697,7 @@ extension GameRuntime {
         battle.pendingPresentationBatches = []
         battle.queuedMessages = []
         battle.message = ""
+        battle.aiLayer2Encouragement = 0
 
         scheduleBattlePresentation(
             [
@@ -533,16 +706,91 @@ extension GameRuntime {
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .enemy,
-                    message: "\(battle.trainerName) sent out \(nextEnemy.nickname)!",
+                    message: trainerSentOutText(trainerName: battle.trainerName, pokemon: nextEnemy),
+                    phase: .turnText,
+                    pendingAction: pendingAction,
                     enemyParty: battle.enemyParty,
-                    enemyActiveIndex: nextIndex
-                ),
-                commandReadyBeat(
-                    delay: battlePresentationDelay(base: 0.26),
-                    playerPokemon: battle.playerPokemon
+                    enemyActiveIndex: nextIndex,
+                    soundEffectRequest: speciesCrySoundEffectRequest(speciesID: nextEnemy.speciesID)
                 ),
             ],
             battleID: battle.battleID
         )
+    }
+
+    func makePlayerSendOutBatch(
+        playerPokemon: RuntimePokemonState,
+        enemyPokemon: RuntimePokemonState,
+        pendingAction: RuntimeBattlePendingAction? = nil
+    ) -> [RuntimeBattlePresentationBeat] {
+        [
+            .init(
+                delay: battlePresentationDelay(base: 0.34),
+                stage: .enemySendOut,
+                uiVisibility: .visible,
+                activeSide: .player,
+                message: playerSendOutText(for: playerPokemon, against: enemyPokemon),
+                phase: .turnText,
+                pendingAction: pendingAction,
+                playerPokemon: playerPokemon,
+                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: playerPokemon.speciesID)
+            ),
+        ]
+    }
+
+    func makeTrainerOpeningSendOutBatches(
+        battle: RuntimeBattleState
+    ) -> [[RuntimeBattlePresentationBeat]] {
+        [
+            [
+            .init(
+                delay: battlePresentationDelay(base: 0.34),
+                    stage: .enemySendOut,
+                    uiVisibility: .visible,
+                    activeSide: .enemy,
+                    hidePlayerPokemon: true,
+                    message: trainerSentOutText(trainerName: battle.trainerName, pokemon: battle.enemyPokemon),
+                    phase: .turnText,
+                    enemyParty: battle.enemyParty,
+                enemyActiveIndex: battle.enemyActiveIndex,
+                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: battle.enemyPokemon.speciesID)
+            ),
+            ],
+            makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon
+            )
+        ]
+    }
+
+    func enterTrainerAboutToUseDecision(battle: inout RuntimeBattleState, nextIndex: Int) {
+        guard battle.enemyParty.indices.contains(nextIndex) else {
+            returnToBattleMoveSelection(battle: &battle)
+            return
+        }
+
+        let message = trainerAboutToUseMessages(
+            trainerName: battle.trainerName,
+            pokemon: battle.enemyParty[nextIndex]
+        ).last ?? trainerAboutToUseText(
+            trainerName: battle.trainerName,
+            pokemon: battle.enemyParty[nextIndex]
+        )
+        let previousMoveIndex = battle.focusedMoveIndex
+        battle.phase = .trainerAboutToUseDecision
+        battle.focusedMoveIndex = 1
+        battle.rewardContinuation = .aboutToUse(index: nextIndex, previousMoveIndex: previousMoveIndex)
+        battle.pendingAction = nil
+        battle.pendingPresentationBatches = []
+        battle.queuedMessages = []
+        battle.message = paginatedBattleMessage(message).last ?? message
+    }
+
+    func completeTrainerVictory(battle: RuntimeBattleState, payout: Int) {
+        if var gameplayState {
+            gameplayState.money += payout
+            self.gameplayState = gameplayState
+        }
+        finishBattle(battle: battle, won: true)
     }
 }

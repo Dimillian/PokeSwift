@@ -1,45 +1,6 @@
 import Foundation
 import PokeDataModel
 
-public struct FieldObjectRenderState: Equatable, Sendable {
-    public let id: String
-    public let displayName: String
-    public let sprite: String
-    public let position: TilePoint
-    public let facing: FacingDirection
-    public let movementBehavior: ObjectMovementBehavior
-    public let movementMode: ActorMovementMode?
-    public let interactionDialogueID: String?
-    public let trainerBattleID: String?
-
-    public init(
-        id: String,
-        displayName: String,
-        sprite: String,
-        position: TilePoint,
-        facing: FacingDirection,
-        movementBehavior: ObjectMovementBehavior = .init(
-            idleMode: .stay,
-            axis: .none,
-            home: .init(x: 0, y: 0),
-            maxDistanceFromHome: 0
-        ),
-        movementMode: ActorMovementMode? = nil,
-        interactionDialogueID: String?,
-        trainerBattleID: String?
-    ) {
-        self.id = id
-        self.displayName = displayName
-        self.sprite = sprite
-        self.position = position
-        self.facing = facing
-        self.movementBehavior = movementBehavior
-        self.movementMode = movementMode
-        self.interactionDialogueID = interactionDialogueID
-        self.trainerBattleID = trainerBattleID
-    }
-}
-
 struct RuntimeObjectState {
     var position: TilePoint
     var facing: FacingDirection
@@ -87,10 +48,56 @@ struct RuntimePokemonState {
     let special: Int
     var attackStage: Int
     var defenseStage: Int
+    var speedStage: Int
+    var specialStage: Int
     var accuracyStage: Int
     var evasionStage: Int
     var majorStatus: MajorStatusCondition
     var moves: [RuntimeMoveState]
+
+    init(
+        speciesID: String,
+        nickname: String,
+        level: Int,
+        experience: Int,
+        dvs: PokemonDVs,
+        statExp: PokemonStatExp,
+        maxHP: Int,
+        currentHP: Int,
+        attack: Int,
+        defense: Int,
+        speed: Int,
+        special: Int,
+        attackStage: Int = 0,
+        defenseStage: Int = 0,
+        speedStage: Int = 0,
+        specialStage: Int = 0,
+        accuracyStage: Int = 0,
+        evasionStage: Int = 0,
+        majorStatus: MajorStatusCondition = .none,
+        moves: [RuntimeMoveState]
+    ) {
+        self.speciesID = speciesID
+        self.nickname = nickname
+        self.level = level
+        self.experience = experience
+        self.dvs = dvs
+        self.statExp = statExp
+        self.maxHP = maxHP
+        self.currentHP = currentHP
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.special = special
+        self.attackStage = attackStage
+        self.defenseStage = defenseStage
+        self.speedStage = speedStage
+        self.specialStage = specialStage
+        self.accuracyStage = accuracyStage
+        self.evasionStage = evasionStage
+        self.majorStatus = majorStatus
+        self.moves = moves
+    }
 }
 
 enum RuntimeBattlePhase: String {
@@ -98,6 +105,7 @@ enum RuntimeBattlePhase: String {
     case moveSelection
     case bagSelection
     case partySelection
+    case trainerAboutToUseDecision
     case learnMoveDecision
     case learnMoveSelection
     case resolvingTurn
@@ -115,17 +123,21 @@ enum RuntimeBattleCaptureResult: Equatable {
 enum RuntimeBattlePendingAction {
     case moveSelection
     case finish(won: Bool)
+    case performBlackout(sourceTrainerObjectID: String?)
     case escape
     case captured
     case capturedNicknamePrompt
+    case enterTrainerAboutToUseDecision(nextIndex: Int)
+    case completeTrainerVictory(payout: Int)
     case continueSwitchTurn
     case continueForcedSwitch
     case continueLevelUpResolution
 }
 
-enum RuntimeBattlePartySelectionMode {
+enum RuntimeBattlePartySelectionMode: Equatable {
     case optionalSwitch
     case forcedReplacement
+    case trainerShift(nextEnemyIndex: Int)
 }
 
 struct RuntimeBattleLearnMoveState {
@@ -134,7 +146,9 @@ struct RuntimeBattleLearnMoveState {
 }
 
 enum RuntimeBattleRewardContinuation {
+    case aboutToUse(index: Int, previousMoveIndex: Int)
     case sendNextEnemy(index: Int)
+    case finishTrainerWin(payout: Int)
     case finishWin
 }
 
@@ -183,6 +197,7 @@ struct RuntimeBattlePresentationState {
     var revision: Int
     var uiVisibility: BattlePresentationUIVisibility
     var activeSide: BattlePresentationSide?
+    var hidePlayerPokemon: Bool
     var transitionStyle: BattleTransitionStyle
     var meterAnimation: BattleMeterAnimationTelemetry?
 
@@ -191,6 +206,7 @@ struct RuntimeBattlePresentationState {
         revision: Int = 0,
         uiVisibility: BattlePresentationUIVisibility = .visible,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil
     ) {
@@ -198,6 +214,7 @@ struct RuntimeBattlePresentationState {
         self.revision = revision
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
     }
@@ -208,6 +225,8 @@ struct RuntimeBattlePresentationBeat {
     let stage: BattlePresentationStage
     let uiVisibility: BattlePresentationUIVisibility
     let activeSide: BattlePresentationSide?
+    let hidePlayerPokemon: Bool
+    let requiresConfirmAfterDisplay: Bool
     let transitionStyle: BattleTransitionStyle
     let meterAnimation: BattleMeterAnimationTelemetry?
     let message: String?
@@ -219,8 +238,8 @@ struct RuntimeBattlePresentationBeat {
     let enemyPokemon: RuntimePokemonState?
     let enemyParty: [RuntimePokemonState]?
     let enemyActiveIndex: Int?
-    let moveAudioMoveID: String?
-    let moveAudioAttackerSpeciesID: String?
+    let soundEffectRequest: SoundEffectPlaybackRequest?
+    let audioCueID: String?
     let finishBattleWon: Bool?
     let escapeBattle: Bool
 
@@ -229,6 +248,8 @@ struct RuntimeBattlePresentationBeat {
         stage: BattlePresentationStage,
         uiVisibility: BattlePresentationUIVisibility,
         activeSide: BattlePresentationSide? = nil,
+        hidePlayerPokemon: Bool = false,
+        requiresConfirmAfterDisplay: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
         message: String? = nil,
@@ -240,8 +261,8 @@ struct RuntimeBattlePresentationBeat {
         enemyPokemon: RuntimePokemonState? = nil,
         enemyParty: [RuntimePokemonState]? = nil,
         enemyActiveIndex: Int? = nil,
-        moveAudioMoveID: String? = nil,
-        moveAudioAttackerSpeciesID: String? = nil,
+        soundEffectRequest: SoundEffectPlaybackRequest? = nil,
+        audioCueID: String? = nil,
         finishBattleWon: Bool? = nil,
         escapeBattle: Bool = false
     ) {
@@ -249,6 +270,8 @@ struct RuntimeBattlePresentationBeat {
         self.stage = stage
         self.uiVisibility = uiVisibility
         self.activeSide = activeSide
+        self.hidePlayerPokemon = hidePlayerPokemon
+        self.requiresConfirmAfterDisplay = requiresConfirmAfterDisplay
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
         self.message = message
@@ -260,8 +283,8 @@ struct RuntimeBattlePresentationBeat {
         self.enemyPokemon = enemyPokemon
         self.enemyParty = enemyParty
         self.enemyActiveIndex = enemyActiveIndex
-        self.moveAudioMoveID = moveAudioMoveID
-        self.moveAudioAttackerSpeciesID = moveAudioAttackerSpeciesID
+        self.soundEffectRequest = soundEffectRequest
+        self.audioCueID = audioCueID
         self.finishBattleWon = finishBattleWon
         self.escapeBattle = escapeBattle
     }
@@ -271,15 +294,21 @@ struct RuntimeBattleState {
     let battleID: String
     let kind: BattleKind
     let trainerName: String
+    let trainerSpritePath: String?
+    let baseRewardMoney: Int
     let completionFlagID: String
     let healsPartyAfterBattle: Bool
     let preventsBlackoutOnLoss: Bool
-    let winDialogueID: String
-    let loseDialogueID: String
+    let playerWinDialogueID: String
+    let playerLoseDialogueID: String?
+    let postBattleScriptID: String?
     let canRun: Bool
+    let trainerClass: String?
+    let sourceTrainerObjectID: String?
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
+    var aiLayer2Encouragement: Int
     var phase: RuntimeBattlePhase
     var focusedMoveIndex: Int
     var focusedBagItemIndex: Int
@@ -301,19 +330,52 @@ struct RuntimeBattleState {
 }
 
 struct DialogueState {
-    enum CompletionAction {
+    indirect enum CompletionAction {
         case returnToField
         case continueScript
         case healAndShow(dialogueID: String)
         case openStarterChoice(preselectedSpeciesID: String)
         case beginPostChoiceSequence
         case beginPostChoiceNaming
-        case startPostBattleDialogue(won: Bool)
+        case finishTrainerBattle(
+            won: Bool,
+            preventsBlackoutOnLoss: Bool,
+            postBattleScriptID: String?,
+            sourceTrainerObjectID: String?
+        )
+        case startBattle(battleID: String, sourceTrainerObjectID: String?)
+        case showDialogue(dialogueID: String, completionAction: CompletionAction)
+        case fieldPrompt(interactionID: String, completionAction: CompletionAction)
+        case startFieldHealing(interactionID: String, completionAction: CompletionAction)
     }
 
     let dialogueID: String
     var pageIndex: Int
     let completionAction: CompletionAction
+}
+
+struct RuntimeFieldPromptState {
+    let interactionID: String
+    let kind: FieldPromptKind
+    let completionAction: DialogueState.CompletionAction
+    var focusedIndex: Int
+}
+
+enum RuntimeFieldHealingPhase: String {
+    case priming
+    case machineActive
+    case healedJingle
+}
+
+struct RuntimeFieldHealingState {
+    let interactionID: String
+    let nurseObjectID: String?
+    let originalFacing: FacingDirection?
+    let completionAction: DialogueState.CompletionAction
+    var phase: RuntimeFieldHealingPhase
+    var activeBallCount: Int
+    var totalBallCount: Int
+    var pulseStep: Int
 }
 
 enum DeferredAction {
@@ -379,10 +441,16 @@ public struct RuntimeNamingState {
     public var enteredText: String { String(enteredCharacters) }
 }
 
+struct RuntimeFieldAlertState: Equatable {
+    var objectID: String
+    var kind: FieldAlertBubbleKind
+}
+
 struct GameplayState {
     var mapID: String
     var playerPosition: TilePoint
     var facing: FacingDirection
+    var blackoutCheckpoint: BlackoutCheckpointManifest?
     var objectStates: [String: RuntimeObjectState]
     var activeFlags: Set<String>
     var money: Int
