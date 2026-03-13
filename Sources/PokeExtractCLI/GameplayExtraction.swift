@@ -2743,7 +2743,7 @@ private func parsePokedexText(repoRoot: URL) throws -> [String: String] {
             var joined = ""
             for part in textParts {
                 if joined.hasSuffix("-") {
-                    joined += part
+                    joined = String(joined.dropLast()) + part
                 } else if !joined.isEmpty {
                     joined += " " + part
                 } else {

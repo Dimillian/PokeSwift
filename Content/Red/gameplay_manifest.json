@@ -22450,7 +22450,7 @@
           "moveID" : "SUPER_FANG"
         }
       ],
-      "pokedexEntryText" : "It uses its whis- kers to maintain its balance. It apparently slows down if they are cut off",
+      "pokedexEntryText" : "It uses its whiskers to maintain its balance. It apparently slows down if they are cut off",
       "primaryType" : "NORMAL",
       "speciesCategory" : "RAT",
       "startingMoves" : [
@@ -23763,7 +23763,7 @@
           "moveID" : "GROWTH"
         }
       ],
-      "pokedexEntryText" : "Burrows to suck tree roots. The mushrooms on its back grow by draw- ing nutrients from the bug host",
+      "pokedexEntryText" : "Burrows to suck tree roots. The mushrooms on its back grow by drawing nutrients from the bug host",
       "primaryType" : "BUG",
       "secondaryType" : "GRASS",
       "speciesCategory" : "MUSHROOM",
@@ -24246,7 +24246,7 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
-      "pokedexEntryText" : "Often seen swim- ming elegantly by lake shores. It is often mistaken for the Japanese monster, Kappa",
+      "pokedexEntryText" : "Often seen swimming elegantly by lake shores. It is often mistaken for the Japanese monster, Kappa",
       "primaryType" : "WATER",
       "speciesCategory" : "DUCK",
       "startingMoves" : [
@@ -24740,7 +24740,7 @@
           "moveID" : "REFLECT"
         }
       ],
-      "pokedexEntryText" : "Its brain can out- perform a super- computer. Its intelligence quotient is said to be 5,000",
+      "pokedexEntryText" : "Its brain can outperform a supercomputer. Its intelligence quotient is said to be 5,000",
       "primaryType" : "PSYCHIC_TYPE",
       "speciesCategory" : "PSI",
       "startingMoves" : [
@@ -26269,7 +26269,7 @@
           "moveID" : "DREAM_EATER"
         }
       ],
-      "pokedexEntryText" : "Because of its ability to slip through block walls, it is said to be from an- other dimension",
+      "pokedexEntryText" : "Because of its ability to slip through block walls, it is said to be from another dimension",
       "primaryType" : "GHOST",
       "secondaryType" : "POISON",
       "speciesCategory" : "GAS",
@@ -27378,7 +27378,7 @@
           "moveID" : "GROWTH"
         }
       ],
-      "pokedexEntryText" : "The whole body is swathed with wide vines that are similar to sea- weed. Its vines shake as it walks",
+      "pokedexEntryText" : "The whole body is swathed with wide vines that are similar to seaweed. Its vines shake as it walks",
       "primaryType" : "GRASS",
       "speciesCategory" : "VINE",
       "startingMoves" : [
@@ -27533,7 +27533,7 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
-      "pokedexEntryText" : "Capable of swim- ming backwards by rapidly flapping its wing-like pectoral fins and stout tail",
+      "pokedexEntryText" : "Capable of swimming backwards by rapidly flapping its wing-like pectoral fins and stout tail",
       "primaryType" : "WATER",
       "speciesCategory" : "DRAGON",
       "startingMoves" : [
@@ -27645,7 +27645,7 @@
           "moveID" : "AGILITY"
         }
       ],
-      "pokedexEntryText" : "In the autumn spawning season, they can be seen swimming power- fully up rivers and creeks",
+      "pokedexEntryText" : "In the autumn spawning season, they can be seen swimming powerfully up rivers and creeks",
       "primaryType" : "WATER",
       "speciesCategory" : "GOLDFISH",
       "startingMoves" : [
@@ -28264,7 +28264,7 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
-      "pokedexEntryText" : "A POKéMON that has been over- hunted almost to extinction. It can ferry people across the water",
+      "pokedexEntryText" : "A POKéMON that has been overhunted almost to extinction. It can ferry people across the water",
       "primaryType" : "WATER",
       "secondaryType" : "ICE",
       "speciesCategory" : "TRANSPORT",
@@ -28475,7 +28475,7 @@
           "moveID" : "THUNDER"
         }
       ],
-      "pokedexEntryText" : "It accumulates negative ions in the atmosphere to blast out 10000- volt lightning bolts",
+      "pokedexEntryText" : "It accumulates negative ions in the atmosphere to blast out 10000volt lightning bolts",
       "primaryType" : "ELECTRIC",
       "speciesCategory" : "LIGHTNING",
       "startingMoves" : [
@@ -28788,7 +28788,7 @@
           "moveID" : "HYDRO_PUMP"
         }
       ],
-      "pokedexEntryText" : "Its sleek shape is perfect for swim- ming. It slashes prey with its claws and drains the body fluids",
+      "pokedexEntryText" : "Its sleek shape is perfect for swimming. It slashes prey with its claws and drains the body fluids",
       "primaryType" : "ROCK",
       "secondaryType" : "WATER",
       "speciesCategory" : "SHELLFISH",
@@ -28838,7 +28838,7 @@
           "moveID" : "HYPER_BEAM"
         }
       ],
-      "pokedexEntryText" : "A ferocious, pre- historic POKéMON that goes for the enemy's throat with its serrated saw-like fangs",
+      "pokedexEntryText" : "A ferocious, prehistoric POKéMON that goes for the enemy's throat with its serrated saw-like fangs",
       "primaryType" : "ROCK",
       "secondaryType" : "FLYING",
       "speciesCategory" : "FOSSIL",
