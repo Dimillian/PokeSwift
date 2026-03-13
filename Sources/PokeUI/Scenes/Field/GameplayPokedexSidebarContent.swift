@@ -711,7 +711,7 @@ private struct PokedexEntryRow: View {
                         statusIndicator
                     }
                 }
-                .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.5))
+                .opacity(entry.isOwned || entry.isSeen ? 1 : 0.5)
             }
             .buttonStyle(.plain)
             .disabled(!entry.isOwned)
@@ -744,6 +744,7 @@ private struct PokedexEntryRow: View {
         if let spriteURL = entry.spriteURL {
             PixelAssetView(url: spriteURL, label: entry.displayName, whiteIsTransparent: true)
                 .aspectRatio(contentMode: .fit)
+                .opacity(entry.isOwned ? 1 : 0.2)
         } else if entry.isSeen {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(FieldRetroPalette.slotFill.opacity(0.4))
@@ -853,7 +854,7 @@ private struct PokedexGridEntryCell: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .opacity(entry.isOwned ? 1 : (entry.isSeen ? 0.72 : 0.52))
+                .opacity(entry.isOwned || entry.isSeen ? 1 : 0.52)
             }
             .buttonStyle(.plain)
             .disabled(!entry.isOwned)
@@ -879,6 +880,7 @@ private struct PokedexGridEntryCell: View {
         if let spriteURL = entry.spriteURL {
             PixelAssetView(url: spriteURL, label: entry.displayName, whiteIsTransparent: true)
                 .aspectRatio(contentMode: .fit)
+                .opacity(entry.isOwned ? 1 : 0.2)
         } else if entry.isSeen {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(FieldRetroPalette.slotFill.opacity(0.4))

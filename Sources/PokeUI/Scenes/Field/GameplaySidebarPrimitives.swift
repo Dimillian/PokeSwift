@@ -1,5 +1,10 @@
 import SwiftUI
 
+func gameBoyUppercasedLabel(_ text: String) -> String {
+    // The GB font atlas follows source-style POKéMON casing, not Unicode-capitalized É.
+    text.uppercased().replacingOccurrences(of: "É", with: "é")
+}
+
 struct AccordionSidebarCard<Content: View>: View {
     let title: String
     let summary: String?
@@ -79,7 +84,7 @@ struct AccordionSidebarCard<Content: View>: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 GameBoyPixelText(
-                    title.uppercased(),
+                    gameBoyUppercasedLabel(title),
                     scale: 1.5,
                     color: FieldRetroPalette.ink.opacity(isHighlighted ? 0.82 : 0.6),
                     fallbackFont: .system(size: 12, weight: .bold, design: .rounded)
