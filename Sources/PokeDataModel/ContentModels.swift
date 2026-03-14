@@ -105,6 +105,15 @@ public enum TextSpeed: String, CaseIterable, Codable, Sendable {
         rawValue.uppercased()
     }
 
+    /// Per-character reveal delay in seconds, matching original Game Boy frame timings.
+    public var characterDelay: TimeInterval {
+        switch self {
+        case .fast: return 1.0 / 60.0   // 1 frame
+        case .medium: return 3.0 / 60.0  // 3 frames
+        case .slow: return 5.0 / 60.0    // 5 frames
+        }
+    }
+
     public static let allOptions: [TextSpeed] = [.fast, .medium, .slow]
 }
 

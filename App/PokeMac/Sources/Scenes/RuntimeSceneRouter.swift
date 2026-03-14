@@ -10,6 +10,7 @@ struct RuntimeSceneRouter: View {
 
     var body: some View {
         sceneContent
+            .pokeTextSpeed(preferences.textSpeed)
             .onChange(of: runtime.scene) { oldValue, newValue in
                 if oldValue != .titleOptions, newValue == .titleOptions {
                     runtime.optionsTextSpeed = preferences.textSpeed

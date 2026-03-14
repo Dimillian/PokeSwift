@@ -5,13 +5,24 @@ public struct DialogueBoxView: View {
     let title: String?
     let lines: [String]
 
+    @Environment(\.pokeTextSpeed) private var textSpeed
+    @State private var revealedCharacters = 0
+
+    private var totalCharacters: Int {
+        lines.reduce(0) { $0 + $1.count }
+    }
+
+    private var isFullyRevealed: Bool {
+        revealedCharacters >= totalCharacters
+    }
+
     public init(title: String? = nil, lines: [String]) {
         self.title = title
         self.lines = lines
     }
 
     public var body: some View {
-        GameBoyDialogueFrame {
+        GameBoyDialogueFrame(showPromptIndicator: isFullyRevealed) {
             VStack(alignment: .leading, spacing: 8) {
                 if let title {
                     GameBoyPixelText(
@@ -23,9 +34,9 @@ public struct DialogueBoxView: View {
                     .padding(.bottom, 2)
                 }
 
-                ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
                     GameBoyPixelText(
-                        line,
+                        revealedPortion(of: line, lineIndex: index),
                         scale: 2,
                         color: PokeThemePalette.primaryText,
                         fallbackFont: .system(size: 20, weight: .medium, design: .monospaced)
@@ -35,13 +46,36 @@ public struct DialogueBoxView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .task(id: lines) {
+            revealedCharacters = 0
+            let delay = textSpeed.characterDelay
+            let total = totalCharacters
+            guard total > 0 else { return }
+            for i in 1...total {
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                if Task.isCancelled { return }
+                revealedCharacters = i
+            }
+        }
+    }
+
+    private func revealedPortion(of line: String, lineIndex: Int) -> String {
+        var charsBefore = 0
+        for i in 0..<lineIndex {
+            charsBefore += lines[i].count
+        }
+        let available = max(0, revealedCharacters - charsBefore)
+        if available >= line.count { return line }
+        return String(line.prefix(available))
     }
 }
 
 private struct GameBoyDialogueFrame<Content: View>: View {
     private let content: Content
+    private let showPromptIndicator: Bool
 
-    init(@ViewBuilder content: () -> Content) {
+    init(showPromptIndicator: Bool = true, @ViewBuilder content: () -> Content) {
+        self.showPromptIndicator = showPromptIndicator
         self.content = content()
     }
 
@@ -83,6 +117,7 @@ private struct GameBoyDialogueFrame<Content: View>: View {
             }
             .padding(.trailing, 18)
             .padding(.bottom, 16)
+            .opacity(showPromptIndicator ? 1 : 0)
         }
         .shadow(color: PokeThemePalette.dialogueShadow, radius: 18, y: 8)
     }

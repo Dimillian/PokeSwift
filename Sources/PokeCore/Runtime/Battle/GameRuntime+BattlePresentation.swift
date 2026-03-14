@@ -257,7 +257,11 @@ extension GameRuntime {
         if validationMode || isTestEnvironment {
             scale = 0.12
         } else {
-            scale = 1
+            switch optionsTextSpeed {
+            case .fast: scale = 0.6
+            case .medium: scale = 1.0
+            case .slow: scale = 1.6
+            }
         }
         return max(0, base * scale)
     }

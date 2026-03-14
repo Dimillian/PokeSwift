@@ -29,6 +29,7 @@ final class AppPreferences {
     func attachRuntime(_ runtime: GameRuntime?) {
         self.runtime = runtime
         runtime?.setMusicEnabled(musicEnabled)
+        runtime?.optionsTextSpeed = textSpeed
     }
 
     func cycleAppearanceMode() {
