@@ -127,12 +127,14 @@ enum PokeContentTestSupport {
         let fieldSpriteRoot = assetRoot.appendingPathComponent("field/sprites", isDirectory: true)
         let battleFrontRoot = assetRoot.appendingPathComponent("battle/pokemon/front", isDirectory: true)
         let battleBackRoot = assetRoot.appendingPathComponent("battle/pokemon/back", isDirectory: true)
+        let battleEffectsRoot = assetRoot.appendingPathComponent("battle/effects", isDirectory: true)
 
         try FileManager.default.createDirectory(at: fieldTilesetRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: fieldBlocksetRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: fieldSpriteRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: battleFrontRoot, withIntermediateDirectories: true, attributes: nil)
         try FileManager.default.createDirectory(at: battleBackRoot, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(at: battleEffectsRoot, withIntermediateDirectories: true, attributes: nil)
 
         FileManager.default.createFile(atPath: fieldTilesetRoot.appendingPathComponent("reds_house.png").path, contents: Data())
         FileManager.default.createFile(
@@ -142,6 +144,7 @@ enum PokeContentTestSupport {
         FileManager.default.createFile(atPath: fieldSpriteRoot.appendingPathComponent("red.png").path, contents: Data())
         FileManager.default.createFile(atPath: battleFrontRoot.appendingPathComponent("squirtle.png").path, contents: Data())
         FileManager.default.createFile(atPath: battleBackRoot.appendingPathComponent("squirtle.png").path, contents: Data())
+        FileManager.default.createFile(atPath: battleEffectsRoot.appendingPathComponent("send_out_poof.png").path, contents: Data())
 
         return root
     }
