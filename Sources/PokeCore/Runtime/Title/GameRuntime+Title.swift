@@ -24,6 +24,10 @@ extension GameRuntime {
                 if continueFromTitleMenu() == false {
                     substate = "continue_disabled"
                 }
+            case "options":
+                optionsFocusedRow = 0
+                scene = .titleOptions
+                substate = "title_options"
             default:
                 placeholderTitle = selected.label
                 substate = selected.id
@@ -35,6 +39,78 @@ extension GameRuntime {
             substate = "attract"
             requestTitleMusic()
         case .left, .right:
+            break
+        }
+    }
+
+    func handleTitleOptions(button: RuntimeButton) {
+        let rowCount = 4 // textSpeed, battleAnimation, battleStyle, cancel
+        switch button {
+        case .up:
+            optionsFocusedRow = (optionsFocusedRow - 1 + rowCount) % rowCount
+            substate = "title_options"
+        case .down:
+            optionsFocusedRow = (optionsFocusedRow + 1) % rowCount
+            substate = "title_options"
+        case .left:
+            cycleOptionLeft()
+        case .right:
+            cycleOptionRight()
+        case .confirm:
+            if optionsFocusedRow == 3 {
+                playUIConfirmSound()
+                scene = .titleMenu
+                substate = "title_menu"
+            }
+        case .cancel:
+            playUIConfirmSound()
+            scene = .titleMenu
+            substate = "title_menu"
+        case .start:
+            break
+        }
+    }
+
+    private func cycleOptionLeft() {
+        switch optionsFocusedRow {
+        case 0:
+            let options = TextSpeed.allOptions
+            if let idx = options.firstIndex(of: optionsTextSpeed), idx > 0 {
+                optionsTextSpeed = options[idx - 1]
+            }
+        case 1:
+            let options = BattleAnimation.allOptions
+            if let idx = options.firstIndex(of: optionsBattleAnimation), idx > 0 {
+                optionsBattleAnimation = options[idx - 1]
+            }
+        case 2:
+            let options = BattleStyle.allOptions
+            if let idx = options.firstIndex(of: optionsBattleStyle), idx > 0 {
+                optionsBattleStyle = options[idx - 1]
+            }
+        default:
+            break
+        }
+    }
+
+    private func cycleOptionRight() {
+        switch optionsFocusedRow {
+        case 0:
+            let options = TextSpeed.allOptions
+            if let idx = options.firstIndex(of: optionsTextSpeed), idx < options.count - 1 {
+                optionsTextSpeed = options[idx + 1]
+            }
+        case 1:
+            let options = BattleAnimation.allOptions
+            if let idx = options.firstIndex(of: optionsBattleAnimation), idx < options.count - 1 {
+                optionsBattleAnimation = options[idx + 1]
+            }
+        case 2:
+            let options = BattleStyle.allOptions
+            if let idx = options.firstIndex(of: optionsBattleStyle), idx < options.count - 1 {
+                optionsBattleStyle = options[idx + 1]
+            }
+        default:
             break
         }
     }

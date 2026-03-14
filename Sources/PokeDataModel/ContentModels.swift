@@ -96,6 +96,40 @@ public struct TitleMenuEntry: Codable, Equatable, Hashable, Sendable {
     }
 }
 
+public enum TextSpeed: String, CaseIterable, Codable, Sendable {
+    case fast
+    case medium
+    case slow
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+
+    public static let allOptions: [TextSpeed] = [.fast, .medium, .slow]
+}
+
+public enum BattleAnimation: String, CaseIterable, Codable, Sendable {
+    case on
+    case off
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+
+    public static let allOptions: [BattleAnimation] = [.on, .off]
+}
+
+public enum BattleStyle: String, CaseIterable, Codable, Sendable {
+    case shift
+    case set
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+
+    public static let allOptions: [BattleStyle] = [.shift, .set]
+}
+
 public struct LogoBounceStep: Codable, Equatable, Hashable, Sendable {
     public let yDelta: Int
     public let frames: Int

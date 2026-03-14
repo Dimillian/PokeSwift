@@ -5,7 +5,7 @@ import PokeDataModel
 
 @MainActor
 extension PokeCoreTests {
-    func testTitleFlowTransitionsFromAttractToMenuAndOptionsPlaceholder() async {
+    func testTitleFlowTransitionsFromAttractToMenuAndOptions() async {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
         runtime.start()
         await waitForScene(.titleAttract, in: runtime, message: "title flow did not reach attract mode")
@@ -19,7 +19,10 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         runtime.updateWindowScale(5)
         XCTAssertEqual(runtime.currentSnapshot().window.scale, 5)
-        XCTAssertEqual(runtime.scene, .placeholder)
+        XCTAssertEqual(runtime.scene, .titleOptions)
+
+        runtime.handle(button: .cancel)
+        XCTAssertEqual(runtime.scene, .titleMenu)
     }
     func testMenuInteractionWithDisabledContinue() async {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)

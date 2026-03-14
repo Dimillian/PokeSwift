@@ -12,6 +12,7 @@ public enum RuntimeScene: String, Codable, Sendable {
     case battle
     case naming
     case oakIntro
+    case titleOptions
     case placeholder
 }
 

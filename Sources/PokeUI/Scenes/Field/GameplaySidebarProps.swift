@@ -1125,6 +1125,8 @@ public enum GameplaySidebarPropsBuilder {
             "NAMING"
         case .oakIntro:
             "INTRO"
+        case .titleOptions:
+            "OPTIONS"
         case .placeholder:
             "PLACEHOLDER"
         }
