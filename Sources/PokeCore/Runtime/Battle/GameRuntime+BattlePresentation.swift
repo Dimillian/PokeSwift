@@ -621,6 +621,7 @@ extension GameRuntime {
         } else {
             moveAudioRequest = nil
         }
+        let skipAnimation = optionsBattleAnimation == .off
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
@@ -632,14 +633,19 @@ extension GameRuntime {
                 playerPokemon: attackerPokemon,
                 enemyPokemon: enemyAttacker
             ),
-            .init(
-                delay: battlePresentationDelay(base: 0.22),
-                stage: .attackImpact,
-                uiVisibility: .visible,
-                activeSide: action.side,
-                soundEffectRequest: moveAudioRequest
-            ),
         ]
+
+        if skipAnimation == false {
+            beats.append(
+                .init(
+                    delay: battlePresentationDelay(base: 0.22),
+                    stage: .attackImpact,
+                    uiVisibility: .visible,
+                    activeSide: action.side,
+                    soundEffectRequest: moveAudioRequest
+                )
+            )
+        }
 
         let trailingMessages = Array(action.messages.dropFirst())
         if action.dealtDamage > 0 {
