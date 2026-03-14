@@ -5,11 +5,11 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let mapSizes = try parseMapSizes(repoRoot: source.repoRoot)
     let mapHeadersByID = try parseMapHeaders(repoRoot: source.repoRoot)
     let mapMusic = try parseMapMusic(repoRoot: source.repoRoot)
-    let eventFlags = try parseEventFlags(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
     let mapScriptMetadataByMapID = try parseSelectedMapScriptMetadata(repoRoot: source.repoRoot)
+    let martStockLabels = try Set(parseMartStocks(repoRoot: source.repoRoot).keys)
 
-    let mapDrafts = try currentGameplaySliceMaps.map { definition in
+    let mapDrafts = try gameplayCoverageMaps.map { definition in
         try makeMapManifestDraft(
             repoRoot: source.repoRoot,
             definition: definition,
@@ -18,30 +18,52 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             mapSizes: mapSizes,
             mapHeadersByID: mapHeadersByID,
             tilesets: tilesets,
-            mapScriptMetadata: mapScriptMetadataByMapID[definition.mapID]
+            mapScriptMetadata: mapScriptMetadataByMapID[definition.mapID],
+            martStockLabels: martStockLabels
         )
     }
     let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
     let playerStart = try buildPlayerStart(repoRoot: source.repoRoot)
+    let dialogues = try buildDialogues(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID)
+    let fieldInteractions = try buildFieldInteractions(maps: maps, repoRoot: source.repoRoot)
+    let mapScripts = buildMapScripts()
+    let scripts = try buildScripts(repoRoot: source.repoRoot, maps: maps)
+    let items = try buildItems(repoRoot: source.repoRoot)
+    let marts = try buildMarts(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID)
+    let species = try buildSpecies(repoRoot: source.repoRoot)
+    let moves = try buildMoves(repoRoot: source.repoRoot)
+    let typeEffectiveness = try buildTypeEffectiveness(repoRoot: source.repoRoot)
+    let wildEncounterTables = try buildWildEncounterTables(repoRoot: source.repoRoot)
+    let trainerAIMoveChoiceModifications = try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot)
+    let trainerBattles = try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID)
+    let eventFlags = try parseEventFlags(
+        repoRoot: source.repoRoot,
+        maps: maps,
+        mapScripts: mapScripts,
+        scripts: scripts,
+        trainerBattles: trainerBattles,
+        playerStart: playerStart
+    )
+    let commonBattleText = try buildCommonBattleText(repoRoot: source.repoRoot)
 
     return GameplayManifest(
         maps: maps,
         tilesets: tilesets,
         overworldSprites: buildOverworldSprites(),
-        dialogues: try buildDialogues(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
-        fieldInteractions: try buildFieldInteractions(maps: maps, repoRoot: source.repoRoot),
+        dialogues: dialogues,
+        fieldInteractions: fieldInteractions,
         eventFlags: EventFlagManifest(flags: eventFlags),
-        mapScripts: buildMapScripts(),
-        scripts: try buildScripts(repoRoot: source.repoRoot),
-        items: try buildItems(repoRoot: source.repoRoot),
-        marts: try buildMarts(repoRoot: source.repoRoot),
-        species: try buildSpecies(repoRoot: source.repoRoot),
-        moves: try buildMoves(repoRoot: source.repoRoot),
-        typeEffectiveness: try buildTypeEffectiveness(repoRoot: source.repoRoot),
-        wildEncounterTables: try buildWildEncounterTables(repoRoot: source.repoRoot),
-        trainerAIMoveChoiceModifications: try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot),
-        trainerBattles: try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID),
-        commonBattleText: try buildCommonBattleText(repoRoot: source.repoRoot),
+        mapScripts: mapScripts,
+        scripts: scripts,
+        items: items,
+        marts: marts,
+        species: species,
+        moves: moves,
+        typeEffectiveness: typeEffectiveness,
+        wildEncounterTables: wildEncounterTables,
+        trainerAIMoveChoiceModifications: trainerAIMoveChoiceModifications,
+        trainerBattles: trainerBattles,
+        commonBattleText: commonBattleText,
         playerStart: playerStart
     )
 }
@@ -86,6 +108,7 @@ private struct MapScriptMetadata {
     let textLabelByTextID: [String: String]
     let pickupTextIDs: Set<String>
     let farTextLabelByLocalLabel: [String: String]
+    let referencedFarTextLabels: Set<String>
     let trainerHeadersByLabel: [String: StandardTrainerHeaderMetadata]
     let trainerHeaderLabelByTextLabel: [String: String]
     let usesStandardTrainerLoop: Bool
@@ -177,27 +200,22 @@ private func parseMapSizes(repoRoot: URL) throws -> [String: TileSize] {
     }
 }
 
-private func parseEventFlags(repoRoot: URL) throws -> [EventFlagDefinition] {
-    let requiredFlags = [
-        "EVENT_FOLLOWED_OAK_INTO_LAB",
-        "EVENT_FOLLOWED_OAK_INTO_LAB_2",
-        "EVENT_OAK_ASKED_TO_CHOOSE_MON",
-        "EVENT_GOT_STARTER",
-        "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
-        "EVENT_OAK_APPEARED_IN_PALLET",
-        "EVENT_GOT_POTION_SAMPLE",
-        "EVENT_GOT_OAKS_PARCEL",
-        "EVENT_OAK_GOT_PARCEL",
-        "EVENT_GOT_POKEDEX",
-        "EVENT_VIRIDIAN_GYM_OPEN",
-        "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
-        "EVENT_2ND_ROUTE22_RIVAL_BATTLE",
-        "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
-        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
-        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
-        "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
-    ]
+private func parseEventFlags(
+    repoRoot: URL,
+    maps: [MapManifest],
+    mapScripts: [MapScriptManifest],
+    scripts: [ScriptManifest],
+    trainerBattles: [TrainerBattleManifest],
+    playerStart: PlayerStartManifest
+) throws -> [EventFlagDefinition] {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/event_constants.asm"))
+    let requiredFlags = referencedEventFlagIDs(
+        maps: maps,
+        mapScripts: mapScripts,
+        scripts: scripts,
+        trainerBattles: trainerBattles,
+        playerStart: playerStart
+    )
 
     return try requiredFlags.map { flagID in
         guard contents.contains("const \(flagID)") else {
@@ -205,6 +223,36 @@ private func parseEventFlags(repoRoot: URL) throws -> [EventFlagDefinition] {
         }
         return EventFlagDefinition(id: flagID, sourceConstant: flagID)
     }
+}
+
+private func referencedEventFlagIDs(
+    maps: [MapManifest],
+    mapScripts: [MapScriptManifest],
+    scripts: [ScriptManifest],
+    trainerBattles: [TrainerBattleManifest],
+    playerStart: PlayerStartManifest
+) -> [String] {
+    let objectTriggerFlags = maps.flatMap { map in
+        map.objects.flatMap { object in
+            object.interactionTriggers.flatMap { $0.conditions.compactMap(\.flagID) }
+        }
+    }
+    let mapScriptFlags = mapScripts.flatMap { $0.triggers.flatMap { $0.conditions.compactMap(\.flagID) } }
+    let scriptStepFlags = scripts.flatMap { script in
+        script.steps.compactMap(\.flagID) + script.steps.flatMap { step in
+            (step.movement?.variants ?? []).flatMap { $0.conditions.compactMap(\.flagID) }
+        }
+    }
+    let trainerBattleFlags = trainerBattles.map(\.completionFlagID)
+
+    return Set(
+        playerStart.initialFlags
+        + objectTriggerFlags
+        + mapScriptFlags
+        + scriptStepFlags
+        + trainerBattleFlags
+    )
+    .sorted()
 }
 
 private func parseMapHeaders(repoRoot: URL) throws -> [String: ParsedMapHeader] {
@@ -275,8 +323,8 @@ private func parseMapMusic(repoRoot: URL) throws -> [String: String] {
 }
 
 private func parseSelectedMapScriptMetadata(repoRoot: URL) throws -> [String: MapScriptMetadata] {
-    try currentGameplaySliceMaps.reduce(into: [:]) { result, definition in
-        let scriptPath = scriptPathForSliceMap(definition)
+    try gameplayCoverageMaps.reduce(into: [:]) { result, definition in
+        let scriptPath = scriptPathForMap(definition)
         let scriptURL = repoRoot.appendingPathComponent(scriptPath)
         guard FileManager.default.fileExists(atPath: scriptURL.path) else {
             return
@@ -286,9 +334,39 @@ private func parseSelectedMapScriptMetadata(repoRoot: URL) throws -> [String: Ma
     }
 }
 
-private func scriptPathForSliceMap(_ definition: CurrentGameplaySliceMapDefinition) -> String {
-    let stem = URL(fileURLWithPath: definition.objectFile).deletingPathExtension().lastPathComponent
-    return "scripts/\(stem).asm"
+private func mapFileStem(for definition: GameplayCoverageMapDefinition) -> String {
+    URL(fileURLWithPath: definition.objectFile).deletingPathExtension().lastPathComponent
+}
+
+private func scriptPathForMap(_ definition: GameplayCoverageMapDefinition) -> String {
+    "scripts/\(mapFileStem(for: definition)).asm"
+}
+
+private func buildTextContentsByMapID(repoRoot: URL) throws -> [String: String] {
+    let textDirectoryURL = repoRoot.appendingPathComponent("text", isDirectory: true)
+    let textFiles = try FileManager.default.contentsOfDirectory(
+        at: textDirectoryURL,
+        includingPropertiesForKeys: nil
+    )
+    .filter { $0.pathExtension == "asm" }
+    .sorted { $0.lastPathComponent < $1.lastPathComponent }
+
+    return try gameplayCoverageMaps.reduce(into: [:]) { result, definition in
+        let stem = mapFileStem(for: definition)
+        let candidateURLs = textFiles
+            .filter { url in
+                url.deletingPathExtension().lastPathComponent == stem ||
+                url.deletingPathExtension().lastPathComponent.hasPrefix("\(stem)_")
+            }
+
+        guard candidateURLs.isEmpty == false else {
+            return
+        }
+
+        result[definition.mapID] = try candidateURLs
+            .map { try String(contentsOf: $0) }
+            .joined(separator: "\n")
+    }
 }
 
 private func parseMapScriptMetadata(contents: String) -> MapScriptMetadata {
@@ -297,6 +375,7 @@ private func parseMapScriptMetadata(contents: String) -> MapScriptMetadata {
         label == "PickUpItemText" ? textID : nil
     })
     let farTextLabelByLocalLabel = parseFarTextLabels(contents: contents)
+    let referencedFarTextLabels = parseReferencedFarTextLabels(contents: contents)
     let trainerHeadersByLabel = parseStandardTrainerHeaders(contents: contents)
     let trainerHeaderLabelByTextLabel = parseTalkToTrainerBindings(contents: contents)
     let usesStandardTrainerLoop =
@@ -309,6 +388,7 @@ private func parseMapScriptMetadata(contents: String) -> MapScriptMetadata {
         textLabelByTextID: textLabelByTextID,
         pickupTextIDs: pickupTextIDs,
         farTextLabelByLocalLabel: farTextLabelByLocalLabel,
+        referencedFarTextLabels: referencedFarTextLabels,
         trainerHeadersByLabel: trainerHeadersByLabel,
         trainerHeaderLabelByTextLabel: trainerHeaderLabelByTextLabel,
         usesStandardTrainerLoop: usesStandardTrainerLoop
@@ -330,20 +410,41 @@ private func parseMapTextPointerLabels(contents: String) -> [String: String] {
 }
 
 private func parseFarTextLabels(contents: String) -> [String: String] {
-    let regex = try! NSRegularExpression(
-        pattern: #"(?ms)^\s*([A-Za-z0-9_\.]+):\s*\n\s*text_far\s+([A-Za-z0-9_\.]+)"#,
-        options: [.anchorsMatchLines]
-    )
-    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
-    return regex.matches(in: contents, range: nsRange).reduce(into: [:]) { result, match in
-        guard
-            let localRange = Range(match.range(at: 1), in: contents),
-            let farRange = Range(match.range(at: 2), in: contents)
-        else {
-            return
+    var rootLabel: String?
+    var result: [String: String] = [:]
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if let labelMatch = line.firstMatch(of: /^([A-Za-z0-9_]+):$/) {
+            rootLabel = String(labelMatch.output.1)
+            continue
         }
-        result[String(contents[localRange])] = String(contents[farRange])
+
+        guard let rootLabel,
+              result[rootLabel] == nil,
+              let farMatch = line.firstMatch(of: /text_far\s+([A-Za-z0-9_\.]+)/) else {
+            continue
+        }
+
+        result[rootLabel] = String(farMatch.output.1)
     }
+
+    return result
+}
+
+private func parseReferencedFarTextLabels(contents: String) -> Set<String> {
+    let regex = try! NSRegularExpression(pattern: #"text_far\s+([A-Za-z0-9_\.]+)"#)
+    let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+    return Set(regex.matches(in: contents, range: nsRange).compactMap { match in
+        guard let farRange = Range(match.range(at: 1), in: contents) else {
+            return nil
+        }
+        return String(contents[farRange])
+    })
 }
 
 private func parseStandardTrainerHeaders(contents: String) -> [String: StandardTrainerHeaderMetadata] {
@@ -463,8 +564,10 @@ private func collisionKey(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1_Coll"
     case "REDS_HOUSE_2": return "RedsHouse2_Coll"
     case "DOJO": return "Dojo_Coll"
+    case "GYM": return "Gym_Coll"
     case "FOREST": return "Forest_Coll"
     case "FOREST_GATE": return "ForestGate_Coll"
+    case "MUSEUM": return "Museum_Coll"
     case "HOUSE": return "House_Coll"
     case "MART": return "Mart_Coll"
     case "POKECENTER": return "Pokecenter_Coll"
@@ -478,8 +581,10 @@ private func tilesetLabel(for tileset: String) -> String {
     case "REDS_HOUSE_1": return "RedsHouse1"
     case "REDS_HOUSE_2": return "RedsHouse2"
     case "DOJO": return "Dojo"
+    case "GYM": return "Gym"
     case "FOREST": return "Forest"
     case "FOREST_GATE": return "ForestGate"
+    case "MUSEUM": return "Museum"
     case "HOUSE": return "House"
     case "MART": return "Mart"
     case "POKECENTER": return "Pokecenter"
@@ -521,13 +626,14 @@ private func parseGrassTiles(repoRoot: URL) throws -> [String: Int?] {
 
 private func makeMapManifestDraft(
     repoRoot: URL,
-    definition: CurrentGameplaySliceMapDefinition,
+    definition: GameplayCoverageMapDefinition,
     size: TileSize,
     defaultMusicID: String,
     mapSizes: [String: TileSize],
     mapHeadersByID: [String: ParsedMapHeader],
     tilesets: [TilesetManifest],
-    mapScriptMetadata: MapScriptMetadata?
+    mapScriptMetadata: MapScriptMetadata?,
+    martStockLabels: Set<String>
  ) throws -> MapManifestDraft {
     let mapID = definition.mapID
     guard let mapHeader = mapHeadersByID[mapID] else {
@@ -575,8 +681,13 @@ private func makeMapManifestDraft(
         blockIDs: blockIDs,
         stepCollisionTileIDs: resolvedStepCollisionTileIDs,
         rawWarps: parseRawWarps(contents: contents),
-        backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents),
-        objects: parseObjects(mapID: mapID, contents: contents, mapScriptMetadata: mapScriptMetadata),
+        backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents, mapScriptMetadata: mapScriptMetadata),
+        objects: parseObjects(
+            mapID: mapID,
+            contents: contents,
+            mapScriptMetadata: mapScriptMetadata,
+            martStockLabels: martStockLabels
+        ),
         connections: connections
     )
 }
@@ -781,6 +892,15 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             collision: tilesetCollisionManifest(for: "DOJO", parsed: collisionData)
         ),
         .init(
+            id: "GYM",
+            imagePath: "Assets/field/tilesets/gym.png",
+            blocksetPath: "Assets/field/blocksets/gym.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "GYM", parsed: collisionData)
+        ),
+        .init(
             id: "FOREST",
             imagePath: "Assets/field/tilesets/forest.png",
             blocksetPath: "Assets/field/blocksets/forest.bst",
@@ -797,6 +917,15 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             blockTileWidth: 4,
             blockTileHeight: 4,
             collision: tilesetCollisionManifest(for: "FOREST_GATE", parsed: collisionData)
+        ),
+        .init(
+            id: "MUSEUM",
+            imagePath: "Assets/field/tilesets/gate.png",
+            blocksetPath: "Assets/field/blocksets/gate.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "MUSEUM", parsed: collisionData)
         ),
         .init(
             id: "HOUSE",
@@ -1060,7 +1189,11 @@ private func parseRawWarps(contents: String) -> [RawWarpEntry] {
     }
 }
 
-private func parseBackgroundEvents(mapID: String, contents: String) -> [BackgroundEventManifest] {
+private func parseBackgroundEvents(
+    mapID: String,
+    contents: String,
+    mapScriptMetadata: MapScriptMetadata?
+) -> [BackgroundEventManifest] {
     let regex = try! NSRegularExpression(pattern: #"bg_event\s+(\d+),\s+(\d+),\s+([A-Z0-9_]+)"#)
     let nsrange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
     return regex.matches(in: contents, range: nsrange).enumerated().compactMap { index, match in
@@ -1077,7 +1210,7 @@ private func parseBackgroundEvents(mapID: String, contents: String) -> [Backgrou
         return BackgroundEventManifest(
             id: "\(mapID.lowercased())_bg_\(index)",
             position: .init(x: x, y: y),
-            dialogueID: dialogueID(for: mapID, textID: textID)
+            dialogueID: dialogueID(for: mapID, textID: textID, mapScriptMetadata: mapScriptMetadata)
         )
     }
 }
@@ -1085,7 +1218,8 @@ private func parseBackgroundEvents(mapID: String, contents: String) -> [Backgrou
 private func parseObjects(
     mapID: String,
     contents: String,
-    mapScriptMetadata: MapScriptMetadata?
+    mapScriptMetadata: MapScriptMetadata?,
+    martStockLabels: Set<String>
 ) -> [MapObjectManifest] {
     let regex = try! NSRegularExpression(
         pattern: #"(?m)^\s*object_event\s+(\d+),\s+(\d+),\s+([A-Z0-9_]+),\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z0-9_]+)(.*)$"#,
@@ -1110,7 +1244,6 @@ private func parseObjects(
         let movement = String(contents[movementRange])
         let facing = facingDirection(from: String(contents[facingRange]))
         let textID = String(contents[textRange])
-        let objectID = objectIDFor(mapID: mapID, index: index, textID: textID)
         let extraTokens = Range(match.range(at: 7), in: contents)
             .map { parseObjectExtraTokens(from: String(contents[$0])) } ?? []
         let trainerClass = extraTokens.count >= 2 ? extraTokens[0] : nil
@@ -1127,17 +1260,30 @@ private func parseObjects(
                 ? extraTokens[0]
                 : nil
         let position = TilePoint(x: x, y: y)
+        let objectID = objectIDFor(
+            mapID: mapID,
+            index: index,
+            textID: textID,
+            pickupItemID: pickupItemID,
+            mapScriptMetadata: mapScriptMetadata
+        )
 
         return MapObjectManifest(
             id: objectID,
-            displayName: displayNameForObject(objectID: objectID, textID: textID),
+            displayName: displayNameForObject(objectID: objectID, textID: textID, sprite: sprite, pickupItemID: pickupItemID),
             sprite: sprite,
             position: position,
             facing: facing,
-            interactionReach: interactionReach(for: objectID),
-            interactionTriggers: interactionTriggers(for: objectID),
-            interactionDialogueID: dialogueID(for: mapID, textID: textID),
-            interactionScriptID: interactionScriptID(for: objectID),
+            interactionReach: interactionReach(for: objectID, sprite: sprite),
+            interactionTriggers: interactionTriggers(
+                for: objectID,
+                mapID: mapID,
+                sprite: sprite,
+                textLabel: textLabel,
+                martStockLabels: martStockLabels
+            ),
+            interactionDialogueID: dialogueID(for: mapID, textID: textID, mapScriptMetadata: mapScriptMetadata),
+            interactionScriptID: interactionScriptID(for: objectID, mapID: mapID, sprite: sprite),
             movementBehavior: movementBehavior(
                 movementToken: movement,
                 facingToken: String(contents[facingRange]),
@@ -1224,7 +1370,13 @@ private func movementBehavior(
     }
 }
 
-private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
+private func objectIDFor(
+    mapID: String,
+    index: Int,
+    textID: String,
+    pickupItemID: String?,
+    mapScriptMetadata: MapScriptMetadata?
+) -> String {
     switch (mapID, textID) {
     case ("PALLET_TOWN", "TEXT_PALLETTOWN_OAK"): return "pallet_town_oak"
     case ("PALLET_TOWN", "TEXT_PALLETTOWN_GIRL"): return "pallet_town_girl"
@@ -1274,29 +1426,77 @@ private func objectIDFor(mapID: String, index: Int, textID: String) -> String {
     case ("OAKS_LAB", "TEXT_OAKSLAB_OAK2"): return "oaks_lab_oak_2"
     case ("OAKS_LAB", "TEXT_OAKSLAB_POKEDEX1"): return "oaks_lab_pokedex_1"
     case ("OAKS_LAB", "TEXT_OAKSLAB_POKEDEX2"): return "oaks_lab_pokedex_2"
-    default: return "\(mapID.lowercased())_object_\(index)"
+    default:
+        if let pickupItemID {
+            return "\(mapID.lowercased())_\(pickupItemID.lowercased())"
+        }
+        if let fallbackObjectID = fallbackObjectID(for: textID, mapScriptMetadata: mapScriptMetadata) {
+            return fallbackObjectID
+        }
+        return "\(mapID.lowercased())_object_\(index)"
     }
 }
 
-private func interactionReach(for objectID: String) -> ObjectInteractionReach {
+private func fallbackObjectID(for textID: String, mapScriptMetadata: MapScriptMetadata?) -> String? {
+    guard
+        let mapScriptMetadata,
+        let baseID = fallbackObjectIDBase(for: textID, mapScriptMetadata: mapScriptMetadata)
+    else {
+        return nil
+    }
+
+    let matchingTextIDs = mapScriptMetadata.textLabelByTextID.keys
+        .filter { fallbackObjectIDBase(for: $0, mapScriptMetadata: mapScriptMetadata) == baseID }
+        .sorted()
+
+    guard matchingTextIDs.count > 1, let matchingIndex = matchingTextIDs.firstIndex(of: textID) else {
+        return baseID
+    }
+
+    return "\(baseID)_\(matchingIndex + 1)"
+}
+
+private func fallbackObjectIDBase(for textID: String, mapScriptMetadata: MapScriptMetadata) -> String? {
+    guard let localLabel = mapScriptMetadata.textLabelByTextID[textID] else {
+        return nil
+    }
+
+    return dialogueID(forScriptLabel: localLabel, mapScriptMetadata: mapScriptMetadata)
+}
+
+private func interactionReach(for objectID: String, sprite: String) -> ObjectInteractionReach {
     switch objectID {
     case "viridian_mart_clerk", "viridian_pokecenter_nurse":
         return .overCounter
     default:
-        return .adjacent
+        switch sprite {
+        case "SPRITE_CLERK", "SPRITE_NURSE":
+            return .overCounter
+        default:
+            return .adjacent
+        }
     }
 }
 
-private func interactionScriptID(for objectID: String) -> String? {
+private func interactionScriptID(for objectID: String, mapID: String, sprite: String) -> String? {
     switch objectID {
     case "viridian_pokecenter_nurse":
         return "viridian_pokecenter_nurse_heal"
     default:
+        if sprite == "SPRITE_NURSE" {
+            return pokemonCenterHealScriptID(for: mapID)
+        }
         return nil
     }
 }
 
-private func interactionTriggers(for objectID: String) -> [ObjectInteractionTriggerManifest] {
+private func interactionTriggers(
+    for objectID: String,
+    mapID: String,
+    sprite: String,
+    textLabel: String?,
+    martStockLabels: Set<String>
+) -> [ObjectInteractionTriggerManifest] {
     switch objectID {
     case "reds_house_1f_mom":
         return [
@@ -1381,6 +1581,9 @@ private func interactionTriggers(for objectID: String) -> [ObjectInteractionTrig
     case "oaks_lab_poke_ball_bulbasaur":
         return starterBallInteractionTriggers(speciesID: "BULBASAUR", scriptID: "oaks_lab_choose_bulbasaur")
     default:
+        if sprite == "SPRITE_CLERK", let textLabel, martStockLabels.contains(textLabel) {
+            return [.init(martID: martID(for: mapID))]
+        }
         return []
     }
 }
@@ -1399,7 +1602,12 @@ private func starterBallInteractionTriggers(speciesID _: String, scriptID: Strin
     ]
 }
 
-private func displayNameForObject(objectID: String, textID: String) -> String {
+private func displayNameForObject(
+    objectID: String,
+    textID: String,
+    sprite: String,
+    pickupItemID: String?
+) -> String {
     switch objectID {
     case "pallet_town_oak": return "Oak"
     case "pallet_town_girl": return "Girl"
@@ -1442,7 +1650,14 @@ private func displayNameForObject(objectID: String, textID: String) -> String {
     case "oaks_lab_poke_ball_bulbasaur": return "Bulbasaur"
     case "oaks_lab_oak_1", "oaks_lab_oak_2": return "Oak"
     case "oaks_lab_pokedex_1", "oaks_lab_pokedex_2": return "Pokedex"
-    default: return textID
+    default:
+        if let pickupItemID {
+            return humanizedIdentifier(pickupItemID)
+        }
+        if let spriteDisplayName = displayName(forSprite: sprite) {
+            return spriteDisplayName
+        }
+        return humanizedIdentifier(objectID.isEmpty ? textID : objectID)
     }
 }
 
@@ -1460,7 +1675,7 @@ private func defaultVisibility(for objectID: String) -> Bool {
     }
 }
 
-private func dialogueID(for mapID: String, textID: String) -> String {
+private func dialogueID(for mapID: String, textID: String, mapScriptMetadata: MapScriptMetadata?) -> String {
     switch (mapID, textID) {
     case ("PALLET_TOWN", "TEXT_PALLETTOWN_OAK"): return "pallet_town_oak_its_unsafe"
     case ("PALLET_TOWN", "TEXT_PALLETTOWN_GIRL"): return "pallet_town_girl"
@@ -1529,7 +1744,71 @@ private func dialogueID(for mapID: String, textID: String) -> String {
     case ("OAKS_LAB", "TEXT_OAKSLAB_SCIENTIST1"), ("OAKS_LAB", "TEXT_OAKSLAB_SCIENTIST2"):
         return "oaks_lab_girl"
     default:
+        if let localLabel = mapScriptMetadata?.textLabelByTextID[textID] {
+            switch localLabel {
+            case "MartSignText":
+                return "\(mapID.lowercased())_mart_sign"
+            case "PokeCenterSignText":
+                return "\(mapID.lowercased())_pokecenter_sign"
+            default:
+                break
+            }
+            return dialogueID(forScriptLabel: localLabel, mapScriptMetadata: mapScriptMetadata)
+        }
         return "\(mapID.lowercased())_\(textID.lowercased())"
+    }
+}
+
+private func martID(for mapID: String) -> String {
+    mapID.lowercased()
+}
+
+private func pokemonCenterFieldInteractionID(for mapID: String) -> String {
+    mapID == "VIRIDIAN_POKECENTER" ? "pokemon_center_healing" : "\(mapID.lowercased())_pokemon_center_healing"
+}
+
+private func pokemonCenterHealScriptID(for mapID: String) -> String {
+    mapID == "VIRIDIAN_POKECENTER" ? "viridian_pokecenter_nurse_heal" : "\(mapID.lowercased())_nurse_heal"
+}
+
+private func wildEncounterPath(for definition: GameplayCoverageMapDefinition, repoRoot: URL) -> String? {
+    let stem = URL(fileURLWithPath: definition.objectFile).deletingPathExtension().lastPathComponent
+    let path = "data/wild/maps/\(stem).asm"
+    let url = repoRoot.appendingPathComponent(path)
+    return FileManager.default.fileExists(atPath: url.path) ? path : nil
+}
+
+private func humanizedIdentifier(_ identifier: String) -> String {
+    identifier
+        .lowercased()
+        .split(separator: "_")
+        .map { $0.capitalized }
+        .joined(separator: " ")
+}
+
+private func displayName(forSprite sprite: String) -> String? {
+    switch sprite {
+    case "SPRITE_CLERK": return "Clerk"
+    case "SPRITE_NURSE": return "Nurse"
+    case "SPRITE_GENTLEMAN": return "Gentleman"
+    case "SPRITE_LINK_RECEPTIONIST": return "Receptionist"
+    case "SPRITE_YOUNGSTER": return "Youngster"
+    case "SPRITE_SUPER_NERD": return "Super Nerd"
+    case "SPRITE_COOLTRAINER_F": return "Cooltrainer"
+    case "SPRITE_COOLTRAINER_M": return "Cooltrainer"
+    case "SPRITE_GAMBLER": return "Gambler"
+    case "SPRITE_GIRL": return "Girl"
+    case "SPRITE_LITTLE_GIRL": return "Little Girl"
+    case "SPRITE_MIDDLE_AGED_MAN": return "Middle Aged Man"
+    case "SPRITE_MONSTER": return "Monster"
+    case "SPRITE_FAIRY": return "Jigglypuff"
+    case "SPRITE_SCIENTIST": return "Scientist"
+    case "SPRITE_OLD_AMBER": return "Old Amber"
+    case "SPRITE_HIKER": return "Hiker"
+    case "SPRITE_GRAMPS": return "Gramps"
+    case "SPRITE_GYM_GUIDE": return "Gym Guide"
+    default:
+        return nil
     }
 }
 
@@ -1538,6 +1817,7 @@ private func buildDialogues(
     mapScriptMetadataByMapID: [String: MapScriptMetadata]
 ) throws -> [DialogueManifest] {
     let scriptDialogueEvents = try buildScriptDialogueEvents(repoRoot: repoRoot)
+    let textContentsByMapID = try buildTextContentsByMapID(repoRoot: repoRoot)
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
@@ -1686,30 +1966,130 @@ private func buildDialogues(
         try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2, extraEvents: scriptDialogueEvents["_Rival1WinText"] ?? []),
     ]
 
+    dialogues.append(contentsOf: try buildCoverageMapDialogues(
+        textContentsByMapID: textContentsByMapID,
+        mapScriptMetadataByMapID: mapScriptMetadataByMapID,
+        scriptDialogueEvents: scriptDialogueEvents
+    ))
     dialogues.append(contentsOf: try buildStandardTrainerDialogues(
-        mapIDs: ["VIRIDIAN_FOREST"],
-        textContentsByMapID: [
-            "VIRIDIAN_FOREST": viridianForest,
-        ],
+        mapIDs: gameplayCoverageMaps.map(\.mapID),
+        textContentsByMapID: textContentsByMapID,
         mapScriptMetadataByMapID: mapScriptMetadataByMapID
     ))
     dialogues.append(contentsOf: buildPickupFoundDialogues(
         itemIDs: referencedVisiblePickupItemIDs(repoRoot: repoRoot),
         itemNamesByID: itemNamesByID
     ))
-    return dialogues
+
+    var dialogueByID: [String: DialogueManifest] = [:]
+    for dialogue in dialogues where dialogueByID[dialogue.id] == nil {
+        dialogueByID[dialogue.id] = dialogue
+    }
+    return dialogueByID.values.sorted { $0.id < $1.id }
+}
+
+private func buildCoverageMapDialogues(
+    textContentsByMapID: [String: String],
+    mapScriptMetadataByMapID: [String: MapScriptMetadata],
+    scriptDialogueEvents: [String: [DialogueEvent]]
+) throws -> [DialogueManifest] {
+    var dialogueByID: [String: DialogueManifest] = [:]
+
+    for definition in gameplayCoverageMaps {
+        guard
+            let metadata = mapScriptMetadataByMapID[definition.mapID],
+            let textContents = textContentsByMapID[definition.mapID]
+        else {
+            continue
+        }
+
+        for (textID, localLabel) in metadata.textLabelByTextID.sorted(by: { $0.key < $1.key }) {
+            if let specialDialogue = specialCoverageDialogue(
+                mapID: definition.mapID,
+                textID: textID,
+                localLabel: localLabel,
+                mapScriptMetadata: metadata
+            ) {
+                dialogueByID[specialDialogue.id] = specialDialogue
+                continue
+            }
+
+            let resolvedLabel = metadata.farTextLabelByLocalLabel[localLabel] ?? localLabel
+            guard let dialogue = try extractDialogueIfPresent(
+                id: dialogueID(for: definition.mapID, textID: textID, mapScriptMetadata: metadata),
+                label: resolvedLabel,
+                from: textContents,
+                extraEvents: scriptDialogueEvents[resolvedLabel] ?? []
+            ) else {
+                continue
+            }
+            dialogueByID[dialogue.id] = dialogue
+        }
+
+        for farLabel in metadata.referencedFarTextLabels.sorted() {
+            let dialogueID = normalizedDialogueID(from: farLabel)
+            guard dialogueByID[dialogueID] == nil,
+                  let dialogue = try extractDialogueIfPresent(
+                      id: dialogueID,
+                      label: farLabel,
+                      from: textContents,
+                      extraEvents: scriptDialogueEvents[farLabel] ?? []
+                  ) else {
+                continue
+            }
+            dialogueByID[dialogue.id] = dialogue
+        }
+    }
+
+    return dialogueByID.values.sorted { $0.id < $1.id }
+}
+
+private func specialCoverageDialogue(
+    mapID: String,
+    textID: String,
+    localLabel: String,
+    mapScriptMetadata: MapScriptMetadata
+) -> DialogueManifest? {
+    let line: String
+    switch localLabel {
+    case "MartSignText":
+        line = "#MON MART"
+    case "PokeCenterSignText":
+        line = "#MON CENTER"
+    default:
+        return nil
+    }
+
+    return DialogueManifest(
+        id: dialogueID(for: mapID, textID: textID, mapScriptMetadata: mapScriptMetadata),
+        pages: [.init(lines: [line], waitsForPrompt: true)]
+    )
+}
+
+private func extractDialogueIfPresent(
+    id: String,
+    label: String,
+    from contents: String,
+    extraEvents: [DialogueEvent] = []
+) throws -> DialogueManifest? {
+    guard dialogueLabelExists(label, in: contents) else {
+        return nil
+    }
+    return try extractDialogue(id: id, label: label, from: contents, extraEvents: extraEvents)
+}
+
+private func dialogueLabelExists(_ label: String, in contents: String) -> Bool {
+    contents.range(of: "\(label)::") != nil || contents.range(of: "\(label):") != nil
 }
 
 private func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -> [FieldInteractionManifest] {
-    let viridianPokecenterCheckpoint = try blackoutCheckpointForPokemonCenter(
-        mapID: "VIRIDIAN_POKECENTER",
-        maps: maps,
-        repoRoot: repoRoot
-    )
+    try maps.compactMap { map in
+        guard let nurseObject = map.objects.first(where: { $0.sprite == "SPRITE_NURSE" }) else {
+            return nil
+        }
 
-    let interactions: [FieldInteractionManifest] = [
-        .init(
-            id: "pokemon_center_healing",
+        return FieldInteractionManifest(
+            id: pokemonCenterFieldInteractionID(for: map.id),
             kind: .pokemonCenterHealing,
             introDialogueID: "pokemon_center_welcome",
             prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
@@ -1717,15 +2097,17 @@ private func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -
             successDialogueID: "pokemon_center_fighting_fit",
             farewellDialogueID: "pokemon_center_farewell",
             healingSequence: .init(
-                nurseObjectID: "viridian_pokecenter_nurse",
+                nurseObjectID: nurseObject.id,
                 machineSoundEffectID: "SFX_HEALING_MACHINE",
                 healedAudioCueID: "pokemon_center_healed",
-                blackoutCheckpoint: viridianPokecenterCheckpoint
+                blackoutCheckpoint: try blackoutCheckpointForPokemonCenter(
+                    mapID: map.id,
+                    maps: maps,
+                    repoRoot: repoRoot
+                )
             )
-        ),
-    ]
-
-    return interactions
+        )
+    }
 }
 
 private func blackoutCheckpointForPokemonCenter(
@@ -1780,12 +2162,9 @@ private func parseFlyWarpCheckpoint(repoRoot: URL, mapID: String) throws -> Blac
 }
 
 private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [DialogueEvent]] {
-    let scriptPaths = [
-        "scripts/Route1.asm",
-        "scripts/ViridianCity.asm",
-        "scripts/ViridianMart.asm",
-        "scripts/OaksLab.asm",
-    ]
+    let scriptPaths = gameplayCoverageMaps
+        .map(scriptPathForMap)
+        .filter { FileManager.default.fileExists(atPath: repoRoot.appendingPathComponent($0).path) }
 
     var eventsByTextLabel: [String: [DialogueEvent]] = [:]
 
@@ -1821,7 +2200,7 @@ private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [Dialog
 }
 
 private func extractDialogue(id: String, label: String, from contents: String, extraEvents: [DialogueEvent] = []) throws -> DialogueManifest {
-    guard let range = contents.range(of: "\(label)::") else {
+    guard let range = contents.range(of: "\(label)::") ?? contents.range(of: "\(label):") else {
         throw ExtractorError.invalidArguments("missing dialogue label \(label)")
     }
 
@@ -1832,7 +2211,8 @@ private func extractDialogue(id: String, label: String, from contents: String, e
 
     for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
         let line = rawLine.trimmingCharacters(in: .whitespaces)
-        if line.hasSuffix("::"), line.hasPrefix("_"), line.hasPrefix(label) == false {
+        if let labelMatch = line.firstMatch(of: /^([A-Za-z0-9_\.]+)::?$/),
+           String(labelMatch.output.1) != label {
             break
         }
         if line.hasPrefix("text \"") || line.hasPrefix("line \"") || line.hasPrefix("cont \"") || line.hasPrefix("para \"") {
@@ -1926,7 +2306,7 @@ private func buildStandardTrainerDialogues(
 private func referencedVisiblePickupItemIDs(repoRoot: URL) -> [String] {
     var itemIDs: Set<String> = []
 
-    for definition in currentGameplaySliceMaps {
+    for definition in gameplayCoverageMaps {
         let objectURL = repoRoot.appendingPathComponent(definition.objectFile)
         guard let contents = try? String(contentsOf: objectURL) else { continue }
         for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
@@ -2100,7 +2480,7 @@ private func buildMapScripts() -> [MapScriptManifest] {
     ]
 }
 
-private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
+private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest] {
     let autoMovement = try String(contentsOf: repoRoot.appendingPathComponent("engine/overworld/auto_movement.asm"))
     let oaksLabScripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/OaksLab.asm"))
 
@@ -2116,7 +2496,7 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
     let rivalLeftBall2 = try parseMovementLabel(".LeftBallMovement2", from: oaksLabScripts)
     let rivalExitPath = try parseMovementLabel(".RivalExitMovement", from: oaksLabScripts)
 
-    return [
+    var scripts: [ScriptManifest] = [
         ScriptManifest(
             id: "reds_house_1f_mom_heal",
             steps: [
@@ -2470,6 +2850,26 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
             ]
         ),
     ]
+
+    scripts.append(contentsOf: buildPokemonCenterHealingScripts(maps: maps))
+    return scripts
+}
+
+private func buildPokemonCenterHealingScripts(maps: [MapManifest]) -> [ScriptManifest] {
+    maps.compactMap { map in
+        guard
+            map.id != "VIRIDIAN_POKECENTER",
+            map.objects.contains(where: { $0.sprite == "SPRITE_NURSE" })
+        else {
+            return nil
+        }
+        return ScriptManifest(
+            id: pokemonCenterHealScriptID(for: map.id),
+            steps: [
+                .init(action: "startFieldInteraction", fieldInteractionID: pokemonCenterFieldInteractionID(for: map.id)),
+            ]
+        )
+    }
 }
 
 private func parseMovementLabel(_ label: String, from contents: String) throws -> [FacingDirection] {
@@ -3207,7 +3607,7 @@ private func buildItems(repoRoot: URL) throws -> [ItemManifest] {
     let keyItemIDs = try parseKeyItemIDs(repoRoot: repoRoot)
     let pricesByID = try parseItemPrices(repoRoot: repoRoot)
 
-    return currentGameplaySliceItemIDs.map { itemID in
+    return try parseDefinedItemIDs(repoRoot: repoRoot).map { itemID in
         ItemManifest(
             id: itemID,
             displayName: namesByID[itemID] ?? itemID,
@@ -3218,33 +3618,63 @@ private func buildItems(repoRoot: URL) throws -> [ItemManifest] {
     }
 }
 
-private func buildMarts(repoRoot: URL) throws -> [MartManifest] {
+private func buildMarts(
+    repoRoot: URL,
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [MartManifest] {
     let martsByLabel = try parseMartStocks(repoRoot: repoRoot)
-    return currentGameplaySliceMarts.compactMap { definition in
-        guard let stockItemIDs = martsByLabel[definition.stockLabel] else { return nil }
-        return MartManifest(
-            id: definition.id,
-            mapID: definition.mapID,
-            clerkObjectID: definition.clerkObjectID,
-            stockItemIDs: stockItemIDs
-        )
+    let regex = try NSRegularExpression(
+        pattern: #"(?m)^\s*object_event\s+\d+,\s+\d+,\s+([A-Z0-9_]+),\s+[A-Z_]+,\s+[A-Z_]+,\s+([A-Z0-9_]+)(.*)$"#,
+        options: [.anchorsMatchLines]
+    )
+
+    return try gameplayCoverageMaps.compactMap { definition in
+        guard let metadata = mapScriptMetadataByMapID[definition.mapID] else {
+            return nil
+        }
+
+        let contents = try String(contentsOf: repoRoot.appendingPathComponent(definition.objectFile))
+        let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
+
+        for (index, match) in regex.matches(in: contents, range: nsRange).enumerated() {
+            guard
+                let spriteRange = Range(match.range(at: 1), in: contents),
+                let textIDRange = Range(match.range(at: 2), in: contents),
+                String(contents[spriteRange]) == "SPRITE_CLERK"
+            else {
+                continue
+            }
+
+            let textID = String(contents[textIDRange])
+            guard
+                let textLabel = metadata.textLabelByTextID[textID],
+                let stockItemIDs = martsByLabel[textLabel]
+            else {
+                continue
+            }
+
+            return MartManifest(
+                id: martID(for: definition.mapID),
+                mapID: definition.mapID,
+                clerkObjectID: objectIDFor(
+                    mapID: definition.mapID,
+                    index: index,
+                    textID: textID,
+                    pickupItemID: nil,
+                    mapScriptMetadata: metadata
+                ),
+                stockItemIDs: stockItemIDs
+            )
+        }
+
+        return nil
     }
+    .sorted { $0.id < $1.id }
 }
 
 private func parseItemNames(repoRoot: URL) throws -> [String: String] {
-    let constants = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
+    let itemIDs = try parseDefinedItemIDs(repoRoot: repoRoot)
     let names = try String(contentsOf: repoRoot.appendingPathComponent("data/items/names.asm"))
-
-    let itemIDs = constants
-        .split(separator: "\n", omittingEmptySubsequences: false)
-        .compactMap { rawLine -> String? in
-            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
-                .trimmingCharacters(in: .whitespaces) ?? ""
-            guard line.hasPrefix("const ") else { return nil }
-            let identifier = line.replacingOccurrences(of: "const", with: "").trimmingCharacters(in: .whitespaces)
-            guard identifier.isEmpty == false, identifier != "NO_ITEM" else { return nil }
-            return identifier.components(separatedBy: .whitespaces).first
-        }
 
     let itemNames = names
         .split(separator: "\n", omittingEmptySubsequences: false)
@@ -3259,16 +3689,7 @@ private func parseItemNames(repoRoot: URL) throws -> [String: String] {
 
 private func parseKeyItemIDs(repoRoot: URL) throws -> Set<String> {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/items/key_items.asm"))
-    let itemIDs = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
-        .split(separator: "\n", omittingEmptySubsequences: false)
-        .compactMap { rawLine -> String? in
-            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
-                .trimmingCharacters(in: .whitespaces) ?? ""
-            guard line.hasPrefix("const ") else { return nil }
-            let identifier = line.replacingOccurrences(of: "const", with: "").trimmingCharacters(in: .whitespaces)
-            guard identifier.isEmpty == false, identifier != "NO_ITEM" else { return nil }
-            return identifier.components(separatedBy: .whitespaces).first
-        }
+    let itemIDs = try parseDefinedItemIDs(repoRoot: repoRoot)
 
     let keyFlags = contents
         .split(separator: "\n", omittingEmptySubsequences: false)
@@ -3285,7 +3706,7 @@ private func parseKeyItemIDs(repoRoot: URL) throws -> Set<String> {
 }
 
 private func parseItemPrices(repoRoot: URL) throws -> [String: Int] {
-    let itemIDs = try parseOrderedItemIDs(repoRoot: repoRoot)
+    let itemIDs = try parseDefinedItemIDs(repoRoot: repoRoot)
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/items/prices.asm"))
     let prices = contents
         .split(separator: "\n", omittingEmptySubsequences: false)
@@ -3320,7 +3741,7 @@ private func parseMartStocks(repoRoot: URL) throws -> [String: [String]] {
     return result
 }
 
-private func parseOrderedItemIDs(repoRoot: URL) throws -> [String] {
+private func parseDefinedItemIDs(repoRoot: URL) throws -> [String] {
     try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
         .split(separator: "\n", omittingEmptySubsequences: false)
         .compactMap { rawLine -> String? in
@@ -3328,7 +3749,13 @@ private func parseOrderedItemIDs(repoRoot: URL) throws -> [String] {
                 .trimmingCharacters(in: .whitespaces) ?? ""
             guard line.hasPrefix("const ") else { return nil }
             let identifier = line.replacingOccurrences(of: "const", with: "").trimmingCharacters(in: .whitespaces)
-            guard identifier.isEmpty == false, identifier != "NO_ITEM" else { return nil }
+            guard
+                identifier.isEmpty == false,
+                identifier != "NO_ITEM",
+                identifier.contains(#"\"#) == false
+            else {
+                return nil
+            }
             return identifier.components(separatedBy: .whitespaces).first
         }
 }
@@ -3343,11 +3770,14 @@ private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {
 }
 
 private func buildWildEncounterTables(repoRoot: URL) throws -> [WildEncounterTableManifest] {
-    try currentGameplaySliceWildEncounterMaps.map { definition in
-        try parseWildEncounterTable(
+    try gameplayCoverageMaps.compactMap { definition in
+        guard let path = wildEncounterPath(for: definition, repoRoot: repoRoot) else {
+            return nil
+        }
+        return try parseWildEncounterTable(
             repoRoot: repoRoot,
             mapID: definition.mapID,
-            path: definition.path
+            path: path
         )
     }
 }
@@ -3444,6 +3874,29 @@ private func buildTrainerBattles(
             preventsBlackoutOnLoss: true,
             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
             postBattleScriptID: "oaks_lab_rival_exit_after_battle"
+        )
+    }
+
+    if let brockMetadata = trainerClassMetadataByID["OPP_BROCK"] {
+        guard brockMetadata.parties.indices.contains(0) else {
+            throw ExtractorError.invalidArguments("missing Brock trainer party 1")
+        }
+
+        battlesByID["opp_brock_1"] = TrainerBattleManifest(
+            id: "opp_brock_1",
+            trainerClass: "OPP_BROCK",
+            trainerNumber: 1,
+            displayName: brockMetadata.displayName,
+            party: brockMetadata.parties[0],
+            trainerSpritePath: brockMetadata.trainerSpritePath,
+            baseRewardMoney: brockMetadata.baseRewardMoney,
+            encounterAudioCueID: trainerEncounterCueByClass["OPP_BROCK"],
+            playerWinDialogueID: "pewter_gym_brock_received_boulder_badge",
+            playerLoseDialogueID: nil,
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            completionFlagID: "EVENT_BEAT_BROCK",
+            postBattleScriptID: nil
         )
     }
 
@@ -3598,7 +4051,7 @@ private func referencedSliceTrainerBattles(
     )
     var referencesByID: [String: ReferencedSliceTrainerBattle] = [:]
 
-    for definition in currentGameplaySliceMaps {
+    for definition in gameplayCoverageMaps {
         guard let metadata = mapScriptMetadataByMapID[definition.mapID], metadata.usesStandardTrainerLoop else {
             continue
         }

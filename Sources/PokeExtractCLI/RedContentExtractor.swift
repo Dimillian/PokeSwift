@@ -180,7 +180,7 @@ public enum RedContentExtractor {
 
     private static func makeGameManifest(source: SourceTree) -> GameManifest {
         GameManifest(
-            contentVersion: "m3-red-first-slice-v1",
+            contentVersion: "m5-red-coverage-v1",
             variant: .red,
             sourceCommit: source.gitCommit,
             extractorVersion: extractorVersion,

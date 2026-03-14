@@ -1,4 +1,4 @@
-struct CurrentGameplaySliceMapDefinition {
+struct GameplayCoverageMapDefinition {
     let mapID: String
     let displayName: String
     let objectFile: String
@@ -7,7 +7,7 @@ struct CurrentGameplaySliceMapDefinition {
     let isOutdoor: Bool
 }
 
-let currentGameplaySliceMaps: [CurrentGameplaySliceMapDefinition] = [
+let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
     .init(
         mapID: "REDS_HOUSE_2F",
         displayName: "Red's House 2F",
@@ -120,53 +120,78 @@ let currentGameplaySliceMaps: [CurrentGameplaySliceMapDefinition] = [
         parentMapID: "PALLET_TOWN",
         isOutdoor: false
     ),
-]
-
-let currentGameplaySliceMapIDs = Set(currentGameplaySliceMaps.map(\.mapID))
-
-let currentGameplaySliceItemIDs = [
-    "POKE_BALL",
-    "POTION",
-    "ANTIDOTE",
-    "PARLYZ_HEAL",
-    "BURN_HEAL",
-    "MOON_STONE",
-    "HP_UP",
-    "OAKS_PARCEL",
-]
-
-struct CurrentGameplaySliceMartDefinition {
-    let id: String
-    let mapID: String
-    let clerkObjectID: String
-    let stockLabel: String
-}
-
-let currentGameplaySliceMarts: [CurrentGameplaySliceMartDefinition] = [
     .init(
-        id: "viridian_mart",
-        mapID: "VIRIDIAN_MART",
-        clerkObjectID: "viridian_mart_clerk",
-        stockLabel: "ViridianMartClerkText"
+        mapID: "PEWTER_CITY",
+        displayName: "Pewter City",
+        objectFile: "data/maps/objects/PewterCity.asm",
+        blockFile: "maps/PewterCity.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "PEWTER_POKECENTER",
+        displayName: "Pewter Pokecenter",
+        objectFile: "data/maps/objects/PewterPokecenter.asm",
+        blockFile: "maps/PewterPokecenter.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "PEWTER_MART",
+        displayName: "Pewter Mart",
+        objectFile: "data/maps/objects/PewterMart.asm",
+        blockFile: "maps/PewterMart.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "PEWTER_NIDORAN_HOUSE",
+        displayName: "Pewter Nidoran House",
+        objectFile: "data/maps/objects/PewterNidoranHouse.asm",
+        blockFile: "maps/PewterNidoranHouse.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "PEWTER_SPEECH_HOUSE",
+        displayName: "Pewter Speech House",
+        objectFile: "data/maps/objects/PewterSpeechHouse.asm",
+        blockFile: "maps/PewterSpeechHouse.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "MUSEUM_1F",
+        displayName: "Museum 1F",
+        objectFile: "data/maps/objects/Museum1F.asm",
+        blockFile: "maps/Museum1F.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "MUSEUM_2F",
+        displayName: "Museum 2F",
+        objectFile: "data/maps/objects/Museum2F.asm",
+        blockFile: "maps/Museum2F.blk",
+        parentMapID: "MUSEUM_1F",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "PEWTER_GYM",
+        displayName: "Pewter Gym",
+        objectFile: "data/maps/objects/PewterGym.asm",
+        blockFile: "maps/PewterGym.blk",
+        parentMapID: "PEWTER_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "ROUTE_3",
+        displayName: "Route 3",
+        objectFile: "data/maps/objects/Route3.asm",
+        blockFile: "maps/Route3.blk",
+        parentMapID: nil,
+        isOutdoor: true
     ),
 ]
 
-struct CurrentGameplaySliceWildEncounterDefinition {
-    let mapID: String
-    let path: String
-}
-
-let currentGameplaySliceWildEncounterMaps: [CurrentGameplaySliceWildEncounterDefinition] = [
-    .init(
-        mapID: "ROUTE_1",
-        path: "data/wild/maps/Route1.asm"
-    ),
-    .init(
-        mapID: "ROUTE_2",
-        path: "data/wild/maps/Route2.asm"
-    ),
-    .init(
-        mapID: "VIRIDIAN_FOREST",
-        path: "data/wild/maps/ViridianForest.asm"
-    ),
-]
+let gameplayCoverageMapIDs = Set(gameplayCoverageMaps.map(\.mapID))

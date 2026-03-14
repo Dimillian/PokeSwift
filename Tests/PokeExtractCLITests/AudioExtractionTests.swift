@@ -13,12 +13,21 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(
             manifest.mapRoutes,
             [
+                .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
                 .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "PEWTER_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "PEWTER_GYM", musicID: "MUSIC_GYM"),
+                .init(mapID: "PEWTER_MART", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "PEWTER_NIDORAN_HOUSE", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "PEWTER_POKECENTER", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "PEWTER_SPEECH_HOUSE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
@@ -53,8 +62,10 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_PALLET_TOWN",
             "MUSIC_OAKS_LAB",
             "MUSIC_ROUTES1",
+            "MUSIC_ROUTES3",
             "MUSIC_CITIES1",
             "MUSIC_DUNGEON2",
+            "MUSIC_GYM",
             "MUSIC_POKECENTER",
             "MUSIC_MEET_PROF_OAK",
             "MUSIC_MEET_RIVAL",
@@ -229,9 +240,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 14)
+        XCTAssertEqual(decoded.mapRoutes.count, 23)
         XCTAssertEqual(decoded.cues.count, 12)
-        XCTAssertEqual(decoded.tracks.count, 16)
+        XCTAssertEqual(decoded.tracks.count, 18)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }

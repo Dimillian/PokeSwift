@@ -10,7 +10,7 @@ private struct AudioConstantDefinition {
 func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> AudioManifest {
     let musicConstants = try parseAudioConstants(repoRoot: source.repoRoot, prefix: "MUSIC_")
     let soundEffectConstants = try parseAudioConstants(repoRoot: source.repoRoot, prefix: "SFX_")
-    let mapRoutes = try parseCurrentSliceMapRoutes(repoRoot: source.repoRoot)
+    let mapRoutes = try parseGameplayCoverageMapRoutes(repoRoot: source.repoRoot)
     let musicHeaders = try parseMusicHeaders(repoRoot: source.repoRoot)
     let soundEffectHeaders = try parseSoundEffectHeaders(repoRoot: source.repoRoot)
     let labelIndex = try buildMusicLabelIndex(repoRoot: source.repoRoot)
@@ -178,8 +178,8 @@ private func parseAudioConstants(repoRoot: URL, prefix: String) throws -> [Audio
     return result
 }
 
-func parseCurrentSliceMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
-    let requiredMaps = currentGameplaySliceMapIDs
+func parseGameplayCoverageMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute] {
+    let requiredMaps = gameplayCoverageMapIDs
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/songs.asm"))
     let regex = try NSRegularExpression(pattern: #"db\s+(MUSIC_[A-Z0-9_]+),\s+BANK\([A-Za-z0-9_]+\)\s*;\s*([A-Z0-9_]+)"#)
     let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
@@ -196,7 +196,7 @@ func parseCurrentSliceMapRoutes(repoRoot: URL) throws -> [AudioManifest.MapRoute
         routes.append(.init(mapID: mapID, musicID: String(contents[musicRange])))
     }
     guard routes.count == requiredMaps.count else {
-        throw ExtractorError.invalidArguments("failed to resolve all current-slice map music routes")
+        throw ExtractorError.invalidArguments("failed to resolve all gameplay coverage map music routes")
     }
     return routes.sorted { $0.mapID < $1.mapID }
 }
