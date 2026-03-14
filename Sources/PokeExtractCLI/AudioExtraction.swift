@@ -364,6 +364,7 @@ private enum MusicInstruction {
     case tempo(Int)
     case volume(Int, Int)
     case dutyCycle(Int)
+    case pitchSweep(Int, Int)
     case vibrato(Int, Int, Int)
     case pitchSlide(Int, Int, String)
     case togglePerfectPitch
@@ -397,6 +398,7 @@ private struct ChannelState {
     var vibratoDepthSemitones: Double = 0
     var vibratoRateHz: Double = 0
     var pendingPitchSlide: PendingPitchSlide?
+    var channel1PitchSweep: Channel1PitchSweepState?
     var waveform: AudioManifest.Waveform
 }
 
@@ -435,6 +437,12 @@ private struct PendingPitchSlide {
     let targetHz: Double?
     let targetRegister: Int?
     let lengthModifier: Int
+}
+
+private struct Channel1PitchSweepState {
+    let periodNibble: Int
+    let shiftMagnitude: Int
+    let decreasesPitch: Bool
 }
 
 private struct NoiseInstrumentEventTemplate {
@@ -506,6 +514,11 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
     }
     if let match = line.firstMatch(of: /duty_cycle\s+(-?\d+)/), let value = Int(match.output.1) {
         return .dutyCycle(value)
+    }
+    if let match = line.firstMatch(of: /pitch_sweep\s+(-?\d+),\s*(-?\d+)/),
+       let time = Int(match.output.1),
+       let shift = Int(match.output.2) {
+        return .pitchSweep(time, shift)
     }
     if let match = line.firstMatch(of: /vibrato\s+(-?\d+),\s*(-?\d+),\s*(-?\d+)/),
        let first = Int(match.output.1),
@@ -686,6 +699,11 @@ private func renderChannelEntry(
                 state.masterVolume = max(0, min(1, (Double(left + right) / 2) / 7))
             case let .dutyCycle(value):
                 state.dutyCycle = dutyCycle(for: value)
+            case let .pitchSweep(time, shift):
+                state.channel1PitchSweep = makeChannel1PitchSweepState(
+                    timeNibble: time,
+                    signedShiftMagnitude: shift
+                )
             case let .vibrato(length, depth, rate):
                 state.vibratoDelaySeconds = Double(max(0, length)) / 60
                 state.vibratoDepthSemitones = Double(abs(depth)) / 64
@@ -761,6 +779,15 @@ private func renderChannelEntry(
             case let .squareNote(length, volume, fade, register):
                 let duration = Double(max(1, length + 1)) / 60
                 let noteRegister = register == 0 ? nil : register
+                let pitchSlide = state.pendingPitchSlide
+                state.pendingPitchSlide = nil
+                let channel1SweepTarget = noteRegister.flatMap { register in
+                    renderChannel1PitchSweepTarget(
+                        startRegister: register,
+                        duration: duration,
+                        sweepState: state.channel1PitchSweep
+                    )
+                }
                 events.append(
                     TimedEvent(
                         startTime: state.currentTime,
@@ -775,9 +802,9 @@ private func renderChannelEntry(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
-                        pitchSlideTargetHz: nil,
-                        pitchSlideTargetRegister: nil,
-                        pitchSlideFrameCount: nil,
+                        pitchSlideTargetHz: pitchSlide?.targetHz ?? channel1SweepTarget?.targetHz,
+                        pitchSlideTargetRegister: pitchSlide?.targetRegister ?? channel1SweepTarget?.targetRegister,
+                        pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) } ?? channel1SweepTarget?.frameCount,
                         noiseShortMode: nil,
                         waveform: .square
                     )
@@ -920,6 +947,11 @@ private func renderSubroutine(
                 state.masterVolume = max(0, min(1, (Double(left + right) / 2) / 7))
             case let .dutyCycle(value):
                 state.dutyCycle = dutyCycle(for: value)
+            case let .pitchSweep(time, shift):
+                state.channel1PitchSweep = makeChannel1PitchSweepState(
+                    timeNibble: time,
+                    signedShiftMagnitude: shift
+                )
             case let .vibrato(length, depth, rate):
                 state.vibratoDelaySeconds = Double(max(0, length)) / 60
                 state.vibratoDepthSemitones = Double(abs(depth)) / 64
@@ -995,6 +1027,15 @@ private func renderSubroutine(
             case let .squareNote(length, volume, fade, register):
                 let duration = Double(max(1, length + 1)) / 60
                 let noteRegister = register == 0 ? nil : register
+                let pitchSlide = state.pendingPitchSlide
+                state.pendingPitchSlide = nil
+                let channel1SweepTarget = noteRegister.flatMap { register in
+                    renderChannel1PitchSweepTarget(
+                        startRegister: register,
+                        duration: duration,
+                        sweepState: state.channel1PitchSweep
+                    )
+                }
                 events.append(
                     TimedEvent(
                         startTime: state.currentTime,
@@ -1009,9 +1050,9 @@ private func renderSubroutine(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
-                        pitchSlideTargetHz: nil,
-                        pitchSlideTargetRegister: nil,
-                        pitchSlideFrameCount: nil,
+                        pitchSlideTargetHz: pitchSlide?.targetHz ?? channel1SweepTarget?.targetHz,
+                        pitchSlideTargetRegister: pitchSlide?.targetRegister ?? channel1SweepTarget?.targetRegister,
+                        pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) } ?? channel1SweepTarget?.frameCount,
                         noiseShortMode: nil,
                         waveform: .square
                     )
@@ -1267,6 +1308,64 @@ private func envelopeStepDuration(for fade: Int) -> Double? {
     let period = abs(fade)
     guard period > 0 else { return nil }
     return Double(period) / 64
+}
+
+private struct RenderedChannel1PitchSweepTarget {
+    let targetHz: Double
+    let targetRegister: Int
+    let frameCount: Int
+}
+
+// Channel 1 `pitch_sweep` commands program NR10 directly, so approximate the
+// hardware sweep into a single register target over the rendered note duration.
+private func makeChannel1PitchSweepState(
+    timeNibble: Int,
+    signedShiftMagnitude: Int
+) -> Channel1PitchSweepState? {
+    let shiftMagnitude = abs(signedShiftMagnitude) & 0x7
+    guard shiftMagnitude > 0 else { return nil }
+
+    return Channel1PitchSweepState(
+        periodNibble: timeNibble & 0xf,
+        shiftMagnitude: shiftMagnitude,
+        decreasesPitch: signedShiftMagnitude < 0
+    )
+}
+
+private func renderChannel1PitchSweepTarget(
+    startRegister: Int,
+    duration: Double,
+    sweepState: Channel1PitchSweepState?
+) -> RenderedChannel1PitchSweepTarget? {
+    guard let sweepState else { return nil }
+
+    let periodBits = sweepState.periodNibble & 0x7
+    let periodTicks = periodBits == 0 ? 8 : periodBits
+    let stepDuration = Double(periodTicks) / 128
+    guard stepDuration > 0 else { return nil }
+
+    let iterations = max(1, Int((duration / stepDuration).rounded(.down)))
+    var currentRegister = startRegister
+
+    for _ in 0..<iterations {
+        let delta = currentRegister >> sweepState.shiftMagnitude
+        guard delta > 0 else { break }
+
+        let nextRegister = sweepState.decreasesPitch
+            ? currentRegister - delta
+            : currentRegister + delta
+
+        guard (1...2047).contains(nextRegister) else { break }
+        currentRegister = nextRegister
+    }
+
+    guard currentRegister != startRegister else { return nil }
+
+    return RenderedChannel1PitchSweepTarget(
+        targetHz: frequencyHz(forRegister: currentRegister, waveform: .square),
+        targetRegister: currentRegister,
+        frameCount: noteFrameCount(for: duration)
+    )
 }
 
 private func advanceNoteDurationSeconds(length: Int, state: inout ChannelState) -> Double {

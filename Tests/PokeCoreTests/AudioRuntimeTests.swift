@@ -482,7 +482,7 @@ extension PokeCoreTests {
         XCTAssertTrue(audioPlayer.soundEffectRequests.map(\.soundEffectID).contains("SFX_DEX_PAGE_ADDED"))
     }
 
-    func testRepoGeneratedTrainerEnemySendOutUsesSpeciesCry() throws {
+    func testRepoGeneratedTrainerEnemySendOutUsesSpeciesCryAndPoof() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
@@ -503,19 +503,23 @@ extension PokeCoreTests {
             frequencyModifier: enemySpecies.cryPitch,
             tempoModifier: enemySpecies.cryLength
         )
+        let expectedPoof = SoundEffectPlaybackRequest(soundEffectID: "SFX_BALL_POOF")
 
         advanceBattlePresentationBatch(runtime)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .enemy &&
+            audioPlayer.soundEffectRequests.contains(expectedPoof) &&
                 audioPlayer.soundEffectRequests.contains(expectedCry),
-            message: "trainer send out did not request the enemy species cry",
+            message: "trainer send out did not request the enemy poof and cry",
             maxTicks: 240
         )
+
+        let poofIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedPoof))
+        let cryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedCry))
+        XCTAssertLessThan(poofIndex, cryIndex)
     }
 
-    func testRepoGeneratedPlayerSendOutUsesStarterCryForIntroAndManualSwitch() throws {
+    func testRepoGeneratedPlayerSendOutUsesStarterCryAndPoofForIntroAndManualSwitch() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
@@ -543,11 +547,21 @@ extension PokeCoreTests {
             frequencyModifier: switchSpecies.cryPitch,
             tempoModifier: switchSpecies.cryLength
         )
+        let expectedPoof = SoundEffectPlaybackRequest(soundEffectID: "SFX_BALL_POOF")
 
         runtime.startWildBattle(speciesID: "RATTATA", level: 3)
         drainBattleText(runtime)
 
-        XCTAssertTrue(audioPlayer.soundEffectRequests.contains(starterCry))
+        waitUntil(
+            audioPlayer.soundEffectRequests.contains(expectedPoof) &&
+                audioPlayer.soundEffectRequests.contains(starterCry),
+            message: "initial player send out did not request the pokeball poof and starter cry",
+            maxTicks: 240
+        )
+
+        let introPoofIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedPoof))
+        let introCryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: starterCry))
+        XCTAssertLessThan(introPoofIndex, introCryIndex)
 
         let battle = try XCTUnwrap(runtime.gameplayState?.battle)
         let switchIndex = runtime.switchActionIndex(for: battle)
@@ -558,12 +572,18 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .player &&
+            audioPlayer.soundEffectRequests.filter { $0 == expectedPoof }.count >= 2 &&
                 audioPlayer.soundEffectRequests.contains(switchCry),
-            message: "manual battle switch did not request the replacement species cry",
+            message: "manual battle switch did not request the replacement poof and species cry",
             maxTicks: 240
         )
+
+        let poofIndices = audioPlayer.soundEffectRequests.indices.filter {
+            audioPlayer.soundEffectRequests[$0] == expectedPoof
+        }
+        let switchPoofIndex = try XCTUnwrap(poofIndices.last)
+        let switchCryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.lastIndex(of: switchCry))
+        XCTAssertLessThan(switchPoofIndex, switchCryIndex)
     }
 
     func testBattlePresentationUsesPlayerCryWhenPokemonFaints() {

@@ -64,7 +64,8 @@ extension GameRuntime {
                         pendingAction: .moveSelection,
                         enemyParty: battle.enemyParty,
                         enemyActiveIndex: nextEnemyIndex,
-                        soundEffectRequest: speciesCrySoundEffectRequest(
+                        stagedSoundEffectRequests: sendOutSoundEffectRequests(
+                            side: .enemy,
                             speciesID: battle.enemyParty[nextEnemyIndex].speciesID
                         )
                     ),
@@ -93,7 +94,10 @@ extension GameRuntime {
                     phase: .turnText,
                     pendingAction: .continueSwitchTurn,
                     playerPokemon: battle.playerPokemon,
-                    soundEffectRequest: speciesCrySoundEffectRequest(speciesID: battle.playerPokemon.speciesID)
+                    stagedSoundEffectRequests: sendOutSoundEffectRequests(
+                        side: .player,
+                        speciesID: battle.playerPokemon.speciesID
+                    )
                 ),
             ]
         }

@@ -38,6 +38,7 @@ public final class GameRuntime {
     var idleMovementTask: Task<Void, Never>?
     var trainerEngagementTask: Task<Void, Never>?
     var battlePresentationTask: Task<Void, Never>?
+    var battlePresentationStagedSoundTasks: [UUID: Task<Void, Never>] = [:]
     var fieldInteractionTask: Task<Void, Never>?
     var hasStarted = false
     var gameplayState: GameplayState?

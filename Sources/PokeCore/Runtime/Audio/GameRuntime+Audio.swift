@@ -150,6 +150,33 @@ extension GameRuntime {
         )
     }
 
+    func sendOutSoundEffectRequests(
+        side: BattlePresentationSide,
+        speciesID: String
+    ) -> [RuntimeStagedSoundEffectRequest] {
+        var requests: [RuntimeStagedSoundEffectRequest] = []
+
+        if let poofRequest = battleSoundEffectRequest(id: "SFX_BALL_POOF") {
+            requests.append(
+                RuntimeStagedSoundEffectRequest(
+                    delay: BattleSendOutAnimationTiming.poofSoundDelay,
+                    request: poofRequest
+                )
+            )
+        }
+
+        if let cryRequest = speciesCrySoundEffectRequest(speciesID: speciesID) {
+            requests.append(
+                RuntimeStagedSoundEffectRequest(
+                    delay: BattleSendOutAnimationTiming.crySoundDelay(for: side),
+                    request: cryRequest
+                )
+            )
+        }
+
+        return requests
+    }
+
     func enemyFaintSoundEffectRequests() -> [SoundEffectPlaybackRequest] {
         ["SFX_FAINT_FALL", "SFX_FAINT_THUD"].compactMap { battleSoundEffectRequest(id: $0) }
     }

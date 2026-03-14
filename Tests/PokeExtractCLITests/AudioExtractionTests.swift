@@ -222,6 +222,26 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(channelSeven.prelude.first?.waveform, .wave)
     }
 
+    func testAudioExtractorCarriesPitchSweepIntoBallPoofSquareChannel() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: PokeExtractCLITestSupport.repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let ballPoof = try XCTUnwrap(manifest.soundEffects.first { $0.id == "SFX_BALL_POOF" })
+        let channelFive = try XCTUnwrap(ballPoof.channels.first { $0.channelNumber == 5 })
+        let firstEvent = try XCTUnwrap(channelFive.prelude.first)
+        let targetRegister = try XCTUnwrap(firstEvent.pitchSlideTargetRegister)
+        let targetHz = try XCTUnwrap(firstEvent.pitchSlideTargetHz)
+        let frameCount = try XCTUnwrap(firstEvent.pitchSlideFrameCount)
+
+        XCTAssertEqual(firstEvent.waveform, .square)
+        XCTAssertEqual(firstEvent.frequencyRegister, 1024)
+        XCTAssertGreaterThan(targetRegister, 1024)
+        XCTAssertEqual(frameCount, 16)
+        XCTAssertGreaterThan(targetHz, 128)
+    }
+
     func testExtractorWritesDeterministicAudioManifestJSON() throws {
         let repoRoot = PokeExtractCLITestSupport.repoRoot()
         let firstOutputRoot = try PokeExtractCLITestSupport.temporaryDirectory()

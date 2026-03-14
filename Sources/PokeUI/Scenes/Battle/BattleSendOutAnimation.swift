@@ -5,12 +5,12 @@ import PokeDataModel
 enum BattleSendOutAnimationTimeline {
     static let poofTileSize = 8
 
-    static let tossDuration: TimeInterval = 0.28
-    static let releaseHoldDuration: TimeInterval = 0.05
-    static let poofFrameDuration: TimeInterval = 0.07
-    static let revealStep1Duration: TimeInterval = 0.08
-    static let revealStep2Duration: TimeInterval = 0.10
-    static let revealFinalDuration: TimeInterval = 0.14
+    static let tossDuration = BattleSendOutAnimationTiming.tossDuration
+    static let releaseHoldDuration = BattleSendOutAnimationTiming.releaseHoldDuration
+    static let poofFrameDuration = BattleSendOutAnimationTiming.poofFrameDuration
+    static let revealStep1Duration = BattleSendOutAnimationTiming.revealStep1Duration
+    static let revealStep2Duration = BattleSendOutAnimationTiming.revealStep2Duration
+    static let revealFinalDuration = BattleSendOutAnimationTiming.revealFinalDuration
 
     static let enemyPoofFrames = buildPoofFrames(
         frames: [
