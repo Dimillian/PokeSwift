@@ -1176,7 +1176,7 @@ extension PokeUITests {
         spriteFrame: .init(x: 0, y: 16, width: 16, height: 16)
       ),
       money: 4242,
-      ownedBadgeIDs: ["cascade", "boulder"]
+      ownedBadgeIDs: ["CASCADE_BADGE", "BoulderBadge"]
     )
     let sidebarParty = GameplaySidebarPropsBuilder.makeParty(
       from: party,

@@ -49,6 +49,22 @@ let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
         isOutdoor: true
     ),
     .init(
+        mapID: "ROUTE_22",
+        displayName: "Route 22",
+        objectFile: "data/maps/objects/Route22.asm",
+        blockFile: "maps/Route22.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "ROUTE_22_GATE",
+        displayName: "Route 22 Gate",
+        objectFile: "data/maps/objects/Route22Gate.asm",
+        blockFile: "maps/Route22Gate.blk",
+        parentMapID: "ROUTE_22",
+        isOutdoor: false
+    ),
+    .init(
         mapID: "ROUTE_2",
         displayName: "Route 2",
         objectFile: "data/maps/objects/Route2.asm",

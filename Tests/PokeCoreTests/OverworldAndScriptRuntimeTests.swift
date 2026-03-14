@@ -820,4 +820,157 @@ extension PokeCoreTests {
         }
         XCTAssertEqual(scriptID, "oaks_lab_rival_picks_after_squirtle")
     }
+
+    func testRepoGeneratedFirstRoute22RivalTriggerStartsBattleAndClearsFlagsAfterWin() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_MART"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 7)
+        runtime.gameplayState?.facing = .up
+        runtime.beginScript(id: "viridian_mart_oaks_parcel")
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_OAKS_PARCEL") ?? false)
+        })
+
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 18, nickname: "Squirtle")]
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "OAKS_LAB"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.activeFlags.insert("EVENT_BATTLED_RIVAL_IN_OAKS_LAB")
+        runtime.beginScript(id: "oaks_lab_parcel_handoff")
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_POKEDEX") ?? false)
+                && ($0.eventFlags?.activeFlags.contains("EVENT_1ST_ROUTE22_RIVAL_BATTLE") ?? false)
+                && ($0.eventFlags?.activeFlags.contains("EVENT_ROUTE22_RIVAL_WANTS_BATTLE") ?? false)
+        })
+
+        XCTAssertTrue(runtime.gameplayState?.objectStates["route_22_rival_1"]?.visible ?? false)
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_22"
+        runtime.gameplayState?.playerPosition = .init(x: 29, y: 4)
+        runtime.gameplayState?.facing = .right
+
+        runtime.evaluateMapScriptsIfNeeded()
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .battle
+        })
+
+        XCTAssertEqual(runtime.gameplayState?.activeMapScriptTriggerID, "first_rival_upper_after_squirtle")
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "route_22_rival_1_5_upper")
+        XCTAssertEqual(battle.postBattleScriptID, "route_22_rival_1_exit_upper")
+
+        runtime.finishBattle(battle: battle, won: true)
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE") ?? false)
+        })
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"))
+        XCTAssertFalse(runtime.hasFlag("EVENT_1ST_ROUTE22_RIVAL_BATTLE"))
+        XCTAssertFalse(runtime.hasFlag("EVENT_ROUTE22_RIVAL_WANTS_BATTLE"))
+        XCTAssertFalse(runtime.gameplayState?.objectStates["route_22_rival_1"]?.visible ?? true)
+        XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "route_22_rival_1" }))
+    }
+
+    func testRepoGeneratedBrockRewardScriptRetriesTMUntilBagHasRoomAndKeepsBadgeNormalized() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "PEWTER_GYM"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 3)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.inventory = Array(
+            runtime.content.gameplayManifest.items
+                .map(\.id)
+                .filter { $0 != "TM_BIDE" }
+                .prefix(GameRuntime.bagItemCapacity)
+                .enumerated()
+                .map { index, itemID in
+                    RuntimeInventoryItemState(itemID: itemID, quantity: index == 0 ? 2 : 1)
+                }
+        )
+
+        runtime.beginScript(id: "pewter_gym_brock_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_BROCK") ?? false)
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["boulder"]))
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_BEAT_BROCK") ?? false)
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_GOT_TM34") ?? true)
+        XCTAssertNil(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BIDE" })
+        XCTAssertFalse(runtime.gameplayState?.objectStates["pewter_city_youngster"]?.visible ?? true)
+        XCTAssertFalse(runtime.gameplayState?.objectStates["route_22_rival_1"]?.visible ?? true)
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "pewter_gym_brock_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_TM34") ?? false)
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["boulder"]))
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_GOT_TM34") ?? false)
+        XCTAssertEqual(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BIDE" }?.quantity, 1)
+    }
+
+    func testLossCanContinueIntoConfiguredPostBattleScript() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    scripts: [
+                        .init(
+                            id: "loss_followup",
+                            steps: [.init(action: "setFlag", flagID: "EVENT_LOSS_FOLLOWUP")]
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+
+        runtime.completeTrainerBattleDialogue(
+            won: false,
+            preventsBlackoutOnLoss: true,
+            postBattleScriptID: "loss_followup",
+            runsPostBattleScriptOnLoss: true,
+            sourceTrainerObjectID: nil
+        )
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field && ($0.eventFlags?.activeFlags.contains("EVENT_LOSS_FOLLOWUP") ?? false)
+        }
+
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_LOSS_FOLLOWUP") ?? false)
+    }
 }

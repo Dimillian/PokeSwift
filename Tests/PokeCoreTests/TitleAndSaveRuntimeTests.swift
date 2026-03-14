@@ -57,7 +57,7 @@ extension PokeCoreTests {
         runtime.gameplayState?.playerPosition = TilePoint(x: 2, y: 3)
         runtime.gameplayState?.facing = .left
         runtime.gameplayState?.money = 4242
-        runtime.gameplayState?.earnedBadgeIDs = ["BOULDER"]
+        runtime.gameplayState?.earnedBadgeIDs = ["BOULDERBADGE"]
         runtime.gameplayState?.ownedSpeciesIDs = ["SQUIRTLE", "PIDGEY"]
         runtime.gameplayState?.seenSpeciesIDs = ["SQUIRTLE", "PIDGEY", "RATTATA"]
         runtime.gameplayState?.speciesEncounterCounts = ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7, "MISSINGNO": 0]
@@ -120,6 +120,7 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.ownedSpeciesIDs.sorted(), ["PIDGEY", "SQUIRTLE"])
         XCTAssertEqual(saveStore.envelope?.snapshot.seenSpeciesIDs.sorted(), ["PIDGEY", "RATTATA", "SQUIRTLE"])
         XCTAssertEqual(saveStore.envelope?.snapshot.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
+        XCTAssertEqual(saveStore.envelope?.snapshot.earnedBadgeIDs, ["boulder"])
         XCTAssertEqual(
             saveStore.envelope?.snapshot.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -155,7 +156,7 @@ extension PokeCoreTests {
         )
         XCTAssertEqual(snapshot.eventFlags?.activeFlags, [])
         XCTAssertEqual(resumed.playerMoney, 4242)
-        XCTAssertEqual(resumed.earnedBadgeIDs, Set(["BOULDER"]))
+        XCTAssertEqual(resumed.earnedBadgeIDs, Set(["boulder"]))
         XCTAssertFalse(resumed.currentFieldObjects.contains(where: { $0.id == "test_object" }))
     }
 

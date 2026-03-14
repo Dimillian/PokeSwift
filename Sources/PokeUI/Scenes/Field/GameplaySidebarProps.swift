@@ -1177,13 +1177,22 @@ public enum GameplaySidebarPropsBuilder {
     }
 
     private static func makeBadges(ownedBadgeIDs: Set<String>) -> [TrainerBadgeProps] {
-        badgeDefinitions.map { definition in
+        let normalizedBadgeIDs = Set(ownedBadgeIDs.map(normalizedBadgeID))
+        return badgeDefinitions.map { definition in
             TrainerBadgeProps(
                 id: definition.id,
                 shortLabel: definition.shortLabel,
-                isEarned: ownedBadgeIDs.contains(definition.id)
+                isEarned: normalizedBadgeIDs.contains(definition.id)
             )
         }
+    }
+
+    private static func normalizedBadgeID(_ badgeID: String) -> String {
+        badgeID
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_badge", with: "")
+            .replacingOccurrences(of: "badge", with: "")
     }
 
     private static func formatMoney(_ amount: Int) -> String {

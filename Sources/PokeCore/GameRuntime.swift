@@ -150,7 +150,7 @@ public final class GameRuntime {
     }
 
     public var earnedBadgeIDs: Set<String> {
-        gameplayState?.earnedBadgeIDs ?? []
+        Self.normalizedBadgeIDs(gameplayState?.earnedBadgeIDs ?? [])
     }
 
     public var ownedSpeciesIDs: Set<String> {
@@ -181,6 +181,18 @@ public final class GameRuntime {
 
     public var chosenStarterSpeciesID: String? {
         gameplayState?.chosenStarterSpeciesID
+    }
+
+    static func normalizedBadgeID(_ badgeID: String) -> String {
+        badgeID
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_badge", with: "")
+            .replacingOccurrences(of: "badge", with: "")
+    }
+
+    static func normalizedBadgeIDs<S: Sequence>(_ badgeIDs: S) -> Set<String> where S.Element == String {
+        Set(badgeIDs.map(Self.normalizedBadgeID))
     }
 
     public var currentFieldObjects: [FieldRenderableObjectState] {

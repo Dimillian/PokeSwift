@@ -2479,6 +2479,37 @@
       ]
     },
     {
+      "id" : "pewter_city_super_nerd_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Did you check out",
+            "the MUSEUM?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_super_nerd_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Psssst!",
+            "Do you know what",
+            "I'm doing?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "pewter_city_trainer_tips",
       "pages" : [
         {
@@ -2499,6 +2530,32 @@
             "takes part in",
             "battle, however",
             "short, earns EXP!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_youngster_follow_me",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're a trainer",
+            "right? BROCK's",
+            "looking for new",
+            "challengers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Follow me!"
           ],
           "waitsForPrompt" : true
         }
@@ -2698,11 +2755,48 @@
         },
         {
           "events" : [
-
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
           ],
           "lines" : [
             "<PLAYER> received",
             "the BOULDERBADGE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That's an official",
+            "POKéMON LEAGUE",
+            "BADGE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Its bearer's",
+            "POKéMON become",
+            "more powerful!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The technique",
+            "FLASH can now be",
+            "used any time!"
           ],
           "waitsForPrompt" : true
         }
@@ -2924,7 +3018,97 @@
       ]
     },
     {
+      "id" : "pewter_gym_received_tm34",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> received",
+            "TM34!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A TM contains a",
+            "technique that",
+            "can be taught to",
+            "POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A TM is good only",
+            "once! So when you",
+            "use one to teach",
+            "a new technique,"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "pick the POKéMON",
+            "carefully!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TM34 contains",
+            "BIDE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Your POKéMON will",
+            "absorb damage in",
+            "battle then pay",
+            "it back double!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "pewter_gym_t_m34_no_room",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You don't have",
+            "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_gym_tm34_no_room",
       "pages" : [
         {
           "events" : [
@@ -3878,6 +4062,376 @@
       ]
     },
     {
+      "id" : "route22_gate_guard_go_right_ahead",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "Oh! That is the",
+            "BOULDERBADGE!",
+            "Go right ahead!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_gate_guard_i_cant_let_you_pass",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The rules are",
+            "rules. I can't",
+            "let you pass."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_gate_guard_no_boulderbadge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Only truly skilled",
+            "trainers are",
+            "allowed through."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You don't have the",
+            "BOULDERBADGE yet!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_pokemon_league_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON LEAGUE",
+            "Front Gate"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival1_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Awww!",
+            "You just lucked",
+            "out!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival1_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "Why do I have 2",
+            "POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should catch",
+            "some more too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival2_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "What!?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I was just",
+            "careless!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival2_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hahaha!",
+            "<PLAYER>! That's",
+            "your best? You're",
+            "nowhere near as"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "good as me, pal!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Go train some",
+            "more! You loser!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_after_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I heard POKéMON",
+            "LEAGUE has many",
+            "tough trainers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I have to figure",
+            "out how to get",
+            "past them!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should quit",
+            "dawdling and get",
+            "a move on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_after_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That loosened me",
+            "up! I'm ready for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<PLAYER>, you need",
+            "more practice!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "But hey, you know",
+            "that! I'm out of",
+            "here. Smell ya!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_before_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hey!",
+            "<PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Forget it! You",
+            "probably don't",
+            "have any BADGEs!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The guard won't",
+            "let you through!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "By the way, did",
+            "your POKéMON",
+            "get any stronger?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_before_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "<PLAYER>! What a",
+            "surprise to see",
+            "you here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "So you're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You collected all",
+            "the BADGEs too?",
+            "That's cool!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Then I'll whip you",
+            "<PLAYER> as a",
+            "warm up for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "route2_digletts_cave_sign",
       "pages" : [
         {
@@ -4456,6 +5010,311 @@
             "You can get back",
             "to PALLET TOWN",
             "quicker that way."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_gate_guard_go_right_ahead",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Oh! That is the",
+            "BOULDERBADGE!",
+            "Go right ahead!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_gate_guard_no_boulder_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Only truly skilled",
+            "trainers are",
+            "allowed through."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_DENIED",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "You don't have the",
+            "BOULDERBADGE yet!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The rules are",
+            "rules. I can't",
+            "let you pass."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_pokemon_league_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON LEAGUE",
+            "Front Gate"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Awww!",
+            "You just lucked",
+            "out!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "Why do I have 2",
+            "POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should catch",
+            "some more too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_after_battle_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I heard POKéMON",
+            "LEAGUE has many",
+            "tough trainers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I have to figure",
+            "out how to get",
+            "past them!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should quit",
+            "dawdling and get",
+            "a move on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_after_battle_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That loosened me",
+            "up! I'm ready for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<PLAYER>, you need",
+            "more practice!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "But hey, you know",
+            "that! I'm out of",
+            "here. Smell ya!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_before_battle_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hey!",
+            "<PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Forget it! You",
+            "probably don't",
+            "have any BADGEs!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The guard won't",
+            "let you through!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "By the way, did",
+            "your POKéMON",
+            "get any stronger?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_before_battle_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "<PLAYER>! What a",
+            "surprise to see",
+            "you here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "So you're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You collected all",
+            "the BADGEs too?",
+            "That's cool!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Then I'll whip you",
+            "<PLAYER> as a",
+            "warm up for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come on!"
           ],
           "waitsForPrompt" : true
         }
@@ -6422,6 +7281,14 @@
         "sourceConstant" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0"
       },
       {
+        "id" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        "sourceConstant" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"
+      },
+      {
+        "id" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
+        "sourceConstant" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE"
+      },
+      {
         "id" : "EVENT_BEAT_ROUTE_3_TRAINER_0",
         "sourceConstant" : "EVENT_BEAT_ROUTE_3_TRAINER_0"
       },
@@ -6488,6 +7355,10 @@
       {
         "id" : "EVENT_GOT_STARTER",
         "sourceConstant" : "EVENT_GOT_STARTER"
+      },
+      {
+        "id" : "EVENT_GOT_TM34",
+        "sourceConstant" : "EVENT_GOT_TM34"
       },
       {
         "id" : "EVENT_OAK_APPEARED_IN_PALLET",
@@ -7242,6 +8113,20 @@
       "id" : "FLOOR_B4F",
       "isKeyItem" : false,
       "price" : 0
+    },
+    {
+      "battleUse" : "none",
+      "displayName" : "TM34",
+      "id" : "TM_BIDE",
+      "isKeyItem" : false,
+      "price" : 2000
+    },
+    {
+      "battleUse" : "none",
+      "displayName" : "TM42",
+      "id" : "TM_DREAM_EATER",
+      "isKeyItem" : false,
+      "price" : 2000
     }
   ],
   "mapScripts" : [
@@ -7321,6 +8206,167 @@
           ],
           "id" : "oaks_parcel_entry",
           "scriptID" : "viridian_mart_oaks_parcel"
+        }
+      ]
+    },
+    {
+      "mapID" : "ROUTE_22",
+      "triggers" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "CHARMANDER"
+            }
+          ],
+          "id" : "first_rival_upper_after_charmander",
+          "scriptID" : "route_22_rival_1_challenge_4_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "SQUIRTLE"
+            }
+          ],
+          "id" : "first_rival_upper_after_squirtle",
+          "scriptID" : "route_22_rival_1_challenge_5_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "BULBASAUR"
+            }
+          ],
+          "id" : "first_rival_upper_after_bulbasaur",
+          "scriptID" : "route_22_rival_1_challenge_6_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "CHARMANDER"
+            }
+          ],
+          "id" : "first_rival_lower_after_charmander",
+          "scriptID" : "route_22_rival_1_challenge_4_lower"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "SQUIRTLE"
+            }
+          ],
+          "id" : "first_rival_lower_after_squirtle",
+          "scriptID" : "route_22_rival_1_challenge_5_lower"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "BULBASAUR"
+            }
+          ],
+          "id" : "first_rival_lower_after_bulbasaur",
+          "scriptID" : "route_22_rival_1_challenge_6_lower"
         }
       ]
     },
@@ -13308,6 +14354,2324 @@
           },
           "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_GYM",
+          "targetPosition" : {
+            "x" : 0,
+            "y" : 0
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+        {
+          "dialogueID" : "route_22_pokemon_league_sign",
+          "id" : "route_22_bg_0",
+          "position" : {
+            "x" : 7,
+            "y" : 11
+          }
+        }
+      ],
+      "blockHeight" : 9,
+      "blockIDs" : [
+        19,
+        32,
+        13,
+        13,
+        13,
+        13,
+        33,
+        40,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        43,
+        87,
+        87,
+        87,
+        42,
+        44,
+        59,
+        104,
+        127,
+        127,
+        127,
+        127,
+        105,
+        36,
+        87,
+        87,
+        87,
+        87,
+        87,
+        87,
+        37,
+        7,
+        47,
+        7,
+        40,
+        44,
+        41,
+        55,
+        125,
+        125,
+        58,
+        125,
+        126,
+        19,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        36,
+        87,
+        41,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        19,
+        7,
+        7,
+        7,
+        29,
+        30,
+        62,
+        59,
+        47,
+        7,
+        98,
+        10,
+        10,
+        41,
+        7,
+        7,
+        7,
+        7,
+        47,
+        7,
+        19,
+        11,
+        11,
+        11,
+        101,
+        100,
+        40,
+        41,
+        11,
+        11,
+        78,
+        1,
+        1,
+        41,
+        49,
+        49,
+        86,
+        119,
+        119,
+        119,
+        19,
+        11,
+        11,
+        11,
+        85,
+        85,
+        40,
+        41,
+        11,
+        11,
+        78,
+        1,
+        62,
+        41,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        36,
+        37,
+        7,
+        47,
+        7,
+        7,
+        40,
+        41,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        40,
+        44,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        44
+      ],
+      "blockWidth" : 20,
+      "borderBlockID" : 44,
+      "connections" : [
+        {
+          "direction" : "north",
+          "offset" : 0,
+          "targetBlockHeight" : 72,
+          "targetBlockIDs" : [
+            53,
+            23,
+            54,
+            54,
+            67,
+            66,
+            53,
+            53,
+            23,
+            54,
+            53,
+            23,
+            54,
+            54,
+            67,
+            66,
+            53,
+            53,
+            23,
+            54,
+            53,
+            54,
+            43,
+            43,
+            67,
+            66,
+            44,
+            44,
+            53,
+            54,
+            53,
+            54,
+            65,
+            67,
+            66,
+            65,
+            65,
+            65,
+            53,
+            54,
+            53,
+            54,
+            66,
+            65,
+            65,
+            67,
+            67,
+            67,
+            53,
+            54,
+            53,
+            54,
+            67,
+            65,
+            67,
+            66,
+            65,
+            66,
+            53,
+            54,
+            53,
+            54,
+            65,
+            67,
+            67,
+            67,
+            66,
+            65,
+            53,
+            54,
+            53,
+            54,
+            67,
+            66,
+            66,
+            66,
+            66,
+            65,
+            53,
+            54,
+            44,
+            43,
+            66,
+            65,
+            67,
+            66,
+            65,
+            66,
+            44,
+            43,
+            65,
+            65,
+            67,
+            67,
+            67,
+            66,
+            66,
+            66,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            42,
+            65,
+            53,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            54,
+            65,
+            53,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            54,
+            65,
+            24,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            27,
+            65,
+            28,
+            39,
+            30,
+            39,
+            53,
+            23,
+            54,
+            30,
+            31,
+            65,
+            10,
+            72,
+            10,
+            10,
+            24,
+            26,
+            27,
+            65,
+            65,
+            65,
+            10,
+            10,
+            10,
+            10,
+            53,
+            23,
+            54,
+            1,
+            1,
+            1,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            1,
+            1,
+            42,
+            10,
+            10,
+            10,
+            10,
+            53,
+            23,
+            54,
+            23,
+            23,
+            54,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            26,
+            26,
+            27,
+            68,
+            10,
+            69,
+            10,
+            44,
+            40,
+            43,
+            40,
+            40,
+            43,
+            24,
+            26,
+            27,
+            10,
+            2,
+            64,
+            10,
+            1,
+            1,
+            1,
+            44,
+            40,
+            43,
+            10,
+            19,
+            22,
+            10,
+            41,
+            1,
+            42,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            68,
+            10,
+            69,
+            10,
+            10,
+            69,
+            10,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            26,
+            26,
+            27,
+            10,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            40,
+            40,
+            43,
+            10,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            64,
+            64,
+            10,
+            10,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            64,
+            2,
+            10,
+            22,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            22,
+            19,
+            64,
+            64,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            22,
+            19,
+            19,
+            22,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            64,
+            2,
+            10,
+            22,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            22,
+            64,
+            19,
+            10,
+            44,
+            40,
+            43,
+            24,
+            26,
+            27,
+            2,
+            10,
+            10,
+            10,
+            64,
+            64,
+            64,
+            53,
+            23,
+            54,
+            2,
+            10,
+            10,
+            10,
+            68,
+            10,
+            69,
+            24,
+            26,
+            27,
+            18,
+            18,
+            18,
+            18,
+            24,
+            26,
+            27,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            70,
+            4,
+            4,
+            70,
+            4,
+            71,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            26,
+            24,
+            26,
+            27,
+            70,
+            71,
+            4,
+            4,
+            44,
+            40,
+            40,
+            53,
+            23,
+            54,
+            24,
+            27,
+            4,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            53,
+            54,
+            4,
+            4,
+            4,
+            4,
+            4,
+            53,
+            23,
+            54,
+            24,
+            27,
+            4,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            44,
+            43,
+            4,
+            20,
+            65,
+            21,
+            4,
+            53,
+            23,
+            54,
+            4,
+            4,
+            4,
+            56,
+            18,
+            55,
+            4,
+            24,
+            26,
+            27,
+            70,
+            4,
+            4,
+            71,
+            4,
+            4,
+            4,
+            53,
+            23,
+            54,
+            24,
+            26,
+            26,
+            27,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            44,
+            40,
+            40,
+            43,
+            4,
+            4,
+            4,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            70,
+            4,
+            4,
+            4,
+            71,
+            4,
+            4,
+            4,
+            70,
+            71,
+            24,
+            26,
+            26,
+            26,
+            27,
+            10,
+            10,
+            10,
+            24,
+            27,
+            44,
+            40,
+            40,
+            40,
+            43,
+            10,
+            10,
+            10,
+            44,
+            43,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            1,
+            1,
+            65,
+            41,
+            1,
+            1,
+            42,
+            1,
+            41,
+            1,
+            1,
+            42,
+            65,
+            24,
+            26,
+            26,
+            27,
+            1,
+            24,
+            26,
+            26,
+            27,
+            65,
+            44,
+            40,
+            40,
+            43,
+            1,
+            44,
+            40,
+            40,
+            43,
+            65,
+            65,
+            65,
+            65,
+            65,
+            1,
+            1,
+            1,
+            1,
+            1,
+            41,
+            1,
+            1,
+            42,
+            65,
+            41,
+            1,
+            42,
+            1,
+            42,
+            24,
+            26,
+            26,
+            27,
+            65,
+            24,
+            26,
+            27,
+            26,
+            27,
+            44,
+            40,
+            40,
+            43,
+            65,
+            44,
+            40,
+            43,
+            40,
+            43,
+            1,
+            1,
+            1,
+            1,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            41,
+            1,
+            42,
+            1,
+            42,
+            65,
+            41,
+            42,
+            24,
+            26,
+            24,
+            26,
+            27,
+            26,
+            27,
+            65,
+            24,
+            27,
+            44,
+            40,
+            44,
+            40,
+            43,
+            40,
+            43,
+            65,
+            44,
+            43,
+            1,
+            1,
+            1,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            42,
+            65,
+            65,
+            41,
+            1,
+            1,
+            1,
+            42,
+            24,
+            26,
+            27,
+            65,
+            65,
+            24,
+            26,
+            26,
+            26,
+            27,
+            44,
+            40,
+            43,
+            65,
+            65,
+            44,
+            40,
+            40,
+            40,
+            43,
+            1,
+            58,
+            60,
+            60,
+            60,
+            60,
+            59,
+            1,
+            1,
+            1,
+            1,
+            62,
+            61,
+            61,
+            61,
+            61,
+            63,
+            1,
+            1,
+            1
+          ],
+          "targetBlockWidth" : 10,
+          "targetMapID" : "ROUTE_23"
+        },
+        {
+          "direction" : "east",
+          "offset" : -4,
+          "targetBlockHeight" : 18,
+          "targetBlockIDs" : [
+            44,
+            44,
+            41,
+            15,
+            15,
+            15,
+            15,
+            15,
+            27,
+            8,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            44,
+            44,
+            41,
+            15,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            15,
+            15,
+            49,
+            49,
+            49,
+            49,
+            49,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            10,
+            82,
+            82,
+            82,
+            52,
+            1,
+            1,
+            1,
+            49,
+            49,
+            49,
+            12,
+            13,
+            14,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            27,
+            49,
+            49,
+            8,
+            16,
+            17,
+            18,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            2,
+            3,
+            26,
+            26,
+            7,
+            7,
+            7,
+            26,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            49,
+            15,
+            15,
+            87,
+            87,
+            37,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            15,
+            15,
+            10,
+            10,
+            10,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            2,
+            3,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            15,
+            15,
+            49,
+            1,
+            1,
+            10,
+            108,
+            108,
+            108,
+            108,
+            8,
+            1,
+            119,
+            119,
+            1,
+            10,
+            32,
+            33,
+            10,
+            1,
+            15,
+            15,
+            63,
+            59,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            116,
+            116,
+            1,
+            10,
+            124,
+            115,
+            10,
+            1,
+            15,
+            15,
+            44,
+            41,
+            28,
+            111,
+            10,
+            10,
+            10,
+            10,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            15,
+            15,
+            44,
+            41,
+            1,
+            10,
+            52,
+            116,
+            116,
+            10,
+            1,
+            116,
+            1,
+            32,
+            33,
+            1,
+            116,
+            10,
+            10,
+            1,
+            15,
+            15,
+            44,
+            41,
+            1,
+            10,
+            29,
+            31,
+            30,
+            10,
+            1,
+            10,
+            1,
+            124,
+            114,
+            1,
+            10,
+            10,
+            116,
+            1,
+            15,
+            15,
+            87,
+            37,
+            26,
+            7,
+            101,
+            67,
+            100,
+            47,
+            26,
+            47,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            15,
+            15,
+            10,
+            77,
+            1,
+            116,
+            10,
+            10,
+            10,
+            10,
+            1,
+            10,
+            8,
+            10,
+            116,
+            116,
+            1,
+            116,
+            116,
+            1,
+            15,
+            15,
+            10,
+            77,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            1,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            15,
+            15,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            77,
+            10,
+            10,
+            77,
+            1,
+            78,
+            10,
+            10,
+            78,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            77,
+            10,
+            10,
+            77,
+            1,
+            78,
+            10,
+            10,
+            78,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "targetBlockWidth" : 20,
+          "targetMapID" : "VIRIDIAN_CITY"
+        }
+      ],
+      "defaultMusicID" : "MUSIC_ROUTES3",
+      "displayName" : "Route 22",
+      "id" : "ROUTE_22",
+      "objects" : [
+        {
+          "displayName" : "Blue",
+          "facing" : "down",
+          "id" : "route_22_rival_1",
+          "interactionDialogueID" : "route_22_rival_before_battle_1",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_rival_after_battle_1"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 25,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 25,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BLUE",
+          "visibleByDefault" : false
+        },
+        {
+          "displayName" : "Blue",
+          "facing" : "down",
+          "id" : "route_22_rival_2",
+          "interactionDialogueID" : "route_22_rival_before_battle_2",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_rival_after_battle_2"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 25,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 25,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BLUE",
+          "visibleByDefault" : false
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        58,
+        58,
+        90,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        58,
+        58,
+        92,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        19,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        54,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        58,
+        58,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        78,
+        26,
+        26,
+        26,
+        26,
+        26,
+        27,
+        26,
+        26,
+        26,
+        26,
+        26,
+        58,
+        58,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        54,
+        55,
+        55,
+        55,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        58,
+        58,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        50,
+        20,
+        20,
+        20,
+        30,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        58,
+        58,
+        44,
+        44,
+        44,
+        44,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        58,
+        58,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        55,
+        60,
+        55,
+        55,
+        58,
+        44,
+        44,
+        44,
+        44,
+        44,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        57,
+        35,
+        57,
+        35,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        35,
+        57,
+        35,
+        57,
+        17,
+        36,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        57,
+        35,
+        30,
+        17,
+        17,
+        36,
+        57,
+        57,
+        57,
+        57,
+        85,
+        86,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        35,
+        57,
+        39,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        54,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        55,
+        55,
+        39,
+        17,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17
+      ],
+      "stepHeight" : 18,
+      "stepWidth" : 40,
+      "tileset" : "OVERWORLD",
+      "warps" : [
+        {
+          "id" : "route_22_warp_0",
+          "origin" : {
+            "x" : 8,
+            "y" : 5
+          },
+          "targetFacing" : "up",
+          "targetMapID" : "ROUTE_22_GATE",
+          "targetPosition" : {
+            "x" : 4,
+            "y" : 7
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        3,
+        46,
+        40,
+        47,
+        3,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        44,
+        4,
+        45,
+        0
+      ],
+      "blockWidth" : 5,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_DUNGEON2",
+      "displayName" : "Route 22 Gate",
+      "id" : "ROUTE_22_GATE",
+      "objects" : [
+        {
+          "displayName" : "Route 22 Gate Guard",
+          "facing" : "left",
+          "id" : "route_22_gate_guard",
+          "interactionDialogueID" : "route_22_gate_guard_no_boulder_badge",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_gate_guard_go_right_ahead"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 6,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 6,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_GUARD",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        0,
+        0,
+        0,
+        14,
+        59,
+        59,
+        14,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        50,
+        55,
+        56,
+        50,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        14,
+        55,
+        56,
+        14,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        50,
+        55,
+        56,
+        50,
+        1,
+        1,
+        1
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 10,
+      "tileset" : "GATE",
+      "warps" : [
+        {
+          "id" : "route_22_gate_warp_0",
+          "origin" : {
+            "x" : 4,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_22",
+          "targetPosition" : {
+            "x" : 8,
+            "y" : 5
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_1",
+          "origin" : {
+            "x" : 5,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_22",
+          "targetPosition" : {
+            "x" : 8,
+            "y" : 5
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_2",
+          "origin" : {
+            "x" : 4,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_23",
+          "targetPosition" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_3",
+          "origin" : {
+            "x" : 5,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_23",
           "targetPosition" : {
             "x" : 0,
             "y" : 0
@@ -20143,7 +23507,7 @@
             "y" : 2
           },
           "sprite" : "SPRITE_OAK",
-          "visibleByDefault" : true
+          "visibleByDefault" : false
         },
         {
           "displayName" : "Pokedex",
@@ -21626,8 +24990,8 @@
         {
           "displayName" : "Super Nerd",
           "facing" : "down",
-          "id" : "pewter_city_super_nerd1_did_you_check_out_museum",
-          "interactionDialogueID" : "pewter_city_super_nerd1_did_you_check_out_museum",
+          "id" : "pewter_city_super_nerd_1",
+          "interactionDialogueID" : "pewter_city_super_nerd_1",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -21651,8 +25015,8 @@
         {
           "displayName" : "Super Nerd",
           "facing" : "down",
-          "id" : "pewter_city_super_nerd2_do_you_know_what_im_doing",
-          "interactionDialogueID" : "pewter_city_super_nerd2_do_you_know_what_im_doing",
+          "id" : "pewter_city_super_nerd_2",
+          "interactionDialogueID" : "pewter_city_super_nerd_2",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -21676,8 +25040,8 @@
         {
           "displayName" : "Youngster",
           "facing" : "down",
-          "id" : "pewter_city_youngster_youre_a_trainer_follow_me",
-          "interactionDialogueID" : "pewter_city_youngster_youre_a_trainer_follow_me",
+          "id" : "pewter_city_youngster",
+          "interactionDialogueID" : "pewter_city_youngster_follow_me",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -24913,13 +28277,44 @@
       "id" : "PEWTER_GYM",
       "objects" : [
         {
-          "displayName" : "Super Nerd",
+          "displayName" : "Brock",
           "facing" : "down",
-          "id" : "pewter_gym_brock_pre_battle",
+          "id" : "pewter_gym_brock",
           "interactionDialogueID" : "pewter_gym_brock_pre_battle",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM34",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "pewter_gym_brock_post_battle_advice"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM34",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "scriptID" : "pewter_gym_brock_reward"
+            },
+            {
+              "conditions" : [
 
+              ],
+              "scriptID" : "pewter_gym_brock_battle"
+            }
           ],
           "movementBehavior" : {
             "axis" : "none",
@@ -24935,9 +28330,6 @@
             "y" : 1
           },
           "sprite" : "SPRITE_SUPER_NERD",
-          "trainerBattleID" : "opp_brock_1",
-          "trainerClass" : "OPP_BROCK",
-          "trainerNumber" : 1,
           "visibleByDefault" : true
         },
         {
@@ -24975,11 +28367,25 @@
         {
           "displayName" : "Gym Guide",
           "facing" : "down",
-          "id" : "pewter_gym_guide",
-          "interactionDialogueID" : "pewter_gym_guide",
+          "id" : "pewter_gym_gym_guide",
+          "interactionDialogueID" : "pewter_gym_guide_pre_advice",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "pewter_gym_guide_post_battle"
+            },
+            {
+              "conditions" : [
 
+              ],
+              "dialogueID" : "pewter_gym_guide_pre_advice"
+            }
           ],
           "movementBehavior" : {
             "axis" : "none",
@@ -30980,6 +34386,42 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_SUPER_NERD",
+      "imagePath" : "Assets/field/sprites/super_nerd.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_BRUNETTE_GIRL",
       "imagePath" : "Assets/field/sprites/brunette_girl.png"
     },
@@ -31430,6 +34872,42 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_GYM_GUIDE",
+      "imagePath" : "Assets/field/sprites/gym_guide.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LINK_RECEPTIONIST",
       "imagePath" : "Assets/field/sprites/link_receptionist.png"
     },
@@ -31838,6 +35316,14 @@
 
           ],
           "visible" : false
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : true
         },
         {
           "action" : "setFlag",
@@ -32892,6 +36378,673 @@
 
           ],
           "visible" : false
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "pewter_gym_brock_battle",
+      "steps" : [
+        {
+          "action" : "faceObject",
+          "objectID" : "pewter_gym_brock",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pewter_gym_brock_pre_battle",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "opp_brock_1",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "pewter_gym_brock_reward",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pewter_gym_brock_wait_take_this",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_BROCK",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "giveItem",
+          "failureDialogueID" : "pewter_gym_tm34_no_room",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "TM_BIDE",
+          "successDialogueID" : "pewter_gym_received_tm34",
+          "successFlagID" : "EVENT_GOT_TM34"
+        },
+        {
+          "action" : "awardBadge",
+          "badgeID" : "BOULDERBADGE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "pewter_city_youngster",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_4_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_4_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_5_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_5_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_6_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_6_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_4_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_4_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_5_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_5_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_6_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_6_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_exit_upper",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_after_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_exit"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+                  "up",
+                  "right",
+                  "right",
+                  "right",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down"
+                ]
+              }
+            ],
+            "kind" : "fixedPath",
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_exit_lower",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_after_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_exit"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+                  "right",
+                  "right",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down"
+                ]
+              }
+            ],
+            "kind" : "fixedPath",
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
         },
         {
           "action" : "restoreMapMusic",
@@ -41434,6 +45587,80 @@
           28
         ]
       },
+      "id" : "GATE",
+      "imagePath" : "Assets/field/tilesets/gate.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/gate.bst",
+      "collision" : {
+        "doorTileIDs" : [
+
+        ],
+        "ledges" : [
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 54,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 29,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 57
+          }
+        ],
+        "passableTileIDs" : [
+          1,
+          18,
+          20,
+          26,
+          28,
+          55,
+          56,
+          59,
+          60,
+          94
+        ],
+        "tilePairCollisions" : [
+
+        ],
+        "warpTileIDs" : [
+          26,
+          28
+        ]
+      },
       "id" : "MUSEUM",
       "imagePath" : "Assets/field/tilesets/gate.png",
       "sourceTileSize" : 8
@@ -41980,7 +46207,9 @@
         }
       ],
       "playerWinDialogueID" : "pewter_gym_brock_received_boulder_badge",
+      "postBattleScriptID" : "pewter_gym_brock_reward",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BROCK",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/brock.png"
@@ -42004,6 +46233,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42031,6 +46261,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42050,6 +46281,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster4_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42077,6 +46309,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster1_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 4,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42108,6 +46341,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 5,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42131,6 +46365,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster5_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 6,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42154,6 +46389,7 @@
       ],
       "playerWinDialogueID" : "pewter_gym_cooltrainer_m_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_JR_TRAINER_M",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/jr.trainerm.png"
@@ -42177,6 +46413,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f1_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42200,6 +46437,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42219,6 +46457,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42239,6 +46478,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42259,6 +46499,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42279,6 +46520,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42302,6 +46544,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_YOUNGSTER",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/youngster.png"
@@ -42321,9 +46564,160 @@
       ],
       "playerWinDialogueID" : "route3_youngster4_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_YOUNGSTER",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/youngster.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_4_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "SQUIRTLE"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 4,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_4_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "SQUIRTLE"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 4,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_5_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "BULBASAUR"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 5,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_5_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "BULBASAUR"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 5,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_6_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "CHARMANDER"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 6,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_6_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "CHARMANDER"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 6,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
     }
   ],
   "typeEffectiveness" : [
@@ -42784,6 +47178,92 @@
         }
       ],
       "mapID" : "ROUTE_1",
+      "waterEncounterRate" : 0,
+      "waterSlots" : [
+
+      ]
+    },
+    {
+      "grassEncounterRate" : 25,
+      "grassSlots" : [
+        {
+          "level" : 3,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 5,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 5,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_M"
+        }
+      ],
+      "mapID" : "ROUTE_22",
       "waterEncounterRate" : 0,
       "waterSlots" : [
 

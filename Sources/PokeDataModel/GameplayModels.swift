@@ -627,12 +627,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
     public let stringValue: String?
     public let secondaryStringValue: String?
     public let intValue: Int?
+    public let badgeID: String?
     public let point: TilePoint?
     public let path: [FacingDirection]
     public let movement: ScriptMovementManifest?
     public let flagID: String?
     public let objectID: String?
     public let dialogueID: String?
+    public let successDialogueID: String?
+    public let failureDialogueID: String?
+    public let successFlagID: String?
     public let fieldInteractionID: String?
     public let battleID: String?
     public let trainerClass: String?
@@ -644,12 +648,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         stringValue: String? = nil,
         secondaryStringValue: String? = nil,
         intValue: Int? = nil,
+        badgeID: String? = nil,
         point: TilePoint? = nil,
         path: [FacingDirection] = [],
         movement: ScriptMovementManifest? = nil,
         flagID: String? = nil,
         objectID: String? = nil,
         dialogueID: String? = nil,
+        successDialogueID: String? = nil,
+        failureDialogueID: String? = nil,
+        successFlagID: String? = nil,
         fieldInteractionID: String? = nil,
         battleID: String? = nil,
         trainerClass: String? = nil,
@@ -660,12 +668,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         self.stringValue = stringValue
         self.secondaryStringValue = secondaryStringValue
         self.intValue = intValue
+        self.badgeID = badgeID
         self.point = point
         self.path = path
         self.movement = movement
         self.flagID = flagID
         self.objectID = objectID
         self.dialogueID = dialogueID
+        self.successDialogueID = successDialogueID
+        self.failureDialogueID = failureDialogueID
+        self.successFlagID = successFlagID
         self.fieldInteractionID = fieldInteractionID
         self.battleID = battleID
         self.trainerClass = trainerClass
@@ -1369,6 +1381,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
     public let preventsBlackoutOnLoss: Bool
     public let completionFlagID: String
     public let postBattleScriptID: String?
+    public let runsPostBattleScriptOnLoss: Bool
 
     public init(
         id: String,
@@ -1384,7 +1397,8 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         healsPartyAfterBattle: Bool,
         preventsBlackoutOnLoss: Bool,
         completionFlagID: String,
-        postBattleScriptID: String? = nil
+        postBattleScriptID: String? = nil,
+        runsPostBattleScriptOnLoss: Bool = false
     ) {
         self.id = id
         self.trainerClass = trainerClass
@@ -1400,6 +1414,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         self.preventsBlackoutOnLoss = preventsBlackoutOnLoss
         self.completionFlagID = completionFlagID
         self.postBattleScriptID = postBattleScriptID
+        self.runsPostBattleScriptOnLoss = runsPostBattleScriptOnLoss
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -1417,6 +1432,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         case preventsBlackoutOnLoss
         case completionFlagID
         case postBattleScriptID
+        case runsPostBattleScriptOnLoss
     }
 
     public init(from decoder: Decoder) throws {
@@ -1435,6 +1451,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         preventsBlackoutOnLoss = try container.decode(Bool.self, forKey: .preventsBlackoutOnLoss)
         completionFlagID = try container.decode(String.self, forKey: .completionFlagID)
         postBattleScriptID = try container.decodeIfPresent(String.self, forKey: .postBattleScriptID)
+        runsPostBattleScriptOnLoss = try container.decodeIfPresent(Bool.self, forKey: .runsPostBattleScriptOnLoss) ?? false
     }
 }
 

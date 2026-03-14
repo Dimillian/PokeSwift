@@ -11,6 +11,8 @@ final class GameplayExtractionTests: XCTestCase {
             "PALLET_TOWN",
             "ROUTE_1",
             "VIRIDIAN_CITY",
+            "ROUTE_22",
+            "ROUTE_22_GATE",
             "ROUTE_2",
             "VIRIDIAN_SCHOOL_HOUSE",
             "VIRIDIAN_NICKNAME_HOUSE",
@@ -36,7 +38,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
         XCTAssertEqual(
             manifest.tilesets.map(\.id),
-            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "GYM", "FOREST", "FOREST_GATE", "MUSEUM", "HOUSE", "MART", "POKECENTER"]
+            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "GYM", "FOREST", "FOREST_GATE", "GATE", "MUSEUM", "HOUSE", "MART", "POKECENTER"]
         )
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.imagePath, "Assets/field/tilesets/house.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
@@ -53,6 +55,7 @@ final class GameplayExtractionTests: XCTestCase {
             "SPRITE_YOUNGSTER",
             "SPRITE_GAMBLER",
             "SPRITE_GAMBLER_ASLEEP",
+            "SPRITE_SUPER_NERD",
             "SPRITE_BRUNETTE_GIRL",
             "SPRITE_COOLTRAINER_F",
             "SPRITE_BALDING_GUY",
@@ -63,6 +66,7 @@ final class GameplayExtractionTests: XCTestCase {
             "SPRITE_COOLTRAINER_M",
             "SPRITE_NURSE",
             "SPRITE_GENTLEMAN",
+            "SPRITE_GYM_GUIDE",
             "SPRITE_LINK_RECEPTIONIST",
             "SPRITE_POKE_BALL",
             "SPRITE_POKEDEX",
@@ -134,6 +138,8 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
                 "EVENT_BEAT_BROCK",
                 "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
+                "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+                "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
                 "EVENT_BEAT_ROUTE_3_TRAINER_0",
                 "EVENT_BEAT_ROUTE_3_TRAINER_1",
                 "EVENT_BEAT_ROUTE_3_TRAINER_2",
@@ -151,6 +157,7 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_GOT_POKEDEX",
                 "EVENT_GOT_POTION_SAMPLE",
                 "EVENT_GOT_STARTER",
+                "EVENT_GOT_TM34",
                 "EVENT_OAK_APPEARED_IN_PALLET",
                 "EVENT_OAK_ASKED_TO_CHOOSE_MON",
                 "EVENT_OAK_GOT_PARCEL",
@@ -178,6 +185,16 @@ final class GameplayExtractionTests: XCTestCase {
             "oaks_lab_rival_challenge_vs_bulbasaur",
             "oaks_lab_rival_challenge_vs_charmander",
             "oaks_lab_rival_exit_after_battle",
+            "pewter_gym_brock_battle",
+            "pewter_gym_brock_reward",
+            "route_22_rival_1_challenge_4_upper",
+            "route_22_rival_1_challenge_5_upper",
+            "route_22_rival_1_challenge_6_upper",
+            "route_22_rival_1_challenge_4_lower",
+            "route_22_rival_1_challenge_5_lower",
+            "route_22_rival_1_challenge_6_lower",
+            "route_22_rival_1_exit_upper",
+            "route_22_rival_1_exit_lower",
             "pewter_pokecenter_nurse_heal",
         ])
         XCTAssertEqual(
@@ -345,7 +362,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "SURF" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "THUNDERBOLT" })
-        XCTAssertEqual(manifest.items.count, 97)
+        XCTAssertEqual(manifest.items.count, 99)
         XCTAssertFalse(manifest.items.contains { $0.id.contains("\\") })
         XCTAssertEqual(manifest.items.first?.id, "MASTER_BALL")
         XCTAssertEqual(manifest.items.first?.displayName, "MASTER BALL")
@@ -361,8 +378,12 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(oaksParcel.displayName, "OAK's PARCEL")
         XCTAssertEqual(oaksParcel.isKeyItem, true)
         XCTAssertEqual(oaksParcel.price, 0)
-        XCTAssertEqual(manifest.items.last?.id, "FLOOR_B4F")
-        XCTAssertEqual(manifest.items.last?.displayName, "B4F")
+        let tmBide = try XCTUnwrap(manifest.items.first { $0.id == "TM_BIDE" })
+        XCTAssertEqual(tmBide.displayName, "TM34")
+        XCTAssertFalse(tmBide.isKeyItem)
+        XCTAssertEqual(tmBide.price, 2000)
+        XCTAssertEqual(manifest.items.last?.id, "TM_DREAM_EATER")
+        XCTAssertEqual(manifest.items.last?.displayName, "TM42")
         XCTAssertEqual(charmander.catchRate, 45)
         XCTAssertEqual(pidgey.catchRate, 255)
         XCTAssertFalse(manifest.typeEffectiveness.isEmpty)
@@ -393,6 +414,12 @@ final class GameplayExtractionTests: XCTestCase {
                 "opp_rival1_3",
                 "opp_youngster_1",
                 "opp_youngster_2",
+                "route_22_rival_1_4_lower",
+                "route_22_rival_1_4_upper",
+                "route_22_rival_1_5_lower",
+                "route_22_rival_1_5_upper",
+                "route_22_rival_1_6_lower",
+                "route_22_rival_1_6_upper",
             ]
         )
         XCTAssertEqual(
@@ -413,12 +440,22 @@ final class GameplayExtractionTests: XCTestCase {
             "Assets/battle/trainers/rival1.png"
         )
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.baseRewardMoney, 35)
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rival1_1" }?.runsPostBattleScriptOnLoss, true)
         XCTAssertEqual(
             manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.party,
             [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)]
         )
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.completionFlagID, "EVENT_BEAT_BROCK")
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.postBattleScriptID, "pewter_gym_brock_reward")
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "route_22_rival_1_4_upper" }?.party,
+            [.init(speciesID: "PIDGEY", level: 9), .init(speciesID: "SQUIRTLE", level: 8)]
+        )
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "route_22_rival_1_4_upper" }?.postBattleScriptID,
+            "route_22_rival_1_exit_upper"
+        )
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_jr_trainer_m_1" }?.trainerSpritePath, "Assets/battle/trainers/jr.trainerm.png")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_lass_1" }?.trainerSpritePath, "Assets/battle/trainers/lass.png")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_youngster_1" }?.trainerSpritePath, "Assets/battle/trainers/youngster.png")
@@ -449,6 +486,58 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(route1.defaultMusicID, "MUSIC_ROUTES1")
         XCTAssertEqual(route1.connections.map(\.targetMapID), ["VIRIDIAN_CITY", "PALLET_TOWN"])
         XCTAssertEqual(route1.objects.map(\.id), ["route_1_youngster_1", "route_1_youngster_2"])
+
+        let route22 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_22" })
+        let route22Rival1 = try XCTUnwrap(route22.objects.first { $0.id == "route_22_rival_1" })
+        let route22Rival2 = try XCTUnwrap(route22.objects.first { $0.id == "route_22_rival_2" })
+        XCTAssertEqual(route22.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(route22.connections.map(\.targetMapID), ["ROUTE_23", "VIRIDIAN_CITY"])
+        XCTAssertEqual(route22.objects.map(\.id), ["route_22_rival_1", "route_22_rival_2"])
+        XCTAssertEqual(route22.objects.first?.visibleByDefault, false)
+        XCTAssertNil(route22Rival1.trainerBattleID)
+        XCTAssertEqual(route22Rival1.interactionDialogueID, "route_22_rival_before_battle_1")
+        XCTAssertEqual(
+            route22Rival1.interactionTriggers,
+            [.init(conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE")], dialogueID: "route_22_rival_after_battle_1")]
+        )
+        XCTAssertEqual(route22Rival2.interactionDialogueID, "route_22_rival_before_battle_2")
+        XCTAssertEqual(
+            route22Rival2.interactionTriggers,
+            [.init(conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE")], dialogueID: "route_22_rival_after_battle_2")]
+        )
+        XCTAssertEqual(route22.backgroundEvents.map(\.dialogueID), ["route_22_pokemon_league_sign"])
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "ROUTE_22" }?.triggers.map(\.scriptID),
+            [
+                "route_22_rival_1_challenge_4_upper",
+                "route_22_rival_1_challenge_5_upper",
+                "route_22_rival_1_challenge_6_upper",
+                "route_22_rival_1_challenge_4_lower",
+                "route_22_rival_1_challenge_5_lower",
+                "route_22_rival_1_challenge_6_lower",
+            ]
+        )
+
+        let route22UpperChallenge = try XCTUnwrap(manifest.scripts.first { $0.id == "route_22_rival_1_challenge_4_upper" })
+        XCTAssertEqual(route22UpperChallenge.steps.filter { $0.action == "faceObject" }.compactMap(\.stringValue), ["right"])
+        XCTAssertEqual(route22UpperChallenge.steps.filter { $0.action == "facePlayer" }.compactMap(\.stringValue), ["left"])
+
+        let route22LowerChallenge = try XCTUnwrap(manifest.scripts.first { $0.id == "route_22_rival_1_challenge_4_lower" })
+        XCTAssertEqual(route22LowerChallenge.steps.filter { $0.action == "faceObject" }.compactMap(\.stringValue), ["up"])
+        XCTAssertEqual(route22LowerChallenge.steps.filter { $0.action == "facePlayer" }.compactMap(\.stringValue), ["down"])
+
+        let route22Gate = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_22_GATE" })
+        let route22GateGuard = try XCTUnwrap(route22Gate.objects.first { $0.id == "route_22_gate_guard" })
+        XCTAssertEqual(route22Gate.defaultMusicID, "MUSIC_DUNGEON2")
+        XCTAssertEqual(route22Gate.objects.map(\.id), ["route_22_gate_guard"])
+        XCTAssertEqual(route22GateGuard.interactionDialogueID, "route_22_gate_guard_no_boulder_badge")
+        XCTAssertEqual(
+            route22GateGuard.interactionTriggers,
+            [.init(conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK")], dialogueID: "route_22_gate_guard_go_right_ahead")]
+        )
+        XCTAssertEqual(route22Gate.warps.map(\.targetMapID), ["ROUTE_22", "ROUTE_22", "ROUTE_23", "ROUTE_23"])
+        XCTAssertEqual(route22Gate.warps[0].targetPosition, .init(x: 8, y: 5))
+        XCTAssertEqual(route22Gate.warps[1].targetPosition, .init(x: 8, y: 5))
 
         let route2 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_2" })
         XCTAssertEqual(route2.defaultMusicID, "MUSIC_ROUTES1")
@@ -622,7 +711,27 @@ final class GameplayExtractionTests: XCTestCase {
 
         let pewterGym = try XCTUnwrap(manifest.maps.first { $0.id == "PEWTER_GYM" })
         XCTAssertEqual(pewterGym.tileset, "GYM")
-        XCTAssertEqual(pewterGym.objects.first { $0.id == "pewter_gym_brock_pre_battle" }?.trainerBattleID, "opp_brock_1")
+        XCTAssertEqual(
+            pewterGym.objects.first { $0.id == "pewter_gym_brock" }?.interactionTriggers,
+            [
+                .init(
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK"),
+                        .init(kind: "flagSet", flagID: "EVENT_GOT_TM34"),
+                    ],
+                    dialogueID: "pewter_gym_brock_post_battle_advice"
+                ),
+                .init(
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK"),
+                        .init(kind: "flagUnset", flagID: "EVENT_GOT_TM34"),
+                    ],
+                    scriptID: "pewter_gym_brock_reward"
+                ),
+                .init(scriptID: "pewter_gym_brock_battle"),
+            ]
+        )
+        XCTAssertNil(pewterGym.objects.first { $0.id == "pewter_gym_brock" }?.trainerBattleID)
         XCTAssertEqual(pewterGym.objects.first { $0.id == "pewter_gym_cooltrainer_m" }?.trainerBattleID, "opp_jr_trainer_m_1")
 
         let route3 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_3" })
@@ -643,6 +752,10 @@ final class GameplayExtractionTests: XCTestCase {
         let route2Encounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "ROUTE_2" })
         XCTAssertEqual(route2Encounters.grassEncounterRate, 25)
         XCTAssertEqual(Set(route2Encounters.grassSlots.map(\.speciesID)), Set(["PIDGEY", "RATTATA", "WEEDLE", "CATERPIE"]))
+
+        let route22Encounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "ROUTE_22" })
+        XCTAssertEqual(route22Encounters.grassEncounterRate, 25)
+        XCTAssertEqual(Set(route22Encounters.grassSlots.map(\.speciesID)), Set(["RATTATA", "NIDORAN_M", "NIDORAN_F", "SPEAROW"]))
 
         let viridianForestEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "VIRIDIAN_FOREST" })
         XCTAssertEqual(viridianForestEncounters.grassEncounterRate, 8)
@@ -669,6 +782,13 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_need_your_pokemon" }?.pages.first?.lines, ["OK. We'll need", "your POKéMON."])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_fighting_fit" }?.pages.first?.lines, ["Thank you!", "Your POKéMON are", "fighting fit!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_farewell" }?.pages.first?.lines, ["We hope to see", "you again!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "route_22_rival_before_battle_1" }?.pages.count, 5)
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pewter_gym_received_tm34" }?.pages.first?.lines, ["<PLAYER> received", "TM34!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "pewter_gym_tm34_no_room" }?.pages.first?.lines, ["You don't have", "room for this!"])
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "pewter_gym_brock_received_boulder_badge" }?.pages[2].lines,
+            ["<PLAYER> received", "the BOULDERBADGE!"]
+        )
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.lines, ["All right!", "{capturedPokemon} was", "caught!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.events, [.init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_dex_added" }?.pages.first?.lines, ["New POKéDEX data", "will be added for", "{capturedPokemon}!"])
@@ -693,6 +813,7 @@ final class GameplayExtractionTests: XCTestCase {
         let eventFlagIDs = Set(manifest.eventFlags.flags.map(\.id))
         let missingCompletionFlags = manifest.trainerBattles
             .map(\.completionFlagID)
+            .filter { $0.isEmpty == false }
             .filter { eventFlagIDs.contains($0) == false }
         XCTAssertEqual(missingCompletionFlags, [])
     }
@@ -714,15 +835,15 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(first, second)
 
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
-        XCTAssertEqual(decoded.maps.count, 23)
-        XCTAssertEqual(decoded.tilesets.count, 11)
-        XCTAssertEqual(decoded.overworldSprites.count, 23)
-        XCTAssertEqual(decoded.items.count, 97)
+        XCTAssertEqual(decoded.maps.count, 25)
+        XCTAssertEqual(decoded.tilesets.count, 12)
+        XCTAssertEqual(decoded.overworldSprites.count, 25)
+        XCTAssertEqual(decoded.items.count, 99)
         XCTAssertEqual(decoded.marts.count, 2)
-        XCTAssertEqual(decoded.wildEncounterTables.count, 4)
+        XCTAssertEqual(decoded.wildEncounterTables.count, 5)
         XCTAssertEqual(decoded.fieldInteractions.count, 2)
-        XCTAssertEqual(decoded.trainerBattles.count, 16)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 27)
+        XCTAssertEqual(decoded.trainerBattles.count, 22)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 30)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })

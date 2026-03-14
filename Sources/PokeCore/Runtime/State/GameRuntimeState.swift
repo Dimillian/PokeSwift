@@ -450,6 +450,7 @@ struct RuntimeBattleState {
     let playerWinDialogueID: String
     let playerLoseDialogueID: String?
     let postBattleScriptID: String?
+    let runsPostBattleScriptOnLoss: Bool
     let canRun: Bool
     let trainerClass: String?
     let sourceTrainerObjectID: String?
@@ -472,6 +473,76 @@ struct RuntimeBattleState {
     var rewardContinuation: RuntimeBattleRewardContinuation?
     var presentation: RuntimeBattlePresentationState
 
+    init(
+        battleID: String,
+        kind: BattleKind,
+        trainerName: String,
+        trainerSpritePath: String?,
+        baseRewardMoney: Int,
+        completionFlagID: String,
+        healsPartyAfterBattle: Bool,
+        preventsBlackoutOnLoss: Bool,
+        playerWinDialogueID: String,
+        playerLoseDialogueID: String?,
+        postBattleScriptID: String?,
+        runsPostBattleScriptOnLoss: Bool = false,
+        canRun: Bool,
+        trainerClass: String?,
+        sourceTrainerObjectID: String?,
+        playerPokemon: RuntimePokemonState,
+        enemyParty: [RuntimePokemonState],
+        enemyActiveIndex: Int,
+        aiLayer2Encouragement: Int,
+        payDayMoney: Int,
+        phase: RuntimeBattlePhase,
+        focusedMoveIndex: Int,
+        focusedBagItemIndex: Int,
+        focusedPartyIndex: Int,
+        partySelectionMode: RuntimeBattlePartySelectionMode,
+        message: String,
+        queuedMessages: [String],
+        pendingAction: RuntimeBattlePendingAction?,
+        lastCaptureResult: RuntimeBattleCaptureResult?,
+        pendingPresentationBatches: [[RuntimeBattlePresentationBeat]],
+        learnMoveState: RuntimeBattleLearnMoveState?,
+        rewardContinuation: RuntimeBattleRewardContinuation?,
+        presentation: RuntimeBattlePresentationState
+    ) {
+        self.battleID = battleID
+        self.kind = kind
+        self.trainerName = trainerName
+        self.trainerSpritePath = trainerSpritePath
+        self.baseRewardMoney = baseRewardMoney
+        self.completionFlagID = completionFlagID
+        self.healsPartyAfterBattle = healsPartyAfterBattle
+        self.preventsBlackoutOnLoss = preventsBlackoutOnLoss
+        self.playerWinDialogueID = playerWinDialogueID
+        self.playerLoseDialogueID = playerLoseDialogueID
+        self.postBattleScriptID = postBattleScriptID
+        self.runsPostBattleScriptOnLoss = runsPostBattleScriptOnLoss
+        self.canRun = canRun
+        self.trainerClass = trainerClass
+        self.sourceTrainerObjectID = sourceTrainerObjectID
+        self.playerPokemon = playerPokemon
+        self.enemyParty = enemyParty
+        self.enemyActiveIndex = enemyActiveIndex
+        self.aiLayer2Encouragement = aiLayer2Encouragement
+        self.payDayMoney = payDayMoney
+        self.phase = phase
+        self.focusedMoveIndex = focusedMoveIndex
+        self.focusedBagItemIndex = focusedBagItemIndex
+        self.focusedPartyIndex = focusedPartyIndex
+        self.partySelectionMode = partySelectionMode
+        self.message = message
+        self.queuedMessages = queuedMessages
+        self.pendingAction = pendingAction
+        self.lastCaptureResult = lastCaptureResult
+        self.pendingPresentationBatches = pendingPresentationBatches
+        self.learnMoveState = learnMoveState
+        self.rewardContinuation = rewardContinuation
+        self.presentation = presentation
+    }
+
     var enemyPokemon: RuntimePokemonState {
         get { enemyParty[enemyActiveIndex] }
         set { enemyParty[enemyActiveIndex] = newValue }
@@ -490,6 +561,7 @@ struct DialogueState {
             won: Bool,
             preventsBlackoutOnLoss: Bool,
             postBattleScriptID: String?,
+            runsPostBattleScriptOnLoss: Bool,
             sourceTrainerObjectID: String?
         )
         case startBattle(battleID: String, sourceTrainerObjectID: String?)

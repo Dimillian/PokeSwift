@@ -78,13 +78,14 @@ extension GameRuntime {
                 defaultName: defaultName,
                 completion: .returnToFieldAfterStarter
             )
-        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, sourceTrainerObjectID):
+        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, runsPostBattleScriptOnLoss, sourceTrainerObjectID):
             scene = .field
             substate = "field"
             completeTrainerBattleDialogue(
                 won: won,
                 preventsBlackoutOnLoss: preventsBlackoutOnLoss,
                 postBattleScriptID: postBattleScriptID,
+                runsPostBattleScriptOnLoss: runsPostBattleScriptOnLoss,
                 sourceTrainerObjectID: sourceTrainerObjectID
             )
         case let .startBattle(battleID, sourceTrainerObjectID):

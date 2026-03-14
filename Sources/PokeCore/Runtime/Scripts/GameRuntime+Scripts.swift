@@ -166,18 +166,10 @@ extension GameRuntime {
                 }
             case "addItem":
                 if let itemID = step.stringValue {
-                    addItem(itemID, quantity: step.intValue ?? 1, to: &gameplayState)
-                    traceEvent(
-                        .inventoryChanged,
-                        "Added \(step.intValue ?? 1)x \(itemID).",
-                        mapID: gameplayState.mapID,
-                        scriptID: gameplayState.activeScriptID,
-                        details: [
-                            "itemID": itemID,
-                            "quantity": String(step.intValue ?? 1),
-                            "operation": "add",
-                        ]
-                    )
+                    let quantity = step.intValue ?? 1
+                    if addItem(itemID, quantity: quantity, to: &gameplayState) {
+                        traceScriptInventoryAddition(itemID: itemID, quantity: quantity, gameplayState: gameplayState)
+                    }
                 }
             case "removeItem":
                 if let itemID = step.stringValue {
@@ -195,6 +187,28 @@ extension GameRuntime {
                             ]
                         )
                     }
+                }
+            case "giveItem":
+                if let itemID = step.stringValue {
+                    let quantity = step.intValue ?? 1
+                    let added = addItem(itemID, quantity: quantity, to: &gameplayState)
+                    if added {
+                        if let flagID = step.successFlagID {
+                            gameplayState.activeFlags.insert(flagID)
+                        }
+                        traceScriptInventoryAddition(itemID: itemID, quantity: quantity, gameplayState: gameplayState)
+                    }
+                    self.gameplayState = gameplayState
+                    let dialogueID = added ? step.successDialogueID : step.failureDialogueID
+                    if let dialogueID {
+                        showDialogue(id: dialogueID, completion: .continueScript)
+                        return true
+                    }
+                    return false
+                }
+            case "awardBadge":
+                if let badgeID = step.badgeID ?? step.stringValue {
+                    gameplayState.earnedBadgeIDs.insert(Self.normalizedBadgeID(badgeID))
                 }
             case "setObjectVisibility":
                 if let objectID = step.objectID, let visible = step.visible {
@@ -312,5 +326,23 @@ extension GameRuntime {
 
     private func facingDirection(for rawValue: String) -> FacingDirection {
         FacingDirection(rawValue: rawValue) ?? .down
+    }
+
+    private func traceScriptInventoryAddition(
+        itemID: String,
+        quantity: Int,
+        gameplayState: GameplayState
+    ) {
+        traceEvent(
+            .inventoryChanged,
+            "Added \(quantity)x \(itemID).",
+            mapID: gameplayState.mapID,
+            scriptID: gameplayState.activeScriptID,
+            details: [
+                "itemID": itemID,
+                "quantity": String(quantity),
+                "operation": "add",
+            ]
+        )
     }
 }

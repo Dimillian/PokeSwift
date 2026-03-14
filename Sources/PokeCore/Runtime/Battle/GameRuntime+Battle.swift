@@ -60,6 +60,7 @@ extension GameRuntime {
                     won: won,
                     preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
                     postBattleScriptID: battle.postBattleScriptID,
+                    runsPostBattleScriptOnLoss: battle.runsPostBattleScriptOnLoss,
                     sourceTrainerObjectID: battle.sourceTrainerObjectID
                 )
             )
@@ -68,6 +69,7 @@ extension GameRuntime {
                 won: won,
                 preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
                 postBattleScriptID: battle.postBattleScriptID,
+                runsPostBattleScriptOnLoss: battle.runsPostBattleScriptOnLoss,
                 sourceTrainerObjectID: battle.sourceTrainerObjectID
             )
         }
@@ -77,9 +79,10 @@ extension GameRuntime {
         won: Bool,
         preventsBlackoutOnLoss: Bool,
         postBattleScriptID: String?,
+        runsPostBattleScriptOnLoss: Bool = false,
         sourceTrainerObjectID: String?
     ) {
-        if let postBattleScriptID {
+        if let postBattleScriptID, won || runsPostBattleScriptOnLoss {
             beginScript(id: postBattleScriptID)
             return
         }
@@ -259,6 +262,7 @@ extension GameRuntime {
             playerWinDialogueID: battleManifest.playerWinDialogueID,
             playerLoseDialogueID: battleManifest.playerLoseDialogueID,
             postBattleScriptID: battleManifest.postBattleScriptID,
+            runsPostBattleScriptOnLoss: battleManifest.runsPostBattleScriptOnLoss,
             canRun: false,
             trainerClass: battleManifest.trainerClass,
             sourceTrainerObjectID: sourceTrainerObjectID,
@@ -352,6 +356,7 @@ extension GameRuntime {
             playerWinDialogueID: "",
             playerLoseDialogueID: nil,
             postBattleScriptID: nil,
+            runsPostBattleScriptOnLoss: false,
             canRun: true,
             trainerClass: nil,
             sourceTrainerObjectID: nil,
