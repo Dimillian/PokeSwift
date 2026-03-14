@@ -1,4 +1,5 @@
 import XCTest
+import ImageIO
 @testable import PokeContent
 
 final class RepoContentContractTests: XCTestCase {
@@ -9,10 +10,16 @@ final class RepoContentContractTests: XCTestCase {
         let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
         let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
+        let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
+        let sendOutPoofSource = try XCTUnwrap(CGImageSourceCreateWithURL(sendOutPoofURL as CFURL, nil))
+        let sendOutPoofImage = try XCTUnwrap(CGImageSourceCreateImageAtIndex(sendOutPoofSource, 0, nil))
+        XCTAssertEqual(sendOutPoofImage.width, 128)
+        XCTAssertEqual(sendOutPoofImage.height, 40)
         XCTAssertTrue(
             loaded.fieldRenderIssues(
                 map: oaksLab,
@@ -41,12 +48,21 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(
             loaded.audioManifest.mapRoutes,
             [
+                .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
                 .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
+                .init(mapID: "PEWTER_CITY", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "PEWTER_GYM", musicID: "MUSIC_GYM"),
+                .init(mapID: "PEWTER_MART", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "PEWTER_NIDORAN_HOUSE", musicID: "MUSIC_CITIES1"),
+                .init(mapID: "PEWTER_POKECENTER", musicID: "MUSIC_POKECENTER"),
+                .init(mapID: "PEWTER_SPEECH_HOUSE", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
@@ -63,22 +79,41 @@ final class RepoContentContractTests: XCTestCase {
         let root = PokeContentTestSupport.repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
         let loaded = try FileSystemContentLoader(rootURL: root).load()
 
-        let mart = try XCTUnwrap(loaded.mart(id: "viridian_mart"))
+        let viridianMart = try XCTUnwrap(loaded.mart(id: "viridian_mart"))
+        let pewterMart = try XCTUnwrap(loaded.mart(id: "pewter_mart"))
+        let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
         let pokeBall = try XCTUnwrap(loaded.item(id: "POKE_BALL"))
+        let boulderBadge = try XCTUnwrap(loaded.item(id: "BOULDERBADGE"))
+        let floorB2F = try XCTUnwrap(loaded.item(id: "FLOOR_B2F"))
         let pidgey = try XCTUnwrap(loaded.species(id: "PIDGEY"))
         let squirtle = try XCTUnwrap(loaded.species(id: "SQUIRTLE"))
+        let brock = try XCTUnwrap(loaded.trainerBattle(id: "opp_brock_1"))
+        let route3Youngster = try XCTUnwrap(loaded.trainerBattle(id: "opp_youngster_1"))
 
-        XCTAssertEqual(mart.mapID, "VIRIDIAN_MART")
-        XCTAssertEqual(mart.clerkObjectID, "viridian_mart_clerk")
-        XCTAssertEqual(mart.stockItemIDs, ["POKE_BALL", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL"])
-        XCTAssertEqual(loaded.mart(mapID: "VIRIDIAN_MART", clerkObjectID: "viridian_mart_clerk")?.id, mart.id)
+        XCTAssertEqual(viridianMart.mapID, "VIRIDIAN_MART")
+        XCTAssertEqual(viridianMart.clerkObjectID, "viridian_mart_clerk")
+        XCTAssertEqual(viridianMart.stockItemIDs, ["POKE_BALL", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL"])
+        XCTAssertEqual(loaded.mart(mapID: "VIRIDIAN_MART", clerkObjectID: "viridian_mart_clerk")?.id, viridianMart.id)
+        XCTAssertEqual(pewterMart.mapID, "PEWTER_MART")
+        XCTAssertEqual(pewterMart.clerkObjectID, "pewter_mart_clerk")
+        XCTAssertEqual(pewterMart.stockItemIDs, ["POKE_BALL", "POTION", "ESCAPE_ROPE", "ANTIDOTE", "BURN_HEAL", "AWAKENING", "PARLYZ_HEAL"])
+        XCTAssertEqual(Set(oaksLab.objects.map(\.id)).count, oaksLab.objects.count)
+        XCTAssertNotNil(loaded.dialogue(id: "pewter_city_mart_sign"))
+        XCTAssertNotNil(loaded.dialogue(id: "pewter_city_pokecenter_sign"))
+        XCTAssertNil(loaded.dialogue(id: "pewter_city_text_pewtercity_mart_sign"))
+        XCTAssertNil(loaded.dialogue(id: "pewter_city_text_pewtercity_pokecenter_sign"))
         XCTAssertEqual(pokeBall.price, 200)
         XCTAssertEqual(pokeBall.battleUse, .ball)
+        XCTAssertEqual(boulderBadge.isKeyItem, true)
+        XCTAssertEqual(floorB2F.displayName, "B2F")
         XCTAssertEqual(pidgey.catchRate, 255)
         XCTAssertEqual(
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
         )
+        XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
+        XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
+        XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")
     }
 
     func testLoaderReadsRepoGeneratedPokemonCenterInteractionContract() throws {
@@ -86,6 +121,7 @@ final class RepoContentContractTests: XCTestCase {
         let loaded = try FileSystemContentLoader(rootURL: root).load()
 
         let interaction = try XCTUnwrap(loaded.fieldInteraction(id: "pokemon_center_healing"))
+        let pewterInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "pewter_pokecenter_pokemon_center_healing"))
         XCTAssertEqual(interaction.kind, .pokemonCenterHealing)
         XCTAssertEqual(interaction.introDialogueID, "pokemon_center_welcome")
         XCTAssertEqual(interaction.prompt.dialogueID, "pokemon_center_shall_we_heal")
@@ -99,12 +135,22 @@ final class RepoContentContractTests: XCTestCase {
             .init(mapID: "VIRIDIAN_CITY", position: .init(x: 23, y: 26), facing: .down)
         )
         XCTAssertEqual(
+            pewterInteraction.healingSequence?.blackoutCheckpoint,
+            .init(mapID: "PEWTER_CITY", position: .init(x: 13, y: 26), facing: .down)
+        )
+        XCTAssertEqual(loaded.map(id: "PEWTER_GYM")?.defaultMusicID, "MUSIC_GYM")
+        XCTAssertEqual(loaded.map(id: "ROUTE_3")?.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(
             loaded.gameplayManifest.playerStart.defaultBlackoutCheckpoint,
             .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)
         )
         XCTAssertEqual(
             loaded.commonBattleText.playerBlackedOut,
             "{playerName} is out of useable POKéMON! {playerName} blacked out!"
+        )
+        XCTAssertTrue(
+            Set(loaded.gameplayManifest.trainerBattles.map(\.completionFlagID))
+                .isSubset(of: Set(loaded.gameplayManifest.eventFlags.flags.map(\.id)))
         )
     }
 }

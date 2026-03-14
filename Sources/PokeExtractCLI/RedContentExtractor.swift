@@ -3,6 +3,7 @@ import PokeDataModel
 
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
+    private static let sendOutPoofAssetPath = "Assets/battle/effects/send_out_poof.png"
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
@@ -87,6 +88,10 @@ public enum RedContentExtractor {
             let destinationURL = variantRoot.appendingPathComponent(battleAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
+        try copyAsset(
+            from: configuration.repoRoot.appendingPathComponent("gfx/battle/move_anim_0.png"),
+            to: variantRoot.appendingPathComponent(sendOutPoofAssetPath)
+        )
     }
 
     public static func verify(configuration: Configuration) throws {
@@ -139,6 +144,7 @@ public enum RedContentExtractor {
             "Assets/field/blocksets/gate.bst",
             "Assets/field/blocksets/house.bst",
             "Assets/field/blocksets/pokecenter.bst",
+            sendOutPoofAssetPath,
         ]
 
         for relativePath in required {
@@ -161,6 +167,11 @@ public enum RedContentExtractor {
                 throw ExtractorError.missingOutput(url.path)
             }
         }
+
+        let sendOutPoofURL = variantRoot.appendingPathComponent(sendOutPoofAssetPath)
+        guard FileManager.default.fileExists(atPath: sendOutPoofURL.path) else {
+            throw ExtractorError.missingOutput(sendOutPoofURL.path)
+        }
     }
 
     public static func parseCharmap(at url: URL) throws -> CharmapManifest {
@@ -169,7 +180,7 @@ public enum RedContentExtractor {
 
     private static func makeGameManifest(source: SourceTree) -> GameManifest {
         GameManifest(
-            contentVersion: "m3-red-first-slice-v1",
+            contentVersion: "m5-red-coverage-v1",
             variant: .red,
             sourceCommit: source.gitCommit,
             extractorVersion: extractorVersion,

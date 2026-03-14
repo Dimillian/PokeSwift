@@ -109,6 +109,7 @@ enum GameplayScenePropsFactory {
             }
             let playerTrainerFrontSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/red.png")
             let playerTrainerBackSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/trainers/redb.png")
+            let sendOutPoofSpriteURL = runtime.content.rootURL.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
             let promptText = GameplayBattlePrompts.promptText(
                 textLines: battle.textLines,
                 battleMessage: battle.battleMessage,
@@ -127,6 +128,7 @@ enum GameplayScenePropsFactory {
                         trainerSpriteURL: trainerSpriteURL,
                         playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
                         playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,
+                        sendOutPoofSpriteURL: sendOutPoofSpriteURL,
                         playerSpriteURL: playerSpriteURL,
                         enemySpriteURL: enemySpriteURL,
                         bagItems: battle.bagItems,
