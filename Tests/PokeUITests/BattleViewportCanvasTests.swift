@@ -132,6 +132,42 @@ extension PokeUITests {
     )
   }
 
+  func testBattleSendOutStateResolvesToIdleWhenAnimationKeyIsStale() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .enemySendOut,
+        sendOutVisualState: .revealFinal,
+        animationTriggerKey: "enemySendOut-player-2",
+        activeAnimationKey: "enemySendOut-enemy-1"
+      ),
+      .idle
+    )
+  }
+
+  func testBattleSendOutStatePreservesMatchingAnimationKey() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .enemySendOut,
+        sendOutVisualState: .revealStep2,
+        animationTriggerKey: "enemySendOut-player-2",
+        activeAnimationKey: "enemySendOut-player-2"
+      ),
+      .revealStep2
+    )
+  }
+
+  func testBattleSendOutStateResolvesToIdleOutsideSendOutStage() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .commandReady,
+        sendOutVisualState: .revealFinal,
+        animationTriggerKey: "commandReady-player-3",
+        activeAnimationKey: "commandReady-player-3"
+      ),
+      .idle
+    )
+  }
+
   func testBattleSendOutTimelineUsesExpandedEnemyPoofSequence() {
     let enemyPoofStart =
       BattleSendOutAnimationTimeline.tossDuration +

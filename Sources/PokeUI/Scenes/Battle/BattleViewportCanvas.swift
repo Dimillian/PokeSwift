@@ -17,6 +17,7 @@ struct BattleViewportCanvas: View {
     let presentation: BattlePresentationTelemetry
 
     @State private var sendOutVisualState: BattleSendOutVisualState = .idle
+    @State private var activeSendOutAnimationKey: String?
 
     var body: some View {
         GeometryReader { proxy in
@@ -234,7 +235,12 @@ struct BattleViewportCanvas: View {
     }
 
     private var currentSendOutState: BattleSendOutVisualState {
-        presentation.stage == .enemySendOut ? sendOutVisualState : .idle
+        Self.resolvedSendOutState(
+            stage: presentation.stage,
+            sendOutVisualState: sendOutVisualState,
+            animationTriggerKey: sendOutAnimationTriggerKey,
+            activeAnimationKey: activeSendOutAnimationKey
+        )
     }
 
     private var sendOutPoofFrame: BattleSendOutPoofFrame? {
@@ -548,13 +554,27 @@ struct BattleViewportCanvas: View {
         !(stage == .enemySendOut && activeSide == side)
     }
 
+    static func resolvedSendOutState(
+        stage: BattlePresentationStage,
+        sendOutVisualState: BattleSendOutVisualState,
+        animationTriggerKey: String,
+        activeAnimationKey: String?
+    ) -> BattleSendOutVisualState {
+        guard stage == .enemySendOut, activeAnimationKey == animationTriggerKey else {
+            return .idle
+        }
+        return sendOutVisualState
+    }
+
     @MainActor
     private func runSendOutAnimationSequence() async {
         guard presentation.stage == .enemySendOut else {
+            activeSendOutAnimationKey = nil
             sendOutVisualState = .idle
             return
         }
 
+        activeSendOutAnimationKey = sendOutAnimationTriggerKey
         sendOutVisualState = .toss(progress: 0)
 
         withAnimation(.linear(duration: BattleSendOutAnimationTimeline.tossDuration)) {
