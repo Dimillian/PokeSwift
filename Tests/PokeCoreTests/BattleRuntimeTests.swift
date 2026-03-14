@@ -64,7 +64,7 @@ extension PokeCoreTests {
         XCTAssertFalse(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? true)
     }
 
-    func testWildBattleCaptureAddsPokemonToPartyAndEndsBattle() throws {
+    func testWildBattleCaptureShowsDexRevealThenNicknameThenPartyDestination() throws {
         let runtime = try makeRepoRuntime()
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -87,15 +87,28 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         drainBattleUntilComplete(runtime)
 
-        XCTAssertEqual(runtime.scene, .naming)
+        XCTAssertEqual(runtime.scene, .dialogue)
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 0)
         XCTAssertEqual(runtime.gameplayState?.playerParty.count, 2)
         XCTAssertEqual(runtime.gameplayState?.playerParty.last?.speciesID, "PIDGEY")
         XCTAssertTrue(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? false)
+        XCTAssertEqual(runtime.captureAftermathPokedexSelectionID, "PIDGEY")
+        XCTAssertEqual(runtime.currentDialoguePage?.lines, ["New POKéDEX data", "will be added for", "Pidgey!"])
 
         runtime.handle(button: .confirm)
-
         XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.nicknameConfirmation?.defaultName, "Pidgey")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .naming)
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines, ["Pidgey was added", "to your party."])
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.captureAftermathPokedexSelectionID)
     }
 
     func testWildBattleEncounterCountIncrementsOncePerEncounter() throws {
@@ -129,7 +142,7 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts["PIDGEY"], 2)
     }
 
-    func testWildBattleCaptureSendsPokemonToCurrentBoxWhenPartyIsFull() throws {
+    func testWildBattleCaptureShowsDexRevealThenBoxDestinationWhenPartyIsFull() throws {
         let runtime = try makeRepoRuntime()
 
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -155,10 +168,50 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         drainBattleUntilComplete(runtime)
 
-        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.scene, .dialogue)
         XCTAssertEqual(runtime.gameplayState?.playerParty.count, 6)
         XCTAssertEqual(runtime.gameplayState?.boxedPokemon[0].pokemon.count, 1)
         XCTAssertEqual(runtime.gameplayState?.boxedPokemon[0].pokemon.first?.speciesID, "PIDGEY")
+        XCTAssertEqual(runtime.currentDialoguePage?.lines, ["New POKéDEX data", "will be added for", "Pidgey!"])
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines, ["Pidgey was", "transferred to", "someone's PC!"])
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.captureAftermathPokedexSelectionID)
+    }
+
+    func testWildBattleCaptureSkipsDexRevealForAlreadyOwnedSpecies() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+        runtime.gameplayState?.ownedSpeciesIDs.insert("PIDGEY")
+        runtime.gameplayState?.seenSpeciesIDs.insert("PIDGEY")
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([0, 0])
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.nicknameConfirmation?.defaultName, "Pidgey")
+        XCTAssertNil(runtime.currentDialoguePage)
+        XCTAssertNil(runtime.captureAftermathPokedexSelectionID)
     }
 
     func testWildBattleCaptureIsBlockedWhenCurrentBoxIsFull() throws {

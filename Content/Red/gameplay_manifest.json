@@ -45,6 +45,46 @@
       ]
     },
     {
+      "id" : "capture_caught",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_CAUGHT_MON",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "All right!",
+            "{capturedPokemon} was",
+            "caught!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "capture_dex_added",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_DEX_PAGE_ADDED",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "New POKéDEX data",
+            "will be added for",
+            "{capturedPokemon}!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "capture_missed",
       "pages" : [
         {
@@ -69,6 +109,38 @@
           "lines" : [
             "Shoot! It was so",
             "close too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "capture_transferred_bill_pc",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{capturedPokemon} was",
+            "transferred to",
+            "BILL's PC!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "capture_transferred_someone_pc",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{capturedPokemon} was",
+            "transferred to",
+            "someone's PC!"
           ],
           "waitsForPrompt" : true
         }
@@ -1418,9 +1490,7 @@
           ],
           "lines" : [
             "<PLAYER> received",
-            "a",
-            "<NAME>",
-            "!"
+            "a {NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -1707,9 +1777,7 @@
           ],
           "lines" : [
             "<RIVAL> received",
-            "a",
-            "<NAME>",
-            "!"
+            "a {NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -3713,9 +3781,7 @@
           ],
           "lines" : [
             "<PLAYER> got",
-            "",
-            "<NAME>",
-            "!"
+            "{NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -4299,9 +4365,7 @@
           ],
           "lines" : [
             "<PLAYER> got",
-            "",
-            "<NAME>",
-            "!"
+            "{NAME}!"
           ],
           "waitsForPrompt" : true
         }

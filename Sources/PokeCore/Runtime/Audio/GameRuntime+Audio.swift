@@ -184,7 +184,7 @@ extension GameRuntime {
 
     func executeDialoguePageEventsIfNeeded() {
         guard let dialogueState,
-              let dialogue = content.dialogue(id: dialogueState.dialogueID),
+              let dialogue = currentDialogueManifest,
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             isDialogueAudioBlockingInput = false
             return

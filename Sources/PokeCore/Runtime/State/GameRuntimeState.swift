@@ -266,8 +266,7 @@ enum RuntimeBattlePendingAction {
     case finish(won: Bool)
     case performBlackout(sourceTrainerObjectID: String?)
     case escape
-    case captured
-    case capturedNicknamePrompt
+    case captured(RuntimeCaptureAftermathState)
     case enterTrainerAboutToUseDecision(nextIndex: Int)
     case completeTrainerVictory(payout: Int)
     case continueSwitchTurn
@@ -487,11 +486,14 @@ struct DialogueState {
         )
         case startBattle(battleID: String, sourceTrainerObjectID: String?)
         case showDialogue(dialogueID: String, completionAction: CompletionAction)
+        case continueCaptureAftermath(RuntimeCaptureAftermathState)
         case fieldPrompt(interactionID: String, completionAction: CompletionAction)
         case startFieldHealing(interactionID: String, completionAction: CompletionAction)
     }
 
     let dialogueID: String
+    let pages: [DialoguePage]?
+    let replacements: [String: String]
     var pageIndex: Int
     let completionAction: CompletionAction
 }
@@ -559,9 +561,29 @@ struct RuntimeFieldTransitionState: Equatable {
     var phase: RuntimeFieldTransitionPhase
 }
 
+enum RuntimeCaptureAftermathStep {
+    case showDexEntry
+    case promptForNickname
+    case showDestination
+    case finish
+}
+
+struct RuntimeCaptureAftermathState {
+    let battleID: String
+    let speciesID: String
+    let pokemonName: String
+    let defaultName: String
+    let isNewlyOwned: Bool
+    let addedToParty: Bool
+    let destinationDialogueID: String?
+    let destinationFallbackText: String
+    var step: RuntimeCaptureAftermathStep
+}
+
 enum RuntimeNamingCompletionAction {
     case returnToFieldAfterCapture
     case returnToFieldAfterStarter
+    case continueCaptureAftermath(RuntimeCaptureAftermathState)
 }
 
 public struct RuntimeNicknameConfirmationState {

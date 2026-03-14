@@ -63,9 +63,14 @@ extension GameRuntime {
     }
 
     func makeDialogueTelemetry() -> DialogueTelemetry? {
-        guard let dialogueState, let dialogue = content.dialogue(id: dialogueState.dialogueID) else { return nil }
+        guard let dialogueState, let dialogue = currentDialogueManifest else { return nil }
         let page = dialogue.pages[dialogueState.pageIndex]
-        return DialogueTelemetry(dialogueID: dialogue.id, pageIndex: dialogueState.pageIndex, pageCount: dialogue.pages.count, lines: page.lines)
+        return DialogueTelemetry(
+            dialogueID: dialogue.id,
+            pageIndex: dialogueState.pageIndex,
+            pageCount: dialogue.pages.count,
+            lines: resolvedDialogueLines(page.lines, replacements: dialogueState.replacements)
+        )
     }
 
     func makeFieldPromptTelemetry() -> FieldPromptTelemetry? {

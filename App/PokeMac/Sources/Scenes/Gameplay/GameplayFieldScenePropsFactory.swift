@@ -35,7 +35,8 @@ enum GameplayScenePropsFactory {
                 allSpecies: manifestIndex.pokedexSpeciesList,
                 ownedSpeciesIDs: runtime.ownedSpeciesIDs,
                 seenSpeciesIDs: runtime.seenSpeciesIDs,
-                speciesEncounterCounts: runtime.encounterCountsBySpeciesID
+                speciesEncounterCounts: runtime.encounterCountsBySpeciesID,
+                selectedEntryID: runtime.captureAftermathPokedexSelectionID
             )
 
             return GameplaySceneProps(
@@ -71,7 +72,8 @@ enum GameplayScenePropsFactory {
                             isMusicEnabled: runtime.isMusicEnabled,
                             appearanceMode: appearanceMode,
                             gameplayHDREnabled: gameplayHDREnabled
-                        )
+                        ),
+                        preferredExpandedSection: runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex
                     )
                 ),
                 onSidebarAction: { actionID in

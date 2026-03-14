@@ -469,17 +469,20 @@ public struct PokedexSidebarProps: Equatable, Sendable {
     public let ownedCount: Int
     public let seenCount: Int
     public let totalCount: Int
+    public let selectedEntryID: String?
 
     public init(
         entries: [PokedexSidebarEntryProps],
         ownedCount: Int,
         seenCount: Int,
-        totalCount: Int
+        totalCount: Int,
+        selectedEntryID: String? = nil
     ) {
         self.entries = entries
         self.ownedCount = ownedCount
         self.seenCount = seenCount
         self.totalCount = totalCount
+        self.selectedEntryID = selectedEntryID
     }
 }
 
@@ -490,6 +493,7 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
     public let inventory: InventorySidebarProps
     public let save: SaveSidebarProps
     public let options: OptionsSidebarProps
+    public let preferredExpandedSection: GameplaySidebarExpandedSection?
 
     public init(
         profile: TrainerProfileProps,
@@ -497,7 +501,8 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
         party: PartySidebarProps,
         inventory: InventorySidebarProps,
         save: SaveSidebarProps,
-        options: OptionsSidebarProps
+        options: OptionsSidebarProps,
+        preferredExpandedSection: GameplaySidebarExpandedSection? = nil
     ) {
         self.profile = profile
         self.pokedex = pokedex
@@ -505,6 +510,7 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
         self.inventory = inventory
         self.save = save
         self.options = options
+        self.preferredExpandedSection = preferredExpandedSection
     }
 }
 
@@ -813,8 +819,8 @@ public enum GameplaySidebarMode: Equatable, Sendable {
 
     public var defaultExpandedSection: GameplaySidebarExpandedSection {
         switch self {
-        case .fieldLike:
-            return .trainer
+        case let .fieldLike(props):
+            return props.preferredExpandedSection ?? .trainer
         case .battle:
             return .battleCombat
         }
@@ -960,7 +966,8 @@ public enum GameplaySidebarPropsBuilder {
         allSpecies: [PokedexSpeciesData],
         ownedSpeciesIDs: Set<String>,
         seenSpeciesIDs: Set<String>,
-        speciesEncounterCounts: [String: Int] = [:]
+        speciesEncounterCounts: [String: Int] = [:],
+        selectedEntryID: String? = nil
     ) -> PokedexSidebarProps {
         var ownedCount = 0
         var seenCount = 0
@@ -1001,7 +1008,8 @@ public enum GameplaySidebarPropsBuilder {
             entries: entries,
             ownedCount: ownedCount,
             seenCount: seenCount,
-            totalCount: entries.count
+            totalCount: entries.count,
+            selectedEntryID: selectedEntryID
         )
     }
 

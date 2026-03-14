@@ -1920,6 +1920,32 @@ private func buildDialogues(
         try extractDialogue(id: "capture_broke_free", label: "_ItemUseBallText02", from: text6),
         try extractDialogue(id: "capture_almost", label: "_ItemUseBallText03", from: text6),
         try extractDialogue(id: "capture_so_close", label: "_ItemUseBallText04", from: text6),
+        try extractDialogue(
+            id: "capture_caught",
+            label: "_ItemUseBallText05",
+            from: text6,
+            placeholderMap: ["wEnemyMonNick": "capturedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")]
+        ),
+        try extractDialogue(
+            id: "capture_dex_added",
+            label: "_ItemUseBallText06",
+            from: text6,
+            placeholderMap: ["wEnemyMonNick": "capturedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_DEX_PAGE_ADDED")]
+        ),
+        try extractDialogue(
+            id: "capture_transferred_bill_pc",
+            label: "_ItemUseBallText07",
+            from: text6,
+            placeholderMap: ["wBoxMonNicks": "capturedPokemon"]
+        ),
+        try extractDialogue(
+            id: "capture_transferred_someone_pc",
+            label: "_ItemUseBallText08",
+            from: text6,
+            placeholderMap: ["wBoxMonNicks": "capturedPokemon"]
+        ),
         try extractDialogue(id: "viridian_pokecenter_gentleman", label: "_ViridianPokecenterGentlemanText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterGentlemanText"] ?? []),
         try extractDialogue(id: "viridian_pokecenter_cooltrainer", label: "_ViridianPokecenterCooltrainerMText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterCooltrainerMText"] ?? []),
         try extractDialogue(id: "oaks_lab_rival_gramps_isnt_around", label: "_OaksLabRivalGrampsIsntAroundText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalGrampsIsntAroundText"] ?? []),
@@ -2199,15 +2225,53 @@ private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [Dialog
     return eventsByTextLabel
 }
 
-private func extractDialogue(id: String, label: String, from contents: String, extraEvents: [DialogueEvent] = []) throws -> DialogueManifest {
+private func extractDialogue(
+    id: String,
+    label: String,
+    from contents: String,
+    placeholderMap: [String: String] = [:],
+    extraEvents: [DialogueEvent] = []
+) throws -> DialogueManifest {
     guard let range = contents.range(of: "\(label)::") ?? contents.range(of: "\(label):") else {
         throw ExtractorError.invalidArguments("missing dialogue label \(label)")
     }
 
     let tail = contents[range.upperBound...]
     var lines: [String] = []
+    var currentLine = ""
     var events: [DialogueEvent] = []
     var pages: [DialoguePage] = []
+
+    func appendSegment(_ segment: String) {
+        guard segment.isEmpty == false else { return }
+        if currentLine.isEmpty == false,
+           let lastCharacter = currentLine.last,
+           let firstCharacter = segment.first,
+           (lastCharacter.isLetter || lastCharacter.isNumber || lastCharacter == "}" || lastCharacter == "!") &&
+            (firstCharacter.isLetter || firstCharacter.isNumber || firstCharacter == "{") {
+            currentLine += " "
+        }
+        currentLine += segment
+    }
+
+    func flushLineIfNeeded(force: Bool = false) {
+        guard force || currentLine.isEmpty == false else { return }
+        lines.append(currentLine)
+        currentLine = ""
+        if lines.count == 4 {
+            pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
+            lines = []
+            events = []
+        }
+    }
+
+    func flushPageIfNeeded() {
+        flushLineIfNeeded()
+        guard lines.isEmpty == false else { return }
+        pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
+        lines = []
+        events = []
+    }
 
     for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
         let line = rawLine.trimmingCharacters(in: .whitespaces)
@@ -2217,36 +2281,29 @@ private func extractDialogue(id: String, label: String, from contents: String, e
         }
         if line.hasPrefix("text \"") || line.hasPrefix("line \"") || line.hasPrefix("cont \"") || line.hasPrefix("para \"") {
             let value = extractQuotedString(from: line)
-            if line.hasPrefix("para ") && lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
+            if line.hasPrefix("para ") {
+                flushPageIfNeeded()
+            } else if line.hasPrefix("line ") || line.hasPrefix("cont ") {
+                flushLineIfNeeded(force: true)
             }
-            lines.append(value)
-            if lines.count == 4 {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
-            }
-        } else if line.hasPrefix("text_ram") {
-            lines.append("<NAME>")
+            appendSegment(value)
+        } else if line.hasPrefix("text_ram ") {
+            let token = line
+                .replacingOccurrences(of: "text_ram ", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            let placeholder = placeholderMap[token] ?? "NAME"
+            appendSegment("{\(placeholder)}")
         } else if let event = dialogueEvent(for: line) {
             events.append(event)
         } else if line == "done" || line == "prompt" || line == "text_end" {
-            if lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
-            }
+            flushPageIfNeeded()
             if line == "text_end" || line == "done" || line == "prompt" {
                 break
             }
         }
     }
 
-    if lines.isEmpty == false {
-        pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-    }
+    flushPageIfNeeded()
 
     if extraEvents.isEmpty == false, pages.isEmpty == false {
         let lastIndex = pages.index(before: pages.endIndex)

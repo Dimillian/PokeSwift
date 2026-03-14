@@ -834,16 +834,11 @@ extension GameRuntime {
                 break
             }
             finishWildBattleEscape()
-        case .captured:
-            if awardPayDayIfNeeded(battle: &battle, pendingAction: .captured) {
+        case let .captured(aftermath):
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .captured(aftermath)) {
                 break
             }
-            finishWildBattleCapture(battle: battle)
-        case .capturedNicknamePrompt:
-            if awardPayDayIfNeeded(battle: &battle, pendingAction: .capturedNicknamePrompt) {
-                break
-            }
-            beginNicknameConfirmationAfterCapture(battle: battle)
+            beginCaptureAftermath(battle: battle, aftermath: aftermath)
         case let .enterTrainerAboutToUseDecision(nextIndex):
             enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
         case let .completeTrainerVictory(payout):

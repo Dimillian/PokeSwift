@@ -214,6 +214,35 @@ extension PokeUITests {
     XCTAssertEqual(entry.detailFields.last?.value, "3")
   }
 
+  func testPokedexSidebarBuilderCarriesSelectedEntryID() {
+    let props = GameplaySidebarPropsBuilder.makePokedex(
+      allSpecies: [
+        .init(
+          id: "PIDGEY",
+          dexNumber: 16,
+          displayName: "Pidgey",
+          primaryType: "NORMAL",
+          secondaryType: "FLYING",
+          spriteURL: nil,
+          speciesCategory: nil,
+          heightText: nil,
+          weightText: nil,
+          descriptionText: nil,
+          baseHP: 40,
+          baseAttack: 45,
+          baseDefense: 40,
+          baseSpeed: 56,
+          baseSpecial: 35
+        )
+      ],
+      ownedSpeciesIDs: ["PIDGEY"],
+      seenSpeciesIDs: ["PIDGEY"],
+      selectedEntryID: "PIDGEY"
+    )
+
+    XCTAssertEqual(props.selectedEntryID, "PIDGEY")
+  }
+
   func testGameBoyUppercasedLabelPreservesPokemonAccentConvention() {
     XCTAssertEqual(gameBoyUppercasedLabel("Trainer"), "TRAINER")
     XCTAssertEqual(gameBoyUppercasedLabel("Pokédex"), "POKéDEX")
@@ -1288,6 +1317,38 @@ extension PokeUITests {
 
     expansion.activate(.party)
     XCTAssertEqual(expansion.expandedSection, .party)
+  }
+
+  func testFieldSidebarModeUsesPreferredExpandedSectionWhenProvided() {
+    let mode = GameplaySidebarMode.fieldLike(
+      GameplayFieldSidebarProps(
+        profile: .init(
+          trainerName: "RED",
+          locationName: "Pallet Town",
+          portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
+          badges: [],
+          badgeSummaryText: "0/8",
+          moneyText: "¥3,000",
+          statusItems: ["FIELD", "X4 Y6", "DOWN"]
+        ),
+        pokedex: GameplaySidebarPropsBuilder.makePokedex(
+          allSpecies: [],
+          ownedSpeciesIDs: [],
+          seenSpeciesIDs: []
+        ),
+        party: .init(pokemon: [], totalSlots: 6, mode: .passive, promptText: nil),
+        inventory: GameplaySidebarPropsBuilder.makeInventory(),
+        save: GameplaySidebarPropsBuilder.makeSaveSection(),
+        options: GameplaySidebarPropsBuilder.makeOptionsSection(
+          isMusicEnabled: true,
+          appearanceMode: .light,
+          gameplayHDREnabled: true
+        ),
+        preferredExpandedSection: .pokedex
+      )
+    )
+
+    XCTAssertEqual(mode.defaultExpandedSection, .pokedex)
   }
   func testSaveAndOptionsBuildersProduceDisabledRows() {
     let save = GameplaySidebarPropsBuilder.makeSaveSection()

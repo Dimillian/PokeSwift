@@ -198,12 +198,13 @@ extension GameRuntime {
         [playerBlackedOutText()]
     }
 
-    func finishWildBattleCapture(battle: RuntimeBattleState) {
+    func beginCaptureAftermath(battle: RuntimeBattleState, aftermath: RuntimeCaptureAftermathState) {
         cancelBattlePresentation()
         guard var gameplayState else { return }
         gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
+        captureAftermathPokedexSelectionID = nil
         scene = .field
         substate = "field"
         traceEvent(
@@ -218,6 +219,7 @@ extension GameRuntime {
             ]
         )
         requestDefaultMapMusic()
+        continueCaptureAftermath(aftermath)
     }
 
     func startBattle(

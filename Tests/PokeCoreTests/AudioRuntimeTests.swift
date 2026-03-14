@@ -449,6 +449,39 @@ extension PokeCoreTests {
         )
     }
 
+    func testWildCaptureUsesCaughtAndDexAddedSoundEffects() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([0, 0])
+        let confirmCountBeforeThrow = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(
+            audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count,
+            confirmCountBeforeThrow
+        )
+        XCTAssertTrue(audioPlayer.soundEffectRequests.map(\.soundEffectID).contains("SFX_CAUGHT_MON"))
+        XCTAssertTrue(audioPlayer.soundEffectRequests.map(\.soundEffectID).contains("SFX_DEX_PAGE_ADDED"))
+    }
+
     func testRepoGeneratedTrainerEnemySendOutUsesSpeciesCry() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)

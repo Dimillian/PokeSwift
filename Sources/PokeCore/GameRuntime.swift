@@ -42,6 +42,7 @@ public final class GameRuntime {
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
+    public internal(set) var captureAftermathPokedexSelectionID: String?
     public internal(set) var oakIntroState: OakIntroState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
@@ -192,6 +193,9 @@ public final class GameRuntime {
 
     public var currentDialogueManifest: DialogueManifest? {
         guard let dialogueState else { return nil }
+        if let pages = dialogueState.pages {
+            return DialogueManifest(id: dialogueState.dialogueID, pages: pages)
+        }
         return content.dialogue(id: dialogueState.dialogueID)
     }
 
@@ -225,10 +229,7 @@ public final class GameRuntime {
             return nil
         }
         let page = dialogue.pages[dialogueState.pageIndex]
-        let substitutedLines = page.lines.map {
-            $0.replacingOccurrences(of: "<PLAYER>", with: playerName)
-              .replacingOccurrences(of: "<RIVAL>", with: gameplayState?.rivalName ?? "BLUE")
-        }
+        let substitutedLines = resolvedDialogueLines(page.lines, replacements: dialogueState.replacements)
         return DialoguePage(lines: substitutedLines, waitsForPrompt: page.waitsForPrompt, events: page.events)
     }
 

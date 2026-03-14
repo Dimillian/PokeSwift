@@ -669,6 +669,12 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_need_your_pokemon" }?.pages.first?.lines, ["OK. We'll need", "your POKéMON."])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_fighting_fit" }?.pages.first?.lines, ["Thank you!", "Your POKéMON are", "fighting fit!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_farewell" }?.pages.first?.lines, ["We hope to see", "you again!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.lines, ["All right!", "{capturedPokemon} was", "caught!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.events, [.init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_dex_added" }?.pages.first?.lines, ["New POKéDEX data", "will be added for", "{capturedPokemon}!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_dex_added" }?.pages.first?.events, [.init(kind: .soundEffect, soundEffectID: "SFX_DEX_PAGE_ADDED")])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_transferred_bill_pc" }?.pages.first?.lines, ["{capturedPokemon} was", "transferred to", "BILL's PC!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_transferred_someone_pc" }?.pages.first?.lines, ["{capturedPokemon} was", "transferred to", "someone's PC!"])
 
         let extractedDialogueIDs = Set(manifest.dialogues.map(\.id))
         let parcelHandoff = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_parcel_handoff" })

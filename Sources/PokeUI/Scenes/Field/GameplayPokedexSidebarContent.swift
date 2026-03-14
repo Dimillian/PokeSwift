@@ -11,6 +11,7 @@ private enum PokedexSortMode: String, CaseIterable {
 struct PokedexSidebarContent: View {
     let props: PokedexSidebarProps
     @State private var selectedEntryID: String?
+    @State private var lastPropDrivenSelectionID: String?
     @State private var searchText = ""
     @State private var isSearchFocused = false
     @State private var sortMode: PokedexSortMode = .dexNumber
@@ -38,6 +39,10 @@ struct PokedexSidebarContent: View {
                     entriesContent
                 }
             }
+        }
+        .onAppear(perform: syncSelectedEntryFromProps)
+        .onChange(of: props.selectedEntryID) { _, _ in
+            syncSelectedEntryFromProps()
         }
     }
 
@@ -329,6 +334,20 @@ struct PokedexSidebarContent: View {
         withAnimation(.snappy(duration: 0.2)) {
             selectedEntryID = entry.id
         }
+    }
+
+    private func syncSelectedEntryFromProps() {
+        guard let selectedEntryID = props.selectedEntryID else {
+            if let lastPropDrivenSelectionID,
+               self.selectedEntryID == lastPropDrivenSelectionID {
+                self.selectedEntryID = nil
+            }
+            self.lastPropDrivenSelectionID = nil
+            return
+        }
+        guard props.entries.contains(where: { $0.id == selectedEntryID && $0.isOwned }) else { return }
+        self.selectedEntryID = selectedEntryID
+        lastPropDrivenSelectionID = selectedEntryID
     }
 
     private var searchQuery: String {
