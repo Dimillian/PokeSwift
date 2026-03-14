@@ -80,7 +80,8 @@ struct BattleViewportCanvas: View {
                     PixelAssetView(
                         url: enemySpriteURL,
                         label: enemyPokemon.displayName,
-                        whiteIsTransparent: true
+                        whiteIsTransparent: true,
+                        renderMode: .battlePokemonFront
                     )
                     .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
                     .scaleEffect(
@@ -120,7 +121,8 @@ struct BattleViewportCanvas: View {
                     PixelAssetView(
                         url: playerSpriteURL,
                         label: playerPokemon.displayName,
-                        whiteIsTransparent: true
+                        whiteIsTransparent: true,
+                        renderMode: .battlePokemonBack
                     )
                     .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
                     .scaleEffect(
@@ -826,6 +828,10 @@ private extension Int {
 
 struct BattleViewportLayout {
     let size: CGSize
+    private let pokemonSpriteScaleFactor: CGFloat = 0.3
+    private let playerPokemonFloorRatio: CGFloat = 0.79
+    private let playerTrainerFloorRatio: CGFloat = 0.85
+    private let playerFloorClearance: CGFloat = 2
 
     var enemyCardSize: CGSize {
         CGSize(width: size.width * 0.38, height: size.height * 0.105)
@@ -860,17 +866,17 @@ struct BattleViewportLayout {
 
     var playerTrainerCenter: CGPoint {
         CGPoint(
-            x: playerSpriteCenter.x,
-            y: playerSpriteCenter.y + (playerSpriteSize.height - playerTrainerSize.height) * 0.5
+            x: size.width * 0.25,
+            y: (size.height * playerTrainerFloorRatio) - playerFloorClearance - (playerTrainerSize.height * 0.5)
         )
     }
 
     var enemySpriteSize: CGSize {
-        CGSize(width: size.width * 0.3, height: size.height * 0.3)
+        CGSize(width: size.width * pokemonSpriteScaleFactor, height: size.height * pokemonSpriteScaleFactor)
     }
 
     var playerSpriteSize: CGSize {
-        CGSize(width: size.width * 0.28, height: size.height * 0.28)
+        CGSize(width: size.width * pokemonSpriteScaleFactor, height: size.height * pokemonSpriteScaleFactor)
     }
 
     var sendOutPoofSize: CGSize {
@@ -882,7 +888,10 @@ struct BattleViewportLayout {
     }
 
     var playerSpriteCenter: CGPoint {
-        CGPoint(x: size.width * 0.25, y: size.height * 0.69)
+        CGPoint(
+            x: size.width * 0.25,
+            y: (size.height * playerPokemonFloorRatio) - playerFloorClearance - (playerSpriteSize.height * 0.5)
+        )
     }
 
     var enemyTrainerPokeballOrigin: CGPoint {

@@ -191,4 +191,11 @@ extension PokeUITests {
     XCTAssertLessThan(layout.enemyTrainerPokeballOrigin.x, layout.enemySendOutAnchor.x)
     XCTAssertGreaterThan(layout.playerTrainerPokeballOrigin.x, layout.playerSendOutAnchor.x)
   }
+
+  func testBattleViewportLayoutUsesMatchingPokemonSpriteSlots() {
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+
+    XCTAssertEqual(layout.enemySpriteSize, layout.playerSpriteSize)
+    XCTAssertGreaterThan(layout.playerTrainerCenter.y, layout.playerSpriteCenter.y)
+  }
 }

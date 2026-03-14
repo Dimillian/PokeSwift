@@ -5,13 +5,20 @@ public struct PixelAssetView: View {
     private let url: URL
     private let label: String
     private let whiteIsTransparent: Bool
+    private let renderMode: PixelAssetRenderMode
     @State private var renderedImage: CGImage?
     @State private var didAttemptLoad = false
 
-    public init(url: URL, label: String, whiteIsTransparent: Bool = false) {
+    public init(
+        url: URL,
+        label: String,
+        whiteIsTransparent: Bool = false,
+        renderMode: PixelAssetRenderMode = .standard
+    ) {
         self.url = url
         self.label = label
         self.whiteIsTransparent = whiteIsTransparent
+        self.renderMode = renderMode
     }
 
     public var body: some View {
@@ -46,7 +53,8 @@ public struct PixelAssetView: View {
         .task(id: taskID) {
             let image = await PixelAssetImageRepository.shared.image(
                 for: url,
-                whiteIsTransparent: whiteIsTransparent
+                whiteIsTransparent: whiteIsTransparent,
+                renderMode: renderMode
             )
             guard Task.isCancelled == false else { return }
             renderedImage = image
@@ -55,17 +63,14 @@ public struct PixelAssetView: View {
     }
 
     private var taskID: String {
-        "\(url.standardizedFileURL.path)|\(whiteIsTransparent)"
+        "\(url.standardizedFileURL.path)|\(whiteIsTransparent)|\(String(describing: renderMode))"
     }
 
     private var syncProcessedImage: CGImage? {
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            return nil
-        }
-        if whiteIsTransparent {
-            return PixelAssetMasking.applyWhiteTransparencyMask(to: image)
-        }
-        return image
+        PixelAssetImageRepository.loadImage(
+            for: url,
+            whiteIsTransparent: whiteIsTransparent,
+            renderMode: renderMode
+        )
     }
 }
