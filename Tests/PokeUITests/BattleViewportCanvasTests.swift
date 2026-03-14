@@ -81,6 +81,57 @@ extension PokeUITests {
     XCTAssertEqual(BattleSendOutVisualState.revealStep1.ballOpacity, 0)
   }
 
+  func testBattleSendOutRevealUsesCenteredScaleAnchor() {
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        side: .enemy
+      ),
+      .center
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .enemySendOut,
+        activeSide: .player,
+        side: .player
+      ),
+      .center
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .attackImpact,
+        activeSide: .enemy,
+        side: .enemy
+      ),
+      .center
+    )
+  }
+
+  func testBattleSendOutDisablesRevisionDrivenPokemonAnimation() {
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        side: .enemy
+      )
+    )
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .enemySendOut,
+        activeSide: .player,
+        side: .player
+      )
+    )
+    XCTAssertTrue(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .attackImpact,
+        activeSide: .enemy,
+        side: .enemy
+      )
+    )
+  }
+
   func testBattleSendOutTimelineUsesExpandedEnemyPoofSequence() {
     let enemyPoofStart =
       BattleSendOutAnimationTimeline.tossDuration +

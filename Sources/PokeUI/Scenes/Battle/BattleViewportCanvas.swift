@@ -83,11 +83,25 @@ struct BattleViewportCanvas: View {
                         whiteIsTransparent: true
                     )
                     .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
-                    .position(enemySpriteCenter(in: layout))
-                    .scaleEffect(enemySpriteScale, anchor: pokemonScaleAnchor(for: .enemy))
+                    .scaleEffect(
+                        enemySpriteScale,
+                        anchor: Self.pokemonScaleAnchor(
+                            stage: presentation.stage,
+                            activeSide: presentation.activeSide,
+                            side: .enemy
+                        )
+                    )
                     .rotationEffect(enemyPokemonRotation)
                     .opacity(enemyPokemonOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
+                    .position(enemySpriteCenter(in: layout))
+                    .animation(
+                        Self.usesImplicitPokemonRevisionAnimation(
+                            stage: presentation.stage,
+                            activeSide: presentation.activeSide,
+                            side: .enemy
+                        ) ? spriteAnimation : nil,
+                        value: presentation.revision
+                    )
                 }
 
                 if let sendOutPoofSpriteURL, let sendOutPoofFrame {
@@ -109,11 +123,25 @@ struct BattleViewportCanvas: View {
                         whiteIsTransparent: true
                     )
                     .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
-                    .position(playerSpriteCenter(in: layout))
-                    .scaleEffect(playerSpriteScale, anchor: pokemonScaleAnchor(for: .player))
+                    .scaleEffect(
+                        playerSpriteScale,
+                        anchor: Self.pokemonScaleAnchor(
+                            stage: presentation.stage,
+                            activeSide: presentation.activeSide,
+                            side: .player
+                        )
+                    )
                     .rotationEffect(playerPokemonRotation)
                     .opacity(playerPokemonOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
+                    .position(playerSpriteCenter(in: layout))
+                    .animation(
+                        Self.usesImplicitPokemonRevisionAnimation(
+                            stage: presentation.stage,
+                            activeSide: presentation.activeSide,
+                            side: .player
+                        ) ? spriteAnimation : nil,
+                        value: presentation.revision
+                    )
                 }
 
                 if shouldShowPokeball {
@@ -494,11 +522,28 @@ struct BattleViewportCanvas: View {
         return CGPoint(x: x, y: y)
     }
 
-    private func pokemonScaleAnchor(for side: BattlePresentationSide) -> UnitPoint {
-        if presentation.stage == .enemySendOut, presentation.activeSide == side {
-            return .bottom
+    static func pokemonScaleAnchor(
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        side: BattlePresentationSide
+    ) -> UnitPoint {
+        if stage == .enemySendOut, activeSide == side {
+            // Keep the reveal locked to the settled battlefield position so the
+            // sprite only scales up instead of drifting as it appears.
+            return .center
         }
         return .center
+    }
+
+    static func usesImplicitPokemonRevisionAnimation(
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        side: BattlePresentationSide
+    ) -> Bool {
+        // Send-out reveal beats are driven by local sendOutVisualState. Letting
+        // the stage revision animate the whole sprite causes SwiftUI to tween
+        // more than just scale/opacity, which reads as the Pokemon drifting.
+        !(stage == .enemySendOut && activeSide == side)
     }
 
     @MainActor
@@ -523,13 +568,19 @@ struct BattleViewportCanvas: View {
             guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.poofFrameDuration) else { return }
         }
 
-        sendOutVisualState = .revealStep1
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealStep1Duration)) {
+            sendOutVisualState = .revealStep1
+        }
         guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep1Duration) else { return }
 
-        sendOutVisualState = .revealStep2
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealStep2Duration)) {
+            sendOutVisualState = .revealStep2
+        }
         guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep2Duration) else { return }
 
-        sendOutVisualState = .revealFinal
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealFinalDuration)) {
+            sendOutVisualState = .revealFinal
+        }
     }
 
     private func sleepForSendOutStep(_ duration: TimeInterval) async -> Bool {
