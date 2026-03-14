@@ -18,6 +18,7 @@ public final class GameRuntime {
     public var optionsTextSpeed: TextSpeed = .medium
     public var optionsBattleAnimation: BattleAnimation = .on
     public var optionsBattleStyle: BattleStyle = .shift
+    public var dialogueTextFullyRevealed = true
 
     let telemetryPublisher: (any TelemetryPublisher)?
     let audioPlayer: (any RuntimeAudioPlaying)?

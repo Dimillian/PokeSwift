@@ -28,6 +28,8 @@ struct GameplayFieldViewportProps {
     let fieldTransition: FieldTransitionTelemetry?
     let fieldAlert: FieldAlertTelemetry?
     let dialogueLines: [String]?
+    let dialogueInstantReveal: Bool
+    let onDialogueRevealed: (() -> Void)?
     let fieldPrompt: FieldPromptTelemetry?
     let fieldHealing: FieldHealingTelemetry?
     let shop: ShopTelemetry?

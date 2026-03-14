@@ -4,6 +4,8 @@ import PokeDataModel
 public struct DialogueBoxView: View {
     let title: String?
     let lines: [String]
+    var instantReveal: Bool
+    var onFullyRevealed: (() -> Void)?
 
     @Environment(\.pokeTextSpeed) private var textSpeed
     @State private var revealedCharacters = 0
@@ -16,9 +18,16 @@ public struct DialogueBoxView: View {
         revealedCharacters >= totalCharacters
     }
 
-    public init(title: String? = nil, lines: [String]) {
+    public init(
+        title: String? = nil,
+        lines: [String],
+        instantReveal: Bool = false,
+        onFullyRevealed: (() -> Void)? = nil
+    ) {
         self.title = title
         self.lines = lines
+        self.instantReveal = instantReveal
+        self.onFullyRevealed = onFullyRevealed
     }
 
     public var body: some View {
@@ -48,13 +57,27 @@ public struct DialogueBoxView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .task(id: lines) {
             revealedCharacters = 0
-            let delay = textSpeed.characterDelay
             let total = totalCharacters
-            guard total > 0 else { return }
+            guard total > 0 else {
+                onFullyRevealed?()
+                return
+            }
+            let delay = textSpeed.characterDelay
             for i in 1...total {
                 try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 if Task.isCancelled { return }
+                if revealedCharacters >= total { return }
                 revealedCharacters = i
+            }
+            onFullyRevealed?()
+        }
+        .onChange(of: lines) { _, _ in
+            revealedCharacters = 0
+        }
+        .onChange(of: instantReveal) { _, newValue in
+            if newValue, isFullyRevealed == false {
+                revealedCharacters = totalCharacters
+                onFullyRevealed?()
             }
         }
     }

@@ -51,6 +51,8 @@ enum GameplayScenePropsFactory {
                         fieldTransition: fieldState.transition,
                         fieldAlert: fieldState.fieldAlert,
                         dialogueLines: runtime.currentDialoguePage?.lines,
+                        dialogueInstantReveal: runtime.dialogueTextFullyRevealed,
+                        onDialogueRevealed: { [weak runtime] in runtime?.dialogueTextFullyRevealed = true },
                         fieldPrompt: fieldState.fieldPrompt,
                         fieldHealing: fieldState.fieldHealing,
                         shop: fieldState.shop,
