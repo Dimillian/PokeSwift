@@ -53,9 +53,9 @@ extension GameRuntime {
             optionsFocusedRow = (optionsFocusedRow + 1) % rowCount
             substate = "title_options"
         case .left:
-            cycleOptionLeft()
+            cycleOption(delta: -1)
         case .right:
-            cycleOptionRight()
+            cycleOption(delta: 1)
         case .confirm:
             if optionsFocusedRow == 3 {
                 playUIConfirmSound()
@@ -71,48 +71,30 @@ extension GameRuntime {
         }
     }
 
-    private func cycleOptionLeft() {
+    private func cycleOption(delta: Int) {
         switch optionsFocusedRow {
         case 0:
-            let options = TextSpeed.allOptions
-            if let idx = options.firstIndex(of: optionsTextSpeed), idx > 0 {
-                optionsTextSpeed = options[idx - 1]
+            if let next = stepped(among: TextSpeed.allCases, from: optionsTextSpeed, by: delta) {
+                optionsTextSpeed = next
             }
         case 1:
-            let options = BattleAnimation.allOptions
-            if let idx = options.firstIndex(of: optionsBattleAnimation), idx > 0 {
-                optionsBattleAnimation = options[idx - 1]
+            if let next = stepped(among: BattleAnimation.allCases, from: optionsBattleAnimation, by: delta) {
+                optionsBattleAnimation = next
             }
         case 2:
-            let options = BattleStyle.allOptions
-            if let idx = options.firstIndex(of: optionsBattleStyle), idx > 0 {
-                optionsBattleStyle = options[idx - 1]
+            if let next = stepped(among: BattleStyle.allCases, from: optionsBattleStyle, by: delta) {
+                optionsBattleStyle = next
             }
         default:
             break
         }
     }
 
-    private func cycleOptionRight() {
-        switch optionsFocusedRow {
-        case 0:
-            let options = TextSpeed.allOptions
-            if let idx = options.firstIndex(of: optionsTextSpeed), idx < options.count - 1 {
-                optionsTextSpeed = options[idx + 1]
-            }
-        case 1:
-            let options = BattleAnimation.allOptions
-            if let idx = options.firstIndex(of: optionsBattleAnimation), idx < options.count - 1 {
-                optionsBattleAnimation = options[idx + 1]
-            }
-        case 2:
-            let options = BattleStyle.allOptions
-            if let idx = options.firstIndex(of: optionsBattleStyle), idx < options.count - 1 {
-                optionsBattleStyle = options[idx + 1]
-            }
-        default:
-            break
-        }
+    private func stepped<T: Equatable>(among options: [T], from current: T, by delta: Int) -> T? {
+        guard let idx = options.firstIndex(of: current) else { return nil }
+        let next = idx + delta
+        guard options.indices.contains(next) else { return nil }
+        return options[next]
     }
 
     func beginNewGame() {

@@ -160,15 +160,14 @@ struct TitleOptionsScene: View {
 
     private let palette = PokeThemePalette.lightPalette
     private let panelShape = RoundedRectangle(cornerRadius: 14, style: .continuous)
-    private let cursorBlinkTimer = Timer.publish(every: 0.32, on: .main, in: .common).autoconnect()
 
     var body: some View {
         GameBoyScreen {
             VStack(spacing: 0) {
                 OptionsSection(
                     title: "TEXT SPEED",
-                    options: TextSpeed.allOptions.map(\.label),
-                    selectedIndex: TextSpeed.allOptions.firstIndex(of: props.textSpeed) ?? 1,
+                    options: TextSpeed.allCases.map(\.label),
+                    selectedIndex: TextSpeed.allCases.firstIndex(of: props.textSpeed) ?? 1,
                     isFocused: props.focusedRow == 0,
                     cursorVisible: cursorVisible
                 )
@@ -177,8 +176,8 @@ struct TitleOptionsScene: View {
 
                 OptionsSection(
                     title: "BATTLE ANIMATION",
-                    options: BattleAnimation.allOptions.map(\.label),
-                    selectedIndex: BattleAnimation.allOptions.firstIndex(of: props.battleAnimation) ?? 0,
+                    options: BattleAnimation.allCases.map(\.label),
+                    selectedIndex: BattleAnimation.allCases.firstIndex(of: props.battleAnimation) ?? 0,
                     isFocused: props.focusedRow == 1,
                     cursorVisible: cursorVisible
                 )
@@ -187,8 +186,8 @@ struct TitleOptionsScene: View {
 
                 OptionsSection(
                     title: "BATTLE STYLE",
-                    options: BattleStyle.allOptions.map(\.label),
-                    selectedIndex: BattleStyle.allOptions.firstIndex(of: props.battleStyle) ?? 0,
+                    options: BattleStyle.allCases.map(\.label),
+                    selectedIndex: BattleStyle.allCases.firstIndex(of: props.battleStyle) ?? 0,
                     isFocused: props.focusedRow == 2,
                     cursorVisible: cursorVisible
                 )
@@ -208,8 +207,12 @@ struct TitleOptionsScene: View {
             .frame(width: 500)
             .shadow(color: palette.dialogueShadow.color, radius: 12, y: 6)
         }
-        .onReceive(cursorBlinkTimer) { _ in
-            cursorVisible.toggle()
+        .task {
+            while Task.isCancelled == false {
+                try? await Task.sleep(nanoseconds: 320_000_000)
+                if Task.isCancelled { break }
+                cursorVisible.toggle()
+            }
         }
         .onChange(of: props.focusedRow) { _, _ in
             cursorVisible = true

@@ -30,6 +30,8 @@ final class AppPreferences {
         self.runtime = runtime
         runtime?.setMusicEnabled(musicEnabled)
         runtime?.optionsTextSpeed = textSpeed
+        runtime?.optionsBattleAnimation = battleAnimation
+        runtime?.optionsBattleStyle = battleStyle
     }
 
     func cycleAppearanceMode() {
@@ -66,5 +68,22 @@ final class AppPreferences {
         battleStyle = value
         settingsStore.battleStyle = value
         runtime?.optionsBattleStyle = value
+    }
+
+    func cycleTextSpeed() {
+        setTextSpeed(nextOption(after: textSpeed, in: TextSpeed.allCases))
+    }
+
+    func cycleBattleAnimation() {
+        setBattleAnimation(nextOption(after: battleAnimation, in: BattleAnimation.allCases))
+    }
+
+    func cycleBattleStyle() {
+        setBattleStyle(nextOption(after: battleStyle, in: BattleStyle.allCases))
+    }
+
+    private func nextOption<T: Equatable>(after current: T, in options: [T]) -> T {
+        guard let idx = options.firstIndex(of: current) else { return current }
+        return options[(idx + 1) % options.count]
     }
 }

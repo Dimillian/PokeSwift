@@ -113,8 +113,6 @@ public enum TextSpeed: String, CaseIterable, Codable, Sendable {
         case .slow: return 5.0 / 60.0    // 5 frames
         }
     }
-
-    public static let allOptions: [TextSpeed] = [.fast, .medium, .slow]
 }
 
 public enum BattleAnimation: String, CaseIterable, Codable, Sendable {
@@ -124,8 +122,6 @@ public enum BattleAnimation: String, CaseIterable, Codable, Sendable {
     public var label: String {
         rawValue.uppercased()
     }
-
-    public static let allOptions: [BattleAnimation] = [.on, .off]
 }
 
 public enum BattleStyle: String, CaseIterable, Codable, Sendable {
@@ -135,8 +131,6 @@ public enum BattleStyle: String, CaseIterable, Codable, Sendable {
     public var label: String {
         rawValue.uppercased()
     }
-
-    public static let allOptions: [BattleStyle] = [.shift, .set]
 }
 
 public struct LogoBounceStep: Codable, Equatable, Hashable, Sendable {
