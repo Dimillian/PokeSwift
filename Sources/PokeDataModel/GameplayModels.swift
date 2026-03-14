@@ -1005,6 +1005,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let baseSpeed: Int
     public let baseSpecial: Int
     public let startingMoves: [String]
+    public let evolutions: [EvolutionManifest]
     public let levelUpLearnset: [LevelUpMoveManifest]
     public let crySoundEffectID: String?
     public let cryPitch: Int?
@@ -1031,6 +1032,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed: Int,
         baseSpecial: Int,
         startingMoves: [String],
+        evolutions: [EvolutionManifest] = [],
         levelUpLearnset: [LevelUpMoveManifest] = [],
         crySoundEffectID: String? = nil,
         cryPitch: Int? = nil,
@@ -1056,6 +1058,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
         self.startingMoves = startingMoves
+        self.evolutions = evolutions
         self.levelUpLearnset = levelUpLearnset
         self.crySoundEffectID = crySoundEffectID
         self.cryPitch = cryPitch
@@ -1083,6 +1086,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case baseSpeed
         case baseSpecial
         case startingMoves
+        case evolutions
         case levelUpLearnset
         case crySoundEffectID
         case cryPitch
@@ -1111,6 +1115,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed = try container.decode(Int.self, forKey: .baseSpeed)
         baseSpecial = try container.decode(Int.self, forKey: .baseSpecial)
         startingMoves = try container.decode([String].self, forKey: .startingMoves)
+        evolutions = try container.decodeIfPresent([EvolutionManifest].self, forKey: .evolutions) ?? []
         levelUpLearnset = try container.decodeIfPresent([LevelUpMoveManifest].self, forKey: .levelUpLearnset) ?? []
         crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
         cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
@@ -1121,6 +1126,41 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         heightInches = try container.decodeIfPresent(Int.self, forKey: .heightInches)
         weightTenths = try container.decodeIfPresent(Int.self, forKey: .weightTenths)
         pokedexEntryText = try container.decodeIfPresent(String.self, forKey: .pokedexEntryText)
+    }
+}
+
+public enum EvolutionTriggerKind: String, Codable, Equatable, Sendable {
+    case level
+    case item
+    case trade
+}
+
+public struct EvolutionTriggerManifest: Codable, Equatable, Sendable {
+    public let kind: EvolutionTriggerKind
+    public let level: Int?
+    public let itemID: String?
+    public let minimumLevel: Int?
+
+    public init(
+        kind: EvolutionTriggerKind,
+        level: Int? = nil,
+        itemID: String? = nil,
+        minimumLevel: Int? = nil
+    ) {
+        self.kind = kind
+        self.level = level.map { max(1, $0) }
+        self.itemID = itemID
+        self.minimumLevel = minimumLevel.map { max(1, $0) }
+    }
+}
+
+public struct EvolutionManifest: Codable, Equatable, Sendable {
+    public let trigger: EvolutionTriggerManifest
+    public let targetSpeciesID: String
+
+    public init(trigger: EvolutionTriggerManifest, targetSpeciesID: String) {
+        self.trigger = trigger
+        self.targetSpeciesID = targetSpeciesID
     }
 }
 

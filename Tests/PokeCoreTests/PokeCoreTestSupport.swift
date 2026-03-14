@@ -140,6 +140,7 @@ func fixtureAudioManifest() -> AudioManifest {
             .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
             .init(id: "trainer_victory", assetID: "MUSIC_DEFEATED_TRAINER"),
             .init(id: "wild_victory", assetID: "MUSIC_DEFEATED_WILD_MON"),
+            .init(id: "evolution", assetID: "MUSIC_SAFARI_ZONE"),
             .init(
                 id: "mom_heal",
                 assetID: "MUSIC_PKMN_HEALED",
@@ -203,6 +204,12 @@ func fixtureAudioManifest() -> AudioManifest {
                 entries: [.init(id: "default", sourceLabel: "Music_DefeatedWildMon_Ch1", playbackMode: .looping, channels: [])]
             ),
             .init(
+                id: "MUSIC_SAFARI_ZONE",
+                sourceLabel: "Music_SafariZone",
+                sourceFile: "audio/music/safarizone.asm",
+                entries: [.init(id: "default", sourceLabel: "Music_SafariZone_Ch1", playbackMode: .looping, channels: [])]
+            ),
+            .init(
                 id: "MUSIC_PKMN_HEALED",
                 sourceLabel: "Music_PkmnHealed",
                 sourceFile: "audio/music/pkmnhealed.asm",
@@ -244,6 +251,16 @@ func fixtureAudioManifest() -> AudioManifest {
                 id: "SFX_LEVEL_UP",
                 sourceLabel: "SFX_Level_Up",
                 sourceFile: "audio/sfx/level_up.asm",
+                bank: 2,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5, 6, 7],
+                channels: []
+            ),
+            .init(
+                id: "SFX_GET_ITEM_2",
+                sourceLabel: "SFX_Get_Item_2",
+                sourceFile: "audio/sfx/get_item_2.asm",
                 bank: 2,
                 priority: 0,
                 order: 0,

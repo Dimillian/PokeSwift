@@ -172,6 +172,68 @@
       ]
     },
     {
+      "id" : "evolution_evolved",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{pokemon} evolved"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_into",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_2",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "into {evolvedPokemon}!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_is_evolving",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "What? {pokemon}",
+            "is evolving!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_stopped",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Huh? {pokemon}",
+            "stopped evolving!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "museum1_f_gambler",
       "pages" : [
         {
@@ -37085,6 +37147,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 1,
       "displayName" : "Bulbasaur",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "IVYSAUR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -37146,6 +37217,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 2,
       "displayName" : "Ivysaur",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VENUSAUR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 32
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -37208,6 +37288,9 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 3,
       "displayName" : "Venusaur",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -37271,6 +37354,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 4,
       "displayName" : "Charmander",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CHARMELEON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -37327,6 +37419,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 5,
       "displayName" : "Charmeleon",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CHARIZARD",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -37384,6 +37485,9 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 6,
       "displayName" : "Charizard",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -37443,6 +37547,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 7,
       "displayName" : "Squirtle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WARTORTLE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -37499,6 +37612,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 8,
       "displayName" : "Wartortle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BLASTOISE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -37556,6 +37678,9 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 9,
       "displayName" : "Blastoise",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -37614,6 +37739,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 10,
       "displayName" : "Caterpie",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "METAPOD",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 7
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -37647,6 +37781,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 11,
       "displayName" : "Metapod",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BUTTERFREE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 10
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -37679,6 +37822,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 12,
       "displayName" : "Butterfree",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -37739,6 +37885,15 @@
       "crySoundEffectID" : "SFX_CRY_15",
       "dexNumber" : 13,
       "displayName" : "Weedle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KAKUNA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 7
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -37773,6 +37928,15 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 14,
       "displayName" : "Kakuna",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BEEDRILL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 10
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -37806,6 +37970,9 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 15,
       "displayName" : "Beedrill",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -37862,6 +38029,15 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 16,
       "displayName" : "Pidgey",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PIDGEOTTO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 18
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -37918,6 +38094,15 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 17,
       "displayName" : "Pidgeotto",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PIDGEOT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -37975,6 +38160,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 18,
       "displayName" : "Pidgeot",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -38033,6 +38221,15 @@
       "crySoundEffectID" : "SFX_CRY_22",
       "dexNumber" : 19,
       "displayName" : "Rattata",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RATICATE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -38081,6 +38278,9 @@
       "crySoundEffectID" : "SFX_CRY_22",
       "dexNumber" : 20,
       "displayName" : "Raticate",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -38130,6 +38330,15 @@
       "crySoundEffectID" : "SFX_CRY_10",
       "dexNumber" : 21,
       "displayName" : "Spearow",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "FEAROW",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -38183,6 +38392,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 22,
       "displayName" : "Fearow",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -38237,6 +38449,15 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 23,
       "displayName" : "Ekans",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ARBOK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -38289,6 +38510,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 24,
       "displayName" : "Arbok",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 11,
       "heightInches" : 6,
@@ -38342,6 +38566,16 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 25,
       "displayName" : "Pikachu",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RAICHU",
+          "trigger" : {
+            "itemID" : "THUNDER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -38394,6 +38628,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 26,
       "displayName" : "Raichu",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -38428,6 +38665,15 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 27,
       "displayName" : "Sandshrew",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SANDSLASH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -38479,6 +38725,9 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 28,
       "displayName" : "Sandslash",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -38531,6 +38780,15 @@
       "crySoundEffectID" : "SFX_CRY_01",
       "dexNumber" : 29,
       "displayName" : "Nidoran F",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDORINA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -38587,6 +38845,16 @@
       "crySoundEffectID" : "SFX_CRY_01",
       "dexNumber" : 30,
       "displayName" : "Nidorina",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDOQUEEN",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -38644,6 +38912,9 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 31,
       "displayName" : "Nidoqueen",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -38691,6 +38962,15 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 32,
       "displayName" : "Nidoran M",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDORINO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -38747,6 +39027,16 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 33,
       "displayName" : "Nidorino",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDOKING",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -38804,6 +39094,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 34,
       "displayName" : "Nidoking",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -38851,6 +39144,16 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 35,
       "displayName" : "Clefairy",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CLEFABLE",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -38907,6 +39210,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 36,
       "displayName" : "Clefable",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -38942,6 +39248,16 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 37,
       "displayName" : "Vulpix",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NINETALES",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -38994,6 +39310,9 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 38,
       "displayName" : "Ninetales",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -39029,6 +39348,16 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 39,
       "displayName" : "Jigglypuff",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WIGGLYTUFF",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -39088,6 +39417,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 40,
       "displayName" : "Wigglytuff",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -39123,6 +39455,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 41,
       "displayName" : "Zubat",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLBAT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -39175,6 +39516,9 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 42,
       "displayName" : "Golbat",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -39229,6 +39573,15 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 43,
       "displayName" : "Oddish",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GLOOM",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 21
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -39285,6 +39638,16 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 44,
       "displayName" : "Gloom",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VILEPLUME",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -39343,6 +39706,9 @@
       "crySoundEffectID" : "SFX_CRY_23",
       "dexNumber" : 45,
       "displayName" : "Vileplume",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -39390,6 +39756,15 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 46,
       "displayName" : "Paras",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PARASECT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 24
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -39442,6 +39817,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 47,
       "displayName" : "Parasect",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -39496,6 +39874,15 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 48,
       "displayName" : "Venonat",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VENOMOTH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 31
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -39553,6 +39940,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 49,
       "displayName" : "Venomoth",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -39612,6 +40002,15 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 50,
       "displayName" : "Diglett",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DUGTRIO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 26
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 0,
       "heightInches" : 8,
@@ -39663,6 +40062,9 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 51,
       "displayName" : "Dugtrio",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -39716,6 +40118,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 52,
       "displayName" : "Meowth",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PERSIAN",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -39768,6 +40179,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 53,
       "displayName" : "Persian",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -39822,6 +40236,15 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 54,
       "displayName" : "Psyduck",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLDUCK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 33
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -39873,6 +40296,9 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 55,
       "displayName" : "Golduck",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -39926,6 +40352,15 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 56,
       "displayName" : "Mankey",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PRIMEAPE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -39978,6 +40413,9 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 57,
       "displayName" : "Primeape",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -40032,6 +40470,16 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 58,
       "displayName" : "Growlithe",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ARCANINE",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -40084,6 +40532,9 @@
       "crySoundEffectID" : "SFX_CRY_15",
       "dexNumber" : 59,
       "displayName" : "Arcanine",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 3,
@@ -40119,6 +40570,15 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 60,
       "displayName" : "Poliwag",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "POLIWHIRL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -40174,6 +40634,16 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 61,
       "displayName" : "Poliwhirl",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "POLIWRATH",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -40231,6 +40701,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 62,
       "displayName" : "Poliwrath",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -40274,6 +40747,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 63,
       "displayName" : "Abra",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KADABRA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -40306,6 +40788,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 64,
       "displayName" : "Kadabra",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ALAKAZAM",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -40363,6 +40854,9 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 65,
       "displayName" : "Alakazam",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -40420,6 +40914,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 66,
       "displayName" : "Machop",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MACHOKE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -40471,6 +40974,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 67,
       "displayName" : "Machoke",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MACHAMP",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -40524,6 +41036,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 68,
       "displayName" : "Machamp",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -40577,6 +41092,15 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 69,
       "displayName" : "Bellsprout",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WEEPINBELL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 21
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -40638,6 +41162,16 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 70,
       "displayName" : "Weepinbell",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VICTREEBEL",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -40700,6 +41234,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 71,
       "displayName" : "Victreebel",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -40747,6 +41284,15 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 72,
       "displayName" : "Tentacool",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "TENTACRUEL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -40811,6 +41357,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 73,
       "displayName" : "Tentacruel",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -40877,6 +41426,15 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 74,
       "displayName" : "Geodude",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GRAVELER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -40933,6 +41491,15 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 75,
       "displayName" : "Graveler",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLEM",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -40990,6 +41557,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 76,
       "displayName" : "Golem",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -41047,6 +41617,15 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 77,
       "displayName" : "Ponyta",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RAPIDASH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -41102,6 +41681,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 78,
       "displayName" : "Rapidash",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -41160,6 +41742,15 @@
       "crySoundEffectID" : "SFX_CRY_02",
       "dexNumber" : 79,
       "displayName" : "Slowpoke",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SLOWBRO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 37
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -41216,6 +41807,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 80,
       "displayName" : "Slowbro",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -41278,6 +41872,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 81,
       "displayName" : "Magnemite",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MAGNETON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -41333,6 +41936,9 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 82,
       "displayName" : "Magneton",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -41390,6 +41996,9 @@
       "crySoundEffectID" : "SFX_CRY_10",
       "dexNumber" : 83,
       "displayName" : "Farfetch'd",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -41443,6 +42052,15 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 84,
       "displayName" : "Doduo",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DODRIO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 31
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -41499,6 +42117,9 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 85,
       "displayName" : "Dodrio",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -41557,6 +42178,15 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 86,
       "displayName" : "Seel",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DEWGONG",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 34
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -41608,6 +42238,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 87,
       "displayName" : "Dewgong",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -41662,6 +42295,15 @@
       "crySoundEffectID" : "SFX_CRY_05",
       "dexNumber" : 88,
       "displayName" : "Grimer",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MUK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 38
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -41718,6 +42360,9 @@
       "crySoundEffectID" : "SFX_CRY_07",
       "dexNumber" : 89,
       "displayName" : "Muk",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -41775,6 +42420,16 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 90,
       "displayName" : "Shellder",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CLOYSTER",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -41827,6 +42482,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 91,
       "displayName" : "Cloyster",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -41866,6 +42524,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 92,
       "displayName" : "Gastly",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "HAUNTER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -41908,6 +42575,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 93,
       "displayName" : "Haunter",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GENGAR",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -41950,6 +42626,9 @@
       "crySoundEffectID" : "SFX_CRY_07",
       "dexNumber" : 94,
       "displayName" : "Gengar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -41992,6 +42671,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 95,
       "displayName" : "Onix",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 28,
       "heightInches" : 10,
@@ -42045,6 +42727,15 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 96,
       "displayName" : "Drowzee",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "HYPNO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 26
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -42101,6 +42792,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 97,
       "displayName" : "Hypno",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -42159,6 +42853,15 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 98,
       "displayName" : "Krabby",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KINGLER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -42211,6 +42914,9 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 99,
       "displayName" : "Kingler",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -42264,6 +42970,15 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 100,
       "displayName" : "Voltorb",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ELECTRODE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -42316,6 +43031,9 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 101,
       "displayName" : "Electrode",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -42369,6 +43087,16 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 102,
       "displayName" : "Exeggcute",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "EXEGGUTOR",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -42426,6 +43154,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 103,
       "displayName" : "Exeggutor",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -42463,6 +43194,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 104,
       "displayName" : "Cubone",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MAROWAK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -42515,6 +43255,9 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 105,
       "displayName" : "Marowak",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -42569,6 +43312,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 106,
       "displayName" : "Hitmonlee",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -42621,6 +43367,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 107,
       "displayName" : "Hitmonchan",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -42673,6 +43422,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 108,
       "displayName" : "Lickitung",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -42725,6 +43477,15 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 109,
       "displayName" : "Koffing",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WEEZING",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 35
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -42777,6 +43538,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 110,
       "displayName" : "Weezing",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -42830,6 +43594,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 111,
       "displayName" : "Rhyhorn",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RHYDON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 42
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -42886,6 +43659,9 @@
       "crySoundEffectID" : "SFX_CRY_11",
       "dexNumber" : 112,
       "displayName" : "Rhydon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 3,
@@ -42945,6 +43721,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 113,
       "displayName" : "Chansey",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -43001,6 +43780,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 114,
       "displayName" : "Tangela",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -43057,6 +43839,9 @@
       "crySoundEffectID" : "SFX_CRY_03",
       "dexNumber" : 115,
       "displayName" : "Kangaskhan",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 7,
       "heightInches" : 3,
@@ -43109,6 +43894,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 116,
       "displayName" : "Horsea",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SEADRA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 32
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -43160,6 +43954,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 117,
       "displayName" : "Seadra",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -43212,6 +44009,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 118,
       "displayName" : "Goldeen",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SEAKING",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 33
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -43268,6 +44074,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 119,
       "displayName" : "Seaking",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -43325,6 +44134,16 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 120,
       "displayName" : "Staryu",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "STARMIE",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -43384,6 +44203,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 121,
       "displayName" : "Starmie",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -43419,6 +44241,9 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 122,
       "displayName" : "Mr. Mime",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -43471,6 +44296,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 123,
       "displayName" : "Scyther",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -43527,6 +44355,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 124,
       "displayName" : "Jynx",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -43584,6 +44415,9 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 125,
       "displayName" : "Electabuzz",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -43636,6 +44470,9 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 126,
       "displayName" : "Magmar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -43691,6 +44528,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 127,
       "displayName" : "Pinsir",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -43746,6 +44586,9 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 128,
       "displayName" : "Tauros",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -43797,6 +44640,15 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 129,
       "displayName" : "Magikarp",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GYARADOS",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -43832,6 +44684,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 130,
       "displayName" : "Gyarados",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 21,
       "heightInches" : 4,
@@ -43887,6 +44742,9 @@
       "crySoundEffectID" : "SFX_CRY_1B",
       "dexNumber" : 131,
       "displayName" : "Lapras",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 8,
       "heightInches" : 2,
@@ -43944,6 +44802,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 132,
       "displayName" : "Ditto",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -43976,6 +44837,32 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 133,
       "displayName" : "Eevee",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "FLAREON",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        },
+        {
+          "targetSpeciesID" : "JOLTEON",
+          "trigger" : {
+            "itemID" : "THUNDER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        },
+        {
+          "targetSpeciesID" : "VAPOREON",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -44024,6 +44911,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 134,
       "displayName" : "Vaporeon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -44090,6 +44980,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 135,
       "displayName" : "Jolteon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -44156,6 +45049,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 136,
       "displayName" : "Flareon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -44222,6 +45118,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 137,
       "displayName" : "Porygon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -44271,6 +45170,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 138,
       "displayName" : "Omanyte",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "OMASTAR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -44320,6 +45228,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 139,
       "displayName" : "Omastar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -44370,6 +45281,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 140,
       "displayName" : "Kabuto",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KABUTOPS",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -44419,6 +45339,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 141,
       "displayName" : "Kabutops",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -44469,6 +45392,9 @@
       "crySoundEffectID" : "SFX_CRY_23",
       "dexNumber" : 142,
       "displayName" : "Aerodactyl",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -44518,6 +45444,9 @@
       "crySoundEffectID" : "SFX_CRY_05",
       "dexNumber" : 143,
       "displayName" : "Snorlax",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 11,
@@ -44567,6 +45496,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 144,
       "displayName" : "Articuno",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -44612,6 +45544,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 145,
       "displayName" : "Zapdos",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -44657,6 +45592,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 146,
       "displayName" : "Moltres",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -44702,6 +45640,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 147,
       "displayName" : "Dratini",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DRAGONAIR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -44754,6 +45701,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 148,
       "displayName" : "Dragonair",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DRAGONITE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 55
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 13,
       "heightInches" : 1,
@@ -44807,6 +45763,9 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 149,
       "displayName" : "Dragonite",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 7,
       "heightInches" : 3,
@@ -44862,6 +45821,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 150,
       "displayName" : "Mewtwo",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -44916,6 +45878,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 151,
       "displayName" : "Mew",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,

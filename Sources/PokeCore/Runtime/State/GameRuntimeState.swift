@@ -285,11 +285,40 @@ struct RuntimeBattleLearnMoveState {
     let remainingMoveIDs: [String]
 }
 
+struct RuntimePendingEvolutionState {
+    let partyIndex: Int
+    let originalSpeciesID: String
+    let targetSpeciesID: String
+}
+
 enum RuntimeBattleRewardContinuation {
     case aboutToUse(index: Int, previousMoveIndex: Int)
     case sendNextEnemy(index: Int)
     case finishTrainerWin(payout: Int)
     case finishWin
+}
+
+enum RuntimeEvolutionPhase: String {
+    case intro
+    case animating
+    case evolved
+    case into
+}
+
+enum RuntimeEvolutionContinuation {
+    case trainerBattle(battle: RuntimeBattleState, won: Bool)
+    case wildBattle(battle: RuntimeBattleState, won: Bool)
+}
+
+struct RuntimeEvolutionState {
+    let partyIndex: Int
+    let originalPokemon: RuntimePokemonState
+    let evolvedPokemon: RuntimePokemonState
+    var phase: RuntimeEvolutionPhase
+    var animationStep = 0
+    var showsEvolvedSprite = false
+    let continuation: RuntimeEvolutionContinuation
+    let resumeAudioState: RuntimeAudioState?
 }
 
 struct RuntimePokemonBoxState {
@@ -374,6 +403,7 @@ struct RuntimeBattlePresentationBeat {
     var pendingAction: RuntimeBattlePendingAction?
     let learnMoveState: RuntimeBattleLearnMoveState?
     let rewardContinuation: RuntimeBattleRewardContinuation?
+    let pendingEvolution: RuntimePendingEvolutionState?
     let playerPokemon: RuntimePokemonState?
     let enemyPokemon: RuntimePokemonState?
     let enemyParty: [RuntimePokemonState]?
@@ -398,6 +428,7 @@ struct RuntimeBattlePresentationBeat {
         pendingAction: RuntimeBattlePendingAction? = nil,
         learnMoveState: RuntimeBattleLearnMoveState? = nil,
         rewardContinuation: RuntimeBattleRewardContinuation? = nil,
+        pendingEvolution: RuntimePendingEvolutionState? = nil,
         playerPokemon: RuntimePokemonState? = nil,
         enemyPokemon: RuntimePokemonState? = nil,
         enemyParty: [RuntimePokemonState]? = nil,
@@ -421,6 +452,7 @@ struct RuntimeBattlePresentationBeat {
         self.pendingAction = pendingAction
         self.learnMoveState = learnMoveState
         self.rewardContinuation = rewardContinuation
+        self.pendingEvolution = pendingEvolution
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
         self.enemyParty = enemyParty
@@ -471,6 +503,7 @@ struct RuntimeBattleState {
     var pendingPresentationBatches: [[RuntimeBattlePresentationBeat]]
     var learnMoveState: RuntimeBattleLearnMoveState?
     var rewardContinuation: RuntimeBattleRewardContinuation?
+    var pendingEvolution: RuntimePendingEvolutionState?
     var presentation: RuntimeBattlePresentationState
 
     init(
@@ -506,6 +539,7 @@ struct RuntimeBattleState {
         pendingPresentationBatches: [[RuntimeBattlePresentationBeat]],
         learnMoveState: RuntimeBattleLearnMoveState?,
         rewardContinuation: RuntimeBattleRewardContinuation?,
+        pendingEvolution: RuntimePendingEvolutionState? = nil,
         presentation: RuntimeBattlePresentationState
     ) {
         self.battleID = battleID
@@ -540,6 +574,7 @@ struct RuntimeBattleState {
         self.pendingPresentationBatches = pendingPresentationBatches
         self.learnMoveState = learnMoveState
         self.rewardContinuation = rewardContinuation
+        self.pendingEvolution = pendingEvolution
         self.presentation = presentation
     }
 

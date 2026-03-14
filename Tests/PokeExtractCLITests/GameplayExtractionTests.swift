@@ -309,6 +309,15 @@ final class GameplayExtractionTests: XCTestCase {
             ]
         )
         XCTAssertEqual(
+            charmander.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .level, level: 16),
+                    targetSpeciesID: "CHARMELEON"
+                ),
+            ]
+        )
+        XCTAssertEqual(
             charmander.battleSprite,
             .init(
                 frontImagePath: "Assets/battle/pokemon/front/charmander.png",
@@ -323,6 +332,15 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
+        )
+        XCTAssertEqual(
+            squirtle.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .level, level: 16),
+                    targetSpeciesID: "WARTORTLE"
+                ),
+            ]
         )
         let bulbasaur = try XCTUnwrap(manifest.species.first { $0.id == "BULBASAUR" })
         XCTAssertEqual(bulbasaur.primaryType, "GRASS")
@@ -357,6 +375,26 @@ final class GameplayExtractionTests: XCTestCase {
                 frontImagePath: "Assets/battle/pokemon/front/mr.mime.png",
                 backImagePath: "Assets/battle/pokemon/back/mr.mime.png"
             )
+        )
+        let pikachu = try XCTUnwrap(manifest.species.first { $0.id == "PIKACHU" })
+        XCTAssertEqual(
+            pikachu.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .item, itemID: "THUNDER_STONE", minimumLevel: 1),
+                    targetSpeciesID: "RAICHU"
+                ),
+            ]
+        )
+        let kadabra = try XCTUnwrap(manifest.species.first { $0.id == "KADABRA" })
+        XCTAssertEqual(
+            kadabra.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .trade, minimumLevel: 1),
+                    targetSpeciesID: "ALAKAZAM"
+                ),
+            ]
         )
         XCTAssertEqual(manifest.moves.count, 165)
         XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
@@ -782,6 +820,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_need_your_pokemon" }?.pages.first?.lines, ["OK. We'll need", "your POKéMON."])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_fighting_fit" }?.pages.first?.lines, ["Thank you!", "Your POKéMON are", "fighting fit!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pokemon_center_farewell" }?.pages.first?.lines, ["We hope to see", "you again!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "evolution_evolved" }?.pages.first?.lines, ["{pokemon} evolved"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "evolution_into" }?.pages.first?.lines, ["into {evolvedPokemon}!"])
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "evolution_into" }?.pages.first?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+        )
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "evolution_is_evolving" }?.pages.first?.lines, ["What? {pokemon}", "is evolving!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "evolution_stopped" }?.pages.first?.lines, ["Huh? {pokemon}", "stopped evolving!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "route_22_rival_before_battle_1" }?.pages.count, 5)
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pewter_gym_received_tm34" }?.pages.first?.lines, ["<PLAYER> received", "TM34!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "pewter_gym_tm34_no_room" }?.pages.first?.lines, ["You don't have", "room for this!"])

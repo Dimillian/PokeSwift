@@ -301,7 +301,22 @@ extension PokeUITests {
     XCTAssertEqual(GameplaySidebarKind.forScene(.field), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.dialogue), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.starterChoice), .fieldLike)
+    XCTAssertEqual(GameplaySidebarKind.forScene(.evolution), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.battle), .battle)
+  }
+  func testSidebarPropBuilderMapsEvolutionProfileStatus() {
+    let profile = GameplaySidebarPropsBuilder.makeProfile(
+      trainerName: "RED",
+      locationName: "Red's House",
+      scene: .evolution,
+      playerPosition: .init(x: 4, y: 4),
+      facing: .down,
+      portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
+      money: 3000,
+      ownedBadgeIDs: []
+    )
+
+    XCTAssertEqual(profile.statusItems, ["EVOLVE", "X4 Y4", "DOWN"])
   }
   func testBattleSidebarPropsPreservePhaseSpecificState() {
     let moveSelection = BattleSidebarProps(

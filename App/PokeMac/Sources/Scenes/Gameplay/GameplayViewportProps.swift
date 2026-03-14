@@ -15,6 +15,7 @@ struct GameplaySceneProps {
 enum GameplayViewportProps {
     case field(GameplayFieldViewportProps)
     case battle(BattleViewportProps)
+    case evolution(EvolutionViewportProps)
 }
 
 struct GameplayFieldViewportProps {
@@ -54,6 +55,17 @@ struct BattleViewportProps {
     let focusedBagItemIndex: Int
     let presentation: BattlePresentationTelemetry
     let nicknameConfirmation: NicknameConfirmationViewProps?
+}
+
+struct EvolutionViewportProps {
+    let phase: String
+    let animationStep: Int
+    let showsEvolvedSprite: Bool
+    let textLines: [String]
+    let originalDisplayName: String
+    let evolvedDisplayName: String
+    let originalSpriteURL: URL?
+    let evolvedSpriteURL: URL?
 }
 
 struct NamingOverlayProps {

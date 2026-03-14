@@ -45,6 +45,7 @@ private extension GameplayScene {
         ZStack {
             fieldStageLayer
             battleStageLayer
+            evolutionStageLayer
         }
     }
 
@@ -63,6 +64,16 @@ private extension GameplayScene {
         if case let .battle(battleProps) = props.viewport {
             BattleStageView(
                 props: battleProps,
+                fieldDisplayStyle: fieldDisplayStyle
+            )
+        }
+    }
+
+    @ViewBuilder
+    var evolutionStageLayer: some View {
+        if case let .evolution(evolutionProps) = props.viewport {
+            EvolutionStageView(
+                props: evolutionProps,
                 fieldDisplayStyle: fieldDisplayStyle
             )
         }

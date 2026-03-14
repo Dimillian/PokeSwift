@@ -52,6 +52,7 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
         XCTAssertEqual(cueByID["trainer_victory"]?.trackID, "MUSIC_DEFEATED_TRAINER")
         XCTAssertEqual(cueByID["wild_victory"]?.trackID, "MUSIC_DEFEATED_WILD_MON")
+        XCTAssertEqual(cueByID["evolution"]?.trackID, "MUSIC_SAFARI_ZONE")
         XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
         XCTAssertEqual(cueByID["mom_heal"]?.waitForCompletion, true)
         XCTAssertEqual(cueByID["mom_heal"]?.resumeMusicAfterCompletion, true)
@@ -77,6 +78,7 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_TRAINER_BATTLE",
             "MUSIC_DEFEATED_TRAINER",
             "MUSIC_DEFEATED_WILD_MON",
+            "MUSIC_SAFARI_ZONE",
             "MUSIC_PKMN_HEALED",
         ]
         XCTAssertTrue(requiredTrackIDs.isSubset(of: Set(manifest.tracks.map(\.id))))
@@ -263,8 +265,8 @@ final class AudioExtractionTests: XCTestCase {
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
         XCTAssertEqual(decoded.mapRoutes.count, 25)
-        XCTAssertEqual(decoded.cues.count, 12)
-        XCTAssertEqual(decoded.tracks.count, 18)
+        XCTAssertEqual(decoded.cues.count, 13)
+        XCTAssertEqual(decoded.tracks.count, 19)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }

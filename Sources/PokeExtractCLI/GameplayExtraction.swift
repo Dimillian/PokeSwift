@@ -2006,6 +2006,7 @@ private func buildDialogues(
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
     let text1 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_1.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
+    let text3 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_3.asm"))
     let text4 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_4.asm"))
     let text6 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_6.asm"))
     let itemNamesByID = try parseItemNames(repoRoot: repoRoot)
@@ -2073,6 +2074,31 @@ private func buildDialogues(
         try extractDialogue(id: "viridian_forest_north_gate_super_nerd", label: "_ViridianForestNorthGateSuperNerdText", from: viridianForestNorthGate),
         try extractDialogue(id: "viridian_forest_north_gate_gramps", label: "_ViridianForestNorthGateGrampsText", from: viridianForestNorthGate),
         try extractDialogue(id: "pickup_no_room", label: "_NoMoreRoomForItemText", from: text1),
+        try extractDialogue(
+            id: "evolution_evolved",
+            label: "_EvolvedText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
+        try extractDialogue(
+            id: "evolution_into",
+            label: "_IntoText",
+            from: text3,
+            placeholderMap: ["wNameBuffer": "evolvedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+        ),
+        try extractDialogue(
+            id: "evolution_stopped",
+            label: "_StoppedEvolvingText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
+        try extractDialogue(
+            id: "evolution_is_evolving",
+            label: "_IsEvolvingText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
         try extractDialogue(id: "pokemart_greeting", label: "_PokemartGreetingText", from: text4),
         try extractDialogue(id: "pokemart_buying_greeting", label: "_PokemartBuyingGreetingText", from: text4),
         try extractDialogue(id: "pokemart_bought_item", label: "_PokemartBoughtItemText", from: text4),
@@ -2544,7 +2570,7 @@ private func extractDialogue(
         if currentLine.isEmpty == false,
            let lastCharacter = currentLine.last,
            let firstCharacter = segment.first,
-           (lastCharacter.isLetter || lastCharacter.isNumber || lastCharacter == "}" || lastCharacter == "!") &&
+           (lastCharacter.isLetter || lastCharacter.isNumber || lastCharacter == "}" || lastCharacter == "!" || lastCharacter == "?") &&
             (firstCharacter.isLetter || firstCharacter.isNumber || firstCharacter == "{") {
             currentLine += " "
         }
@@ -2581,7 +2607,7 @@ private func extractDialogue(
             if line.hasPrefix("para ") {
                 flushPageIfNeeded()
             } else if line.hasPrefix("line ") || line.hasPrefix("cont ") {
-                flushLineIfNeeded(force: true)
+                flushLineIfNeeded()
             }
             appendSegment(value)
         } else if line.hasPrefix("text_ram ") {
@@ -3526,7 +3552,7 @@ private func directionToken(_ token: String) -> FacingDirection? {
 
 private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
     let speciesDefinitions = try parseCanonicalSpeciesDefinitions(repoRoot: repoRoot)
-    let levelUpLearnsetsByID = try parseLevelUpLearnsets(repoRoot: repoRoot)
+    let progressionBySpeciesID = try parseSpeciesProgression(repoRoot: repoRoot)
     let dexNumbersByID = try parsePokedexNumbers(repoRoot: repoRoot)
     let dexEntriesByKey = try parsePokedexEntries(repoRoot: repoRoot)
     let dexTextByKey = try parsePokedexText(repoRoot: repoRoot)
@@ -3551,7 +3577,8 @@ private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
             id: definition.id,
             displayName: definition.displayName,
             cryData: definition.cryData,
-            levelUpLearnset: levelUpLearnsetsByID[definition.id] ?? [],
+            evolutions: progressionBySpeciesID[definition.id]?.evolutions ?? [],
+            levelUpLearnset: progressionBySpeciesID[definition.id]?.levelUpLearnset ?? [],
             pokedexData: pokedexData
         )
     }
@@ -3862,49 +3889,128 @@ private func speciesID(forBaseStatStem stem: String) throws -> String {
     }
 }
 
-private func parseLevelUpLearnsets(repoRoot: URL) throws -> [String: [LevelUpMoveManifest]] {
-    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/evos_moves.asm"))
-    var learnsetsByLabel: [String: [LevelUpMoveManifest]] = [:]
-    var currentLabel: String?
-    var isParsingLearnset = false
+private struct SpeciesProgressionManifest {
+    let evolutions: [EvolutionManifest]
+    let levelUpLearnset: [LevelUpMoveManifest]
+}
 
-    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
-        let line = rawLine.trimmingCharacters(in: .whitespaces)
-        if let match = line.firstMatch(of: /([A-Za-z0-9]+)EvosMoves:/) {
-            currentLabel = String(match.output.1)
-            learnsetsByLabel[currentLabel ?? ""] = []
-            isParsingLearnset = false
-            continue
-        }
-        guard let currentLabel else {
-            continue
-        }
-        if line == "; Learnset" {
-            isParsingLearnset = true
-            continue
-        }
-        guard isParsingLearnset else {
-            continue
-        }
-        if line == "db 0" {
-            isParsingLearnset = false
-            continue
-        }
-        guard let match = line.firstMatch(of: /db\s+(\d+),\s+([A-Z_]+)/) else {
-            continue
-        }
-        learnsetsByLabel[currentLabel, default: []].append(
-            LevelUpMoveManifest(
-                level: Int(match.output.1) ?? 1,
-                moveID: String(match.output.2)
-            )
+private enum SpeciesProgressionSection {
+    case none
+    case evolutions
+    case learnset
+}
+
+private func parseSpeciesProgression(repoRoot: URL) throws -> [String: SpeciesProgressionManifest] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/evos_moves.asm"))
+    var progressionByLabel: [String: SpeciesProgressionManifest] = [:]
+    var currentLabel: String?
+    var currentEvolutions: [EvolutionManifest] = []
+    var currentLearnset: [LevelUpMoveManifest] = []
+    var section: SpeciesProgressionSection = .none
+
+    func flushCurrentSpecies() {
+        guard let currentLabel else { return }
+        progressionByLabel[currentLabel] = SpeciesProgressionManifest(
+            evolutions: currentEvolutions,
+            levelUpLearnset: currentLearnset
         )
     }
 
-    return Dictionary(uniqueKeysWithValues: try learnsetsByLabel.map { label, learnset in
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let trimmedLine = rawLine.trimmingCharacters(in: .whitespaces)
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        if let match = line.firstMatch(of: /([A-Za-z0-9]+)EvosMoves:/) {
+            flushCurrentSpecies()
+            currentLabel = String(match.output.1)
+            currentEvolutions = []
+            currentLearnset = []
+            section = .none
+            continue
+        }
+        guard currentLabel != nil else {
+            continue
+        }
+        if trimmedLine == "; Evolutions" {
+            section = .evolutions
+            continue
+        }
+        if trimmedLine == "; Learnset" {
+            section = .learnset
+            continue
+        }
+        if line == "db 0" {
+            section = .none
+            continue
+        }
+
+        switch section {
+        case .none:
+            continue
+        case .evolutions:
+            if let evolution = parseEvolutionManifest(from: line) {
+                currentEvolutions.append(evolution)
+            }
+        case .learnset:
+            guard let match = line.firstMatch(of: /db\s+(\d+),\s+([A-Z_]+)/) else {
+                continue
+            }
+            currentLearnset.append(
+                LevelUpMoveManifest(
+                    level: Int(match.output.1) ?? 1,
+                    moveID: String(match.output.2)
+                )
+            )
+        }
+    }
+
+    flushCurrentSpecies()
+
+    return Dictionary(uniqueKeysWithValues: try progressionByLabel.map { label, progression in
         let speciesID = try speciesID(forEvosMovesLabel: label)
-        return (speciesID, learnset)
+        return (speciesID, progression)
     })
+}
+
+private func parseEvolutionManifest(from line: String) -> EvolutionManifest? {
+    let tokens = line
+        .replacingOccurrences(of: "db", with: "")
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+    guard let kindToken = tokens.first else {
+        return nil
+    }
+
+    switch kindToken {
+    case "EVOLVE_LEVEL":
+        guard tokens.count >= 3, let level = Int(tokens[1]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .level, level: level),
+            targetSpeciesID: tokens[2]
+        )
+    case "EVOLVE_ITEM":
+        guard tokens.count >= 4, let minimumLevel = Int(tokens[2]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .item, itemID: tokens[1], minimumLevel: minimumLevel),
+            targetSpeciesID: tokens[3]
+        )
+    case "EVOLVE_TRADE":
+        guard tokens.count >= 3, let minimumLevel = Int(tokens[1]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .trade, minimumLevel: minimumLevel),
+            targetSpeciesID: tokens[2]
+        )
+    default:
+        return nil
+    }
 }
 
 private func speciesID(forEvosMovesLabel label: String) throws -> String {
@@ -3933,6 +4039,7 @@ private func parseSpecies(
     id: String,
     displayName: String,
     cryData: (soundEffectID: String?, pitch: Int?, length: Int?),
+    evolutions: [EvolutionManifest],
     levelUpLearnset: [LevelUpMoveManifest],
     pokedexData: PokedexData? = nil
 ) throws -> SpeciesManifest {
@@ -3990,6 +4097,7 @@ private func parseSpecies(
         baseSpeed: statsValues[safe: 3] ?? 0,
         baseSpecial: statsValues[safe: 4] ?? 0,
         startingMoves: moveValues.filter { $0 != "NO_MOVE" },
+        evolutions: evolutions,
         levelUpLearnset: levelUpLearnset,
         crySoundEffectID: cryData.soundEffectID,
         cryPitch: cryData.pitch,

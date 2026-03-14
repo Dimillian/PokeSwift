@@ -39,6 +39,7 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
         XCTAssertEqual(loaded.audioCue(id: "trainer_victory")?.trackID, "MUSIC_DEFEATED_TRAINER")
         XCTAssertEqual(loaded.audioCue(id: "wild_victory")?.trackID, "MUSIC_DEFEATED_WILD_MON")
+        XCTAssertEqual(loaded.audioCue(id: "evolution")?.trackID, "MUSIC_SAFARI_ZONE")
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.waitForCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.resumeMusicAfterCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.waitForCompletion, true)
@@ -113,6 +114,17 @@ final class RepoContentContractTests: XCTestCase {
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
         )
+        XCTAssertEqual(
+            squirtle.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .level, level: 16),
+                    targetSpeciesID: "WARTORTLE"
+                ),
+            ]
+        )
+        XCTAssertEqual(loaded.dialogue(id: "evolution_evolved")?.pages.first?.lines, ["{pokemon} evolved"])
+        XCTAssertEqual(loaded.dialogue(id: "evolution_into")?.pages.first?.lines, ["into {evolvedPokemon}!"])
         XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
         XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")

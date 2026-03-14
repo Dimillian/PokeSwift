@@ -30,6 +30,7 @@ func extractAudioManifest(source: SourceTree, titleTrackID: String) throws -> Au
         .init(id: "trainer_battle", assetID: "MUSIC_TRAINER_BATTLE"),
         .init(id: "trainer_victory", assetID: "MUSIC_DEFEATED_TRAINER"),
         .init(id: "wild_victory", assetID: "MUSIC_DEFEATED_WILD_MON"),
+        .init(id: "evolution", assetID: "MUSIC_SAFARI_ZONE"),
         .init(
             id: "mom_heal",
             assetID: "MUSIC_PKMN_HEALED",

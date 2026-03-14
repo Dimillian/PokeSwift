@@ -40,6 +40,7 @@ public final class GameRuntime {
     var battlePresentationTask: Task<Void, Never>?
     var battlePresentationStagedSoundTasks: [UUID: Task<Void, Never>] = [:]
     var fieldInteractionTask: Task<Void, Never>?
+    var evolutionTask: Task<Void, Never>?
     var hasStarted = false
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
@@ -49,6 +50,7 @@ public final class GameRuntime {
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
+    var evolutionState: RuntimeEvolutionState?
     public internal(set) var captureAftermathPokedexSelectionID: String?
     public internal(set) var oakIntroState: OakIntroState?
     var deferredActions: [DeferredAction] = []
@@ -382,6 +384,8 @@ public final class GameRuntime {
             handleStarterChoice(button: button)
         case .battle:
             handleBattle(button: button)
+        case .evolution:
+            handleEvolution(button: button)
         case .naming:
             handleNaming(button: button)
         case .oakIntro:

@@ -426,6 +426,9 @@ extension GameRuntime {
         if let rewardContinuation = beat.rewardContinuation {
             battle.rewardContinuation = rewardContinuation
         }
+        if let pendingEvolution = beat.pendingEvolution {
+            battle.pendingEvolution = pendingEvolution
+        }
         if let playerPokemon = beat.playerPokemon {
             battle.playerPokemon = playerPokemon
         }

@@ -288,6 +288,10 @@ extension GameRuntime {
         audioPlayer?.playMusic(request: .init(trackID: trackID, entryID: entryID), completion: nil)
     }
 
+    func restoreAudioState(_ state: RuntimeAudioState, reason: String) {
+        requestMusic(trackID: state.trackID, entryID: state.entryID, reason: reason)
+    }
+
     private func playOneShotMusic(trackID: String, entryID: String, reason: String, completion: (() -> Void)? = nil) {
         let nextRevision = (currentAudioState?.playbackRevision ?? 0) + 1
         currentAudioState = RuntimeAudioState(

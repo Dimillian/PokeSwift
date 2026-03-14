@@ -1159,6 +1159,8 @@ public enum GameplaySidebarPropsBuilder {
             "STARTER"
         case .battle:
             "BATTLE"
+        case .evolution:
+            "EVOLVE"
         case .titleMenu:
             "MENU"
         case .titleAttract:
