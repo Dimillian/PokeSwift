@@ -70,7 +70,10 @@ enum GameplayScenePropsFactory {
                         options: GameplaySidebarPropsBuilder.makeOptionsSection(
                             isMusicEnabled: runtime.isMusicEnabled,
                             appearanceMode: appearanceMode,
-                            gameplayHDREnabled: gameplayHDREnabled
+                            gameplayHDREnabled: gameplayHDREnabled,
+                            textSpeed: runtime.optionsTextSpeed,
+                            battleAnimation: runtime.optionsBattleAnimation,
+                            battleStyle: runtime.optionsBattleStyle
                         )
                     )
                 ),

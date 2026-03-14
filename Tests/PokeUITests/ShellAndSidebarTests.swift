@@ -1301,7 +1301,7 @@ extension PokeUITests {
     XCTAssertTrue(save.actions.allSatisfy { $0.isEnabled == false })
     XCTAssertEqual(
       options.rows.map(\.title), ["Appearance", "HDR Effects", "Text Speed", "Battle Scene", "Battle Style", "Music"])
-    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, false, false, false, true])
+    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, true, true, true, true])
     XCTAssertEqual(options.rows.last?.detail, "On")
     XCTAssertEqual(options.rows.first?.detail, "Light")
     XCTAssertEqual(options.rows.dropFirst().first?.detail, "On")

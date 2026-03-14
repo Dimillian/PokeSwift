@@ -1,4 +1,5 @@
 import SwiftUI
+import PokeDataModel
 import PokeRender
 import PokeUI
 
@@ -83,6 +84,27 @@ private extension GameplayScene {
             return
         case "music":
             preferences.toggleMusicEnabled()
+            return
+        case "textSpeed":
+            let options = TextSpeed.allOptions
+            if let idx = options.firstIndex(of: preferences.textSpeed) {
+                let next = options[(idx + 1) % options.count]
+                preferences.setTextSpeed(next)
+            }
+            return
+        case "battleScene":
+            let options = BattleAnimation.allOptions
+            if let idx = options.firstIndex(of: preferences.battleAnimation) {
+                let next = options[(idx + 1) % options.count]
+                preferences.setBattleAnimation(next)
+            }
+            return
+        case "battleStyle":
+            let options = BattleStyle.allOptions
+            if let idx = options.firstIndex(of: preferences.battleStyle) {
+                let next = options[(idx + 1) % options.count]
+                preferences.setBattleStyle(next)
+            }
             return
         default:
             break

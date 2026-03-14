@@ -53,15 +53,18 @@ final class AppPreferences {
     func setTextSpeed(_ value: TextSpeed) {
         textSpeed = value
         settingsStore.textSpeed = value
+        runtime?.optionsTextSpeed = value
     }
 
     func setBattleAnimation(_ value: BattleAnimation) {
         battleAnimation = value
         settingsStore.battleAnimation = value
+        runtime?.optionsBattleAnimation = value
     }
 
     func setBattleStyle(_ value: BattleStyle) {
         battleStyle = value
         settingsStore.battleStyle = value
+        runtime?.optionsBattleStyle = value
     }
 }
