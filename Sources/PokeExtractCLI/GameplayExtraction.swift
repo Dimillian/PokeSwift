@@ -1430,11 +1430,38 @@ private func objectIDFor(
         if let pickupItemID {
             return "\(mapID.lowercased())_\(pickupItemID.lowercased())"
         }
-        if let localLabel = mapScriptMetadata?.textLabelByTextID[textID] {
-            return dialogueID(forScriptLabel: localLabel, mapScriptMetadata: mapScriptMetadata)
+        if let fallbackObjectID = fallbackObjectID(for: textID, mapScriptMetadata: mapScriptMetadata) {
+            return fallbackObjectID
         }
         return "\(mapID.lowercased())_object_\(index)"
     }
+}
+
+private func fallbackObjectID(for textID: String, mapScriptMetadata: MapScriptMetadata?) -> String? {
+    guard
+        let mapScriptMetadata,
+        let baseID = fallbackObjectIDBase(for: textID, mapScriptMetadata: mapScriptMetadata)
+    else {
+        return nil
+    }
+
+    let matchingTextIDs = mapScriptMetadata.textLabelByTextID.keys
+        .filter { fallbackObjectIDBase(for: $0, mapScriptMetadata: mapScriptMetadata) == baseID }
+        .sorted()
+
+    guard matchingTextIDs.count > 1, let matchingIndex = matchingTextIDs.firstIndex(of: textID) else {
+        return baseID
+    }
+
+    return "\(baseID)_\(matchingIndex + 1)"
+}
+
+private func fallbackObjectIDBase(for textID: String, mapScriptMetadata: MapScriptMetadata) -> String? {
+    guard let localLabel = mapScriptMetadata.textLabelByTextID[textID] else {
+        return nil
+    }
+
+    return dialogueID(forScriptLabel: localLabel, mapScriptMetadata: mapScriptMetadata)
 }
 
 private func interactionReach(for objectID: String, sprite: String) -> ObjectInteractionReach {
@@ -1977,7 +2004,12 @@ private func buildCoverageMapDialogues(
         }
 
         for (textID, localLabel) in metadata.textLabelByTextID.sorted(by: { $0.key < $1.key }) {
-            if let specialDialogue = specialCoverageDialogue(mapID: definition.mapID, textID: textID, localLabel: localLabel) {
+            if let specialDialogue = specialCoverageDialogue(
+                mapID: definition.mapID,
+                textID: textID,
+                localLabel: localLabel,
+                mapScriptMetadata: metadata
+            ) {
                 dialogueByID[specialDialogue.id] = specialDialogue
                 continue
             }
@@ -2012,21 +2044,26 @@ private func buildCoverageMapDialogues(
     return dialogueByID.values.sorted { $0.id < $1.id }
 }
 
-private func specialCoverageDialogue(mapID: String, textID: String, localLabel: String) -> DialogueManifest? {
+private func specialCoverageDialogue(
+    mapID: String,
+    textID: String,
+    localLabel: String,
+    mapScriptMetadata: MapScriptMetadata
+) -> DialogueManifest? {
+    let line: String
     switch localLabel {
     case "MartSignText":
-        return DialogueManifest(
-            id: dialogueID(for: mapID, textID: textID, mapScriptMetadata: nil),
-            pages: [.init(lines: ["#MON MART"], waitsForPrompt: true)]
-        )
+        line = "#MON MART"
     case "PokeCenterSignText":
-        return DialogueManifest(
-            id: dialogueID(for: mapID, textID: textID, mapScriptMetadata: nil),
-            pages: [.init(lines: ["#MON CENTER"], waitsForPrompt: true)]
-        )
+        line = "#MON CENTER"
     default:
         return nil
     }
+
+    return DialogueManifest(
+        id: dialogueID(for: mapID, textID: textID, mapScriptMetadata: mapScriptMetadata),
+        pages: [.init(lines: [line], waitsForPrompt: true)]
+    )
 }
 
 private func extractDialogueIfPresent(

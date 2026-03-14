@@ -2196,6 +2196,20 @@
       ]
     },
     {
+      "id" : "pewter_city_mart_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "#MON MART"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "pewter_city_museum_sign",
       "pages" : [
         {
@@ -2205,6 +2219,20 @@
           "lines" : [
             "PEWTER MUSEUM",
             "OF SCIENCE"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_pokecenter_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "#MON CENTER"
           ],
           "waitsForPrompt" : true
         }
@@ -2377,34 +2405,6 @@
           "lines" : [
             "That's right!",
             "It's hard work!"
-          ],
-          "waitsForPrompt" : true
-        }
-      ]
-    },
-    {
-      "id" : "pewter_city_text_pewtercity_mart_sign",
-      "pages" : [
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "#MON MART"
-          ],
-          "waitsForPrompt" : true
-        }
-      ]
-    },
-    {
-      "id" : "pewter_city_text_pewtercity_pokecenter_sign",
-      "pages" : [
-        {
-          "events" : [
-
-          ],
-          "lines" : [
-            "#MON CENTER"
           ],
           "waitsForPrompt" : true
         }
@@ -20184,7 +20184,7 @@
         {
           "displayName" : "Scientist",
           "facing" : "down",
-          "id" : "oaks_lab_scientist",
+          "id" : "oaks_lab_scientist_1",
           "interactionDialogueID" : "oaks_lab_girl",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
@@ -20209,7 +20209,7 @@
         {
           "displayName" : "Scientist",
           "facing" : "down",
-          "id" : "oaks_lab_scientist",
+          "id" : "oaks_lab_scientist_2",
           "interactionDialogueID" : "oaks_lab_girl",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [

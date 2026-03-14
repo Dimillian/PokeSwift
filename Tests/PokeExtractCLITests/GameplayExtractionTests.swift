@@ -117,9 +117,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(oaksLab.borderBlockID, 0x03)
         XCTAssertEqual(oaksLab.warps.map(\.targetPosition), [.init(x: 12, y: 11), .init(x: 12, y: 11)])
         XCTAssertEqual(oaksLab.objects.count, 11)
+        XCTAssertEqual(Set(oaksLab.objects.map(\.id)).count, oaksLab.objects.count)
         XCTAssertEqual(
             oaksLab.objects.filter { $0.id.hasPrefix("oaks_lab_poke_ball_") }.map(\.id),
             ["oaks_lab_poke_ball_charmander", "oaks_lab_poke_ball_squirtle", "oaks_lab_poke_ball_bulbasaur"]
+        )
+        XCTAssertEqual(
+            oaksLab.objects.filter { $0.id.hasPrefix("oaks_lab_scientist") }.map(\.id),
+            ["oaks_lab_scientist_1", "oaks_lab_scientist_2"]
         )
         XCTAssertEqual(
             manifest.eventFlags.flags.map(\.id),
@@ -591,6 +596,10 @@ final class GameplayExtractionTests: XCTestCase {
             "pewter_city_gym_sign",
             "pewter_city_sign",
         ])
+        XCTAssertNotNil(manifest.dialogues.first { $0.id == "pewter_city_mart_sign" })
+        XCTAssertNotNil(manifest.dialogues.first { $0.id == "pewter_city_pokecenter_sign" })
+        XCTAssertNil(manifest.dialogues.first { $0.id == "pewter_city_text_pewtercity_mart_sign" })
+        XCTAssertNil(manifest.dialogues.first { $0.id == "pewter_city_text_pewtercity_pokecenter_sign" })
 
         let pewterPokecenter = try XCTUnwrap(manifest.maps.first { $0.id == "PEWTER_POKECENTER" })
         XCTAssertEqual(pewterPokecenter.tileset, "POKECENTER")

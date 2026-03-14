@@ -1,7 +1,7 @@
 {
   "contentVersion" : "m5-red-coverage-v1",
   "extractorVersion" : "0.1.0",
-  "sourceCommit" : "8351a2159cdf",
+  "sourceCommit" : "2b58669f2008",
   "sourceFiles" : [
     {
       "path" : "constants/charmap.asm",
