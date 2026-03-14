@@ -625,7 +625,7 @@ extension GameRuntime {
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
-                stage: .attackWindup,
+                stage: skipAnimation ? .resultText : .attackWindup,
                 uiVisibility: .visible,
                 activeSide: action.side,
                 message: action.messages.first,
