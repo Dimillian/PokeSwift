@@ -406,10 +406,22 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(route1.objects.map(\.id), ["route_1_youngster_1", "route_1_youngster_2"])
 
         let route22 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_22" })
+        let route22Rival1 = try XCTUnwrap(route22.objects.first { $0.id == "route_22_rival_1" })
+        let route22Rival2 = try XCTUnwrap(route22.objects.first { $0.id == "route_22_rival_2" })
         XCTAssertEqual(route22.defaultMusicID, "MUSIC_ROUTES3")
         XCTAssertEqual(route22.connections.map(\.targetMapID), ["ROUTE_23", "VIRIDIAN_CITY"])
         XCTAssertEqual(route22.objects.map(\.id), ["route_22_rival_1", "route_22_rival_2"])
         XCTAssertEqual(route22.objects.first?.visibleByDefault, false)
+        XCTAssertEqual(route22Rival1.interactionDialogueID, "route_22_rival_before_battle_1")
+        XCTAssertEqual(
+            route22Rival1.interactionTriggers,
+            [.init(conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE")], dialogueID: "route_22_rival_after_battle_1")]
+        )
+        XCTAssertEqual(route22Rival2.interactionDialogueID, "route_22_rival_before_battle_2")
+        XCTAssertEqual(
+            route22Rival2.interactionTriggers,
+            [.init(conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE")], dialogueID: "route_22_rival_after_battle_2")]
+        )
         XCTAssertEqual(route22.backgroundEvents.map(\.dialogueID), ["route_22_pokemon_league_sign"])
         XCTAssertEqual(
             manifest.mapScripts.first { $0.mapID == "ROUTE_22" }?.triggers.map(\.scriptID),
@@ -422,6 +434,14 @@ final class GameplayExtractionTests: XCTestCase {
                 "route_22_rival_1_challenge_6_lower",
             ]
         )
+
+        let route22UpperChallenge = try XCTUnwrap(manifest.scripts.first { $0.id == "route_22_rival_1_challenge_4_upper" })
+        XCTAssertEqual(route22UpperChallenge.steps.filter { $0.action == "faceObject" }.compactMap(\.stringValue), ["right"])
+        XCTAssertEqual(route22UpperChallenge.steps.filter { $0.action == "facePlayer" }.compactMap(\.stringValue), ["left"])
+
+        let route22LowerChallenge = try XCTUnwrap(manifest.scripts.first { $0.id == "route_22_rival_1_challenge_4_lower" })
+        XCTAssertEqual(route22LowerChallenge.steps.filter { $0.action == "faceObject" }.compactMap(\.stringValue), ["up"])
+        XCTAssertEqual(route22LowerChallenge.steps.filter { $0.action == "facePlayer" }.compactMap(\.stringValue), ["down"])
 
         let route2 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_2" })
         XCTAssertEqual(route2.defaultMusicID, "MUSIC_ROUTES1")

@@ -1,3 +1,5 @@
+import CoreGraphics
+import ImageIO
 import SwiftUI
 import PokeDataModel
 import PokeRender
@@ -9,14 +11,12 @@ struct BattleViewportCanvas: View {
     let trainerSpriteURL: URL?
     let playerTrainerFrontSpriteURL: URL?
     let playerTrainerBackSpriteURL: URL?
+    let sendOutPoofSpriteURL: URL?
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let presentation: BattlePresentationTelemetry
 
-    @State private var sendOutBallProgress: CGFloat = 1
-    @State private var sendOutBallOpacity: Double = 0
-    @State private var sendOutPokemonProgress: CGFloat = 1
-    @State private var sendOutPokemonVisibility: Double = 1
+    @State private var sendOutVisualState: BattleSendOutVisualState = .idle
 
     var body: some View {
         GeometryReader { proxy in
@@ -84,10 +84,22 @@ struct BattleViewportCanvas: View {
                     )
                     .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
                     .position(enemySpriteCenter(in: layout))
-                    .scaleEffect(enemySpriteScale)
+                    .scaleEffect(enemySpriteScale, anchor: pokemonScaleAnchor(for: .enemy))
                     .rotationEffect(enemyPokemonRotation)
                     .opacity(enemyPokemonOpacity)
                     .animation(spriteAnimation, value: presentation.revision)
+                }
+
+                if let sendOutPoofSpriteURL, let sendOutPoofFrame {
+                    BattleSendOutPoofView(
+                        url: sendOutPoofSpriteURL,
+                        frame: sendOutPoofFrame,
+                        label: "Send Out Poof",
+                        whiteIsTransparent: true
+                    )
+                    .frame(width: layout.sendOutPoofSize.width, height: layout.sendOutPoofSize.height)
+                    .position(sendOutPoofCenter(in: layout))
+                    .opacity(sendOutPoofOpacity)
                 }
 
                 if let playerSpriteURL, shouldShowPlayerPokemon {
@@ -98,7 +110,7 @@ struct BattleViewportCanvas: View {
                     )
                     .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
                     .position(playerSpriteCenter(in: layout))
-                    .scaleEffect(playerSpriteScale)
+                    .scaleEffect(playerSpriteScale, anchor: pokemonScaleAnchor(for: .player))
                     .rotationEffect(playerPokemonRotation)
                     .opacity(playerPokemonOpacity)
                     .animation(spriteAnimation, value: presentation.revision)
@@ -108,7 +120,7 @@ struct BattleViewportCanvas: View {
                     BattlePokeballToken()
                         .frame(width: max(8, size.width * 0.05), height: max(8, size.width * 0.05))
                         .position(pokeballCenter(in: layout))
-                        .opacity(sendOutBallOpacity)
+                        .opacity(currentSendOutState.ballOpacity)
                         .animation(spriteAnimation, value: presentation.revision)
                 }
             }
@@ -191,8 +203,29 @@ struct BattleViewportCanvas: View {
         presentation.stage == .enemySendOut
     }
 
+    private var currentSendOutState: BattleSendOutVisualState {
+        presentation.stage == .enemySendOut ? sendOutVisualState : .idle
+    }
+
+    private var sendOutPoofFrame: BattleSendOutPoofFrame? {
+        let activeSide = presentation.activeSide ?? .player
+        guard let frameIndex = currentSendOutState.poofFrameIndex,
+              BattleSendOutAnimationTimeline.poofFrames(for: activeSide).indices.contains(frameIndex) else {
+            return nil
+        }
+        return BattleSendOutAnimationTimeline.poofFrames(for: activeSide)[frameIndex]
+    }
+
+    private var sendOutPoofOpacity: Double {
+        currentSendOutState.poofOpacity
+    }
+
     private var sendOutAnimationTriggerKey: String {
         "\(presentation.stage)-\(String(describing: presentation.activeSide))-\(presentation.revision)"
+    }
+
+    private var sendOutPoofSequence: [Int] {
+        BattleSendOutAnimationTimeline.poofFrameSequence(for: presentation.activeSide ?? .player)
     }
 
     private var enemyHudOpacity: Double {
@@ -203,7 +236,7 @@ struct BattleViewportCanvas: View {
             case .introReveal:
                 return 0
             case .enemySendOut where presentation.activeSide == .enemy:
-                return sendOutPokemonVisibility
+                return currentSendOutState.pokemonOpacity
             default:
                 return 1
             }
@@ -222,7 +255,7 @@ struct BattleViewportCanvas: View {
             case .enemySendOut where presentation.activeSide == .enemy:
                 return 0
             case .enemySendOut where presentation.activeSide == .player:
-                return sendOutPokemonVisibility
+                return currentSendOutState.pokemonOpacity
             default:
                 return 1
             }
@@ -231,7 +264,7 @@ struct BattleViewportCanvas: View {
         if isWildBattle {
             switch presentation.stage {
             case .enemySendOut where presentation.activeSide == .player:
-                return sendOutPokemonVisibility
+                return currentSendOutState.pokemonOpacity
             default:
                 return 1
             }
@@ -260,7 +293,7 @@ struct BattleViewportCanvas: View {
     }
 
     private var trainerScale: CGFloat {
-        presentation.stage == .enemySendOut ? 1.02 : 1
+        presentation.stage == .enemySendOut ? 1.01 : 1
     }
 
     private var enemySpriteScale: CGFloat {
@@ -268,7 +301,7 @@ struct BattleViewportCanvas: View {
         case .introReveal where isTrainerBattle:
             return 0.34
         case .enemySendOut where presentation.activeSide == .enemy:
-            return 0.18 + (0.82 * sendOutPokemonProgress)
+            return currentSendOutState.pokemonScale
         case .attackImpact where presentation.activeSide == .enemy:
             return 1.04
         default:
@@ -281,7 +314,7 @@ struct BattleViewportCanvas: View {
         case .introReveal where isTrainerBattle:
             return 0.34
         case .enemySendOut where presentation.activeSide == .player:
-            return 0.18 + (0.82 * sendOutPokemonProgress)
+            return currentSendOutState.pokemonScale
         case .attackImpact where presentation.activeSide == .player:
             return 1.04
         default:
@@ -294,7 +327,7 @@ struct BattleViewportCanvas: View {
         if isTrainerBattle, presentation.stage == .introReveal {
             visibility = 0
         } else if presentation.stage == .enemySendOut, presentation.activeSide == .enemy {
-            visibility = sendOutPokemonVisibility
+            visibility = currentSendOutState.pokemonOpacity
         } else if enemyPokemon.currentHP == 0 {
             visibility = 0
         } else {
@@ -312,7 +345,7 @@ struct BattleViewportCanvas: View {
             case .enemySendOut where presentation.activeSide == .enemy && presentation.hidePlayerPokemon:
                 visibility = 0
             case .enemySendOut where presentation.activeSide == .player:
-                visibility = sendOutPokemonVisibility
+                visibility = currentSendOutState.pokemonOpacity
             case _ where playerPokemon.currentHP == 0:
                 visibility = 0
             default:
@@ -323,7 +356,7 @@ struct BattleViewportCanvas: View {
             case .introFlash1, .introFlash2, .introFlash3, .introSpiral, .introCrossing, .introReveal:
                 visibility = 0
             case .enemySendOut where presentation.activeSide == .player:
-                visibility = sendOutPokemonVisibility
+                visibility = currentSendOutState.pokemonOpacity
             case _ where playerPokemon.currentHP == 0:
                 visibility = 0
             default:
@@ -385,21 +418,18 @@ struct BattleViewportCanvas: View {
 
     private func enemySpriteCenter(in layout: BattleViewportLayout) -> CGPoint {
         let settled = layout.enemySpriteCenter
-        let sendOutOrigin = layout.enemyTrainerPokemonOrigin
+        let sendOutAnchor = layout.enemySendOutAnchor
         switch presentation.stage {
-        case .introFlash1, .introFlash2, .introFlash3, .introSpiral where isWildBattle:
+        case .introFlash1, .introFlash2, .introFlash3, .introSpiral:
+            guard isWildBattle else { return settled }
             return CGPoint(
                 x: -(layout.enemySpriteSize.width * 0.5) - 12,
                 y: settled.y - 6
             )
         case .introReveal where isTrainerBattle:
-            return sendOutOrigin
+            return sendOutAnchor
         case .enemySendOut where presentation.activeSide == .enemy:
-            return interpolate(
-                from: sendOutOrigin,
-                to: settled,
-                progress: sendOutPokemonProgress
-            )
+            return currentSendOutState.usesSendOutAnchor ? sendOutAnchor : settled
         case .attackWindup where presentation.activeSide == .enemy:
             return CGPoint(x: settled.x - layout.size.width * 0.07, y: settled.y + 2)
         case .attackImpact where presentation.activeSide == .enemy:
@@ -413,16 +443,12 @@ struct BattleViewportCanvas: View {
 
     private func playerSpriteCenter(in layout: BattleViewportLayout) -> CGPoint {
         let settled = layout.playerSpriteCenter
-        let sendOutOrigin = layout.playerTrainerPokemonOrigin
+        let sendOutAnchor = layout.playerSendOutAnchor
         switch presentation.stage {
         case .introReveal where isTrainerBattle:
-            return sendOutOrigin
+            return sendOutAnchor
         case .enemySendOut where presentation.activeSide == .player:
-            return interpolate(
-                from: sendOutOrigin,
-                to: settled,
-                progress: sendOutPokemonProgress
-            )
+            return currentSendOutState.usesSendOutAnchor ? sendOutAnchor : settled
         case .attackWindup where presentation.activeSide == .player:
             return CGPoint(x: settled.x + layout.size.width * 0.09, y: settled.y - 4)
         case .attackImpact where presentation.activeSide == .player:
@@ -439,28 +465,25 @@ struct BattleViewportCanvas: View {
         let end: CGPoint
         if presentation.activeSide == .enemy {
             start = layout.enemyTrainerPokeballOrigin
-            end = layout.enemyTrainerPokemonOrigin
+            end = layout.enemySendOutAnchor
         } else {
             start = layout.playerTrainerPokeballOrigin
-            end = layout.playerTrainerPokemonOrigin
+            end = layout.playerSendOutAnchor
         }
 
         return quadraticBezier(
             start: start,
             control: CGPoint(
                 x: (start.x + end.x) / 2,
-                y: min(start.y, end.y) - layout.size.height * 0.12
+                y: min(start.y, end.y) - layout.size.height * 0.18
             ),
             end: end,
-            progress: sendOutBallProgress
+            progress: currentSendOutState.ballProgress
         )
     }
 
-    private func interpolate(from start: CGPoint, to end: CGPoint, progress: CGFloat) -> CGPoint {
-        CGPoint(
-            x: start.x + ((end.x - start.x) * progress),
-            y: start.y + ((end.y - start.y) * progress)
-        )
+    private func sendOutPoofCenter(in layout: BattleViewportLayout) -> CGPoint {
+        presentation.activeSide == .enemy ? layout.enemySendOutAnchor : layout.playerSendOutAnchor
     }
 
     private func quadraticBezier(start: CGPoint, control: CGPoint, end: CGPoint, progress: CGFloat) -> CGPoint {
@@ -471,35 +494,48 @@ struct BattleViewportCanvas: View {
         return CGPoint(x: x, y: y)
     }
 
+    private func pokemonScaleAnchor(for side: BattlePresentationSide) -> UnitPoint {
+        if presentation.stage == .enemySendOut, presentation.activeSide == side {
+            return .bottom
+        }
+        return .center
+    }
+
     @MainActor
     private func runSendOutAnimationSequence() async {
         guard presentation.stage == .enemySendOut else {
-            sendOutBallProgress = 1
-            sendOutBallOpacity = 0
-            sendOutPokemonProgress = 1
-            sendOutPokemonVisibility = 1
+            sendOutVisualState = .idle
             return
         }
 
-        sendOutBallProgress = 0
-        sendOutBallOpacity = 1
-        sendOutPokemonProgress = 0
-        sendOutPokemonVisibility = 0
+        sendOutVisualState = .toss(progress: 0)
 
-        withAnimation(.linear(duration: 0.16)) {
-            sendOutBallProgress = 1
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.tossDuration)) {
+            sendOutVisualState = .toss(progress: 1)
+        }
+        guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.tossDuration) else { return }
+
+        sendOutVisualState = .releaseHold
+        guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.releaseHoldDuration) else { return }
+
+        for frameIndex in sendOutPoofSequence {
+            sendOutVisualState = .poof(frameIndex: frameIndex)
+            guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.poofFrameDuration) else { return }
         }
 
-        try? await Task.sleep(nanoseconds: 120_000_000)
-        guard Task.isCancelled == false else { return }
+        sendOutVisualState = .revealStep1
+        guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep1Duration) else { return }
 
-        withAnimation(.easeOut(duration: 0.08)) {
-            sendOutBallOpacity = 0
-        }
-        sendOutPokemonVisibility = 1
-        withAnimation(.spring(response: 0.24, dampingFraction: 0.76)) {
-            sendOutPokemonProgress = 1
-        }
+        sendOutVisualState = .revealStep2
+        guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep2Duration) else { return }
+
+        sendOutVisualState = .revealFinal
+    }
+
+    private func sleepForSendOutStep(_ duration: TimeInterval) async -> Bool {
+        let nanoseconds = UInt64(duration * 1_000_000_000)
+        try? await Task.sleep(nanoseconds: nanoseconds)
+        return Task.isCancelled == false
     }
 
     private var battleBackground: some View {
@@ -524,7 +560,7 @@ struct BattleViewportCanvas: View {
         case .introCrossing:
             return .linear(duration: 0.55)
         case .enemySendOut:
-            return .spring(response: 0.34, dampingFraction: 0.8)
+            return .easeInOut(duration: BattleSendOutAnimationTimeline.tossDuration)
         default:
             return .easeInOut(duration: 0.24)
         }
@@ -555,6 +591,186 @@ private struct BattlePokeballToken: View {
                 .frame(width: 4, height: 4)
         }
     }
+}
+
+private struct BattleSendOutPoofView: View {
+    let url: URL
+    let frame: BattleSendOutPoofFrame
+    let label: String
+    let whiteIsTransparent: Bool
+
+    var body: some View {
+        GeometryReader { proxy in
+            let scale = min(
+                proxy.size.width / max(1, frame.canvasSize.width),
+                proxy.size.height / max(1, frame.canvasSize.height)
+            )
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(frame.placements.enumerated()), id: \.offset) { _, placement in
+                    BattleSpriteSheetFrameView(
+                        url: url,
+                        frameRect: placement.atlasFrame,
+                        label: label,
+                        whiteIsTransparent: whiteIsTransparent,
+                        flipHorizontal: placement.flipH,
+                        flipVertical: placement.flipV
+                    )
+                    .frame(
+                        width: BattleSendOutAnimationTimeline.poofTileSize.cgFloat * scale,
+                        height: BattleSendOutAnimationTimeline.poofTileSize.cgFloat * scale
+                    )
+                    .offset(
+                        x: placement.x.cgFloat * scale,
+                        y: placement.y.cgFloat * scale
+                    )
+                }
+            }
+            .frame(
+                width: frame.canvasSize.width * scale,
+                height: frame.canvasSize.height * scale,
+                alignment: .topLeading
+            )
+            .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+        }
+        .accessibilityLabel(label)
+    }
+}
+
+private struct BattleSpriteSheetFrameView: View {
+    let url: URL
+    let frameRect: CGRect
+    let label: String
+    let whiteIsTransparent: Bool
+    let flipHorizontal: Bool
+    let flipVertical: Bool
+
+    var body: some View {
+        Group {
+            if let image = croppedFrameImage {
+                Image(decorative: image, scale: 1)
+                    .resizable()
+                    .interpolation(.none)
+                    .antialiased(false)
+                    .aspectRatio(contentMode: .fit)
+                    .scaleEffect(x: flipHorizontal ? -1 : 1, y: flipVertical ? -1 : 1)
+            } else {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Color.black.opacity(0.12))
+            }
+        }
+        .accessibilityLabel(label)
+    }
+
+    private var croppedFrameImage: CGImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+              let croppedImage = image.cropping(to: frameRect.integral) else {
+            return nil
+        }
+
+        guard whiteIsTransparent else {
+            return croppedImage
+        }
+
+        return applyWhiteTransparencyMask(to: croppedImage)
+    }
+
+    private func applyWhiteTransparencyMask(to image: CGImage) -> CGImage? {
+        let width = image.width
+        let height = image.height
+        let grayscaleBytesPerRow = width
+        var grayscaleBytes = [UInt8](repeating: 0, count: width * height)
+
+        guard let grayscaleContext = CGContext(
+            data: &grayscaleBytes,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: grayscaleBytesPerRow,
+            space: CGColorSpaceCreateDeviceGray(),
+            bitmapInfo: CGImageAlphaInfo.none.rawValue
+        ) else {
+            return nil
+        }
+
+        grayscaleContext.interpolationQuality = .none
+        grayscaleContext.setShouldAntialias(false)
+        grayscaleContext.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        let threshold: UInt8 = 250
+        var maskBytes = [UInt8](repeating: 0, count: width * height)
+        var visited = [Bool](repeating: false, count: width * height)
+        var queue: [Int] = []
+        queue.reserveCapacity((width * 2) + (height * 2))
+
+        func enqueueIfNeeded(x: Int, y: Int) {
+            guard x >= 0, x < width, y >= 0, y < height else { return }
+            let index = (y * width) + x
+            guard visited[index] == false, grayscaleBytes[index] >= threshold else { return }
+            visited[index] = true
+            queue.append(index)
+        }
+
+        for x in 0..<width {
+            enqueueIfNeeded(x: x, y: 0)
+            enqueueIfNeeded(x: x, y: height - 1)
+        }
+
+        for y in 0..<height {
+            enqueueIfNeeded(x: 0, y: y)
+            enqueueIfNeeded(x: width - 1, y: y)
+        }
+
+        var queueIndex = 0
+        while queueIndex < queue.count {
+            let index = queue[queueIndex]
+            queueIndex += 1
+            maskBytes[index] = 255
+
+            let x = index % width
+            let y = index / width
+            enqueueIfNeeded(x: x - 1, y: y)
+            enqueueIfNeeded(x: x + 1, y: y)
+            enqueueIfNeeded(x: x, y: y - 1)
+            enqueueIfNeeded(x: x, y: y + 1)
+        }
+
+        let rgbaBytesPerRow = width * 4
+        var rgbaBytes = [UInt8](repeating: 0, count: width * height * 4)
+
+        for index in 0..<(width * height) {
+            let alpha: UInt8 = maskBytes[index] == 255 ? 0 : 255
+            let value = grayscaleBytes[index]
+            let rgbaIndex = index * 4
+            rgbaBytes[rgbaIndex] = value
+            rgbaBytes[rgbaIndex + 1] = value
+            rgbaBytes[rgbaIndex + 2] = value
+            rgbaBytes[rgbaIndex + 3] = alpha
+        }
+
+        let rgbaData = Data(rgbaBytes) as CFData
+        guard let provider = CGDataProvider(data: rgbaData) else {
+            return nil
+        }
+
+        return CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: rgbaBytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+        )
+    }
+}
+
+private extension Int {
+    var cgFloat: CGFloat { CGFloat(self) }
 }
 
 struct BattleViewportLayout {
@@ -606,6 +822,10 @@ struct BattleViewportLayout {
         CGSize(width: size.width * 0.28, height: size.height * 0.28)
     }
 
+    var sendOutPoofSize: CGSize {
+        CGSize(width: size.width * 0.2, height: size.width * 0.2)
+    }
+
     var enemySpriteCenter: CGPoint {
         CGPoint(x: size.width * 0.72, y: size.height * 0.3)
     }
@@ -626,6 +846,14 @@ struct BattleViewportLayout {
             x: playerTrainerCenter.x + playerTrainerSize.width * 0.18,
             y: playerTrainerCenter.y - 2
         )
+    }
+
+    var enemySendOutAnchor: CGPoint {
+        enemySpriteCenter
+    }
+
+    var playerSendOutAnchor: CGPoint {
+        playerSpriteCenter
     }
 
     var enemyTrainerPokemonOrigin: CGPoint {

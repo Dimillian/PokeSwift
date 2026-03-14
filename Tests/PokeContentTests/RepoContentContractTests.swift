@@ -1,4 +1,5 @@
 import XCTest
+import ImageIO
 @testable import PokeContent
 
 final class RepoContentContractTests: XCTestCase {
@@ -9,10 +10,16 @@ final class RepoContentContractTests: XCTestCase {
         let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
         let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
+        let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
+        let sendOutPoofSource = try XCTUnwrap(CGImageSourceCreateWithURL(sendOutPoofURL as CFURL, nil))
+        let sendOutPoofImage = try XCTUnwrap(CGImageSourceCreateImageAtIndex(sendOutPoofSource, 0, nil))
+        XCTAssertEqual(sendOutPoofImage.width, 128)
+        XCTAssertEqual(sendOutPoofImage.height, 40)
         XCTAssertTrue(
             loaded.fieldRenderIssues(
                 map: oaksLab,

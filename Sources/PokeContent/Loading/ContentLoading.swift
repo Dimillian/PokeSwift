@@ -46,6 +46,7 @@ public final class FileSystemContentLoader: ContentLoader {
 
         let requiredAssetPaths =
             titleManifest.assets.map(\.relativePath) +
+            ["Assets/battle/effects/send_out_poof.png"] +
             gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
             gameplayManifest.overworldSprites.map(\.imagePath) +
             gameplayManifest.species.flatMap { species -> [String] in

@@ -1195,7 +1195,7 @@ private func parseObjects(
             facing: facing,
             interactionReach: interactionReach(for: objectID),
             interactionTriggers: interactionTriggers(for: objectID),
-            interactionDialogueID: interactionDialogueID(for: mapID, textID: textID, objectID: objectID),
+            interactionDialogueID: dialogueID(for: mapID, textID: textID),
             interactionScriptID: interactionScriptID(for: objectID),
             movementBehavior: movementBehavior(
                 movementToken: movement,
@@ -1441,6 +1441,20 @@ private func interactionTriggers(for objectID: String) -> [ObjectInteractionTrig
                 dialogueID: "viridian_city_girl_after_pokedex"
             ),
         ]
+    case "route_22_rival_1":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE")],
+                dialogueID: "route_22_rival_after_battle_1"
+            ),
+        ]
+    case "route_22_rival_2":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE")],
+                dialogueID: "route_22_rival_after_battle_2"
+            ),
+        ]
     case "viridian_mart_clerk":
         return [
             .init(
@@ -1576,15 +1590,6 @@ private func usesScriptedTrainerBattle(objectID: String) -> Bool {
         return true
     default:
         return false
-    }
-}
-
-private func interactionDialogueID(for mapID: String, textID: String, objectID: String) -> String? {
-    switch objectID {
-    case "route_22_rival_1", "route_22_rival_2":
-        return nil
-    default:
-        return dialogueID(for: mapID, textID: textID)
     }
 }
 
@@ -2801,12 +2806,12 @@ private func buildScripts(repoRoot: URL) throws -> [ScriptManifest] {
     )
 
     let route22ChallengeVariants: [(scriptID: String, battleID: String, offset: TilePoint, rivalFacing: String, playerFacing: String)] = [
-        ("route_22_rival_1_challenge_4_upper", "route_22_rival_1_4_upper", .init(x: 0, y: 1), "up", "down"),
-        ("route_22_rival_1_challenge_5_upper", "route_22_rival_1_5_upper", .init(x: 0, y: 1), "up", "down"),
-        ("route_22_rival_1_challenge_6_upper", "route_22_rival_1_6_upper", .init(x: 0, y: 1), "up", "down"),
-        ("route_22_rival_1_challenge_4_lower", "route_22_rival_1_4_lower", .init(x: -1, y: 0), "right", "left"),
-        ("route_22_rival_1_challenge_5_lower", "route_22_rival_1_5_lower", .init(x: -1, y: 0), "right", "left"),
-        ("route_22_rival_1_challenge_6_lower", "route_22_rival_1_6_lower", .init(x: -1, y: 0), "right", "left"),
+        ("route_22_rival_1_challenge_4_upper", "route_22_rival_1_4_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_5_upper", "route_22_rival_1_5_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_6_upper", "route_22_rival_1_6_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_4_lower", "route_22_rival_1_4_lower", .init(x: -1, y: 0), "up", "down"),
+        ("route_22_rival_1_challenge_5_lower", "route_22_rival_1_5_lower", .init(x: -1, y: 0), "up", "down"),
+        ("route_22_rival_1_challenge_6_lower", "route_22_rival_1_6_lower", .init(x: -1, y: 0), "up", "down"),
     ]
 
     for variant in route22ChallengeVariants {

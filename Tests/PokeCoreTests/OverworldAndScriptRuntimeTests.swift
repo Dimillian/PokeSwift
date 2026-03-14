@@ -379,6 +379,38 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.itemQuantity("TM_BIDE"), 1)
     }
 
+    func testRepoGeneratedRoute22RivalInteractionShowsContextualDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_22"
+        runtime.gameplayState?.playerPosition = .init(x: 28, y: 5)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.activeFlags.formUnion(["EVENT_1ST_ROUTE22_RIVAL_BATTLE", "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"])
+
+        let route22 = try XCTUnwrap(runtime.content.map(id: "ROUTE_22"))
+        let rivalManifest = try XCTUnwrap(route22.objects.first { $0.id == "route_22_rival_1" })
+        runtime.gameplayState?.objectStates["route_22_rival_1"] = RuntimeObjectState(
+            position: rivalManifest.position,
+            facing: rivalManifest.facing,
+            visible: true
+        )
+
+        let rival = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "route_22_rival_1" })
+
+        runtime.interact(with: rival)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "route_22_rival_before_battle_1")
+
+        advanceDialogueUntilComplete(runtime)
+
+        runtime.gameplayState?.activeFlags.insert("EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE")
+        runtime.interact(with: rival)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "route_22_rival_after_battle_1")
+    }
+
     func testRepoGeneratedRoute22FirstRivalTriggerStartsBattleAndClearsFlagsAfterWin() async throws {
         let runtime = try makeRepoRuntime()
 

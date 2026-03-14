@@ -40,6 +40,7 @@ final class AssetCopyingTests: XCTestCase {
             "Assets/battle/trainers/bugcatcher.png",
             "Assets/battle/trainers/red.png",
             "Assets/battle/trainers/redb.png",
+            "Assets/battle/effects/send_out_poof.png",
         ]
 
         for relativePath in expectedFieldAssets {
