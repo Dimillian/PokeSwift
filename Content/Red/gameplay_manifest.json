@@ -10275,7 +10275,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "reds_house_1f_warp_1",
@@ -10290,7 +10290,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "reds_house_1f_warp_2",
@@ -21135,7 +21135,7 @@
             "y" : 15
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_school_house_warp_1",
@@ -21150,7 +21150,7 @@
             "y" : 15
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -21370,7 +21370,7 @@
             "y" : 9
           },
           "targetWarpIndex" : 3,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_nickname_house_warp_1",
@@ -21385,7 +21385,7 @@
             "y" : 9
           },
           "targetWarpIndex" : 3,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -21666,7 +21666,7 @@
             "y" : 25
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_pokecenter_warp_1",
@@ -21681,7 +21681,7 @@
             "y" : 25
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -21906,7 +21906,7 @@
             "y" : 19
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_mart_warp_1",
@@ -21921,7 +21921,7 @@
             "y" : 19
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -22141,7 +22141,7 @@
             "y" : 43
           },
           "targetWarpIndex" : 5,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_forest_south_gate_warp_3",
@@ -22156,7 +22156,7 @@
             "y" : 43
           },
           "targetWarpIndex" : 5,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -24772,7 +24772,7 @@
             "y" : 11
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_forest_north_gate_warp_1",
@@ -24787,7 +24787,7 @@
             "y" : 11
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "viridian_forest_north_gate_warp_2",
@@ -25426,7 +25426,7 @@
             "y" : 11
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "oaks_lab_warp_1",
@@ -25441,7 +25441,7 @@
             "y" : 11
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -28524,7 +28524,7 @@
             "y" : 25
           },
           "targetWarpIndex" : 6,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "pewter_pokecenter_warp_1",
@@ -28539,7 +28539,7 @@
             "y" : 25
           },
           "targetWarpIndex" : 6,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -28739,7 +28739,7 @@
             "y" : 17
           },
           "targetWarpIndex" : 4,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "pewter_mart_warp_1",
@@ -28754,7 +28754,7 @@
             "y" : 17
           },
           "targetWarpIndex" : 4,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -28949,7 +28949,7 @@
             "y" : 13
           },
           "targetWarpIndex" : 3,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "pewter_nidoran_house_warp_1",
@@ -28964,7 +28964,7 @@
             "y" : 13
           },
           "targetWarpIndex" : 3,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -29134,7 +29134,7 @@
             "y" : 29
           },
           "targetWarpIndex" : 5,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "pewter_speech_house_warp_1",
@@ -29149,7 +29149,7 @@
             "y" : 29
           },
           "targetWarpIndex" : 5,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -29565,7 +29565,7 @@
             "y" : 7
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "museum_1f_warp_1",
@@ -29580,7 +29580,7 @@
             "y" : 7
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "museum_1f_warp_2",
@@ -29595,7 +29595,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "museum_1f_warp_3",
@@ -29610,7 +29610,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 1,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "museum_1f_warp_4",
@@ -30287,7 +30287,7 @@
             "y" : 17
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "pewter_gym_warp_1",
@@ -30302,7 +30302,7 @@
             "y" : 17
           },
           "targetWarpIndex" : 2,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },
@@ -36197,7 +36197,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         },
         {
           "id" : "mt_moon_pokecenter_warp_1",
@@ -36212,7 +36212,7 @@
             "y" : 5
           },
           "targetWarpIndex" : 0,
-          "usesPreviousMapTarget" : true
+          "usesPreviousMapTarget" : false
         }
       ]
     },

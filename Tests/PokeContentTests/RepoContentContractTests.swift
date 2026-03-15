@@ -214,7 +214,8 @@ final class RepoContentContractTests: XCTestCase {
         )
         XCTAssertEqual(loaded.map(id: "PEWTER_GYM")?.defaultMusicID, "MUSIC_GYM")
         XCTAssertEqual(loaded.map(id: "ROUTE_3")?.defaultMusicID, "MUSIC_ROUTES3")
-        XCTAssertEqual(loaded.map(id: "MT_MOON_POKECENTER")?.warps.allSatisfy(\.usesPreviousMapTarget), true)
+        XCTAssertEqual(loaded.map(id: "MT_MOON_POKECENTER")?.warps.allSatisfy { $0.usesPreviousMapTarget == false }, true)
+        XCTAssertEqual(loaded.map(id: "REDS_HOUSE_1F")?.warps.prefix(2).allSatisfy { $0.usesPreviousMapTarget == false }, true)
         XCTAssertEqual(
             loaded.mapScript(for: "MT_MOON_B2F")?.triggers.map(\.scriptID),
             ["mt_moon_b2f_super_nerd_battle"]

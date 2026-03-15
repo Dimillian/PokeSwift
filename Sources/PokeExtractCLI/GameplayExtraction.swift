@@ -857,7 +857,16 @@ private func resolveTargetMapID(
 }
 
 private func warpUsesPreviousMapTarget(from currentMap: MapManifestDraft, rawWarp: RawWarpEntry) -> Bool {
-    rawWarp.rawTargetMapID == "LAST_MAP" && currentMap.id != "ROUTE_22_GATE"
+    guard rawWarp.rawTargetMapID == "LAST_MAP" else {
+        return false
+    }
+
+    switch currentMap.id {
+    case "MT_MOON_1F", "MT_MOON_B1F":
+        return true
+    default:
+        return false
+    }
 }
 
 private func resolveTargetWarpPosition(

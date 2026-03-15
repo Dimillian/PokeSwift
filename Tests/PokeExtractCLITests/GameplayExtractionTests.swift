@@ -1041,7 +1041,7 @@ final class GameplayExtractionTests: XCTestCase {
 
         let mtMoonPokecenter = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_POKECENTER" })
         XCTAssertEqual(mtMoonPokecenter.tileset, "POKECENTER")
-        XCTAssertTrue(mtMoonPokecenter.warps.allSatisfy(\.usesPreviousMapTarget))
+        XCTAssertTrue(mtMoonPokecenter.warps.allSatisfy { $0.usesPreviousMapTarget == false })
         XCTAssertEqual(mtMoonPokecenter.objects.first { $0.id == "mt_moon_pokecenter_nurse" }?.interactionScriptID, "mt_moon_pokecenter_nurse_heal")
 
         let mtMoon1F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_1F" })
@@ -1054,6 +1054,9 @@ final class GameplayExtractionTests: XCTestCase {
         let mtMoonB1F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_B1F" })
         XCTAssertEqual(mtMoonB1F.tileset, "CAVERN")
         XCTAssertTrue(mtMoonB1F.warps.last?.usesPreviousMapTarget ?? false)
+
+        let redsHouse1F = try XCTUnwrap(manifest.maps.first { $0.id == "REDS_HOUSE_1F" })
+        XCTAssertTrue(redsHouse1F.warps.prefix(2).allSatisfy { $0.usesPreviousMapTarget == false })
 
         let mtMoonB2F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_B2F" })
         XCTAssertEqual(mtMoonB2F.tileset, "CAVERN")

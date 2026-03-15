@@ -907,6 +907,24 @@ extension PokeCoreTests {
         XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
     }
+    func testRepoGeneratedRedsHouseDoorWarpIgnoresIndoorPreviousMapAnchor() async throws {
+        let runtime = try makeRepoRuntime()
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_1F"
+        runtime.gameplayState?.previousMapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 2, y: 6)
+        runtime.gameplayState?.facing = .down
+
+        runtime.movePlayer(in: .down)
+
+        let settledSnapshot = try await waitForSnapshot(runtime) {
+            $0.field?.mapID == "PALLET_TOWN" && $0.field?.transition == nil
+        }
+        XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
+        XCTAssertEqual(settledSnapshot.field?.facing, .down)
+    }
     func testRepoGeneratedViridianForestSouthGateCenterAisleWalksNorthThroughEntrance() async throws {
         let runtime = try makeRepoRuntime()
         runtime.gameplayState = runtime.makeInitialGameplayState()
