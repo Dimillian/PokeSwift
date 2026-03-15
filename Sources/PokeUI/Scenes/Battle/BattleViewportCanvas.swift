@@ -8,6 +8,7 @@ struct BattleViewportCanvas: View {
     let kind: BattleKind
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let isEnemySpeciesOwned: Bool
     let trainerSpriteURL: URL?
     let playerTrainerFrontSpriteURL: URL?
     let playerTrainerBackSpriteURL: URL?
@@ -167,12 +168,14 @@ struct BattleViewportCanvas: View {
     private func hudLayer(layout: BattleViewportLayout) -> some View {
         let sharedNameScale = BattleStatusCard.sharedNameScale(
             enemyCardWidth: layout.enemyCardSize.width,
-            playerCardWidth: layout.playerCardSize.width
+            playerCardWidth: layout.playerCardSize.width,
+            enemyShowsCaughtIndicator: shouldShowEnemyCaughtIndicator
         )
 
         BattleStatusCard(
             pokemon: enemyPokemon,
             chrome: .enemy,
+            showsCaughtIndicator: shouldShowEnemyCaughtIndicator,
             showsExperience: false,
             presentation: presentation,
             nameScale: sharedNameScale
@@ -186,6 +189,7 @@ struct BattleViewportCanvas: View {
         BattleStatusCard(
             pokemon: playerPokemon,
             chrome: .player,
+            showsCaughtIndicator: false,
             showsExperience: true,
             presentation: presentation,
             nameScale: sharedNameScale
@@ -203,6 +207,14 @@ struct BattleViewportCanvas: View {
 
     private var isWildBattle: Bool {
         kind == .wild
+    }
+
+    private var shouldShowEnemyCaughtIndicator: Bool {
+        BattleStatusCard.showsCaughtIndicator(
+            chrome: .enemy,
+            battleKind: kind,
+            isSpeciesOwned: isEnemySpeciesOwned
+        )
     }
 
     private var playerTrainerSpriteURL: URL? {
@@ -684,23 +696,6 @@ struct BattleViewportCanvas: View {
             return max(1, floor(rawScale))
         }
         return rawScale
-    }
-}
-
-private struct BattlePokeballToken: View {
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(Color.white.opacity(0.95))
-            Circle()
-                .stroke(Color.black.opacity(0.82), lineWidth: 1.5)
-            Rectangle()
-                .fill(Color.black.opacity(0.82))
-                .frame(height: 1.5)
-            Circle()
-                .fill(Color.black.opacity(0.82))
-                .frame(width: 4, height: 4)
-        }
     }
 }
 

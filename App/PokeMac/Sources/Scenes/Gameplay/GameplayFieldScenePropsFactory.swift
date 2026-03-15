@@ -127,6 +127,7 @@ enum GameplayScenePropsFactory {
         case .battle:
             let battleState = runtime.currentBattleSceneState()
             guard let battle = battleState.battle else { return nil }
+            let isEnemySpeciesOwned = runtime.ownedSpeciesIDs.contains(battle.enemyPokemon.speciesID)
 
             let playerSpriteURL = runtime.content.species(id: battle.playerPokemon.speciesID)?
                 .battleSprite
@@ -155,6 +156,7 @@ enum GameplayScenePropsFactory {
                         textLines: battle.textLines,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
+                        isEnemySpeciesOwned: isEnemySpeciesOwned,
                         trainerSpriteURL: trainerSpriteURL,
                         playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
                         playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,

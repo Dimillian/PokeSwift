@@ -208,6 +208,7 @@ extension PokeUITests {
         special: 10,
         moves: ["SCRATCH", "GROWL"]
       ),
+      isEnemySpeciesOwned: false,
       trainerSpriteURL: nil,
       playerTrainerFrontSpriteURL: nil,
       playerTrainerBackSpriteURL: nil,
@@ -228,9 +229,13 @@ extension PokeUITests {
     let layout = BattleViewportLayout(size: CGSize(width: 320, height: 288))
     let nameScale = BattleStatusCard.sharedNameScale(
       enemyCardWidth: layout.enemyCardSize.width,
-      playerCardWidth: layout.playerCardSize.width
+      playerCardWidth: layout.playerCardSize.width,
+      enemyShowsCaughtIndicator: true
     )
-    let availableWidth = BattleStatusCard.availableNameWidth(cardWidth: layout.enemyCardSize.width)
+    let availableWidth = BattleStatusCard.availableNameWidth(
+      cardWidth: layout.enemyCardSize.width,
+      showsCaughtIndicator: true
+    )
 
     XCTAssertLessThan(nameScale, BattleStatusCard.preferredNameScale)
     XCTAssertLessThanOrEqual(
@@ -246,6 +251,19 @@ extension PokeUITests {
     )
 
     XCTAssertEqual(nameScale, BattleStatusCard.preferredNameScale, accuracy: 0.001)
+  }
+  func testBattleStatusCardCaughtIndicatorShowsOnlyForOwnedEnemy() {
+    XCTAssertTrue(BattleStatusCard.showsCaughtIndicator(chrome: .enemy, battleKind: .wild, isSpeciesOwned: true))
+    XCTAssertFalse(BattleStatusCard.showsCaughtIndicator(chrome: .enemy, battleKind: .wild, isSpeciesOwned: false))
+    XCTAssertFalse(BattleStatusCard.showsCaughtIndicator(chrome: .enemy, battleKind: .trainer, isSpeciesOwned: true))
+    XCTAssertFalse(BattleStatusCard.showsCaughtIndicator(chrome: .player, battleKind: .wild, isSpeciesOwned: true))
+  }
+  func testBattleStatusCardCaughtIndicatorUsesVisibleAccessorySize() {
+    XCTAssertGreaterThan(BattleStatusCard.caughtIndicatorDiameter(scale: BattleStatusCard.metadataScale), 0)
+    XCTAssertGreaterThan(
+      BattleStatusCard.caughtIndicatorReservedWidth(scale: BattleStatusCard.metadataScale),
+      BattleStatusCard.caughtIndicatorDiameter(scale: BattleStatusCard.metadataScale)
+    )
   }
   func testSidebarPropBuilderMapsEmptyPartyProfile() {
     let profile = GameplaySidebarPropsBuilder.makeProfile(
