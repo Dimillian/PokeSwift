@@ -688,6 +688,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
 
 public enum FieldInteractionKind: String, Codable, Equatable, Sendable {
     case pokemonCenterHealing
+    case paidAdmission
 }
 
 public enum FieldPromptKind: String, Codable, Equatable, Sendable {
@@ -723,6 +724,28 @@ public struct FieldHealingSequenceManifest: Codable, Equatable, Sendable {
     }
 }
 
+public struct FieldPaidAdmissionManifest: Codable, Equatable, Sendable {
+    public let price: Int
+    public let successFlagID: String
+    public let insufficientFundsDialogueID: String
+    public let purchaseSoundEffectID: String?
+    public let deniedExitPath: [FacingDirection]
+
+    public init(
+        price: Int,
+        successFlagID: String,
+        insufficientFundsDialogueID: String,
+        purchaseSoundEffectID: String? = nil,
+        deniedExitPath: [FacingDirection] = []
+    ) {
+        self.price = price
+        self.successFlagID = successFlagID
+        self.insufficientFundsDialogueID = insufficientFundsDialogueID
+        self.purchaseSoundEffectID = purchaseSoundEffectID
+        self.deniedExitPath = deniedExitPath
+    }
+}
+
 public struct FieldInteractionManifest: Codable, Equatable, Sendable {
     public let id: String
     public let kind: FieldInteractionKind
@@ -733,6 +756,7 @@ public struct FieldInteractionManifest: Codable, Equatable, Sendable {
     public let declinedDialogueID: String?
     public let farewellDialogueID: String
     public let healingSequence: FieldHealingSequenceManifest?
+    public let paidAdmission: FieldPaidAdmissionManifest?
 
     public init(
         id: String,
@@ -743,7 +767,8 @@ public struct FieldInteractionManifest: Codable, Equatable, Sendable {
         successDialogueID: String,
         declinedDialogueID: String? = nil,
         farewellDialogueID: String,
-        healingSequence: FieldHealingSequenceManifest? = nil
+        healingSequence: FieldHealingSequenceManifest? = nil,
+        paidAdmission: FieldPaidAdmissionManifest? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -754,6 +779,7 @@ public struct FieldInteractionManifest: Codable, Equatable, Sendable {
         self.declinedDialogueID = declinedDialogueID
         self.farewellDialogueID = farewellDialogueID
         self.healingSequence = healingSequence
+        self.paidAdmission = paidAdmission
     }
 }
 
