@@ -5,6 +5,12 @@ import PokeDataModel
 
 @MainActor
 final class PokeAudioService: RuntimeAudioPlaying {
+    private enum MixDefaults {
+        static let masterVolume: Float = 0.6
+        static let musicVolume: Float = 0.4
+        static let soundEffectVolume: Float = 1.0
+    }
+
     private struct RenderedChannelBuffers: @unchecked Sendable {
         let prelude: AVAudioPCMBuffer?
         let loop: AVAudioPCMBuffer?
@@ -43,6 +49,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
     private let manifest: AudioManifest
     private let engine = AVAudioEngine()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
+    private let musicMixerNode = AVAudioMixerNode()
+    private let soundEffectMixerNode = AVAudioMixerNode()
     private let renderQueue = DispatchQueue(
         label: "com.dimillian.PokeSwift.audio-render",
         qos: .userInitiated,
@@ -63,11 +71,23 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     init(manifest: AudioManifest) {
         self.manifest = manifest
-        for player in musicPlayers + soundEffectPlayers {
+        engine.attach(musicMixerNode)
+        engine.attach(soundEffectMixerNode)
+        engine.connect(musicMixerNode, to: engine.mainMixerNode, format: format)
+        engine.connect(soundEffectMixerNode, to: engine.mainMixerNode, format: format)
+
+        for player in musicPlayers {
             engine.attach(player)
-            engine.connect(player, to: engine.mainMixerNode, format: format)
+            engine.connect(player, to: musicMixerNode, format: format)
         }
-        engine.mainMixerNode.outputVolume = 0.6
+        for player in soundEffectPlayers {
+            engine.attach(player)
+            engine.connect(player, to: soundEffectMixerNode, format: format)
+        }
+
+        musicMixerNode.outputVolume = MixDefaults.musicVolume
+        soundEffectMixerNode.outputVolume = MixDefaults.soundEffectVolume
+        engine.mainMixerNode.outputVolume = MixDefaults.masterVolume
         try? engine.start()
         primeMusicEntryIfPossible(trackID: manifest.titleTrackID, entryID: "default")
         prewarmMusicManifest()
