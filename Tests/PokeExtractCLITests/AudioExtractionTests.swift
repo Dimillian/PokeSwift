@@ -13,6 +13,10 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(
             manifest.mapRoutes,
             [
+                .init(mapID: "MT_MOON_1F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_B1F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_B2F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_POKECENTER", musicID: "MUSIC_POKECENTER"),
                 .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
@@ -30,6 +34,7 @@ final class AudioExtractionTests: XCTestCase {
                 .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
+                .init(mapID: "ROUTE_4", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
@@ -68,6 +73,7 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_ROUTES3",
             "MUSIC_CITIES1",
             "MUSIC_DUNGEON2",
+            "MUSIC_DUNGEON3",
             "MUSIC_GYM",
             "MUSIC_POKECENTER",
             "MUSIC_MEET_PROF_OAK",
@@ -264,9 +270,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 25)
+        XCTAssertEqual(decoded.mapRoutes.count, 30)
         XCTAssertEqual(decoded.cues.count, 13)
-        XCTAssertEqual(decoded.tracks.count, 19)
+        XCTAssertEqual(decoded.tracks.count, 20)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }
