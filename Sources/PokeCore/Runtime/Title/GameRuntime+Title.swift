@@ -78,13 +78,9 @@ extension GameRuntime {
                 optionsTextSpeed = next
             }
         case 1:
-            if let next = stepped(among: BattleAnimation.allCases, from: optionsBattleAnimation, by: delta) {
-                optionsBattleAnimation = next
-            }
+            optionsBattleAnimation = toggled(among: BattleAnimation.allCases, from: optionsBattleAnimation)
         case 2:
-            if let next = stepped(among: BattleStyle.allCases, from: optionsBattleStyle, by: delta) {
-                optionsBattleStyle = next
-            }
+            optionsBattleStyle = toggled(among: BattleStyle.allCases, from: optionsBattleStyle)
         default:
             break
         }
@@ -95,6 +91,11 @@ extension GameRuntime {
         let next = idx + delta
         guard options.indices.contains(next) else { return nil }
         return options[next]
+    }
+
+    private func toggled<T: Equatable>(among options: [T], from current: T) -> T {
+        guard let idx = options.firstIndex(of: current) else { return current }
+        return options[(idx + 1) % options.count]
     }
 
     func beginNewGame() {

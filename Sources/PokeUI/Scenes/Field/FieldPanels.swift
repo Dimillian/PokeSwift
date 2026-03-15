@@ -56,12 +56,12 @@ public struct DialogueBoxView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .task(id: lines) {
-            revealedCharacters = 0
             let total = totalCharacters
-            guard total > 0 else {
-                onFullyRevealed?()
+            guard total > 0, onFullyRevealed != nil else {
+                revealedCharacters = total
                 return
             }
+            revealedCharacters = 0
             let delay = textSpeed.characterDelay
             for i in 1...total {
                 try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
@@ -72,7 +72,9 @@ public struct DialogueBoxView: View {
             onFullyRevealed?()
         }
         .onChange(of: lines) { _, _ in
-            revealedCharacters = 0
+            if onFullyRevealed != nil {
+                revealedCharacters = 0
+            }
         }
         .onChange(of: instantReveal) { _, newValue in
             if newValue, isFullyRevealed == false {
