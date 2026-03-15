@@ -132,6 +132,36 @@ extension PokeUITests {
     )
   }
 
+  func testBattleSendOutPinsPlayerBallAtAnchorBeforePoof() {
+    XCTAssertEqual(
+      BattleViewportCanvas.pokeballTravelProgress(
+        sendOutState: .toss(progress: 0),
+        activeSide: .player
+      ),
+      1,
+      accuracy: 0.0001
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.pokeballTravelProgress(
+        sendOutState: .releaseHold,
+        activeSide: .player
+      ),
+      1,
+      accuracy: 0.0001
+    )
+  }
+
+  func testBattleSendOutKeepsEnemyBallTossProgress() {
+    XCTAssertEqual(
+      BattleViewportCanvas.pokeballTravelProgress(
+        sendOutState: .toss(progress: 0.35),
+        activeSide: .enemy
+      ),
+      0.35,
+      accuracy: 0.0001
+    )
+  }
+
   func testBattleSendOutStateResolvesToIdleWhenAnimationKeyIsStale() {
     XCTAssertEqual(
       BattleViewportCanvas.resolvedSendOutState(

@@ -536,6 +536,11 @@ struct BattleViewportCanvas: View {
             end = layout.playerSendOutAnchor
         }
 
+        let progress = Self.pokeballTravelProgress(
+            sendOutState: currentSendOutState,
+            activeSide: presentation.activeSide
+        )
+
         return quadraticBezier(
             start: start,
             control: CGPoint(
@@ -543,7 +548,7 @@ struct BattleViewportCanvas: View {
                 y: min(start.y, end.y) - layout.size.height * 0.18
             ),
             end: end,
-            progress: currentSendOutState.ballProgress
+            progress: progress
         )
     }
 
@@ -581,6 +586,22 @@ struct BattleViewportCanvas: View {
         // the stage revision animate the whole sprite causes SwiftUI to tween
         // more than just scale/opacity, which reads as the Pokemon drifting.
         !(stage == .enemySendOut && activeSide == side)
+    }
+
+    static func pokeballTravelProgress(
+        sendOutState: BattleSendOutVisualState,
+        activeSide: BattlePresentationSide?
+    ) -> CGFloat {
+        guard activeSide == .player else {
+            return sendOutState.ballProgress
+        }
+
+        switch sendOutState {
+        case .toss, .releaseHold:
+            return 1
+        case .idle, .poof, .revealStep1, .revealStep2, .revealFinal:
+            return sendOutState.ballProgress
+        }
     }
 
     static func resolvedSendOutState(
