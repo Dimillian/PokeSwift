@@ -523,15 +523,15 @@ private struct PokedexDetailContent: View {
             if entry.detailFields.isEmpty == false {
                 detailFieldsSection
             }
+            baseStatsSection
+            if let description = entry.descriptionText {
+                descriptionSection(description)
+            }
             if entry.preEvolution != nil || entry.evolutions.isEmpty == false {
                 evolutionSection
             }
             if entry.learnedMoves.isEmpty == false {
                 levelUpMovesSection
-            }
-            baseStatsSection
-            if let description = entry.descriptionText {
-                descriptionSection(description)
             }
         }
     }
