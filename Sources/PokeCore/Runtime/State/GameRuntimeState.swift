@@ -605,6 +605,7 @@ struct DialogueState {
         case fieldPrompt(interactionID: String, completionAction: CompletionAction)
         case startFieldHealing(interactionID: String, completionAction: CompletionAction)
         case beginScriptedMovement(path: [FacingDirection])
+        case openScriptItemPrompt(RuntimeScriptItemPromptState)
     }
 
     let dialogueID: String
@@ -619,6 +620,15 @@ struct RuntimeFieldPromptState {
     let kind: FieldPromptKind
     let completionAction: DialogueState.CompletionAction
     var focusedIndex: Int
+}
+
+struct RuntimeScriptItemPromptState {
+    let promptID: String
+    let itemID: String
+    let targetObjectID: String?
+    let successFlagID: String?
+    let successDialogueID: String
+    let failureDialogueID: String?
 }
 
 enum RuntimeFieldHealingPhase: String {
@@ -802,6 +812,7 @@ struct RuntimeFieldAlertState: Equatable {
 
 struct GameplayState {
     var mapID: String
+    var previousMapID: String?
     var playerPosition: TilePoint
     var facing: FacingDirection
     var blackoutCheckpoint: BlackoutCheckpointManifest?

@@ -49,14 +49,16 @@ struct BattleSummaryContent: View {
                 }
             }
 
-            if props.showsInterface {
+            if props.showsEnemyCombatantStatus {
                 BattleCombatantStatusRow(
                     title: "FOE",
                     pokemon: props.enemyPokemon,
                     accentFill: FieldRetroPalette.slotFill.opacity(0.82),
                     showsExperience: false
                 )
+            }
 
+            if props.showsPlayerCombatantStatus {
                 BattleCombatantStatusRow(
                     title: "YOU",
                     pokemon: props.playerPokemon,

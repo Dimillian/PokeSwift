@@ -129,6 +129,58 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "PEWTER_CITY")
     }
 
+    func testRepoGeneratedRoute3NorthConnectionCrossesIntoRoute4() throws {
+        let runtime = try makeRepoRuntime()
+        let start = try findConnectionStart(
+            from: "ROUTE_3",
+            moving: .up,
+            expecting: "ROUTE_4"
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_3"
+        runtime.gameplayState?.playerPosition = start
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_4")
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_4")
+    }
+
+    func testRepoGeneratedMtMoonB1FExitWarpReturnsToRoute4Anchor() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_4"
+        runtime.gameplayState?.playerPosition = .init(x: 24, y: 5)
+        runtime.gameplayState?.facing = .up
+
+        XCTAssertTrue(runtime.handleWarpIfNeeded())
+        _ = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.field?.mapID == "MT_MOON_B1F" && $0.field?.transition == nil
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "MT_MOON_B1F")
+        XCTAssertEqual(runtime.gameplayState?.previousMapID, "ROUTE_4")
+
+        runtime.gameplayState?.playerPosition = .init(x: 27, y: 3)
+        runtime.gameplayState?.facing = .up
+
+        XCTAssertTrue(runtime.handleWarpIfNeeded())
+        _ = try await waitForSnapshot(runtime, timeout: 2.0) {
+            $0.field?.mapID == "ROUTE_4" && $0.field?.transition == nil
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_4")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, .init(x: 24, y: 6))
+        XCTAssertEqual(runtime.gameplayState?.previousMapID, "ROUTE_4")
+    }
+
     func testRepoGeneratedMuseum1FOldAmberExhibitShowsDialogue() throws {
         let runtime = try makeRepoRuntime()
 
@@ -202,6 +254,70 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.scene, .field)
         XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_1")
         XCTAssertEqual(runtime.gameplayState?.playerPosition, grassTile)
+    }
+
+    func testRepoGeneratedMtMoonFloorCanTriggerWildEncounterAndEscapeForFixedRandomBytes() throws {
+        let runtime = try makeRepoRuntime()
+        let encounterTile = try findLandEncounterFloorTile(in: runtime, mapID: "MT_MOON_1F")
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MT_MOON_1F"
+        runtime.gameplayState?.playerPosition = encounterTile
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 12, nickname: "Squirtle")]
+        runtime.setAcquisitionRandomOverrides([0, 0])
+
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .wild)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPokemon.speciesID, "ZUBAT")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPokemon.level, 8)
+
+        drainBattleText(runtime)
+        runtime.handle(button: .cancel)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.gameplayState?.mapID, "MT_MOON_1F")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, encounterTile)
+    }
+    func testRepoGeneratedMtMoonB2FFossilAreaSuppressesEncountersAfterSuperNerd() throws {
+        let runtime = try makeRepoRuntime()
+        let fossilAreaPositions = (5...8).flatMap { y in
+            (11...14).map { x in TilePoint(x: x, y: y) }
+        }
+        let outsideEncounterTile = try findLandEncounterFloorTile(
+            in: runtime,
+            mapID: "MT_MOON_B2F",
+            excluding: fossilAreaPositions
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MT_MOON_B2F"
+        runtime.gameplayState?.playerPosition = .init(x: 11, y: 5)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 12, nickname: "Squirtle")]
+        runtime.gameplayState?.activeFlags.insert("EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
+        runtime.setAcquisitionRandomOverrides([0, 0, 0, 0])
+
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.currentSnapshot().battle)
+        XCTAssertEqual(runtime.gameplayState?.encounterStepCounter, 0)
+
+        runtime.gameplayState?.playerPosition = outsideEncounterTile
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .wild)
     }
     func testWildEncounterSlotThresholdsMatchGBTableForFixedRolls() {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
@@ -825,6 +941,24 @@ extension PokeCoreTests {
         XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
         XCTAssertEqual(settledSnapshot.field?.facing, .down)
     }
+    func testRepoGeneratedRedsHouseDoorWarpIgnoresIndoorPreviousMapAnchor() async throws {
+        let runtime = try makeRepoRuntime()
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_1F"
+        runtime.gameplayState?.previousMapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.playerPosition = TilePoint(x: 2, y: 6)
+        runtime.gameplayState?.facing = .down
+
+        runtime.movePlayer(in: .down)
+
+        let settledSnapshot = try await waitForSnapshot(runtime) {
+            $0.field?.mapID == "PALLET_TOWN" && $0.field?.transition == nil
+        }
+        XCTAssertEqual(settledSnapshot.field?.playerPosition, .init(x: 5, y: 6))
+        XCTAssertEqual(settledSnapshot.field?.facing, .down)
+    }
     func testRepoGeneratedViridianForestSouthGateCenterAisleWalksNorthThroughEntrance() async throws {
         let runtime = try makeRepoRuntime()
         runtime.gameplayState = runtime.makeInitialGameplayState()
@@ -1253,6 +1387,59 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["boulder"]))
         XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_GOT_TM34") ?? false)
         XCTAssertEqual(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BIDE" }?.quantity, 1)
+    }
+
+    func testRepoGeneratedMtMoonSuperNerdBattleThenDomeFossilChoiceUpdatesState() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MT_MOON_B2F"
+        runtime.gameplayState?.playerPosition = .init(x: 13, y: 8)
+        runtime.gameplayState?.facing = .left
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 28, nickname: "Wartortle")]
+
+        runtime.evaluateMapScriptsIfNeeded()
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_super_nerd_2")
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD") ?? false)
+        }
+
+        runtime.gameplayState?.playerPosition = .init(x: 12, y: 7)
+        runtime.gameplayState?.facing = .up
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "mt_moon_b2f_dome_fossil_you_want")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+
+        runtime.handle(button: .confirm)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_DOME_FOSSIL") ?? false)
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("DOME_FOSSIL"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_DOME_FOSSIL"))
+        XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_dome_fossil" }))
+        XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_helix_fossil" }))
+        XCTAssertTrue(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_super_nerd" }))
     }
 
     func testLossCanContinueIntoConfiguredPostBattleScript() {

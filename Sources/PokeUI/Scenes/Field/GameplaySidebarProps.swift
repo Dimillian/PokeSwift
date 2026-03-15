@@ -674,6 +674,33 @@ public struct BattleSidebarProps: Equatable, Sendable {
         presentation.uiVisibility == .visible
     }
 
+    public var showsEnemyCombatantStatus: Bool {
+        guard showsInterface else {
+            return false
+        }
+
+        if kind == .trainer, presentation.stage == .introReveal {
+            return false
+        }
+
+        return true
+    }
+
+    public var showsPlayerCombatantStatus: Bool {
+        guard showsInterface else {
+            return false
+        }
+
+        switch presentation.stage {
+        case .introReveal:
+            return false
+        case .enemySendOut where presentation.activeSide == .enemy:
+            return false
+        default:
+            return true
+        }
+    }
+
     public var actionRows: [BattleSidebarActionRowProps] {
         guard showsInterface else {
             return []

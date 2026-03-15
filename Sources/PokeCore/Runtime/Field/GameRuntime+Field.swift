@@ -13,6 +13,13 @@ private struct ResolvedFieldStep {
     let point: TilePoint
 }
 
+private struct ResolvedWarpDestination {
+    let map: MapManifest
+    let position: TilePoint
+    let facing: FacingDirection
+    let previousMapID: String?
+}
+
 extension GameRuntime {
     func handleField(button: RuntimeButton) {
         if nicknameConfirmation != nil {
@@ -477,12 +484,17 @@ extension GameRuntime {
         guard var gameplayState,
               let map = content.map(id: gameplayState.mapID),
               let warp = map.warps.first(where: { $0.origin == gameplayState.playerPosition }),
-              let targetMap = content.map(id: warp.targetMapID) else {
+              let destination = resolveWarpDestination(for: warp, from: map, gameplayState: gameplayState) else {
             return false
         }
         clearHeldFieldDirections()
-        let transitionKind = fieldTransitionKind(sourceMap: map, sourcePosition: warp.origin, targetMap: targetMap, targetPosition: warp.targetPosition)
-        let shouldStepOut = shouldAutoStepOut(on: warp.targetPosition, in: targetMap)
+        let transitionKind = fieldTransitionKind(
+            sourceMap: map,
+            sourcePosition: warp.origin,
+            targetMap: destination.map,
+            targetPosition: destination.position
+        )
+        let shouldStepOut = shouldAutoStepOut(on: destination.position, in: destination.map)
 
         gameplayState.activeMapScriptTriggerID = nil
         self.gameplayState = gameplayState
@@ -495,7 +507,7 @@ extension GameRuntime {
         fieldTransitionTask = Task { [weak self] in
             await self?.runWarpTransition(
                 warp: warp,
-                targetMap: targetMap,
+                destination: destination,
                 kind: transitionKind,
                 shouldStepOut: shouldStepOut
             )
@@ -503,9 +515,9 @@ extension GameRuntime {
         return true
     }
 
-    func runWarpTransition(
+    private func runWarpTransition(
         warp: WarpManifest,
-        targetMap: MapManifest,
+        destination: ResolvedWarpDestination,
         kind: RuntimeFieldTransitionKind,
         shouldStepOut: Bool
     ) async {
@@ -519,9 +531,10 @@ extension GameRuntime {
         await sleep(seconds: fieldFadeDuration)
 
         guard Task.isCancelled == false, var gameplayState else { return }
-        gameplayState.mapID = targetMap.id
-        gameplayState.playerPosition = warp.targetPosition
-        gameplayState.facing = warp.targetFacing
+        gameplayState.mapID = destination.map.id
+        gameplayState.previousMapID = destination.previousMapID
+        gameplayState.playerPosition = destination.position
+        gameplayState.facing = destination.facing
         gameplayState.activeMapScriptTriggerID = nil
         self.gameplayState = gameplayState
 
@@ -550,16 +563,80 @@ extension GameRuntime {
         publishSnapshot()
         traceEvent(
             .warpCompleted,
-            "Warped to \(targetMap.id).",
-            mapID: targetMap.id,
+            "Warped to \(destination.map.id).",
+            mapID: destination.map.id,
             details: [
                 "warpID": warp.id,
-                "toMapID": targetMap.id,
+                "toMapID": destination.map.id,
                 "transitionKind": kind.rawValue,
                 "steppedOut": shouldStepOut ? "true" : "false",
             ]
         )
         evaluateMapScriptsIfNeeded()
+    }
+
+    private func resolveWarpDestination(
+        for warp: WarpManifest,
+        from sourceMap: MapManifest,
+        gameplayState: GameplayState
+    ) -> ResolvedWarpDestination? {
+        let targetMapID = resolvedWarpTargetMapID(for: warp, gameplayState: gameplayState)
+        guard let targetMap = content.map(id: targetMapID) else {
+            return nil
+        }
+        let targetPosition = resolvedWarpTargetPosition(for: warp, in: targetMap)
+        let targetFacing = resolvedWarpTargetFacing(for: warp, targetMap: targetMap, targetPosition: targetPosition)
+        let previousMapID = updatedPreviousMapID(
+            entering: targetMap,
+            from: sourceMap,
+            currentPreviousMapID: gameplayState.previousMapID
+        )
+        return ResolvedWarpDestination(
+            map: targetMap,
+            position: targetPosition,
+            facing: targetFacing,
+            previousMapID: previousMapID
+        )
+    }
+
+    func resolvedWarpTargetMapID(for warp: WarpManifest, gameplayState: GameplayState) -> String {
+        if warp.usesPreviousMapTarget, let previousMapID = gameplayState.previousMapID {
+            return previousMapID
+        }
+        return warp.targetMapID
+    }
+
+    func resolvedWarpTargetPosition(for warp: WarpManifest, in targetMap: MapManifest) -> TilePoint {
+        guard let targetWarpIndex = warp.targetWarpIndex,
+              targetMap.warps.indices.contains(targetWarpIndex) else {
+            return warp.targetPosition
+        }
+        return targetMap.warps[targetWarpIndex].origin
+    }
+
+    func resolvedWarpTargetFacing(for warp: WarpManifest, targetMap: MapManifest, targetPosition: TilePoint) -> FacingDirection {
+        if isDoorTile(at: targetPosition, in: targetMap) {
+            return .down
+        }
+        return warp.targetFacing
+    }
+
+    func updatedPreviousMapID(
+        entering targetMap: MapManifest,
+        from sourceMap: MapManifest,
+        currentPreviousMapID: String?
+    ) -> String? {
+        let returnTargetMapIDs = Set(targetMap.warps.filter(\.usesPreviousMapTarget).map(\.targetMapID))
+        guard returnTargetMapIDs.isEmpty == false else {
+            return currentPreviousMapID
+        }
+        if returnTargetMapIDs.contains(sourceMap.id) {
+            return sourceMap.id
+        }
+        if let currentPreviousMapID, returnTargetMapIDs.contains(currentPreviousMapID) {
+            return currentPreviousMapID
+        }
+        return sourceMap.id
     }
 
     func beginScriptedPlayerMovement(_ path: [FacingDirection]) {

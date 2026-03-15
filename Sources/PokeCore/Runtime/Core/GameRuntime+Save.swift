@@ -121,6 +121,7 @@ extension GameRuntime {
 
         let snapshot = GameSaveSnapshot(
             mapID: gameplayState.mapID,
+            previousMapID: gameplayState.previousMapID,
             playerPosition: gameplayState.playerPosition,
             facing: gameplayState.facing,
             blackoutCheckpoint: gameplayState.blackoutCheckpoint,
@@ -178,6 +179,7 @@ extension GameRuntime {
         }
         gameplayState = GameplayState(
             mapID: envelope.snapshot.mapID,
+            previousMapID: envelope.snapshot.previousMapID,
             playerPosition: envelope.snapshot.playerPosition,
             facing: envelope.snapshot.facing,
             blackoutCheckpoint: envelope.snapshot.blackoutCheckpoint ?? content.gameplayManifest.playerStart.defaultBlackoutCheckpoint,
@@ -209,6 +211,7 @@ extension GameRuntime {
         clearHeldFieldDirections()
         dialogueState = nil
         fieldPromptState = nil
+        scriptItemPromptState = nil
         fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil

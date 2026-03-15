@@ -803,6 +803,103 @@ extension PokeUITests {
     XCTAssertFalse(props.shouldForceCombatSectionOpen)
     XCTAssertTrue(props.actionRows.isEmpty)
   }
+  func testBattleSidebarPropsRevealCombatantsAlongsidePresentationTiming() {
+    func makeProps(kind: BattleKind, presentation: BattlePresentationTelemetry) -> BattleSidebarProps {
+      BattleSidebarProps(
+        trainerName: "BLUE",
+        kind: kind,
+        phase: "turnText",
+        promptText: "Battle intro text.",
+        playerPokemon: .init(
+          speciesID: "BULBASAUR",
+          displayName: "Bulbasaur",
+          level: 5,
+          currentHP: 19,
+          maxHP: 19,
+          attack: 11,
+          defense: 10,
+          speed: 9,
+          special: 12,
+          moves: ["TACKLE", "GROWL"]
+        ),
+        enemyPokemon: .init(
+          speciesID: "CHARMANDER",
+          displayName: "Charmander",
+          level: 5,
+          currentHP: 18,
+          maxHP: 20,
+          attack: 10,
+          defense: 9,
+          speed: 11,
+          special: 10,
+          moves: ["SCRATCH", "GROWL"]
+        ),
+        moveSlots: [],
+        focusedMoveIndex: 0,
+        canRun: false,
+        party: .init(pokemon: []),
+        presentation: presentation
+      )
+    }
+
+    let trainerIntroProps = makeProps(
+      kind: .trainer,
+      presentation: .init(
+        stage: .introReveal,
+        revision: 1,
+        uiVisibility: .visible
+      )
+    )
+    XCTAssertFalse(trainerIntroProps.showsEnemyCombatantStatus)
+    XCTAssertFalse(trainerIntroProps.showsPlayerCombatantStatus)
+
+    let trainerEnemySendOutProps = makeProps(
+      kind: .trainer,
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 2,
+        uiVisibility: .visible,
+        activeSide: .enemy
+      )
+    )
+    XCTAssertTrue(trainerEnemySendOutProps.showsEnemyCombatantStatus)
+    XCTAssertFalse(trainerEnemySendOutProps.showsPlayerCombatantStatus)
+
+    let trainerPlayerSendOutProps = makeProps(
+      kind: .trainer,
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 3,
+        uiVisibility: .visible,
+        activeSide: .player
+      )
+    )
+    XCTAssertTrue(trainerPlayerSendOutProps.showsEnemyCombatantStatus)
+    XCTAssertTrue(trainerPlayerSendOutProps.showsPlayerCombatantStatus)
+
+    let wildIntroProps = makeProps(
+      kind: .wild,
+      presentation: .init(
+        stage: .introReveal,
+        revision: 4,
+        uiVisibility: .visible
+      )
+    )
+    XCTAssertTrue(wildIntroProps.showsEnemyCombatantStatus)
+    XCTAssertFalse(wildIntroProps.showsPlayerCombatantStatus)
+
+    let wildPlayerSendOutProps = makeProps(
+      kind: .wild,
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 5,
+        uiVisibility: .visible,
+        activeSide: .player
+      )
+    )
+    XCTAssertTrue(wildPlayerSendOutProps.showsEnemyCombatantStatus)
+    XCTAssertTrue(wildPlayerSendOutProps.showsPlayerCombatantStatus)
+  }
   func testBattleSidebarActionRowsFocusRunOnlyForWildBattles() {
     let wildProps = BattleSidebarProps(
       trainerName: "PIDGEY",

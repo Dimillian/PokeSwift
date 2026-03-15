@@ -10,6 +10,7 @@ extension GameRuntime {
         }
 
         fieldPromptState = nil
+        scriptItemPromptState = nil
         fieldHealingState = nil
 
         switch interaction.kind {
@@ -47,8 +48,28 @@ extension GameRuntime {
     }
 
     func handleFieldPrompt(button: RuntimeButton) {
-        guard var promptState = fieldPromptState,
-              let interaction = content.fieldInteraction(id: promptState.interactionID) else {
+        guard var promptState = fieldPromptState else {
+            fieldPromptState = nil
+            scriptItemPromptState = nil
+            return
+        }
+
+        if let scriptItemPromptState {
+            switch button {
+            case .left, .right, .up, .down:
+                promptState.focusedIndex = promptState.focusedIndex == 0 ? 1 : 0
+                fieldPromptState = promptState
+            case .cancel:
+                playUIConfirmSound()
+                resolveScriptItemPromptSelection(accepted: false, promptState: scriptItemPromptState)
+            case .confirm, .start:
+                playUIConfirmSound()
+                resolveScriptItemPromptSelection(accepted: promptState.focusedIndex == 0, promptState: scriptItemPromptState)
+            }
+            return
+        }
+
+        guard let interaction = content.fieldInteraction(id: promptState.interactionID) else {
             fieldPromptState = nil
             return
         }
@@ -64,6 +85,54 @@ extension GameRuntime {
             playUIConfirmSound()
             resolveFieldPromptSelection(accepted: promptState.focusedIndex == 0, promptState: promptState, interaction: interaction)
         }
+    }
+
+    private func resolveScriptItemPromptSelection(
+        accepted: Bool,
+        promptState: RuntimeScriptItemPromptState
+    ) {
+        fieldPromptState = nil
+        scriptItemPromptState = nil
+        dialogueState = nil
+        isDialogueAudioBlockingInput = false
+        scene = .field
+        substate = "field"
+
+        guard accepted else {
+            finishScript()
+            return
+        }
+
+        guard var gameplayState else {
+            finishScript()
+            return
+        }
+
+        let itemID = promptState.itemID
+        guard addItem(itemID, quantity: 1, to: &gameplayState) else {
+            finishScript()
+            if let failureDialogueID = promptState.failureDialogueID {
+                showDialogue(id: failureDialogueID, completion: .returnToField)
+            }
+            return
+        }
+
+        if let objectID = promptState.targetObjectID {
+            ensureObjectStateExists(objectID, in: &gameplayState)
+            gameplayState.objectStates[objectID]?.visible = false
+        }
+        if let successFlagID = promptState.successFlagID {
+            gameplayState.activeFlags.insert(successFlagID)
+        }
+        self.gameplayState = gameplayState
+        traceScriptInventoryAddition(itemID: itemID, quantity: 1, gameplayState: gameplayState)
+
+        let itemDisplayName = content.item(id: itemID)?.displayName ?? itemID
+        showDialogue(
+            id: promptState.successDialogueID,
+            replacements: ["wStringBuffer": itemDisplayName],
+            completion: .continueScript
+        )
     }
 
     private func resolveFieldPromptSelection(
