@@ -253,16 +253,7 @@ extension GameRuntime {
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
-        let scale: Double
-        if validationMode || isTestEnvironment {
-            scale = 0.12
-        } else {
-            switch optionsTextSpeed {
-            case .fast: scale = 0.6
-            case .medium: scale = 1.0
-            case .slow: scale = 1.6
-            }
-        }
+        let scale: Double = validationMode || isTestEnvironment ? 0.12 : 1.0
         return max(0, base * scale)
     }
 
