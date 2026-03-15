@@ -66,6 +66,7 @@ public struct GameSaveEnvelope: Codable, Equatable, Sendable {
 
 public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let mapID: String
+    public let previousMapID: String?
     public let playerPosition: TilePoint
     public let facing: FacingDirection
     public let blackoutCheckpoint: BlackoutCheckpointManifest?
@@ -93,6 +94,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
 
     public init(
         mapID: String,
+        previousMapID: String? = nil,
         playerPosition: TilePoint,
         facing: FacingDirection,
         blackoutCheckpoint: BlackoutCheckpointManifest? = nil,
@@ -119,6 +121,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         playTimeSeconds: Int
     ) {
         self.mapID = mapID
+        self.previousMapID = previousMapID
         self.playerPosition = playerPosition
         self.facing = facing
         self.blackoutCheckpoint = blackoutCheckpoint
@@ -147,6 +150,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case mapID
+        case previousMapID
         case playerPosition
         case facing
         case blackoutCheckpoint
@@ -176,6 +180,7 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         mapID = try container.decode(String.self, forKey: .mapID)
+        previousMapID = try container.decodeIfPresent(String.self, forKey: .previousMapID)
         playerPosition = try container.decode(TilePoint.self, forKey: .playerPosition)
         facing = try container.decode(FacingDirection.self, forKey: .facing)
         blackoutCheckpoint = try container.decodeIfPresent(BlackoutCheckpointManifest.self, forKey: .blackoutCheckpoint)

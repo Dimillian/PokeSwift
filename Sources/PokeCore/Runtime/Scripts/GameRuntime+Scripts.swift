@@ -122,6 +122,27 @@ extension GameRuntime {
             guard let battleID = step.battleID else { return false }
             startBattle(id: battleID)
             return true
+        case "promptItemPickup":
+            guard let itemID = step.stringValue,
+                  let dialogueID = step.dialogueID,
+                  let successDialogueID = step.successDialogueID else {
+                return false
+            }
+            let promptID = "\(gameplayState?.activeScriptID ?? itemID.lowercased())_prompt"
+            showDialogue(
+                id: dialogueID,
+                completion: .openScriptItemPrompt(
+                    .init(
+                        promptID: promptID,
+                        itemID: itemID,
+                        targetObjectID: step.objectID,
+                        successFlagID: step.successFlagID,
+                        successDialogueID: successDialogueID,
+                        failureDialogueID: step.failureDialogueID
+                    )
+                )
+            )
+            return true
         case "healParty":
             healParty()
             return false
@@ -295,6 +316,7 @@ extension GameRuntime {
 
         return GameplayState(
             mapID: start.mapID,
+            previousMapID: nil,
             playerPosition: start.position,
             facing: start.facing,
             blackoutCheckpoint: start.defaultBlackoutCheckpoint,
@@ -328,7 +350,7 @@ extension GameRuntime {
         FacingDirection(rawValue: rawValue) ?? .down
     }
 
-    private func traceScriptInventoryAddition(
+    func traceScriptInventoryAddition(
         itemID: String,
         quantity: Int,
         gameplayState: GameplayState

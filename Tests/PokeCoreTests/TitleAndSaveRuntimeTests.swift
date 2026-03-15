@@ -57,6 +57,7 @@ extension PokeCoreTests {
         completeOakIntro(runtime)
 
         runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.previousMapID = "PALLET_TOWN"
         runtime.gameplayState?.playerPosition = TilePoint(x: 2, y: 3)
         runtime.gameplayState?.facing = .left
         runtime.gameplayState?.money = 4242
@@ -111,7 +112,7 @@ extension PokeCoreTests {
 
         XCTAssertTrue(runtime.saveCurrentGame())
         XCTAssertNotNil(saveStore.envelope)
-        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 8)
+        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 9)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.experience, 202)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.dvs, savedPokemon?.dvs)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.statExp, savedPokemon?.statExp)
@@ -124,6 +125,7 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.seenSpeciesIDs.sorted(), ["PIDGEY", "RATTATA", "SQUIRTLE"])
         XCTAssertEqual(saveStore.envelope?.snapshot.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
         XCTAssertEqual(saveStore.envelope?.snapshot.earnedBadgeIDs, ["boulder"])
+        XCTAssertEqual(saveStore.envelope?.snapshot.previousMapID, "PALLET_TOWN")
         XCTAssertEqual(
             saveStore.envelope?.snapshot.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -153,6 +155,7 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.gameplayState?.ownedSpeciesIDs, Set(["SQUIRTLE", "PIDGEY"]))
         XCTAssertEqual(resumed.gameplayState?.seenSpeciesIDs, Set(["SQUIRTLE", "PIDGEY", "RATTATA"]))
         XCTAssertEqual(resumed.gameplayState?.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
+        XCTAssertEqual(resumed.gameplayState?.previousMapID, "PALLET_TOWN")
         XCTAssertEqual(
             resumed.gameplayState?.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -278,6 +281,20 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.speciesEncounterCounts, [:])
         XCTAssertEqual(runtime.encounterCountsBySpeciesID["SQUIRTLE"] ?? 0, 0)
     }
+
+    func testSchemaEightSaveDefaultsPreviousMapIDToNil() throws {
+        let saveStore = InMemorySaveStore()
+        saveStore.envelope = try decodeLegacySaveEnvelope(
+            schemaVersion: 8,
+            acquisitionRNGState: 1
+        )
+
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        XCTAssertNil(runtime.gameplayState?.previousMapID)
+    }
+
     func testContinueMergesDefaultObjectStatesSoForestTrainerSightStillWorks() async throws {
         let saveStore = InMemorySaveStore()
         let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
@@ -296,6 +313,7 @@ extension PokeCoreTests {
             ),
             snapshot: .init(
                 mapID: "VIRIDIAN_FOREST",
+                previousMapID: nil,
                 playerPosition: .init(x: 25, y: 33),
                 facing: .right,
                 objectStates: [:],
@@ -367,6 +385,7 @@ extension PokeCoreTests {
             ),
             snapshot: .init(
                 mapID: "VIRIDIAN_FOREST",
+                previousMapID: nil,
                 playerPosition: .init(x: 25, y: 12),
                 facing: .up,
                 objectStates: [:],
@@ -467,6 +486,7 @@ extension PokeCoreTests {
             ),
             snapshot: .init(
                 mapID: "REDS_HOUSE_2F",
+                previousMapID: nil,
                 playerPosition: .init(x: 4, y: 4),
                 facing: .down,
                 objectStates: [:],
