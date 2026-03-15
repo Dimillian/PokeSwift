@@ -6,6 +6,7 @@ struct BattleStatusCard: View {
     let chrome: Chrome
     let showsExperience: Bool
     let presentation: BattlePresentationTelemetry
+    let nameScale: CGFloat
 
     var body: some View {
         GeometryReader { proxy in
@@ -14,7 +15,6 @@ struct BattleStatusCard: View {
             let topPadding = max(6, size.height * 0.06)
             let bottomPadding = max(8, size.height * 0.085)
             let topInset = max(2, size.height * 0.045)
-            let pixelNameScale: CGFloat = 0.9
             let pixelMetaScale: CGFloat = 0.9
             let cardShape = RoundedRectangle(cornerRadius: 12, style: .continuous)
 
@@ -22,16 +22,15 @@ struct BattleStatusCard: View {
                 Color.clear
                     .frame(height: topInset)
 
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: Self.nameRowSpacing) {
                     CombatPixelText(
                         pokemon.displayName.uppercased(),
                         color: FieldRetroPalette.ink,
-                        primaryScale: pixelNameScale,
-                        minimumScale: pixelNameScale,
+                        primaryScale: nameScale,
+                        minimumScale: nameScale,
                         fallbackFont: .system(size: max(14, size.height * 0.28), weight: .bold, design: .monospaced)
                     )
-
-                    Spacer(minLength: 8)
+                    .layoutPriority(1)
 
                     CombatPixelText(
                         "LV\(pokemon.level)",
@@ -40,6 +39,7 @@ struct BattleStatusCard: View {
                         alignment: .trailing,
                         fallbackFont: .system(size: max(12, size.height * 0.2), weight: .bold, design: .monospaced)
                     )
+                    .frame(width: Self.levelLabelWidth(scale: pixelMetaScale), alignment: .trailing)
                 }
 
                 HStack(alignment: .center, spacing: 10) {
@@ -116,6 +116,36 @@ struct BattleStatusCard: View {
             return nil
         }
         return meterAnimation
+    }
+}
+
+extension BattleStatusCard {
+    static let preferredNameScale: CGFloat = 0.9
+    static let minimumNameScale: CGFloat = 0.55
+    static let glyphTileWidth: CGFloat = 8
+    static let maxBattleNameCharacters = 10
+    static let levelLabelCharacterCount = 5
+    static let nameRowSpacing: CGFloat = 8
+
+    static func sharedNameScale(enemyCardWidth: CGFloat, playerCardWidth: CGFloat) -> CGFloat {
+        let constrainedCardWidth = min(enemyCardWidth, playerCardWidth)
+        let availableWidth = availableNameWidth(cardWidth: constrainedCardWidth)
+        let scale = availableWidth / (CGFloat(maxBattleNameCharacters) * glyphTileWidth)
+        return min(preferredNameScale, max(minimumNameScale, scale))
+    }
+
+    static func availableNameWidth(cardWidth: CGFloat) -> CGFloat {
+        let horizontalPadding = max(12, cardWidth * 0.055)
+        let contentWidth = max(0, cardWidth - (horizontalPadding * 2))
+        return max(0, contentWidth - levelLabelWidth(scale: preferredNameScale) - nameRowSpacing)
+    }
+
+    static func requiredNameWidth(scale: CGFloat) -> CGFloat {
+        CGFloat(maxBattleNameCharacters) * glyphTileWidth * scale
+    }
+
+    static func levelLabelWidth(scale: CGFloat) -> CGFloat {
+        CGFloat(levelLabelCharacterCount) * glyphTileWidth * scale
     }
 }
 

@@ -165,11 +165,17 @@ struct BattleViewportCanvas: View {
 
     @ViewBuilder
     private func hudLayer(layout: BattleViewportLayout) -> some View {
+        let sharedNameScale = BattleStatusCard.sharedNameScale(
+            enemyCardWidth: layout.enemyCardSize.width,
+            playerCardWidth: layout.playerCardSize.width
+        )
+
         BattleStatusCard(
             pokemon: enemyPokemon,
             chrome: .enemy,
             showsExperience: false,
-            presentation: presentation
+            presentation: presentation,
+            nameScale: sharedNameScale
         )
         .frame(width: layout.enemyCardSize.width, height: layout.enemyCardSize.height)
         .position(x: layout.enemyCardCenter.x, y: layout.enemyCardCenter.y)
@@ -181,7 +187,8 @@ struct BattleViewportCanvas: View {
             pokemon: playerPokemon,
             chrome: .player,
             showsExperience: true,
-            presentation: presentation
+            presentation: presentation,
+            nameScale: sharedNameScale
         )
         .frame(width: layout.playerCardSize.width, height: layout.playerCardSize.height)
         .position(x: layout.playerCardCenter.x, y: layout.playerCardCenter.y)

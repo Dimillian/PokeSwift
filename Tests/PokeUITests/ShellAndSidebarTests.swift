@@ -224,6 +224,29 @@ extension PokeUITests {
 
     XCTAssertNotNil(view)
   }
+  func testBattleStatusCardSharedNameScaleFitsTenCharacterNamesOnCompactViewport() {
+    let layout = BattleViewportLayout(size: CGSize(width: 320, height: 288))
+    let nameScale = BattleStatusCard.sharedNameScale(
+      enemyCardWidth: layout.enemyCardSize.width,
+      playerCardWidth: layout.playerCardSize.width
+    )
+    let availableWidth = BattleStatusCard.availableNameWidth(cardWidth: layout.enemyCardSize.width)
+
+    XCTAssertLessThan(nameScale, BattleStatusCard.preferredNameScale)
+    XCTAssertLessThanOrEqual(
+      BattleStatusCard.requiredNameWidth(scale: nameScale),
+      availableWidth + 0.001
+    )
+  }
+  func testBattleStatusCardSharedNameScaleKeepsPreferredSizeOnRoomyViewport() {
+    let layout = BattleViewportLayout(size: CGSize(width: 640, height: 576))
+    let nameScale = BattleStatusCard.sharedNameScale(
+      enemyCardWidth: layout.enemyCardSize.width,
+      playerCardWidth: layout.playerCardSize.width
+    )
+
+    XCTAssertEqual(nameScale, BattleStatusCard.preferredNameScale, accuracy: 0.001)
+  }
   func testSidebarPropBuilderMapsEmptyPartyProfile() {
     let profile = GameplaySidebarPropsBuilder.makeProfile(
       trainerName: "RED",

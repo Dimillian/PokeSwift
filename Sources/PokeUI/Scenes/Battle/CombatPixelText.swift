@@ -33,6 +33,9 @@ struct CombatPixelText: View {
             Text(text)
                 .font(fallbackFont)
                 .foregroundStyle(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.55)
+                .allowsTightening(true)
                 .frame(maxWidth: .infinity, alignment: alignment)
         }
     }
