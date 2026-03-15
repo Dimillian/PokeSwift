@@ -17,6 +17,7 @@ struct ResolvedBattleAction {
     let updatedDefender: RuntimePokemonState
     let messages: [String]
     let dealtDamage: Int
+    let typeMultiplier: Int
     let defenderHPBefore: Int
     let defenderHPAfter: Int
     let pendingAction: RuntimeBattlePendingAction?

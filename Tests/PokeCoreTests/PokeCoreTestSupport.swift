@@ -240,6 +240,36 @@ func fixtureAudioManifest() -> AudioManifest {
                 channels: []
             ),
             .init(
+                id: "SFX_DAMAGE",
+                sourceLabel: "SFX_Damage",
+                sourceFile: "audio/sfx/damage.asm",
+                bank: 8,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_NOT_VERY_EFFECTIVE",
+                sourceLabel: "SFX_Not_Very_Effective",
+                sourceFile: "audio/sfx/not_very_effective.asm",
+                bank: 8,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
+                id: "SFX_SUPER_EFFECTIVE",
+                sourceLabel: "SFX_Super_Effective",
+                sourceFile: "audio/sfx/super_effective.asm",
+                bank: 8,
+                priority: 0,
+                order: 0,
+                requestedChannels: [5],
+                channels: []
+            ),
+            .init(
                 id: "SFX_HEALING_MACHINE",
                 sourceLabel: "SFX_HealingMachine",
                 sourceFile: "audio/sfx/healing_machine_1.asm",

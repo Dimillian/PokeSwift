@@ -203,6 +203,34 @@ extension GameRuntime {
         }
     }
 
+    func applyingHitSoundEffectRequest(typeMultiplier: Int) -> SoundEffectPlaybackRequest? {
+        let soundEffectID: String
+        let frequencyModifier: Int
+        let tempoModifier: Int
+        switch typeMultiplier {
+        case Int.min..<1:
+            return nil
+        case 1..<10:
+            soundEffectID = "SFX_NOT_VERY_EFFECTIVE"
+            frequencyModifier = 0x50
+            tempoModifier = 0x01
+        case 11...Int.max:
+            soundEffectID = "SFX_SUPER_EFFECTIVE"
+            frequencyModifier = 0xE0
+            tempoModifier = 0xFF
+        default:
+            soundEffectID = "SFX_DAMAGE"
+            frequencyModifier = 0x20
+            tempoModifier = 0x30
+        }
+
+        return battleSoundEffectRequest(
+            id: soundEffectID,
+            frequencyModifier: frequencyModifier,
+            tempoModifier: tempoModifier
+        )
+    }
+
     @discardableResult
     func playMoveAudio(for move: MoveManifest, attackerSpeciesID: String, reason: String = "battleMove") -> SoundEffectPlaybackResult? {
         guard let request = moveSoundEffectRequest(for: move, attackerSpeciesID: attackerSpeciesID) else { return nil }

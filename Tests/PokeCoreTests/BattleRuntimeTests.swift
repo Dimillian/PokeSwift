@@ -896,6 +896,7 @@ extension PokeCoreTests {
                 updatedDefender: defender,
                 messages: ["Squirtle used TACKLE!"],
                 dealtDamage: 3,
+                typeMultiplier: 10,
                 defenderHPBefore: defenderHPBefore,
                 defenderHPAfter: defender.currentHP,
                 pendingAction: nil,
@@ -922,10 +923,275 @@ extension PokeCoreTests {
         XCTAssertEqual(hitEffectBeat.applyingHitEffect?.kind, .blinkDefender)
         XCTAssertEqual(hitEffectBeat.applyingHitEffect?.attackerSide, .player)
         XCTAssertEqual(hitEffectBeat.delay, 0.16, accuracy: 0.0001)
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.soundEffectID, "SFX_DAMAGE")
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.frequencyModifier, 0x20)
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.tempoModifier, 0x30)
 
         let hpDrainBeat = try XCTUnwrap(beats.dropFirst(3).first)
         XCTAssertEqual(hpDrainBeat.stage, .hpDrain)
         XCTAssertEqual(hpDrainBeat.delay, 0.156, accuracy: 0.0001)
+    }
+
+    func testApplyingHitSoundEffectUsesEffectivenessBuckets() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")
+        let defender = runtime.makePokemon(speciesID: "SLOWMON", level: 3, nickname: "Slowmon")
+
+        func attackImpactBeat(
+            typeMultiplier: Int,
+            dealtDamage: Int,
+            messages: [String]
+        ) -> RuntimeBattlePresentationBeat? {
+            runtime.makeBeats(
+                for: ResolvedBattleAction(
+                    side: .player,
+                    moveID: "TACKLE",
+                    attackerSpeciesID: "FASTMON",
+                    didExecuteMove: true,
+                    updatedAttacker: attacker,
+                    updatedDefender: defender,
+                    messages: messages,
+                    dealtDamage: dealtDamage,
+                    typeMultiplier: typeMultiplier,
+                    defenderHPBefore: defender.currentHP,
+                    defenderHPAfter: max(0, defender.currentHP - dealtDamage),
+                    pendingAction: nil,
+                    payDayMoneyGain: 0
+                )
+            ).first(where: { $0.stage == .attackImpact })
+        }
+
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 10,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!"]
+                )
+            ).soundEffectRequest?.soundEffectID,
+            "SFX_DAMAGE"
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 10,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!"]
+                )
+            ).soundEffectRequest?.frequencyModifier,
+            0x20
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 10,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!"]
+                )
+            ).soundEffectRequest?.tempoModifier,
+            0x30
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 20,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's super effective!"]
+                )
+            ).soundEffectRequest?.soundEffectID,
+            "SFX_SUPER_EFFECTIVE"
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 20,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's super effective!"]
+                )
+            ).soundEffectRequest?.frequencyModifier,
+            0xE0
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 20,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's super effective!"]
+                )
+            ).soundEffectRequest?.tempoModifier,
+            0xFF
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 5,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's not very effective..."]
+                )
+            ).soundEffectRequest?.soundEffectID,
+            "SFX_NOT_VERY_EFFECTIVE"
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 5,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's not very effective..."]
+                )
+            ).soundEffectRequest?.frequencyModifier,
+            0x50
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(
+                attackImpactBeat(
+                    typeMultiplier: 5,
+                    dealtDamage: 5,
+                    messages: ["Fastmon used TACKLE!", "It's not very effective..."]
+                )
+            ).soundEffectRequest?.tempoModifier,
+            0x01
+        )
+        XCTAssertNil(
+            attackImpactBeat(
+                typeMultiplier: 0,
+                dealtDamage: 0,
+                messages: ["Fastmon used TACKLE!", "It doesn't affect Slowmon!"]
+            )
+        )
+    }
+
+    func testAnimationOffFallbackKeepsMoveSoundAndPlaysDistinctNeutralImpactVariant() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_DAMAGE", frequencyModifier: 0, tempoModifier: 128)
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+        runtime.optionsBattleAnimation = .off
+
+        let attacker = runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")
+        let defender = runtime.makePokemon(speciesID: "SLOWMON", level: 3, nickname: "Slowmon")
+
+        let beats = runtime.makeBeats(
+            for: ResolvedBattleAction(
+                side: .player,
+                moveID: "TACKLE",
+                attackerSpeciesID: "FASTMON",
+                didExecuteMove: true,
+                updatedAttacker: attacker,
+                updatedDefender: defender,
+                messages: ["Fastmon used TACKLE!"],
+                dealtDamage: 5,
+                typeMultiplier: 10,
+                defenderHPBefore: defender.currentHP,
+                defenderHPAfter: max(0, defender.currentHP - 5),
+                pendingAction: nil,
+                payDayMoneyGain: 0
+            )
+        )
+
+        let windupBeat = try XCTUnwrap(beats.dropFirst().first)
+        XCTAssertEqual(windupBeat.stage, .attackWindup)
+        XCTAssertNil(windupBeat.attackAnimation)
+        XCTAssertEqual(windupBeat.soundEffectRequest?.soundEffectID, "SFX_DAMAGE")
+        XCTAssertEqual(windupBeat.soundEffectRequest?.frequencyModifier, 0)
+        XCTAssertEqual(windupBeat.soundEffectRequest?.tempoModifier, 128)
+
+        let hitEffectBeat = try XCTUnwrap(beats.dropFirst(2).first)
+        XCTAssertEqual(hitEffectBeat.stage, .attackImpact)
+        XCTAssertEqual(hitEffectBeat.applyingHitEffect?.kind, .blinkDefender)
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.soundEffectID, "SFX_DAMAGE")
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.frequencyModifier, 0x20)
+        XCTAssertEqual(hitEffectBeat.soundEffectRequest?.tempoModifier, 0x30)
+    }
+
+    func testAnimationOffFallbackSuppressesExactlyDuplicateImpactSound() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_DAMAGE", frequencyModifier: 0x20, tempoModifier: 0x30)
+                        ),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+        runtime.optionsBattleAnimation = .off
+
+        let attacker = runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")
+        let defender = runtime.makePokemon(speciesID: "SLOWMON", level: 3, nickname: "Slowmon")
+
+        let beats = runtime.makeBeats(
+            for: ResolvedBattleAction(
+                side: .player,
+                moveID: "TACKLE",
+                attackerSpeciesID: "FASTMON",
+                didExecuteMove: true,
+                updatedAttacker: attacker,
+                updatedDefender: defender,
+                messages: ["Fastmon used TACKLE!"],
+                dealtDamage: 5,
+                typeMultiplier: 10,
+                defenderHPBefore: defender.currentHP,
+                defenderHPAfter: max(0, defender.currentHP - 5),
+                pendingAction: nil,
+                payDayMoneyGain: 0
+            )
+        )
+
+        let windupBeat = try XCTUnwrap(beats.dropFirst().first)
+        XCTAssertEqual(windupBeat.stage, .attackWindup)
+        XCTAssertEqual(windupBeat.soundEffectRequest?.soundEffectID, "SFX_DAMAGE")
+        XCTAssertEqual(windupBeat.soundEffectRequest?.frequencyModifier, 0x20)
+        XCTAssertEqual(windupBeat.soundEffectRequest?.tempoModifier, 0x30)
+
+        let hitEffectBeat = try XCTUnwrap(beats.dropFirst(2).first)
+        XCTAssertEqual(hitEffectBeat.stage, .attackImpact)
+        XCTAssertNil(hitEffectBeat.soundEffectRequest)
     }
 
     func testApplyingHitEffectMapsGBStyleVariants() throws {
@@ -960,6 +1226,7 @@ extension PokeCoreTests {
                     updatedDefender: defender,
                     messages: ["Fastmon used TACKLE!"],
                     dealtDamage: 5,
+                    typeMultiplier: 10,
                     defenderHPBefore: defender.currentHP,
                     defenderHPAfter: max(0, defender.currentHP - 5),
                     pendingAction: nil,
@@ -981,6 +1248,7 @@ extension PokeCoreTests {
                     updatedDefender: attacker,
                     messages: ["Slowmon used TACKLE!"],
                     dealtDamage: 5,
+                    typeMultiplier: 10,
                     defenderHPBefore: attacker.currentHP,
                     defenderHPAfter: max(0, attacker.currentHP - 5),
                     pendingAction: nil,
@@ -1002,6 +1270,7 @@ extension PokeCoreTests {
                     updatedDefender: defender,
                     messages: ["Fastmon used BODY SLAM!"],
                     dealtDamage: 5,
+                    typeMultiplier: 10,
                     defenderHPBefore: defender.currentHP,
                     defenderHPAfter: max(0, defender.currentHP - 5),
                     pendingAction: nil,
@@ -1023,6 +1292,7 @@ extension PokeCoreTests {
                     updatedDefender: attacker,
                     messages: ["Slowmon used GROWL!", "Fastmon's ATTACK fell!"],
                     dealtDamage: 0,
+                    typeMultiplier: 10,
                     defenderHPBefore: attacker.currentHP,
                     defenderHPAfter: attacker.currentHP,
                     pendingAction: nil,
@@ -1099,6 +1369,7 @@ extension PokeCoreTests {
                 updatedDefender: defender,
                 messages: ["Fastmon used GROWL!", "Slowmon's ATTACK fell!"],
                 dealtDamage: 0,
+                typeMultiplier: 10,
                 defenderHPBefore: defender.currentHP,
                 defenderHPAfter: defender.currentHP,
                 pendingAction: nil,

@@ -830,6 +830,14 @@ extension GameRuntime {
         }
         let fallbackMovePlaybackDelay = battlePresentationDelay(base: 30.0 / 60.0)
         let movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
+        let windupSoundEffectRequest = attackAnimationPlayback == nil ? moveAudioRequest : nil
+        let movePhaseSoundEffectRequests = stagedAttackSoundEffectRequests.map(\.request) + (windupSoundEffectRequest.map { [$0] } ?? [])
+        let impactSoundEffectRequest = action.dealtDamage > 0
+            ? applyingHitSoundEffectRequest(typeMultiplier: action.typeMultiplier)
+            : nil
+        let resolvedApplyingHitSoundEffectRequest = impactSoundEffectRequest.flatMap { request in
+            movePhaseSoundEffectRequests.contains(request) ? nil : request
+        }
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: 0,
@@ -844,16 +852,16 @@ extension GameRuntime {
             ),
         ]
 
-        if skipAnimation == false {
+        if skipAnimation == false || windupSoundEffectRequest != nil {
             beats.append(
                 .init(
-                    delay: battlePresentationDelay(base: 3.0 / 60.0),
+                    delay: skipAnimation ? 0 : battlePresentationDelay(base: 3.0 / 60.0),
                     stage: .attackWindup,
                     uiVisibility: .visible,
                     activeSide: action.side,
                     attackAnimation: attackAnimationPlayback,
                     phase: .resolvingTurn,
-                    soundEffectRequest: attackAnimationPlayback == nil ? moveAudioRequest : nil,
+                    soundEffectRequest: windupSoundEffectRequest,
                     stagedSoundEffectRequests: stagedAttackSoundEffectRequests
                 )
             )
@@ -867,7 +875,7 @@ extension GameRuntime {
                     uiVisibility: .visible,
                     activeSide: action.side,
                     applyingHitEffect: applyingHitEffect,
-                    soundEffectRequest: skipAnimation ? moveAudioRequest : nil
+                    soundEffectRequest: resolvedApplyingHitSoundEffectRequest
                 )
             )
         }

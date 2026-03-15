@@ -48,6 +48,7 @@ extension GameRuntime {
             updatedDefender: updatedDefender,
             messages: preparation.messages + resolvedMove.messages,
             dealtDamage: resolvedMove.dealtDamage,
+            typeMultiplier: resolvedMove.typeMultiplier,
             defenderHPBefore: defenderHPBefore,
             defenderHPAfter: updatedDefender.currentHP,
             pendingAction: resolvedMove.pendingAction,
