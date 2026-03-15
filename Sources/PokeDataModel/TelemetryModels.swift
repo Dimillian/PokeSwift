@@ -434,6 +434,25 @@ public struct BattleMeterAnimationTelemetry: Codable, Equatable, Sendable {
     }
 }
 
+public struct BattleAttackAnimationPlaybackTelemetry: Codable, Equatable, Sendable {
+    public let playbackID: String
+    public let moveID: String
+    public let attackerSide: BattlePresentationSide
+    public let totalDuration: TimeInterval
+
+    public init(
+        playbackID: String,
+        moveID: String,
+        attackerSide: BattlePresentationSide,
+        totalDuration: TimeInterval
+    ) {
+        self.playbackID = playbackID
+        self.moveID = moveID
+        self.attackerSide = attackerSide
+        self.totalDuration = totalDuration
+    }
+}
+
 public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
     public let stage: BattlePresentationStage
     public let revision: Int
@@ -442,6 +461,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
     public let hidePlayerPokemon: Bool
     public let transitionStyle: BattleTransitionStyle
     public let meterAnimation: BattleMeterAnimationTelemetry?
+    public let attackAnimation: BattleAttackAnimationPlaybackTelemetry?
 
     public init(
         stage: BattlePresentationStage,
@@ -450,7 +470,8 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         activeSide: BattlePresentationSide? = nil,
         hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
-        meterAnimation: BattleMeterAnimationTelemetry? = nil
+        meterAnimation: BattleMeterAnimationTelemetry? = nil,
+        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil
     ) {
         self.stage = stage
         self.revision = revision
@@ -459,6 +480,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
+        self.attackAnimation = attackAnimation
     }
 }
 

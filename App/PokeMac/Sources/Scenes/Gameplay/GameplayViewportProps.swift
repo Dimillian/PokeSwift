@@ -52,6 +52,8 @@ struct BattleViewportProps {
     let playerTrainerFrontSpriteURL: URL?
     let playerTrainerBackSpriteURL: URL?
     let sendOutPoofSpriteURL: URL?
+    let battleAnimationManifest: BattleAnimationManifest
+    let battleAnimationTilesetURLs: [String: URL]
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let bagItems: [InventoryItemTelemetry]

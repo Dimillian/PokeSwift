@@ -43,10 +43,12 @@ public final class FileSystemContentLoader: ContentLoader {
         let titleManifest: TitleSceneManifest = try decode("title_manifest.json", at: variantRoot)
         let audioManifest: AudioManifest = try decode("audio_manifest.json", at: variantRoot)
         let gameplayManifest: GameplayManifest = try decode("gameplay_manifest.json", at: variantRoot)
+        let battleAnimationManifest: BattleAnimationManifest = try decode("battle_animation_manifest.json", at: variantRoot)
 
         let requiredAssetPaths =
             titleManifest.assets.map(\.relativePath) +
             ["Assets/battle/effects/send_out_poof.png"] +
+            battleAnimationManifest.tilesets.map(\.imagePath) +
             gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
             gameplayManifest.overworldSprites.map(\.imagePath) +
             gameplayManifest.species.flatMap { species -> [String] in
@@ -87,7 +89,8 @@ public final class FileSystemContentLoader: ContentLoader {
             charmapManifest: charmapManifest,
             titleManifest: titleManifest,
             audioManifest: audioManifest,
-            gameplayManifest: gameplayManifest
+            gameplayManifest: gameplayManifest,
+            battleAnimationManifest: battleAnimationManifest
         )
     }
 

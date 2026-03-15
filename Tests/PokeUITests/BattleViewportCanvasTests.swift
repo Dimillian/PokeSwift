@@ -1,6 +1,7 @@
 import XCTest
 
 @testable import PokeUI
+import PokeDataModel
 
 @MainActor
 extension PokeUITests {
@@ -113,6 +114,7 @@ extension PokeUITests {
       BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
         stage: .enemySendOut,
         activeSide: .enemy,
+        attackAnimation: nil,
         side: .enemy
       )
     )
@@ -120,6 +122,7 @@ extension PokeUITests {
       BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
         stage: .enemySendOut,
         activeSide: .player,
+        attackAnimation: nil,
         side: .player
       )
     )
@@ -127,8 +130,66 @@ extension PokeUITests {
       BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
         stage: .attackImpact,
         activeSide: .enemy,
+        attackAnimation: nil,
         side: .enemy
       )
+    )
+  }
+
+  func testBattleAttackTimelineBuildsOverlayFramesAndScreenEffects() {
+    let frames = BattleAttackAnimationTimeline.sequence(
+      for: makeAttackPlayback(),
+      manifest: makeAttackAnimationManifest()
+    )
+
+    XCTAssertFalse(frames.isEmpty)
+    XCTAssertEqual(frames.first?.state.overlayPlacements.first?.tilesetID, "MOVE_ANIM_TILESET_0")
+    XCTAssertEqual(frames.first?.state.overlayPlacements.first?.x, 80)
+    XCTAssertEqual(frames.first?.state.overlayPlacements.first?.y, 56)
+    XCTAssertTrue(frames.contains { $0.state.flashOpacity > 0 })
+  }
+
+  func testBattleAttackAnimationDisablesRevisionDrivenAnimationForActiveSide() {
+    let playback = makeAttackPlayback()
+
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .attackWindup,
+        activeSide: .player,
+        attackAnimation: playback,
+        side: .player
+      )
+    )
+    XCTAssertTrue(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .attackWindup,
+        activeSide: .player,
+        attackAnimation: playback,
+        side: .enemy
+      )
+    )
+  }
+
+  func testBattleAttackStateResolvesToIdleWhenAnimationKeyIsStale() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedAttackAnimationState(
+        attackAnimation: makeAttackPlayback(playbackID: "attack-2"),
+        attackAnimationVisualState: .init(
+          playerOffset: .zero,
+          enemyOffset: .zero,
+          playerScale: 1,
+          enemyScale: 1,
+          playerOpacity: 1,
+          enemyOpacity: 1,
+          overlayPlacements: [.init(tilesetID: "MOVE_ANIM_TILESET_0", x: 80, y: 56, tileID: 0, flipH: false, flipV: false)],
+          screenShake: .zero,
+          flashOpacity: 0,
+          darknessOpacity: 0
+        ),
+        animationTriggerKey: "attack-3",
+        activeAnimationKey: "attack-2"
+      ),
+      .idle
     )
   }
 
@@ -233,5 +294,66 @@ extension PokeUITests {
 
     XCTAssertEqual(layout.enemySpriteSize, layout.playerSpriteSize)
     XCTAssertGreaterThan(layout.playerTrainerCenter.y, layout.playerSpriteCenter.y)
+  }
+
+  private func makeAttackPlayback(
+    playbackID: String = "attack-1"
+  ) -> BattleAttackAnimationPlaybackTelemetry {
+    .init(
+      playbackID: playbackID,
+      moveID: "TACKLE",
+      attackerSide: .player,
+      totalDuration: 0.2
+    )
+  }
+
+  private func makeAttackAnimationManifest() -> BattleAnimationManifest {
+    .init(
+      variant: .red,
+      moveAnimations: [
+        .init(
+          moveID: "TACKLE",
+          commands: [
+            .init(
+              kind: .subanimation,
+              soundMoveID: "TACKLE",
+              subanimationID: "SUBANIM_TEST",
+              specialEffectID: nil,
+              tilesetID: "MOVE_ANIM_TILESET_0",
+              delayFrames: 2
+            ),
+            .init(
+              kind: .specialEffect,
+              soundMoveID: nil,
+              subanimationID: nil,
+              specialEffectID: "SE_DARK_SCREEN_FLASH",
+              tilesetID: nil,
+              delayFrames: nil
+            ),
+          ]
+        ),
+      ],
+      subanimations: [
+        .init(
+          id: "SUBANIM_TEST",
+          transform: .normal,
+          steps: [
+            .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+          ]
+        ),
+      ],
+      frameBlocks: [
+        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+      ],
+      baseCoordinates: [
+        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+      ],
+      specialEffects: [
+        .init(id: "SE_DARK_SCREEN_FLASH", routine: "AnimationFlashScreen"),
+      ],
+      tilesets: [
+        .init(id: "MOVE_ANIM_TILESET_0", tileCount: 79, imagePath: "Assets/battle/animations/move_anim_0.png"),
+      ]
+    )
   }
 }

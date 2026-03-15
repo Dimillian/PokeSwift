@@ -16,6 +16,8 @@ public struct BattlePanel: View {
     let playerTrainerFrontSpriteURL: URL?
     let playerTrainerBackSpriteURL: URL?
     let sendOutPoofSpriteURL: URL?
+    let battleAnimationManifest: BattleAnimationManifest
+    let battleAnimationTilesetURLs: [String: URL]
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let displayStyle: FieldDisplayStyle
@@ -31,6 +33,8 @@ public struct BattlePanel: View {
         playerTrainerFrontSpriteURL: URL?,
         playerTrainerBackSpriteURL: URL?,
         sendOutPoofSpriteURL: URL?,
+        battleAnimationManifest: BattleAnimationManifest,
+        battleAnimationTilesetURLs: [String: URL],
         playerSpriteURL: URL?,
         enemySpriteURL: URL?,
         displayStyle: FieldDisplayStyle,
@@ -45,6 +49,8 @@ public struct BattlePanel: View {
         self.playerTrainerFrontSpriteURL = playerTrainerFrontSpriteURL
         self.playerTrainerBackSpriteURL = playerTrainerBackSpriteURL
         self.sendOutPoofSpriteURL = sendOutPoofSpriteURL
+        self.battleAnimationManifest = battleAnimationManifest
+        self.battleAnimationTilesetURLs = battleAnimationTilesetURLs
         self.playerSpriteURL = playerSpriteURL
         self.enemySpriteURL = enemySpriteURL
         self.displayStyle = displayStyle
@@ -68,6 +74,8 @@ public struct BattlePanel: View {
                 playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,
                 playerTrainerBackSpriteURL: playerTrainerBackSpriteURL,
                 sendOutPoofSpriteURL: sendOutPoofSpriteURL,
+                battleAnimationManifest: battleAnimationManifest,
+                battleAnimationTilesetURLs: battleAnimationTilesetURLs,
                 playerSpriteURL: playerSpriteURL,
                 enemySpriteURL: enemySpriteURL,
                 displayStyle: displayStyle,

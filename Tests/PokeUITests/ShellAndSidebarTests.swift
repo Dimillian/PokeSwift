@@ -213,6 +213,8 @@ extension PokeUITests {
       playerTrainerFrontSpriteURL: nil,
       playerTrainerBackSpriteURL: nil,
       sendOutPoofSpriteURL: nil,
+      battleAnimationManifest: .empty,
+      battleAnimationTilesetURLs: [:],
       playerSpriteURL: nil,
       enemySpriteURL: nil,
       displayStyle: .dmgAuthentic,

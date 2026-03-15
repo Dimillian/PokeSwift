@@ -14,6 +14,8 @@ final class RepoContentContractTests: XCTestCase {
         let fossilSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_FOSSIL"))
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
         let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
+        let moveAnim0URL = root.appendingPathComponent("Assets/battle/animations/move_anim_0.png")
+        let moveAnim1URL = root.appendingPathComponent("Assets/battle/animations/move_anim_1.png")
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
@@ -23,10 +25,71 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(rocketSprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(fossilSprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim0URL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim1URL.path))
         let sendOutPoofSource = try XCTUnwrap(CGImageSourceCreateWithURL(sendOutPoofURL as CFURL, nil))
         let sendOutPoofImage = try XCTUnwrap(CGImageSourceCreateImageAtIndex(sendOutPoofSource, 0, nil))
         XCTAssertEqual(sendOutPoofImage.width, 128)
         XCTAssertEqual(sendOutPoofImage.height, 40)
+        XCTAssertEqual(loaded.battleAnimationManifest.tilesets.map(\.imagePath), [
+            "Assets/battle/animations/move_anim_0.png",
+            "Assets/battle/animations/move_anim_1.png",
+            "Assets/battle/animations/move_anim_0.png",
+        ])
+        XCTAssertEqual(
+            loaded.battleAnimation(moveID: "POUND")?.commands,
+            [
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: "POUND",
+                    subanimationID: "SUBANIM_0_STAR_TWICE",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_0",
+                    delayFrames: 8
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            loaded.battleAnimation(moveID: "THUNDERPUNCH")?.commands,
+            [
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: "THUNDERPUNCH",
+                    subanimationID: "SUBANIM_0_STAR_THRICE",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_0",
+                    delayFrames: 6
+                ),
+                .init(
+                    kind: .specialEffect,
+                    soundMoveID: nil,
+                    subanimationID: nil,
+                    specialEffectID: "SE_DARK_SCREEN_PALETTE",
+                    tilesetID: nil,
+                    delayFrames: nil
+                ),
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: nil,
+                    subanimationID: "SUBANIM_1_LIGHTNING",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_1",
+                    delayFrames: 6
+                ),
+                .init(
+                    kind: .specialEffect,
+                    soundMoveID: nil,
+                    subanimationID: nil,
+                    specialEffectID: "SE_RESET_SCREEN_PALETTE",
+                    tilesetID: nil,
+                    delayFrames: nil
+                ),
+            ]
+        )
+        XCTAssertEqual(loaded.battleAnimationSubanimation(id: "SUBANIM_0_STAR_TWICE")?.steps.count, 2)
+        XCTAssertEqual(loaded.battleAnimationFrameBlock(id: "FRAMEBLOCK_06")?.tiles.count, 12)
+        XCTAssertEqual(loaded.battleAnimationBaseCoordinate(id: "BASECOORD_30"), .init(id: "BASECOORD_30", x: 0x28, y: 0x58))
+        XCTAssertEqual(loaded.battleAnimationSpecialEffect(id: "SE_SHAKE_SCREEN")?.routine, "AnimationShakeScreen")
         XCTAssertTrue(
             loaded.fieldRenderIssues(
                 map: oaksLab,

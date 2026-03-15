@@ -9,6 +9,8 @@ final class LoaderFixtureTests: XCTestCase {
         XCTAssertEqual(loaded.gameManifest.variant, .red)
         XCTAssertEqual(loaded.titleManifest.menuEntries.count, 3)
         XCTAssertEqual(loaded.gameplayManifest.maps.count, 1)
+        XCTAssertEqual(loaded.battleAnimationManifest.variant, .red)
+        XCTAssertTrue(loaded.battleAnimationManifest.tilesets.isEmpty)
         XCTAssertEqual(loaded.gameplayManifest.dialogues.count, 5)
         XCTAssertEqual(loaded.gameplayManifest.playerStart.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(loaded.map(id: "REDS_HOUSE_2F")?.displayName, "Red's House 2F")

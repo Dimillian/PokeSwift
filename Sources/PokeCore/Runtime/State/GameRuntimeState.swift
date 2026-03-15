@@ -369,6 +369,7 @@ struct RuntimeBattlePresentationState {
     var hidePlayerPokemon: Bool
     var transitionStyle: BattleTransitionStyle
     var meterAnimation: BattleMeterAnimationTelemetry?
+    var attackAnimation: BattleAttackAnimationPlaybackTelemetry?
 
     init(
         stage: BattlePresentationStage = .idle,
@@ -377,7 +378,8 @@ struct RuntimeBattlePresentationState {
         activeSide: BattlePresentationSide? = nil,
         hidePlayerPokemon: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
-        meterAnimation: BattleMeterAnimationTelemetry? = nil
+        meterAnimation: BattleMeterAnimationTelemetry? = nil,
+        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil
     ) {
         self.stage = stage
         self.revision = revision
@@ -386,6 +388,7 @@ struct RuntimeBattlePresentationState {
         self.hidePlayerPokemon = hidePlayerPokemon
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
+        self.attackAnimation = attackAnimation
     }
 }
 
@@ -398,6 +401,7 @@ struct RuntimeBattlePresentationBeat {
     let requiresConfirmAfterDisplay: Bool
     let transitionStyle: BattleTransitionStyle
     let meterAnimation: BattleMeterAnimationTelemetry?
+    let attackAnimation: BattleAttackAnimationPlaybackTelemetry?
     let message: String?
     let phase: RuntimeBattlePhase?
     var pendingAction: RuntimeBattlePendingAction?
@@ -423,6 +427,7 @@ struct RuntimeBattlePresentationBeat {
         requiresConfirmAfterDisplay: Bool = false,
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
+        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
         message: String? = nil,
         phase: RuntimeBattlePhase? = nil,
         pendingAction: RuntimeBattlePendingAction? = nil,
@@ -447,6 +452,7 @@ struct RuntimeBattlePresentationBeat {
         self.requiresConfirmAfterDisplay = requiresConfirmAfterDisplay
         self.transitionStyle = transitionStyle
         self.meterAnimation = meterAnimation
+        self.attackAnimation = attackAnimation
         self.message = message
         self.phase = phase
         self.pendingAction = pendingAction

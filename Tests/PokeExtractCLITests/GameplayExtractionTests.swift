@@ -1278,4 +1278,105 @@ final class GameplayExtractionTests: XCTestCase {
             .init(kind: .cry, soundEffectID: nil, frequencyModifier: 0, tempoModifier: 192)
         )
     }
+
+    func testBattleAnimationExtractorBuildsSourceDrivenMoveAnimationsAndSupportTables() throws {
+        let manifest = try extractBattleAnimationManifest(source: SourceTree(repoRoot: PokeExtractCLITestSupport.repoRoot()))
+
+        XCTAssertEqual(manifest.variant, .red)
+        XCTAssertEqual(
+            manifest.sourceFiles,
+            [
+                "data/moves/animations.asm",
+                "data/battle_anims/subanimations.asm",
+                "data/battle_anims/frame_blocks.asm",
+                "data/battle_anims/base_coords.asm",
+                "data/battle_anims/special_effect_pointers.asm",
+                "constants/move_animation_constants.asm",
+                "engine/battle/animations.asm",
+                "gfx/battle/move_anim_0.png",
+                "gfx/battle/move_anim_1.png",
+            ]
+        )
+        XCTAssertEqual(
+            manifest.tilesets,
+            [
+                .init(id: "MOVE_ANIM_TILESET_0", tileCount: 79, imagePath: "Assets/battle/animations/move_anim_0.png"),
+                .init(id: "MOVE_ANIM_TILESET_1", tileCount: 79, imagePath: "Assets/battle/animations/move_anim_1.png"),
+                .init(id: "MOVE_ANIM_TILESET_2", tileCount: 64, imagePath: "Assets/battle/animations/move_anim_0.png"),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.moveAnimations.first { $0.moveID == "POUND" }?.commands,
+            [
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: "POUND",
+                    subanimationID: "SUBANIM_0_STAR_TWICE",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_0",
+                    delayFrames: 8
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.moveAnimations.first { $0.moveID == "THUNDERPUNCH" }?.commands,
+            [
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: "THUNDERPUNCH",
+                    subanimationID: "SUBANIM_0_STAR_THRICE",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_0",
+                    delayFrames: 6
+                ),
+                .init(
+                    kind: .specialEffect,
+                    soundMoveID: nil,
+                    subanimationID: nil,
+                    specialEffectID: "SE_DARK_SCREEN_PALETTE",
+                    tilesetID: nil,
+                    delayFrames: nil
+                ),
+                .init(
+                    kind: .subanimation,
+                    soundMoveID: nil,
+                    subanimationID: "SUBANIM_1_LIGHTNING",
+                    specialEffectID: nil,
+                    tilesetID: "MOVE_ANIM_TILESET_1",
+                    delayFrames: 6
+                ),
+                .init(
+                    kind: .specialEffect,
+                    soundMoveID: nil,
+                    subanimationID: nil,
+                    specialEffectID: "SE_RESET_SCREEN_PALETTE",
+                    tilesetID: nil,
+                    delayFrames: nil
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.subanimations.first { $0.id == "SUBANIM_0_STAR_TWICE" },
+            .init(
+                id: "SUBANIM_0_STAR_TWICE",
+                transform: .hFlip,
+                steps: [
+                    .init(frameBlockID: "FRAMEBLOCK_01", baseCoordinateID: "BASECOORD_0F", frameBlockMode: .mode00),
+                    .init(frameBlockID: "FRAMEBLOCK_01", baseCoordinateID: "BASECOORD_1D", frameBlockMode: .mode00),
+                ]
+            )
+        )
+        XCTAssertEqual(
+            manifest.frameBlocks.first { $0.id == "FRAMEBLOCK_06" }?.tiles.first,
+            .init(x: 8, y: 0, tileID: 0x23, flipH: false, flipV: false)
+        )
+        XCTAssertEqual(
+            manifest.baseCoordinates.first { $0.id == "BASECOORD_30" },
+            .init(id: "BASECOORD_30", x: 0x28, y: 0x58)
+        )
+        XCTAssertEqual(
+            manifest.specialEffects.first { $0.id == "SE_SHAKE_SCREEN" },
+            .init(id: "SE_SHAKE_SCREEN", routine: "AnimationShakeScreen")
+        )
+    }
 }

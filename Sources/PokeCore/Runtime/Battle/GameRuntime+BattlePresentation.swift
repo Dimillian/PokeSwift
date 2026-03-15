@@ -257,6 +257,68 @@ extension GameRuntime {
         return max(0, base * scale)
     }
 
+    func makeAttackAnimationPlayback(
+        for action: ResolvedBattleAction,
+        moveAnimation: BattleMoveAnimationManifest
+    ) -> BattleAttackAnimationPlaybackTelemetry {
+        .init(
+            playbackID: UUID().uuidString,
+            moveID: action.moveID,
+            attackerSide: action.side,
+            totalDuration: battlePresentationDelay(base: attackAnimationBaseDuration(for: moveAnimation))
+        )
+    }
+
+    func attackAnimationBaseDuration(for moveAnimation: BattleMoveAnimationManifest) -> TimeInterval {
+        let totalFrames = moveAnimation.commands.reduce(0) { partialResult, command in
+            partialResult + attackAnimationCommandFrameCount(command)
+        }
+        return Double(max(1, totalFrames)) / BattleAnimationPlaybackDefaults.framesPerSecond
+    }
+
+    func attackAnimationSoundEffectRequests(
+        for moveAnimation: BattleMoveAnimationManifest,
+        attackerSpeciesID: String
+    ) -> [RuntimeStagedSoundEffectRequest] {
+        var elapsedBaseTime: TimeInterval = 0
+        var requests: [RuntimeStagedSoundEffectRequest] = []
+
+        for command in moveAnimation.commands {
+            if let soundMoveID = command.soundMoveID,
+               let move = content.move(id: soundMoveID),
+               let request = moveSoundEffectRequest(for: move, attackerSpeciesID: attackerSpeciesID) {
+                requests.append(
+                    RuntimeStagedSoundEffectRequest(
+                        delay: battlePresentationDelay(base: elapsedBaseTime),
+                        request: request
+                    )
+                )
+            }
+            let commandFrames = attackAnimationCommandFrameCount(command)
+            elapsedBaseTime += Double(commandFrames) / BattleAnimationPlaybackDefaults.framesPerSecond
+        }
+
+        return requests
+    }
+
+    func attackAnimationCommandFrameCount(_ command: BattleAnimationCommandManifest) -> Int {
+        switch command.kind {
+        case .specialEffect:
+            return BattleAnimationPlaybackDefaults.specialEffectFrameCount(id: command.specialEffectID)
+        case .subanimation:
+            let delayFrames = max(1, command.delayFrames ?? 1)
+            guard let subanimationID = command.subanimationID,
+                  let subanimation = content.battleAnimationSubanimation(id: subanimationID),
+                  subanimation.steps.isEmpty == false else {
+                return delayFrames
+            }
+            let totalFrames = subanimation.steps.reduce(0) { partialResult, step in
+                partialResult + (step.frameBlockMode == .mode02 ? 0 : delayFrames)
+            }
+            return max(1, totalFrames)
+        }
+    }
+
     private func cancelBattlePresentationTask() {
         battlePresentationTask?.cancel()
         battlePresentationTask = nil
@@ -321,7 +383,8 @@ extension GameRuntime {
         activeSide: BattlePresentationSide?,
         hidePlayerPokemon: Bool = false,
         meterAnimation: BattleMeterAnimationTelemetry?,
-        transitionStyle: BattleTransitionStyle
+        transitionStyle: BattleTransitionStyle,
+        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil
     ) {
         battle.presentation.stage = stage
         battle.presentation.revision += 1
@@ -330,6 +393,7 @@ extension GameRuntime {
         battle.presentation.hidePlayerPokemon = hidePlayerPokemon
         battle.presentation.meterAnimation = meterAnimation
         battle.presentation.transitionStyle = transitionStyle
+        battle.presentation.attackAnimation = attackAnimation
     }
 
     func advanceBattlePresentationBatch(battle: inout RuntimeBattleState) {
@@ -467,7 +531,8 @@ extension GameRuntime {
             activeSide: beat.activeSide,
             hidePlayerPokemon: beat.hidePlayerPokemon,
             meterAnimation: beat.meterAnimation,
-            transitionStyle: beat.transitionStyle
+            transitionStyle: beat.transitionStyle,
+            attackAnimation: beat.attackAnimation
         )
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
@@ -665,6 +730,17 @@ extension GameRuntime {
             }
         }
 
+        let skipAnimation = optionsBattleAnimation == .off
+        let sourceMoveAnimation = skipAnimation ? nil : content.battleAnimation(moveID: action.moveID)
+        let attackAnimationPlayback = sourceMoveAnimation.map {
+            makeAttackAnimationPlayback(for: action, moveAnimation: $0)
+        }
+        let stagedAttackSoundEffectRequests = sourceMoveAnimation.map {
+            attackAnimationSoundEffectRequests(
+                for: $0,
+                attackerSpeciesID: action.attackerSpeciesID
+            )
+        } ?? []
         let moveAudioRequest: SoundEffectPlaybackRequest?
         if let move = content.move(id: action.moveID) {
             moveAudioRequest = moveSoundEffectRequest(
@@ -674,21 +750,22 @@ extension GameRuntime {
         } else {
             moveAudioRequest = nil
         }
-        let skipAnimation = optionsBattleAnimation == .off
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
                 stage: skipAnimation ? .resultText : .attackWindup,
                 uiVisibility: .visible,
                 activeSide: action.side,
+                attackAnimation: attackAnimationPlayback,
                 message: action.messages.first,
                 phase: .turnText,
                 playerPokemon: attackerPokemon,
-                enemyPokemon: enemyAttacker
+                enemyPokemon: enemyAttacker,
+                stagedSoundEffectRequests: stagedAttackSoundEffectRequests
             ),
         ]
 
-        if skipAnimation == false {
+        if skipAnimation == false, attackAnimationPlayback == nil {
             beats.append(
                 .init(
                     delay: battlePresentationDelay(base: 0.22),
@@ -701,10 +778,11 @@ extension GameRuntime {
         }
 
         let trailingMessages = Array(action.messages.dropFirst())
+        let postAttackDelay = attackAnimationPlayback?.totalDuration ?? battlePresentationDelay(base: 0.18)
         if action.dealtDamage > 0 {
             beats.append(
                 .init(
-                    delay: battlePresentationDelay(base: 0.18),
+                    delay: postAttackDelay,
                     stage: .hpDrain,
                     uiVisibility: .visible,
                     activeSide: action.side == .player ? .enemy : .player,
@@ -717,7 +795,7 @@ extension GameRuntime {
             let statusMessage = trailingMessages.first
             beats.append(
                 .init(
-                    delay: battlePresentationDelay(base: 0.18),
+                    delay: postAttackDelay,
                     stage: .resultText,
                     uiVisibility: .visible,
                     activeSide: action.side == .player ? .enemy : .player,

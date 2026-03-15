@@ -53,6 +53,7 @@ enum PokeContentTestSupport {
             )
         ).write(to: root.appendingPathComponent("title_manifest.json"))
         try encoder.encode(testGameplayManifest()).write(to: root.appendingPathComponent("gameplay_manifest.json"))
+        try encoder.encode(BattleAnimationManifest.empty).write(to: root.appendingPathComponent("battle_animation_manifest.json"))
         try encoder.encode(
             AudioManifest(
                 variant: .red,

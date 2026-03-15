@@ -6,7 +6,8 @@ import PokeDataModel
 @MainActor
 func fixtureContent(
     gameplayManifest: GameplayManifest? = nil,
-    audioManifest: AudioManifest? = nil
+    audioManifest: AudioManifest? = nil,
+    battleAnimationManifest: BattleAnimationManifest = .empty
 ) -> LoadedContent {
     LoadedContent(
         rootURL: URL(fileURLWithPath: "/tmp", isDirectory: true),
@@ -27,7 +28,8 @@ func fixtureContent(
             timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
         ),
         audioManifest: audioManifest ?? fixtureAudioManifest(),
-        gameplayManifest: gameplayManifest ?? fixtureGameplayManifest()
+        gameplayManifest: gameplayManifest ?? fixtureGameplayManifest(),
+        battleAnimationManifest: battleAnimationManifest
     )
 }
 

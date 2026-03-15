@@ -9,6 +9,7 @@ public struct LoadedContent: Sendable {
     public let titleManifest: TitleSceneManifest
     public let audioManifest: AudioManifest
     public let gameplayManifest: GameplayManifest
+    public let battleAnimationManifest: BattleAnimationManifest
 
     public init(
         rootURL: URL,
@@ -17,7 +18,8 @@ public struct LoadedContent: Sendable {
         charmapManifest: CharmapManifest,
         titleManifest: TitleSceneManifest,
         audioManifest: AudioManifest,
-        gameplayManifest: GameplayManifest
+        gameplayManifest: GameplayManifest,
+        battleAnimationManifest: BattleAnimationManifest
     ) {
         self.rootURL = rootURL
         self.gameManifest = gameManifest
@@ -26,6 +28,7 @@ public struct LoadedContent: Sendable {
         self.titleManifest = titleManifest
         self.audioManifest = audioManifest
         self.gameplayManifest = gameplayManifest
+        self.battleAnimationManifest = battleAnimationManifest
     }
 
     public var contentRoot: URL {
@@ -98,6 +101,30 @@ public struct LoadedContent: Sendable {
 
     public func trainerBattle(trainerClass: String, trainerNumber: Int) -> TrainerBattleManifest? {
         gameplayManifest.trainerBattles.first { $0.trainerClass == trainerClass && $0.trainerNumber == trainerNumber }
+    }
+
+    public func battleAnimation(moveID: String) -> BattleMoveAnimationManifest? {
+        battleAnimationManifest.moveAnimations.first { $0.moveID == moveID }
+    }
+
+    public func battleAnimationSubanimation(id: String) -> BattleSubanimationManifest? {
+        battleAnimationManifest.subanimations.first { $0.id == id }
+    }
+
+    public func battleAnimationFrameBlock(id: String) -> BattleAnimationFrameBlockManifest? {
+        battleAnimationManifest.frameBlocks.first { $0.id == id }
+    }
+
+    public func battleAnimationBaseCoordinate(id: String) -> BattleAnimationBaseCoordinateManifest? {
+        battleAnimationManifest.baseCoordinates.first { $0.id == id }
+    }
+
+    public func battleAnimationSpecialEffect(id: String) -> BattleAnimationSpecialEffectManifest? {
+        battleAnimationManifest.specialEffects.first { $0.id == id }
+    }
+
+    public func battleAnimationTileset(id: String) -> BattleAnimationTilesetManifest? {
+        battleAnimationManifest.tilesets.first { $0.id == id }
     }
 
     public func trainerEncounterAudioCueID(for battleID: String) -> String? {

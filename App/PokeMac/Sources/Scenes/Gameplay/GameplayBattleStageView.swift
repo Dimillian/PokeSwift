@@ -24,6 +24,8 @@ struct BattleStageView: View {
                 playerTrainerFrontSpriteURL: props.playerTrainerFrontSpriteURL,
                 playerTrainerBackSpriteURL: props.playerTrainerBackSpriteURL,
                 sendOutPoofSpriteURL: props.sendOutPoofSpriteURL,
+                battleAnimationManifest: props.battleAnimationManifest,
+                battleAnimationTilesetURLs: props.battleAnimationTilesetURLs,
                 playerSpriteURL: props.playerSpriteURL,
                 enemySpriteURL: props.enemySpriteURL,
                 displayStyle: fieldDisplayStyle,

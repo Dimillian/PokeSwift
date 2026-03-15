@@ -40,6 +40,8 @@ final class AssetCopyingTests: XCTestCase {
             "Assets/battle/trainers/bugcatcher.png",
             "Assets/battle/trainers/red.png",
             "Assets/battle/trainers/redb.png",
+            "Assets/battle/animations/move_anim_0.png",
+            "Assets/battle/animations/move_anim_1.png",
             "Assets/battle/effects/send_out_poof.png",
         ]
 

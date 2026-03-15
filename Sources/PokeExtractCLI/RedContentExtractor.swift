@@ -4,6 +4,10 @@ import PokeDataModel
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
     private static let sendOutPoofAssetPath = "Assets/battle/effects/send_out_poof.png"
+    private static let battleAnimationAssetMap: [(source: String, destination: String)] = [
+        ("gfx/battle/move_anim_0.png", "Assets/battle/animations/move_anim_0.png"),
+        ("gfx/battle/move_anim_1.png", "Assets/battle/animations/move_anim_1.png"),
+    ]
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
@@ -78,6 +82,7 @@ public enum RedContentExtractor {
         let titleManifest = try parseTitleManifest(source: source)
         let gameManifest = makeGameManifest(source: source)
         let gameplayManifest = try extractGameplayManifest(source: source)
+        let battleAnimationManifest = try extractBattleAnimationManifest(source: source)
         let audioManifest = try extractAudioManifest(source: source, titleTrackID: constants.musicTrack)
 
         try writeJSON(gameManifest, to: variantRoot.appendingPathComponent("game_manifest.json"))
@@ -85,6 +90,7 @@ public enum RedContentExtractor {
         try writeJSON(charmap, to: variantRoot.appendingPathComponent("charmap.json"))
         try writeJSON(titleManifest, to: variantRoot.appendingPathComponent("title_manifest.json"))
         try writeJSON(gameplayManifest, to: variantRoot.appendingPathComponent("gameplay_manifest.json"))
+        try writeJSON(battleAnimationManifest, to: variantRoot.appendingPathComponent("battle_animation_manifest.json"))
         try writeJSON(audioManifest, to: variantRoot.appendingPathComponent("audio_manifest.json"))
 
         for (sourcePath, destination) in source.assetMap.sorted(by: { $0.key < $1.key }) {
@@ -102,6 +108,11 @@ public enum RedContentExtractor {
             let destinationURL = variantRoot.appendingPathComponent(battleAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
+        for battleAnimationAsset in battleAnimationAssetMap {
+            let sourceURL = configuration.repoRoot.appendingPathComponent(battleAnimationAsset.source)
+            let destinationURL = variantRoot.appendingPathComponent(battleAnimationAsset.destination)
+            try copyAsset(from: sourceURL, to: destinationURL)
+        }
         try copyAsset(
             from: configuration.repoRoot.appendingPathComponent("gfx/battle/move_anim_0.png"),
             to: variantRoot.appendingPathComponent(sendOutPoofAssetPath)
@@ -117,6 +128,7 @@ public enum RedContentExtractor {
             "charmap.json",
             "title_manifest.json",
             "gameplay_manifest.json",
+            "battle_animation_manifest.json",
             "audio_manifest.json",
             "Assets/title/pokemon_logo.png",
             "Assets/title/player.png",
@@ -172,6 +184,8 @@ public enum RedContentExtractor {
             "Assets/field/blocksets/gate.bst",
             "Assets/field/blocksets/house.bst",
             "Assets/field/blocksets/pokecenter.bst",
+            "Assets/battle/animations/move_anim_0.png",
+            "Assets/battle/animations/move_anim_1.png",
             sendOutPoofAssetPath,
         ]
 
@@ -187,6 +201,7 @@ public enum RedContentExtractor {
         _ = try decoder.decode(CharmapManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("charmap.json")))
         _ = try decoder.decode(TitleSceneManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("title_manifest.json")))
         let gameplayManifest = try decoder.decode(GameplayManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("gameplay_manifest.json")))
+        _ = try decoder.decode(BattleAnimationManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("battle_animation_manifest.json")))
         _ = try decoder.decode(AudioManifest.self, from: Data(contentsOf: variantRoot.appendingPathComponent("audio_manifest.json")))
 
         for battleAsset in battleAssetMap(from: gameplayManifest) {
