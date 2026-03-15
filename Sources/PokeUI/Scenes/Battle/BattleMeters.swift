@@ -20,14 +20,19 @@ struct BattleExperienceBar: View {
     var body: some View {
         GeometryReader { proxy in
             let width = max(0, proxy.size.width * fraction)
+            let barShape = RoundedRectangle(cornerRadius: 4, style: .continuous)
 
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                barShape
                     .fill(FieldRetroPalette.track)
 
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(red: 0.28, green: 0.46, blue: 0.62))
+                barShape
+                    .fill(Color(red: 0.2, green: 0.47, blue: 0.86))
                     .frame(width: width)
+            }
+            .overlay {
+                barShape
+                    .stroke(Color.white.opacity(0.16), lineWidth: 0.8)
             }
         }
         .onAppear {
@@ -98,21 +103,26 @@ struct BattleHPBar: View {
         case ..<0.5:
             return Color(red: 0.72, green: 0.55, blue: 0.21)
         default:
-            return Color(red: 0.2, green: 0.32, blue: 0.14)
+            return Color(red: 0.22, green: 0.62, blue: 0.28)
         }
     }
 
     var body: some View {
         GeometryReader { proxy in
             let width = max(0, proxy.size.width * hpFraction)
+            let barShape = RoundedRectangle(cornerRadius: 4, style: .continuous)
 
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                barShape
                     .fill(FieldRetroPalette.track)
 
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                barShape
                     .fill(barColor)
                     .frame(width: width)
+            }
+            .overlay {
+                barShape
+                    .stroke(Color.white.opacity(0.16), lineWidth: 0.8)
             }
         }
         .onAppear {

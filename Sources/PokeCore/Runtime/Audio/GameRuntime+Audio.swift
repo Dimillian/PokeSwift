@@ -150,6 +150,33 @@ extension GameRuntime {
         )
     }
 
+    func sendOutSoundEffectRequests(
+        side: BattlePresentationSide,
+        speciesID: String
+    ) -> [RuntimeStagedSoundEffectRequest] {
+        var requests: [RuntimeStagedSoundEffectRequest] = []
+
+        if let poofRequest = battleSoundEffectRequest(id: "SFX_BALL_POOF") {
+            requests.append(
+                RuntimeStagedSoundEffectRequest(
+                    delay: BattleSendOutAnimationTiming.poofSoundDelay,
+                    request: poofRequest
+                )
+            )
+        }
+
+        if let cryRequest = speciesCrySoundEffectRequest(speciesID: speciesID) {
+            requests.append(
+                RuntimeStagedSoundEffectRequest(
+                    delay: BattleSendOutAnimationTiming.crySoundDelay(for: side),
+                    request: cryRequest
+                )
+            )
+        }
+
+        return requests
+    }
+
     func enemyFaintSoundEffectRequests() -> [SoundEffectPlaybackRequest] {
         ["SFX_FAINT_FALL", "SFX_FAINT_THUD"].compactMap { battleSoundEffectRequest(id: $0) }
     }
@@ -184,7 +211,7 @@ extension GameRuntime {
 
     func executeDialoguePageEventsIfNeeded() {
         guard let dialogueState,
-              let dialogue = content.dialogue(id: dialogueState.dialogueID),
+              let dialogue = currentDialogueManifest,
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             isDialogueAudioBlockingInput = false
             return
@@ -259,6 +286,10 @@ extension GameRuntime {
         )
         guard isMusicEnabled else { return }
         audioPlayer?.playMusic(request: .init(trackID: trackID, entryID: entryID), completion: nil)
+    }
+
+    func restoreAudioState(_ state: RuntimeAudioState, reason: String) {
+        requestMusic(trackID: state.trackID, entryID: state.entryID, reason: reason)
     }
 
     private func playOneShotMusic(trackID: String, entryID: String, reason: String, completion: (() -> Void)? = nil) {

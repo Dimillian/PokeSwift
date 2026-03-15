@@ -17,6 +17,7 @@ public struct BattlePanel: View {
     let sendOutPoofSpriteURL: URL?
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
+    let displayStyle: FieldDisplayStyle
     let presentation: BattlePresentationTelemetry
 
     public init(
@@ -30,6 +31,7 @@ public struct BattlePanel: View {
         sendOutPoofSpriteURL: URL?,
         playerSpriteURL: URL?,
         enemySpriteURL: URL?,
+        displayStyle: FieldDisplayStyle,
         presentation: BattlePresentationTelemetry
     ) {
         self.trainerName = trainerName
@@ -42,6 +44,7 @@ public struct BattlePanel: View {
         self.sendOutPoofSpriteURL = sendOutPoofSpriteURL
         self.playerSpriteURL = playerSpriteURL
         self.enemySpriteURL = enemySpriteURL
+        self.displayStyle = displayStyle
         self.presentation = presentation
     }
 
@@ -63,14 +66,11 @@ public struct BattlePanel: View {
                 sendOutPoofSpriteURL: sendOutPoofSpriteURL,
                 playerSpriteURL: playerSpriteURL,
                 enemySpriteURL: enemySpriteURL,
+                displayStyle: displayStyle,
+                hdrBoost: battleShaderHDRBoost,
                 presentation: presentation
             )
             .frame(width: viewportSize.width, height: viewportSize.height)
-            .battleScreenEffect(
-                displayScale: scale,
-                presentation: presentation,
-                hdrBoost: battleShaderHDRBoost
-            )
             .overlay {
                 BattleIntroFlashOverlay(presentation: presentation)
             }

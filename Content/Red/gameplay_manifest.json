@@ -45,6 +45,46 @@
       ]
     },
     {
+      "id" : "capture_caught",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_CAUGHT_MON",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "All right!",
+            "{capturedPokemon} was",
+            "caught!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "capture_dex_added",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_DEX_PAGE_ADDED",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "New POKéDEX data",
+            "will be added for",
+            "{capturedPokemon}!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "capture_missed",
       "pages" : [
         {
@@ -75,6 +115,38 @@
       ]
     },
     {
+      "id" : "capture_transferred_bill_pc",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{capturedPokemon} was",
+            "transferred to",
+            "BILL's PC!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "capture_transferred_someone_pc",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{capturedPokemon} was",
+            "transferred to",
+            "someone's PC!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "capture_uncatchable",
       "pages" : [
         {
@@ -94,6 +166,68 @@
           "lines" : [
             "This POKéMON",
             "can't be caught!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_evolved",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{pokemon} evolved"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_into",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_2",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "into {evolvedPokemon}!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_is_evolving",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "What? {pokemon}",
+            "is evolving!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "evolution_stopped",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Huh? {pokemon}",
+            "stopped evolving!"
           ],
           "waitsForPrompt" : true
         }
@@ -1418,9 +1552,7 @@
           ],
           "lines" : [
             "<PLAYER> received",
-            "a",
-            "<NAME>",
-            "!"
+            "a {NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -1707,9 +1839,7 @@
           ],
           "lines" : [
             "<RIVAL> received",
-            "a",
-            "<NAME>",
-            "!"
+            "a {NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -2411,6 +2541,37 @@
       ]
     },
     {
+      "id" : "pewter_city_super_nerd_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Did you check out",
+            "the MUSEUM?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_super_nerd_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Psssst!",
+            "Do you know what",
+            "I'm doing?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "pewter_city_trainer_tips",
       "pages" : [
         {
@@ -2431,6 +2592,32 @@
             "takes part in",
             "battle, however",
             "short, earns EXP!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_youngster_follow_me",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're a trainer",
+            "right? BROCK's",
+            "looking for new",
+            "challengers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Follow me!"
           ],
           "waitsForPrompt" : true
         }
@@ -2630,11 +2817,48 @@
         },
         {
           "events" : [
-
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
           ],
           "lines" : [
             "<PLAYER> received",
             "the BOULDERBADGE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That's an official",
+            "POKéMON LEAGUE",
+            "BADGE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Its bearer's",
+            "POKéMON become",
+            "more powerful!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The technique",
+            "FLASH can now be",
+            "used any time!"
           ],
           "waitsForPrompt" : true
         }
@@ -2856,7 +3080,97 @@
       ]
     },
     {
+      "id" : "pewter_gym_received_tm34",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> received",
+            "TM34!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A TM contains a",
+            "technique that",
+            "can be taught to",
+            "POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A TM is good only",
+            "once! So when you",
+            "use one to teach",
+            "a new technique,"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "pick the POKéMON",
+            "carefully!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TM34 contains",
+            "BIDE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Your POKéMON will",
+            "absorb damage in",
+            "battle then pay",
+            "it back double!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "pewter_gym_t_m34_no_room",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You don't have",
+            "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "pewter_gym_tm34_no_room",
       "pages" : [
         {
           "events" : [
@@ -3713,9 +4027,7 @@
           ],
           "lines" : [
             "<PLAYER> got",
-            "",
-            "<NAME>",
-            "!"
+            "{NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -3806,6 +4118,376 @@
             "You can get back",
             "to PALLET TOWN",
             "quicker that way."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_gate_guard_go_right_ahead",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "Oh! That is the",
+            "BOULDERBADGE!",
+            "Go right ahead!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_gate_guard_i_cant_let_you_pass",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The rules are",
+            "rules. I can't",
+            "let you pass."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_gate_guard_no_boulderbadge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Only truly skilled",
+            "trainers are",
+            "allowed through."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You don't have the",
+            "BOULDERBADGE yet!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_pokemon_league_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON LEAGUE",
+            "Front Gate"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival1_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Awww!",
+            "You just lucked",
+            "out!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival1_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "Why do I have 2",
+            "POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should catch",
+            "some more too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival2_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "What!?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I was just",
+            "careless!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival2_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hahaha!",
+            "<PLAYER>! That's",
+            "your best? You're",
+            "nowhere near as"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "good as me, pal!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Go train some",
+            "more! You loser!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_after_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I heard POKéMON",
+            "LEAGUE has many",
+            "tough trainers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I have to figure",
+            "out how to get",
+            "past them!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should quit",
+            "dawdling and get",
+            "a move on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_after_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That loosened me",
+            "up! I'm ready for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<PLAYER>, you need",
+            "more practice!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "But hey, you know",
+            "that! I'm out of",
+            "here. Smell ya!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_before_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hey!",
+            "<PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Forget it! You",
+            "probably don't",
+            "have any BADGEs!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The guard won't",
+            "let you through!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "By the way, did",
+            "your POKéMON",
+            "get any stronger?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route22_rival_before_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "<PLAYER>! What a",
+            "surprise to see",
+            "you here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "So you're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You collected all",
+            "the BADGEs too?",
+            "That's cool!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Then I'll whip you",
+            "<PLAYER> as a",
+            "warm up for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come on!"
           ],
           "waitsForPrompt" : true
         }
@@ -4299,9 +4981,7 @@
           ],
           "lines" : [
             "<PLAYER> got",
-            "",
-            "<NAME>",
-            "!"
+            "{NAME}!"
           ],
           "waitsForPrompt" : true
         }
@@ -4392,6 +5072,311 @@
             "You can get back",
             "to PALLET TOWN",
             "quicker that way."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_gate_guard_go_right_ahead",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Oh! That is the",
+            "BOULDERBADGE!",
+            "Go right ahead!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_gate_guard_no_boulder_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Only truly skilled",
+            "trainers are",
+            "allowed through."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_DENIED",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "You don't have the",
+            "BOULDERBADGE yet!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The rules are",
+            "rules. I can't",
+            "let you pass."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_pokemon_league_sign",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON LEAGUE",
+            "Front Gate"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_defeated",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Awww!",
+            "You just lucked",
+            "out!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_victory",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "Why do I have 2",
+            "POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should catch",
+            "some more too!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_after_battle_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I heard POKéMON",
+            "LEAGUE has many",
+            "tough trainers!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I have to figure",
+            "out how to get",
+            "past them!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You should quit",
+            "dawdling and get",
+            "a move on!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_after_battle_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That loosened me",
+            "up! I'm ready for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<PLAYER>, you need",
+            "more practice!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "But hey, you know",
+            "that! I'm out of",
+            "here. Smell ya!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_before_battle_1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: Hey!",
+            "<PLAYER>!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Forget it! You",
+            "probably don't",
+            "have any BADGEs!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The guard won't",
+            "let you through!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "By the way, did",
+            "your POKéMON",
+            "get any stronger?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_before_battle_2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<RIVAL>: What?",
+            "<PLAYER>! What a",
+            "surprise to see",
+            "you here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "So you're going to",
+            "POKéMON LEAGUE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You collected all",
+            "the BADGEs too?",
+            "That's cool!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Then I'll whip you",
+            "<PLAYER> as a",
+            "warm up for",
+            "POKéMON LEAGUE!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come on!"
           ],
           "waitsForPrompt" : true
         }
@@ -6358,6 +7343,14 @@
         "sourceConstant" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0"
       },
       {
+        "id" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        "sourceConstant" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"
+      },
+      {
+        "id" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
+        "sourceConstant" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE"
+      },
+      {
         "id" : "EVENT_BEAT_ROUTE_3_TRAINER_0",
         "sourceConstant" : "EVENT_BEAT_ROUTE_3_TRAINER_0"
       },
@@ -6424,6 +7417,10 @@
       {
         "id" : "EVENT_GOT_STARTER",
         "sourceConstant" : "EVENT_GOT_STARTER"
+      },
+      {
+        "id" : "EVENT_GOT_TM34",
+        "sourceConstant" : "EVENT_GOT_TM34"
       },
       {
         "id" : "EVENT_OAK_APPEARED_IN_PALLET",
@@ -7178,6 +8175,20 @@
       "id" : "FLOOR_B4F",
       "isKeyItem" : false,
       "price" : 0
+    },
+    {
+      "battleUse" : "none",
+      "displayName" : "TM34",
+      "id" : "TM_BIDE",
+      "isKeyItem" : false,
+      "price" : 2000
+    },
+    {
+      "battleUse" : "none",
+      "displayName" : "TM42",
+      "id" : "TM_DREAM_EATER",
+      "isKeyItem" : false,
+      "price" : 2000
     }
   ],
   "mapScripts" : [
@@ -7257,6 +8268,208 @@
           ],
           "id" : "oaks_parcel_entry",
           "scriptID" : "viridian_mart_oaks_parcel"
+        }
+      ]
+    },
+    {
+      "mapID" : "ROUTE_22",
+      "triggers" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "CHARMANDER"
+            }
+          ],
+          "id" : "first_rival_upper_after_charmander",
+          "scriptID" : "route_22_rival_1_challenge_4_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "SQUIRTLE"
+            }
+          ],
+          "id" : "first_rival_upper_after_squirtle",
+          "scriptID" : "route_22_rival_1_challenge_5_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "BULBASAUR"
+            }
+          ],
+          "id" : "first_rival_upper_after_bulbasaur",
+          "scriptID" : "route_22_rival_1_challenge_6_upper"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "CHARMANDER"
+            }
+          ],
+          "id" : "first_rival_lower_after_charmander",
+          "scriptID" : "route_22_rival_1_challenge_4_lower"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "SQUIRTLE"
+            }
+          ],
+          "id" : "first_rival_lower_after_squirtle",
+          "scriptID" : "route_22_rival_1_challenge_5_lower"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 29,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerYEquals"
+            },
+            {
+              "kind" : "chosenStarterEquals",
+              "stringValue" : "BULBASAUR"
+            }
+          ],
+          "id" : "first_rival_lower_after_bulbasaur",
+          "scriptID" : "route_22_rival_1_challenge_6_lower"
+        }
+      ]
+    },
+    {
+      "mapID" : "ROUTE_22_GATE",
+      "triggers" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BEAT_BROCK",
+              "kind" : "flagUnset"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 2,
+              "kind" : "playerYEquals"
+            }
+          ],
+          "id" : "guard_blocks_upper_lane_without_boulder_badge",
+          "scriptID" : "route_22_gate_guard_blocks_northbound_upper_lane"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BEAT_BROCK",
+              "kind" : "flagUnset"
+            },
+            {
+              "intValue" : 5,
+              "kind" : "playerXEquals"
+            },
+            {
+              "intValue" : 2,
+              "kind" : "playerYEquals"
+            }
+          ],
+          "id" : "guard_blocks_lower_lane_without_boulder_badge",
+          "scriptID" : "route_22_gate_guard_blocks_northbound_lower_lane"
         }
       ]
     },
@@ -13244,6 +14457,2324 @@
           },
           "targetFacing" : "up",
           "targetMapID" : "VIRIDIAN_GYM",
+          "targetPosition" : {
+            "x" : 0,
+            "y" : 0
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+        {
+          "dialogueID" : "route_22_pokemon_league_sign",
+          "id" : "route_22_bg_0",
+          "position" : {
+            "x" : 7,
+            "y" : 11
+          }
+        }
+      ],
+      "blockHeight" : 9,
+      "blockIDs" : [
+        19,
+        32,
+        13,
+        13,
+        13,
+        13,
+        33,
+        40,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        43,
+        87,
+        87,
+        87,
+        42,
+        44,
+        59,
+        104,
+        127,
+        127,
+        127,
+        127,
+        105,
+        36,
+        87,
+        87,
+        87,
+        87,
+        87,
+        87,
+        37,
+        7,
+        47,
+        7,
+        40,
+        44,
+        41,
+        55,
+        125,
+        125,
+        58,
+        125,
+        126,
+        19,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        36,
+        87,
+        41,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        19,
+        7,
+        7,
+        7,
+        29,
+        30,
+        62,
+        59,
+        47,
+        7,
+        98,
+        10,
+        10,
+        41,
+        7,
+        7,
+        7,
+        7,
+        47,
+        7,
+        19,
+        11,
+        11,
+        11,
+        101,
+        100,
+        40,
+        41,
+        11,
+        11,
+        78,
+        1,
+        1,
+        41,
+        49,
+        49,
+        86,
+        119,
+        119,
+        119,
+        19,
+        11,
+        11,
+        11,
+        85,
+        85,
+        40,
+        41,
+        11,
+        11,
+        78,
+        1,
+        62,
+        41,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        36,
+        37,
+        7,
+        47,
+        7,
+        7,
+        40,
+        41,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        40,
+        44,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        44
+      ],
+      "blockWidth" : 20,
+      "borderBlockID" : 44,
+      "connections" : [
+        {
+          "direction" : "north",
+          "offset" : 0,
+          "targetBlockHeight" : 72,
+          "targetBlockIDs" : [
+            53,
+            23,
+            54,
+            54,
+            67,
+            66,
+            53,
+            53,
+            23,
+            54,
+            53,
+            23,
+            54,
+            54,
+            67,
+            66,
+            53,
+            53,
+            23,
+            54,
+            53,
+            54,
+            43,
+            43,
+            67,
+            66,
+            44,
+            44,
+            53,
+            54,
+            53,
+            54,
+            65,
+            67,
+            66,
+            65,
+            65,
+            65,
+            53,
+            54,
+            53,
+            54,
+            66,
+            65,
+            65,
+            67,
+            67,
+            67,
+            53,
+            54,
+            53,
+            54,
+            67,
+            65,
+            67,
+            66,
+            65,
+            66,
+            53,
+            54,
+            53,
+            54,
+            65,
+            67,
+            67,
+            67,
+            66,
+            65,
+            53,
+            54,
+            53,
+            54,
+            67,
+            66,
+            66,
+            66,
+            66,
+            65,
+            53,
+            54,
+            44,
+            43,
+            66,
+            65,
+            67,
+            66,
+            65,
+            66,
+            44,
+            43,
+            65,
+            65,
+            67,
+            67,
+            67,
+            66,
+            66,
+            66,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            42,
+            65,
+            53,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            54,
+            65,
+            53,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            23,
+            54,
+            65,
+            24,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            27,
+            65,
+            28,
+            39,
+            30,
+            39,
+            53,
+            23,
+            54,
+            30,
+            31,
+            65,
+            10,
+            72,
+            10,
+            10,
+            24,
+            26,
+            27,
+            65,
+            65,
+            65,
+            10,
+            10,
+            10,
+            10,
+            53,
+            23,
+            54,
+            1,
+            1,
+            1,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            1,
+            1,
+            42,
+            10,
+            10,
+            10,
+            10,
+            53,
+            23,
+            54,
+            23,
+            23,
+            54,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            26,
+            26,
+            27,
+            68,
+            10,
+            69,
+            10,
+            44,
+            40,
+            43,
+            40,
+            40,
+            43,
+            24,
+            26,
+            27,
+            10,
+            2,
+            64,
+            10,
+            1,
+            1,
+            1,
+            44,
+            40,
+            43,
+            10,
+            19,
+            22,
+            10,
+            41,
+            1,
+            42,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            24,
+            26,
+            27,
+            68,
+            10,
+            69,
+            10,
+            10,
+            69,
+            10,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            26,
+            26,
+            27,
+            10,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            40,
+            40,
+            43,
+            10,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            64,
+            64,
+            10,
+            10,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            64,
+            2,
+            10,
+            22,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            22,
+            19,
+            64,
+            64,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            22,
+            19,
+            19,
+            22,
+            53,
+            23,
+            54,
+            24,
+            26,
+            27,
+            64,
+            2,
+            10,
+            22,
+            24,
+            26,
+            27,
+            53,
+            23,
+            54,
+            22,
+            64,
+            19,
+            10,
+            44,
+            40,
+            43,
+            24,
+            26,
+            27,
+            2,
+            10,
+            10,
+            10,
+            64,
+            64,
+            64,
+            53,
+            23,
+            54,
+            2,
+            10,
+            10,
+            10,
+            68,
+            10,
+            69,
+            24,
+            26,
+            27,
+            18,
+            18,
+            18,
+            18,
+            24,
+            26,
+            27,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            70,
+            4,
+            4,
+            70,
+            4,
+            71,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            26,
+            24,
+            26,
+            27,
+            70,
+            71,
+            4,
+            4,
+            44,
+            40,
+            40,
+            53,
+            23,
+            54,
+            24,
+            27,
+            4,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            53,
+            54,
+            4,
+            4,
+            4,
+            4,
+            4,
+            53,
+            23,
+            54,
+            24,
+            27,
+            4,
+            4,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            44,
+            43,
+            4,
+            20,
+            65,
+            21,
+            4,
+            53,
+            23,
+            54,
+            4,
+            4,
+            4,
+            56,
+            18,
+            55,
+            4,
+            24,
+            26,
+            27,
+            70,
+            4,
+            4,
+            71,
+            4,
+            4,
+            4,
+            53,
+            23,
+            54,
+            24,
+            26,
+            26,
+            27,
+            4,
+            4,
+            4,
+            24,
+            26,
+            27,
+            44,
+            40,
+            40,
+            43,
+            4,
+            4,
+            4,
+            44,
+            40,
+            43,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            70,
+            4,
+            4,
+            4,
+            71,
+            4,
+            4,
+            4,
+            70,
+            71,
+            24,
+            26,
+            26,
+            26,
+            27,
+            10,
+            10,
+            10,
+            24,
+            27,
+            44,
+            40,
+            40,
+            40,
+            43,
+            10,
+            10,
+            10,
+            44,
+            43,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            1,
+            1,
+            65,
+            41,
+            1,
+            1,
+            42,
+            1,
+            41,
+            1,
+            1,
+            42,
+            65,
+            24,
+            26,
+            26,
+            27,
+            1,
+            24,
+            26,
+            26,
+            27,
+            65,
+            44,
+            40,
+            40,
+            43,
+            1,
+            44,
+            40,
+            40,
+            43,
+            65,
+            65,
+            65,
+            65,
+            65,
+            1,
+            1,
+            1,
+            1,
+            1,
+            41,
+            1,
+            1,
+            42,
+            65,
+            41,
+            1,
+            42,
+            1,
+            42,
+            24,
+            26,
+            26,
+            27,
+            65,
+            24,
+            26,
+            27,
+            26,
+            27,
+            44,
+            40,
+            40,
+            43,
+            65,
+            44,
+            40,
+            43,
+            40,
+            43,
+            1,
+            1,
+            1,
+            1,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            41,
+            1,
+            42,
+            1,
+            42,
+            65,
+            41,
+            42,
+            24,
+            26,
+            24,
+            26,
+            27,
+            26,
+            27,
+            65,
+            24,
+            27,
+            44,
+            40,
+            44,
+            40,
+            43,
+            40,
+            43,
+            65,
+            44,
+            43,
+            1,
+            1,
+            1,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            41,
+            1,
+            42,
+            65,
+            65,
+            41,
+            1,
+            1,
+            1,
+            42,
+            24,
+            26,
+            27,
+            65,
+            65,
+            24,
+            26,
+            26,
+            26,
+            27,
+            44,
+            40,
+            43,
+            65,
+            65,
+            44,
+            40,
+            40,
+            40,
+            43,
+            1,
+            58,
+            60,
+            60,
+            60,
+            60,
+            59,
+            1,
+            1,
+            1,
+            1,
+            62,
+            61,
+            61,
+            61,
+            61,
+            63,
+            1,
+            1,
+            1
+          ],
+          "targetBlockWidth" : 10,
+          "targetMapID" : "ROUTE_23"
+        },
+        {
+          "direction" : "east",
+          "offset" : -4,
+          "targetBlockHeight" : 18,
+          "targetBlockIDs" : [
+            44,
+            44,
+            41,
+            15,
+            15,
+            15,
+            15,
+            15,
+            27,
+            8,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            44,
+            44,
+            41,
+            15,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            15,
+            15,
+            49,
+            49,
+            49,
+            49,
+            49,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            10,
+            82,
+            82,
+            82,
+            52,
+            1,
+            1,
+            1,
+            49,
+            49,
+            49,
+            12,
+            13,
+            14,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            27,
+            49,
+            49,
+            8,
+            16,
+            17,
+            18,
+            49,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            2,
+            3,
+            26,
+            26,
+            7,
+            7,
+            7,
+            26,
+            15,
+            15,
+            44,
+            44,
+            41,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            49,
+            15,
+            15,
+            87,
+            87,
+            37,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            15,
+            15,
+            10,
+            10,
+            10,
+            77,
+            15,
+            15,
+            15,
+            15,
+            27,
+            1,
+            2,
+            3,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            15,
+            15,
+            49,
+            1,
+            1,
+            10,
+            108,
+            108,
+            108,
+            108,
+            8,
+            1,
+            119,
+            119,
+            1,
+            10,
+            32,
+            33,
+            10,
+            1,
+            15,
+            15,
+            63,
+            59,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            116,
+            116,
+            1,
+            10,
+            124,
+            115,
+            10,
+            1,
+            15,
+            15,
+            44,
+            41,
+            28,
+            111,
+            10,
+            10,
+            10,
+            10,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            15,
+            15,
+            44,
+            41,
+            1,
+            10,
+            52,
+            116,
+            116,
+            10,
+            1,
+            116,
+            1,
+            32,
+            33,
+            1,
+            116,
+            10,
+            10,
+            1,
+            15,
+            15,
+            44,
+            41,
+            1,
+            10,
+            29,
+            31,
+            30,
+            10,
+            1,
+            10,
+            1,
+            124,
+            114,
+            1,
+            10,
+            10,
+            116,
+            1,
+            15,
+            15,
+            87,
+            37,
+            26,
+            7,
+            101,
+            67,
+            100,
+            47,
+            26,
+            47,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            26,
+            15,
+            15,
+            10,
+            77,
+            1,
+            116,
+            10,
+            10,
+            10,
+            10,
+            1,
+            10,
+            8,
+            10,
+            116,
+            116,
+            1,
+            116,
+            116,
+            1,
+            15,
+            15,
+            10,
+            77,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            1,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            119,
+            15,
+            15,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            77,
+            10,
+            10,
+            77,
+            1,
+            78,
+            10,
+            10,
+            78,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            77,
+            10,
+            10,
+            77,
+            1,
+            78,
+            10,
+            10,
+            78,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "targetBlockWidth" : 20,
+          "targetMapID" : "VIRIDIAN_CITY"
+        }
+      ],
+      "defaultMusicID" : "MUSIC_ROUTES3",
+      "displayName" : "Route 22",
+      "id" : "ROUTE_22",
+      "objects" : [
+        {
+          "displayName" : "Blue",
+          "facing" : "down",
+          "id" : "route_22_rival_1",
+          "interactionDialogueID" : "route_22_rival_before_battle_1",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_rival_after_battle_1"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 25,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 25,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BLUE",
+          "visibleByDefault" : false
+        },
+        {
+          "displayName" : "Blue",
+          "facing" : "down",
+          "id" : "route_22_rival_2",
+          "interactionDialogueID" : "route_22_rival_before_battle_2",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_rival_after_battle_2"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 25,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 25,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_BLUE",
+          "visibleByDefault" : false
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        58,
+        58,
+        90,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        18,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        58,
+        58,
+        92,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        19,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        54,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        15,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        75,
+        58,
+        58,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        17,
+        17,
+        36,
+        78,
+        26,
+        26,
+        26,
+        26,
+        26,
+        27,
+        26,
+        26,
+        26,
+        26,
+        26,
+        58,
+        58,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        54,
+        55,
+        55,
+        55,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        58,
+        58,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        50,
+        20,
+        20,
+        20,
+        30,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        58,
+        58,
+        44,
+        44,
+        44,
+        44,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        58,
+        58,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        55,
+        60,
+        55,
+        55,
+        58,
+        44,
+        44,
+        44,
+        44,
+        44,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        57,
+        35,
+        57,
+        35,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        50,
+        20,
+        20,
+        20,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        35,
+        57,
+        35,
+        57,
+        17,
+        36,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        57,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        57,
+        35,
+        30,
+        17,
+        17,
+        36,
+        57,
+        57,
+        57,
+        57,
+        85,
+        86,
+        85,
+        85,
+        85,
+        85,
+        85,
+        85,
+        58,
+        58,
+        82,
+        82,
+        82,
+        82,
+        82,
+        82,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        82,
+        82,
+        82,
+        82,
+        58,
+        44,
+        35,
+        57,
+        39,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        36,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        39,
+        17,
+        17,
+        36,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        54,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        60,
+        55,
+        55,
+        55,
+        55,
+        39,
+        17,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        36,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        91,
+        39,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17
+      ],
+      "stepHeight" : 18,
+      "stepWidth" : 40,
+      "tileset" : "OVERWORLD",
+      "warps" : [
+        {
+          "id" : "route_22_warp_0",
+          "origin" : {
+            "x" : 8,
+            "y" : 5
+          },
+          "targetFacing" : "up",
+          "targetMapID" : "ROUTE_22_GATE",
+          "targetPosition" : {
+            "x" : 4,
+            "y" : 7
+          }
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        3,
+        46,
+        40,
+        47,
+        3,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        44,
+        4,
+        45,
+        0
+      ],
+      "blockWidth" : 5,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_DUNGEON2",
+      "displayName" : "Route 22 Gate",
+      "id" : "ROUTE_22_GATE",
+      "objects" : [
+        {
+          "displayName" : "Route 22 Gate Guard",
+          "facing" : "left",
+          "id" : "route_22_gate_guard",
+          "interactionDialogueID" : "route_22_gate_guard_no_boulder_badge",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "route_22_gate_guard_go_right_ahead"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 6,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 6,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_GUARD",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        0,
+        0,
+        0,
+        14,
+        59,
+        59,
+        14,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        50,
+        55,
+        56,
+        50,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        56,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        14,
+        55,
+        56,
+        14,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        50,
+        55,
+        56,
+        50,
+        1,
+        1,
+        1
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 10,
+      "tileset" : "GATE",
+      "warps" : [
+        {
+          "id" : "route_22_gate_warp_0",
+          "origin" : {
+            "x" : 4,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_22",
+          "targetPosition" : {
+            "x" : 8,
+            "y" : 5
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_1",
+          "origin" : {
+            "x" : 5,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_22",
+          "targetPosition" : {
+            "x" : 8,
+            "y" : 5
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_2",
+          "origin" : {
+            "x" : 4,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_23",
+          "targetPosition" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "id" : "route_22_gate_warp_3",
+          "origin" : {
+            "x" : 5,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "ROUTE_23",
           "targetPosition" : {
             "x" : 0,
             "y" : 0
@@ -20079,7 +23610,7 @@
             "y" : 2
           },
           "sprite" : "SPRITE_OAK",
-          "visibleByDefault" : true
+          "visibleByDefault" : false
         },
         {
           "displayName" : "Pokedex",
@@ -21562,8 +25093,8 @@
         {
           "displayName" : "Super Nerd",
           "facing" : "down",
-          "id" : "pewter_city_super_nerd1_did_you_check_out_museum",
-          "interactionDialogueID" : "pewter_city_super_nerd1_did_you_check_out_museum",
+          "id" : "pewter_city_super_nerd_1",
+          "interactionDialogueID" : "pewter_city_super_nerd_1",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -21587,8 +25118,8 @@
         {
           "displayName" : "Super Nerd",
           "facing" : "down",
-          "id" : "pewter_city_super_nerd2_do_you_know_what_im_doing",
-          "interactionDialogueID" : "pewter_city_super_nerd2_do_you_know_what_im_doing",
+          "id" : "pewter_city_super_nerd_2",
+          "interactionDialogueID" : "pewter_city_super_nerd_2",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -21612,8 +25143,8 @@
         {
           "displayName" : "Youngster",
           "facing" : "down",
-          "id" : "pewter_city_youngster_youre_a_trainer_follow_me",
-          "interactionDialogueID" : "pewter_city_youngster_youre_a_trainer_follow_me",
+          "id" : "pewter_city_youngster",
+          "interactionDialogueID" : "pewter_city_youngster_follow_me",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
 
@@ -24849,13 +28380,44 @@
       "id" : "PEWTER_GYM",
       "objects" : [
         {
-          "displayName" : "Super Nerd",
+          "displayName" : "Brock",
           "facing" : "down",
-          "id" : "pewter_gym_brock_pre_battle",
+          "id" : "pewter_gym_brock",
           "interactionDialogueID" : "pewter_gym_brock_pre_battle",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM34",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "pewter_gym_brock_post_battle_advice"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM34",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "scriptID" : "pewter_gym_brock_reward"
+            },
+            {
+              "conditions" : [
 
+              ],
+              "scriptID" : "pewter_gym_brock_battle"
+            }
           ],
           "movementBehavior" : {
             "axis" : "none",
@@ -24871,9 +28433,6 @@
             "y" : 1
           },
           "sprite" : "SPRITE_SUPER_NERD",
-          "trainerBattleID" : "opp_brock_1",
-          "trainerClass" : "OPP_BROCK",
-          "trainerNumber" : 1,
           "visibleByDefault" : true
         },
         {
@@ -24911,11 +28470,25 @@
         {
           "displayName" : "Gym Guide",
           "facing" : "down",
-          "id" : "pewter_gym_guide",
-          "interactionDialogueID" : "pewter_gym_guide",
+          "id" : "pewter_gym_gym_guide",
+          "interactionDialogueID" : "pewter_gym_guide_pre_advice",
           "interactionReach" : "adjacent",
           "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_BROCK",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "pewter_gym_guide_post_battle"
+            },
+            {
+              "conditions" : [
 
+              ],
+              "dialogueID" : "pewter_gym_guide_pre_advice"
+            }
           ],
           "movementBehavior" : {
             "axis" : "none",
@@ -30916,6 +34489,42 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_SUPER_NERD",
+      "imagePath" : "Assets/field/sprites/super_nerd.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_BRUNETTE_GIRL",
       "imagePath" : "Assets/field/sprites/brunette_girl.png"
     },
@@ -31366,6 +34975,42 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_GYM_GUIDE",
+      "imagePath" : "Assets/field/sprites/gym_guide.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LINK_RECEPTIONIST",
       "imagePath" : "Assets/field/sprites/link_receptionist.png"
     },
@@ -31621,6 +35266,42 @@
       ]
     },
     {
+      "id" : "route_22_gate_guard_blocks_northbound_upper_lane",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_gate_guard_no_boulder_badge",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "movePlayer",
+          "path" : [
+            "down"
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_gate_guard_blocks_northbound_lower_lane",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_gate_guard_no_boulder_badge",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "movePlayer",
+          "path" : [
+            "down"
+          ]
+        }
+      ]
+    },
+    {
       "id" : "oaks_lab_parcel_handoff",
       "steps" : [
         {
@@ -31774,6 +35455,14 @@
 
           ],
           "visible" : false
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : true
         },
         {
           "action" : "setFlag",
@@ -32838,6 +36527,673 @@
       ]
     },
     {
+      "id" : "pewter_gym_brock_battle",
+      "steps" : [
+        {
+          "action" : "faceObject",
+          "objectID" : "pewter_gym_brock",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pewter_gym_brock_pre_battle",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "opp_brock_1",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "pewter_gym_brock_reward",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "pewter_gym_brock_wait_take_this",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_BROCK",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "giveItem",
+          "failureDialogueID" : "pewter_gym_tm34_no_room",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "TM_BIDE",
+          "successDialogueID" : "pewter_gym_received_tm34",
+          "successFlagID" : "EVENT_GOT_TM34"
+        },
+        {
+          "action" : "awardBadge",
+          "badgeID" : "BOULDERBADGE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "pewter_city_youngster",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_4_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_4_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_5_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_5_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_6_upper",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : 0,
+              "y" : 1
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "right"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "left"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_6_upper",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_4_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_4_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_5_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_5_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_challenge_6_lower",
+      "steps" : [
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_intro"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+
+                ]
+              }
+            ],
+            "kind" : "pathToPlayerAdjacent",
+            "targetPlayerOffset" : {
+              "x" : -1,
+              "y" : 0
+            },
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "faceObject",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_before_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "route_22_rival_1_6_lower",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_exit_upper",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_after_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_exit"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+                  "up",
+                  "right",
+                  "right",
+                  "right",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down"
+                ]
+              }
+            ],
+            "kind" : "fixedPath",
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "route_22_rival_1_exit_lower",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "route_22_rival_after_battle_1",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "playMusicCue",
+          "path" : [
+
+          ],
+          "stringValue" : "rival_exit"
+        },
+        {
+          "action" : "performMovement",
+          "movement" : {
+            "actors" : [
+              {
+                "actorID" : "route_22_rival_1",
+                "path" : [
+                  "right",
+                  "right",
+                  "down",
+                  "down",
+                  "down",
+                  "down",
+                  "down"
+                ]
+              }
+            ],
+            "kind" : "fixedPath",
+            "variants" : [
+
+            ]
+          },
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setObjectVisibility",
+          "objectID" : "route_22_rival_1",
+          "path" : [
+
+          ],
+          "visible" : false
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_1ST_ROUTE22_RIVAL_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
       "id" : "pewter_pokecenter_nurse_heal",
       "steps" : [
         {
@@ -32868,6 +37224,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 1,
       "displayName" : "Bulbasaur",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "IVYSAUR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -32929,6 +37294,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 2,
       "displayName" : "Ivysaur",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VENUSAUR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 32
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -32991,6 +37365,9 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 3,
       "displayName" : "Venusaur",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -33054,6 +37431,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 4,
       "displayName" : "Charmander",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CHARMELEON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -33110,6 +37496,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 5,
       "displayName" : "Charmeleon",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CHARIZARD",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -33167,6 +37562,9 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 6,
       "displayName" : "Charizard",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -33226,6 +37624,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 7,
       "displayName" : "Squirtle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WARTORTLE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -33282,6 +37689,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 8,
       "displayName" : "Wartortle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BLASTOISE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -33339,6 +37755,9 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 9,
       "displayName" : "Blastoise",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -33397,6 +37816,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 10,
       "displayName" : "Caterpie",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "METAPOD",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 7
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -33430,6 +37858,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 11,
       "displayName" : "Metapod",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BUTTERFREE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 10
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -33462,6 +37899,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 12,
       "displayName" : "Butterfree",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -33522,6 +37962,15 @@
       "crySoundEffectID" : "SFX_CRY_15",
       "dexNumber" : 13,
       "displayName" : "Weedle",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KAKUNA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 7
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -33556,6 +38005,15 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 14,
       "displayName" : "Kakuna",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "BEEDRILL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 10
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -33589,6 +38047,9 @@
       "crySoundEffectID" : "SFX_CRY_13",
       "dexNumber" : 15,
       "displayName" : "Beedrill",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -33645,6 +38106,15 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 16,
       "displayName" : "Pidgey",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PIDGEOTTO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 18
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -33701,6 +38171,15 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 17,
       "displayName" : "Pidgeotto",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PIDGEOT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 36
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -33758,6 +38237,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 18,
       "displayName" : "Pidgeot",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -33816,6 +38298,15 @@
       "crySoundEffectID" : "SFX_CRY_22",
       "dexNumber" : 19,
       "displayName" : "Rattata",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RATICATE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -33864,6 +38355,9 @@
       "crySoundEffectID" : "SFX_CRY_22",
       "dexNumber" : 20,
       "displayName" : "Raticate",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -33913,6 +38407,15 @@
       "crySoundEffectID" : "SFX_CRY_10",
       "dexNumber" : 21,
       "displayName" : "Spearow",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "FEAROW",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -33966,6 +38469,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 22,
       "displayName" : "Fearow",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -34020,6 +38526,15 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 23,
       "displayName" : "Ekans",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ARBOK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -34072,6 +38587,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 24,
       "displayName" : "Arbok",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 11,
       "heightInches" : 6,
@@ -34125,6 +38643,16 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 25,
       "displayName" : "Pikachu",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RAICHU",
+          "trigger" : {
+            "itemID" : "THUNDER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -34177,6 +38705,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 26,
       "displayName" : "Raichu",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -34211,6 +38742,15 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 27,
       "displayName" : "Sandshrew",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SANDSLASH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -34262,6 +38802,9 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 28,
       "displayName" : "Sandslash",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -34314,6 +38857,15 @@
       "crySoundEffectID" : "SFX_CRY_01",
       "dexNumber" : 29,
       "displayName" : "Nidoran F",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDORINA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -34370,6 +38922,16 @@
       "crySoundEffectID" : "SFX_CRY_01",
       "dexNumber" : 30,
       "displayName" : "Nidorina",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDOQUEEN",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -34427,6 +38989,9 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 31,
       "displayName" : "Nidoqueen",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -34474,6 +39039,15 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 32,
       "displayName" : "Nidoran M",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDORINO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -34530,6 +39104,16 @@
       "crySoundEffectID" : "SFX_CRY_00",
       "dexNumber" : 33,
       "displayName" : "Nidorino",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NIDOKING",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -34587,6 +39171,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 34,
       "displayName" : "Nidoking",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -34634,6 +39221,16 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 35,
       "displayName" : "Clefairy",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CLEFABLE",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -34690,6 +39287,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 36,
       "displayName" : "Clefable",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -34725,6 +39325,16 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 37,
       "displayName" : "Vulpix",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "NINETALES",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -34777,6 +39387,9 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 38,
       "displayName" : "Ninetales",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -34812,6 +39425,16 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 39,
       "displayName" : "Jigglypuff",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WIGGLYTUFF",
+          "trigger" : {
+            "itemID" : "MOON_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -34871,6 +39494,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 40,
       "displayName" : "Wigglytuff",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -34906,6 +39532,15 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 41,
       "displayName" : "Zubat",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLBAT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 22
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -34958,6 +39593,9 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 42,
       "displayName" : "Golbat",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -35012,6 +39650,15 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 43,
       "displayName" : "Oddish",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GLOOM",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 21
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -35068,6 +39715,16 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 44,
       "displayName" : "Gloom",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VILEPLUME",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -35126,6 +39783,9 @@
       "crySoundEffectID" : "SFX_CRY_23",
       "dexNumber" : 45,
       "displayName" : "Vileplume",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -35173,6 +39833,15 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 46,
       "displayName" : "Paras",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PARASECT",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 24
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -35225,6 +39894,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 47,
       "displayName" : "Parasect",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -35279,6 +39951,15 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 48,
       "displayName" : "Venonat",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VENOMOTH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 31
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -35336,6 +40017,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 49,
       "displayName" : "Venomoth",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -35395,6 +40079,15 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 50,
       "displayName" : "Diglett",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DUGTRIO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 26
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 0,
       "heightInches" : 8,
@@ -35446,6 +40139,9 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 51,
       "displayName" : "Dugtrio",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -35499,6 +40195,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 52,
       "displayName" : "Meowth",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PERSIAN",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -35551,6 +40256,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 53,
       "displayName" : "Persian",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -35605,6 +40313,15 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 54,
       "displayName" : "Psyduck",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLDUCK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 33
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -35656,6 +40373,9 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 55,
       "displayName" : "Golduck",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -35709,6 +40429,15 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 56,
       "displayName" : "Mankey",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "PRIMEAPE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -35761,6 +40490,9 @@
       "crySoundEffectID" : "SFX_CRY_0A",
       "dexNumber" : 57,
       "displayName" : "Primeape",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -35815,6 +40547,16 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 58,
       "displayName" : "Growlithe",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ARCANINE",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -35867,6 +40609,9 @@
       "crySoundEffectID" : "SFX_CRY_15",
       "dexNumber" : 59,
       "displayName" : "Arcanine",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 3,
@@ -35902,6 +40647,15 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 60,
       "displayName" : "Poliwag",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "POLIWHIRL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -35957,6 +40711,16 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 61,
       "displayName" : "Poliwhirl",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "POLIWRATH",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -36014,6 +40778,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 62,
       "displayName" : "Poliwrath",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -36057,6 +40824,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 63,
       "displayName" : "Abra",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KADABRA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 16
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -36089,6 +40865,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 64,
       "displayName" : "Kadabra",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ALAKAZAM",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -36146,6 +40931,9 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 65,
       "displayName" : "Alakazam",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -36203,6 +40991,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 66,
       "displayName" : "Machop",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MACHOKE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -36254,6 +41051,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 67,
       "displayName" : "Machoke",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MACHAMP",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -36307,6 +41113,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 68,
       "displayName" : "Machamp",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -36360,6 +41169,15 @@
       "crySoundEffectID" : "SFX_CRY_21",
       "dexNumber" : 69,
       "displayName" : "Bellsprout",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WEEPINBELL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 21
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 2,
       "heightInches" : 4,
@@ -36421,6 +41239,16 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 70,
       "displayName" : "Weepinbell",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "VICTREEBEL",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -36483,6 +41311,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 71,
       "displayName" : "Victreebel",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -36530,6 +41361,15 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 72,
       "displayName" : "Tentacool",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "TENTACRUEL",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -36594,6 +41434,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 73,
       "displayName" : "Tentacruel",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -36660,6 +41503,15 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 74,
       "displayName" : "Geodude",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GRAVELER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -36716,6 +41568,15 @@
       "crySoundEffectID" : "SFX_CRY_24",
       "dexNumber" : 75,
       "displayName" : "Graveler",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GOLEM",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -36773,6 +41634,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 76,
       "displayName" : "Golem",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -36830,6 +41694,15 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 77,
       "displayName" : "Ponyta",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RAPIDASH",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -36885,6 +41758,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 78,
       "displayName" : "Rapidash",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -36943,6 +41819,15 @@
       "crySoundEffectID" : "SFX_CRY_02",
       "dexNumber" : 79,
       "displayName" : "Slowpoke",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SLOWBRO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 37
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -36999,6 +41884,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 80,
       "displayName" : "Slowbro",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -37061,6 +41949,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 81,
       "displayName" : "Magnemite",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MAGNETON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -37116,6 +42013,9 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 82,
       "displayName" : "Magneton",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -37173,6 +42073,9 @@
       "crySoundEffectID" : "SFX_CRY_10",
       "dexNumber" : 83,
       "displayName" : "Farfetch'd",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -37226,6 +42129,15 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 84,
       "displayName" : "Doduo",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DODRIO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 31
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -37282,6 +42194,9 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 85,
       "displayName" : "Dodrio",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -37340,6 +42255,15 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 86,
       "displayName" : "Seel",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DEWGONG",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 34
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -37391,6 +42315,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 87,
       "displayName" : "Dewgong",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -37445,6 +42372,15 @@
       "crySoundEffectID" : "SFX_CRY_05",
       "dexNumber" : 88,
       "displayName" : "Grimer",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MUK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 38
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -37501,6 +42437,9 @@
       "crySoundEffectID" : "SFX_CRY_07",
       "dexNumber" : 89,
       "displayName" : "Muk",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -37558,6 +42497,16 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 90,
       "displayName" : "Shellder",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "CLOYSTER",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -37610,6 +42559,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 91,
       "displayName" : "Cloyster",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -37649,6 +42601,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 92,
       "displayName" : "Gastly",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "HAUNTER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 25
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -37691,6 +42652,15 @@
       "crySoundEffectID" : "SFX_CRY_1C",
       "dexNumber" : 93,
       "displayName" : "Haunter",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GENGAR",
+          "trigger" : {
+            "kind" : "trade",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -37733,6 +42703,9 @@
       "crySoundEffectID" : "SFX_CRY_07",
       "dexNumber" : 94,
       "displayName" : "Gengar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -37775,6 +42748,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 95,
       "displayName" : "Onix",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 28,
       "heightInches" : 10,
@@ -37828,6 +42804,15 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 96,
       "displayName" : "Drowzee",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "HYPNO",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 26
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -37884,6 +42869,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 97,
       "displayName" : "Hypno",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -37942,6 +42930,15 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 98,
       "displayName" : "Krabby",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KINGLER",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -37994,6 +42991,9 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 99,
       "displayName" : "Kingler",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -38047,6 +43047,15 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 100,
       "displayName" : "Voltorb",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "ELECTRODE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -38099,6 +43108,9 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 101,
       "displayName" : "Electrode",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -38152,6 +43164,16 @@
       "crySoundEffectID" : "SFX_CRY_0B",
       "dexNumber" : 102,
       "displayName" : "Exeggcute",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "EXEGGUTOR",
+          "trigger" : {
+            "itemID" : "LEAF_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -38209,6 +43231,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 103,
       "displayName" : "Exeggutor",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -38246,6 +43271,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 104,
       "displayName" : "Cubone",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "MAROWAK",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 28
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -38298,6 +43332,9 @@
       "crySoundEffectID" : "SFX_CRY_08",
       "dexNumber" : 105,
       "displayName" : "Marowak",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -38352,6 +43389,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 106,
       "displayName" : "Hitmonlee",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -38404,6 +43444,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 107,
       "displayName" : "Hitmonchan",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -38456,6 +43499,9 @@
       "crySoundEffectID" : "SFX_CRY_0C",
       "dexNumber" : 108,
       "displayName" : "Lickitung",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -38508,6 +43554,15 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 109,
       "displayName" : "Koffing",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "WEEZING",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 35
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -38560,6 +43615,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 110,
       "displayName" : "Weezing",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -38613,6 +43671,15 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 111,
       "displayName" : "Rhyhorn",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "RHYDON",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 42
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -38669,6 +43736,9 @@
       "crySoundEffectID" : "SFX_CRY_11",
       "dexNumber" : 112,
       "displayName" : "Rhydon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 3,
@@ -38728,6 +43798,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 113,
       "displayName" : "Chansey",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -38784,6 +43857,9 @@
       "crySoundEffectID" : "SFX_CRY_12",
       "dexNumber" : 114,
       "displayName" : "Tangela",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -38840,6 +43916,9 @@
       "crySoundEffectID" : "SFX_CRY_03",
       "dexNumber" : 115,
       "displayName" : "Kangaskhan",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 7,
       "heightInches" : 3,
@@ -38892,6 +43971,15 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 116,
       "displayName" : "Horsea",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SEADRA",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 32
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -38943,6 +44031,9 @@
       "crySoundEffectID" : "SFX_CRY_19",
       "dexNumber" : 117,
       "displayName" : "Seadra",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 11,
@@ -38995,6 +44086,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 118,
       "displayName" : "Goldeen",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "SEAKING",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 33
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 0,
@@ -39051,6 +44151,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 119,
       "displayName" : "Seaking",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -39108,6 +44211,16 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 120,
       "displayName" : "Staryu",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "STARMIE",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -39167,6 +44280,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 121,
       "displayName" : "Starmie",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -39202,6 +44318,9 @@
       "crySoundEffectID" : "SFX_CRY_20",
       "dexNumber" : 122,
       "displayName" : "Mr. Mime",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -39254,6 +44373,9 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 123,
       "displayName" : "Scyther",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -39310,6 +44432,9 @@
       "crySoundEffectID" : "SFX_CRY_0D",
       "dexNumber" : 124,
       "displayName" : "Jynx",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -39367,6 +44492,9 @@
       "crySoundEffectID" : "SFX_CRY_06",
       "dexNumber" : 125,
       "displayName" : "Electabuzz",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 7,
@@ -39419,6 +44547,9 @@
       "crySoundEffectID" : "SFX_CRY_04",
       "dexNumber" : 126,
       "displayName" : "Magmar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -39474,6 +44605,9 @@
       "crySoundEffectID" : "SFX_CRY_14",
       "dexNumber" : 127,
       "displayName" : "Pinsir",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 11,
@@ -39529,6 +44663,9 @@
       "crySoundEffectID" : "SFX_CRY_1D",
       "dexNumber" : 128,
       "displayName" : "Tauros",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 4,
       "heightInches" : 7,
@@ -39580,6 +44717,15 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 129,
       "displayName" : "Magikarp",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "GYARADOS",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 20
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -39615,6 +44761,9 @@
       "crySoundEffectID" : "SFX_CRY_17",
       "dexNumber" : 130,
       "displayName" : "Gyarados",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 21,
       "heightInches" : 4,
@@ -39670,6 +44819,9 @@
       "crySoundEffectID" : "SFX_CRY_1B",
       "dexNumber" : 131,
       "displayName" : "Lapras",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 8,
       "heightInches" : 2,
@@ -39727,6 +44879,9 @@
       "crySoundEffectID" : "SFX_CRY_0E",
       "dexNumber" : 132,
       "displayName" : "Ditto",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -39759,6 +44914,32 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 133,
       "displayName" : "Eevee",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "FLAREON",
+          "trigger" : {
+            "itemID" : "FIRE_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        },
+        {
+          "targetSpeciesID" : "JOLTEON",
+          "trigger" : {
+            "itemID" : "THUNDER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        },
+        {
+          "targetSpeciesID" : "VAPOREON",
+          "trigger" : {
+            "itemID" : "WATER_STONE",
+            "kind" : "item",
+            "minimumLevel" : 1
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 0,
@@ -39807,6 +44988,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 134,
       "displayName" : "Vaporeon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -39873,6 +45057,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 135,
       "displayName" : "Jolteon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -39939,6 +45126,9 @@
       "crySoundEffectID" : "SFX_CRY_1A",
       "dexNumber" : 136,
       "displayName" : "Flareon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 11,
@@ -40005,6 +45195,9 @@
       "crySoundEffectID" : "SFX_CRY_25",
       "dexNumber" : 137,
       "displayName" : "Porygon",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 2,
       "heightInches" : 7,
@@ -40054,6 +45247,15 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 138,
       "displayName" : "Omanyte",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "OMASTAR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -40103,6 +45305,9 @@
       "crySoundEffectID" : "SFX_CRY_1F",
       "dexNumber" : 139,
       "displayName" : "Omastar",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 3,
       "heightInches" : 3,
@@ -40153,6 +45358,15 @@
       "crySoundEffectID" : "SFX_CRY_16",
       "dexNumber" : 140,
       "displayName" : "Kabuto",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "KABUTOPS",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 40
+          }
+        }
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 1,
       "heightInches" : 8,
@@ -40202,6 +45416,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 141,
       "displayName" : "Kabutops",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_FAST",
       "heightFeet" : 4,
       "heightInches" : 3,
@@ -40252,6 +45469,9 @@
       "crySoundEffectID" : "SFX_CRY_23",
       "dexNumber" : 142,
       "displayName" : "Aerodactyl",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -40301,6 +45521,9 @@
       "crySoundEffectID" : "SFX_CRY_05",
       "dexNumber" : 143,
       "displayName" : "Snorlax",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 11,
@@ -40350,6 +45573,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 144,
       "displayName" : "Articuno",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 7,
@@ -40395,6 +45621,9 @@
       "crySoundEffectID" : "SFX_CRY_18",
       "dexNumber" : 145,
       "displayName" : "Zapdos",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 3,
@@ -40440,6 +45669,9 @@
       "crySoundEffectID" : "SFX_CRY_09",
       "dexNumber" : 146,
       "displayName" : "Moltres",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -40485,6 +45717,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 147,
       "displayName" : "Dratini",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DRAGONAIR",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 30
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 5,
       "heightInches" : 11,
@@ -40537,6 +45778,15 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 148,
       "displayName" : "Dragonair",
+      "evolutions" : [
+        {
+          "targetSpeciesID" : "DRAGONITE",
+          "trigger" : {
+            "kind" : "level",
+            "level" : 55
+          }
+        }
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 13,
       "heightInches" : 1,
@@ -40590,6 +45840,9 @@
       "crySoundEffectID" : "SFX_CRY_0F",
       "dexNumber" : 149,
       "displayName" : "Dragonite",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 7,
       "heightInches" : 3,
@@ -40645,6 +45898,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 150,
       "displayName" : "Mewtwo",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_SLOW",
       "heightFeet" : 6,
       "heightInches" : 7,
@@ -40699,6 +45955,9 @@
       "crySoundEffectID" : "SFX_CRY_1E",
       "dexNumber" : 151,
       "displayName" : "Mew",
+      "evolutions" : [
+
+      ],
       "growthRate" : "GROWTH_MEDIUM_SLOW",
       "heightFeet" : 1,
       "heightInches" : 4,
@@ -41370,6 +46629,80 @@
           28
         ]
       },
+      "id" : "GATE",
+      "imagePath" : "Assets/field/tilesets/gate.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/gate.bst",
+      "collision" : {
+        "doorTileIDs" : [
+
+        ],
+        "ledges" : [
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 54,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 29,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 57
+          }
+        ],
+        "passableTileIDs" : [
+          1,
+          18,
+          20,
+          26,
+          28,
+          55,
+          56,
+          59,
+          60,
+          94
+        ],
+        "tilePairCollisions" : [
+
+        ],
+        "warpTileIDs" : [
+          26,
+          28
+        ]
+      },
       "id" : "MUSEUM",
       "imagePath" : "Assets/field/tilesets/gate.png",
       "sourceTileSize" : 8
@@ -41916,7 +47249,9 @@
         }
       ],
       "playerWinDialogueID" : "pewter_gym_brock_received_boulder_badge",
+      "postBattleScriptID" : "pewter_gym_brock_reward",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BROCK",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/brock.png"
@@ -41940,6 +47275,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -41967,6 +47303,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -41986,6 +47323,7 @@
       ],
       "playerWinDialogueID" : "viridian_forest_youngster4_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42013,6 +47351,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster1_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 4,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42044,6 +47383,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 5,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42067,6 +47407,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster5_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_BUG_CATCHER",
       "trainerNumber" : 6,
       "trainerSpritePath" : "Assets/battle/trainers/bugcatcher.png"
@@ -42090,6 +47431,7 @@
       ],
       "playerWinDialogueID" : "pewter_gym_cooltrainer_m_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_JR_TRAINER_M",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/jr.trainerm.png"
@@ -42113,6 +47455,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f1_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42136,6 +47479,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42155,6 +47499,7 @@
       ],
       "playerWinDialogueID" : "route3_cooltrainer_f3_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_LASS",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
@@ -42175,6 +47520,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42195,6 +47541,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42215,6 +47562,7 @@
       "playerWinDialogueID" : "oaks_lab_rival_i_picked_the_wrong_pokemon",
       "postBattleScriptID" : "oaks_lab_rival_exit_after_battle",
       "preventsBlackoutOnLoss" : true,
+      "runsPostBattleScriptOnLoss" : true,
       "trainerClass" : "OPP_RIVAL1",
       "trainerNumber" : 3,
       "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
@@ -42238,6 +47586,7 @@
       ],
       "playerWinDialogueID" : "route3_youngster2_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_YOUNGSTER",
       "trainerNumber" : 1,
       "trainerSpritePath" : "Assets/battle/trainers/youngster.png"
@@ -42257,9 +47606,160 @@
       ],
       "playerWinDialogueID" : "route3_youngster4_end_battle",
       "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
       "trainerClass" : "OPP_YOUNGSTER",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/youngster.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_4_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "SQUIRTLE"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 4,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_4_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "SQUIRTLE"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 4,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_5_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "BULBASAUR"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 5,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_5_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "BULBASAUR"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 5,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_6_lower",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "CHARMANDER"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_lower",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 6,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
+    },
+    {
+      "baseRewardMoney" : 35,
+      "completionFlagID" : "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+      "displayName" : "BLUE",
+      "healsPartyAfterBattle" : false,
+      "id" : "route_22_rival_1_6_upper",
+      "party" : [
+        {
+          "level" : 9,
+          "speciesID" : "PIDGEY"
+        },
+        {
+          "level" : 8,
+          "speciesID" : "CHARMANDER"
+        }
+      ],
+      "playerLoseDialogueID" : "route_22_rival_1_victory",
+      "playerWinDialogueID" : "route_22_rival_1_defeated",
+      "postBattleScriptID" : "route_22_rival_1_exit_upper",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_RIVAL1",
+      "trainerNumber" : 6,
+      "trainerSpritePath" : "Assets/battle/trainers/rival1.png"
     }
   ],
   "typeEffectiveness" : [
@@ -42720,6 +48220,92 @@
         }
       ],
       "mapID" : "ROUTE_1",
+      "waterEncounterRate" : 0,
+      "waterSlots" : [
+
+      ]
+    },
+    {
+      "grassEncounterRate" : 25,
+      "grassSlots" : [
+        {
+          "level" : 3,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 5,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "RATTATA"
+        },
+        {
+          "level" : 2,
+          "speciesID" : "NIDORAN_F"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 5,
+          "speciesID" : "SPEAROW"
+        },
+        {
+          "level" : 3,
+          "speciesID" : "NIDORAN_M"
+        },
+        {
+          "level" : 4,
+          "speciesID" : "NIDORAN_M"
+        }
+      ],
+      "mapID" : "ROUTE_22",
       "waterEncounterRate" : 0,
       "waterSlots" : [
 

@@ -7,6 +7,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let mapMusic = try parseMapMusic(repoRoot: source.repoRoot)
     let tilesets = try buildTilesets(repoRoot: source.repoRoot)
     let mapScriptMetadataByMapID = try parseSelectedMapScriptMetadata(repoRoot: source.repoRoot)
+    let toggleableObjectVisibilityByMapID = try parseToggleableObjectDefaultVisibility(repoRoot: source.repoRoot)
     let martStockLabels = try Set(parseMartStocks(repoRoot: source.repoRoot).keys)
 
     let mapDrafts = try gameplayCoverageMaps.map { definition in
@@ -19,6 +20,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             mapHeadersByID: mapHeadersByID,
             tilesets: tilesets,
             mapScriptMetadata: mapScriptMetadataByMapID[definition.mapID],
+            objectVisibilityByConstant: toggleableObjectVisibilityByMapID[definition.mapID] ?? [:],
             martStockLabels: martStockLabels
         )
     }
@@ -239,11 +241,13 @@ private func referencedEventFlagIDs(
     }
     let mapScriptFlags = mapScripts.flatMap { $0.triggers.flatMap { $0.conditions.compactMap(\.flagID) } }
     let scriptStepFlags = scripts.flatMap { script in
-        script.steps.compactMap(\.flagID) + script.steps.flatMap { step in
+        script.steps.compactMap(\.flagID)
+        + script.steps.compactMap(\.successFlagID)
+        + script.steps.flatMap { step in
             (step.movement?.variants ?? []).flatMap { $0.conditions.compactMap(\.flagID) }
         }
     }
-    let trainerBattleFlags = trainerBattles.map(\.completionFlagID)
+    let trainerBattleFlags = trainerBattles.map(\.completionFlagID).filter { $0.isEmpty == false }
 
     return Set(
         playerStart.initialFlags
@@ -332,6 +336,35 @@ private func parseSelectedMapScriptMetadata(repoRoot: URL) throws -> [String: Ma
         let contents = try String(contentsOf: scriptURL)
         result[definition.mapID] = parseMapScriptMetadata(contents: contents)
     }
+}
+
+private func parseToggleableObjectDefaultVisibility(repoRoot: URL) throws -> [String: [String: Bool]] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/maps/toggleable_objects.asm"))
+    var currentMapID: String?
+    var visibilityByMapID: [String: [String: Bool]] = [:]
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if let match = line.firstMatch(of: /toggleable_objects_for\s+([A-Z0-9_]+)/) {
+            currentMapID = String(match.output.1)
+            continue
+        }
+
+        guard
+            let currentMapID,
+            let match = line.firstMatch(of: /toggle_object_state\s+([A-Z0-9_]+),\s+(ON|OFF)/)
+        else {
+            continue
+        }
+
+        visibilityByMapID[currentMapID, default: [:]][String(match.output.1)] = String(match.output.2) == "ON"
+    }
+
+    return visibilityByMapID
 }
 
 private func mapFileStem(for definition: GameplayCoverageMapDefinition) -> String {
@@ -567,6 +600,7 @@ private func collisionKey(for tileset: String) -> String {
     case "GYM": return "Gym_Coll"
     case "FOREST": return "Forest_Coll"
     case "FOREST_GATE": return "ForestGate_Coll"
+    case "GATE": return "Gate_Coll"
     case "MUSEUM": return "Museum_Coll"
     case "HOUSE": return "House_Coll"
     case "MART": return "Mart_Coll"
@@ -584,6 +618,7 @@ private func tilesetLabel(for tileset: String) -> String {
     case "GYM": return "Gym"
     case "FOREST": return "Forest"
     case "FOREST_GATE": return "ForestGate"
+    case "GATE": return "Gate"
     case "MUSEUM": return "Museum"
     case "HOUSE": return "House"
     case "MART": return "Mart"
@@ -633,6 +668,7 @@ private func makeMapManifestDraft(
     mapHeadersByID: [String: ParsedMapHeader],
     tilesets: [TilesetManifest],
     mapScriptMetadata: MapScriptMetadata?,
+    objectVisibilityByConstant: [String: Bool],
     martStockLabels: Set<String>
  ) throws -> MapManifestDraft {
     let mapID = definition.mapID
@@ -686,6 +722,7 @@ private func makeMapManifestDraft(
             mapID: mapID,
             contents: contents,
             mapScriptMetadata: mapScriptMetadata,
+            objectVisibilityByConstant: objectVisibilityByConstant,
             martStockLabels: martStockLabels
         ),
         connections: connections
@@ -701,7 +738,7 @@ private func resolveMapWarps(
 
     return try drafts.map { draft in
         let warps = try draft.rawWarps.enumerated().map { index, rawWarp in
-            let targetMapID = resolveTargetMapID(from: draft, rawTargetMapID: rawWarp.rawTargetMapID)
+            let targetMapID = resolveTargetMapID(from: draft, rawWarp: rawWarp, rawTargetMapID: rawWarp.rawTargetMapID)
             let targetPosition = try resolveTargetWarpPosition(
                 currentMapID: draft.id,
                 targetMapID: targetMapID,
@@ -790,9 +827,17 @@ private func buildMapConnections(
     }
 }
 
-private func resolveTargetMapID(from currentMap: MapManifestDraft, rawTargetMapID: String) -> String {
+private func resolveTargetMapID(
+    from currentMap: MapManifestDraft,
+    rawWarp: RawWarpEntry,
+    rawTargetMapID: String
+) -> String {
     guard rawTargetMapID == "LAST_MAP" else {
         return rawTargetMapID
+    }
+
+    if currentMap.id == "ROUTE_22_GATE" {
+        return rawWarp.origin.y == 7 ? "ROUTE_22" : "ROUTE_23"
     }
 
     return currentMap.parentMapID ?? rawTargetMapID
@@ -917,6 +962,15 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             blockTileWidth: 4,
             blockTileHeight: 4,
             collision: tilesetCollisionManifest(for: "FOREST_GATE", parsed: collisionData)
+        ),
+        .init(
+            id: "GATE",
+            imagePath: "Assets/field/tilesets/gate.png",
+            blocksetPath: "Assets/field/blocksets/gate.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "GATE", parsed: collisionData)
         ),
         .init(
             id: "MUSEUM",
@@ -1105,6 +1159,7 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_YOUNGSTER", imagePath: "Assets/field/sprites/youngster.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER", imagePath: "Assets/field/sprites/gambler.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_SUPER_NERD", imagePath: "Assets/field/sprites/super_nerd.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BRUNETTE_GIRL", imagePath: "Assets/field/sprites/brunette_girl.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_F", imagePath: "Assets/field/sprites/cooltrainer_f.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BALDING_GUY", imagePath: "Assets/field/sprites/balding_guy.png", hasWalkingFrames: false),
@@ -1115,6 +1170,7 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_M", imagePath: "Assets/field/sprites/cooltrainer_m.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_NURSE", imagePath: "Assets/field/sprites/nurse.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_GENTLEMAN", imagePath: "Assets/field/sprites/gentleman.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_GYM_GUIDE", imagePath: "Assets/field/sprites/gym_guide.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LINK_RECEPTIONIST", imagePath: "Assets/field/sprites/link_receptionist.png", hasWalkingFrames: false),
         .init(
             id: "SPRITE_POKE_BALL",
@@ -1219,8 +1275,10 @@ private func parseObjects(
     mapID: String,
     contents: String,
     mapScriptMetadata: MapScriptMetadata?,
+    objectVisibilityByConstant: [String: Bool],
     martStockLabels: Set<String>
 ) -> [MapObjectManifest] {
+    let objectConstantNames = parseObjectConstantNames(contents: contents)
     let regex = try! NSRegularExpression(
         pattern: #"(?m)^\s*object_event\s+(\d+),\s+(\d+),\s+([A-Z0-9_]+),\s+([A-Z_]+),\s+([A-Z_]+),\s+([A-Z0-9_]+)(.*)$"#,
         options: [.anchorsMatchLines]
@@ -1267,6 +1325,8 @@ private func parseObjects(
             pickupItemID: pickupItemID,
             mapScriptMetadata: mapScriptMetadata
         )
+        let objectConstant = objectConstantNames.indices.contains(index) ? objectConstantNames[index] : nil
+        let usesScriptedBattle = usesScriptedTrainerBattle(objectID: objectID)
 
         return MapObjectManifest(
             id: objectID,
@@ -1289,17 +1349,35 @@ private func parseObjects(
                 facingToken: String(contents[facingRange]),
                 home: position
             ),
-            trainerBattleID: trainerBattleID,
-            trainerClass: trainerClass,
-            trainerNumber: trainerNumber,
-            trainerEngageDistance: trainerHeader?.engageDistance,
-            trainerIntroDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.battleTextLabel, mapScriptMetadata: mapScriptMetadata) },
-            trainerEndBattleDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.endBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
-            trainerAfterBattleDialogueID: trainerHeader.map { dialogueID(forScriptLabel: $0.afterBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            trainerBattleID: usesScriptedBattle ? nil : trainerBattleID,
+            trainerClass: usesScriptedBattle ? nil : trainerClass,
+            trainerNumber: usesScriptedBattle ? nil : trainerNumber,
+            trainerEngageDistance: usesScriptedBattle ? nil : trainerHeader?.engageDistance,
+            trainerIntroDialogueID: usesScriptedBattle ? nil : trainerHeader.map { dialogueID(forScriptLabel: $0.battleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            trainerEndBattleDialogueID: usesScriptedBattle ? nil : trainerHeader.map { dialogueID(forScriptLabel: $0.endBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
+            trainerAfterBattleDialogueID: usesScriptedBattle ? nil : trainerHeader.map { dialogueID(forScriptLabel: $0.afterBattleTextLabel, mapScriptMetadata: mapScriptMetadata) },
             pickupItemID: pickupItemID,
-            visibleByDefault: defaultVisibility(for: objectID)
+            visibleByDefault: objectConstant.flatMap { objectVisibilityByConstant[$0] } ?? defaultVisibility(for: objectID)
         )
     }
+}
+
+private func parseObjectConstantNames(contents: String) -> [String] {
+    contents
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> String? in
+            let line = rawLine
+                .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+                .first?
+                .trimmingCharacters(in: .whitespaces) ?? ""
+            if line.hasPrefix("def_object_events") {
+                return nil
+            }
+            guard let match = line.firstMatch(of: /const_export\s+([A-Z0-9_]+)/) else {
+                return nil
+            }
+            return String(match.output.1)
+        }
 }
 
 private func parseObjectExtraTokens(from suffix: String) -> [String] {
@@ -1384,6 +1462,9 @@ private func objectIDFor(
     case ("REDS_HOUSE_1F", "TEXT_REDSHOUSE1F_MOM"): return "reds_house_1f_mom"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER1"): return "route_1_youngster_1"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER2"): return "route_1_youngster_2"
+    case ("ROUTE_22", "TEXT_ROUTE22_RIVAL1"): return "route_22_rival_1"
+    case ("ROUTE_22", "TEXT_ROUTE22_RIVAL2"): return "route_22_rival_2"
+    case ("ROUTE_22_GATE", "TEXT_ROUTE22GATE_GUARD"): return "route_22_gate_guard"
     case ("ROUTE_2", "TEXT_ROUTE2_MOON_STONE"): return "route_2_moon_stone"
     case ("ROUTE_2", "TEXT_ROUTE2_HP_UP"): return "route_2_hp_up"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_OLD_MAN_SLEEPY"): return "viridian_city_old_man_sleepy"
@@ -1414,6 +1495,14 @@ private func objectIDFor(
     case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_YOUNGSTER5"): return "viridian_forest_youngster_5"
     case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_SUPER_NERD"): return "viridian_forest_north_gate_super_nerd"
     case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_GRAMPS"): return "viridian_forest_north_gate_gramps"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_COOLTRAINER_F"): return "pewter_city_cooltrainer_f"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_COOLTRAINER_M"): return "pewter_city_cooltrainer_m"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_SUPER_NERD1"): return "pewter_city_super_nerd_1"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_SUPER_NERD2"): return "pewter_city_super_nerd_2"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_YOUNGSTER"): return "pewter_city_youngster"
+    case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock"
+    case ("PEWTER_GYM", "TEXT_PEWTERGYM_COOLTRAINER_M"): return "pewter_gym_cooltrainer_m"
+    case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_gym_guide"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_NURSE"): return "viridian_pokecenter_nurse"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
@@ -1556,6 +1645,27 @@ private func interactionTriggers(
                 dialogueID: "viridian_city_girl_after_pokedex"
             ),
         ]
+    case "route_22_rival_1":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE")],
+                dialogueID: "route_22_rival_after_battle_1"
+            ),
+        ]
+    case "route_22_rival_2":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE")],
+                dialogueID: "route_22_rival_after_battle_2"
+            ),
+        ]
+    case "route_22_gate_guard":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK")],
+                dialogueID: "route_22_gate_guard_go_right_ahead"
+            ),
+        ]
     case "viridian_mart_clerk":
         return [
             .init(
@@ -1580,6 +1690,32 @@ private func interactionTriggers(
         return starterBallInteractionTriggers(speciesID: "SQUIRTLE", scriptID: "oaks_lab_choose_squirtle")
     case "oaks_lab_poke_ball_bulbasaur":
         return starterBallInteractionTriggers(speciesID: "BULBASAUR", scriptID: "oaks_lab_choose_bulbasaur")
+    case "pewter_gym_brock":
+        return [
+            .init(
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK"),
+                    .init(kind: "flagSet", flagID: "EVENT_GOT_TM34"),
+                ],
+                dialogueID: "pewter_gym_brock_post_battle_advice"
+            ),
+            .init(
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK"),
+                    .init(kind: "flagUnset", flagID: "EVENT_GOT_TM34"),
+                ],
+                scriptID: "pewter_gym_brock_reward"
+            ),
+            .init(scriptID: "pewter_gym_brock_battle"),
+        ]
+    case "pewter_gym_gym_guide":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_BROCK")],
+                dialogueID: "pewter_gym_guide_post_battle"
+            ),
+            .init(dialogueID: "pewter_gym_guide_pre_advice"),
+        ]
     default:
         if sprite == "SPRITE_CLERK", let textLabel, martStockLabels.contains(textLabel) {
             return [.init(martID: martID(for: mapID))]
@@ -1650,6 +1786,13 @@ private func displayNameForObject(
     case "oaks_lab_poke_ball_bulbasaur": return "Bulbasaur"
     case "oaks_lab_oak_1", "oaks_lab_oak_2": return "Oak"
     case "oaks_lab_pokedex_1", "oaks_lab_pokedex_2": return "Pokedex"
+    case "route_22_rival_1", "route_22_rival_2": return "Blue"
+    case "pewter_city_cooltrainer_f", "pewter_city_cooltrainer_m": return "Cooltrainer"
+    case "pewter_city_super_nerd_1", "pewter_city_super_nerd_2": return "Super Nerd"
+    case "pewter_city_youngster": return "Youngster"
+    case "pewter_gym_brock": return "Brock"
+    case "pewter_gym_cooltrainer_m": return "Cooltrainer"
+    case "pewter_gym_gym_guide": return "Gym Guide"
     default:
         if let pickupItemID {
             return humanizedIdentifier(pickupItemID)
@@ -1664,6 +1807,15 @@ private func displayNameForObject(
 private func trainerBattleIDFor(trainerClass: String?, trainerNumber: Int?) -> String? {
     guard let trainerClass, let trainerNumber else { return nil }
     return "\(trainerClass.lowercased())_\(trainerNumber)"
+}
+
+private func usesScriptedTrainerBattle(objectID: String) -> Bool {
+    switch objectID {
+    case "route_22_rival_1", "route_22_rival_2", "pewter_gym_brock":
+        return true
+    default:
+        return false
+    }
 }
 
 private func defaultVisibility(for objectID: String) -> Bool {
@@ -1689,6 +1841,10 @@ private func dialogueID(for mapID: String, textID: String, mapScriptMetadata: Ma
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER1"): return "route_1_youngster_1_after_sample"
     case ("ROUTE_1", "TEXT_ROUTE1_YOUNGSTER2"): return "route_1_youngster_2"
     case ("ROUTE_1", "TEXT_ROUTE1_SIGN"): return "route_1_sign"
+    case ("ROUTE_22", "TEXT_ROUTE22_POKEMON_LEAGUE_SIGN"): return "route_22_pokemon_league_sign"
+    case ("ROUTE_22", "TEXT_ROUTE22_RIVAL1"): return "route_22_rival_before_battle_1"
+    case ("ROUTE_22", "TEXT_ROUTE22_RIVAL2"): return "route_22_rival_before_battle_2"
+    case ("ROUTE_22_GATE", "TEXT_ROUTE22GATE_GUARD"): return "route_22_gate_guard_no_boulder_badge"
     case ("ROUTE_2", "TEXT_ROUTE2_SIGN"): return "route_2_sign"
     case ("ROUTE_2", "TEXT_ROUTE2_DIGLETTS_CAVE_SIGN"): return "route_2_digletts_cave_sign"
     case ("VIRIDIAN_CITY", "TEXT_VIRIDIANCITY_YOUNGSTER1"): return "viridian_city_youngster_1"
@@ -1727,6 +1883,20 @@ private func dialogueID(for mapID: String, textID: String, mapScriptMetadata: Ma
     case ("VIRIDIAN_FOREST", "TEXT_VIRIDIANFOREST_LEAVING_SIGN"): return "viridian_forest_leaving_sign"
     case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_SUPER_NERD"): return "viridian_forest_north_gate_super_nerd"
     case ("VIRIDIAN_FOREST_NORTH_GATE", "TEXT_VIRIDIANFORESTNORTHGATE_GRAMPS"): return "viridian_forest_north_gate_gramps"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_COOLTRAINER_F"): return "pewter_city_cooltrainer_f"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_COOLTRAINER_M"): return "pewter_city_cooltrainer_m"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_SUPER_NERD1"): return "pewter_city_super_nerd_1"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_SUPER_NERD2"): return "pewter_city_super_nerd_2"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_YOUNGSTER"): return "pewter_city_youngster_follow_me"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_TRAINER_TIPS"): return "pewter_city_trainer_tips"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_POLICE_NOTICE_SIGN"): return "pewter_city_police_notice_sign"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_MART_SIGN"): return "pewter_city_mart_sign"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_POKECENTER_SIGN"): return "pewter_city_pokecenter_sign"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_MUSEUM_SIGN"): return "pewter_city_museum_sign"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_GYM_SIGN"): return "pewter_city_gym_sign"
+    case ("PEWTER_CITY", "TEXT_PEWTERCITY_SIGN"): return "pewter_city_sign"
+    case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock_pre_battle"
+    case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_guide_pre_advice"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_LINK_RECEPTIONIST"): return "viridian_pokecenter_link_receptionist"
@@ -1818,6 +1988,9 @@ private func buildDialogues(
 ) throws -> [DialogueManifest] {
     let scriptDialogueEvents = try buildScriptDialogueEvents(repoRoot: repoRoot)
     let textContentsByMapID = try buildTextContentsByMapID(repoRoot: repoRoot)
+        let route22Text = textContentsByMapID["ROUTE_22"]
+        let route22GateText = textContentsByMapID["ROUTE_22_GATE"]
+    let pewterGymText = textContentsByMapID["PEWTER_GYM"]
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
@@ -1833,6 +2006,7 @@ private func buildDialogues(
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
     let text1 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_1.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
+    let text3 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_3.asm"))
     let text4 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_4.asm"))
     let text6 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_6.asm"))
     let itemNamesByID = try parseItemNames(repoRoot: repoRoot)
@@ -1900,6 +2074,31 @@ private func buildDialogues(
         try extractDialogue(id: "viridian_forest_north_gate_super_nerd", label: "_ViridianForestNorthGateSuperNerdText", from: viridianForestNorthGate),
         try extractDialogue(id: "viridian_forest_north_gate_gramps", label: "_ViridianForestNorthGateGrampsText", from: viridianForestNorthGate),
         try extractDialogue(id: "pickup_no_room", label: "_NoMoreRoomForItemText", from: text1),
+        try extractDialogue(
+            id: "evolution_evolved",
+            label: "_EvolvedText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
+        try extractDialogue(
+            id: "evolution_into",
+            label: "_IntoText",
+            from: text3,
+            placeholderMap: ["wNameBuffer": "evolvedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+        ),
+        try extractDialogue(
+            id: "evolution_stopped",
+            label: "_StoppedEvolvingText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
+        try extractDialogue(
+            id: "evolution_is_evolving",
+            label: "_IsEvolvingText",
+            from: text3,
+            placeholderMap: ["wStringBuffer": "pokemon"]
+        ),
         try extractDialogue(id: "pokemart_greeting", label: "_PokemartGreetingText", from: text4),
         try extractDialogue(id: "pokemart_buying_greeting", label: "_PokemartBuyingGreetingText", from: text4),
         try extractDialogue(id: "pokemart_bought_item", label: "_PokemartBoughtItemText", from: text4),
@@ -1920,6 +2119,32 @@ private func buildDialogues(
         try extractDialogue(id: "capture_broke_free", label: "_ItemUseBallText02", from: text6),
         try extractDialogue(id: "capture_almost", label: "_ItemUseBallText03", from: text6),
         try extractDialogue(id: "capture_so_close", label: "_ItemUseBallText04", from: text6),
+        try extractDialogue(
+            id: "capture_caught",
+            label: "_ItemUseBallText05",
+            from: text6,
+            placeholderMap: ["wEnemyMonNick": "capturedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")]
+        ),
+        try extractDialogue(
+            id: "capture_dex_added",
+            label: "_ItemUseBallText06",
+            from: text6,
+            placeholderMap: ["wEnemyMonNick": "capturedPokemon"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_DEX_PAGE_ADDED")]
+        ),
+        try extractDialogue(
+            id: "capture_transferred_bill_pc",
+            label: "_ItemUseBallText07",
+            from: text6,
+            placeholderMap: ["wBoxMonNicks": "capturedPokemon"]
+        ),
+        try extractDialogue(
+            id: "capture_transferred_someone_pc",
+            label: "_ItemUseBallText08",
+            from: text6,
+            placeholderMap: ["wBoxMonNicks": "capturedPokemon"]
+        ),
         try extractDialogue(id: "viridian_pokecenter_gentleman", label: "_ViridianPokecenterGentlemanText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterGentlemanText"] ?? []),
         try extractDialogue(id: "viridian_pokecenter_cooltrainer", label: "_ViridianPokecenterCooltrainerMText", from: viridianPokecenter, extraEvents: scriptDialogueEvents["_ViridianPokecenterCooltrainerMText"] ?? []),
         try extractDialogue(id: "oaks_lab_rival_gramps_isnt_around", label: "_OaksLabRivalGrampsIsntAroundText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalGrampsIsntAroundText"] ?? []),
@@ -1965,6 +2190,101 @@ private func buildDialogues(
         try extractDialogue(id: "oaks_lab_rival_leave_it_all_to_me", label: "_OaksLabRivalLeaveItAllToMeText", from: oaksLab, extraEvents: scriptDialogueEvents["_OaksLabRivalLeaveItAllToMeText"] ?? []),
         try extractDialogue(id: "rival_1_win_text", label: "_Rival1WinText", from: text2, extraEvents: scriptDialogueEvents["_Rival1WinText"] ?? []),
     ]
+
+    if let route22Text {
+        if let beforeBattle1 = try extractDialogueIfPresent(
+            id: "route_22_rival_before_battle_1",
+            label: "_Route22RivalBeforeBattleText1",
+            from: route22Text
+        ) {
+            dialogues.append(beforeBattle1)
+        }
+        if let afterBattle1 = try extractDialogueIfPresent(
+            id: "route_22_rival_after_battle_1",
+            label: "_Route22RivalAfterBattleText1",
+            from: route22Text
+        ) {
+            dialogues.append(afterBattle1)
+        }
+        if let defeatedDialogue = try extractDialogueIfPresent(
+            id: "route_22_rival_1_defeated",
+            label: "_Route22Rival1DefeatedText",
+            from: route22Text
+        ) {
+            dialogues.append(defeatedDialogue)
+        }
+        if let victoryDialogue = try extractDialogueIfPresent(
+            id: "route_22_rival_1_victory",
+            label: "_Route22Rival1VictoryText",
+            from: route22Text
+        ) {
+            dialogues.append(victoryDialogue)
+        }
+        if let beforeBattle2 = try extractDialogueIfPresent(
+            id: "route_22_rival_before_battle_2",
+            label: "_Route22RivalBeforeBattleText2",
+            from: route22Text
+        ) {
+            dialogues.append(beforeBattle2)
+        }
+        if let afterBattle2 = try extractDialogueIfPresent(
+            id: "route_22_rival_after_battle_2",
+            label: "_Route22RivalAfterBattleText2",
+            from: route22Text
+        ) {
+            dialogues.append(afterBattle2)
+        }
+    }
+
+    if let route22GateText {
+        dialogues.append(
+            try extractCombinedDialogue(
+                id: "route_22_gate_guard_no_boulder_badge",
+                segments: [
+                    (label: "_Route22GateGuardNoBoulderbadgeText", contents: route22GateText),
+                    (label: "_Route22GateGuardICantLetYouPassText", contents: route22GateText),
+                ],
+                trailingEventsBySegmentIndex: [0: [.init(kind: .soundEffect, soundEffectID: "SFX_DENIED")]]
+            )
+        )
+        if let goRightAhead = try extractDialogueIfPresent(
+            id: "route_22_gate_guard_go_right_ahead",
+            label: "_Route22GateGuardGoRightAheadText",
+            from: route22GateText
+        ) {
+            dialogues.append(goRightAhead)
+        }
+    }
+
+    if let pewterGymText {
+        dialogues.append(
+            try extractCombinedDialogue(
+                id: "pewter_gym_received_tm34",
+                segments: [
+                    (label: "_PewterGymReceivedTM34Text", contents: pewterGymText),
+                    (label: "_TM34ExplanationText", contents: pewterGymText),
+                ],
+                trailingEventsBySegmentIndex: [0: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")]]
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "pewter_gym_tm34_no_room",
+                label: "_PewterGymTM34NoRoomText",
+                from: pewterGymText
+            )
+        )
+        dialogues.append(
+            try extractCombinedDialogue(
+                id: "pewter_gym_brock_received_boulder_badge",
+                segments: [
+                    (label: "_PewterGymBrockReceivedBoulderBadgeText", contents: pewterGymText),
+                    (label: "_PewterGymBrockBoulderBadgeInfoText", contents: pewterGymText),
+                ],
+                trailingEventsBySegmentIndex: [0: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")]]
+            )
+        )
+    }
 
     dialogues.append(contentsOf: try buildCoverageMapDialogues(
         textContentsByMapID: textContentsByMapID,
@@ -2076,6 +2396,35 @@ private func extractDialogueIfPresent(
         return nil
     }
     return try extractDialogue(id: id, label: label, from: contents, extraEvents: extraEvents)
+}
+
+private func extractCombinedDialogue(
+    id: String,
+    segments: [(label: String, contents: String)],
+    trailingEventsBySegmentIndex: [Int: [DialogueEvent]] = [:]
+) throws -> DialogueManifest {
+    var pages: [DialoguePage] = []
+
+    for (index, segment) in segments.enumerated() {
+        let extracted = try extractDialogue(
+            id: "\(id)_segment_\(index)",
+            label: segment.label,
+            from: segment.contents
+        )
+        var extractedPages = extracted.pages
+        if let trailingEvents = trailingEventsBySegmentIndex[index], extractedPages.isEmpty == false {
+            let lastPageIndex = extractedPages.index(before: extractedPages.endIndex)
+            let lastPage = extractedPages[lastPageIndex]
+            extractedPages[lastPageIndex] = .init(
+                lines: lastPage.lines,
+                waitsForPrompt: lastPage.waitsForPrompt,
+                events: lastPage.events + trailingEvents
+            )
+        }
+        pages.append(contentsOf: extractedPages)
+    }
+
+    return DialogueManifest(id: id, pages: pages)
 }
 
 private func dialogueLabelExists(_ label: String, in contents: String) -> Bool {
@@ -2199,15 +2548,53 @@ private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [Dialog
     return eventsByTextLabel
 }
 
-private func extractDialogue(id: String, label: String, from contents: String, extraEvents: [DialogueEvent] = []) throws -> DialogueManifest {
+private func extractDialogue(
+    id: String,
+    label: String,
+    from contents: String,
+    placeholderMap: [String: String] = [:],
+    extraEvents: [DialogueEvent] = []
+) throws -> DialogueManifest {
     guard let range = contents.range(of: "\(label)::") ?? contents.range(of: "\(label):") else {
         throw ExtractorError.invalidArguments("missing dialogue label \(label)")
     }
 
     let tail = contents[range.upperBound...]
     var lines: [String] = []
+    var currentLine = ""
     var events: [DialogueEvent] = []
     var pages: [DialoguePage] = []
+
+    func appendSegment(_ segment: String) {
+        guard segment.isEmpty == false else { return }
+        if currentLine.isEmpty == false,
+           let lastCharacter = currentLine.last,
+           let firstCharacter = segment.first,
+           (lastCharacter.isLetter || lastCharacter.isNumber || lastCharacter == "}" || lastCharacter == "!" || lastCharacter == "?") &&
+            (firstCharacter.isLetter || firstCharacter.isNumber || firstCharacter == "{") {
+            currentLine += " "
+        }
+        currentLine += segment
+    }
+
+    func flushLineIfNeeded(force: Bool = false) {
+        guard force || currentLine.isEmpty == false else { return }
+        lines.append(currentLine)
+        currentLine = ""
+        if lines.count == 4 {
+            pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
+            lines = []
+            events = []
+        }
+    }
+
+    func flushPageIfNeeded() {
+        flushLineIfNeeded()
+        guard lines.isEmpty == false else { return }
+        pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
+        lines = []
+        events = []
+    }
 
     for rawLine in tail.split(separator: "\n", omittingEmptySubsequences: false) {
         let line = rawLine.trimmingCharacters(in: .whitespaces)
@@ -2217,36 +2604,29 @@ private func extractDialogue(id: String, label: String, from contents: String, e
         }
         if line.hasPrefix("text \"") || line.hasPrefix("line \"") || line.hasPrefix("cont \"") || line.hasPrefix("para \"") {
             let value = extractQuotedString(from: line)
-            if line.hasPrefix("para ") && lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
+            if line.hasPrefix("para ") {
+                flushPageIfNeeded()
+            } else if line.hasPrefix("line ") || line.hasPrefix("cont ") {
+                flushLineIfNeeded()
             }
-            lines.append(value)
-            if lines.count == 4 {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
-            }
-        } else if line.hasPrefix("text_ram") {
-            lines.append("<NAME>")
+            appendSegment(value)
+        } else if line.hasPrefix("text_ram ") {
+            let token = line
+                .replacingOccurrences(of: "text_ram ", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            let placeholder = placeholderMap[token] ?? "NAME"
+            appendSegment("{\(placeholder)}")
         } else if let event = dialogueEvent(for: line) {
             events.append(event)
         } else if line == "done" || line == "prompt" || line == "text_end" {
-            if lines.isEmpty == false {
-                pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-                lines = []
-                events = []
-            }
+            flushPageIfNeeded()
             if line == "text_end" || line == "done" || line == "prompt" {
                 break
             }
         }
     }
 
-    if lines.isEmpty == false {
-        pages.append(.init(lines: lines, waitsForPrompt: true, events: events))
-    }
+    flushPageIfNeeded()
 
     if extraEvents.isEmpty == false, pages.isEmpty == false {
         let lastIndex = pages.index(before: pages.endIndex)
@@ -2434,6 +2814,100 @@ private func buildMapScripts() -> [MapScriptManifest] {
             ]
         ),
         MapScriptManifest(
+            mapID: "ROUTE_22",
+            triggers: [
+                .init(
+                    id: "first_rival_upper_after_charmander",
+                    scriptID: "route_22_rival_1_challenge_4_upper",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
+                    ]
+                ),
+                .init(
+                    id: "first_rival_upper_after_squirtle",
+                    scriptID: "route_22_rival_1_challenge_5_upper",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
+                    ]
+                ),
+                .init(
+                    id: "first_rival_upper_after_bulbasaur",
+                    scriptID: "route_22_rival_1_challenge_6_upper",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
+                    ]
+                ),
+                .init(
+                    id: "first_rival_lower_after_charmander",
+                    scriptID: "route_22_rival_1_challenge_4_lower",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 5),
+                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
+                    ]
+                ),
+                .init(
+                    id: "first_rival_lower_after_squirtle",
+                    scriptID: "route_22_rival_1_challenge_5_lower",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 5),
+                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
+                    ]
+                ),
+                .init(
+                    id: "first_rival_lower_after_bulbasaur",
+                    scriptID: "route_22_rival_1_challenge_6_lower",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                        .init(kind: "playerXEquals", intValue: 29),
+                        .init(kind: "playerYEquals", intValue: 5),
+                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
+            mapID: "ROUTE_22_GATE",
+            triggers: [
+                .init(
+                    id: "guard_blocks_upper_lane_without_boulder_badge",
+                    scriptID: "route_22_gate_guard_blocks_northbound_upper_lane",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_BROCK"),
+                        .init(kind: "playerXEquals", intValue: 4),
+                        .init(kind: "playerYEquals", intValue: 2),
+                    ]
+                ),
+                .init(
+                    id: "guard_blocks_lower_lane_without_boulder_badge",
+                    scriptID: "route_22_gate_guard_blocks_northbound_lower_lane",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_BROCK"),
+                        .init(kind: "playerXEquals", intValue: 5),
+                        .init(kind: "playerYEquals", intValue: 2),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
             mapID: "OAKS_LAB",
             triggers: [
                 .init(
@@ -2483,6 +2957,7 @@ private func buildMapScripts() -> [MapScriptManifest] {
 private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest] {
     let autoMovement = try String(contentsOf: repoRoot.appendingPathComponent("engine/overworld/auto_movement.asm"))
     let oaksLabScripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/OaksLab.asm"))
+    let route22Scripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/Route22.asm"))
 
     let palletOakEscortPath = try parseRepeatedMovementLabel("RLEList_ProfOakWalkToLab", from: autoMovement)
     let palletPlayerEscortPath = try parseSimulatedJoypadMovementLabel("RLEList_PlayerWalkToLab", from: autoMovement)
@@ -2495,6 +2970,8 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
     let rivalLeftBall1 = try parseMovementLabel(".LeftBallMovement1", from: oaksLabScripts)
     let rivalLeftBall2 = try parseMovementLabel(".LeftBallMovement2", from: oaksLabScripts)
     let rivalExitPath = try parseMovementLabel(".RivalExitMovement", from: oaksLabScripts)
+    let route22Rival1ExitPathLower = try parseMovementLabel("Route22Rival1ExitMovementData1", from: route22Scripts)
+    let route22Rival1ExitPathUpper = try parseMovementLabel("Route22Rival1ExitMovementData2", from: route22Scripts)
 
     var scripts: [ScriptManifest] = [
         ScriptManifest(
@@ -2550,6 +3027,20 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
             ]
         ),
         ScriptManifest(
+            id: "route_22_gate_guard_blocks_northbound_upper_lane",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route_22_gate_guard_no_boulder_badge"),
+                .init(action: "movePlayer", path: [.down]),
+            ]
+        ),
+        ScriptManifest(
+            id: "route_22_gate_guard_blocks_northbound_lower_lane",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route_22_gate_guard_no_boulder_badge"),
+                .init(action: "movePlayer", path: [.down]),
+            ]
+        ),
+        ScriptManifest(
             id: "oaks_lab_parcel_handoff",
             steps: [
                 .init(action: "showDialogue", dialogueID: "oaks_lab_oak_deliver_parcel"),
@@ -2572,6 +3063,7 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
                 .init(action: "showDialogue", dialogueID: "oaks_lab_oak_that_was_my_dream"),
                 .init(action: "showDialogue", dialogueID: "oaks_lab_rival_leave_it_all_to_me"),
                 .init(action: "setObjectVisibility", objectID: "oaks_lab_rival", visible: false),
+                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: true),
                 .init(action: "setFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
                 .init(action: "clearFlag", flagID: "EVENT_2ND_ROUTE22_RIVAL_BATTLE"),
                 .init(action: "setFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
@@ -2851,6 +3343,117 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
         ),
     ]
 
+    scripts.append(
+        ScriptManifest(
+            id: "pewter_gym_brock_battle",
+            steps: [
+                .init(action: "faceObject", stringValue: "down", objectID: "pewter_gym_brock"),
+                .init(action: "facePlayer", stringValue: "up"),
+                .init(action: "showDialogue", dialogueID: "pewter_gym_brock_pre_battle"),
+                .init(action: "startBattle", battleID: "opp_brock_1"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "pewter_gym_brock_reward",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "pewter_gym_brock_wait_take_this"),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_BROCK"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "TM_BIDE",
+                    intValue: 1,
+                    successDialogueID: "pewter_gym_received_tm34",
+                    failureDialogueID: "pewter_gym_tm34_no_room",
+                    successFlagID: "EVENT_GOT_TM34"
+                ),
+                .init(action: "awardBadge", badgeID: "BOULDERBADGE"),
+                .init(action: "setObjectVisibility", objectID: "pewter_city_youngster", visible: false),
+                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
+                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_PEWTER_GYM_TRAINER_0"),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+
+    let route22ChallengeVariants: [(scriptID: String, battleID: String, offset: TilePoint, rivalFacing: String, playerFacing: String)] = [
+        ("route_22_rival_1_challenge_4_upper", "route_22_rival_1_4_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_5_upper", "route_22_rival_1_5_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_6_upper", "route_22_rival_1_6_upper", .init(x: 0, y: 1), "right", "left"),
+        ("route_22_rival_1_challenge_4_lower", "route_22_rival_1_4_lower", .init(x: -1, y: 0), "up", "down"),
+        ("route_22_rival_1_challenge_5_lower", "route_22_rival_1_5_lower", .init(x: -1, y: 0), "up", "down"),
+        ("route_22_rival_1_challenge_6_lower", "route_22_rival_1_6_lower", .init(x: -1, y: 0), "up", "down"),
+    ]
+
+    for variant in route22ChallengeVariants {
+        scripts.append(
+            ScriptManifest(
+                id: variant.scriptID,
+                steps: [
+                    .init(action: "playMusicCue", stringValue: "rival_intro"),
+                    .init(
+                        action: "performMovement",
+                        movement: .init(
+                            kind: .pathToPlayerAdjacent,
+                            actors: [.init(actorID: "route_22_rival_1", path: [])],
+                            targetPlayerOffset: variant.offset
+                        )
+                    ),
+                    .init(action: "faceObject", stringValue: variant.rivalFacing, objectID: "route_22_rival_1"),
+                    .init(action: "facePlayer", stringValue: variant.playerFacing),
+                    .init(action: "showDialogue", dialogueID: "route_22_rival_before_battle_1"),
+                    .init(action: "startBattle", battleID: variant.battleID),
+                ]
+            )
+        )
+    }
+
+    scripts.append(
+        ScriptManifest(
+            id: "route_22_rival_1_exit_upper",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route_22_rival_after_battle_1"),
+                .init(action: "playMusicCue", stringValue: "rival_exit"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .fixedPath,
+                        actors: [.init(actorID: "route_22_rival_1", path: route22Rival1ExitPathUpper)]
+                    )
+                ),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"),
+                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
+                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "route_22_rival_1_exit_lower",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route_22_rival_after_battle_1"),
+                .init(action: "playMusicCue", stringValue: "rival_exit"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .fixedPath,
+                        actors: [.init(actorID: "route_22_rival_1", path: route22Rival1ExitPathLower)]
+                    )
+                ),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"),
+                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
+                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+
     scripts.append(contentsOf: buildPokemonCenterHealingScripts(maps: maps))
     return scripts
 }
@@ -2986,7 +3589,7 @@ private func directionToken(_ token: String) -> FacingDirection? {
 
 private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
     let speciesDefinitions = try parseCanonicalSpeciesDefinitions(repoRoot: repoRoot)
-    let levelUpLearnsetsByID = try parseLevelUpLearnsets(repoRoot: repoRoot)
+    let progressionBySpeciesID = try parseSpeciesProgression(repoRoot: repoRoot)
     let dexNumbersByID = try parsePokedexNumbers(repoRoot: repoRoot)
     let dexEntriesByKey = try parsePokedexEntries(repoRoot: repoRoot)
     let dexTextByKey = try parsePokedexText(repoRoot: repoRoot)
@@ -3011,7 +3614,8 @@ private func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
             id: definition.id,
             displayName: definition.displayName,
             cryData: definition.cryData,
-            levelUpLearnset: levelUpLearnsetsByID[definition.id] ?? [],
+            evolutions: progressionBySpeciesID[definition.id]?.evolutions ?? [],
+            levelUpLearnset: progressionBySpeciesID[definition.id]?.levelUpLearnset ?? [],
             pokedexData: pokedexData
         )
     }
@@ -3322,49 +3926,128 @@ private func speciesID(forBaseStatStem stem: String) throws -> String {
     }
 }
 
-private func parseLevelUpLearnsets(repoRoot: URL) throws -> [String: [LevelUpMoveManifest]] {
-    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/evos_moves.asm"))
-    var learnsetsByLabel: [String: [LevelUpMoveManifest]] = [:]
-    var currentLabel: String?
-    var isParsingLearnset = false
+private struct SpeciesProgressionManifest {
+    let evolutions: [EvolutionManifest]
+    let levelUpLearnset: [LevelUpMoveManifest]
+}
 
-    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
-        let line = rawLine.trimmingCharacters(in: .whitespaces)
-        if let match = line.firstMatch(of: /([A-Za-z0-9]+)EvosMoves:/) {
-            currentLabel = String(match.output.1)
-            learnsetsByLabel[currentLabel ?? ""] = []
-            isParsingLearnset = false
-            continue
-        }
-        guard let currentLabel else {
-            continue
-        }
-        if line == "; Learnset" {
-            isParsingLearnset = true
-            continue
-        }
-        guard isParsingLearnset else {
-            continue
-        }
-        if line == "db 0" {
-            isParsingLearnset = false
-            continue
-        }
-        guard let match = line.firstMatch(of: /db\s+(\d+),\s+([A-Z_]+)/) else {
-            continue
-        }
-        learnsetsByLabel[currentLabel, default: []].append(
-            LevelUpMoveManifest(
-                level: Int(match.output.1) ?? 1,
-                moveID: String(match.output.2)
-            )
+private enum SpeciesProgressionSection {
+    case none
+    case evolutions
+    case learnset
+}
+
+private func parseSpeciesProgression(repoRoot: URL) throws -> [String: SpeciesProgressionManifest] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/pokemon/evos_moves.asm"))
+    var progressionByLabel: [String: SpeciesProgressionManifest] = [:]
+    var currentLabel: String?
+    var currentEvolutions: [EvolutionManifest] = []
+    var currentLearnset: [LevelUpMoveManifest] = []
+    var section: SpeciesProgressionSection = .none
+
+    func flushCurrentSpecies() {
+        guard let currentLabel else { return }
+        progressionByLabel[currentLabel] = SpeciesProgressionManifest(
+            evolutions: currentEvolutions,
+            levelUpLearnset: currentLearnset
         )
     }
 
-    return Dictionary(uniqueKeysWithValues: try learnsetsByLabel.map { label, learnset in
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let trimmedLine = rawLine.trimmingCharacters(in: .whitespaces)
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        if let match = line.firstMatch(of: /([A-Za-z0-9]+)EvosMoves:/) {
+            flushCurrentSpecies()
+            currentLabel = String(match.output.1)
+            currentEvolutions = []
+            currentLearnset = []
+            section = .none
+            continue
+        }
+        guard currentLabel != nil else {
+            continue
+        }
+        if trimmedLine == "; Evolutions" {
+            section = .evolutions
+            continue
+        }
+        if trimmedLine == "; Learnset" {
+            section = .learnset
+            continue
+        }
+        if line == "db 0" {
+            section = .none
+            continue
+        }
+
+        switch section {
+        case .none:
+            continue
+        case .evolutions:
+            if let evolution = parseEvolutionManifest(from: line) {
+                currentEvolutions.append(evolution)
+            }
+        case .learnset:
+            guard let match = line.firstMatch(of: /db\s+(\d+),\s+([A-Z_]+)/) else {
+                continue
+            }
+            currentLearnset.append(
+                LevelUpMoveManifest(
+                    level: Int(match.output.1) ?? 1,
+                    moveID: String(match.output.2)
+                )
+            )
+        }
+    }
+
+    flushCurrentSpecies()
+
+    return Dictionary(uniqueKeysWithValues: try progressionByLabel.map { label, progression in
         let speciesID = try speciesID(forEvosMovesLabel: label)
-        return (speciesID, learnset)
+        return (speciesID, progression)
     })
+}
+
+private func parseEvolutionManifest(from line: String) -> EvolutionManifest? {
+    let tokens = line
+        .replacingOccurrences(of: "db", with: "")
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+    guard let kindToken = tokens.first else {
+        return nil
+    }
+
+    switch kindToken {
+    case "EVOLVE_LEVEL":
+        guard tokens.count >= 3, let level = Int(tokens[1]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .level, level: level),
+            targetSpeciesID: tokens[2]
+        )
+    case "EVOLVE_ITEM":
+        guard tokens.count >= 4, let minimumLevel = Int(tokens[2]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .item, itemID: tokens[1], minimumLevel: minimumLevel),
+            targetSpeciesID: tokens[3]
+        )
+    case "EVOLVE_TRADE":
+        guard tokens.count >= 3, let minimumLevel = Int(tokens[1]) else {
+            return nil
+        }
+        return EvolutionManifest(
+            trigger: .init(kind: .trade, minimumLevel: minimumLevel),
+            targetSpeciesID: tokens[2]
+        )
+    default:
+        return nil
+    }
 }
 
 private func speciesID(forEvosMovesLabel label: String) throws -> String {
@@ -3393,6 +4076,7 @@ private func parseSpecies(
     id: String,
     displayName: String,
     cryData: (soundEffectID: String?, pitch: Int?, length: Int?),
+    evolutions: [EvolutionManifest],
     levelUpLearnset: [LevelUpMoveManifest],
     pokedexData: PokedexData? = nil
 ) throws -> SpeciesManifest {
@@ -3450,6 +4134,7 @@ private func parseSpecies(
         baseSpeed: statsValues[safe: 3] ?? 0,
         baseSpecial: statsValues[safe: 4] ?? 0,
         startingMoves: moveValues.filter { $0 != "NO_MOVE" },
+        evolutions: evolutions,
         levelUpLearnset: levelUpLearnset,
         crySoundEffectID: cryData.soundEffectID,
         cryPitch: cryData.pitch,
@@ -3673,6 +4358,7 @@ private func buildMarts(
 }
 
 private func parseItemNames(repoRoot: URL) throws -> [String: String] {
+    let constants = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
     let itemIDs = try parseDefinedItemIDs(repoRoot: repoRoot)
     let names = try String(contentsOf: repoRoot.appendingPathComponent("data/items/names.asm"))
 
@@ -3684,7 +4370,9 @@ private func parseItemNames(repoRoot: URL) throws -> [String: String] {
             return extractQuotedString(from: line)
         }
 
-    return Dictionary(uniqueKeysWithValues: zip(itemIDs, itemNames))
+    var result = Dictionary(uniqueKeysWithValues: zip(itemIDs, itemNames))
+    result.merge(parseTMHMDisplayNames(constants: constants)) { current, _ in current }
+    return result
 }
 
 private func parseKeyItemIDs(repoRoot: URL) throws -> Set<String> {
@@ -3716,7 +4404,9 @@ private func parseItemPrices(repoRoot: URL) throws -> [String: Int] {
             guard line.hasPrefix("bcd3 ") else { return nil }
             return Int(line.replacingOccurrences(of: "bcd3", with: "").trimmingCharacters(in: .whitespaces))
         }
-    return Dictionary(uniqueKeysWithValues: zip(itemIDs, prices))
+    var result = Dictionary(uniqueKeysWithValues: zip(itemIDs, prices))
+    result.merge(try parseTMPrices(repoRoot: repoRoot)) { current, _ in current }
+    return result
 }
 
 private func parseMartStocks(repoRoot: URL) throws -> [String: [String]] {
@@ -3742,7 +4432,8 @@ private func parseMartStocks(repoRoot: URL) throws -> [String: [String]] {
 }
 
 private func parseDefinedItemIDs(repoRoot: URL) throws -> [String] {
-    try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
+    let constants = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
+    let baseItemIDs = constants
         .split(separator: "\n", omittingEmptySubsequences: false)
         .compactMap { rawLine -> String? in
             let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
@@ -3758,6 +4449,80 @@ private func parseDefinedItemIDs(repoRoot: URL) throws -> [String] {
             }
             return identifier.components(separatedBy: .whitespaces).first
         }
+    let referencedTMHMItemIDs = try parseReferencedTMHMItemIDs(repoRoot: repoRoot, constants: constants)
+    return baseItemIDs + referencedTMHMItemIDs.filter { baseItemIDs.contains($0) == false }
+}
+
+private func parseReferencedTMHMItemIDs(repoRoot: URL, constants: String) throws -> [String] {
+    let knownTMHMItemIDs = Set(parseTMHMDisplayNames(constants: constants).keys)
+    guard knownTMHMItemIDs.isEmpty == false else { return [] }
+
+    var referencedItemIDs: Set<String> = []
+    for definition in gameplayCoverageMaps {
+        let scriptURL = repoRoot.appendingPathComponent(scriptPathForMap(definition))
+        guard FileManager.default.fileExists(atPath: scriptURL.path) else {
+            continue
+        }
+        let contents = try String(contentsOf: scriptURL)
+        for match in contents.matches(of: /(?:TM|HM)_[A-Z0-9_]+/) {
+            referencedItemIDs.insert(String(match.output))
+        }
+    }
+
+    return referencedItemIDs
+        .filter { knownTMHMItemIDs.contains($0) }
+        .sorted()
+}
+
+private func parseTMHMDisplayNames(constants: String) -> [String: String] {
+    var result: [String: String] = [:]
+    var hmIndex = 1
+    var tmIndex = 1
+
+    for rawLine in constants.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if let match = line.firstMatch(of: /add_hm\s+([A-Z0-9_]+)/) {
+            result["HM_\(match.output.1)"] = String(format: "HM%02d", hmIndex)
+            hmIndex += 1
+            continue
+        }
+
+        if let match = line.firstMatch(of: /add_tm\s+([A-Z0-9_]+)/) {
+            result["TM_\(match.output.1)"] = String(format: "TM%02d", tmIndex)
+            tmIndex += 1
+        }
+    }
+
+    return result
+}
+
+private func parseTMPrices(repoRoot: URL) throws -> [String: Int] {
+    let constants = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
+    let tmPriceContents = try String(contentsOf: repoRoot.appendingPathComponent("data/items/tm_prices.asm"))
+    let tmIDs = constants
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> String? in
+            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+                .trimmingCharacters(in: .whitespaces) ?? ""
+            guard let match = line.firstMatch(of: /add_tm\s+([A-Z0-9_]+)/) else {
+                return nil
+            }
+            return "TM_\(match.output.1)"
+        }
+    let tmPrices = tmPriceContents
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .compactMap { rawLine -> Int? in
+            let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+                .trimmingCharacters(in: .whitespaces) ?? ""
+            guard let match = line.firstMatch(of: /nybble\s+([0-9]+)/) else {
+                return nil
+            }
+            return (Int(match.output.1) ?? 0) * 1000
+        }
+
+    return Dictionary(uniqueKeysWithValues: zip(tmIDs, tmPrices))
 }
 
 private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {
@@ -3852,15 +4617,28 @@ private func buildTrainerBattles(
     let trainerEncounterCueByClass = try parseTrainerEncounterCueIDs(repoRoot: repoRoot)
     let rivalClassMetadata = try trainerClassMetadataByID
         .value(for: "OPP_RIVAL1", missingMessage: "missing trainer metadata for OPP_RIVAL1")
+    let brockClassMetadata = try trainerClassMetadataByID
+        .value(for: "OPP_BROCK", missingMessage: "missing trainer metadata for OPP_BROCK")
 
     var battlesByID: [String: TrainerBattleManifest] = [:]
 
-    for trainerNumber in 1...3 {
+    func makeRivalBattle(
+        id: String,
+        trainerNumber: Int,
+        playerWinDialogueID: String,
+        playerLoseDialogueID: String?,
+        healsPartyAfterBattle: Bool,
+        preventsBlackoutOnLoss: Bool,
+        completionFlagID: String,
+        postBattleScriptID: String?,
+        runsPostBattleScriptOnLoss: Bool = false
+    ) throws -> TrainerBattleManifest {
         guard rivalClassMetadata.parties.indices.contains(trainerNumber - 1) else {
             throw ExtractorError.invalidArguments("missing Rival1 trainer party \(trainerNumber)")
         }
-        battlesByID["opp_rival1_\(trainerNumber)"] = TrainerBattleManifest(
-            id: "opp_rival1_\(trainerNumber)",
+
+        return TrainerBattleManifest(
+            id: id,
             trainerClass: "OPP_RIVAL1",
             trainerNumber: trainerNumber,
             displayName: "BLUE",
@@ -3868,37 +4646,70 @@ private func buildTrainerBattles(
             trainerSpritePath: rivalClassMetadata.trainerSpritePath,
             baseRewardMoney: rivalClassMetadata.baseRewardMoney,
             encounterAudioCueID: trainerEncounterCueByClass["OPP_RIVAL1"],
+            playerWinDialogueID: playerWinDialogueID,
+            playerLoseDialogueID: playerLoseDialogueID,
+            healsPartyAfterBattle: healsPartyAfterBattle,
+            preventsBlackoutOnLoss: preventsBlackoutOnLoss,
+            completionFlagID: completionFlagID,
+            postBattleScriptID: postBattleScriptID,
+            runsPostBattleScriptOnLoss: runsPostBattleScriptOnLoss
+        )
+    }
+
+    for trainerNumber in 1...3 {
+        battlesByID["opp_rival1_\(trainerNumber)"] = try makeRivalBattle(
+            id: "opp_rival1_\(trainerNumber)",
+            trainerNumber: trainerNumber,
             playerWinDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
             playerLoseDialogueID: "oaks_lab_rival_am_i_great_or_what",
             healsPartyAfterBattle: true,
             preventsBlackoutOnLoss: true,
             completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
-            postBattleScriptID: "oaks_lab_rival_exit_after_battle"
+            postBattleScriptID: "oaks_lab_rival_exit_after_battle",
+            runsPostBattleScriptOnLoss: true
         )
     }
 
-    if let brockMetadata = trainerClassMetadataByID["OPP_BROCK"] {
-        guard brockMetadata.parties.indices.contains(0) else {
-            throw ExtractorError.invalidArguments("missing Brock trainer party 1")
-        }
-
-        battlesByID["opp_brock_1"] = TrainerBattleManifest(
-            id: "opp_brock_1",
-            trainerClass: "OPP_BROCK",
-            trainerNumber: 1,
-            displayName: brockMetadata.displayName,
-            party: brockMetadata.parties[0],
-            trainerSpritePath: brockMetadata.trainerSpritePath,
-            baseRewardMoney: brockMetadata.baseRewardMoney,
-            encounterAudioCueID: trainerEncounterCueByClass["OPP_BROCK"],
-            playerWinDialogueID: "pewter_gym_brock_received_boulder_badge",
-            playerLoseDialogueID: nil,
+    for (battleID, trainerNumber, postBattleScriptID) in [
+        ("route_22_rival_1_4_upper", 4, "route_22_rival_1_exit_upper"),
+        ("route_22_rival_1_5_upper", 5, "route_22_rival_1_exit_upper"),
+        ("route_22_rival_1_6_upper", 6, "route_22_rival_1_exit_upper"),
+        ("route_22_rival_1_4_lower", 4, "route_22_rival_1_exit_lower"),
+        ("route_22_rival_1_5_lower", 5, "route_22_rival_1_exit_lower"),
+        ("route_22_rival_1_6_lower", 6, "route_22_rival_1_exit_lower"),
+    ] {
+        battlesByID[battleID] = try makeRivalBattle(
+            id: battleID,
+            trainerNumber: trainerNumber,
+            playerWinDialogueID: "route_22_rival_1_defeated",
+            playerLoseDialogueID: "route_22_rival_1_victory",
             healsPartyAfterBattle: false,
             preventsBlackoutOnLoss: false,
-            completionFlagID: "EVENT_BEAT_BROCK",
-            postBattleScriptID: nil
+            completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+            postBattleScriptID: postBattleScriptID
         )
     }
+
+    guard brockClassMetadata.parties.indices.contains(0) else {
+        throw ExtractorError.invalidArguments("missing Brock trainer party 1")
+    }
+
+    battlesByID["opp_brock_1"] = TrainerBattleManifest(
+        id: "opp_brock_1",
+        trainerClass: "OPP_BROCK",
+        trainerNumber: 1,
+        displayName: brockClassMetadata.displayName,
+        party: brockClassMetadata.parties[0],
+        trainerSpritePath: brockClassMetadata.trainerSpritePath,
+        baseRewardMoney: brockClassMetadata.baseRewardMoney,
+        encounterAudioCueID: trainerEncounterCueByClass["OPP_BROCK"],
+        playerWinDialogueID: "pewter_gym_brock_received_boulder_badge",
+        playerLoseDialogueID: nil,
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_BROCK",
+        postBattleScriptID: "pewter_gym_brock_reward"
+    )
 
     for reference in try referencedSliceTrainerBattles(
         repoRoot: repoRoot,

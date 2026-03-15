@@ -4,6 +4,23 @@ import PokeContent
 import PokeDataModel
 
 @MainActor
+private func fixtureEvolutionAudioDialogues() -> [DialogueManifest] {
+    [
+        .init(id: "evolution_evolved", pages: [.init(lines: ["{pokemon} evolved"], waitsForPrompt: true)]),
+        .init(
+            id: "evolution_into",
+            pages: [.init(
+                lines: ["into {evolvedPokemon}!"],
+                waitsForPrompt: true,
+                events: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+            )]
+        ),
+        .init(id: "evolution_is_evolving", pages: [.init(lines: ["What? {pokemon}", "is evolving!"], waitsForPrompt: true)]),
+        .init(id: "evolution_stopped", pages: [.init(lines: ["Huh? {pokemon}", "stopped evolving!"], waitsForPrompt: true)]),
+    ]
+}
+
+@MainActor
 private func fixtureBattleLifecycleAudioManifest() -> AudioManifest {
     let base = fixtureAudioManifest()
     return AudioManifest(
@@ -449,7 +466,40 @@ extension PokeCoreTests {
         )
     }
 
-    func testRepoGeneratedTrainerEnemySendOutUsesSpeciesCry() throws {
+    func testWildCaptureUsesCaughtAndDexAddedSoundEffects() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([0, 0])
+        let confirmCountBeforeThrow = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
+        runtime.handle(button: .confirm)
+        drainBattleUntilComplete(runtime)
+
+        XCTAssertEqual(
+            audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count,
+            confirmCountBeforeThrow
+        )
+        XCTAssertTrue(audioPlayer.soundEffectRequests.map(\.soundEffectID).contains("SFX_CAUGHT_MON"))
+        XCTAssertTrue(audioPlayer.soundEffectRequests.map(\.soundEffectID).contains("SFX_DEX_PAGE_ADDED"))
+    }
+
+    func testRepoGeneratedTrainerEnemySendOutUsesSpeciesCryAndPoof() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
@@ -470,19 +520,23 @@ extension PokeCoreTests {
             frequencyModifier: enemySpecies.cryPitch,
             tempoModifier: enemySpecies.cryLength
         )
+        let expectedPoof = SoundEffectPlaybackRequest(soundEffectID: "SFX_BALL_POOF")
 
         advanceBattlePresentationBatch(runtime)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .enemy &&
+            audioPlayer.soundEffectRequests.contains(expectedPoof) &&
                 audioPlayer.soundEffectRequests.contains(expectedCry),
-            message: "trainer send out did not request the enemy species cry",
+            message: "trainer send out did not request the enemy poof and cry",
             maxTicks: 240
         )
+
+        let poofIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedPoof))
+        let cryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedCry))
+        XCTAssertLessThan(poofIndex, cryIndex)
     }
 
-    func testRepoGeneratedPlayerSendOutUsesStarterCryForIntroAndManualSwitch() throws {
+    func testRepoGeneratedPlayerSendOutUsesStarterCryAndPoofForIntroAndManualSwitch() throws {
         let audioPlayer = RecordingAudioPlayer()
         let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
 
@@ -510,11 +564,21 @@ extension PokeCoreTests {
             frequencyModifier: switchSpecies.cryPitch,
             tempoModifier: switchSpecies.cryLength
         )
+        let expectedPoof = SoundEffectPlaybackRequest(soundEffectID: "SFX_BALL_POOF")
 
         runtime.startWildBattle(speciesID: "RATTATA", level: 3)
         drainBattleText(runtime)
 
-        XCTAssertTrue(audioPlayer.soundEffectRequests.contains(starterCry))
+        waitUntil(
+            audioPlayer.soundEffectRequests.contains(expectedPoof) &&
+                audioPlayer.soundEffectRequests.contains(starterCry),
+            message: "initial player send out did not request the pokeball poof and starter cry",
+            maxTicks: 240
+        )
+
+        let introPoofIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: expectedPoof))
+        let introCryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.firstIndex(of: starterCry))
+        XCTAssertLessThan(introPoofIndex, introCryIndex)
 
         let battle = try XCTUnwrap(runtime.gameplayState?.battle)
         let switchIndex = runtime.switchActionIndex(for: battle)
@@ -525,12 +589,18 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.presentation.stage == .enemySendOut &&
-                runtime.currentSnapshot().battle?.presentation.activeSide == .player &&
+            audioPlayer.soundEffectRequests.filter { $0 == expectedPoof }.count >= 2 &&
                 audioPlayer.soundEffectRequests.contains(switchCry),
-            message: "manual battle switch did not request the replacement species cry",
+            message: "manual battle switch did not request the replacement poof and species cry",
             maxTicks: 240
         )
+
+        let poofIndices = audioPlayer.soundEffectRequests.indices.filter {
+            audioPlayer.soundEffectRequests[$0] == expectedPoof
+        }
+        let switchPoofIndex = try XCTUnwrap(poofIndices.last)
+        let switchCryIndex = try XCTUnwrap(audioPlayer.soundEffectRequests.lastIndex(of: switchCry))
+        XCTAssertLessThan(switchPoofIndex, switchCryIndex)
     }
 
     func testBattlePresentationUsesPlayerCryWhenPokemonFaints() {
@@ -654,6 +724,153 @@ extension PokeCoreTests {
             $0 == "SFX_FAINT_FALL" && $1 == "SFX_FAINT_THUD"
         }
         XCTAssertTrue(hasEnemyFaintSequence, "enemy faint did not request faint fall then faint thud")
+    }
+
+    func testEvolutionSequenceRequestsMusicDialogueEffectAndSpeciesCries() {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: fixtureEvolutionAudioDialogues(),
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"],
+                            evolutions: [.init(trigger: .init(kind: .level, level: 16), targetSpeciesID: "CHARMELEON")],
+                            crySoundEffectID: "SFX_CRY_00",
+                            cryPitch: 32,
+                            cryLength: 128
+                        ),
+                        .init(
+                            id: "CHARMELEON",
+                            displayName: "Charmeleon",
+                            baseHP: 58,
+                            baseAttack: 64,
+                            baseDefense: 58,
+                            baseSpeed: 80,
+                            baseSpecial: 65,
+                            startingMoves: ["SCRATCH"],
+                            crySoundEffectID: "SFX_CRY_01",
+                            cryPitch: 64,
+                            cryLength: 96
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 50,
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 95, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                ),
+                audioManifest: fixtureBattleLifecycleAudioManifest()
+            ),
+            telemetryPublisher: nil,
+            audioPlayer: audioPlayer
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [
+            runtime.makeConfiguredPokemon(
+                speciesID: "CHARMANDER",
+                nickname: "Blaze",
+                level: 15,
+                experience: runtime.experienceRequired(for: 16, speciesID: "CHARMANDER") - 1,
+                dvs: .zero,
+                statExp: .zero,
+                currentHP: nil,
+                attackStage: 0,
+                defenseStage: 0,
+                accuracyStage: 0,
+                evasionStage: 0,
+                moves: nil
+            )
+        ]
+        runtime.requestDefaultMapMusic()
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 1)
+        let resumedMusic = audioPlayer.musicRequests.last
+        guard var battle = runtime.gameplayState?.battle else {
+            XCTFail("Expected a wild battle")
+            return
+        }
+
+        var rewardedPokemon = battle.playerPokemon
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: battle.enemyPokemon,
+            to: &rewardedPokemon,
+            isTrainerBattle: false
+        )
+        battle.playerPokemon = rewardedPokemon
+        battle.pendingEvolution = rewardResult.pendingEvolution
+        runtime.gameplayState?.battle = battle
+
+        runtime.finishWildBattle(battle: battle, won: true)
+
+        let originalCry = SoundEffectPlaybackRequest(
+            soundEffectID: "SFX_CRY_00",
+            frequencyModifier: 32,
+            tempoModifier: 128
+        )
+        let evolvedCry = SoundEffectPlaybackRequest(
+            soundEffectID: "SFX_CRY_01",
+            frequencyModifier: 64,
+            tempoModifier: 96
+        )
+        let evolutionMusic = MusicPlaybackRequest(trackID: "MUSIC_SAFARI_ZONE", entryID: "default")
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.last, originalCry)
+        XCTAssertFalse(audioPlayer.musicRequests.contains(evolutionMusic))
+        XCTAssertEqual(audioPlayer.pendingCompletionCount, 1)
+
+        audioPlayer.completePendingPlayback()
+
+        XCTAssertEqual(audioPlayer.musicRequests.last, evolutionMusic)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertTrue(audioPlayer.soundEffectRequests.contains(originalCry))
+
+        waitUntil(
+            audioPlayer.soundEffectRequests.contains(evolvedCry),
+            message: "evolution completion did not request the evolved species cry",
+            maxTicks: 900
+        )
+        XCTAssertEqual(audioPlayer.musicRequests.last, evolutionMusic)
+        XCTAssertEqual(audioPlayer.pendingCompletionCount, 1)
+
+        audioPlayer.completePendingPlayback()
+
+        XCTAssertEqual(audioPlayer.musicRequests.last, resumedMusic)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(audioPlayer.soundEffectRequests.last, .init(soundEffectID: "SFX_GET_ITEM_2"))
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_PALLET_TOWN", entryID: "default"))
     }
 
     func testRepoGeneratedOrdinaryTrainerLossBlackoutsToViridianCityAndRestartsMapMusic() async throws {

@@ -11,6 +11,7 @@ enum GameplayScenePropsFactory {
     static func make(
         runtime: GameRuntime,
         appearanceMode: AppAppearanceMode,
+        gameBoyShellStyle: GameBoyShellStyle,
         gameplayHDREnabled: Bool
     ) -> GameplaySceneProps? {
         let manifestIndex = cachedManifestIndex(for: runtime)
@@ -21,6 +22,7 @@ enum GameplayScenePropsFactory {
         switch GameplaySidebarKind.forScene(runtime.scene) {
         case .fieldLike:
             let fieldState = runtime.currentFieldSceneState()
+            let evolutionState = runtime.currentEvolutionSceneState()
             let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
                 items: fieldState.inventory?.items.map {
                     InventorySidebarItemProps(
@@ -35,8 +37,52 @@ enum GameplayScenePropsFactory {
                 allSpecies: manifestIndex.pokedexSpeciesList,
                 ownedSpeciesIDs: runtime.ownedSpeciesIDs,
                 seenSpeciesIDs: runtime.seenSpeciesIDs,
-                speciesEncounterCounts: runtime.encounterCountsBySpeciesID
+                speciesEncounterCounts: runtime.encounterCountsBySpeciesID,
+                selectedEntryID: runtime.captureAftermathPokedexSelectionID
             )
+
+            let sidebarMode = GameplaySidebarMode.fieldLike(
+                GameplayFieldSidebarProps(
+                    profile: makeTrainerProfile(runtime: runtime),
+                    pokedex: pokedexSidebar,
+                    party: makeFieldPartySidebar(runtime: runtime, party: fieldState.party, manifestIndex: manifestIndex),
+                    inventory: sidebarInventory,
+                    save: saveSidebar,
+                    options: GameplaySidebarPropsBuilder.makeOptionsSection(
+                        isMusicEnabled: runtime.isMusicEnabled,
+                        appearanceMode: appearanceMode,
+                        gameBoyShellStyle: gameBoyShellStyle,
+                        gameplayHDREnabled: gameplayHDREnabled,
+                        textSpeed: runtime.optionsTextSpeed,
+                        battleAnimation: runtime.optionsBattleAnimation,
+                        battleStyle: runtime.optionsBattleStyle
+                    ),
+                    preferredExpandedSection: runtime.scene == .evolution ? .party : (
+                        runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex
+                    )
+                )
+            )
+
+            if let evolutionState {
+                return GameplaySceneProps(
+                    viewport: .evolution(makeEvolutionViewportProps(runtime: runtime, evolutionState: evolutionState)),
+                    sidebarMode: sidebarMode,
+                    onSidebarAction: { actionID in
+                        switch actionID {
+                        case "save":
+                            _ = runtime.saveCurrentGame()
+                        case "load":
+                            _ = runtime.loadSavedGameFromSidebar()
+                        default:
+                            break
+                        }
+                    },
+                    onPartyRowSelected: { index in
+                        runtime.handlePartySidebarSelection(index)
+                    },
+                    initialFieldDisplayStyle: .defaultGameplayStyle
+                )
+            }
 
             return GameplaySceneProps(
                 viewport: .field(
@@ -62,23 +108,7 @@ enum GameplayScenePropsFactory {
                         nicknameConfirmation: nicknameConfirmation
                     )
                 ),
-                sidebarMode: .fieldLike(
-                    GameplayFieldSidebarProps(
-                        profile: makeTrainerProfile(runtime: runtime),
-                        pokedex: pokedexSidebar,
-                        party: makeFieldPartySidebar(runtime: runtime, party: fieldState.party, manifestIndex: manifestIndex),
-                        inventory: sidebarInventory,
-                        save: saveSidebar,
-                        options: GameplaySidebarPropsBuilder.makeOptionsSection(
-                            isMusicEnabled: runtime.isMusicEnabled,
-                            appearanceMode: appearanceMode,
-                            gameplayHDREnabled: gameplayHDREnabled,
-                            textSpeed: runtime.optionsTextSpeed,
-                            battleAnimation: runtime.optionsBattleAnimation,
-                            battleStyle: runtime.optionsBattleStyle
-                        )
-                    )
-                ),
+                sidebarMode: sidebarMode,
                 onSidebarAction: { actionID in
                     switch actionID {
                     case "save":
@@ -229,6 +259,29 @@ enum GameplayScenePropsFactory {
         return NicknameConfirmationViewProps(
             speciesDisplayName: confirmation.defaultName,
             focusedIndex: confirmation.focusedIndex
+        )
+    }
+
+    private static func makeEvolutionViewportProps(
+        runtime: GameRuntime,
+        evolutionState: GameplayEvolutionSceneState
+    ) -> EvolutionViewportProps {
+        let originalSpriteURL = runtime.content.species(id: evolutionState.originalSpeciesID)?
+            .battleSprite
+            .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
+        let evolvedSpriteURL = runtime.content.species(id: evolutionState.evolvedSpeciesID)?
+            .battleSprite
+            .map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) }
+
+        return EvolutionViewportProps(
+            phase: evolutionState.phase,
+            animationStep: evolutionState.animationStep,
+            showsEvolvedSprite: evolutionState.showsEvolvedSprite,
+            textLines: evolutionState.textLines,
+            originalDisplayName: evolutionState.originalDisplayName,
+            evolvedDisplayName: evolutionState.evolvedDisplayName,
+            originalSpriteURL: originalSpriteURL,
+            evolvedSpriteURL: evolvedSpriteURL
         )
     }
 

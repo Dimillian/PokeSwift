@@ -6,6 +6,7 @@ import PokeUI
 final class AppSettingsStore {
     private enum Keys {
         static let appearanceMode = "pokemac.appearanceMode"
+        static let gameBoyShellStyle = "pokemac.gameBoyShellStyle"
         static let gameplayHDREnabled = "pokemac.gameplayHDREnabled"
         static let musicEnabled = "pokemac.musicEnabled"
         static let textSpeed = "pokemac.textSpeed"
@@ -41,6 +42,19 @@ final class AppSettingsStore {
         }
         set {
             defaults.set(newValue, forKey: Keys.gameplayHDREnabled)
+        }
+    }
+
+    var gameBoyShellStyle: GameBoyShellStyle {
+        get {
+            guard let rawValue = defaults.string(forKey: Keys.gameBoyShellStyle),
+                  let shellStyle = GameBoyShellStyle(rawValue: rawValue) else {
+                return .classic
+            }
+            return shellStyle
+        }
+        set {
+            defaults.set(newValue.rawValue, forKey: Keys.gameBoyShellStyle)
         }
     }
 

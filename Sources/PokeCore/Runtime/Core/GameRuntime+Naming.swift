@@ -9,6 +9,7 @@ extension GameRuntime {
         defaultName: String,
         completion: RuntimeNamingCompletionAction
     ) {
+        clearHeldFieldDirections()
         nicknameConfirmation = RuntimeNicknameConfirmationState(
             speciesID: speciesID,
             defaultName: defaultName,
@@ -71,34 +72,94 @@ extension GameRuntime {
 
         case .returnToFieldAfterStarter:
             finalizeStarterChoiceSequence(nickname: confirmation.defaultName)
+        case let .continueCaptureAftermath(aftermath):
+            applyNicknameToLastPartyMember(confirmation.defaultName)
+            continueCaptureAftermath(aftermath)
+            traceEvent(
+                .nicknameApplied,
+                "Named \(confirmation.speciesID) as \(confirmation.defaultName).",
+                details: [
+                    "speciesID": confirmation.speciesID,
+                    "nickname": confirmation.defaultName,
+                    "wasDefault": "true",
+                ]
+            )
         }
     }
 
-    func beginNicknameConfirmationAfterCapture(battle: RuntimeBattleState) {
-        cancelBattlePresentation()
-        guard var gameplayState else { return }
-        gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
-        self.gameplayState = gameplayState
-
-        let speciesID = battle.enemyPokemon.speciesID
-        let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
-
-        traceEvent(
-            .battleEnded,
-            "Captured \(speciesID) in \(battle.battleID).",
-            mapID: gameplayState.mapID,
-            battleID: battle.battleID,
-            battleKind: battle.kind,
-            details: [
-                "outcome": "captured",
-                "speciesID": speciesID,
-            ]
-        )
-
+    func beginNicknameConfirmationAfterCapture(_ aftermath: RuntimeCaptureAftermathState) {
         beginNicknameConfirmation(
-            speciesID: speciesID,
-            defaultName: defaultName,
-            completion: .returnToFieldAfterCapture
+            speciesID: aftermath.speciesID,
+            defaultName: aftermath.defaultName,
+            completion: .continueCaptureAftermath(aftermath)
+        )
+    }
+
+    func continueCaptureAftermath(_ aftermath: RuntimeCaptureAftermathState) {
+        switch aftermath.step {
+        case .showDexEntry:
+            guard aftermath.isNewlyOwned else {
+                continueCaptureAftermath(advanceCaptureAftermath(aftermath))
+                return
+            }
+            captureAftermathPokedexSelectionID = aftermath.speciesID
+            showDialogue(
+                id: "capture_dex_added",
+                replacements: captureDialogueReplacements(pokemonName: aftermath.pokemonName),
+                completion: .continueCaptureAftermath(advanceCaptureAftermath(aftermath))
+            )
+        case .promptForNickname:
+            guard aftermath.addedToParty else {
+                continueCaptureAftermath(advanceCaptureAftermath(aftermath))
+                return
+            }
+            scene = .field
+            substate = "field"
+            beginNicknameConfirmationAfterCapture(advanceCaptureAftermath(aftermath))
+        case .showDestination:
+            showCaptureDestinationDialogue(aftermath)
+        case .finish:
+            returnToFieldAfterCapture()
+        }
+    }
+
+    func advanceCaptureAftermath(_ aftermath: RuntimeCaptureAftermathState) -> RuntimeCaptureAftermathState {
+        var updated = aftermath
+        switch aftermath.step {
+        case .showDexEntry:
+            updated.step = .promptForNickname
+        case .promptForNickname:
+            updated.step = .showDestination
+        case .showDestination:
+            updated.step = .finish
+        case .finish:
+            break
+        }
+        return updated
+    }
+
+    func showCaptureDestinationDialogue(_ aftermath: RuntimeCaptureAftermathState) {
+        if let dialogueID = aftermath.destinationDialogueID {
+            showDialogue(
+                id: dialogueID,
+                replacements: captureDialogueReplacements(pokemonName: aftermath.pokemonName),
+                completion: .continueCaptureAftermath(advanceCaptureAftermath(aftermath))
+            )
+            return
+        }
+
+        showInlineDialogue(
+            id: "capture_destination_party",
+            pages: [
+                .init(
+                    lines: [
+                        "\(aftermath.pokemonName) was added",
+                        "to your party.",
+                    ],
+                    waitsForPrompt: true
+                ),
+            ],
+            completion: .continueCaptureAftermath(advanceCaptureAftermath(aftermath))
         )
     }
 
@@ -109,6 +170,7 @@ extension GameRuntime {
         defaultName: String,
         completion: RuntimeNamingCompletionAction
     ) {
+        clearHeldFieldDirections()
         namingState = RuntimeNamingState(
             speciesID: speciesID,
             defaultName: defaultName,
@@ -159,6 +221,10 @@ extension GameRuntime {
         case .returnToFieldAfterStarter:
             namingState = nil
             finalizeStarterChoiceSequence(nickname: nickname)
+        case let .continueCaptureAftermath(aftermath):
+            applyNicknameToLastPartyMember(nickname)
+            namingState = nil
+            continueCaptureAftermath(aftermath)
         }
 
         traceEvent(
@@ -189,6 +255,7 @@ extension GameRuntime {
         }
         scene = .field
         substate = "field"
+        captureAftermathPokedexSelectionID = nil
         requestDefaultMapMusic()
         publishSnapshot()
     }

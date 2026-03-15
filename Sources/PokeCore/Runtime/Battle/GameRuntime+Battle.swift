@@ -32,54 +32,29 @@ extension GameRuntime {
         if won, battle.completionFlagID.isEmpty == false {
             gameplayState.activeFlags.insert(battle.completionFlagID)
         }
-        gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
+        let finalizedParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
+        gameplayState.playerParty = finalizedParty
         gameplayState.battle = nil
         self.gameplayState = gameplayState
-        if battle.healsPartyAfterBattle {
-            healParty()
+        if won,
+           beginPendingEvolutionIfNeeded(
+               from: battle,
+               finalizedParty: finalizedParty,
+               continuation: .trainerBattle(battle: battle, won: won)
+           ) {
+            return
         }
-        traceEvent(
-            .battleEnded,
-            "Finished trainer battle \(battle.battleID).",
-            mapID: gameplayState.mapID,
-            battleID: battle.battleID,
-            battleKind: battle.kind,
-            details: [
-                "outcome": won ? "won" : "lost",
-                "opponent": battle.trainerName,
-            ]
-        )
-        if won == false {
-            stopAllMusic()
-        }
-        let followUpDialogueID = won ? battle.playerWinDialogueID : battle.playerLoseDialogueID
-        if let followUpDialogueID {
-            showDialogue(
-                id: followUpDialogueID,
-                completion: .finishTrainerBattle(
-                    won: won,
-                    preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
-                    postBattleScriptID: battle.postBattleScriptID,
-                    sourceTrainerObjectID: battle.sourceTrainerObjectID
-                )
-            )
-        } else {
-            completeTrainerBattleDialogue(
-                won: won,
-                preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
-                postBattleScriptID: battle.postBattleScriptID,
-                sourceTrainerObjectID: battle.sourceTrainerObjectID
-            )
-        }
+        completeFinishedTrainerBattle(battle: battle, won: won)
     }
 
     func completeTrainerBattleDialogue(
         won: Bool,
         preventsBlackoutOnLoss: Bool,
         postBattleScriptID: String?,
+        runsPostBattleScriptOnLoss: Bool = false,
         sourceTrainerObjectID: String?
     ) {
-        if let postBattleScriptID {
+        if let postBattleScriptID, won || runsPostBattleScriptOnLoss {
             beginScript(id: postBattleScriptID)
             return
         }
@@ -124,9 +99,73 @@ extension GameRuntime {
     func finishWildBattle(battle: RuntimeBattleState, won: Bool) {
         cancelBattlePresentation()
         guard var gameplayState else { return }
-        gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
+        let finalizedParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
+        gameplayState.playerParty = finalizedParty
         gameplayState.battle = nil
         self.gameplayState = gameplayState
+        if won,
+           beginPendingEvolutionIfNeeded(
+               from: battle,
+               finalizedParty: finalizedParty,
+               continuation: .wildBattle(battle: battle, won: won)
+           ) {
+            return
+        }
+        completeFinishedWildBattle(battle: battle, won: won)
+    }
+
+    func shouldBlackoutOnLoss(for battle: RuntimeBattleState) -> Bool {
+        wonBattleWouldPreventBlackout(battle) == false
+    }
+
+    private func wonBattleWouldPreventBlackout(_ battle: RuntimeBattleState) -> Bool {
+        battle.kind == .trainer && battle.preventsBlackoutOnLoss
+    }
+
+    func completeFinishedTrainerBattle(battle: RuntimeBattleState, won: Bool) {
+        guard let gameplayState else { return }
+        if battle.healsPartyAfterBattle {
+            healParty()
+        }
+        traceEvent(
+            .battleEnded,
+            "Finished trainer battle \(battle.battleID).",
+            mapID: gameplayState.mapID,
+            battleID: battle.battleID,
+            battleKind: battle.kind,
+            details: [
+                "outcome": won ? "won" : "lost",
+                "opponent": battle.trainerName,
+            ]
+        )
+        if won == false {
+            stopAllMusic()
+        }
+        let followUpDialogueID = won ? battle.playerWinDialogueID : battle.playerLoseDialogueID
+        if let followUpDialogueID {
+            showDialogue(
+                id: followUpDialogueID,
+                completion: .finishTrainerBattle(
+                    won: won,
+                    preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
+                    postBattleScriptID: battle.postBattleScriptID,
+                    runsPostBattleScriptOnLoss: battle.runsPostBattleScriptOnLoss,
+                    sourceTrainerObjectID: battle.sourceTrainerObjectID
+                )
+            )
+        } else {
+            completeTrainerBattleDialogue(
+                won: won,
+                preventsBlackoutOnLoss: battle.preventsBlackoutOnLoss,
+                postBattleScriptID: battle.postBattleScriptID,
+                runsPostBattleScriptOnLoss: battle.runsPostBattleScriptOnLoss,
+                sourceTrainerObjectID: battle.sourceTrainerObjectID
+            )
+        }
+    }
+
+    func completeFinishedWildBattle(battle: RuntimeBattleState, won: Bool) {
+        guard let gameplayState else { return }
         if won == false {
             traceEvent(
                 .battleEnded,
@@ -151,19 +190,11 @@ extension GameRuntime {
             battleID: battle.battleID,
             battleKind: battle.kind,
             details: [
-                "outcome": won ? "won" : "lost",
+                "outcome": "won",
                 "opponent": battle.trainerName,
             ]
         )
         requestDefaultMapMusic()
-    }
-
-    func shouldBlackoutOnLoss(for battle: RuntimeBattleState) -> Bool {
-        wonBattleWouldPreventBlackout(battle) == false
-    }
-
-    private func wonBattleWouldPreventBlackout(_ battle: RuntimeBattleState) -> Bool {
-        battle.kind == .trainer && battle.preventsBlackoutOnLoss
     }
 
     func beginBlackoutSequence(battle: inout RuntimeBattleState) {
@@ -198,12 +229,13 @@ extension GameRuntime {
         [playerBlackedOutText()]
     }
 
-    func finishWildBattleCapture(battle: RuntimeBattleState) {
+    func beginCaptureAftermath(battle: RuntimeBattleState, aftermath: RuntimeCaptureAftermathState) {
         cancelBattlePresentation()
         guard var gameplayState else { return }
         gameplayState.playerParty = finalizedPlayerPartyAfterBattle(from: battle, gameplayState: gameplayState)
         gameplayState.battle = nil
         self.gameplayState = gameplayState
+        captureAftermathPokedexSelectionID = nil
         scene = .field
         substate = "field"
         traceEvent(
@@ -218,6 +250,7 @@ extension GameRuntime {
             ]
         )
         requestDefaultMapMusic()
+        continueCaptureAftermath(aftermath)
     }
 
     func startBattle(
@@ -234,6 +267,7 @@ extension GameRuntime {
             return
         }
 
+        clearHeldFieldDirections()
         let playerPokemon = clearBattleStatStages(
             gameplayState.playerParty.first ?? makePokemon(speciesID: chosenStarter, level: 5, nickname: chosenStarter.capitalized)
         )
@@ -256,6 +290,7 @@ extension GameRuntime {
             playerWinDialogueID: battleManifest.playerWinDialogueID,
             playerLoseDialogueID: battleManifest.playerLoseDialogueID,
             postBattleScriptID: battleManifest.postBattleScriptID,
+            runsPostBattleScriptOnLoss: battleManifest.runsPostBattleScriptOnLoss,
             canRun: false,
             trainerClass: battleManifest.trainerClass,
             sourceTrainerObjectID: sourceTrainerObjectID,
@@ -320,6 +355,7 @@ extension GameRuntime {
 
     func startWildBattle(speciesID: String, level: Int) {
         guard var gameplayState else { return }
+        clearHeldFieldDirections()
         let playerPokemon = clearBattleStatStages(
             gameplayState.playerParty.first ?? makePokemon(
                 speciesID: gameplayState.chosenStarterSpeciesID ?? "SQUIRTLE",
@@ -348,6 +384,7 @@ extension GameRuntime {
             playerWinDialogueID: "",
             playerLoseDialogueID: nil,
             postBattleScriptID: nil,
+            runsPostBattleScriptOnLoss: false,
             canRun: true,
             trainerClass: nil,
             sourceTrainerObjectID: nil,
@@ -438,6 +475,7 @@ extension GameRuntime {
 
     func performBlackout(sourceTrainerObjectID: String?) {
         guard var gameplayState else { return }
+        clearHeldFieldDirections()
         let previousMoney = gameplayState.money
         if let sourceTrainerObjectID {
             resetObjectStateToManifest(sourceTrainerObjectID, in: &gameplayState)

@@ -63,10 +63,11 @@ struct RuntimeSceneRouter: View {
             .pokeAppearanceMode(.light)
         case .oakIntro:
             OakIntroScene(runtime: runtime)
-        case .field, .dialogue, .scriptedSequence, .starterChoice, .battle, .naming:
+        case .field, .dialogue, .scriptedSequence, .starterChoice, .battle, .evolution, .naming:
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
                 appearanceMode: preferences.appearanceMode,
+                gameBoyShellStyle: preferences.gameBoyShellStyle,
                 gameplayHDREnabled: preferences.gameplayHDREnabled
             ) {
                 GameplayScene(props: gameplaySceneProps)

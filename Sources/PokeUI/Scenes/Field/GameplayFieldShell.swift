@@ -46,6 +46,9 @@ public struct GameplayShell<Stage: View>: View {
 }
 
 public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayContent: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
     private let screenContent: ScreenContent
     private let footer: Footer
     private let overlayContent: OverlayContent
@@ -89,7 +92,7 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(FieldRetroPalette.shellBackdrop)
+                .fill(shellPalette.backdrop.color)
         )
         .glassEffect(
             .regular.tint(FieldRetroPalette.glassTint),
@@ -104,7 +107,16 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
                         .padding(8)
                 }
         }
-        .shadow(color: FieldRetroPalette.shellBackdropShadow.opacity(0.16), radius: 24, y: 12)
+        .shadow(color: shellPalette.shadow.color.opacity(0.16), radius: 24, y: 12)
+        .animation(.spring(response: 0.42, dampingFraction: 0.86), value: shellPalette)
+    }
+
+    private var shellPalette: GameBoyShellPalette {
+        FieldRetroPalette.gameBoyShellPalette(
+            shellStyle: gameBoyShellStyle,
+            appearanceMode: appearanceMode,
+            colorScheme: colorScheme
+        )
     }
 }
 
@@ -167,6 +179,9 @@ public struct BattleViewportStage<Content: View, Footer: View, OverlayContent: V
 }
 
 private struct GameplayDisplayShell<Content: View, Footer: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
     private let screenDisplayStyle: FieldDisplayStyle
     private let content: Content
     private let footer: Footer
@@ -209,9 +224,18 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
                     .font(.system(size: 30, weight: .light, design: .rounded))
                     .tracking(0.4)
             }
-            .foregroundStyle(PokeThemePalette.gameBoyWordmark)
+            .foregroundStyle(shellChrome.wordmark.color)
             .padding(.leading, 10)
+            .animation(.spring(response: 0.42, dampingFraction: 0.86), value: shellChrome)
         }
+    }
+
+    private var shellChrome: GameBoyShellChromePalette {
+        PokeThemePalette.gameBoyShellChromePalette(
+            shellStyle: gameBoyShellStyle,
+            appearanceMode: appearanceMode,
+            colorScheme: colorScheme
+        )
     }
 }
 

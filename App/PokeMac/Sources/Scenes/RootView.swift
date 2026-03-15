@@ -37,6 +37,7 @@ struct RootView: View {
         .frame(width: Self.windowSize.width, height: Self.windowSize.height)
         .preferredColorScheme(preferences.appearanceMode.preferredColorSchemeOverride)
         .pokeAppearanceMode(preferences.appearanceMode)
+        .pokeGameBoyShellStyle(preferences.gameBoyShellStyle)
         .pokeGameplayHDREnabled(preferences.gameplayHDREnabled)
         .toolbar {
             ToolbarItem {

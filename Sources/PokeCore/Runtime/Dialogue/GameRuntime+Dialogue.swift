@@ -2,10 +2,21 @@ import Foundation
 import PokeDataModel
 
 extension GameRuntime {
+    func resolvedDialogueLines(_ lines: [String], replacements: [String: String]) -> [String] {
+        lines.map { line in
+            let withPlaceholders = replacements.reduce(line) { partial, replacement in
+                partial.replacingOccurrences(of: "{\(replacement.key)}", with: replacement.value)
+            }
+            return withPlaceholders
+                .replacingOccurrences(of: "<PLAYER>", with: playerName)
+                .replacingOccurrences(of: "<RIVAL>", with: gameplayState?.rivalName ?? "BLUE")
+        }
+    }
+
     func handleDialogue(button: RuntimeButton) {
         guard button == .confirm || button == .start || button == .cancel,
               var dialogueState,
-              let dialogue = content.dialogue(id: dialogueState.dialogueID),
+              let dialogue = currentDialogueManifest,
               dialogue.pages.indices.contains(dialogueState.pageIndex) else {
             return
         }
@@ -75,13 +86,14 @@ extension GameRuntime {
                 defaultName: defaultName,
                 completion: .returnToFieldAfterStarter
             )
-        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, sourceTrainerObjectID):
+        case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, runsPostBattleScriptOnLoss, sourceTrainerObjectID):
             scene = .field
             substate = "field"
             completeTrainerBattleDialogue(
                 won: won,
                 preventsBlackoutOnLoss: preventsBlackoutOnLoss,
                 postBattleScriptID: postBattleScriptID,
+                runsPostBattleScriptOnLoss: runsPostBattleScriptOnLoss,
                 sourceTrainerObjectID: sourceTrainerObjectID
             )
         case let .startBattle(battleID, sourceTrainerObjectID):
@@ -92,6 +104,10 @@ extension GameRuntime {
             scene = .field
             substate = "field"
             showDialogue(id: dialogueID, completion: completionAction)
+        case let .continueCaptureAftermath(aftermath):
+            scene = .field
+            substate = "field"
+            continueCaptureAftermath(aftermath)
         case let .fieldPrompt(interactionID, completionAction):
             scene = .dialogue
             substate = "dialogue_\(dialogue.id)_prompt"
@@ -123,7 +139,11 @@ extension GameRuntime {
         }
     }
 
-    func showDialogue(id: String, completion: DialogueState.CompletionAction) {
+    func showDialogue(
+        id: String,
+        replacements: [String: String] = [:],
+        completion: DialogueState.CompletionAction
+    ) {
         guard let dialogue = content.dialogue(id: id) else {
             var details: [String: String] = [
                 "failureKind": "missingDialogue",
@@ -161,7 +181,35 @@ extension GameRuntime {
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
         }
-        dialogueState = DialogueState(dialogueID: dialogue.id, pageIndex: 0, completionAction: completion)
+        dialogueState = DialogueState(
+            dialogueID: dialogue.id,
+            pages: nil,
+            replacements: replacements,
+            pageIndex: 0,
+            completionAction: completion
+        )
+        scene = .dialogue
+        substate = "dialogue_\(id)"
+        executeDialoguePageEventsIfNeeded()
+        traceEvent(.dialogueStarted, "Started dialogue \(id).", mapID: gameplayState?.mapID, dialogueID: id)
+    }
+
+    func showInlineDialogue(
+        id: String,
+        pages: [DialoguePage],
+        completion: DialogueState.CompletionAction
+    ) {
+        fieldPromptState = nil
+        if isTestEnvironment == false {
+            dialogueTextFullyRevealed = false
+        }
+        dialogueState = DialogueState(
+            dialogueID: id,
+            pages: pages,
+            replacements: [:],
+            pageIndex: 0,
+            completionAction: completion
+        )
         scene = .dialogue
         substate = "dialogue_\(id)"
         executeDialoguePageEventsIfNeeded()

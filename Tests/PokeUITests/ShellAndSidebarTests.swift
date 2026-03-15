@@ -69,6 +69,7 @@ extension PokeUITests {
         options: GameplaySidebarPropsBuilder.makeOptionsSection(
           isMusicEnabled: true,
           appearanceMode: .light,
+          gameBoyShellStyle: .classic,
           gameplayHDREnabled: true
         )
       )
@@ -157,6 +158,50 @@ extension PokeUITests {
 
     XCTAssertNotNil(view)
   }
+  func testBattlePanelCanBeConstructedWithDisplayStyleAwareBattlefieldLayer() {
+    let view = BattlePanel(
+      trainerName: "BLUE",
+      kind: .trainer,
+      playerPokemon: .init(
+        speciesID: "BULBASAUR",
+        displayName: "Bulbasaur",
+        level: 5,
+        currentHP: 19,
+        maxHP: 19,
+        attack: 11,
+        defense: 10,
+        speed: 9,
+        special: 12,
+        moves: ["TACKLE", "GROWL"]
+      ),
+      enemyPokemon: .init(
+        speciesID: "CHARMANDER",
+        displayName: "Charmander",
+        level: 5,
+        currentHP: 18,
+        maxHP: 20,
+        attack: 10,
+        defense: 9,
+        speed: 11,
+        special: 10,
+        moves: ["SCRATCH", "GROWL"]
+      ),
+      trainerSpriteURL: nil,
+      playerTrainerFrontSpriteURL: nil,
+      playerTrainerBackSpriteURL: nil,
+      sendOutPoofSpriteURL: nil,
+      playerSpriteURL: nil,
+      enemySpriteURL: nil,
+      displayStyle: .dmgAuthentic,
+      presentation: .init(
+        stage: .commandReady,
+        revision: 1,
+        uiVisibility: .visible
+      )
+    )
+
+    XCTAssertNotNil(view)
+  }
   func testSidebarPropBuilderMapsEmptyPartyProfile() {
     let profile = GameplaySidebarPropsBuilder.makeProfile(
       trainerName: "RED",
@@ -212,6 +257,35 @@ extension PokeUITests {
     XCTAssertEqual(entry.detailFields.map(\.id), ["height", "weight", "encounters"])
     XCTAssertEqual(entry.detailFields.last?.label, "ENCOUNTERS")
     XCTAssertEqual(entry.detailFields.last?.value, "3")
+  }
+
+  func testPokedexSidebarBuilderCarriesSelectedEntryID() {
+    let props = GameplaySidebarPropsBuilder.makePokedex(
+      allSpecies: [
+        .init(
+          id: "PIDGEY",
+          dexNumber: 16,
+          displayName: "Pidgey",
+          primaryType: "NORMAL",
+          secondaryType: "FLYING",
+          spriteURL: nil,
+          speciesCategory: nil,
+          heightText: nil,
+          weightText: nil,
+          descriptionText: nil,
+          baseHP: 40,
+          baseAttack: 45,
+          baseDefense: 40,
+          baseSpeed: 56,
+          baseSpecial: 35
+        )
+      ],
+      ownedSpeciesIDs: ["PIDGEY"],
+      seenSpeciesIDs: ["PIDGEY"],
+      selectedEntryID: "PIDGEY"
+    )
+
+    XCTAssertEqual(props.selectedEntryID, "PIDGEY")
   }
 
   func testGameBoyUppercasedLabelPreservesPokemonAccentConvention() {
@@ -271,7 +345,22 @@ extension PokeUITests {
     XCTAssertEqual(GameplaySidebarKind.forScene(.field), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.dialogue), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.starterChoice), .fieldLike)
+    XCTAssertEqual(GameplaySidebarKind.forScene(.evolution), .fieldLike)
     XCTAssertEqual(GameplaySidebarKind.forScene(.battle), .battle)
+  }
+  func testSidebarPropBuilderMapsEvolutionProfileStatus() {
+    let profile = GameplaySidebarPropsBuilder.makeProfile(
+      trainerName: "RED",
+      locationName: "Red's House",
+      scene: .evolution,
+      playerPosition: .init(x: 4, y: 4),
+      facing: .down,
+      portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
+      money: 3000,
+      ownedBadgeIDs: []
+    )
+
+    XCTAssertEqual(profile.statusItems, ["EVOLVE", "X4 Y4", "DOWN"])
   }
   func testBattleSidebarPropsPreservePhaseSpecificState() {
     let moveSelection = BattleSidebarProps(
@@ -1146,7 +1235,7 @@ extension PokeUITests {
         spriteFrame: .init(x: 0, y: 16, width: 16, height: 16)
       ),
       money: 4242,
-      ownedBadgeIDs: ["cascade", "boulder"]
+      ownedBadgeIDs: ["CASCADE_BADGE", "BoulderBadge"]
     )
     let sidebarParty = GameplaySidebarPropsBuilder.makeParty(
       from: party,
@@ -1289,11 +1378,45 @@ extension PokeUITests {
     expansion.activate(.party)
     XCTAssertEqual(expansion.expandedSection, .party)
   }
+
+  func testFieldSidebarModeUsesPreferredExpandedSectionWhenProvided() {
+    let mode = GameplaySidebarMode.fieldLike(
+      GameplayFieldSidebarProps(
+        profile: .init(
+          trainerName: "RED",
+          locationName: "Pallet Town",
+          portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
+          badges: [],
+          badgeSummaryText: "0/8",
+          moneyText: "¥3,000",
+          statusItems: ["FIELD", "X4 Y6", "DOWN"]
+        ),
+        pokedex: GameplaySidebarPropsBuilder.makePokedex(
+          allSpecies: [],
+          ownedSpeciesIDs: [],
+          seenSpeciesIDs: []
+        ),
+        party: .init(pokemon: [], totalSlots: 6, mode: .passive, promptText: nil),
+        inventory: GameplaySidebarPropsBuilder.makeInventory(),
+        save: GameplaySidebarPropsBuilder.makeSaveSection(),
+        options: GameplaySidebarPropsBuilder.makeOptionsSection(
+          isMusicEnabled: true,
+          appearanceMode: .light,
+          gameBoyShellStyle: .classic,
+          gameplayHDREnabled: true
+        ),
+        preferredExpandedSection: .pokedex
+      )
+    )
+
+    XCTAssertEqual(mode.defaultExpandedSection, .pokedex)
+  }
   func testSaveAndOptionsBuildersProduceDisabledRows() {
     let save = GameplaySidebarPropsBuilder.makeSaveSection()
     let options = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
       appearanceMode: .light,
+      gameBoyShellStyle: .classic,
       gameplayHDREnabled: true
     )
 
@@ -1302,6 +1425,9 @@ extension PokeUITests {
     XCTAssertEqual(
       options.rows.map(\.title), ["Appearance", "HDR Effects", "Text Speed", "Battle Scene", "Battle Style", "Music"])
     XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, true, true, true, true])
+    XCTAssertEqual(options.shellPickerTitle, "GB Shell")
+    XCTAssertEqual(options.shellOptions.map(\.shellStyle), [.classic, .kiwi, .dandelion, .teal, .grape])
+    XCTAssertEqual(options.shellOptions.filter(\.isSelected).map(\.shellStyle), [.classic])
     XCTAssertEqual(options.rows.last?.detail, "On")
     XCTAssertEqual(options.rows.first?.detail, "Light")
     XCTAssertEqual(options.rows.dropFirst().first?.detail, "On")
@@ -1342,20 +1468,82 @@ extension PokeUITests {
     XCTAssertNotEqual(raw.outer, tinted.outer)
     XCTAssertNotEqual(authentic.outer, tinted.outer)
   }
+  func testGameplayScreenGlowPaletteUsesRetunedHardwareFriendlyValues() {
+    let tinted = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgTinted,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+    let authentic = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgAuthentic,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+
+    XCTAssertEqual(tinted.outer.red, 0.34, accuracy: 0.0001)
+    XCTAssertEqual(tinted.outer.green, 0.78, accuracy: 0.0001)
+    XCTAssertEqual(tinted.outer.blue, 0.26, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.red, 0.71, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.green, 0.87, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.blue, 0.58, accuracy: 0.0001)
+
+    XCTAssertEqual(authentic.outer.red, 0.42, accuracy: 0.0001)
+    XCTAssertEqual(authentic.outer.green, 0.55, accuracy: 0.0001)
+    XCTAssertEqual(authentic.outer.blue, 0.18, accuracy: 0.0001)
+    XCTAssertEqual(authentic.inner.red, 0.75, accuracy: 0.0001)
+    XCTAssertEqual(authentic.inner.green, 0.79, accuracy: 0.0001)
+    XCTAssertEqual(authentic.inner.blue, 0.41, accuracy: 0.0001)
+  }
+  func testGameplayHDRProfileUsesModeratedScreenBoosts() {
+    let light = PokeThemePalette.gameplayHDRProfile(
+      appearanceMode: .light,
+      colorScheme: .light,
+      isEnabled: true
+    )
+    let dark = PokeThemePalette.gameplayHDRProfile(
+      appearanceMode: .retroDark,
+      colorScheme: .dark,
+      isEnabled: true
+    )
+
+    XCTAssertEqual(light.fieldShaderBoost, 0.14, accuracy: 0.0001)
+    XCTAssertEqual(light.battleShaderBoost, 0.1, accuracy: 0.0001)
+    XCTAssertEqual(dark.fieldShaderBoost, 0.28, accuracy: 0.0001)
+    XCTAssertEqual(dark.battleShaderBoost, 0.22, accuracy: 0.0001)
+    XCTAssertEqual(dark.outerGlowOpacity, 0.5, accuracy: 0.0001)
+    XCTAssertEqual(dark.innerGlowOpacity, 0.34, accuracy: 0.0001)
+  }
+  func testBattleCardPaletteUsesHigherContrastGlassValues() {
+    let light = PokeThemePalette.resolve(for: .light)
+    let dark = PokeThemePalette.resolve(for: .retroDark)
+
+    XCTAssertEqual(light.battleEnemyTint.alpha, 0.54, accuracy: 0.0001)
+    XCTAssertEqual(light.battleEnemyBackground.alpha, 0.26, accuracy: 0.0001)
+    XCTAssertEqual(light.battlePlayerTint.alpha, 0.62, accuracy: 0.0001)
+    XCTAssertEqual(light.battlePlayerBackground.alpha, 0.3, accuracy: 0.0001)
+
+    XCTAssertEqual(dark.battleEnemyTint.green, 0.28, accuracy: 0.0001)
+    XCTAssertEqual(dark.battleEnemyBackground.alpha, 0.42, accuracy: 0.0001)
+    XCTAssertEqual(dark.battlePlayerTint.green, 0.38, accuracy: 0.0001)
+    XCTAssertEqual(dark.battlePlayerBackground.alpha, 0.48, accuracy: 0.0001)
+  }
   func testOptionsBuilderReflectsAppearanceWithoutChangingMusicState() {
     let systemOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
       appearanceMode: .system,
+      gameBoyShellStyle: .classic,
       gameplayHDREnabled: false
     )
     let lightOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
       appearanceMode: .light,
+      gameBoyShellStyle: .kiwi,
       gameplayHDREnabled: true
     )
     let darkOptions = GameplaySidebarPropsBuilder.makeOptionsSection(
       isMusicEnabled: true,
       appearanceMode: .retroDark,
+      gameBoyShellStyle: .dandelion,
       gameplayHDREnabled: true
     )
 
@@ -1368,6 +1556,92 @@ extension PokeUITests {
     XCTAssertEqual(systemOptions.rows.last?.detail, "On")
     XCTAssertEqual(lightOptions.rows.last?.detail, "On")
     XCTAssertEqual(darkOptions.rows.last?.detail, "On")
+    XCTAssertEqual(systemOptions.shellOptions.filter(\.isSelected).map(\.shellStyle), [.classic])
+    XCTAssertEqual(lightOptions.shellOptions.filter(\.isSelected).map(\.shellStyle), [.kiwi])
+    XCTAssertEqual(darkOptions.shellOptions.filter(\.isSelected).map(\.shellStyle), [.dandelion])
+  }
+  func testClassicGameBoyShellPaletteTracksAppearanceMode() {
+    let lightClassic = PokeThemePalette.gameBoyShellPalette(
+      shellStyle: .classic,
+      appearanceMode: .light,
+      colorScheme: .light
+    )
+    let darkClassic = PokeThemePalette.gameBoyShellPalette(
+      shellStyle: .classic,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+
+    XCTAssertEqual(lightClassic.backdrop, PokeThemePalette.resolve(for: .light).field.shellBackdrop)
+    XCTAssertEqual(lightClassic.shadow, PokeThemePalette.resolve(for: .light).field.shellBackdropShadow)
+    XCTAssertEqual(darkClassic.backdrop, PokeThemePalette.resolve(for: .retroDark).field.shellBackdrop)
+    XCTAssertEqual(darkClassic.shadow, PokeThemePalette.resolve(for: .retroDark).field.shellBackdropShadow)
+  }
+  func testClassicGameBoyShellChromeTracksAppearanceMode() {
+    let lightClassic = PokeThemePalette.gameBoyShellChromePalette(
+      shellStyle: .classic,
+      appearanceMode: .light,
+      colorScheme: .light
+    )
+    let darkClassic = PokeThemePalette.gameBoyShellChromePalette(
+      shellStyle: .classic,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+
+    XCTAssertEqual(lightClassic.wordmark, PokeThemePalette.resolve(for: .light).gameBoyWordmark)
+    XCTAssertEqual(darkClassic.wordmark, PokeThemePalette.resolve(for: .retroDark).gameBoyWordmark)
+  }
+  func testExplicitGameBoyShellPalettesStayStableAcrossAppearanceModes() {
+    for shellStyle in [GameBoyShellStyle.kiwi, .dandelion, .teal, .grape] {
+      let lightPalette = PokeThemePalette.gameBoyShellPalette(
+        shellStyle: shellStyle,
+        appearanceMode: .light,
+        colorScheme: .light
+      )
+      let darkPalette = PokeThemePalette.gameBoyShellPalette(
+        shellStyle: shellStyle,
+        appearanceMode: .retroDark,
+        colorScheme: .dark
+      )
+
+      XCTAssertEqual(lightPalette, darkPalette)
+      XCTAssertNotEqual(lightPalette.backdrop, PokeThemePalette.resolve(for: .light).field.shellBackdrop)
+    }
+  }
+  func testExplicitGameBoyShellWordmarksStayStableAcrossAppearanceModes() {
+    for shellStyle in [GameBoyShellStyle.kiwi, .dandelion, .teal, .grape] {
+      let lightChrome = PokeThemePalette.gameBoyShellChromePalette(
+        shellStyle: shellStyle,
+        appearanceMode: .light,
+        colorScheme: .light
+      )
+      let darkChrome = PokeThemePalette.gameBoyShellChromePalette(
+        shellStyle: shellStyle,
+        appearanceMode: .retroDark,
+        colorScheme: .dark
+      )
+
+      XCTAssertEqual(lightChrome.wordmark, darkChrome.wordmark)
+      XCTAssertNotEqual(lightChrome.wordmark, PokeThemePalette.resolve(for: .light).gameBoyWordmark)
+    }
+  }
+  func testOptionsSidebarContentWithShellPickerFitsSidebarWidth() {
+    let props = GameplaySidebarPropsBuilder.makeOptionsSection(
+      isMusicEnabled: true,
+      appearanceMode: .light,
+      gameBoyShellStyle: .kiwi,
+      gameplayHDREnabled: true
+    )
+    let view = OptionsSidebarContent(
+      props: props,
+      fieldDisplayStyle: .constant(.defaultGameplayStyle),
+      onAction: nil
+    )
+
+    let measuredHeight = measureFittingHeight(of: view, width: 320)
+    XCTAssertGreaterThan(measuredHeight, 140)
+    XCTAssertLessThanOrEqual(measuredHeight, GameplayFieldMetrics.optionsExpandedMaxHeight)
   }
   func testAppearanceModeCyclesSystemDarkLight() {
     XCTAssertEqual(AppAppearanceMode.system.nextOptionMode, .retroDark)

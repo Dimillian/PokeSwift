@@ -11,6 +11,7 @@ enum GameplayFieldMetrics {
     static let sidebarSectionSpacing: CGFloat = 12
     static let hoverCardSpacing: CGFloat = 22
     static let inventoryExpandedMaxHeight: CGFloat = 210
+    static let optionsExpandedMaxHeight: CGFloat = 320
     static let glassMergeSpacing: CGFloat = 16
     static let compactPartyThreshold = 3
     static let partyExpandedMaxHeight: CGFloat = 420
@@ -38,6 +39,18 @@ enum FieldRetroPalette {
     static let hoverCardBackgroundTint = PokeThemePalette.fieldHoverCardBackgroundTint
     static let shellBackdrop = PokeThemePalette.fieldShellBackdrop
     static let shellBackdropShadow = PokeThemePalette.fieldShellBackdropShadow
+
+    static func gameBoyShellPalette(
+        shellStyle: GameBoyShellStyle,
+        appearanceMode: AppAppearanceMode,
+        colorScheme: ColorScheme
+    ) -> GameBoyShellPalette {
+        PokeThemePalette.gameBoyShellPalette(
+            shellStyle: shellStyle,
+            appearanceMode: appearanceMode,
+            colorScheme: colorScheme
+        )
+    }
 
     static func pokemonTypeGlassTint(for typeLabel: String) -> Color {
         switch typeLabel.uppercased() {

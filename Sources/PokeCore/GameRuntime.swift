@@ -10,7 +10,13 @@ public final class GameRuntime {
 
     public let content: LoadedContent
 
-    public internal(set) var scene: RuntimeScene = .launch
+    public internal(set) var scene: RuntimeScene = .launch {
+        didSet {
+            if scene != .field {
+                clearHeldFieldDirections()
+            }
+        }
+    }
     public internal(set) var focusedIndex = 0
     public internal(set) var placeholderTitle: String?
     public internal(set) var starterChoiceFocusedIndex = 0
@@ -37,7 +43,9 @@ public final class GameRuntime {
     var idleMovementTask: Task<Void, Never>?
     var trainerEngagementTask: Task<Void, Never>?
     var battlePresentationTask: Task<Void, Never>?
+    var battlePresentationStagedSoundTasks: [UUID: Task<Void, Never>] = [:]
     var fieldInteractionTask: Task<Void, Never>?
+    var evolutionTask: Task<Void, Never>?
     var hasStarted = false
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
@@ -47,6 +55,8 @@ public final class GameRuntime {
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
+    var evolutionState: RuntimeEvolutionState?
+    public internal(set) var captureAftermathPokedexSelectionID: String?
     public internal(set) var oakIntroState: OakIntroState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
@@ -65,6 +75,7 @@ public final class GameRuntime {
     var lastSaveResult: RuntimeSaveResult?
     var gameplaySessionStartedAt: Date?
     var playthroughID = UUID().uuidString
+    var heldFieldDirections: [FacingDirection] = []
 
     public init(
         content: LoadedContent,
@@ -146,7 +157,7 @@ public final class GameRuntime {
     }
 
     public var earnedBadgeIDs: Set<String> {
-        gameplayState?.earnedBadgeIDs ?? []
+        Self.normalizedBadgeIDs(gameplayState?.earnedBadgeIDs ?? [])
     }
 
     public var ownedSpeciesIDs: Set<String> {
@@ -179,6 +190,18 @@ public final class GameRuntime {
         gameplayState?.chosenStarterSpeciesID
     }
 
+    static func normalizedBadgeID(_ badgeID: String) -> String {
+        badgeID
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_badge", with: "")
+            .replacingOccurrences(of: "badge", with: "")
+    }
+
+    static func normalizedBadgeIDs<S: Sequence>(_ badgeIDs: S) -> Set<String> where S.Element == String {
+        Set(badgeIDs.map(Self.normalizedBadgeID))
+    }
+
     public var currentFieldObjects: [FieldRenderableObjectState] {
         guard let gameplayState, let map = currentMapManifest else { return [] }
         return map.objects.compactMap { object in
@@ -197,6 +220,9 @@ public final class GameRuntime {
 
     public var currentDialogueManifest: DialogueManifest? {
         guard let dialogueState else { return nil }
+        if let pages = dialogueState.pages {
+            return DialogueManifest(id: dialogueState.dialogueID, pages: pages)
+        }
         return content.dialogue(id: dialogueState.dialogueID)
     }
 
@@ -230,10 +256,7 @@ public final class GameRuntime {
             return nil
         }
         let page = dialogue.pages[dialogueState.pageIndex]
-        let substitutedLines = page.lines.map {
-            $0.replacingOccurrences(of: "<PLAYER>", with: playerName)
-              .replacingOccurrences(of: "<RIVAL>", with: gameplayState?.rivalName ?? "BLUE")
-        }
+        let substitutedLines = resolvedDialogueLines(page.lines, replacements: dialogueState.replacements)
         return DialoguePage(lines: substitutedLines, waitsForPrompt: page.waitsForPrompt, events: page.events)
     }
 
@@ -368,6 +391,8 @@ public final class GameRuntime {
             handleStarterChoice(button: button)
         case .battle:
             handleBattle(button: button)
+        case .evolution:
+            handleEvolution(button: button)
         case .naming:
             handleNaming(button: button)
         case .oakIntro:
@@ -382,6 +407,30 @@ public final class GameRuntime {
         }
 
         publishSnapshot()
+    }
+
+    public func setDirectionalButton(_ button: RuntimeButton, isPressed: Bool) {
+        guard let direction = facingDirection(for: button) else {
+            if isPressed {
+                handle(button: button)
+            }
+            return
+        }
+
+        guard scene == .field else {
+            if isPressed {
+                handle(button: button)
+            }
+            return
+        }
+
+        if isPressed {
+            record(button: button)
+            pressHeldFieldDirection(direction)
+            publishSnapshot()
+        } else {
+            releaseHeldFieldDirection(direction)
+        }
     }
 
     public func updateWindowScale(_ scale: Int) {
@@ -405,4 +454,21 @@ public final class GameRuntime {
         }
     }
 
+}
+
+private extension GameRuntime {
+    func facingDirection(for button: RuntimeButton) -> FacingDirection? {
+        switch button {
+        case .up:
+            return .up
+        case .down:
+            return .down
+        case .left:
+            return .left
+        case .right:
+            return .right
+        case .confirm, .cancel, .start:
+            return nil
+        }
+    }
 }

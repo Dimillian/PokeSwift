@@ -91,6 +91,7 @@ extension GameRuntime {
             return
         }
 
+        clearHeldFieldDirections()
         recordBlackoutCheckpoint(healing.blackoutCheckpoint)
         fieldInteractionTask?.cancel()
 

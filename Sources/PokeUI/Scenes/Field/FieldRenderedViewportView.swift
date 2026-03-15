@@ -83,7 +83,7 @@ struct FixedViewportRenderedField: View {
                         .zIndex(Double(alertActor.worldPosition.y + 1000))
                 }
             }
-            .fieldScreenEffect(
+            .gameplayScreenEffect(
                 displayStyle: displayStyle,
                 displayScale: displayScale,
                 hdrBoost: fieldShaderHDRBoost

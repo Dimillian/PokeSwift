@@ -16,8 +16,11 @@ extension GameRuntime {
         return gameplayState.inventory.count < Self.bagItemCapacity
     }
 
-    func addItem(_ itemID: String, quantity: Int = 1, to gameplayState: inout GameplayState) {
-        guard quantity > 0, canAddItem(itemID, quantity: quantity, to: gameplayState) else { return }
+    @discardableResult
+    func addItem(_ itemID: String, quantity: Int = 1, to gameplayState: inout GameplayState) -> Bool {
+        guard quantity > 0, canAddItem(itemID, quantity: quantity, to: gameplayState) else {
+            return false
+        }
 
         if let index = gameplayState.inventory.firstIndex(where: { $0.itemID == itemID }) {
             gameplayState.inventory[index].quantity += quantity
@@ -26,6 +29,7 @@ extension GameRuntime {
         }
 
         gameplayState.inventory.sort { $0.itemID < $1.itemID }
+        return true
     }
 
     @discardableResult
@@ -78,7 +82,9 @@ extension GameRuntime {
     @discardableResult
     func addItem(_ itemID: String, quantity: Int = 1) -> Bool {
         guard quantity > 0, var gameplayState else { return false }
-        addItem(itemID, quantity: quantity, to: &gameplayState)
+        guard addItem(itemID, quantity: quantity, to: &gameplayState) else {
+            return false
+        }
         self.gameplayState = gameplayState
         traceEvent(
             .inventoryChanged,

@@ -90,7 +90,7 @@ struct FixedViewportPlaceholderField: View {
                     )
             }
         }
-        .fieldScreenEffect(
+        .gameplayScreenEffect(
             displayStyle: displayStyle,
             displayScale: displayScale,
             hdrBoost: fieldShaderHDRBoost

@@ -381,12 +381,40 @@ public struct SaveSidebarProps: Equatable, Sendable {
     }
 }
 
+public struct GameBoyShellStyleOptionProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let shellStyle: GameBoyShellStyle
+    public let title: String
+    public let isSelected: Bool
+
+    public init(
+        id: String,
+        shellStyle: GameBoyShellStyle,
+        title: String,
+        isSelected: Bool
+    ) {
+        self.id = id
+        self.shellStyle = shellStyle
+        self.title = title
+        self.isSelected = isSelected
+    }
+}
+
 public struct OptionsSidebarProps: Equatable, Sendable {
     public let title: String
+    public let shellPickerTitle: String
+    public let shellOptions: [GameBoyShellStyleOptionProps]
     public let rows: [SidebarActionRowProps]
 
-    public init(title: String, rows: [SidebarActionRowProps]) {
+    public init(
+        title: String,
+        shellPickerTitle: String,
+        shellOptions: [GameBoyShellStyleOptionProps],
+        rows: [SidebarActionRowProps]
+    ) {
         self.title = title
+        self.shellPickerTitle = shellPickerTitle
+        self.shellOptions = shellOptions
         self.rows = rows
     }
 }
@@ -469,17 +497,20 @@ public struct PokedexSidebarProps: Equatable, Sendable {
     public let ownedCount: Int
     public let seenCount: Int
     public let totalCount: Int
+    public let selectedEntryID: String?
 
     public init(
         entries: [PokedexSidebarEntryProps],
         ownedCount: Int,
         seenCount: Int,
-        totalCount: Int
+        totalCount: Int,
+        selectedEntryID: String? = nil
     ) {
         self.entries = entries
         self.ownedCount = ownedCount
         self.seenCount = seenCount
         self.totalCount = totalCount
+        self.selectedEntryID = selectedEntryID
     }
 }
 
@@ -490,6 +521,7 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
     public let inventory: InventorySidebarProps
     public let save: SaveSidebarProps
     public let options: OptionsSidebarProps
+    public let preferredExpandedSection: GameplaySidebarExpandedSection?
 
     public init(
         profile: TrainerProfileProps,
@@ -497,7 +529,8 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
         party: PartySidebarProps,
         inventory: InventorySidebarProps,
         save: SaveSidebarProps,
-        options: OptionsSidebarProps
+        options: OptionsSidebarProps,
+        preferredExpandedSection: GameplaySidebarExpandedSection? = nil
     ) {
         self.profile = profile
         self.pokedex = pokedex
@@ -505,6 +538,7 @@ public struct GameplayFieldSidebarProps: Equatable, Sendable {
         self.inventory = inventory
         self.save = save
         self.options = options
+        self.preferredExpandedSection = preferredExpandedSection
     }
 }
 
@@ -813,8 +847,8 @@ public enum GameplaySidebarMode: Equatable, Sendable {
 
     public var defaultExpandedSection: GameplaySidebarExpandedSection {
         switch self {
-        case .fieldLike:
-            return .trainer
+        case let .fieldLike(props):
+            return props.preferredExpandedSection ?? .trainer
         case .battle:
             return .battleCombat
         }
@@ -960,7 +994,8 @@ public enum GameplaySidebarPropsBuilder {
         allSpecies: [PokedexSpeciesData],
         ownedSpeciesIDs: Set<String>,
         seenSpeciesIDs: Set<String>,
-        speciesEncounterCounts: [String: Int] = [:]
+        speciesEncounterCounts: [String: Int] = [:],
+        selectedEntryID: String? = nil
     ) -> PokedexSidebarProps {
         var ownedCount = 0
         var seenCount = 0
@@ -1001,7 +1036,8 @@ public enum GameplaySidebarPropsBuilder {
             entries: entries,
             ownedCount: ownedCount,
             seenCount: seenCount,
-            totalCount: entries.count
+            totalCount: entries.count,
+            selectedEntryID: selectedEntryID
         )
     }
 
@@ -1086,6 +1122,7 @@ public enum GameplaySidebarPropsBuilder {
     public static func makeOptionsSection(
         isMusicEnabled: Bool,
         appearanceMode: AppAppearanceMode,
+        gameBoyShellStyle: GameBoyShellStyle,
         gameplayHDREnabled: Bool,
         textSpeed: TextSpeed = .medium,
         battleAnimation: BattleAnimation = .on,
@@ -1093,6 +1130,15 @@ public enum GameplaySidebarPropsBuilder {
     ) -> OptionsSidebarProps {
         OptionsSidebarProps(
             title: "Options",
+            shellPickerTitle: "GB Shell",
+            shellOptions: GameBoyShellStyle.allCases.map { shellStyle in
+                GameBoyShellStyleOptionProps(
+                    id: shellStyle.actionID,
+                    shellStyle: shellStyle,
+                    title: shellStyle.optionsLabel,
+                    isSelected: shellStyle == gameBoyShellStyle
+                )
+            },
             rows: [
                 .init(id: "appearanceMode", title: "Appearance", detail: appearanceMode.optionsLabel, isEnabled: true),
                 .init(id: "gameplayHDR", title: "HDR Effects", detail: gameplayHDREnabled ? "On" : "Off", isEnabled: true),
@@ -1116,6 +1162,8 @@ public enum GameplaySidebarPropsBuilder {
             "STARTER"
         case .battle:
             "BATTLE"
+        case .evolution:
+            "EVOLVE"
         case .titleMenu:
             "MENU"
         case .titleAttract:
@@ -1136,13 +1184,22 @@ public enum GameplaySidebarPropsBuilder {
     }
 
     private static func makeBadges(ownedBadgeIDs: Set<String>) -> [TrainerBadgeProps] {
-        badgeDefinitions.map { definition in
+        let normalizedBadgeIDs = Set(ownedBadgeIDs.map(normalizedBadgeID))
+        return badgeDefinitions.map { definition in
             TrainerBadgeProps(
                 id: definition.id,
                 shortLabel: definition.shortLabel,
-                isEarned: ownedBadgeIDs.contains(definition.id)
+                isEarned: normalizedBadgeIDs.contains(definition.id)
             )
         }
+    }
+
+    private static func normalizedBadgeID(_ badgeID: String) -> String {
+        badgeID
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_badge", with: "")
+            .replacingOccurrences(of: "badge", with: "")
     }
 
     private static func formatMoney(_ amount: Int) -> String {

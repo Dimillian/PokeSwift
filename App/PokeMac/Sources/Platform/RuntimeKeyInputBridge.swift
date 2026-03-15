@@ -4,18 +4,15 @@ import PokeDataModel
 
 @MainActor
 final class RuntimeKeyInputBridge {
-    private static let directionalRepeatAvailabilityPollInterval: TimeInterval = 1.0 / 240.0
-
     private var keyMonitor: Any?
-    private var repeatingDirectionalTask: Task<Void, Never>?
-    private var repeatingDirectionalKeyCode: UInt16?
+    private var pressedDirectionalButtons: [UInt16: RuntimeButton] = [:]
 
     func install(runtimeProvider: @escaping @MainActor () -> GameRuntime?) {
         guard keyMonitor == nil else { return }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
             guard let self else { return event }
             if self.shouldAllowTextInput(for: event) {
-                self.stopDirectionalRepeat()
+                self.releaseAllDirectionalButtons(runtimeProvider: runtimeProvider)
                 return event
             }
             guard let runtime = runtimeProvider() else { return event }
@@ -44,20 +41,16 @@ final class RuntimeKeyInputBridge {
                     if event.isARepeat {
                         return nil
                     }
-                    startDirectionalRepeat(
-                        keyCode: event.keyCode,
-                        button: button,
-                        runtimeProvider: runtimeProvider
-                    )
-                    runtime.handle(button: button)
+                    pressedDirectionalButtons[event.keyCode] = button
+                    runtime.setDirectionalButton(button, isPressed: true)
                     return nil
                 }
 
                 runtime.handle(button: button)
                 return nil
             case .keyUp:
-                if repeatingDirectionalKeyCode == event.keyCode {
-                    stopDirectionalRepeat()
+                if let button = pressedDirectionalButtons.removeValue(forKey: event.keyCode) {
+                    runtime.setDirectionalButton(button, isPressed: false)
                     return nil
                 }
                 return event
@@ -68,66 +61,11 @@ final class RuntimeKeyInputBridge {
     }
 
     func remove() {
-        stopDirectionalRepeat()
+        pressedDirectionalButtons.removeAll()
         if let keyMonitor {
             NSEvent.removeMonitor(keyMonitor)
             self.keyMonitor = nil
         }
-    }
-
-    private func startDirectionalRepeat(
-        keyCode: UInt16,
-        button: RuntimeButton,
-        runtimeProvider: @escaping @MainActor () -> GameRuntime?
-    ) {
-        stopDirectionalRepeat()
-        repeatingDirectionalKeyCode = keyCode
-        repeatingDirectionalTask = Task { [weak self] in
-            guard let self else { return }
-
-            let initialDelay = await MainActor.run { () -> TimeInterval in
-                guard self.repeatingDirectionalKeyCode == keyCode,
-                      let runtime = runtimeProvider(),
-                      runtime.scene == .field else {
-                    self.stopDirectionalRepeat()
-                    return 0
-                }
-
-                return runtime.fieldAnimationStepDuration
-            }
-            guard initialDelay > 0 else { return }
-            try? await Task.sleep(nanoseconds: Self.sleepNanoseconds(for: initialDelay))
-
-            while Task.isCancelled == false {
-                let nextDelay = await MainActor.run { () -> TimeInterval in
-                    guard self.repeatingDirectionalKeyCode == keyCode,
-                          let runtime = runtimeProvider(),
-                          runtime.scene == .field else {
-                        self.stopDirectionalRepeat()
-                        return 0
-                    }
-
-                    guard runtime.canAcceptFieldDirectionalInput else {
-                        return Self.directionalRepeatAvailabilityPollInterval
-                    }
-
-                    runtime.handle(button: button)
-                    return runtime.fieldAnimationStepDuration
-                }
-                guard nextDelay > 0 else { return }
-                try? await Task.sleep(nanoseconds: Self.sleepNanoseconds(for: nextDelay))
-            }
-        }
-    }
-
-    private func stopDirectionalRepeat() {
-        repeatingDirectionalTask?.cancel()
-        repeatingDirectionalTask = nil
-        repeatingDirectionalKeyCode = nil
-    }
-
-    private static func sleepNanoseconds(for duration: TimeInterval) -> UInt64 {
-        UInt64(max(0, duration) * 1_000_000_000)
     }
 
     private func shouldAllowTextInput(for event: NSEvent) -> Bool {
@@ -136,6 +74,19 @@ final class RuntimeKeyInputBridge {
         }
 
         return responder.isEditable
+    }
+
+    private func releaseAllDirectionalButtons(runtimeProvider: @escaping @MainActor () -> GameRuntime?) {
+        guard pressedDirectionalButtons.isEmpty == false else { return }
+        guard let runtime = runtimeProvider() else {
+            pressedDirectionalButtons.removeAll()
+            return
+        }
+
+        for button in pressedDirectionalButtons.values {
+            runtime.setDirectionalButton(button, isPressed: false)
+        }
+        pressedDirectionalButtons.removeAll()
     }
 }
 

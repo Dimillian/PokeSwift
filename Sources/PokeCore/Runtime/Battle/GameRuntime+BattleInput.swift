@@ -69,6 +69,23 @@ extension GameRuntime {
         battle.focusedPartyIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) ?? 0
     }
 
+    func shouldPlayBattleAdvanceConfirmSound(for battle: RuntimeBattleState) -> Bool {
+        guard battle.queuedMessages.isEmpty,
+              case .captured = battle.pendingAction else {
+            return true
+        }
+        return false
+    }
+
+    func shouldPlayBattleBagConfirmSound(for battle: RuntimeBattleState) -> Bool {
+        let bagItems = currentBattleBagItems
+        guard bagItems.indices.contains(battle.focusedBagItemIndex),
+              let item = content.item(id: bagItems[battle.focusedBagItemIndex].itemID) else {
+            return true
+        }
+        return item.battleUse != .ball
+    }
+
     func handleBattle(button: RuntimeButton) {
         if nicknameConfirmation != nil {
             handleNicknameConfirmation(button: button)
@@ -155,14 +172,18 @@ extension GameRuntime {
                 if battle.pendingPresentationBatches.isEmpty == false {
                     advanceBattlePresentationBatch(battle: &battle)
                 } else {
-                    playUIConfirmSound()
+                    if shouldPlayBattleAdvanceConfirmSound(for: battle) {
+                        playUIConfirmSound()
+                    }
                     advanceBattleText(battle: &battle)
                 }
             case .moveSelection:
                 playUIConfirmSound()
                 resolveBattleTurn(battle: &battle, gameplayState: &gameplayState)
             case .bagSelection:
-                playUIConfirmSound()
+                if shouldPlayBattleBagConfirmSound(for: battle) {
+                    playUIConfirmSound()
+                }
                 resolveBattleBagSelection(battle: &battle, gameplayState: &gameplayState)
             case .partySelection:
                 playUIConfirmSound()

@@ -10,6 +10,7 @@ public enum RuntimeScene: String, Codable, Sendable {
     case scriptedSequence
     case starterChoice
     case battle
+    case evolution
     case naming
     case oakIntro
     case titleOptions

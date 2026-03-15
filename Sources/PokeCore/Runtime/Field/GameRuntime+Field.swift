@@ -42,6 +42,51 @@ extension GameRuntime {
         }
     }
 
+    var preferredHeldFieldDirection: FacingDirection? {
+        heldFieldDirections.last
+    }
+
+    var canContinueHeldFieldMovement: Bool {
+        scene == .field &&
+            dialogueState == nil &&
+            fieldPromptState == nil &&
+            nicknameConfirmation == nil &&
+            shopState == nil &&
+            fieldHealingState == nil &&
+            fieldTransitionState == nil &&
+            scriptedMovementTask == nil &&
+            trainerEngagementTask == nil &&
+            fieldInteractionTask == nil &&
+            gameplayState?.activeScriptID == nil &&
+            gameplayState?.battle == nil
+    }
+
+    func pressHeldFieldDirection(_ direction: FacingDirection) {
+        heldFieldDirections.removeAll { $0 == direction }
+        heldFieldDirections.append(direction)
+        _ = consumeHeldFieldDirectionIfPossible()
+    }
+
+    func releaseHeldFieldDirection(_ direction: FacingDirection) {
+        heldFieldDirections.removeAll { $0 == direction }
+    }
+
+    func clearHeldFieldDirections() {
+        heldFieldDirections.removeAll()
+    }
+
+    @discardableResult
+    func consumeHeldFieldDirectionIfPossible() -> Bool {
+        guard canContinueHeldFieldMovement,
+              isFieldInputLocked == false,
+              let direction = preferredHeldFieldDirection else {
+            return false
+        }
+
+        movePlayer(in: direction)
+        return true
+    }
+
     func movePlayer(in direction: FacingDirection) {
         guard isFieldInputLocked == false else { return }
         guard var gameplayState, let map = currentMapManifest else { return }
@@ -244,6 +289,7 @@ extension GameRuntime {
         path: [FacingDirection]
     ) {
         guard let battleID else { return }
+        clearHeldFieldDirections()
         trainerEngagementTask?.cancel()
         trainerEngagementTask = Task { [weak self] in
             await self?.runTrainerEngagement(
@@ -434,6 +480,7 @@ extension GameRuntime {
               let targetMap = content.map(id: warp.targetMapID) else {
             return false
         }
+        clearHeldFieldDirections()
         let transitionKind = fieldTransitionKind(sourceMap: map, sourcePosition: warp.origin, targetMap: targetMap, targetPosition: warp.targetPosition)
         let shouldStepOut = shouldAutoStepOut(on: warp.targetPosition, in: targetMap)
 
@@ -520,6 +567,7 @@ extension GameRuntime {
     }
 
     func beginScriptedMovement(_ movement: ScriptMovementManifest) {
+        clearHeldFieldDirections()
         fieldMovementTask?.cancel()
         fieldMovementTask = nil
         idleMovementTask?.cancel()
@@ -537,6 +585,9 @@ extension GameRuntime {
             await self.sleep(seconds: self.fieldStepDuration)
             guard Task.isCancelled == false else { return }
             self.fieldMovementTask = nil
+            if self.consumeHeldFieldDirectionIfPossible() {
+                self.publishSnapshot()
+            }
         }
     }
 

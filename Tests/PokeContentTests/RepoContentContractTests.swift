@@ -39,6 +39,7 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.audioCue(id: "rival_exit")?.entryID, "alternateStart")
         XCTAssertEqual(loaded.audioCue(id: "trainer_victory")?.trackID, "MUSIC_DEFEATED_TRAINER")
         XCTAssertEqual(loaded.audioCue(id: "wild_victory")?.trackID, "MUSIC_DEFEATED_WILD_MON")
+        XCTAssertEqual(loaded.audioCue(id: "evolution")?.trackID, "MUSIC_SAFARI_ZONE")
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.waitForCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "mom_heal")?.resumeMusicAfterCompletion, true)
         XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.waitForCompletion, true)
@@ -62,6 +63,8 @@ final class RepoContentContractTests: XCTestCase {
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
+                .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
@@ -111,6 +114,17 @@ final class RepoContentContractTests: XCTestCase {
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]
         )
+        XCTAssertEqual(
+            squirtle.evolutions,
+            [
+                .init(
+                    trigger: .init(kind: .level, level: 16),
+                    targetSpeciesID: "WARTORTLE"
+                ),
+            ]
+        )
+        XCTAssertEqual(loaded.dialogue(id: "evolution_evolved")?.pages.first?.lines, ["{pokemon} evolved"])
+        XCTAssertEqual(loaded.dialogue(id: "evolution_into")?.pages.first?.lines, ["into {evolvedPokemon}!"])
         XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
         XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")
@@ -140,6 +154,17 @@ final class RepoContentContractTests: XCTestCase {
         )
         XCTAssertEqual(loaded.map(id: "PEWTER_GYM")?.defaultMusicID, "MUSIC_GYM")
         XCTAssertEqual(loaded.map(id: "ROUTE_3")?.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(
+            loaded.mapScript(for: "ROUTE_22_GATE")?.triggers.map(\.scriptID),
+            [
+                "route_22_gate_guard_blocks_northbound_upper_lane",
+                "route_22_gate_guard_blocks_northbound_lower_lane",
+            ]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "route_22_gate_guard_blocks_northbound_upper_lane")?.steps.map(\.action),
+            ["showDialogue", "movePlayer"]
+        )
         XCTAssertEqual(
             loaded.gameplayManifest.playerStart.defaultBlackoutCheckpoint,
             .init(mapID: "PALLET_TOWN", position: .init(x: 5, y: 6), facing: .down)

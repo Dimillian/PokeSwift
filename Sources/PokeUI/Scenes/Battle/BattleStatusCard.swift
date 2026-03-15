@@ -10,15 +10,15 @@ struct BattleStatusCard: View {
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
-            let horizontalPadding = max(8, size.width * 0.035)
-            let topPadding = max(4, size.height * 0.05)
-            let bottomPadding = max(4, size.height * 0.05)
-            let topInset = max(5, size.height * 0.12)
+            let horizontalPadding = max(12, size.width * 0.055)
+            let topPadding = max(6, size.height * 0.06)
+            let bottomPadding = max(8, size.height * 0.085)
+            let topInset = max(2, size.height * 0.045)
             let pixelNameScale: CGFloat = 0.9
             let pixelMetaScale: CGFloat = 0.9
-            let cardShape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+            let cardShape = RoundedRectangle(cornerRadius: 12, style: .continuous)
 
-            VStack(alignment: .leading, spacing: max(4, size.height * 0.045)) {
+            VStack(alignment: .leading, spacing: max(7, size.height * 0.065)) {
                 Color.clear
                     .frame(height: topInset)
 
@@ -86,11 +86,17 @@ struct BattleStatusCard: View {
             .background(chrome.backgroundTint, in: cardShape)
             .overlay {
                 cardShape
-                    .stroke(.white.opacity(0.2), lineWidth: 1)
-                    .padding(3)
+                    .fill(chrome.panelBaseTint)
+                    .padding(1)
+                    .blendMode(.overlay)
+                    .opacity(0.9)
+            }
+            .overlay {
+                cardShape
+                    .stroke(chrome.borderTint, lineWidth: 1.2)
             }
             .glassEffect(.regular.tint(chrome.tint), in: cardShape)
-            .shadow(color: PokeThemePalette.dialogueShadow, radius: 16, y: 8)
+            .shadow(color: chrome.shadowTint, radius: 20, y: 10)
         }
     }
 
@@ -121,18 +127,45 @@ extension BattleStatusCard {
         var tint: Color {
             switch self {
             case .enemy:
-                return PokeThemePalette.battleEnemyTint
+                return PokeThemePalette.battleEnemyTint.opacity(0.94)
             case .player:
-                return PokeThemePalette.battlePlayerTint
+                return PokeThemePalette.battlePlayerTint.opacity(0.94)
             }
         }
 
         var backgroundTint: Color {
             switch self {
             case .enemy:
-                return PokeThemePalette.battleEnemyBackground
+                return PokeThemePalette.battleEnemyBackground.opacity(0.92)
             case .player:
-                return PokeThemePalette.battlePlayerBackground
+                return PokeThemePalette.battlePlayerBackground.opacity(0.94)
+            }
+        }
+
+        var panelBaseTint: Color {
+            switch self {
+            case .enemy:
+                return Color.white.opacity(0.12)
+            case .player:
+                return Color.white.opacity(0.15)
+            }
+        }
+
+        var borderTint: Color {
+            switch self {
+            case .enemy:
+                return Color.white.opacity(0.22)
+            case .player:
+                return Color.white.opacity(0.26)
+            }
+        }
+
+        var shadowTint: Color {
+            switch self {
+            case .enemy:
+                return PokeThemePalette.dialogueShadow.opacity(0.55)
+            case .player:
+                return PokeThemePalette.dialogueShadow.opacity(0.62)
             }
         }
 

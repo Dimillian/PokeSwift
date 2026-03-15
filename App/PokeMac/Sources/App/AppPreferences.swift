@@ -7,6 +7,7 @@ import PokeUI
 @Observable
 final class AppPreferences {
     var appearanceMode: AppAppearanceMode
+    var gameBoyShellStyle: GameBoyShellStyle
     var gameplayHDREnabled: Bool
     var musicEnabled: Bool
     var textSpeed: TextSpeed
@@ -19,6 +20,7 @@ final class AppPreferences {
     init(settingsStore: AppSettingsStore = AppSettingsStore()) {
         self.settingsStore = settingsStore
         appearanceMode = settingsStore.appearanceMode
+        gameBoyShellStyle = settingsStore.gameBoyShellStyle
         gameplayHDREnabled = settingsStore.gameplayHDREnabled
         musicEnabled = settingsStore.musicEnabled
         textSpeed = settingsStore.textSpeed
@@ -38,6 +40,15 @@ final class AppPreferences {
         let nextMode = appearanceMode.nextOptionMode
         appearanceMode = nextMode
         settingsStore.appearanceMode = nextMode
+    }
+
+    func setGameBoyShellStyle(_ shellStyle: GameBoyShellStyle) {
+        guard gameBoyShellStyle != shellStyle else {
+            return
+        }
+
+        gameBoyShellStyle = shellStyle
+        settingsStore.gameBoyShellStyle = shellStyle
     }
 
     func toggleGameplayHDREnabled() {

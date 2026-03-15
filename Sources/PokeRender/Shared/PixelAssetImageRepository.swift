@@ -2,6 +2,12 @@ import CoreGraphics
 import Foundation
 import ImageIO
 
+public enum PixelAssetRenderMode: Hashable, Sendable {
+    case standard
+    case battlePokemonFront
+    case battlePokemonBack
+}
+
 enum PixelAssetMasking {
     static func applyWhiteTransparencyMask(to image: CGImage) -> CGImage? {
         let width = image.width
@@ -97,14 +103,123 @@ enum PixelAssetMasking {
     }
 }
 
+enum PixelAssetImageProcessing {
+    private static let battleCanvasSize = 56
+    private static let battleBackCropSize = 28
+
+    static func processImage(
+        _ image: CGImage,
+        whiteIsTransparent: Bool,
+        renderMode: PixelAssetRenderMode
+    ) -> CGImage? {
+        let processedImage: CGImage
+        if whiteIsTransparent {
+            guard let maskedImage = PixelAssetMasking.applyWhiteTransparencyMask(to: image) else {
+                return nil
+            }
+            processedImage = maskedImage
+        } else {
+            processedImage = image
+        }
+
+        switch renderMode {
+        case .standard:
+            return processedImage
+        case .battlePokemonFront:
+            return centeredOnBattleCanvas(processedImage)
+        case .battlePokemonBack:
+            return normalizedBattleBackSprite(processedImage)
+        }
+    }
+
+    private static func centeredOnBattleCanvas(_ image: CGImage) -> CGImage? {
+        return drawIntoCanvas(width: battleCanvasSize, height: battleCanvasSize) { context in
+            let originX = CGFloat(battleCanvasSize - image.width) / 2
+            let originY = CGFloat(battleCanvasSize - image.height) / 2
+            context.draw(
+                image,
+                in: CGRect(
+                    x: originX,
+                    y: originY,
+                    width: CGFloat(image.width),
+                    height: CGFloat(image.height)
+                )
+            )
+        }
+    }
+
+    private static func normalizedBattleBackSprite(_ image: CGImage) -> CGImage? {
+        let cropWidth = min(battleBackCropSize, image.width)
+        let cropHeight = min(battleBackCropSize, image.height)
+        guard cropWidth > 0, cropHeight > 0 else {
+            return nil
+        }
+
+        guard let croppedImage = image.cropping(
+            to: CGRect(x: 0, y: 0, width: cropWidth, height: cropHeight)
+        ) else {
+            return nil
+        }
+
+        let scaledWidth = cropWidth * 2
+        let scaledHeight = cropHeight * 2
+        guard let scaledImage = drawIntoCanvas(width: scaledWidth, height: scaledHeight, draw: { context in
+            context.draw(
+                croppedImage,
+                in: CGRect(x: 0, y: 0, width: scaledWidth, height: scaledHeight)
+            )
+        }) else {
+            return nil
+        }
+
+        guard scaledWidth != battleCanvasSize || scaledHeight != battleCanvasSize else {
+            return scaledImage
+        }
+        return centeredOnBattleCanvas(scaledImage)
+    }
+
+    private static func drawIntoCanvas(
+        width: Int,
+        height: Int,
+        draw: (CGContext) -> Void
+    ) -> CGImage? {
+        guard
+            let context = CGContext(
+                data: nil,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        else {
+            return nil
+        }
+
+        context.interpolationQuality = .none
+        context.setShouldAntialias(false)
+        context.clear(CGRect(x: 0, y: 0, width: width, height: height))
+        draw(context)
+        return context.makeImage()
+    }
+}
+
 actor PixelAssetImageRepository {
     enum CacheKey: Hashable {
-        case direct(path: String)
-        case whiteMasked(path: String)
+        case asset(
+            path: String,
+            whiteIsTransparent: Bool,
+            renderMode: PixelAssetRenderMode
+        )
 
-        init(url: URL, whiteIsTransparent: Bool) {
+        init(url: URL, whiteIsTransparent: Bool, renderMode: PixelAssetRenderMode) {
             let path = url.standardizedFileURL.path
-            self = whiteIsTransparent ? .whiteMasked(path: path) : .direct(path: path)
+            self = .asset(
+                path: path,
+                whiteIsTransparent: whiteIsTransparent,
+                renderMode: renderMode
+            )
         }
     }
 
@@ -118,8 +233,16 @@ actor PixelAssetImageRepository {
     private var cachedImages: [CacheKey: CachedImage] = [:]
     private var inFlightLoads: [CacheKey: Task<CGImage?, Never>] = [:]
 
-    func image(for url: URL, whiteIsTransparent: Bool) async -> CGImage? {
-        let key = CacheKey(url: url, whiteIsTransparent: whiteIsTransparent)
+    func image(
+        for url: URL,
+        whiteIsTransparent: Bool,
+        renderMode: PixelAssetRenderMode
+    ) async -> CGImage? {
+        let key = CacheKey(
+            url: url,
+            whiteIsTransparent: whiteIsTransparent,
+            renderMode: renderMode
+        )
 
         if let cached = cachedImages[key] {
             switch cached {
@@ -135,7 +258,11 @@ actor PixelAssetImageRepository {
         }
 
         let task = Task.detached(priority: .userInitiated) {
-            Self.loadImage(for: url, whiteIsTransparent: whiteIsTransparent)
+            Self.loadImage(
+                for: url,
+                whiteIsTransparent: whiteIsTransparent,
+                renderMode: renderMode
+            )
         }
         inFlightLoads[key] = task
 
@@ -145,16 +272,20 @@ actor PixelAssetImageRepository {
         return image
     }
 
-    nonisolated private static func loadImage(for url: URL, whiteIsTransparent: Bool) -> CGImage? {
+    nonisolated static func loadImage(
+        for url: URL,
+        whiteIsTransparent: Bool,
+        renderMode: PixelAssetRenderMode
+    ) -> CGImage? {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             return nil
         }
 
-        guard whiteIsTransparent else {
-            return image
-        }
-
-        return PixelAssetMasking.applyWhiteTransparencyMask(to: image)
+        return PixelAssetImageProcessing.processImage(
+            image,
+            whiteIsTransparent: whiteIsTransparent,
+            renderMode: renderMode
+        )
     }
 }

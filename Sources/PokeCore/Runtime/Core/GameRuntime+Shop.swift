@@ -6,6 +6,7 @@ extension GameRuntime {
 
     func openMart(id martID: String) {
         guard content.mart(id: martID) != nil else { return }
+        clearHeldFieldDirections()
         fieldPartyReorderState = nil
         shopState = RuntimeShopState(
             martID: martID,

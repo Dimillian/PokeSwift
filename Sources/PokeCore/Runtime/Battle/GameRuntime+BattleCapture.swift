@@ -56,28 +56,36 @@ extension GameRuntime {
         }
 
         let capturedPokemon = battle.enemyPokemon
+        let isNewlyOwned = gameplayState.ownedSpeciesIDs.contains(capturedPokemon.speciesID) == false
         recordOwnedSpecies(capturedPokemon.speciesID, in: &gameplayState)
-        var messages = ["All right! \(capturedPokemon.nickname) was caught!"]
 
         let addedToParty: Bool
         if gameplayState.playerParty.count < 6 {
             gameplayState.playerParty.append(capturedPokemon)
             addedToParty = true
         } else if addPokemonToCurrentBox(capturedPokemon, in: &gameplayState) {
-            messages.append("\(capturedPokemon.nickname) was transferred to BOX \(gameplayState.currentBoxIndex + 1).")
             addedToParty = false
         } else {
             battle.lastCaptureResult = .boxFull
             addItem(item.id, quantity: 1, to: &gameplayState)
-            messages = ["The #MON BOX is full! Can't use that item!"]
-            presentBattleMessages(messages, battle: &battle, pendingAction: .moveSelection)
+            presentBattleMessages(["The #MON BOX is full! Can't use that item!"], battle: &battle, pendingAction: .moveSelection)
             return .handled
         }
 
-        let action: RuntimeBattlePendingAction = addedToParty
-            ? .capturedNicknamePrompt
-            : .captured
-        presentBattleMessages(messages, battle: &battle, pendingAction: action)
+        _ = playSoundEffect(id: "SFX_CAUGHT_MON", reason: "battleText")
+        presentBattleMessages(
+            [captureCaughtMessage(pokemonName: capturedPokemon.nickname)],
+            battle: &battle,
+            pendingAction: .captured(
+                makeCaptureAftermathState(
+                    battleID: battle.battleID,
+                    capturedPokemon: capturedPokemon,
+                    gameplayState: gameplayState,
+                    isNewlyOwned: isNewlyOwned,
+                    addedToParty: addedToParty
+                )
+            )
+        )
         return .handled
     }
 
@@ -216,5 +224,63 @@ extension GameRuntime {
 
     func battleDialogueText(id: String, fallback: String) -> String {
         dialogueText(id: id, fallback: fallback)
+    }
+
+    func captureCaughtMessage(pokemonName: String) -> String {
+        formattedBattleText(
+            dialogueText(id: "capture_caught", fallback: "All right! {capturedPokemon} was caught!"),
+            replacements: captureDialogueReplacements(pokemonName: pokemonName)
+        )
+    }
+
+    func makeCaptureAftermathState(
+        battleID: String,
+        capturedPokemon: RuntimePokemonState,
+        gameplayState: GameplayState,
+        isNewlyOwned: Bool,
+        addedToParty: Bool
+    ) -> RuntimeCaptureAftermathState {
+        RuntimeCaptureAftermathState(
+            battleID: battleID,
+            speciesID: capturedPokemon.speciesID,
+            pokemonName: capturedPokemon.nickname,
+            defaultName: content.species(id: capturedPokemon.speciesID)?.displayName ?? capturedPokemon.speciesID.capitalized,
+            isNewlyOwned: isNewlyOwned,
+            addedToParty: addedToParty,
+            destinationDialogueID: captureTransferredDialogueID(gameplayState: gameplayState, addedToParty: addedToParty),
+            destinationFallbackText: captureDestinationFallbackText(
+                pokemonName: capturedPokemon.nickname,
+                gameplayState: gameplayState,
+                addedToParty: addedToParty
+            ),
+            step: .showDexEntry
+        )
+    }
+
+    func captureDialogueReplacements(pokemonName: String) -> [String: String] {
+        [
+            "capturedPokemon": pokemonName,
+        ]
+    }
+
+    func captureTransferredDialogueID(gameplayState: GameplayState, addedToParty: Bool) -> String? {
+        guard addedToParty == false else { return nil }
+        return gameplayState.activeFlags.contains("EVENT_MET_BILL")
+            ? "capture_transferred_bill_pc"
+            : "capture_transferred_someone_pc"
+    }
+
+    func captureDestinationFallbackText(
+        pokemonName: String,
+        gameplayState: GameplayState,
+        addedToParty: Bool
+    ) -> String {
+        if addedToParty {
+            return "\(pokemonName) was added to your party."
+        }
+        if gameplayState.activeFlags.contains("EVENT_MET_BILL") {
+            return "\(pokemonName) was transferred to BILL's PC!"
+        }
+        return "\(pokemonName) was transferred to someone's PC!"
     }
 }

@@ -627,12 +627,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
     public let stringValue: String?
     public let secondaryStringValue: String?
     public let intValue: Int?
+    public let badgeID: String?
     public let point: TilePoint?
     public let path: [FacingDirection]
     public let movement: ScriptMovementManifest?
     public let flagID: String?
     public let objectID: String?
     public let dialogueID: String?
+    public let successDialogueID: String?
+    public let failureDialogueID: String?
+    public let successFlagID: String?
     public let fieldInteractionID: String?
     public let battleID: String?
     public let trainerClass: String?
@@ -644,12 +648,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         stringValue: String? = nil,
         secondaryStringValue: String? = nil,
         intValue: Int? = nil,
+        badgeID: String? = nil,
         point: TilePoint? = nil,
         path: [FacingDirection] = [],
         movement: ScriptMovementManifest? = nil,
         flagID: String? = nil,
         objectID: String? = nil,
         dialogueID: String? = nil,
+        successDialogueID: String? = nil,
+        failureDialogueID: String? = nil,
+        successFlagID: String? = nil,
         fieldInteractionID: String? = nil,
         battleID: String? = nil,
         trainerClass: String? = nil,
@@ -660,12 +668,16 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         self.stringValue = stringValue
         self.secondaryStringValue = secondaryStringValue
         self.intValue = intValue
+        self.badgeID = badgeID
         self.point = point
         self.path = path
         self.movement = movement
         self.flagID = flagID
         self.objectID = objectID
         self.dialogueID = dialogueID
+        self.successDialogueID = successDialogueID
+        self.failureDialogueID = failureDialogueID
+        self.successFlagID = successFlagID
         self.fieldInteractionID = fieldInteractionID
         self.battleID = battleID
         self.trainerClass = trainerClass
@@ -993,6 +1005,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let baseSpeed: Int
     public let baseSpecial: Int
     public let startingMoves: [String]
+    public let evolutions: [EvolutionManifest]
     public let levelUpLearnset: [LevelUpMoveManifest]
     public let crySoundEffectID: String?
     public let cryPitch: Int?
@@ -1019,6 +1032,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed: Int,
         baseSpecial: Int,
         startingMoves: [String],
+        evolutions: [EvolutionManifest] = [],
         levelUpLearnset: [LevelUpMoveManifest] = [],
         crySoundEffectID: String? = nil,
         cryPitch: Int? = nil,
@@ -1044,6 +1058,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.baseSpeed = baseSpeed
         self.baseSpecial = baseSpecial
         self.startingMoves = startingMoves
+        self.evolutions = evolutions
         self.levelUpLearnset = levelUpLearnset
         self.crySoundEffectID = crySoundEffectID
         self.cryPitch = cryPitch
@@ -1071,6 +1086,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case baseSpeed
         case baseSpecial
         case startingMoves
+        case evolutions
         case levelUpLearnset
         case crySoundEffectID
         case cryPitch
@@ -1099,6 +1115,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         baseSpeed = try container.decode(Int.self, forKey: .baseSpeed)
         baseSpecial = try container.decode(Int.self, forKey: .baseSpecial)
         startingMoves = try container.decode([String].self, forKey: .startingMoves)
+        evolutions = try container.decodeIfPresent([EvolutionManifest].self, forKey: .evolutions) ?? []
         levelUpLearnset = try container.decodeIfPresent([LevelUpMoveManifest].self, forKey: .levelUpLearnset) ?? []
         crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
         cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
@@ -1109,6 +1126,41 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         heightInches = try container.decodeIfPresent(Int.self, forKey: .heightInches)
         weightTenths = try container.decodeIfPresent(Int.self, forKey: .weightTenths)
         pokedexEntryText = try container.decodeIfPresent(String.self, forKey: .pokedexEntryText)
+    }
+}
+
+public enum EvolutionTriggerKind: String, Codable, Equatable, Sendable {
+    case level
+    case item
+    case trade
+}
+
+public struct EvolutionTriggerManifest: Codable, Equatable, Sendable {
+    public let kind: EvolutionTriggerKind
+    public let level: Int?
+    public let itemID: String?
+    public let minimumLevel: Int?
+
+    public init(
+        kind: EvolutionTriggerKind,
+        level: Int? = nil,
+        itemID: String? = nil,
+        minimumLevel: Int? = nil
+    ) {
+        self.kind = kind
+        self.level = level.map { max(1, $0) }
+        self.itemID = itemID
+        self.minimumLevel = minimumLevel.map { max(1, $0) }
+    }
+}
+
+public struct EvolutionManifest: Codable, Equatable, Sendable {
+    public let trigger: EvolutionTriggerManifest
+    public let targetSpeciesID: String
+
+    public init(trigger: EvolutionTriggerManifest, targetSpeciesID: String) {
+        self.trigger = trigger
+        self.targetSpeciesID = targetSpeciesID
     }
 }
 
@@ -1369,6 +1421,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
     public let preventsBlackoutOnLoss: Bool
     public let completionFlagID: String
     public let postBattleScriptID: String?
+    public let runsPostBattleScriptOnLoss: Bool
 
     public init(
         id: String,
@@ -1384,7 +1437,8 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         healsPartyAfterBattle: Bool,
         preventsBlackoutOnLoss: Bool,
         completionFlagID: String,
-        postBattleScriptID: String? = nil
+        postBattleScriptID: String? = nil,
+        runsPostBattleScriptOnLoss: Bool = false
     ) {
         self.id = id
         self.trainerClass = trainerClass
@@ -1400,6 +1454,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         self.preventsBlackoutOnLoss = preventsBlackoutOnLoss
         self.completionFlagID = completionFlagID
         self.postBattleScriptID = postBattleScriptID
+        self.runsPostBattleScriptOnLoss = runsPostBattleScriptOnLoss
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -1417,6 +1472,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         case preventsBlackoutOnLoss
         case completionFlagID
         case postBattleScriptID
+        case runsPostBattleScriptOnLoss
     }
 
     public init(from decoder: Decoder) throws {
@@ -1435,6 +1491,7 @@ public struct TrainerBattleManifest: Codable, Equatable, Sendable {
         preventsBlackoutOnLoss = try container.decode(Bool.self, forKey: .preventsBlackoutOnLoss)
         completionFlagID = try container.decode(String.self, forKey: .completionFlagID)
         postBattleScriptID = try container.decodeIfPresent(String.self, forKey: .postBattleScriptID)
+        runsPostBattleScriptOnLoss = try container.decodeIfPresent(Bool.self, forKey: .runsPostBattleScriptOnLoss) ?? false
     }
 }
 

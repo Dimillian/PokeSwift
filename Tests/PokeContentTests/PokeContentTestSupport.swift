@@ -63,6 +63,7 @@ enum PokeContentTestSupport {
                     .init(id: "trainer_intro_male", assetID: "MUSIC_MEET_MALE_TRAINER"),
                     .init(id: "trainer_intro_female", assetID: "MUSIC_MEET_FEMALE_TRAINER"),
                     .init(id: "trainer_intro_evil", assetID: "MUSIC_MEET_EVIL_TRAINER"),
+                    .init(id: "evolution", assetID: "MUSIC_SAFARI_ZONE"),
                     .init(
                         id: "mom_heal",
                         assetID: "MUSIC_PKMN_HEALED",
@@ -108,13 +109,30 @@ enum PokeContentTestSupport {
                         entries: [.init(id: "default", sourceLabel: "Music_PalletTown_Ch1", playbackMode: .looping, channels: [])]
                     ),
                     .init(
+                        id: "MUSIC_SAFARI_ZONE",
+                        sourceLabel: "Music_SafariZone",
+                        sourceFile: "audio/music/safarizone.asm",
+                        entries: [.init(id: "default", sourceLabel: "Music_SafariZone_Ch1", playbackMode: .looping, channels: [])]
+                    ),
+                    .init(
                         id: "MUSIC_PKMN_HEALED",
                         sourceLabel: "Music_PkmnHealed",
                         sourceFile: "audio/music/pkmnhealed.asm",
                         entries: [.init(id: "default", sourceLabel: "Music_PkmnHealed_Ch1", playbackMode: .oneShot, channels: [])]
                     ),
                 ],
-                soundEffects: []
+                soundEffects: [
+                    .init(
+                        id: "SFX_GET_ITEM_2",
+                        sourceLabel: "SFX_Get_Item_2",
+                        sourceFile: "audio/sfx/get_item_2.asm",
+                        bank: 2,
+                        priority: 0,
+                        order: 0,
+                        requestedChannels: [5, 6, 7],
+                        channels: []
+                    ),
+                ]
             )
         ).write(to: root.appendingPathComponent("audio_manifest.json"))
 
@@ -200,7 +218,20 @@ enum PokeContentTestSupport {
                     )
                 ),
             ],
-            dialogues: [.init(id: "hello", pages: [.init(lines: ["Hi"], waitsForPrompt: true)])],
+            dialogues: [
+                .init(id: "hello", pages: [.init(lines: ["Hi"], waitsForPrompt: true)]),
+                .init(id: "evolution_evolved", pages: [.init(lines: ["{pokemon} evolved"], waitsForPrompt: true)]),
+                .init(
+                    id: "evolution_into",
+                    pages: [.init(
+                        lines: ["into {evolvedPokemon}!"],
+                        waitsForPrompt: true,
+                        events: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+                    )]
+                ),
+                .init(id: "evolution_is_evolving", pages: [.init(lines: ["What? {pokemon}", "is evolving!"], waitsForPrompt: true)]),
+                .init(id: "evolution_stopped", pages: [.init(lines: ["Huh? {pokemon}", "stopped evolving!"], waitsForPrompt: true)]),
+            ],
             fieldInteractions: [],
             eventFlags: .init(flags: [.init(id: "EVENT_GOT_STARTER", sourceConstant: "EVENT_GOT_STARTER")]),
             mapScripts: [.init(mapID: "REDS_HOUSE_2F", triggers: [.init(id: "intro", scriptID: "oak_intro", conditions: [])])],
@@ -222,6 +253,12 @@ enum PokeContentTestSupport {
                     baseSpeed: 43,
                     baseSpecial: 50,
                     startingMoves: ["TACKLE", "TAIL_WHIP"],
+                    evolutions: [
+                        .init(
+                            trigger: .init(kind: .level, level: 16),
+                            targetSpeciesID: "WARTORTLE"
+                        ),
+                    ],
                     levelUpLearnset: [
                         .init(level: 8, moveID: "BUBBLE"),
                         .init(level: 15, moveID: "WATER_GUN"),

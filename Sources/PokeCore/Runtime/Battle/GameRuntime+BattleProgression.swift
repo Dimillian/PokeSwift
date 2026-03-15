@@ -3,6 +3,7 @@ import PokeDataModel
 struct BattleExperienceRewardResult {
     let messages: [String]
     let pendingLearnMove: RuntimeBattleLearnMoveState?
+    let pendingEvolution: RuntimePendingEvolutionState?
 }
 
 struct LevelUpMoveProcessingResult {
@@ -90,6 +91,7 @@ extension GameRuntime {
                 pendingAction: .continueLevelUpResolution,
                 learnMoveState: rewardResult.pendingLearnMove,
                 rewardContinuation: rewardContinuation,
+                pendingEvolution: rewardResult.pendingEvolution,
                 playerPokemon: updatedPlayer
             )
         )
@@ -113,7 +115,7 @@ extension GameRuntime {
             speciesID: baseSpeciesID
         )
         guard gainedExperience > 0 || updatedStatExp != pokemon.statExp else {
-            return BattleExperienceRewardResult(messages: [], pendingLearnMove: nil)
+            return BattleExperienceRewardResult(messages: [], pendingLearnMove: nil, pendingEvolution: nil)
         }
 
         var messages = ["\(pokemon.nickname) gained \(gainedExperience) EXP!"]
@@ -224,10 +226,38 @@ extension GameRuntime {
             )
         )
         messages.append(contentsOf: learnMoveResult.messages)
+        let pendingEvolution = pendingLevelEvolution(
+            speciesID: baseSpeciesID,
+            from: previousLevel,
+            to: updatedLevel
+        )
 
         return BattleExperienceRewardResult(
             messages: messages,
-            pendingLearnMove: learnMoveResult.pendingLearnMove
+            pendingLearnMove: learnMoveResult.pendingLearnMove,
+            pendingEvolution: pendingEvolution
+        )
+    }
+
+    func pendingLevelEvolution(
+        speciesID: String,
+        from previousLevel: Int,
+        to updatedLevel: Int
+    ) -> RuntimePendingEvolutionState? {
+        guard updatedLevel > previousLevel,
+              let species = content.species(id: speciesID),
+              let evolution = species.evolutions.first(where: {
+                  $0.trigger.kind == .level &&
+                  ($0.trigger.level ?? 0) > previousLevel &&
+                  ($0.trigger.level ?? 0) <= updatedLevel
+              }) else {
+            return nil
+        }
+
+        return RuntimePendingEvolutionState(
+            partyIndex: 0,
+            originalSpeciesID: speciesID,
+            targetSpeciesID: evolution.targetSpeciesID
         )
     }
 

@@ -41,6 +41,40 @@ public struct GameplayBattleSceneState: Equatable, Sendable {
     }
 }
 
+public struct GameplayEvolutionSceneState: Equatable, Sendable {
+    public let party: PartyTelemetry?
+    public let phase: String
+    public let animationStep: Int
+    public let showsEvolvedSprite: Bool
+    public let textLines: [String]
+    public let originalSpeciesID: String
+    public let evolvedSpeciesID: String
+    public let originalDisplayName: String
+    public let evolvedDisplayName: String
+
+    public init(
+        party: PartyTelemetry?,
+        phase: String,
+        animationStep: Int,
+        showsEvolvedSprite: Bool,
+        textLines: [String],
+        originalSpeciesID: String,
+        evolvedSpeciesID: String,
+        originalDisplayName: String,
+        evolvedDisplayName: String
+    ) {
+        self.party = party
+        self.phase = phase
+        self.animationStep = animationStep
+        self.showsEvolvedSprite = showsEvolvedSprite
+        self.textLines = textLines
+        self.originalSpeciesID = originalSpeciesID
+        self.evolvedSpeciesID = evolvedSpeciesID
+        self.originalDisplayName = originalDisplayName
+        self.evolvedDisplayName = evolvedDisplayName
+    }
+}
+
 extension GameRuntime {
     public func currentFieldSceneState() -> GameplayFieldSceneState {
         GameplayFieldSceneState(
@@ -58,6 +92,23 @@ extension GameRuntime {
         GameplayBattleSceneState(
             party: makePartyTelemetry(),
             battle: makeBattleTelemetry()
+        )
+    }
+
+    public func currentEvolutionSceneState() -> GameplayEvolutionSceneState? {
+        guard let evolutionState else { return nil }
+        return GameplayEvolutionSceneState(
+            party: makePartyTelemetry(),
+            phase: evolutionState.phase.rawValue,
+            animationStep: evolutionState.animationStep,
+            showsEvolvedSprite: evolutionState.showsEvolvedSprite,
+            textLines: currentEvolutionDialogueLines(),
+            originalSpeciesID: evolutionState.originalPokemon.speciesID,
+            evolvedSpeciesID: evolutionState.evolvedPokemon.speciesID,
+            originalDisplayName: content.species(id: evolutionState.originalPokemon.speciesID)?.displayName
+                ?? evolutionState.originalPokemon.speciesID.capitalized,
+            evolvedDisplayName: content.species(id: evolutionState.evolvedPokemon.speciesID)?.displayName
+                ?? evolutionState.evolvedPokemon.speciesID.capitalized
         )
     }
 

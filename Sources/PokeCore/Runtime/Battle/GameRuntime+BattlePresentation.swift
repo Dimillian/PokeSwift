@@ -266,9 +266,61 @@ extension GameRuntime {
         return max(0, base * scale)
     }
 
-    func cancelBattlePresentation() {
+    private func cancelBattlePresentationTask() {
         battlePresentationTask?.cancel()
         battlePresentationTask = nil
+    }
+
+    private func cancelBattlePresentationStagedSoundTasks() {
+        for task in battlePresentationStagedSoundTasks.values {
+            task.cancel()
+        }
+        battlePresentationStagedSoundTasks.removeAll()
+    }
+
+    func cancelBattlePresentation() {
+        cancelBattlePresentationTask()
+        cancelBattlePresentationStagedSoundTasks()
+    }
+
+    func scheduleBattlePresentationStagedSoundEffect(
+        _ stagedSoundEffectRequest: RuntimeStagedSoundEffectRequest,
+        battleID: String,
+        stage: BattlePresentationStage
+    ) {
+        let taskID = UUID()
+        let task = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(stagedSoundEffectRequest.delay * 1_000_000_000))
+            guard Task.isCancelled == false else { return }
+            self?.playBattlePresentationStagedSoundEffect(
+                taskID: taskID,
+                stagedSoundEffectRequest: stagedSoundEffectRequest,
+                battleID: battleID,
+                stage: stage
+            )
+        }
+        battlePresentationStagedSoundTasks[taskID] = task
+    }
+
+    func playBattlePresentationStagedSoundEffect(
+        taskID: UUID,
+        stagedSoundEffectRequest: RuntimeStagedSoundEffectRequest,
+        battleID: String,
+        stage: BattlePresentationStage
+    ) {
+        defer {
+            battlePresentationStagedSoundTasks.removeValue(forKey: taskID)
+        }
+
+        guard let activeBattle = gameplayState?.battle,
+              activeBattle.battleID == battleID else {
+            return
+        }
+
+        _ = playSoundEffect(
+            stagedSoundEffectRequest.request,
+            reason: "battlePresentation.\(stage.rawValue).delayed"
+        )
     }
 
     func updateBattlePresentation(
@@ -297,7 +349,7 @@ extension GameRuntime {
     }
 
     func scheduleBattlePresentation(_ beats: [RuntimeBattlePresentationBeat], battleID: String) {
-        cancelBattlePresentation()
+        cancelBattlePresentationTask()
         guard beats.isEmpty == false else { return }
 
         battlePresentationTask = Task { [self] in
@@ -378,6 +430,9 @@ extension GameRuntime {
         if let rewardContinuation = beat.rewardContinuation {
             battle.rewardContinuation = rewardContinuation
         }
+        if let pendingEvolution = beat.pendingEvolution {
+            battle.pendingEvolution = pendingEvolution
+        }
         if let playerPokemon = beat.playerPokemon {
             battle.playerPokemon = playerPokemon
         }
@@ -398,6 +453,13 @@ extension GameRuntime {
             _ = playSoundEffect(
                 soundEffectRequest,
                 reason: "battlePresentation.\(beat.stage.rawValue)"
+            )
+        }
+        for stagedSoundEffectRequest in beat.stagedSoundEffectRequests {
+            scheduleBattlePresentationStagedSoundEffect(
+                stagedSoundEffectRequest,
+                battleID: battleID,
+                stage: beat.stage
             )
         }
         if let audioCueID = beat.audioCueID {
@@ -844,16 +906,11 @@ extension GameRuntime {
                 break
             }
             finishWildBattleEscape()
-        case .captured:
-            if awardPayDayIfNeeded(battle: &battle, pendingAction: .captured) {
+        case let .captured(aftermath):
+            if awardPayDayIfNeeded(battle: &battle, pendingAction: .captured(aftermath)) {
                 break
             }
-            finishWildBattleCapture(battle: battle)
-        case .capturedNicknamePrompt:
-            if awardPayDayIfNeeded(battle: &battle, pendingAction: .capturedNicknamePrompt) {
-                break
-            }
-            beginNicknameConfirmationAfterCapture(battle: battle)
+            beginCaptureAftermath(battle: battle, aftermath: aftermath)
         case let .enterTrainerAboutToUseDecision(nextIndex):
             enterTrainerAboutToUseDecision(battle: &battle, nextIndex: nextIndex)
         case let .completeTrainerVictory(payout):
@@ -955,8 +1012,11 @@ extension GameRuntime {
                     pendingAction: pendingAction,
                     enemyParty: battle.enemyParty,
                     enemyActiveIndex: nextIndex,
-                    soundEffectRequest: speciesCrySoundEffectRequest(speciesID: nextEnemy.speciesID)
-                ),
+                stagedSoundEffectRequests: sendOutSoundEffectRequests(
+                    side: .enemy,
+                    speciesID: nextEnemy.speciesID
+                )
+            ),
             ],
             battleID: battle.battleID
         )
@@ -977,7 +1037,10 @@ extension GameRuntime {
                 phase: .turnText,
                 pendingAction: pendingAction,
                 playerPokemon: playerPokemon,
-                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: playerPokemon.speciesID)
+                stagedSoundEffectRequests: sendOutSoundEffectRequests(
+                    side: .player,
+                    speciesID: playerPokemon.speciesID
+                )
             ),
         ]
     }
@@ -987,8 +1050,8 @@ extension GameRuntime {
     ) -> [[RuntimeBattlePresentationBeat]] {
         [
             [
-            .init(
-                delay: battlePresentationDelay(base: 0.34),
+                .init(
+                    delay: battlePresentationDelay(base: 0.34),
                     stage: .enemySendOut,
                     uiVisibility: .visible,
                     activeSide: .enemy,
@@ -996,9 +1059,12 @@ extension GameRuntime {
                     message: trainerSentOutText(trainerName: battle.trainerName, pokemon: battle.enemyPokemon),
                     phase: .turnText,
                     enemyParty: battle.enemyParty,
-                enemyActiveIndex: battle.enemyActiveIndex,
-                soundEffectRequest: speciesCrySoundEffectRequest(speciesID: battle.enemyPokemon.speciesID)
-            ),
+                    enemyActiveIndex: battle.enemyActiveIndex,
+                    stagedSoundEffectRequests: sendOutSoundEffectRequests(
+                        side: .enemy,
+                        speciesID: battle.enemyPokemon.speciesID
+                    )
+                ),
             ],
             makePlayerSendOutBatch(
                 playerPokemon: battle.playerPokemon,

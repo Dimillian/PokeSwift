@@ -25,6 +25,7 @@ struct BattleStageView: View {
                 sendOutPoofSpriteURL: props.sendOutPoofSpriteURL,
                 playerSpriteURL: props.playerSpriteURL,
                 enemySpriteURL: props.enemySpriteURL,
+                displayStyle: fieldDisplayStyle,
                 presentation: props.presentation
             )
         } footer: {

@@ -45,6 +45,7 @@ private extension GameplayScene {
         ZStack {
             fieldStageLayer
             battleStageLayer
+            evolutionStageLayer
         }
     }
 
@@ -68,9 +69,24 @@ private extension GameplayScene {
         }
     }
 
+    @ViewBuilder
+    var evolutionStageLayer: some View {
+        if case let .evolution(evolutionProps) = props.viewport {
+            EvolutionStageView(
+                props: evolutionProps,
+                fieldDisplayStyle: fieldDisplayStyle
+            )
+        }
+    }
+
     func handleSidebarAction(_ actionID: String) {
         if actionID == "load" {
             isLoadConfirmationPresented = true
+            return
+        }
+
+        if let shellStyle = GameBoyShellStyle(actionID: actionID) {
+            preferences.setGameBoyShellStyle(shellStyle)
             return
         }
 

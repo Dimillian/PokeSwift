@@ -14,120 +14,180 @@ struct BattleViewportCanvas: View {
     let sendOutPoofSpriteURL: URL?
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
+    let displayStyle: FieldDisplayStyle
+    let hdrBoost: Float
     let presentation: BattlePresentationTelemetry
 
     @State private var sendOutVisualState: BattleSendOutVisualState = .idle
+    @State private var activeSendOutAnimationKey: String?
 
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
             let layout = BattleViewportLayout(size: size)
+            let displayScale = viewportScale(for: size)
 
             ZStack(alignment: .topLeading) {
-                battleBackground
-
-                BattleStatusCard(
-                    pokemon: enemyPokemon,
-                    chrome: .enemy,
-                    showsExperience: false,
-                    presentation: presentation
-                )
-                .frame(width: layout.enemyCardSize.width, height: layout.enemyCardSize.height)
-                .position(x: layout.enemyCardCenter.x, y: layout.enemyCardCenter.y)
-                .opacity(enemyHudOpacity)
-                .offset(y: enemyHudOffset)
-                .animation(hudAnimation, value: presentation.revision)
-
-                BattleStatusCard(
-                    pokemon: playerPokemon,
-                    chrome: .player,
-                    showsExperience: true,
-                    presentation: presentation
-                )
-                .frame(width: layout.playerCardSize.width, height: layout.playerCardSize.height)
-                .position(x: layout.playerCardCenter.x, y: layout.playerCardCenter.y)
-                .opacity(playerHudOpacity)
-                .offset(y: playerHudOffset)
-                .animation(hudAnimation, value: presentation.revision)
-
-                if let trainerSpriteURL, shouldShowEnemyTrainer {
-                    PixelAssetView(
-                        url: trainerSpriteURL,
-                        label: "Trainer",
-                        whiteIsTransparent: true
-                    )
-                    .frame(width: layout.enemyTrainerSize.width, height: layout.enemyTrainerSize.height)
-                    .position(enemyTrainerCenter(in: layout))
-                    .scaleEffect(trainerScale)
-                    .opacity(trainerOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
-                }
-
-                if let playerTrainerSpriteURL, shouldShowPlayerTrainer {
-                    PixelAssetView(
-                        url: playerTrainerSpriteURL,
-                        label: "Player Trainer",
-                        whiteIsTransparent: true
-                    )
-                    .frame(width: layout.playerTrainerSize.width, height: layout.playerTrainerSize.height)
-                    .position(playerTrainerCenter(in: layout))
-                    .scaleEffect(trainerScale)
-                    .opacity(trainerOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
-                }
-
-                if let enemySpriteURL, shouldShowEnemyPokemon {
-                    PixelAssetView(
-                        url: enemySpriteURL,
-                        label: enemyPokemon.displayName,
-                        whiteIsTransparent: true
-                    )
-                    .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
-                    .position(enemySpriteCenter(in: layout))
-                    .scaleEffect(enemySpriteScale, anchor: pokemonScaleAnchor(for: .enemy))
-                    .rotationEffect(enemyPokemonRotation)
-                    .opacity(enemyPokemonOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
-                }
-
-                if let sendOutPoofSpriteURL, let sendOutPoofFrame {
-                    BattleSendOutPoofView(
-                        url: sendOutPoofSpriteURL,
-                        frame: sendOutPoofFrame,
-                        label: "Send Out Poof",
-                        whiteIsTransparent: true
-                    )
-                    .frame(width: layout.sendOutPoofSize.width, height: layout.sendOutPoofSize.height)
-                    .position(sendOutPoofCenter(in: layout))
-                    .opacity(sendOutPoofOpacity)
-                }
-
-                if let playerSpriteURL, shouldShowPlayerPokemon {
-                    PixelAssetView(
-                        url: playerSpriteURL,
-                        label: playerPokemon.displayName,
-                        whiteIsTransparent: true
-                    )
-                    .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
-                    .position(playerSpriteCenter(in: layout))
-                    .scaleEffect(playerSpriteScale, anchor: pokemonScaleAnchor(for: .player))
-                    .rotationEffect(playerPokemonRotation)
-                    .opacity(playerPokemonOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
-                }
-
-                if shouldShowPokeball {
-                    BattlePokeballToken()
-                        .frame(width: max(8, size.width * 0.05), height: max(8, size.width * 0.05))
-                        .position(pokeballCenter(in: layout))
-                        .opacity(currentSendOutState.ballOpacity)
-                        .animation(spriteAnimation, value: presentation.revision)
-                }
+                battlefieldLayer(layout: layout, size: size, displayScale: displayScale)
+                hudLayer(layout: layout)
             }
+            .battleTransitionEffect(
+                displayScale: displayScale,
+                presentation: presentation
+            )
             .task(id: sendOutAnimationTriggerKey) {
                 await runSendOutAnimationSequence()
             }
         }
+    }
+
+    @ViewBuilder
+    private func battlefieldLayer(
+        layout: BattleViewportLayout,
+        size: CGSize,
+        displayScale: CGFloat
+    ) -> some View {
+        ZStack(alignment: .topLeading) {
+            battleBackground
+
+            if let trainerSpriteURL, shouldShowEnemyTrainer {
+                PixelAssetView(
+                    url: trainerSpriteURL,
+                    label: "Trainer",
+                    whiteIsTransparent: true
+                )
+                .frame(width: layout.enemyTrainerSize.width, height: layout.enemyTrainerSize.height)
+                .position(enemyTrainerCenter(in: layout))
+                .scaleEffect(trainerScale)
+                .opacity(trainerOpacity)
+                .animation(spriteAnimation, value: presentation.revision)
+            }
+
+            if let playerTrainerSpriteURL, shouldShowPlayerTrainer {
+                PixelAssetView(
+                    url: playerTrainerSpriteURL,
+                    label: "Player Trainer",
+                    whiteIsTransparent: true
+                )
+                .frame(width: layout.playerTrainerSize.width, height: layout.playerTrainerSize.height)
+                .position(playerTrainerCenter(in: layout))
+                .scaleEffect(trainerScale)
+                .opacity(trainerOpacity)
+                .animation(spriteAnimation, value: presentation.revision)
+            }
+
+            if let enemySpriteURL, shouldShowEnemyPokemon {
+                PixelAssetView(
+                    url: enemySpriteURL,
+                    label: enemyPokemon.displayName,
+                    whiteIsTransparent: true,
+                    renderMode: .battlePokemonFront
+                )
+                .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
+                .scaleEffect(
+                    enemySpriteScale,
+                    anchor: Self.pokemonScaleAnchor(
+                        stage: presentation.stage,
+                        activeSide: presentation.activeSide,
+                        side: .enemy
+                    )
+                )
+                .rotationEffect(enemyPokemonRotation)
+                .opacity(enemyPokemonOpacity)
+                .position(enemySpriteCenter(in: layout))
+                .animation(
+                    Self.usesImplicitPokemonRevisionAnimation(
+                        stage: presentation.stage,
+                        activeSide: presentation.activeSide,
+                        side: .enemy
+                    ) ? spriteAnimation : nil,
+                    value: presentation.revision
+                )
+            }
+
+            if let sendOutPoofSpriteURL, let sendOutPoofFrame {
+                BattleSendOutPoofView(
+                    url: sendOutPoofSpriteURL,
+                    frame: sendOutPoofFrame,
+                    label: "Send Out Poof",
+                    whiteIsTransparent: true
+                )
+                .frame(width: layout.sendOutPoofSize.width, height: layout.sendOutPoofSize.height)
+                .position(sendOutPoofCenter(in: layout))
+                .opacity(sendOutPoofOpacity)
+            }
+
+            if let playerSpriteURL, shouldShowPlayerPokemon {
+                PixelAssetView(
+                    url: playerSpriteURL,
+                    label: playerPokemon.displayName,
+                    whiteIsTransparent: true,
+                    renderMode: .battlePokemonBack
+                )
+                .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
+                .scaleEffect(
+                    playerSpriteScale,
+                    anchor: Self.pokemonScaleAnchor(
+                        stage: presentation.stage,
+                        activeSide: presentation.activeSide,
+                        side: .player
+                    )
+                )
+                .rotationEffect(playerPokemonRotation)
+                .opacity(playerPokemonOpacity)
+                .position(playerSpriteCenter(in: layout))
+                .animation(
+                    Self.usesImplicitPokemonRevisionAnimation(
+                        stage: presentation.stage,
+                        activeSide: presentation.activeSide,
+                        side: .player
+                    ) ? spriteAnimation : nil,
+                    value: presentation.revision
+                )
+            }
+
+            if shouldShowPokeball {
+                BattlePokeballToken()
+                    .frame(width: max(8, size.width * 0.05), height: max(8, size.width * 0.05))
+                    .position(pokeballCenter(in: layout))
+                    .opacity(currentSendOutState.ballOpacity)
+                    .animation(spriteAnimation, value: presentation.revision)
+            }
+        }
+        .frame(width: size.width, height: size.height, alignment: .topLeading)
+        .gameplayScreenEffect(
+            displayStyle: displayStyle,
+            displayScale: displayScale,
+            battlePresentation: presentation,
+            hdrBoost: hdrBoost
+        )
+    }
+
+    @ViewBuilder
+    private func hudLayer(layout: BattleViewportLayout) -> some View {
+        BattleStatusCard(
+            pokemon: enemyPokemon,
+            chrome: .enemy,
+            showsExperience: false,
+            presentation: presentation
+        )
+        .frame(width: layout.enemyCardSize.width, height: layout.enemyCardSize.height)
+        .position(x: layout.enemyCardCenter.x, y: layout.enemyCardCenter.y)
+        .opacity(enemyHudOpacity)
+        .offset(y: enemyHudOffset)
+        .animation(hudAnimation, value: presentation.revision)
+
+        BattleStatusCard(
+            pokemon: playerPokemon,
+            chrome: .player,
+            showsExperience: true,
+            presentation: presentation
+        )
+        .frame(width: layout.playerCardSize.width, height: layout.playerCardSize.height)
+        .position(x: layout.playerCardCenter.x, y: layout.playerCardCenter.y)
+        .opacity(playerHudOpacity)
+        .offset(y: playerHudOffset)
+        .animation(hudAnimation, value: presentation.revision)
     }
 
     private var isTrainerBattle: Bool {
@@ -204,7 +264,12 @@ struct BattleViewportCanvas: View {
     }
 
     private var currentSendOutState: BattleSendOutVisualState {
-        presentation.stage == .enemySendOut ? sendOutVisualState : .idle
+        Self.resolvedSendOutState(
+            stage: presentation.stage,
+            sendOutVisualState: sendOutVisualState,
+            animationTriggerKey: sendOutAnimationTriggerKey,
+            activeAnimationKey: activeSendOutAnimationKey
+        )
     }
 
     private var sendOutPoofFrame: BattleSendOutPoofFrame? {
@@ -494,20 +559,51 @@ struct BattleViewportCanvas: View {
         return CGPoint(x: x, y: y)
     }
 
-    private func pokemonScaleAnchor(for side: BattlePresentationSide) -> UnitPoint {
-        if presentation.stage == .enemySendOut, presentation.activeSide == side {
-            return .bottom
+    static func pokemonScaleAnchor(
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        side: BattlePresentationSide
+    ) -> UnitPoint {
+        if stage == .enemySendOut, activeSide == side {
+            // Keep the reveal locked to the settled battlefield position so the
+            // sprite only scales up instead of drifting as it appears.
+            return .center
         }
         return .center
+    }
+
+    static func usesImplicitPokemonRevisionAnimation(
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        side: BattlePresentationSide
+    ) -> Bool {
+        // Send-out reveal beats are driven by local sendOutVisualState. Letting
+        // the stage revision animate the whole sprite causes SwiftUI to tween
+        // more than just scale/opacity, which reads as the Pokemon drifting.
+        !(stage == .enemySendOut && activeSide == side)
+    }
+
+    static func resolvedSendOutState(
+        stage: BattlePresentationStage,
+        sendOutVisualState: BattleSendOutVisualState,
+        animationTriggerKey: String,
+        activeAnimationKey: String?
+    ) -> BattleSendOutVisualState {
+        guard stage == .enemySendOut, activeAnimationKey == animationTriggerKey else {
+            return .idle
+        }
+        return sendOutVisualState
     }
 
     @MainActor
     private func runSendOutAnimationSequence() async {
         guard presentation.stage == .enemySendOut else {
+            activeSendOutAnimationKey = nil
             sendOutVisualState = .idle
             return
         }
 
+        activeSendOutAnimationKey = sendOutAnimationTriggerKey
         sendOutVisualState = .toss(progress: 0)
 
         withAnimation(.linear(duration: BattleSendOutAnimationTimeline.tossDuration)) {
@@ -523,13 +619,19 @@ struct BattleViewportCanvas: View {
             guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.poofFrameDuration) else { return }
         }
 
-        sendOutVisualState = .revealStep1
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealStep1Duration)) {
+            sendOutVisualState = .revealStep1
+        }
         guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep1Duration) else { return }
 
-        sendOutVisualState = .revealStep2
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealStep2Duration)) {
+            sendOutVisualState = .revealStep2
+        }
         guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.revealStep2Duration) else { return }
 
-        sendOutVisualState = .revealFinal
+        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.revealFinalDuration)) {
+            sendOutVisualState = .revealFinal
+        }
     }
 
     private func sleepForSendOutStep(_ duration: TimeInterval) async -> Bool {
@@ -539,20 +641,8 @@ struct BattleViewportCanvas: View {
     }
 
     private var battleBackground: some View {
-        ZStack {
-            Rectangle()
-                .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
-
-            LinearGradient(
-                colors: [
-                    Color.white.opacity(0.03),
-                    Color.clear,
-                    Color.black.opacity(0.04),
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
+        Rectangle()
+            .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
     }
 
     private var spriteAnimation: Animation? {
@@ -573,6 +663,20 @@ struct BattleViewportCanvas: View {
         default:
             return .easeInOut(duration: 0.24)
         }
+    }
+
+    private func viewportScale(for size: CGSize) -> CGFloat {
+        let rawScale = min(
+            size.width / CGFloat(FieldSceneRenderer.viewportPixelSize.width),
+            size.height / CGFloat(FieldSceneRenderer.viewportPixelSize.height)
+        )
+        guard rawScale.isFinite, rawScale > 0 else {
+            return 1
+        }
+        if rawScale >= 1 {
+            return max(1, floor(rawScale))
+        }
+        return rawScale
     }
 }
 
@@ -775,6 +879,10 @@ private extension Int {
 
 struct BattleViewportLayout {
     let size: CGSize
+    private let pokemonSpriteScaleFactor: CGFloat = 0.3
+    private let playerPokemonFloorRatio: CGFloat = 0.79
+    private let playerTrainerFloorRatio: CGFloat = 0.85
+    private let playerFloorClearance: CGFloat = 2
 
     var enemyCardSize: CGSize {
         CGSize(width: size.width * 0.38, height: size.height * 0.105)
@@ -809,17 +917,17 @@ struct BattleViewportLayout {
 
     var playerTrainerCenter: CGPoint {
         CGPoint(
-            x: playerSpriteCenter.x,
-            y: playerSpriteCenter.y + (playerSpriteSize.height - playerTrainerSize.height) * 0.5
+            x: size.width * 0.25,
+            y: (size.height * playerTrainerFloorRatio) - playerFloorClearance - (playerTrainerSize.height * 0.5)
         )
     }
 
     var enemySpriteSize: CGSize {
-        CGSize(width: size.width * 0.3, height: size.height * 0.3)
+        CGSize(width: size.width * pokemonSpriteScaleFactor, height: size.height * pokemonSpriteScaleFactor)
     }
 
     var playerSpriteSize: CGSize {
-        CGSize(width: size.width * 0.28, height: size.height * 0.28)
+        CGSize(width: size.width * pokemonSpriteScaleFactor, height: size.height * pokemonSpriteScaleFactor)
     }
 
     var sendOutPoofSize: CGSize {
@@ -831,7 +939,10 @@ struct BattleViewportLayout {
     }
 
     var playerSpriteCenter: CGPoint {
-        CGPoint(x: size.width * 0.25, y: size.height * 0.69)
+        CGPoint(
+            x: size.width * 0.25,
+            y: (size.height * playerPokemonFloorRatio) - playerFloorClearance - (playerSpriteSize.height * 0.5)
+        )
     }
 
     var enemyTrainerPokeballOrigin: CGPoint {

@@ -751,13 +751,12 @@ public struct FieldSceneRenderer {
 
         context.interpolationQuality = .none
         context.setShouldAntialias(false)
-        context.translateBy(x: 0, y: CGFloat(height))
-        context.scaleBy(x: 1, y: -1)
 
         try drawBackground(
             map: map,
             atlas: atlas,
             blockset: blockset,
+            canvasHeight: height,
             into: context
         )
         try drawActors(
@@ -766,6 +765,7 @@ public struct FieldSceneRenderer {
             playerFacing: playerFacing,
             playerSpriteID: playerSpriteID,
             assets: assets,
+            canvasHeight: height,
             into: context
         )
 
@@ -799,14 +799,13 @@ public struct FieldSceneRenderer {
 
         context.interpolationQuality = .none
         context.setShouldAntialias(false)
-        context.translateBy(x: 0, y: CGFloat(metrics.contentPixelSize.height))
-        context.scaleBy(x: 1, y: -1)
 
         try drawPaddedBackground(
             map: map,
             atlas: atlas,
             blockset: blockset,
             metrics: metrics,
+            canvasHeight: metrics.contentPixelSize.height,
             into: context
         )
 
@@ -919,6 +918,7 @@ public struct FieldSceneRenderer {
         map: MapManifest,
         atlas: PreparedTileAtlas,
         blockset: FieldBlockset,
+        canvasHeight: Int,
         into context: CGContext
     ) throws {
         for blockY in 0..<map.blockHeight {
@@ -929,6 +929,7 @@ public struct FieldSceneRenderer {
                     mapY: blockY,
                     atlas: atlas,
                     blockset: blockset,
+                    canvasHeight: canvasHeight,
                     into: context
                 )
             }
@@ -940,6 +941,7 @@ public struct FieldSceneRenderer {
         atlas: PreparedTileAtlas,
         blockset: FieldBlockset,
         metrics: FieldSceneMetrics,
+        canvasHeight: Int,
         into context: CGContext
     ) throws {
         let paddingBlocksX = metrics.paddingPixels.width / blockPixelSize
@@ -957,6 +959,7 @@ public struct FieldSceneRenderer {
                     mapY: paddedBlockY,
                     atlas: atlas,
                     blockset: blockset,
+                    canvasHeight: canvasHeight,
                     into: context
                 )
             }
@@ -969,6 +972,7 @@ public struct FieldSceneRenderer {
         mapY: Int,
         atlas: PreparedTileAtlas,
         blockset: FieldBlockset,
+        canvasHeight: Int,
         into context: CGContext
     ) throws {
         guard blockset.blocks.indices.contains(blockID) else {
@@ -981,7 +985,8 @@ public struct FieldSceneRenderer {
                 let tileIndex = Int(block[(tileRow * blockset.blockTileWidth) + tileColumn])
                 let tileImage = try atlas.tile(at: tileIndex)
                 let x = (mapX * blockPixelSize) + (tileColumn * tilePixelSize)
-                let y = (mapY * blockPixelSize) + (tileRow * tilePixelSize)
+                let topY = (mapY * blockPixelSize) + (tileRow * tilePixelSize)
+                let y = contextY(forTopY: topY, drawHeight: tilePixelSize, canvasHeight: canvasHeight)
                 context.draw(tileImage, in: CGRect(x: x, y: y, width: tilePixelSize, height: tilePixelSize))
             }
         }
@@ -993,6 +998,7 @@ public struct FieldSceneRenderer {
         playerFacing: FacingDirection,
         playerSpriteID: String,
         assets: FieldRenderAssets,
+        canvasHeight: Int,
         into context: CGContext
     ) throws {
         for object in objects {
@@ -1001,6 +1007,7 @@ public struct FieldSceneRenderer {
                 facing: object.facing,
                 position: object.position,
                 assets: assets,
+                canvasHeight: canvasHeight,
                 into: context
             )
         }
@@ -1010,6 +1017,7 @@ public struct FieldSceneRenderer {
             facing: playerFacing,
             position: playerPosition,
             assets: assets,
+            canvasHeight: canvasHeight,
             into: context
         )
     }
@@ -1019,6 +1027,7 @@ public struct FieldSceneRenderer {
         facing: FacingDirection,
         position: TilePoint,
         assets: FieldRenderAssets,
+        canvasHeight: Int,
         into context: CGContext
     ) throws {
         guard let definition = assets.spriteDefinition(for: spriteID),
@@ -1032,15 +1041,17 @@ public struct FieldSceneRenderer {
         }
 
         let x = position.x * stepPixelSize
-        let y = position.y * stepPixelSize
+        let topY = position.y * stepPixelSize
+        let y = contextY(forTopY: topY, drawHeight: frame.height, canvasHeight: canvasHeight)
         context.saveGState()
         if frame.flippedHorizontally {
-            context.translateBy(x: CGFloat(x + frame.width), y: 0)
-            context.scaleBy(x: -1, y: 1)
-            context.draw(spriteImage, in: CGRect(x: 0, y: y, width: frame.width, height: frame.height))
+            context.translateBy(x: CGFloat(x + frame.width), y: CGFloat(y + frame.height))
+            context.scaleBy(x: -1, y: -1)
         } else {
-            context.draw(spriteImage, in: CGRect(x: x, y: y, width: frame.width, height: frame.height))
+            context.translateBy(x: CGFloat(x), y: CGFloat(y + frame.height))
+            context.scaleBy(x: 1, y: -1)
         }
+        context.draw(spriteImage, in: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
         context.restoreGState()
     }
 
@@ -1055,21 +1066,6 @@ public struct FieldSceneRenderer {
             throw FieldRendererError.cropFailed
         }
         return cropped
-    }
-
-    fileprivate static func prepareImageForFieldContext(_ image: CGImage) throws -> CGImage {
-        guard let context = bitmapContext(width: image.width, height: image.height) else {
-            throw FieldRendererError.bitmapContextCreationFailed
-        }
-        context.interpolationQuality = .none
-        context.setShouldAntialias(false)
-        context.translateBy(x: 0, y: CGFloat(image.height))
-        context.scaleBy(x: 1, y: -1)
-        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
-        guard let flipped = context.makeImage() else {
-            throw FieldRendererError.bitmapContextCreationFailed
-        }
-        return flipped
     }
 
     fileprivate static func prepareSpriteImageForFieldContext(_ image: CGImage) throws -> CGImage {
@@ -1131,6 +1127,10 @@ public struct FieldSceneRenderer {
         return bytes
     }
 
+    private static func contextY(forTopY topY: Int, drawHeight: Int, canvasHeight: Int) -> Int {
+        canvasHeight - topY - drawHeight
+    }
+
     private static func spriteBitmapContext(width: Int, height: Int) -> CGContext? {
         CGContext(
             data: nil,
@@ -1173,7 +1173,7 @@ public struct FieldSceneRenderer {
             guard let tile = image.cropping(to: cropRect.integral) else {
                 throw FieldRendererError.cropFailed
             }
-            return try FieldSceneRenderer.prepareImageForFieldContext(tile)
+            return tile
         }
     }
 }

@@ -81,6 +81,93 @@ extension PokeUITests {
     XCTAssertEqual(BattleSendOutVisualState.revealStep1.ballOpacity, 0)
   }
 
+  func testBattleSendOutRevealUsesCenteredScaleAnchor() {
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        side: .enemy
+      ),
+      .center
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .enemySendOut,
+        activeSide: .player,
+        side: .player
+      ),
+      .center
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.pokemonScaleAnchor(
+        stage: .attackImpact,
+        activeSide: .enemy,
+        side: .enemy
+      ),
+      .center
+    )
+  }
+
+  func testBattleSendOutDisablesRevisionDrivenPokemonAnimation() {
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        side: .enemy
+      )
+    )
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .enemySendOut,
+        activeSide: .player,
+        side: .player
+      )
+    )
+    XCTAssertTrue(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .attackImpact,
+        activeSide: .enemy,
+        side: .enemy
+      )
+    )
+  }
+
+  func testBattleSendOutStateResolvesToIdleWhenAnimationKeyIsStale() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .enemySendOut,
+        sendOutVisualState: .revealFinal,
+        animationTriggerKey: "enemySendOut-player-2",
+        activeAnimationKey: "enemySendOut-enemy-1"
+      ),
+      .idle
+    )
+  }
+
+  func testBattleSendOutStatePreservesMatchingAnimationKey() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .enemySendOut,
+        sendOutVisualState: .revealStep2,
+        animationTriggerKey: "enemySendOut-player-2",
+        activeAnimationKey: "enemySendOut-player-2"
+      ),
+      .revealStep2
+    )
+  }
+
+  func testBattleSendOutStateResolvesToIdleOutsideSendOutStage() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedSendOutState(
+        stage: .commandReady,
+        sendOutVisualState: .revealFinal,
+        animationTriggerKey: "commandReady-player-3",
+        activeAnimationKey: "commandReady-player-3"
+      ),
+      .idle
+    )
+  }
+
   func testBattleSendOutTimelineUsesExpandedEnemyPoofSequence() {
     let enemyPoofStart =
       BattleSendOutAnimationTimeline.tossDuration +
@@ -139,5 +226,12 @@ extension PokeUITests {
     XCTAssertEqual(layout.playerSendOutAnchor, layout.playerSpriteCenter)
     XCTAssertLessThan(layout.enemyTrainerPokeballOrigin.x, layout.enemySendOutAnchor.x)
     XCTAssertGreaterThan(layout.playerTrainerPokeballOrigin.x, layout.playerSendOutAnchor.x)
+  }
+
+  func testBattleViewportLayoutUsesMatchingPokemonSpriteSlots() {
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+
+    XCTAssertEqual(layout.enemySpriteSize, layout.playerSpriteSize)
+    XCTAssertGreaterThan(layout.playerTrainerCenter.y, layout.playerSpriteCenter.y)
   }
 }

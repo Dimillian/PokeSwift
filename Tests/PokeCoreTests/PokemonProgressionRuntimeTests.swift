@@ -3,6 +3,22 @@ import XCTest
 import PokeContent
 import PokeDataModel
 
+private func fixtureEvolutionDialogues() -> [DialogueManifest] {
+    [
+        .init(id: "evolution_evolved", pages: [.init(lines: ["{pokemon} evolved"], waitsForPrompt: true)]),
+        .init(
+            id: "evolution_into",
+            pages: [.init(
+                lines: ["into {evolvedPokemon}!"],
+                waitsForPrompt: true,
+                events: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2")]
+            )]
+        ),
+        .init(id: "evolution_is_evolving", pages: [.init(lines: ["What? {pokemon}", "is evolving!"], waitsForPrompt: true)]),
+        .init(id: "evolution_stopped", pages: [.init(lines: ["Huh? {pokemon}", "stopped evolving!"], waitsForPrompt: true)]),
+    ]
+}
+
 @MainActor
 extension PokeCoreTests {
     func testMakePokemonSeedsTotalExperienceFromGrowthRate() {
@@ -343,6 +359,458 @@ extension PokeCoreTests {
         XCTAssertTrue(rewardResult.messages.contains("Charmander gained 67 EXP!"))
         XCTAssertTrue(rewardResult.messages.contains("Charmander grew to Lv6!"))
         XCTAssertNil(rewardResult.pendingLearnMove)
+    }
+
+    func testBattleExperienceRewardQueuesPendingLevelEvolution() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: fixtureEvolutionDialogues(),
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"],
+                            evolutions: [.init(trigger: .init(kind: .level, level: 16), targetSpeciesID: "CHARMELEON")]
+                        ),
+                        .init(
+                            id: "CHARMELEON",
+                            displayName: "Charmeleon",
+                            primaryType: "FIRE",
+                            baseExp: 142,
+                            growthRate: .mediumSlow,
+                            baseHP: 58,
+                            baseAttack: 64,
+                            baseDefense: 58,
+                            baseSpeed: 80,
+                            baseSpecial: 65,
+                            startingMoves: ["SCRATCH"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 50,
+                            growthRate: .mediumSlow,
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 95, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var playerPokemon = runtime.makeConfiguredPokemon(
+            speciesID: "CHARMANDER",
+            nickname: "Blaze",
+            level: 15,
+            experience: runtime.experienceRequired(for: 16, speciesID: "CHARMANDER") - 1,
+            dvs: .init(attack: 10, defense: 11, speed: 12, special: 13),
+            statExp: .zero,
+            currentHP: nil,
+            attackStage: 0,
+            defenseStage: 0,
+            accuracyStage: 0,
+            evasionStage: 0,
+            moves: nil
+        )
+        let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "PIDGEY", level: 1, nickname: "Pidgey")
+
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: defeatedPokemon,
+            to: &playerPokemon,
+            isTrainerBattle: false
+        )
+
+        XCTAssertEqual(playerPokemon.level, 16)
+        XCTAssertEqual(rewardResult.pendingEvolution?.partyIndex, 0)
+        XCTAssertEqual(rewardResult.pendingEvolution?.originalSpeciesID, "CHARMANDER")
+        XCTAssertEqual(rewardResult.pendingEvolution?.targetSpeciesID, "CHARMELEON")
+        XCTAssertNil(rewardResult.pendingLearnMove)
+    }
+
+    func testBattleExperienceRewardUsesOriginalSpeciesForTransformEvolution() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"],
+                            evolutions: [.init(trigger: .init(kind: .level, level: 16), targetSpeciesID: "CHARMELEON")]
+                        ),
+                        .init(
+                            id: "CHARMELEON",
+                            displayName: "Charmeleon",
+                            primaryType: "FIRE",
+                            baseExp: 142,
+                            growthRate: .mediumSlow,
+                            baseHP: 58,
+                            baseAttack: 64,
+                            baseDefense: 58,
+                            baseSpeed: 80,
+                            baseSpecial: 65,
+                            startingMoves: ["SCRATCH"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 50,
+                            growthRate: .mediumSlow,
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 95, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var playerPokemon = runtime.makeConfiguredPokemon(
+            speciesID: "PIDGEY",
+            nickname: "Blaze",
+            level: 15,
+            experience: runtime.experienceRequired(for: 16, speciesID: "CHARMANDER") - 1,
+            dvs: .init(attack: 10, defense: 11, speed: 12, special: 13),
+            statExp: .zero,
+            currentHP: nil,
+            attackStage: 0,
+            defenseStage: 0,
+            accuracyStage: 0,
+            evasionStage: 0,
+            moves: nil
+        )
+        playerPokemon.battleEffects.transformedState = RuntimeTransformState(
+            originalSpeciesID: "CHARMANDER",
+            originalAttack: 20,
+            originalDefense: 18,
+            originalSpeed: 22,
+            originalSpecial: 19,
+            originalAttackStage: 0,
+            originalDefenseStage: 0,
+            originalSpeedStage: 0,
+            originalSpecialStage: 0,
+            originalAccuracyStage: 0,
+            originalEvasionStage: 0,
+            originalMoves: [RuntimeMoveState(id: "SCRATCH", currentPP: 35)]
+        )
+        let defeatedPokemon = runtime.makeTrainerBattlePokemon(speciesID: "PIDGEY", level: 1, nickname: "Pidgey")
+
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: defeatedPokemon,
+            to: &playerPokemon,
+            isTrainerBattle: false
+        )
+
+        XCTAssertEqual(rewardResult.pendingEvolution?.originalSpeciesID, "CHARMANDER")
+        XCTAssertEqual(rewardResult.pendingEvolution?.targetSpeciesID, "CHARMELEON")
+    }
+
+    func testWildBattleWinBranchesIntoEvolutionSceneAndResumesFieldAfterCompletion() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: fixtureEvolutionDialogues(),
+                    species: [
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseExp: 65,
+                            growthRate: .mediumSlow,
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["SCRATCH"],
+                            evolutions: [.init(trigger: .init(kind: .level, level: 16), targetSpeciesID: "CHARMELEON")]
+                        ),
+                        .init(
+                            id: "CHARMELEON",
+                            displayName: "Charmeleon",
+                            primaryType: "FIRE",
+                            baseExp: 142,
+                            growthRate: .mediumSlow,
+                            baseHP: 58,
+                            baseAttack: 64,
+                            baseDefense: 58,
+                            baseSpeed: 80,
+                            baseSpecial: 65,
+                            startingMoves: ["SCRATCH"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 50,
+                            growthRate: .mediumSlow,
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "SCRATCH", displayName: "SCRATCH", power: 40, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 95, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+
+        let startingPokemon = runtime.makeConfiguredPokemon(
+            speciesID: "CHARMANDER",
+            nickname: "Blaze",
+            level: 15,
+            experience: runtime.experienceRequired(for: 16, speciesID: "CHARMANDER") - 1,
+            dvs: .init(attack: 10, defense: 11, speed: 12, special: 13),
+            statExp: .zero,
+            currentHP: 28,
+            attackStage: 0,
+            defenseStage: 0,
+            accuracyStage: 0,
+            evasionStage: 0,
+            moves: nil
+        )
+        runtime.gameplayState?.chosenStarterSpeciesID = "CHARMANDER"
+        runtime.gameplayState?.playerParty = [startingPokemon]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 1)
+        guard var battle = runtime.gameplayState?.battle else {
+            XCTFail("Expected a wild battle")
+            return
+        }
+
+        var rewardedPokemon = battle.playerPokemon
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: battle.enemyPokemon,
+            to: &rewardedPokemon,
+            isTrainerBattle: false
+        )
+        battle.playerPokemon = rewardedPokemon
+        battle.pendingEvolution = rewardResult.pendingEvolution
+        runtime.gameplayState?.battle = battle
+
+        let expectedEvolved = runtime.makeConfiguredPokemon(
+            speciesID: "CHARMELEON",
+            nickname: rewardedPokemon.nickname,
+            level: rewardedPokemon.level,
+            experience: rewardedPokemon.experience,
+            dvs: rewardedPokemon.dvs,
+            statExp: rewardedPokemon.statExp,
+            currentHP: nil,
+            attackStage: rewardedPokemon.attackStage,
+            defenseStage: rewardedPokemon.defenseStage,
+            speedStage: rewardedPokemon.speedStage,
+            specialStage: rewardedPokemon.specialStage,
+            accuracyStage: rewardedPokemon.accuracyStage,
+            evasionStage: rewardedPokemon.evasionStage,
+            majorStatus: rewardedPokemon.majorStatus,
+            statusCounter: rewardedPokemon.statusCounter,
+            isBadlyPoisoned: rewardedPokemon.isBadlyPoisoned,
+            moves: rewardedPokemon.moves
+        )
+        let expectedCurrentHP = min(
+            expectedEvolved.maxHP,
+            max(0, rewardedPokemon.currentHP + (expectedEvolved.maxHP - rewardedPokemon.maxHP))
+        )
+
+        runtime.finishWildBattle(battle: battle, won: true)
+
+        XCTAssertEqual(runtime.scene, .evolution)
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.phase, "intro")
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.textLines, ["What? Blaze", "is evolving!"])
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.animationStep, 0)
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.showsEvolvedSprite, false)
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "CHARMANDER")
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            (runtime.currentEvolutionSceneState()?.animationStep ?? 0) > 0,
+            message: "evolution animation did not begin alternating sprites",
+            maxTicks: 180
+        )
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.phase, "animating")
+
+        waitUntil(
+            runtime.currentEvolutionSceneState()?.phase == "evolved",
+            message: "evolution did not finish animating",
+            maxTicks: 900
+        )
+
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "CHARMELEON")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.nickname, "Blaze")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, expectedCurrentHP)
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.textLines, ["Blaze evolved"])
+        XCTAssertTrue(runtime.ownedSpeciesIDs.contains("CHARMELEON"))
+        XCTAssertTrue(runtime.seenSpeciesIDs.contains("CHARMELEON"))
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.phase, "into")
+        XCTAssertEqual(runtime.currentEvolutionSceneState()?.textLines, ["into Charmeleon!"])
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.substate, "field")
+        XCTAssertNil(runtime.gameplayState?.battle)
+        XCTAssertEqual(runtime.currentSnapshot().audio?.trackID, "MUSIC_PALLET_TOWN")
+    }
+
+    func testEvolutionUpdatesDefaultSpeciesNicknameToEvolvedSpeciesName() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    dialogues: fixtureEvolutionDialogues(),
+                    species: [
+                        .init(
+                            id: "SQUIRTLE",
+                            displayName: "Squirtle",
+                            primaryType: "WATER",
+                            baseExp: 66,
+                            growthRate: .mediumSlow,
+                            baseHP: 44,
+                            baseAttack: 48,
+                            baseDefense: 65,
+                            baseSpeed: 43,
+                            baseSpecial: 50,
+                            startingMoves: ["TACKLE"],
+                            evolutions: [.init(trigger: .init(kind: .level, level: 16), targetSpeciesID: "WARTORTLE")]
+                        ),
+                        .init(
+                            id: "WARTORTLE",
+                            displayName: "Wartortle",
+                            primaryType: "WATER",
+                            baseExp: 143,
+                            growthRate: .mediumSlow,
+                            baseHP: 59,
+                            baseAttack: 63,
+                            baseDefense: 80,
+                            baseSpeed: 58,
+                            baseSpecial: 65,
+                            startingMoves: ["TACKLE"]
+                        ),
+                        .init(
+                            id: "PIDGEY",
+                            displayName: "Pidgey",
+                            primaryType: "NORMAL",
+                            secondaryType: "FLYING",
+                            baseExp: 50,
+                            growthRate: .mediumSlow,
+                            baseHP: 40,
+                            baseAttack: 45,
+                            baseDefense: 40,
+                            baseSpeed: 56,
+                            baseSpecial: 35,
+                            startingMoves: ["TACKLE"]
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 95, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "REDS_HOUSE_2F"
+        runtime.gameplayState?.playerParty = [
+            runtime.makeConfiguredPokemon(
+                speciesID: "SQUIRTLE",
+                nickname: "Squirtle",
+                level: 15,
+                experience: runtime.experienceRequired(for: 16, speciesID: "SQUIRTLE") - 1,
+                dvs: .zero,
+                statExp: .zero,
+                currentHP: 30,
+                attackStage: 0,
+                defenseStage: 0,
+                accuracyStage: 0,
+                evasionStage: 0,
+                moves: nil
+            )
+        ]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 1)
+        guard var battle = runtime.gameplayState?.battle else {
+            XCTFail("Expected a wild battle")
+            return
+        }
+
+        var rewardedPokemon = battle.playerPokemon
+        let rewardResult = runtime.applyBattleExperienceReward(
+            defeatedPokemon: battle.enemyPokemon,
+            to: &rewardedPokemon,
+            isTrainerBattle: false
+        )
+        battle.playerPokemon = rewardedPokemon
+        battle.pendingEvolution = rewardResult.pendingEvolution
+        runtime.gameplayState?.battle = battle
+
+        runtime.finishWildBattle(battle: battle, won: true)
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentEvolutionSceneState()?.phase == "evolved",
+            message: "default-name evolution did not finish animating",
+            maxTicks: 900
+        )
+
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "WARTORTLE")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.nickname, "Wartortle")
+        XCTAssertTrue(runtime.ownedSpeciesIDs.contains("WARTORTLE"))
+        XCTAssertTrue(runtime.seenSpeciesIDs.contains("WARTORTLE"))
     }
     func testBattleRewardAccumulatesStatExpWithoutVisibleStatRecalc() {
         let runtime = GameRuntime(

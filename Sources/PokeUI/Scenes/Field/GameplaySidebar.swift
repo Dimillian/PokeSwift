@@ -63,6 +63,12 @@ struct GameplaySidebar: View {
     }
 
     private func syncExpansionState(for mode: GameplaySidebarMode) {
+        if case let .fieldLike(props) = mode,
+           let preferredSection = props.preferredExpandedSection,
+           expansionState.expandedSection != preferredSection {
+            expansionState.activate(preferredSection)
+            return
+        }
         let resolvedSection = mode.resolvedExpandedSection(afterRequesting: expansionState.expandedSection)
         guard resolvedSection != expansionState.expandedSection else { return }
         expansionState.activate(resolvedSection)

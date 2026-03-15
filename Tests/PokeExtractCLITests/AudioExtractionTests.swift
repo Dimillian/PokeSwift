@@ -27,6 +27,8 @@ final class AudioExtractionTests: XCTestCase {
                 .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
                 .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
                 .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
+                .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
+                .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
@@ -50,6 +52,7 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(cueByID["trainer_battle"]?.trackID, "MUSIC_TRAINER_BATTLE")
         XCTAssertEqual(cueByID["trainer_victory"]?.trackID, "MUSIC_DEFEATED_TRAINER")
         XCTAssertEqual(cueByID["wild_victory"]?.trackID, "MUSIC_DEFEATED_WILD_MON")
+        XCTAssertEqual(cueByID["evolution"]?.trackID, "MUSIC_SAFARI_ZONE")
         XCTAssertEqual(cueByID["mom_heal"]?.trackID, "MUSIC_PKMN_HEALED")
         XCTAssertEqual(cueByID["mom_heal"]?.waitForCompletion, true)
         XCTAssertEqual(cueByID["mom_heal"]?.resumeMusicAfterCompletion, true)
@@ -75,6 +78,7 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_TRAINER_BATTLE",
             "MUSIC_DEFEATED_TRAINER",
             "MUSIC_DEFEATED_WILD_MON",
+            "MUSIC_SAFARI_ZONE",
             "MUSIC_PKMN_HEALED",
         ]
         XCTAssertTrue(requiredTrackIDs.isSubset(of: Set(manifest.tracks.map(\.id))))
@@ -222,6 +226,26 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(channelSeven.prelude.first?.waveform, .wave)
     }
 
+    func testAudioExtractorCarriesPitchSweepIntoBallPoofSquareChannel() throws {
+        let manifest = try extractAudioManifest(
+            source: SourceTree(repoRoot: PokeExtractCLITestSupport.repoRoot()),
+            titleTrackID: "MUSIC_TITLE_SCREEN"
+        )
+
+        let ballPoof = try XCTUnwrap(manifest.soundEffects.first { $0.id == "SFX_BALL_POOF" })
+        let channelFive = try XCTUnwrap(ballPoof.channels.first { $0.channelNumber == 5 })
+        let firstEvent = try XCTUnwrap(channelFive.prelude.first)
+        let targetRegister = try XCTUnwrap(firstEvent.pitchSlideTargetRegister)
+        let targetHz = try XCTUnwrap(firstEvent.pitchSlideTargetHz)
+        let frameCount = try XCTUnwrap(firstEvent.pitchSlideFrameCount)
+
+        XCTAssertEqual(firstEvent.waveform, .square)
+        XCTAssertEqual(firstEvent.frequencyRegister, 1024)
+        XCTAssertGreaterThan(targetRegister, 1024)
+        XCTAssertEqual(frameCount, 16)
+        XCTAssertGreaterThan(targetHz, 128)
+    }
+
     func testExtractorWritesDeterministicAudioManifestJSON() throws {
         let repoRoot = PokeExtractCLITestSupport.repoRoot()
         let firstOutputRoot = try PokeExtractCLITestSupport.temporaryDirectory()
@@ -240,9 +264,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 23)
-        XCTAssertEqual(decoded.cues.count, 12)
-        XCTAssertEqual(decoded.tracks.count, 18)
+        XCTAssertEqual(decoded.mapRoutes.count, 25)
+        XCTAssertEqual(decoded.cues.count, 13)
+        XCTAssertEqual(decoded.tracks.count, 19)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 }
