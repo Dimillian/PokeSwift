@@ -903,15 +903,311 @@ extension PokeCoreTests {
             )
         )
 
-        XCTAssertEqual(beats.first?.stage, .attackWindup)
-        XCTAssertEqual(beats.first?.attackAnimation?.moveID, "TACKLE")
-        XCTAssertEqual(beats.first?.attackAnimation?.attackerSide, .player)
-        XCTAssertEqual(beats.first?.stagedSoundEffectRequests.count, 2)
-        XCTAssertEqual(try XCTUnwrap(beats.first?.stagedSoundEffectRequests.first?.delay), 0, accuracy: 0.0001)
-        XCTAssertEqual(try XCTUnwrap(beats.first?.stagedSoundEffectRequests.dropFirst().first?.delay), 0.08, accuracy: 0.0001)
-        XCTAssertNil(beats.first?.soundEffectRequest)
-        XCTAssertEqual(beats.dropFirst().first?.stage, .hpDrain)
-        XCTAssertEqual(try XCTUnwrap(beats.dropFirst().first?.delay), 0.16, accuracy: 0.0001)
+        XCTAssertEqual(beats.first?.stage, .resultText)
+        XCTAssertEqual(beats.first?.message, "Squirtle used TACKLE!")
+        XCTAssertTrue(beats.first?.requiresConfirmAfterDisplay ?? false)
+        XCTAssertNil(beats.first?.attackAnimation)
+
+        let animationBeat = try XCTUnwrap(beats.dropFirst().first)
+        XCTAssertEqual(animationBeat.stage, .attackWindup)
+        XCTAssertEqual(animationBeat.attackAnimation?.moveID, "TACKLE")
+        XCTAssertEqual(animationBeat.attackAnimation?.attackerSide, .player)
+        XCTAssertEqual(animationBeat.stagedSoundEffectRequests.count, 2)
+        XCTAssertEqual(try XCTUnwrap(animationBeat.stagedSoundEffectRequests.first?.delay), 0, accuracy: 0.0001)
+        XCTAssertEqual(try XCTUnwrap(animationBeat.stagedSoundEffectRequests.dropFirst().first?.delay), 0.08, accuracy: 0.0001)
+        XCTAssertNil(animationBeat.soundEffectRequest)
+
+        let hitEffectBeat = try XCTUnwrap(beats.dropFirst(2).first)
+        XCTAssertEqual(hitEffectBeat.stage, .attackImpact)
+        XCTAssertEqual(hitEffectBeat.applyingHitEffect?.kind, .blinkDefender)
+        XCTAssertEqual(hitEffectBeat.applyingHitEffect?.attackerSide, .player)
+        XCTAssertEqual(hitEffectBeat.delay, 0.16, accuracy: 0.0001)
+
+        let hpDrainBeat = try XCTUnwrap(beats.dropFirst(3).first)
+        XCTAssertEqual(hpDrainBeat.stage, .hpDrain)
+        XCTAssertEqual(hpDrainBeat.delay, 0.156, accuracy: 0.0001)
+    }
+
+    func testApplyingHitEffectMapsGBStyleVariants() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["TACKLE", "BODY_SLAM", "GROWL"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE", "GROWL"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "BODY_SLAM", displayName: "BODY SLAM", power: 85, accuracy: 100, maxPP: 15, effect: "PARALYZE_SIDE_EFFECT2", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")
+        let defender = runtime.makePokemon(speciesID: "SLOWMON", level: 3, nickname: "Slowmon")
+
+        let playerDamaging = try XCTUnwrap(
+            runtime.makeApplyingHitEffect(
+                for: .init(
+                    side: .player,
+                    moveID: "TACKLE",
+                    attackerSpeciesID: "FASTMON",
+                    didExecuteMove: true,
+                    updatedAttacker: attacker,
+                    updatedDefender: defender,
+                    messages: ["Fastmon used TACKLE!"],
+                    dealtDamage: 5,
+                    defenderHPBefore: defender.currentHP,
+                    defenderHPAfter: max(0, defender.currentHP - 5),
+                    pendingAction: nil,
+                    payDayMoneyGain: 0
+                ),
+                move: try XCTUnwrap(runtime.content.move(id: "TACKLE"))
+            )
+        )
+        XCTAssertEqual(playerDamaging.kind, .blinkDefender)
+
+        let enemyDamaging = try XCTUnwrap(
+            runtime.makeApplyingHitEffect(
+                for: .init(
+                    side: .enemy,
+                    moveID: "TACKLE",
+                    attackerSpeciesID: "SLOWMON",
+                    didExecuteMove: true,
+                    updatedAttacker: defender,
+                    updatedDefender: attacker,
+                    messages: ["Slowmon used TACKLE!"],
+                    dealtDamage: 5,
+                    defenderHPBefore: attacker.currentHP,
+                    defenderHPAfter: max(0, attacker.currentHP - 5),
+                    pendingAction: nil,
+                    payDayMoneyGain: 0
+                ),
+                move: try XCTUnwrap(runtime.content.move(id: "TACKLE"))
+            )
+        )
+        XCTAssertEqual(enemyDamaging.kind, .shakeScreenVertical)
+
+        let playerSideEffect = try XCTUnwrap(
+            runtime.makeApplyingHitEffect(
+                for: .init(
+                    side: .player,
+                    moveID: "BODY_SLAM",
+                    attackerSpeciesID: "FASTMON",
+                    didExecuteMove: true,
+                    updatedAttacker: attacker,
+                    updatedDefender: defender,
+                    messages: ["Fastmon used BODY SLAM!"],
+                    dealtDamage: 5,
+                    defenderHPBefore: defender.currentHP,
+                    defenderHPAfter: max(0, defender.currentHP - 5),
+                    pendingAction: nil,
+                    payDayMoneyGain: 0
+                ),
+                move: try XCTUnwrap(runtime.content.move(id: "BODY_SLAM"))
+            )
+        )
+        XCTAssertEqual(playerSideEffect.kind, .shakeScreenHorizontalLight)
+
+        let enemyStatus = try XCTUnwrap(
+            runtime.makeApplyingHitEffect(
+                for: .init(
+                    side: .enemy,
+                    moveID: "GROWL",
+                    attackerSpeciesID: "SLOWMON",
+                    didExecuteMove: true,
+                    updatedAttacker: defender,
+                    updatedDefender: attacker,
+                    messages: ["Slowmon used GROWL!", "Fastmon's ATTACK fell!"],
+                    dealtDamage: 0,
+                    defenderHPBefore: attacker.currentHP,
+                    defenderHPAfter: attacker.currentHP,
+                    pendingAction: nil,
+                    payDayMoneyGain: 0
+                ),
+                move: try XCTUnwrap(runtime.content.move(id: "GROWL"))
+            )
+        )
+        XCTAssertEqual(enemyStatus.kind, .shakeScreenHorizontalSlow)
+    }
+
+    func testStatusResultWaitsForMovePlaybackAndHitEffect() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["GROWL"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "GROWL",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "GROWL",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 10
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")
+        let defender = runtime.makePokemon(speciesID: "SLOWMON", level: 3, nickname: "Slowmon")
+
+        let beats = runtime.makeBeats(
+            for: ResolvedBattleAction(
+                side: .player,
+                moveID: "GROWL",
+                attackerSpeciesID: "FASTMON",
+                didExecuteMove: true,
+                updatedAttacker: attacker,
+                updatedDefender: defender,
+                messages: ["Fastmon used GROWL!", "Slowmon's ATTACK fell!"],
+                dealtDamage: 0,
+                defenderHPBefore: defender.currentHP,
+                defenderHPAfter: defender.currentHP,
+                pendingAction: nil,
+                payDayMoneyGain: 0
+            )
+        )
+
+        let animationBeat = try XCTUnwrap(beats.dropFirst().first)
+        XCTAssertEqual(animationBeat.stage, .attackWindup)
+        XCTAssertEqual(animationBeat.attackAnimation?.moveID, "GROWL")
+
+        let hitEffectBeat = try XCTUnwrap(beats.dropFirst(2).first)
+        XCTAssertEqual(hitEffectBeat.stage, .attackImpact)
+        XCTAssertEqual(hitEffectBeat.applyingHitEffect?.kind, .shakeScreenHorizontalSlow2)
+        XCTAssertEqual(hitEffectBeat.delay, 10.0 / 60.0, accuracy: 0.0001)
+
+        let statusBeat = try XCTUnwrap(beats.dropFirst(3).first)
+        XCTAssertEqual(statusBeat.stage, .resultText)
+        XCTAssertEqual(statusBeat.message, "Slowmon's ATTACK fell!")
+        XCTAssertEqual(statusBeat.activeSide, .enemy)
+        XCTAssertEqual(statusBeat.delay, 24.0 / 60.0, accuracy: 0.0001)
+    }
+
+    func testResolvedTurnPausesOnUsedMoveTextBeforeEachAttackAnimation() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "FASTMON", displayName: "Fastmon", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 100, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SLOWMON", displayName: "Slowmon", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 10, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "TACKLE",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "TACKLE",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 10
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "FASTMON"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "FASTMON", level: 5, nickname: "Fastmon")]
+
+        runtime.startWildBattle(speciesID: "SLOWMON", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Fastmon used TACKLE!" &&
+                runtime.battlePresentationTask == nil &&
+                (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
+            message: "player turn did not pause on the used-move prompt",
+            maxTicks: 240
+        )
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.attackAnimation?.moveID == "TACKLE",
+            message: "player attack animation did not start after confirming the used-move prompt",
+            maxTicks: 240
+        )
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Slowmon used TACKLE!" &&
+                runtime.battlePresentationTask == nil,
+            message: "enemy turn did not pause on the used-move prompt",
+            maxTicks: 240
+        )
     }
 
     func testExperienceAndLevelUpMessagesRequireConfirm() throws {

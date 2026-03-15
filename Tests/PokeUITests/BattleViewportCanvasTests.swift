@@ -193,6 +193,42 @@ extension PokeUITests {
     )
   }
 
+  func testApplyingHitEffectTimelineBuildsGBBlinkSequence() {
+    let frames = BattleApplyingHitEffectTimeline.sequence(for: makeApplyingHitEffect())
+
+    XCTAssertEqual(frames.count, 12)
+    XCTAssertEqual(frames.first?.state.enemyOpacity, 0)
+    XCTAssertEqual(try XCTUnwrap(frames.first?.duration), 5.0 / 60.0, accuracy: 0.0001)
+    XCTAssertEqual(frames.dropFirst().first?.state.enemyOpacity, 1)
+    XCTAssertEqual(try XCTUnwrap(frames.dropFirst().first?.duration), 8.0 / 60.0, accuracy: 0.0001)
+  }
+
+  func testApplyingHitEffectTimelineBuildsVerticalShakeSequence() {
+    let frames = BattleApplyingHitEffectTimeline.sequence(
+      for: makeApplyingHitEffect(playbackID: "hit-2", kind: .shakeScreenVertical, totalDuration: 48.0 / 60.0)
+    )
+
+    XCTAssertEqual(frames.count, 16)
+    XCTAssertEqual(Double(try XCTUnwrap(frames.first?.state.screenShake.height)), 8, accuracy: 0.0001)
+    XCTAssertEqual(Double(try XCTUnwrap(frames.dropFirst().first?.state.screenShake.height)), 0, accuracy: 0.0001)
+  }
+
+  func testApplyingHitEffectStateResolvesToIdleWhenAnimationKeyIsStale() {
+    XCTAssertEqual(
+      BattleViewportCanvas.resolvedApplyingHitEffectState(
+        applyingHitEffect: makeApplyingHitEffect(playbackID: "hit-2"),
+        applyingHitEffectVisualState: .init(
+          playerOpacity: 1,
+          enemyOpacity: 0,
+          screenShake: .init(width: 2, height: 0)
+        ),
+        animationTriggerKey: "hit-3",
+        activeAnimationKey: "hit-2"
+      ),
+      .idle
+    )
+  }
+
   func testBattleSendOutStateResolvesToIdleWhenAnimationKeyIsStale() {
     XCTAssertEqual(
       BattleViewportCanvas.resolvedSendOutState(
@@ -304,6 +340,19 @@ extension PokeUITests {
       moveID: "TACKLE",
       attackerSide: .player,
       totalDuration: 0.2
+    )
+  }
+
+  private func makeApplyingHitEffect(
+    playbackID: String = "hit-1",
+    kind: BattleApplyingHitEffectKind = .blinkDefender,
+    totalDuration: TimeInterval = 78.0 / 60.0
+  ) -> BattleApplyingHitEffectTelemetry {
+    .init(
+      playbackID: playbackID,
+      kind: kind,
+      attackerSide: .player,
+      totalDuration: totalDuration
     )
   }
 

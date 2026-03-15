@@ -25,6 +25,8 @@ struct BattleViewportCanvas: View {
     @State private var activeSendOutAnimationKey: String?
     @State private var attackAnimationVisualState: BattleAttackAnimationVisualState = .idle
     @State private var activeAttackAnimationKey: String?
+    @State private var applyingHitEffectVisualState: BattleApplyingHitEffectVisualState = .idle
+    @State private var activeApplyingHitEffectKey: String?
 
     var body: some View {
         GeometryReader { proxy in
@@ -45,6 +47,9 @@ struct BattleViewportCanvas: View {
             }
             .task(id: attackAnimationTriggerKey) {
                 await runAttackAnimationSequence()
+            }
+            .task(id: applyingHitEffectTriggerKey) {
+                await runApplyingHitEffectSequence()
             }
         }
     }
@@ -183,8 +188,8 @@ struct BattleViewportCanvas: View {
                 .fill(Color.black.opacity(currentAttackAnimationState.darknessOpacity))
         }
         .offset(
-            x: currentAttackAnimationState.screenShake.width * displayScale,
-            y: currentAttackAnimationState.screenShake.height * displayScale
+            x: combinedScreenShake.width * displayScale,
+            y: combinedScreenShake.height * displayScale
         )
         .gameplayScreenEffect(
             displayStyle: displayStyle,
@@ -330,6 +335,22 @@ struct BattleViewportCanvas: View {
         )
     }
 
+    private var currentApplyingHitEffectState: BattleApplyingHitEffectVisualState {
+        Self.resolvedApplyingHitEffectState(
+            applyingHitEffect: presentation.applyingHitEffect,
+            applyingHitEffectVisualState: applyingHitEffectVisualState,
+            animationTriggerKey: applyingHitEffectTriggerKey,
+            activeAnimationKey: activeApplyingHitEffectKey
+        )
+    }
+
+    private var combinedScreenShake: CGSize {
+        CGSize(
+            width: currentAttackAnimationState.screenShake.width + currentApplyingHitEffectState.screenShake.width,
+            height: currentAttackAnimationState.screenShake.height + currentApplyingHitEffectState.screenShake.height
+        )
+    }
+
     private var sendOutPoofFrame: BattleSendOutPoofFrame? {
         let activeSide = presentation.activeSide ?? .player
         guard let frameIndex = currentSendOutState.poofFrameIndex,
@@ -349,6 +370,10 @@ struct BattleViewportCanvas: View {
 
     private var attackAnimationTriggerKey: String {
         presentation.attackAnimation?.playbackID ?? "attack-idle-\(presentation.revision)"
+    }
+
+    private var applyingHitEffectTriggerKey: String {
+        presentation.applyingHitEffect?.playbackID ?? "hit-idle-\(presentation.revision)"
     }
 
     private var sendOutPoofSequence: [Int] {
@@ -430,7 +455,10 @@ struct BattleViewportCanvas: View {
             baseScale = 0.34
         case .enemySendOut where presentation.activeSide == .enemy:
             baseScale = currentSendOutState.pokemonScale
-        case .attackImpact where presentation.activeSide == .enemy && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .enemy &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             baseScale = 1.04
         default:
             baseScale = enemyPokemon.currentHP == 0 ? 0.18 : 1
@@ -445,7 +473,10 @@ struct BattleViewportCanvas: View {
             baseScale = 0.34
         case .enemySendOut where presentation.activeSide == .player:
             baseScale = currentSendOutState.pokemonScale
-        case .attackImpact where presentation.activeSide == .player && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .player &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             baseScale = 1.04
         default:
             baseScale = playerPokemon.currentHP == 0 ? 0.18 : 1
@@ -464,7 +495,7 @@ struct BattleViewportCanvas: View {
         } else {
             visibility = 1
         }
-        return visibility * currentAttackAnimationState.enemyOpacity
+        return visibility * currentAttackAnimationState.enemyOpacity * currentApplyingHitEffectState.enemyOpacity
     }
 
     private var playerPokemonOpacity: Double {
@@ -496,7 +527,7 @@ struct BattleViewportCanvas: View {
         } else {
             visibility = playerPokemon.currentHP == 0 ? 0 : 1
         }
-        return visibility * currentAttackAnimationState.playerOpacity
+        return visibility * currentAttackAnimationState.playerOpacity * currentApplyingHitEffectState.playerOpacity
     }
 
     private var enemyPokemonRotation: Angle {
@@ -563,9 +594,15 @@ struct BattleViewportCanvas: View {
             return currentSendOutState.usesSendOutAnchor ? sendOutAnchor : settled
         case .attackWindup where presentation.activeSide == .enemy && presentation.attackAnimation == nil:
             return CGPoint(x: settled.x - layout.size.width * 0.07, y: settled.y + 2)
-        case .attackImpact where presentation.activeSide == .enemy && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .enemy &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             return CGPoint(x: settled.x + layout.size.width * 0.02, y: settled.y)
-        case .attackImpact where presentation.activeSide == .player && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .player &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             return CGPoint(x: settled.x + layout.size.width * 0.03, y: settled.y - 2)
         default:
             return CGPoint(
@@ -585,9 +622,15 @@ struct BattleViewportCanvas: View {
             return currentSendOutState.usesSendOutAnchor ? sendOutAnchor : settled
         case .attackWindup where presentation.activeSide == .player && presentation.attackAnimation == nil:
             return CGPoint(x: settled.x + layout.size.width * 0.09, y: settled.y - 4)
-        case .attackImpact where presentation.activeSide == .player && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .player &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             return CGPoint(x: settled.x - layout.size.width * 0.02, y: settled.y)
-        case .attackImpact where presentation.activeSide == .enemy && presentation.attackAnimation == nil:
+        case .attackImpact
+            where presentation.activeSide == .enemy &&
+            presentation.attackAnimation == nil &&
+            presentation.applyingHitEffect == nil:
             return CGPoint(x: settled.x - layout.size.width * 0.03, y: settled.y + 2)
         default:
             return CGPoint(
@@ -683,6 +726,18 @@ struct BattleViewportCanvas: View {
         return attackAnimationVisualState
     }
 
+    static func resolvedApplyingHitEffectState(
+        applyingHitEffect: BattleApplyingHitEffectTelemetry?,
+        applyingHitEffectVisualState: BattleApplyingHitEffectVisualState,
+        animationTriggerKey: String,
+        activeAnimationKey: String?
+    ) -> BattleApplyingHitEffectVisualState {
+        guard applyingHitEffect != nil, activeAnimationKey == animationTriggerKey else {
+            return .idle
+        }
+        return applyingHitEffectVisualState
+    }
+
     @MainActor
     private func runSendOutAnimationSequence() async {
         guard presentation.stage == .enemySendOut else {
@@ -743,6 +798,26 @@ struct BattleViewportCanvas: View {
         }
 
         attackAnimationVisualState = .idle
+    }
+
+    @MainActor
+    private func runApplyingHitEffectSequence() async {
+        guard let applyingHitEffect = presentation.applyingHitEffect else {
+            activeApplyingHitEffectKey = nil
+            applyingHitEffectVisualState = .idle
+            return
+        }
+
+        let keyframes = BattleApplyingHitEffectTimeline.sequence(for: applyingHitEffect)
+        activeApplyingHitEffectKey = applyingHitEffectTriggerKey
+        applyingHitEffectVisualState = .idle
+
+        for keyframe in keyframes {
+            applyingHitEffectVisualState = keyframe.state
+            guard await sleepForAttackStep(keyframe.duration) else { return }
+        }
+
+        applyingHitEffectVisualState = .idle
     }
 
     private func sleepForSendOutStep(_ duration: TimeInterval) async -> Bool {

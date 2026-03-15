@@ -319,6 +319,77 @@ extension GameRuntime {
         }
     }
 
+    func makeApplyingHitEffect(
+        for action: ResolvedBattleAction,
+        move: MoveManifest
+    ) -> BattleApplyingHitEffectTelemetry? {
+        guard let kind = applyingHitEffectKind(for: action, move: move) else {
+            return nil
+        }
+
+        let frameCount = BattleApplyingHitEffectPlaybackDefaults.frameCount(for: kind)
+        return .init(
+            playbackID: UUID().uuidString,
+            kind: kind,
+            attackerSide: action.side,
+            totalDuration: battlePresentationDelay(
+                base: Double(frameCount) / BattleApplyingHitEffectPlaybackDefaults.framesPerSecond
+            )
+        )
+    }
+
+    func applyingHitEffectKind(
+        for action: ResolvedBattleAction,
+        move: MoveManifest
+    ) -> BattleApplyingHitEffectKind? {
+        guard action.didExecuteMove else {
+            return nil
+        }
+
+        let moveFailed = action.messages.contains { message in
+            message == "But it failed!" ||
+                message == "But it missed!" ||
+                message.hasPrefix("It doesn't affect ")
+        }
+        guard moveFailed == false else {
+            return nil
+        }
+
+        if move.power > 0 {
+            guard action.dealtDamage > 0 else {
+                return nil
+            }
+
+            if moveHasAdditionalAttackFeedback(effect: move.effect) {
+                return action.side == .player ? .shakeScreenHorizontalLight : .shakeScreenHorizontalHeavy
+            }
+            return action.side == .player ? .blinkDefender : .shakeScreenVertical
+        }
+
+        return action.side == .player ? .shakeScreenHorizontalSlow2 : .shakeScreenHorizontalSlow
+    }
+
+    func moveHasAdditionalAttackFeedback(effect: String) -> Bool {
+        if let descriptor = statStageEffectDescriptor(for: effect), descriptor.isSideEffect {
+            return true
+        }
+
+        if Self.burnSideEffects.contains(effect) ||
+            Self.freezeSideEffects.contains(effect) ||
+            Self.paralysisSideEffects.contains(effect) ||
+            Self.poisonSideEffects.contains(effect) ||
+            Self.flinchSideEffects.contains(effect) {
+            return true
+        }
+
+        switch effect {
+        case "CONFUSION_SIDE_EFFECT", "PAY_DAY_EFFECT":
+            return true
+        default:
+            return false
+        }
+    }
+
     private func cancelBattlePresentationTask() {
         battlePresentationTask?.cancel()
         battlePresentationTask = nil
@@ -384,7 +455,8 @@ extension GameRuntime {
         hidePlayerPokemon: Bool = false,
         meterAnimation: BattleMeterAnimationTelemetry?,
         transitionStyle: BattleTransitionStyle,
-        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil
+        attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
+        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil
     ) {
         battle.presentation.stage = stage
         battle.presentation.revision += 1
@@ -394,6 +466,7 @@ extension GameRuntime {
         battle.presentation.meterAnimation = meterAnimation
         battle.presentation.transitionStyle = transitionStyle
         battle.presentation.attackAnimation = attackAnimation
+        battle.presentation.applyingHitEffect = applyingHitEffect
     }
 
     func advanceBattlePresentationBatch(battle: inout RuntimeBattleState) {
@@ -532,7 +605,8 @@ extension GameRuntime {
             hidePlayerPokemon: beat.hidePlayerPokemon,
             meterAnimation: beat.meterAnimation,
             transitionStyle: beat.transitionStyle,
-            attackAnimation: beat.attackAnimation
+            attackAnimation: beat.attackAnimation,
+            applyingHitEffect: beat.applyingHitEffect
         )
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
@@ -730,6 +804,7 @@ extension GameRuntime {
             }
         }
 
+        let move = content.move(id: action.moveID)
         let skipAnimation = optionsBattleAnimation == .off
         let sourceMoveAnimation = skipAnimation ? nil : content.battleAnimation(moveID: action.moveID)
         let attackAnimationPlayback = sourceMoveAnimation.map {
@@ -750,35 +825,55 @@ extension GameRuntime {
         } else {
             moveAudioRequest = nil
         }
+        let applyingHitEffect = move.flatMap {
+            makeApplyingHitEffect(for: action, move: $0)
+        }
+        let fallbackMovePlaybackDelay = battlePresentationDelay(base: 30.0 / 60.0)
+        let movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
-                delay: battlePresentationDelay(base: 0),
-                stage: skipAnimation ? .resultText : .attackWindup,
+                delay: 0,
+                stage: .resultText,
                 uiVisibility: .visible,
                 activeSide: action.side,
-                attackAnimation: attackAnimationPlayback,
+                requiresConfirmAfterDisplay: true,
                 message: action.messages.first,
                 phase: .turnText,
                 playerPokemon: attackerPokemon,
-                enemyPokemon: enemyAttacker,
-                stagedSoundEffectRequests: stagedAttackSoundEffectRequests
+                enemyPokemon: enemyAttacker
             ),
         ]
 
-        if skipAnimation == false, attackAnimationPlayback == nil {
+        if skipAnimation == false {
             beats.append(
                 .init(
-                    delay: battlePresentationDelay(base: 0.22),
+                    delay: battlePresentationDelay(base: 3.0 / 60.0),
+                    stage: .attackWindup,
+                    uiVisibility: .visible,
+                    activeSide: action.side,
+                    attackAnimation: attackAnimationPlayback,
+                    phase: .resolvingTurn,
+                    soundEffectRequest: attackAnimationPlayback == nil ? moveAudioRequest : nil,
+                    stagedSoundEffectRequests: stagedAttackSoundEffectRequests
+                )
+            )
+        }
+
+        if let applyingHitEffect {
+            beats.append(
+                .init(
+                    delay: movePlaybackDelay,
                     stage: .attackImpact,
                     uiVisibility: .visible,
                     activeSide: action.side,
-                    soundEffectRequest: moveAudioRequest
+                    applyingHitEffect: applyingHitEffect,
+                    soundEffectRequest: skipAnimation ? moveAudioRequest : nil
                 )
             )
         }
 
         let trailingMessages = Array(action.messages.dropFirst())
-        let postAttackDelay = attackAnimationPlayback?.totalDuration ?? battlePresentationDelay(base: 0.18)
+        let postAttackDelay = applyingHitEffect?.totalDuration ?? movePlaybackDelay
         if action.dealtDamage > 0 {
             beats.append(
                 .init(
@@ -791,7 +886,7 @@ extension GameRuntime {
                     enemyPokemon: defenderMutationEnemy
                 )
             )
-        } else if defenderMutationPlayer != nil || defenderMutationEnemy != nil {
+        } else if trailingMessages.isEmpty == false {
             let statusMessage = trailingMessages.first
             beats.append(
                 .init(
