@@ -208,6 +208,46 @@ let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
         parentMapID: nil,
         isOutdoor: true
     ),
+    .init(
+        mapID: "ROUTE_4",
+        displayName: "Route 4",
+        objectFile: "data/maps/objects/Route4.asm",
+        blockFile: "maps/Route4.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "MT_MOON_POKECENTER",
+        displayName: "Mt. Moon Pokecenter",
+        objectFile: "data/maps/objects/MtMoonPokecenter.asm",
+        blockFile: "maps/MtMoonPokecenter.blk",
+        parentMapID: "ROUTE_4",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "MT_MOON_1F",
+        displayName: "Mt. Moon 1F",
+        objectFile: "data/maps/objects/MtMoon1F.asm",
+        blockFile: "maps/MtMoon1F.blk",
+        parentMapID: "ROUTE_4",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "MT_MOON_B1F",
+        displayName: "Mt. Moon B1F",
+        objectFile: "data/maps/objects/MtMoonB1F.asm",
+        blockFile: "maps/MtMoonB1F.blk",
+        parentMapID: "ROUTE_4",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "MT_MOON_B2F",
+        displayName: "Mt. Moon B2F",
+        objectFile: "data/maps/objects/MtMoonB2F.asm",
+        blockFile: "maps/MtMoonB2F.blk",
+        parentMapID: nil,
+        isOutdoor: false
+    ),
 ]
 
 let gameplayCoverageMapIDs = Set(gameplayCoverageMaps.map(\.mapID))

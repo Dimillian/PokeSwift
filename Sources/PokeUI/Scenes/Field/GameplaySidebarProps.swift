@@ -419,6 +419,30 @@ public struct OptionsSidebarProps: Equatable, Sendable {
     }
 }
 
+public struct PokedexSidebarEvolutionProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let displayName: String
+    public let triggerText: String
+
+    public init(id: String, displayName: String, triggerText: String) {
+        self.id = id
+        self.displayName = displayName
+        self.triggerText = triggerText
+    }
+}
+
+public struct PokedexSidebarLearnedMoveProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let levelText: String
+    public let displayName: String
+
+    public init(id: String, levelText: String, displayName: String) {
+        self.id = id
+        self.levelText = levelText
+        self.displayName = displayName
+    }
+}
+
 public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
     public let id: String
     public let dexNumber: Int
@@ -432,6 +456,9 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
     public let heightText: String?
     public let weightText: String?
     public let descriptionText: String?
+    public let preEvolution: PokedexSidebarEvolutionProps?
+    public let evolutions: [PokedexSidebarEvolutionProps]
+    public let learnedMoves: [PokedexSidebarLearnedMoveProps]
     public let detailFields: [PokedexSidebarDetailFieldProps]
     public let baseHP: Int
     public let baseAttack: Int
@@ -452,6 +479,9 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
         heightText: String? = nil,
         weightText: String? = nil,
         descriptionText: String? = nil,
+        preEvolution: PokedexSidebarEvolutionProps? = nil,
+        evolutions: [PokedexSidebarEvolutionProps] = [],
+        learnedMoves: [PokedexSidebarLearnedMoveProps] = [],
         detailFields: [PokedexSidebarDetailFieldProps] = [],
         baseHP: Int = 0,
         baseAttack: Int = 0,
@@ -471,6 +501,9 @@ public struct PokedexSidebarEntryProps: Identifiable, Equatable, Sendable {
         self.heightText = heightText
         self.weightText = weightText
         self.descriptionText = descriptionText
+        self.preEvolution = preEvolution
+        self.evolutions = evolutions
+        self.learnedMoves = learnedMoves
         self.detailFields = detailFields
         self.baseHP = baseHP
         self.baseAttack = baseAttack
@@ -639,6 +672,33 @@ public struct BattleSidebarProps: Equatable, Sendable {
 
     public var showsInterface: Bool {
         presentation.uiVisibility == .visible
+    }
+
+    public var showsEnemyCombatantStatus: Bool {
+        guard showsInterface else {
+            return false
+        }
+
+        if kind == .trainer, presentation.stage == .introReveal {
+            return false
+        }
+
+        return true
+    }
+
+    public var showsPlayerCombatantStatus: Bool {
+        guard showsInterface else {
+            return false
+        }
+
+        switch presentation.stage {
+        case .introReveal:
+            return false
+        case .enemySendOut where presentation.activeSide == .enemy:
+            return false
+        default:
+            return true
+        }
     }
 
     public var actionRows: [BattleSidebarActionRowProps] {
@@ -1017,6 +1077,9 @@ public enum GameplaySidebarPropsBuilder {
                 heightText: isOwned ? species.heightText : nil,
                 weightText: isOwned ? species.weightText : nil,
                 descriptionText: isOwned ? species.descriptionText : nil,
+                preEvolution: isOwned ? species.preEvolution : nil,
+                evolutions: isOwned ? species.evolutions : [],
+                learnedMoves: isOwned ? species.learnedMoves : [],
                 detailFields: isOwned
                     ? pokedexDetailFields(
                         heightText: species.heightText,
@@ -1068,6 +1131,9 @@ public enum GameplaySidebarPropsBuilder {
         public let heightText: String?
         public let weightText: String?
         public let descriptionText: String?
+        public let preEvolution: PokedexSidebarEvolutionProps?
+        public let evolutions: [PokedexSidebarEvolutionProps]
+        public let learnedMoves: [PokedexSidebarLearnedMoveProps]
         public let baseHP: Int
         public let baseAttack: Int
         public let baseDefense: Int
@@ -1079,6 +1145,9 @@ public enum GameplaySidebarPropsBuilder {
             primaryType: String, secondaryType: String?, spriteURL: URL?,
             speciesCategory: String?, heightText: String?, weightText: String?,
             descriptionText: String?,
+            preEvolution: PokedexSidebarEvolutionProps? = nil,
+            evolutions: [PokedexSidebarEvolutionProps] = [],
+            learnedMoves: [PokedexSidebarLearnedMoveProps] = [],
             baseHP: Int, baseAttack: Int, baseDefense: Int, baseSpeed: Int, baseSpecial: Int
         ) {
             self.id = id
@@ -1091,6 +1160,9 @@ public enum GameplaySidebarPropsBuilder {
             self.heightText = heightText
             self.weightText = weightText
             self.descriptionText = descriptionText
+            self.preEvolution = preEvolution
+            self.evolutions = evolutions
+            self.learnedMoves = learnedMoves
             self.baseHP = baseHP
             self.baseAttack = baseAttack
             self.baseDefense = baseDefense
