@@ -49,13 +49,46 @@ public struct WarpManifest: Codable, Equatable, Sendable {
     public let targetMapID: String
     public let targetPosition: TilePoint
     public let targetFacing: FacingDirection
+    public let targetWarpIndex: Int?
+    public let usesPreviousMapTarget: Bool
 
-    public init(id: String, origin: TilePoint, targetMapID: String, targetPosition: TilePoint, targetFacing: FacingDirection) {
+    public init(
+        id: String,
+        origin: TilePoint,
+        targetMapID: String,
+        targetPosition: TilePoint,
+        targetFacing: FacingDirection,
+        targetWarpIndex: Int? = nil,
+        usesPreviousMapTarget: Bool = false
+    ) {
         self.id = id
         self.origin = origin
         self.targetMapID = targetMapID
         self.targetPosition = targetPosition
         self.targetFacing = targetFacing
+        self.targetWarpIndex = targetWarpIndex
+        self.usesPreviousMapTarget = usesPreviousMapTarget
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case origin
+        case targetMapID
+        case targetPosition
+        case targetFacing
+        case targetWarpIndex
+        case usesPreviousMapTarget
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        origin = try container.decode(TilePoint.self, forKey: .origin)
+        targetMapID = try container.decode(String.self, forKey: .targetMapID)
+        targetPosition = try container.decode(TilePoint.self, forKey: .targetPosition)
+        targetFacing = try container.decode(FacingDirection.self, forKey: .targetFacing)
+        targetWarpIndex = try container.decodeIfPresent(Int.self, forKey: .targetWarpIndex)
+        usesPreviousMapTarget = try container.decodeIfPresent(Bool.self, forKey: .usesPreviousMapTarget) ?? false
     }
 }
 
@@ -1365,8 +1398,14 @@ public struct WildEncounterSlotManifest: Codable, Equatable, Sendable {
     }
 }
 
+public enum WildEncounterSurface: String, Codable, Equatable, Sendable {
+    case grass
+    case floor
+}
+
 public struct WildEncounterTableManifest: Codable, Equatable, Sendable {
     public let mapID: String
+    public let landEncounterSurface: WildEncounterSurface
     public let grassEncounterRate: Int
     public let waterEncounterRate: Int
     public let grassSlots: [WildEncounterSlotManifest]
@@ -1374,16 +1413,37 @@ public struct WildEncounterTableManifest: Codable, Equatable, Sendable {
 
     public init(
         mapID: String,
+        landEncounterSurface: WildEncounterSurface = .grass,
         grassEncounterRate: Int,
         waterEncounterRate: Int,
         grassSlots: [WildEncounterSlotManifest],
         waterSlots: [WildEncounterSlotManifest]
     ) {
         self.mapID = mapID
+        self.landEncounterSurface = landEncounterSurface
         self.grassEncounterRate = grassEncounterRate
         self.waterEncounterRate = waterEncounterRate
         self.grassSlots = grassSlots
         self.waterSlots = waterSlots
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mapID
+        case landEncounterSurface
+        case grassEncounterRate
+        case waterEncounterRate
+        case grassSlots
+        case waterSlots
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        mapID = try container.decode(String.self, forKey: .mapID)
+        landEncounterSurface = try container.decodeIfPresent(WildEncounterSurface.self, forKey: .landEncounterSurface) ?? .grass
+        grassEncounterRate = try container.decode(Int.self, forKey: .grassEncounterRate)
+        waterEncounterRate = try container.decode(Int.self, forKey: .waterEncounterRate)
+        grassSlots = try container.decode([WildEncounterSlotManifest].self, forKey: .grassSlots)
+        waterSlots = try container.decode([WildEncounterSlotManifest].self, forKey: .waterSlots)
     }
 }
 

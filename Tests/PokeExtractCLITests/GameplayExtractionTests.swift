@@ -31,6 +31,11 @@ final class GameplayExtractionTests: XCTestCase {
             "MUSEUM_2F",
             "PEWTER_GYM",
             "ROUTE_3",
+            "ROUTE_4",
+            "MT_MOON_POKECENTER",
+            "MT_MOON_1F",
+            "MT_MOON_B1F",
+            "MT_MOON_B2F",
         ])
         XCTAssertEqual(manifest.playerStart.mapID, "REDS_HOUSE_2F")
         XCTAssertEqual(manifest.playerStart.position, .init(x: 4, y: 4))
@@ -38,7 +43,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
         XCTAssertEqual(
             manifest.tilesets.map(\.id),
-            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "DOJO", "GYM", "FOREST", "FOREST_GATE", "GATE", "MUSEUM", "HOUSE", "MART", "POKECENTER"]
+            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "CAVERN", "DOJO", "GYM", "FOREST", "FOREST_GATE", "GATE", "MUSEUM", "HOUSE", "MART", "POKECENTER"]
         )
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.imagePath, "Assets/field/tilesets/house.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
@@ -47,6 +52,9 @@ final class GameplayExtractionTests: XCTestCase {
         let overworldSpriteIDs = manifest.overworldSprites.map(\.id)
         XCTAssertEqual(Set(overworldSpriteIDs).count, overworldSpriteIDs.count)
         let referencedSpriteIDs = Set(manifest.maps.flatMap(\.objects).map(\.sprite))
+        for map in manifest.maps {
+            XCTAssertEqual(Set(map.objects.map(\.id)).count, map.objects.count, "duplicate object ids in \(map.id)")
+        }
         let missingSpriteIDs = referencedSpriteIDs.subtracting(overworldSpriteIDs)
         XCTAssertTrue(
             missingSpriteIDs.isEmpty,
@@ -118,6 +126,18 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_2ND_ROUTE22_RIVAL_BATTLE",
                 "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
                 "EVENT_BEAT_BROCK",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_0",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_1",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_2",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_3",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_4",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_5",
+                "EVENT_BEAT_MT_MOON_1_TRAINER_6",
+                "EVENT_BEAT_MT_MOON_3_TRAINER_0",
+                "EVENT_BEAT_MT_MOON_3_TRAINER_1",
+                "EVENT_BEAT_MT_MOON_3_TRAINER_2",
+                "EVENT_BEAT_MT_MOON_3_TRAINER_3",
+                "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD",
                 "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
                 "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
                 "EVENT_BEAT_ROUTE22_RIVAL_2ND_BATTLE",
@@ -129,12 +149,15 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_BEAT_ROUTE_3_TRAINER_5",
                 "EVENT_BEAT_ROUTE_3_TRAINER_6",
                 "EVENT_BEAT_ROUTE_3_TRAINER_7",
+                "EVENT_BEAT_ROUTE_4_TRAINER_0",
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
                 "EVENT_BOUGHT_MUSEUM_TICKET",
                 "EVENT_FOLLOWED_OAK_INTO_LAB",
                 "EVENT_FOLLOWED_OAK_INTO_LAB_2",
+                "EVENT_GOT_DOME_FOSSIL",
+                "EVENT_GOT_HELIX_FOSSIL",
                 "EVENT_GOT_OAKS_PARCEL",
                 "EVENT_GOT_POKEDEX",
                 "EVENT_GOT_POTION_SAMPLE",
@@ -182,7 +205,11 @@ final class GameplayExtractionTests: XCTestCase {
             "route_22_rival_1_challenge_6_lower",
             "route_22_rival_1_exit_upper",
             "route_22_rival_1_exit_lower",
+                "mt_moon_b2f_super_nerd_battle",
+                "mt_moon_b2f_take_dome_fossil",
+                "mt_moon_b2f_take_helix_fossil",
             "pewter_pokecenter_nurse_heal",
+                "mt_moon_pokecenter_nurse_heal",
         ])
         XCTAssertEqual(
             manifest.fieldInteractions,
@@ -226,6 +253,25 @@ final class GameplayExtractionTests: XCTestCase {
                     )
                 ),
                 .init(
+                    id: "mt_moon_pokecenter_pokemon_center_healing",
+                    kind: .pokemonCenterHealing,
+                    introDialogueID: "pokemon_center_welcome",
+                    prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
+                    acceptedDialogueID: "pokemon_center_need_your_pokemon",
+                    successDialogueID: "pokemon_center_fighting_fit",
+                    farewellDialogueID: "pokemon_center_farewell",
+                    healingSequence: .init(
+                        nurseObjectID: "mt_moon_pokecenter_nurse",
+                        machineSoundEffectID: "SFX_HEALING_MACHINE",
+                        healedAudioCueID: "pokemon_center_healed",
+                        blackoutCheckpoint: .init(
+                            mapID: "ROUTE_4",
+                            position: .init(x: 11, y: 6),
+                            facing: .down
+                        )
+                    )
+                ),
+                .init(
                     id: "museum_1f_admission",
                     kind: .paidAdmission,
                     introDialogueID: "museum1_f_scientist1_would_you_like_to_come_in",
@@ -251,6 +297,10 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(
             manifest.scripts.first { $0.id == "pewter_pokecenter_nurse_heal" }?.steps,
             [.init(action: "startFieldInteraction", fieldInteractionID: "pewter_pokecenter_pokemon_center_healing")]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "mt_moon_pokecenter_nurse_heal" }?.steps,
+            [.init(action: "startFieldInteraction", fieldInteractionID: "mt_moon_pokecenter_pokemon_center_healing")]
         )
         XCTAssertEqual(
             oaksLab.objects.first { $0.id == "oaks_lab_girl" }?.movementBehavior,
@@ -404,7 +454,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "SURF" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "THUNDERBOLT" })
-        XCTAssertEqual(manifest.items.count, 99)
+        XCTAssertEqual(manifest.items.count, 102)
         XCTAssertFalse(manifest.items.contains { $0.id.contains("\\") })
         XCTAssertEqual(manifest.items.first?.id, "MASTER_BALL")
         XCTAssertEqual(manifest.items.first?.displayName, "MASTER BALL")
@@ -424,8 +474,8 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(tmBide.displayName, "TM34")
         XCTAssertFalse(tmBide.isKeyItem)
         XCTAssertEqual(tmBide.price, 2000)
-        XCTAssertEqual(manifest.items.last?.id, "TM_DREAM_EATER")
-        XCTAssertEqual(manifest.items.last?.displayName, "TM42")
+        XCTAssertEqual(manifest.items.last?.id, "TM_WHIRLWIND")
+        XCTAssertEqual(manifest.items.last?.displayName, "TM04")
         XCTAssertEqual(charmander.catchRate, 45)
         XCTAssertEqual(pidgey.catchRate, 255)
         XCTAssertFalse(manifest.typeEffectiveness.isEmpty)
@@ -447,15 +497,28 @@ final class GameplayExtractionTests: XCTestCase {
                 "opp_bug_catcher_4",
                 "opp_bug_catcher_5",
                 "opp_bug_catcher_6",
+                "opp_bug_catcher_7",
+                "opp_bug_catcher_8",
+                "opp_hiker_1",
                 "opp_jr_trainer_m_1",
                 "opp_lass_1",
                 "opp_lass_2",
                 "opp_lass_3",
+                "opp_lass_4",
+                "opp_lass_5",
+                "opp_lass_6",
                 "opp_rival1_1",
                 "opp_rival1_2",
                 "opp_rival1_3",
+                "opp_rocket_1",
+                "opp_rocket_2",
+                "opp_rocket_3",
+                "opp_rocket_4",
+                "opp_super_nerd_1",
+                "opp_super_nerd_2",
                 "opp_youngster_1",
                 "opp_youngster_2",
+                "opp_youngster_3",
                 "route_22_rival_1_4_lower",
                 "route_22_rival_1_4_upper",
                 "route_22_rival_1_5_lower",
@@ -490,6 +553,15 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.completionFlagID, "EVENT_BEAT_BROCK")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.postBattleScriptID, "pewter_gym_brock_reward")
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_super_nerd_2" }?.party,
+            [.init(speciesID: "GRIMER", level: 12), .init(speciesID: "VOLTORB", level: 12), .init(speciesID: "KOFFING", level: 12)]
+        )
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_super_nerd_2" }?.trainerSpritePath,
+            "Assets/battle/trainers/supernerd.png"
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_super_nerd_2" }?.completionFlagID, "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
         XCTAssertEqual(
             manifest.trainerBattles.first { $0.id == "route_22_rival_1_4_upper" }?.party,
             [.init(speciesID: "PIDGEY", level: 9), .init(speciesID: "SQUIRTLE", level: 8)]
@@ -957,6 +1029,76 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(route3Encounters.waterEncounterRate, 0)
         XCTAssertTrue(Set(route3Encounters.grassSlots.map(\.speciesID)).isSuperset(of: Set(["PIDGEY", "SPEAROW", "JIGGLYPUFF"])))
 
+        let route4 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_4" })
+        XCTAssertEqual(route4.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(route4.connections.map(\.targetMapID), ["ROUTE_3", "CERULEAN_CITY"])
+        XCTAssertEqual(route4.warps.first?.targetMapID, "MT_MOON_POKECENTER")
+        XCTAssertEqual(route4.warps[1].targetMapID, "MT_MOON_1F")
+        XCTAssertEqual(route4.warps[2].targetMapID, "MT_MOON_B1F")
+        XCTAssertEqual(route4.objects.map(\.id), ["route4_cooltrainer_f1", "route4_cooltrainer_f2", "route_4_tm_whirlwind"])
+        XCTAssertEqual(route4.objects.first { $0.id == "route4_cooltrainer_f2" }?.trainerBattleID, "opp_lass_4")
+        XCTAssertEqual(route4.objects.first { $0.id == "route_4_tm_whirlwind" }?.pickupItemID, "TM_WHIRLWIND")
+
+        let mtMoonPokecenter = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_POKECENTER" })
+        XCTAssertEqual(mtMoonPokecenter.tileset, "POKECENTER")
+        XCTAssertTrue(mtMoonPokecenter.warps.allSatisfy(\.usesPreviousMapTarget))
+        XCTAssertEqual(mtMoonPokecenter.objects.first { $0.id == "mt_moon_pokecenter_nurse" }?.interactionScriptID, "mt_moon_pokecenter_nurse_heal")
+
+        let mtMoon1F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_1F" })
+        XCTAssertEqual(mtMoon1F.tileset, "CAVERN")
+        XCTAssertTrue(mtMoon1F.warps.prefix(2).allSatisfy(\.usesPreviousMapTarget))
+        XCTAssertEqual(mtMoon1F.objects.first { $0.id == "mt_moon1_f_hiker" }?.trainerBattleID, "opp_hiker_1")
+        XCTAssertEqual(mtMoon1F.objects.first { $0.id == "mt_moon1_f_super_nerd" }?.trainerBattleID, "opp_super_nerd_1")
+        XCTAssertEqual(mtMoon1F.objects.first { $0.id == "mt_moon_1f_tm_water_gun" }?.pickupItemID, "TM_WATER_GUN")
+
+        let mtMoonB1F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_B1F" })
+        XCTAssertEqual(mtMoonB1F.tileset, "CAVERN")
+        XCTAssertTrue(mtMoonB1F.warps.last?.usesPreviousMapTarget ?? false)
+
+        let mtMoonB2F = try XCTUnwrap(manifest.maps.first { $0.id == "MT_MOON_B2F" })
+        XCTAssertEqual(mtMoonB2F.tileset, "CAVERN")
+        XCTAssertEqual(mtMoonB2F.objects.map(\.id), [
+            "mt_moon_b2f_super_nerd",
+            "mt_moon_b2f_rocket_1",
+            "mt_moon_b2f_rocket_2",
+            "mt_moon_b2f_rocket_3",
+            "mt_moon_b2f_rocket_4",
+            "mt_moon_b2f_dome_fossil",
+            "mt_moon_b2f_helix_fossil",
+            "mt_moon_b2f_hp_up",
+            "mt_moon_b2f_tm_mega_punch",
+        ])
+        XCTAssertEqual(mtMoonB2F.objects.first { $0.id == "mt_moon_b2f_super_nerd" }?.interactionScriptID, "mt_moon_b2f_super_nerd_battle")
+        XCTAssertEqual(mtMoonB2F.objects.first { $0.id == "mt_moon_b2f_dome_fossil" }?.interactionScriptID, "mt_moon_b2f_take_dome_fossil")
+        XCTAssertEqual(mtMoonB2F.objects.first { $0.id == "mt_moon_b2f_helix_fossil" }?.interactionScriptID, "mt_moon_b2f_take_helix_fossil")
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "MT_MOON_B2F" }?.triggers,
+            [
+                .init(
+                    id: "super_nerd_claims_fossils",
+                    scriptID: "mt_moon_b2f_super_nerd_battle",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD"),
+                        .init(kind: "playerXEquals", intValue: 13),
+                        .init(kind: "playerYEquals", intValue: 8),
+                    ]
+                ),
+            ]
+        )
+
+        let mtMoon1FEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "MT_MOON_1F" })
+        XCTAssertEqual(mtMoon1FEncounters.landEncounterSurface, .floor)
+        XCTAssertEqual(mtMoon1FEncounters.grassEncounterRate, 10)
+        XCTAssertTrue(Set(mtMoon1FEncounters.grassSlots.map(\.speciesID)).isSuperset(of: Set(["ZUBAT", "GEODUDE", "PARAS", "CLEFAIRY"])))
+
+        let mtMoonB1FEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "MT_MOON_B1F" })
+        XCTAssertEqual(mtMoonB1FEncounters.landEncounterSurface, .floor)
+        XCTAssertEqual(mtMoonB1FEncounters.grassEncounterRate, 10)
+
+        let mtMoonB2FEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "MT_MOON_B2F" })
+        XCTAssertEqual(mtMoonB2FEncounters.landEncounterSurface, .floor)
+        XCTAssertEqual(mtMoonB2FEncounters.grassEncounterRate, 10)
+
         let redSprite = try XCTUnwrap(manifest.overworldSprites.first { $0.id == "SPRITE_RED" })
         XCTAssertEqual(redSprite.walkingFrames?.down, .init(x: 0, y: 48, width: 16, height: 16))
         XCTAssertEqual(redSprite.walkingFrames?.up, .init(x: 0, y: 64, width: 16, height: 16))
@@ -994,6 +1136,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_dex_added" }?.pages.first?.events, [.init(kind: .soundEffect, soundEffectID: "SFX_DEX_PAGE_ADDED")])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_transferred_bill_pc" }?.pages.first?.lines, ["{capturedPokemon} was", "transferred to", "BILL's PC!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_transferred_someone_pc" }?.pages.first?.lines, ["{capturedPokemon} was", "transferred to", "someone's PC!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_dome_fossil_you_want" }?.pages.first?.lines, ["You want the", "DOME FOSSIL?"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_received_fossil" }?.pages.first?.lines, ["<PLAYER> got the", "{wStringBuffer}!"])
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "mt_moon_b2f_received_fossil" }?.pages.first?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_super_nerd_ok_ill_share" }?.pages.first?.lines, ["OK!", "I'll share!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_super_nerd_each_take_one" }?.pages.first?.lines, ["We'll each take", "one!", "No being greedy!"])
 
         let extractedDialogueIDs = Set(manifest.dialogues.map(\.id))
         let parcelHandoff = try XCTUnwrap(manifest.scripts.first { $0.id == "oaks_lab_parcel_handoff" })
@@ -1034,15 +1184,15 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(first, second)
 
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
-        XCTAssertEqual(decoded.maps.count, 25)
-        XCTAssertEqual(decoded.tilesets.count, 12)
-        XCTAssertEqual(decoded.overworldSprites.count, 33)
-        XCTAssertEqual(decoded.items.count, 99)
+        XCTAssertEqual(decoded.maps.count, 30)
+        XCTAssertEqual(decoded.tilesets.count, 13)
+        XCTAssertEqual(decoded.overworldSprites.count, 35)
+        XCTAssertEqual(decoded.items.count, 102)
         XCTAssertEqual(decoded.marts.count, 2)
-        XCTAssertEqual(decoded.wildEncounterTables.count, 5)
-        XCTAssertEqual(decoded.fieldInteractions.count, 3)
-        XCTAssertEqual(decoded.trainerBattles.count, 22)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 31)
+        XCTAssertEqual(decoded.wildEncounterTables.count, 9)
+        XCTAssertEqual(decoded.fieldInteractions.count, 4)
+        XCTAssertEqual(decoded.trainerBattles.count, 35)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 46)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })

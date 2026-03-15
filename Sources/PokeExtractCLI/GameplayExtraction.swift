@@ -35,7 +35,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let species = try buildSpecies(repoRoot: source.repoRoot)
     let moves = try buildMoves(repoRoot: source.repoRoot)
     let typeEffectiveness = try buildTypeEffectiveness(repoRoot: source.repoRoot)
-    let wildEncounterTables = try buildWildEncounterTables(repoRoot: source.repoRoot)
+    let wildEncounterTables = try buildWildEncounterTables(repoRoot: source.repoRoot, maps: maps)
     let trainerAIMoveChoiceModifications = try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot)
     let trainerBattles = try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID)
     let eventFlags = try parseEventFlags(
@@ -602,6 +602,7 @@ private func parseCollisionSets(repoRoot: URL) throws -> [String: [Int]] {
 private func collisionKey(for tileset: String) -> String {
     switch tileset {
     case "OVERWORLD": return "Overworld_Coll"
+    case "CAVERN": return "Cavern_Coll"
     case "REDS_HOUSE_1": return "RedsHouse1_Coll"
     case "REDS_HOUSE_2": return "RedsHouse2_Coll"
     case "DOJO": return "Dojo_Coll"
@@ -620,6 +621,7 @@ private func collisionKey(for tileset: String) -> String {
 private func tilesetLabel(for tileset: String) -> String {
     switch tileset {
     case "OVERWORLD": return "Overworld"
+    case "CAVERN": return "Cavern"
     case "REDS_HOUSE_1": return "RedsHouse1"
     case "REDS_HOUSE_2": return "RedsHouse2"
     case "DOJO": return "Dojo"
@@ -746,6 +748,7 @@ private func resolveMapWarps(
 
     return try drafts.map { draft in
         let warps = try draft.rawWarps.enumerated().map { index, rawWarp in
+            let usesPreviousMapTarget = warpUsesPreviousMapTarget(from: draft, rawWarp: rawWarp)
             let targetMapID = resolveTargetMapID(from: draft, rawWarp: rawWarp, rawTargetMapID: rawWarp.rawTargetMapID)
             let targetPosition = try resolveTargetWarpPosition(
                 currentMapID: draft.id,
@@ -766,7 +769,9 @@ private func resolveMapWarps(
                 origin: rawWarp.origin,
                 targetMapID: targetMapID,
                 targetPosition: targetPosition,
-                targetFacing: targetFacing
+                targetFacing: targetFacing,
+                targetWarpIndex: rawWarp.targetWarp - 1,
+                usesPreviousMapTarget: usesPreviousMapTarget
             )
         }
 
@@ -849,6 +854,10 @@ private func resolveTargetMapID(
     }
 
     return currentMap.parentMapID ?? rawTargetMapID
+}
+
+private func warpUsesPreviousMapTarget(from currentMap: MapManifestDraft, rawWarp: RawWarpEntry) -> Bool {
+    rawWarp.rawTargetMapID == "LAST_MAP" && currentMap.id != "ROUTE_22_GATE"
 }
 
 private func resolveTargetWarpPosition(
@@ -934,6 +943,15 @@ private func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             blockTileWidth: 4,
             blockTileHeight: 4,
             collision: tilesetCollisionManifest(for: "OVERWORLD", parsed: collisionData)
+        ),
+        .init(
+            id: "CAVERN",
+            imagePath: "Assets/field/tilesets/cavern.png",
+            blocksetPath: "Assets/field/blocksets/cavern.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "CAVERN", parsed: collisionData)
         ),
         .init(
             id: "DOJO",
@@ -1187,7 +1205,9 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_LINK_RECEPTIONIST", imagePath: "Assets/field/sprites/link_receptionist.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_MIDDLE_AGED_MAN", imagePath: "Assets/field/sprites/middle_aged_man.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_MONSTER", imagePath: "Assets/field/sprites/monster.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_ROCKET", imagePath: "Assets/field/sprites/rocket.png", hasWalkingFrames: true),
         buildStaticOverworldSprite(id: "SPRITE_OLD_AMBER", imagePath: "Assets/field/sprites/old_amber.png"),
+        buildStaticOverworldSprite(id: "SPRITE_FOSSIL", imagePath: "Assets/field/sprites/fossil.png"),
         .init(
             id: "SPRITE_POKE_BALL",
             imagePath: "Assets/field/sprites/poke_ball.png",
@@ -1534,6 +1554,15 @@ private func objectIDFor(
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_COOLTRAINER_M"): return "pewter_gym_cooltrainer_m"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_gym_guide"
+    case ("MT_MOON_1F", "TEXT_MTMOON1F_POTION1"): return "mt_moon_1f_potion_1"
+    case ("MT_MOON_1F", "TEXT_MTMOON1F_POTION2"): return "mt_moon_1f_potion_2"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_SUPER_NERD"): return "mt_moon_b2f_super_nerd"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_ROCKET1"): return "mt_moon_b2f_rocket_1"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_ROCKET2"): return "mt_moon_b2f_rocket_2"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_ROCKET3"): return "mt_moon_b2f_rocket_3"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_ROCKET4"): return "mt_moon_b2f_rocket_4"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_DOME_FOSSIL"): return "mt_moon_b2f_dome_fossil"
+    case ("MT_MOON_B2F", "TEXT_MTMOONB2F_HELIX_FOSSIL"): return "mt_moon_b2f_helix_fossil"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_NURSE"): return "viridian_pokecenter_nurse"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
@@ -1602,6 +1631,12 @@ private func interactionScriptID(for objectID: String, mapID: String, sprite: St
     switch objectID {
     case "viridian_pokecenter_nurse":
         return "viridian_pokecenter_nurse_heal"
+    case "mt_moon_b2f_super_nerd":
+        return "mt_moon_b2f_super_nerd_battle"
+    case "mt_moon_b2f_dome_fossil":
+        return "mt_moon_b2f_take_dome_fossil"
+    case "mt_moon_b2f_helix_fossil":
+        return "mt_moon_b2f_take_helix_fossil"
     default:
         if sprite == "SPRITE_NURSE" {
             return pokemonCenterHealScriptID(for: mapID)
@@ -1660,6 +1695,21 @@ private func interactionTriggers(
                 dialogueID: "oaks_lab_oak_which_pokemon_do_you_want"
             ),
             .init(dialogueID: "oaks_lab_oak_choose_mon"),
+        ]
+    case "mt_moon_b2f_super_nerd":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_DOME_FOSSIL")],
+                dialogueID: "mt_moon_b2f_super_nerd_theres_a_pokemon_lab"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_HELIX_FOSSIL")],
+                dialogueID: "mt_moon_b2f_super_nerd_theres_a_pokemon_lab"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")],
+                dialogueID: "mt_moon_b2f_super_nerd_each_take_one"
+            ),
         ]
     case "route_1_youngster_1":
         return [
@@ -1869,7 +1919,7 @@ private func trainerBattleIDFor(trainerClass: String?, trainerNumber: Int?) -> S
 
 private func usesScriptedTrainerBattle(objectID: String) -> Bool {
     switch objectID {
-    case "route_22_rival_1", "route_22_rival_2", "pewter_gym_brock":
+    case "route_22_rival_1", "route_22_rival_2", "pewter_gym_brock", "mt_moon_b2f_super_nerd":
         return true
     default:
         return false
@@ -2068,6 +2118,7 @@ private func buildDialogues(
     let viridianForest = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForest.asm"))
     let viridianForestNorthGate = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForestNorthGate.asm"))
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
+    let mtMoonB2F = try String(contentsOf: repoRoot.appendingPathComponent("text/MtMoonB2F.asm"))
     let text1 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_1.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
     let text3 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_3.asm"))
@@ -2137,6 +2188,26 @@ private func buildDialogues(
         try extractDialogue(id: "viridian_forest_leaving_sign", label: "_ViridianForestLeavingSignText", from: viridianForest),
         try extractDialogue(id: "viridian_forest_north_gate_super_nerd", label: "_ViridianForestNorthGateSuperNerdText", from: viridianForestNorthGate),
         try extractDialogue(id: "viridian_forest_north_gate_gramps", label: "_ViridianForestNorthGateGrampsText", from: viridianForestNorthGate),
+        try extractDialogue(id: "mt_moon_b2f_dome_fossil_you_want", label: "_MtMoonB2FDomeFossilYouWantText", from: mtMoonB2F),
+        try extractDialogue(id: "mt_moon_b2f_helix_fossil_you_want", label: "_MtMoonB2FHelixFossilYouWantText", from: mtMoonB2F),
+        try extractDialogue(
+            id: "mt_moon_b2f_received_fossil",
+            label: "_MtMoonB2FReceivedFossilText",
+            from: mtMoonB2F,
+            placeholderMap: ["wStringBuffer": "wStringBuffer"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        ),
+        try extractDialogue(id: "mt_moon_b2f_you_have_no_room", label: "_MtMoonB2FYouHaveNoRoomText", from: mtMoonB2F),
+        try extractDialogue(id: "mt_moon_b2f_super_nerd_theyre_both_mine", label: "_MtMoonB2FSuperNerdTheyreBothMineText", from: mtMoonB2F),
+        try extractDialogue(id: "mt_moon_b2f_super_nerd_ok_ill_share", label: "_MtMoonB2FSuperNerdOkIllShareText", from: mtMoonB2F),
+        try extractDialogue(id: "mt_moon_b2f_super_nerd_each_take_one", label: "_MtMoonB2fSuperNerdEachTakeOneText", from: mtMoonB2F),
+        try extractDialogue(id: "mt_moon_b2f_super_nerd_theres_a_pokemon_lab", label: "_MtMoonB2FSuperNerdTheresAPokemonLabText", from: mtMoonB2F),
+        try extractDialogue(
+            id: "mt_moon_b2f_super_nerd_then_this_is_mine",
+            label: "_MtMoonB2FSuperNerdThenThisIsMineText",
+            from: mtMoonB2F,
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        ),
         try extractDialogue(id: "pickup_no_room", label: "_NoMoreRoomForItemText", from: text1),
         try extractDialogue(
             id: "evolution_evolved",
@@ -3085,6 +3156,20 @@ private func buildMapScripts() -> [MapScriptManifest] {
                 ),
             ]
         ),
+        MapScriptManifest(
+            mapID: "MT_MOON_B2F",
+            triggers: [
+                .init(
+                    id: "super_nerd_claims_fossils",
+                    scriptID: "mt_moon_b2f_super_nerd_battle",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD"),
+                        .init(kind: "playerXEquals", intValue: 13),
+                        .init(kind: "playerYEquals", intValue: 8),
+                    ]
+                ),
+            ]
+        ),
     ]
 }
 
@@ -3602,6 +3687,56 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
                 .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
                 .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
                 .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+
+    scripts.append(
+        ScriptManifest(
+            id: "mt_moon_b2f_super_nerd_battle",
+            steps: [
+                .init(action: "faceObject", stringValue: "right", objectID: "mt_moon_b2f_super_nerd"),
+                .init(action: "facePlayer", stringValue: "left"),
+                .init(action: "showDialogue", dialogueID: "mt_moon_b2f_super_nerd_theyre_both_mine"),
+                .init(action: "startBattle", battleID: "opp_super_nerd_2"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "mt_moon_b2f_take_dome_fossil",
+            steps: [
+                .init(
+                    action: "promptItemPickup",
+                    stringValue: "DOME_FOSSIL",
+                    objectID: "mt_moon_b2f_dome_fossil",
+                    dialogueID: "mt_moon_b2f_dome_fossil_you_want",
+                    successDialogueID: "mt_moon_b2f_received_fossil",
+                    failureDialogueID: "mt_moon_b2f_you_have_no_room",
+                    successFlagID: "EVENT_GOT_DOME_FOSSIL"
+                ),
+                .init(action: "moveObject", path: [.right], objectID: "mt_moon_b2f_super_nerd"),
+                .init(action: "showDialogue", dialogueID: "mt_moon_b2f_super_nerd_then_this_is_mine"),
+                .init(action: "setObjectVisibility", objectID: "mt_moon_b2f_helix_fossil", visible: false),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "mt_moon_b2f_take_helix_fossil",
+            steps: [
+                .init(
+                    action: "promptItemPickup",
+                    stringValue: "HELIX_FOSSIL",
+                    objectID: "mt_moon_b2f_helix_fossil",
+                    dialogueID: "mt_moon_b2f_helix_fossil_you_want",
+                    successDialogueID: "mt_moon_b2f_received_fossil",
+                    failureDialogueID: "mt_moon_b2f_you_have_no_room",
+                    successFlagID: "EVENT_GOT_HELIX_FOSSIL"
+                ),
+                .init(action: "moveObject", path: [.up], objectID: "mt_moon_b2f_super_nerd"),
+                .init(action: "showDialogue", dialogueID: "mt_moon_b2f_super_nerd_then_this_is_mine"),
+                .init(action: "setObjectVisibility", objectID: "mt_moon_b2f_dome_fossil", visible: false),
             ]
         )
     )
@@ -4686,28 +4821,38 @@ private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {
     }
 }
 
-private func buildWildEncounterTables(repoRoot: URL) throws -> [WildEncounterTableManifest] {
-    try gameplayCoverageMaps.compactMap { definition in
+private func buildWildEncounterTables(repoRoot: URL, maps: [MapManifest]) throws -> [WildEncounterTableManifest] {
+    let mapsByID = Dictionary(uniqueKeysWithValues: maps.map { ($0.id, $0) })
+
+    return try gameplayCoverageMaps.compactMap { definition in
         guard let path = wildEncounterPath(for: definition, repoRoot: repoRoot) else {
             return nil
         }
+        guard let map = mapsByID[definition.mapID] else {
+            throw ExtractorError.invalidArguments("missing map manifest for wild encounters on \(definition.mapID)")
+        }
         return try parseWildEncounterTable(
             repoRoot: repoRoot,
-            mapID: definition.mapID,
+            map: map,
             path: path
         )
     }
 }
 
-private func parseWildEncounterTable(repoRoot: URL, mapID: String, path: String) throws -> WildEncounterTableManifest {
+private func parseWildEncounterTable(repoRoot: URL, map: MapManifest, path: String) throws -> WildEncounterTableManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(path))
     return WildEncounterTableManifest(
-        mapID: mapID,
+        mapID: map.id,
+        landEncounterSurface: landEncounterSurface(for: map),
         grassEncounterRate: try parseEncounterRate(label: "def_grass_wildmons", in: contents),
         waterEncounterRate: try parseEncounterRate(label: "def_water_wildmons", in: contents),
         grassSlots: parseEncounterSlots(from: contents, startMarker: "def_grass_wildmons", endMarker: "end_grass_wildmons"),
         waterSlots: parseEncounterSlots(from: contents, startMarker: "def_water_wildmons", endMarker: "end_water_wildmons")
     )
+}
+
+private func landEncounterSurface(for map: MapManifest) -> WildEncounterSurface {
+    map.tileset == "CAVERN" ? .floor : .grass
 }
 
 private func parseEncounterRate(label: String, in contents: String) throws -> Int {
@@ -4771,6 +4916,8 @@ private func buildTrainerBattles(
         .value(for: "OPP_RIVAL1", missingMessage: "missing trainer metadata for OPP_RIVAL1")
     let brockClassMetadata = try trainerClassMetadataByID
         .value(for: "OPP_BROCK", missingMessage: "missing trainer metadata for OPP_BROCK")
+    let superNerdClassMetadata = try trainerClassMetadataByID
+        .value(for: "OPP_SUPER_NERD", missingMessage: "missing trainer metadata for OPP_SUPER_NERD")
 
     var battlesByID: [String: TrainerBattleManifest] = [:]
 
@@ -4861,6 +5008,27 @@ private func buildTrainerBattles(
         preventsBlackoutOnLoss: false,
         completionFlagID: "EVENT_BEAT_BROCK",
         postBattleScriptID: "pewter_gym_brock_reward"
+    )
+
+    guard superNerdClassMetadata.parties.indices.contains(1) else {
+        throw ExtractorError.invalidArguments("missing Super Nerd trainer party 2")
+    }
+
+    battlesByID["opp_super_nerd_2"] = TrainerBattleManifest(
+        id: "opp_super_nerd_2",
+        trainerClass: "OPP_SUPER_NERD",
+        trainerNumber: 2,
+        displayName: superNerdClassMetadata.displayName,
+        party: superNerdClassMetadata.parties[1],
+        trainerSpritePath: superNerdClassMetadata.trainerSpritePath,
+        baseRewardMoney: superNerdClassMetadata.baseRewardMoney,
+        encounterAudioCueID: trainerEncounterCueByClass["OPP_SUPER_NERD"],
+        playerWinDialogueID: "mt_moon_b2f_super_nerd_ok_ill_share",
+        playerLoseDialogueID: nil,
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD",
+        postBattleScriptID: nil
     )
 
     for reference in try referencedSliceTrainerBattles(

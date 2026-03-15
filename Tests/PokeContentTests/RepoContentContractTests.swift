@@ -8,13 +8,20 @@ final class RepoContentContractTests: XCTestCase {
         let loaded = try FileSystemContentLoader(rootURL: root).load()
 
         let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
+        let cavernTileset = try XCTUnwrap(loaded.tileset(id: "CAVERN"))
         let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
+        let rocketSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_ROCKET"))
+        let fossilSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_FOSSIL"))
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
         let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(rocketSprite.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(fossilSprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
         let sendOutPoofSource = try XCTUnwrap(CGImageSourceCreateWithURL(sendOutPoofURL as CFURL, nil))
         let sendOutPoofImage = try XCTUnwrap(CGImageSourceCreateImageAtIndex(sendOutPoofSource, 0, nil))
@@ -27,6 +34,7 @@ final class RepoContentContractTests: XCTestCase {
             ).isEmpty
         )
         for map in loaded.gameplayManifest.maps {
+            XCTAssertEqual(Set(map.objects.map(\.id)).count, map.objects.count, "duplicate object ids in \(map.id)")
             let spriteIDs = Array(Set(map.objects.map(\.sprite))).sorted()
             XCTAssertTrue(
                 loaded.fieldRenderIssues(map: map, spriteIDs: spriteIDs).isEmpty,
@@ -56,6 +64,10 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(
             loaded.audioManifest.mapRoutes,
             [
+                .init(mapID: "MT_MOON_1F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_B1F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_B2F", musicID: "MUSIC_DUNGEON3"),
+                .init(mapID: "MT_MOON_POKECENTER", musicID: "MUSIC_POKECENTER"),
                 .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
@@ -73,6 +85,7 @@ final class RepoContentContractTests: XCTestCase {
                 .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
+                .init(mapID: "ROUTE_4", musicID: "MUSIC_ROUTES3"),
                 .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
                 .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
                 .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
@@ -99,6 +112,8 @@ final class RepoContentContractTests: XCTestCase {
         let squirtle = try XCTUnwrap(loaded.species(id: "SQUIRTLE"))
         let brock = try XCTUnwrap(loaded.trainerBattle(id: "opp_brock_1"))
         let route3Youngster = try XCTUnwrap(loaded.trainerBattle(id: "opp_youngster_1"))
+        let superNerd = try XCTUnwrap(loaded.trainerBattle(id: "opp_super_nerd_2"))
+        let mtMoon1FEncounters = try XCTUnwrap(loaded.wildEncounterTable(mapID: "MT_MOON_1F"))
 
         XCTAssertEqual(viridianMart.mapID, "VIRIDIAN_MART")
         XCTAssertEqual(viridianMart.clerkObjectID, "viridian_mart_clerk")
@@ -135,6 +150,10 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
         XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")
+        XCTAssertEqual(superNerd.trainerSpritePath, "Assets/battle/trainers/supernerd.png")
+        XCTAssertEqual(superNerd.completionFlagID, "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
+        XCTAssertEqual(mtMoon1FEncounters.landEncounterSurface, .floor)
+        XCTAssertEqual(mtMoon1FEncounters.grassEncounterRate, 10)
     }
 
     func testLoaderReadsRepoGeneratedMuseumExhibitContracts() throws {
@@ -172,6 +191,7 @@ final class RepoContentContractTests: XCTestCase {
 
         let interaction = try XCTUnwrap(loaded.fieldInteraction(id: "pokemon_center_healing"))
         let pewterInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "pewter_pokecenter_pokemon_center_healing"))
+        let mtMoonInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "mt_moon_pokecenter_pokemon_center_healing"))
         XCTAssertEqual(interaction.kind, .pokemonCenterHealing)
         XCTAssertEqual(interaction.introDialogueID, "pokemon_center_welcome")
         XCTAssertEqual(interaction.prompt.dialogueID, "pokemon_center_shall_we_heal")
@@ -188,8 +208,21 @@ final class RepoContentContractTests: XCTestCase {
             pewterInteraction.healingSequence?.blackoutCheckpoint,
             .init(mapID: "PEWTER_CITY", position: .init(x: 13, y: 26), facing: .down)
         )
+        XCTAssertEqual(
+            mtMoonInteraction.healingSequence?.blackoutCheckpoint,
+            .init(mapID: "ROUTE_4", position: .init(x: 11, y: 6), facing: .down)
+        )
         XCTAssertEqual(loaded.map(id: "PEWTER_GYM")?.defaultMusicID, "MUSIC_GYM")
         XCTAssertEqual(loaded.map(id: "ROUTE_3")?.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(loaded.map(id: "MT_MOON_POKECENTER")?.warps.allSatisfy(\.usesPreviousMapTarget), true)
+        XCTAssertEqual(
+            loaded.mapScript(for: "MT_MOON_B2F")?.triggers.map(\.scriptID),
+            ["mt_moon_b2f_super_nerd_battle"]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "mt_moon_b2f_take_dome_fossil")?.steps.map(\.action),
+            ["promptItemPickup", "moveObject", "showDialogue", "setObjectVisibility"]
+        )
         XCTAssertEqual(
             loaded.mapScript(for: "ROUTE_22_GATE")?.triggers.map(\.scriptID),
             [

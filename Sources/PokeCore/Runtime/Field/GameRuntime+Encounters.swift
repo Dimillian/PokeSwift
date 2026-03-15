@@ -9,7 +9,7 @@ extension GameRuntime {
               let map = currentMapManifest,
               let encounterTable = content.wildEncounterTable(mapID: map.id),
               encounterTable.grassEncounterRate > 0,
-              isStandingOnGrass(in: map, position: gameplayState.playerPosition) else {
+              canTriggerLandEncounter(in: map, position: gameplayState.playerPosition, encounterTable: encounterTable) else {
             return
         }
 
@@ -32,10 +32,24 @@ extension GameRuntime {
                 "speciesID": encounter.speciesID,
                 "level": String(encounter.level),
                 "encounterRate": String(encounterTable.grassEncounterRate),
+                "encounterSurface": encounterTable.landEncounterSurface.rawValue,
                 "stepCounter": String(gameplayState.encounterStepCounter),
             ]
         )
         startWildBattle(speciesID: encounter.speciesID, level: encounter.level)
+    }
+
+    func canTriggerLandEncounter(
+        in map: MapManifest,
+        position: TilePoint,
+        encounterTable: WildEncounterTableManifest
+    ) -> Bool {
+        switch encounterTable.landEncounterSurface {
+        case .grass:
+            return isStandingOnGrass(in: map, position: position)
+        case .floor:
+            return isStandingOnLandEncounterFloor(in: map, position: position)
+        }
     }
 
     func isStandingOnGrass(in map: MapManifest, position: TilePoint) -> Bool {
@@ -44,6 +58,17 @@ extension GameRuntime {
             return false
         }
         return tileID == grassTileID
+    }
+
+    func isStandingOnLandEncounterFloor(in map: MapManifest, position: TilePoint) -> Bool {
+        guard let tileset = content.tileset(id: map.tileset),
+              let tileID = collisionTileID(at: position, in: map) else {
+            return false
+        }
+        if tileset.collision.doorTileIDs.contains(tileID) || tileset.collision.warpTileIDs.contains(tileID) {
+            return false
+        }
+        return tileset.collision.passableTileIDs.contains(tileID)
     }
 
     func selectWildEncounter(from slots: [WildEncounterSlotManifest]) -> WildEncounterSlotManifest? {

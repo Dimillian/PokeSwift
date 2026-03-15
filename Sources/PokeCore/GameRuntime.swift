@@ -6,7 +6,7 @@ import PokeDataModel
 @MainActor
 @Observable
 public final class GameRuntime {
-    nonisolated public static let saveSchemaVersion = 8
+    nonisolated public static let saveSchemaVersion = 9
 
     public let content: LoadedContent
 
@@ -50,6 +50,7 @@ public final class GameRuntime {
     var gameplayState: GameplayState?
     var dialogueState: DialogueState?
     var fieldPromptState: RuntimeFieldPromptState?
+    var scriptItemPromptState: RuntimeScriptItemPromptState?
     var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
@@ -294,6 +295,7 @@ public final class GameRuntime {
             scene == .field &&
             dialogueState == nil &&
             fieldPromptState == nil &&
+            scriptItemPromptState == nil &&
             fieldHealingState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
