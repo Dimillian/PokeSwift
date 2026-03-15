@@ -1158,20 +1158,28 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_SCIENTIST", imagePath: "Assets/field/sprites/scientist.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_YOUNGSTER", imagePath: "Assets/field/sprites/youngster.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER", imagePath: "Assets/field/sprites/gambler.png", hasWalkingFrames: true),
-        buildCharacterSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png", hasWalkingFrames: false),
+        buildStaticOverworldSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png"),
         buildCharacterSprite(id: "SPRITE_SUPER_NERD", imagePath: "Assets/field/sprites/super_nerd.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BRUNETTE_GIRL", imagePath: "Assets/field/sprites/brunette_girl.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_F", imagePath: "Assets/field/sprites/cooltrainer_f.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BALDING_GUY", imagePath: "Assets/field/sprites/balding_guy.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LITTLE_GIRL", imagePath: "Assets/field/sprites/little_girl.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_BIRD", imagePath: "Assets/field/sprites/bird.png", hasWalkingFrames: true),
-        buildCharacterSprite(id: "SPRITE_CLIPBOARD", imagePath: "Assets/field/sprites/clipboard.png", hasWalkingFrames: false),
+        buildStaticOverworldSprite(id: "SPRITE_CLIPBOARD", imagePath: "Assets/field/sprites/clipboard.png"),
         buildCharacterSprite(id: "SPRITE_CLERK", imagePath: "Assets/field/sprites/clerk.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_M", imagePath: "Assets/field/sprites/cooltrainer_m.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_NURSE", imagePath: "Assets/field/sprites/nurse.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_GENTLEMAN", imagePath: "Assets/field/sprites/gentleman.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_FAIRY", imagePath: "Assets/field/sprites/fairy.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_GRAMPS", imagePath: "Assets/field/sprites/gramps.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_GUARD", imagePath: "Assets/field/sprites/guard.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_HIKER", imagePath: "Assets/field/sprites/hiker.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GYM_GUIDE", imagePath: "Assets/field/sprites/gym_guide.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_LITTLE_BOY", imagePath: "Assets/field/sprites/little_boy.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LINK_RECEPTIONIST", imagePath: "Assets/field/sprites/link_receptionist.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_MIDDLE_AGED_MAN", imagePath: "Assets/field/sprites/middle_aged_man.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_MONSTER", imagePath: "Assets/field/sprites/monster.png", hasWalkingFrames: true),
+        buildStaticOverworldSprite(id: "SPRITE_OLD_AMBER", imagePath: "Assets/field/sprites/old_amber.png"),
         .init(
             id: "SPRITE_POKE_BALL",
             imagePath: "Assets/field/sprites/poke_ball.png",
@@ -1218,6 +1226,21 @@ private func buildCharacterSprite(id: String, imagePath: String, hasWalkingFrame
             left: .init(x: 0, y: 80, width: 16, height: 16),
             right: .init(x: 0, y: 80, width: 16, height: 16, flippedHorizontally: true)
         ) : nil
+    )
+}
+
+private func buildStaticOverworldSprite(id: String, imagePath: String) -> OverworldSpriteManifest {
+    .init(
+        id: id,
+        imagePath: imagePath,
+        frameWidth: 16,
+        frameHeight: 16,
+        facingFrames: .init(
+            down: .init(x: 0, y: 0, width: 16, height: 16),
+            up: .init(x: 0, y: 0, width: 16, height: 16),
+            left: .init(x: 0, y: 0, width: 16, height: 16),
+            right: .init(x: 0, y: 0, width: 16, height: 16)
+        )
     )
 }
 
@@ -1968,6 +1991,8 @@ private func displayName(forSprite sprite: String) -> String? {
     case "SPRITE_COOLTRAINER_M": return "Cooltrainer"
     case "SPRITE_GAMBLER": return "Gambler"
     case "SPRITE_GIRL": return "Girl"
+    case "SPRITE_GUARD": return "Guard"
+    case "SPRITE_LITTLE_BOY": return "Little Boy"
     case "SPRITE_LITTLE_GIRL": return "Little Girl"
     case "SPRITE_MIDDLE_AGED_MAN": return "Middle Aged Man"
     case "SPRITE_MONSTER": return "Monster"

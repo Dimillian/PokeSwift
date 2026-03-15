@@ -26,6 +26,13 @@ final class RepoContentContractTests: XCTestCase {
                 spriteIDs: ["SPRITE_RED", "SPRITE_OAK", "SPRITE_BLUE", "SPRITE_SCIENTIST", "SPRITE_POKE_BALL", "SPRITE_POKEDEX"]
             ).isEmpty
         )
+        for map in loaded.gameplayManifest.maps {
+            let spriteIDs = Array(Set(map.objects.map(\.sprite))).sorted()
+            XCTAssertTrue(
+                loaded.fieldRenderIssues(map: map, spriteIDs: spriteIDs).isEmpty,
+                "field render issues for \(map.id): \(loaded.fieldRenderIssues(map: map, spriteIDs: spriteIDs))"
+            )
+        }
     }
 
     func testLoaderReadsRepoGeneratedAudioContract() throws {

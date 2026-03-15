@@ -44,33 +44,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.imagePath, "Assets/field/tilesets/gym.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "MUSEUM" }?.blocksetPath, "Assets/field/blocksets/gate.bst")
-        XCTAssertEqual(manifest.overworldSprites.map(\.id), [
-            "SPRITE_RED",
-            "SPRITE_OAK",
-            "SPRITE_BLUE",
-            "SPRITE_MOM",
-            "SPRITE_GIRL",
-            "SPRITE_FISHER",
-            "SPRITE_SCIENTIST",
-            "SPRITE_YOUNGSTER",
-            "SPRITE_GAMBLER",
-            "SPRITE_GAMBLER_ASLEEP",
-            "SPRITE_SUPER_NERD",
-            "SPRITE_BRUNETTE_GIRL",
-            "SPRITE_COOLTRAINER_F",
-            "SPRITE_BALDING_GUY",
-            "SPRITE_LITTLE_GIRL",
-            "SPRITE_BIRD",
-            "SPRITE_CLIPBOARD",
-            "SPRITE_CLERK",
-            "SPRITE_COOLTRAINER_M",
-            "SPRITE_NURSE",
-            "SPRITE_GENTLEMAN",
-            "SPRITE_GYM_GUIDE",
-            "SPRITE_LINK_RECEPTIONIST",
-            "SPRITE_POKE_BALL",
-            "SPRITE_POKEDEX",
-        ])
+        let overworldSpriteIDs = manifest.overworldSprites.map(\.id)
+        XCTAssertEqual(Set(overworldSpriteIDs).count, overworldSpriteIDs.count)
+        let referencedSpriteIDs = Set(manifest.maps.flatMap(\.objects).map(\.sprite))
+        let missingSpriteIDs = referencedSpriteIDs.subtracting(overworldSpriteIDs)
+        XCTAssertTrue(
+            missingSpriteIDs.isEmpty,
+            "missing overworld sprite manifests for current-slice objects: \(missingSpriteIDs.sorted())"
+        )
 
         let palletTown = try XCTUnwrap(manifest.maps.first { $0.id == "PALLET_TOWN" })
         XCTAssertEqual(palletTown.borderBlockID, 0x0B)
@@ -918,7 +899,7 @@ final class GameplayExtractionTests: XCTestCase {
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
         XCTAssertEqual(decoded.maps.count, 25)
         XCTAssertEqual(decoded.tilesets.count, 12)
-        XCTAssertEqual(decoded.overworldSprites.count, 25)
+        XCTAssertEqual(decoded.overworldSprites.count, 33)
         XCTAssertEqual(decoded.items.count, 99)
         XCTAssertEqual(decoded.marts.count, 2)
         XCTAssertEqual(decoded.wildEncounterTables.count, 5)

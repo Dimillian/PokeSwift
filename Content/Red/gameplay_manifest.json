@@ -16609,7 +16609,7 @@
       "id" : "ROUTE_22_GATE",
       "objects" : [
         {
-          "displayName" : "Route 22 Gate Guard",
+          "displayName" : "Guard",
           "facing" : "left",
           "id" : "route_22_gate_guard",
           "interactionDialogueID" : "route_22_gate_guard_no_boulder_badge",
@@ -27266,7 +27266,7 @@
           "visibleByDefault" : true
         },
         {
-          "displayName" : "Pewter Nidoran House Little Boy",
+          "displayName" : "Little Boy",
           "facing" : "right",
           "id" : "pewter_nidoran_house_little_boy",
           "interactionDialogueID" : "pewter_nidoran_house_little_boy",
@@ -34434,21 +34434,21 @@
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "right" : {
-          "flippedHorizontally" : true,
+          "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "up" : {
           "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 16
+          "y" : 0
         }
       },
       "frameHeight" : 16,
@@ -34746,21 +34746,21 @@
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "right" : {
-          "flippedHorizontally" : true,
+          "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "up" : {
           "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 16
+          "y" : 0
         }
       },
       "frameHeight" : 16,
@@ -34975,6 +34975,210 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_FAIRY",
+      "imagePath" : "Assets/field/sprites/fairy.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GRAMPS",
+      "imagePath" : "Assets/field/sprites/gramps.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GUARD",
+      "imagePath" : "Assets/field/sprites/guard.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_HIKER",
+      "imagePath" : "Assets/field/sprites/hiker.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_GYM_GUIDE",
       "imagePath" : "Assets/field/sprites/gym_guide.png"
     },
@@ -35011,8 +35215,212 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_LITTLE_BOY",
+      "imagePath" : "Assets/field/sprites/little_boy.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LINK_RECEPTIONIST",
       "imagePath" : "Assets/field/sprites/link_receptionist.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MIDDLE_AGED_MAN",
+      "imagePath" : "Assets/field/sprites/middle_aged_man.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MONSTER",
+      "imagePath" : "Assets/field/sprites/monster.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "right" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_OLD_AMBER",
+      "imagePath" : "Assets/field/sprites/old_amber.png"
     },
     {
       "facingFrames" : {
