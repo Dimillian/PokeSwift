@@ -41,6 +41,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let eventFlags = try parseEventFlags(
         repoRoot: source.repoRoot,
         maps: maps,
+        fieldInteractions: fieldInteractions,
         mapScripts: mapScripts,
         scripts: scripts,
         trainerBattles: trainerBattles,
@@ -205,6 +206,7 @@ private func parseMapSizes(repoRoot: URL) throws -> [String: TileSize] {
 private func parseEventFlags(
     repoRoot: URL,
     maps: [MapManifest],
+    fieldInteractions: [FieldInteractionManifest],
     mapScripts: [MapScriptManifest],
     scripts: [ScriptManifest],
     trainerBattles: [TrainerBattleManifest],
@@ -213,6 +215,7 @@ private func parseEventFlags(
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/event_constants.asm"))
     let requiredFlags = referencedEventFlagIDs(
         maps: maps,
+        fieldInteractions: fieldInteractions,
         mapScripts: mapScripts,
         scripts: scripts,
         trainerBattles: trainerBattles,
@@ -229,6 +232,7 @@ private func parseEventFlags(
 
 private func referencedEventFlagIDs(
     maps: [MapManifest],
+    fieldInteractions: [FieldInteractionManifest],
     mapScripts: [MapScriptManifest],
     scripts: [ScriptManifest],
     trainerBattles: [TrainerBattleManifest],
@@ -238,6 +242,9 @@ private func referencedEventFlagIDs(
         map.objects.flatMap { object in
             object.interactionTriggers.flatMap { $0.conditions.compactMap(\.flagID) }
         }
+    }
+    let fieldInteractionFlags = fieldInteractions.compactMap { interaction in
+        interaction.paidAdmission?.successFlagID
     }
     let mapScriptFlags = mapScripts.flatMap { $0.triggers.flatMap { $0.conditions.compactMap(\.flagID) } }
     let scriptStepFlags = scripts.flatMap { script in
@@ -252,6 +259,7 @@ private func referencedEventFlagIDs(
     return Set(
         playerStart.initialFlags
         + objectTriggerFlags
+        + fieldInteractionFlags
         + mapScriptFlags
         + scriptStepFlags
         + trainerBattleFlags
@@ -1158,20 +1166,28 @@ private func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_SCIENTIST", imagePath: "Assets/field/sprites/scientist.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_YOUNGSTER", imagePath: "Assets/field/sprites/youngster.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GAMBLER", imagePath: "Assets/field/sprites/gambler.png", hasWalkingFrames: true),
-        buildCharacterSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png", hasWalkingFrames: false),
+        buildStaticOverworldSprite(id: "SPRITE_GAMBLER_ASLEEP", imagePath: "Assets/field/sprites/gambler_asleep.png"),
         buildCharacterSprite(id: "SPRITE_SUPER_NERD", imagePath: "Assets/field/sprites/super_nerd.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BRUNETTE_GIRL", imagePath: "Assets/field/sprites/brunette_girl.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_F", imagePath: "Assets/field/sprites/cooltrainer_f.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_BALDING_GUY", imagePath: "Assets/field/sprites/balding_guy.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LITTLE_GIRL", imagePath: "Assets/field/sprites/little_girl.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_BIRD", imagePath: "Assets/field/sprites/bird.png", hasWalkingFrames: true),
-        buildCharacterSprite(id: "SPRITE_CLIPBOARD", imagePath: "Assets/field/sprites/clipboard.png", hasWalkingFrames: false),
+        buildStaticOverworldSprite(id: "SPRITE_CLIPBOARD", imagePath: "Assets/field/sprites/clipboard.png"),
         buildCharacterSprite(id: "SPRITE_CLERK", imagePath: "Assets/field/sprites/clerk.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_COOLTRAINER_M", imagePath: "Assets/field/sprites/cooltrainer_m.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_NURSE", imagePath: "Assets/field/sprites/nurse.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_GENTLEMAN", imagePath: "Assets/field/sprites/gentleman.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_FAIRY", imagePath: "Assets/field/sprites/fairy.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_GRAMPS", imagePath: "Assets/field/sprites/gramps.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_GUARD", imagePath: "Assets/field/sprites/guard.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_HIKER", imagePath: "Assets/field/sprites/hiker.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GYM_GUIDE", imagePath: "Assets/field/sprites/gym_guide.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_LITTLE_BOY", imagePath: "Assets/field/sprites/little_boy.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LINK_RECEPTIONIST", imagePath: "Assets/field/sprites/link_receptionist.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_MIDDLE_AGED_MAN", imagePath: "Assets/field/sprites/middle_aged_man.png", hasWalkingFrames: true),
+        buildCharacterSprite(id: "SPRITE_MONSTER", imagePath: "Assets/field/sprites/monster.png", hasWalkingFrames: true),
+        buildStaticOverworldSprite(id: "SPRITE_OLD_AMBER", imagePath: "Assets/field/sprites/old_amber.png"),
         .init(
             id: "SPRITE_POKE_BALL",
             imagePath: "Assets/field/sprites/poke_ball.png",
@@ -1218,6 +1234,21 @@ private func buildCharacterSprite(id: String, imagePath: String, hasWalkingFrame
             left: .init(x: 0, y: 80, width: 16, height: 16),
             right: .init(x: 0, y: 80, width: 16, height: 16, flippedHorizontally: true)
         ) : nil
+    )
+}
+
+private func buildStaticOverworldSprite(id: String, imagePath: String) -> OverworldSpriteManifest {
+    .init(
+        id: id,
+        imagePath: imagePath,
+        frameWidth: 16,
+        frameHeight: 16,
+        facingFrames: .init(
+            down: .init(x: 0, y: 0, width: 16, height: 16),
+            up: .init(x: 0, y: 0, width: 16, height: 16),
+            left: .init(x: 0, y: 0, width: 16, height: 16),
+            right: .init(x: 0, y: 0, width: 16, height: 16)
+        )
     )
 }
 
@@ -1555,7 +1586,7 @@ private func fallbackObjectIDBase(for textID: String, mapScriptMetadata: MapScri
 
 private func interactionReach(for objectID: String, sprite: String) -> ObjectInteractionReach {
     switch objectID {
-    case "viridian_mart_clerk", "viridian_pokecenter_nurse":
+    case "viridian_mart_clerk", "viridian_pokecenter_nurse", "museum1_f_scientist1_come_again":
         return .overCounter
     default:
         switch sprite {
@@ -1682,6 +1713,33 @@ private func interactionTriggers(
             .init(
                 conditions: [.init(kind: "flagSet", flagID: "EVENT_OAK_GOT_PARCEL")],
                 martID: "viridian_mart"
+            ),
+        ]
+    case "museum1_f_scientist1_come_again":
+        return [
+            .init(
+                conditions: [
+                    .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                    .init(kind: "playerYEquals", intValue: 4),
+                    .init(kind: "playerXEquals", intValue: 10),
+                ],
+                scriptID: "museum_1f_scientist1_interaction"
+            ),
+            .init(
+                conditions: [
+                    .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                    .init(kind: "playerYEquals", intValue: 4),
+                    .init(kind: "playerXEquals", intValue: 11),
+                ],
+                scriptID: "museum_1f_scientist1_interaction"
+            ),
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET")],
+                dialogueID: "museum1_f_scientist1_take_plenty_of_time"
+            ),
+            .init(
+                conditions: [.init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET")],
+                dialogueID: "museum1_f_scientist1_go_to_other_side"
             ),
         ]
     case "oaks_lab_poke_ball_charmander":
@@ -1937,6 +1995,10 @@ private func pokemonCenterFieldInteractionID(for mapID: String) -> String {
     mapID == "VIRIDIAN_POKECENTER" ? "pokemon_center_healing" : "\(mapID.lowercased())_pokemon_center_healing"
 }
 
+private func museumAdmissionFieldInteractionID(for mapID: String) -> String {
+    "\(mapID.lowercased())_admission"
+}
+
 private func pokemonCenterHealScriptID(for mapID: String) -> String {
     mapID == "VIRIDIAN_POKECENTER" ? "viridian_pokecenter_nurse_heal" : "\(mapID.lowercased())_nurse_heal"
 }
@@ -1968,6 +2030,8 @@ private func displayName(forSprite sprite: String) -> String? {
     case "SPRITE_COOLTRAINER_M": return "Cooltrainer"
     case "SPRITE_GAMBLER": return "Gambler"
     case "SPRITE_GIRL": return "Girl"
+    case "SPRITE_GUARD": return "Guard"
+    case "SPRITE_LITTLE_BOY": return "Little Boy"
     case "SPRITE_LITTLE_GIRL": return "Little Girl"
     case "SPRITE_MIDDLE_AGED_MAN": return "Middle Aged Man"
     case "SPRITE_MONSTER": return "Monster"
@@ -2432,7 +2496,7 @@ private func dialogueLabelExists(_ label: String, in contents: String) -> Bool {
 }
 
 private func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -> [FieldInteractionManifest] {
-    try maps.compactMap { map in
+    var interactions: [FieldInteractionManifest] = try maps.compactMap { map in
         guard let nurseObject = map.objects.first(where: { $0.sprite == "SPRITE_NURSE" }) else {
             return nil
         }
@@ -2457,6 +2521,30 @@ private func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -
             )
         )
     }
+
+    if maps.contains(where: { $0.id == "MUSEUM_1F" }) {
+        interactions.append(
+            FieldInteractionManifest(
+                id: museumAdmissionFieldInteractionID(for: "MUSEUM_1F"),
+                kind: .paidAdmission,
+                introDialogueID: "museum1_f_scientist1_would_you_like_to_come_in",
+                prompt: .init(kind: .yesNo, dialogueID: "museum1_f_scientist1_would_you_like_to_come_in"),
+                acceptedDialogueID: "museum1_f_scientist1_thank_you",
+                successDialogueID: "museum1_f_scientist1_take_plenty_of_time",
+                declinedDialogueID: "museum1_f_scientist1_come_again",
+                farewellDialogueID: "museum1_f_scientist1_come_again",
+                paidAdmission: .init(
+                    price: 50,
+                    successFlagID: "EVENT_BOUGHT_MUSEUM_TICKET",
+                    insufficientFundsDialogueID: "museum1_f_scientist1_dont_have_enough_money",
+                    purchaseSoundEffectID: "SFX_PURCHASE",
+                    deniedExitPath: [.down]
+                )
+            )
+        )
+    }
+
+    return interactions
 }
 
 private func blackoutCheckpointForPokemonCenter(
@@ -2814,6 +2902,52 @@ private func buildMapScripts() -> [MapScriptManifest] {
             ]
         ),
         MapScriptManifest(
+            mapID: "MUSEUM_1F",
+            triggers: [
+                .init(
+                    id: "museum_admission_entry_left",
+                    scriptID: "museum_1f_entrance_admission",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 9),
+                    ]
+                ),
+                .init(
+                    id: "museum_admission_entry_right",
+                    scriptID: "museum_1f_entrance_admission",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 10),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
+            mapID: "PEWTER_CITY",
+            triggers: [
+                .init(
+                    id: "museum_exit_resets_ticket_main",
+                    scriptID: "pewter_city_reset_museum_ticket",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 8),
+                        .init(kind: "playerXEquals", intValue: 14),
+                    ]
+                ),
+                .init(
+                    id: "museum_exit_resets_ticket_back",
+                    scriptID: "pewter_city_reset_museum_ticket",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "playerXEquals", intValue: 19),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
             mapID: "ROUTE_22",
             triggers: [
                 .init(
@@ -2985,6 +3119,24 @@ private func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptM
             id: "viridian_pokecenter_nurse_heal",
             steps: [
                 .init(action: "startFieldInteraction", fieldInteractionID: "pokemon_center_healing"),
+            ]
+        ),
+        ScriptManifest(
+            id: "museum_1f_scientist1_interaction",
+            steps: [
+                .init(action: "startFieldInteraction", fieldInteractionID: museumAdmissionFieldInteractionID(for: "MUSEUM_1F")),
+            ]
+        ),
+        ScriptManifest(
+            id: "museum_1f_entrance_admission",
+            steps: [
+                .init(action: "startFieldInteraction", fieldInteractionID: museumAdmissionFieldInteractionID(for: "MUSEUM_1F")),
+            ]
+        ),
+        ScriptManifest(
+            id: "pewter_city_reset_museum_ticket",
+            steps: [
+                .init(action: "clearFlag", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
             ]
         ),
         ScriptManifest(

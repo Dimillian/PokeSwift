@@ -11,6 +11,28 @@ import XCTest
 
 @MainActor
 extension PokeUITests {
+  func testGameplayScreenGlowPaletteKeepsLegacyTintedGlowInLightAppearance() {
+    let glowPalette = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgTinted,
+      appearanceMode: .light,
+      colorScheme: .light
+    )
+
+    XCTAssertEqual(glowPalette.outer, ThemeRGBA(red: 0.52, green: 0.78, blue: 0.46, alpha: 0.22))
+    XCTAssertEqual(glowPalette.inner, ThemeRGBA(red: 0.92, green: 0.98, blue: 0.84, alpha: 0.14))
+  }
+
+  func testGameplayScreenGlowPaletteKeepsLegacyTintedGlowInRetroDarkAppearance() {
+    let glowPalette = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .dmgTinted,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
+
+    XCTAssertEqual(glowPalette.outer, ThemeRGBA(red: 0.22, green: 0.96, blue: 0.24, alpha: 0.38))
+    XCTAssertEqual(glowPalette.inner, ThemeRGBA(red: 0.74, green: 1, blue: 0.72, alpha: 0.2))
+  }
+
   func testTitleMenuPanelCanBeConstructed() {
     let view = TitleMenuPanel(
       entries: [.init(id: "newGame", label: "New Game", isEnabled: true)], focusedIndex: 0)
@@ -1468,7 +1490,7 @@ extension PokeUITests {
     XCTAssertNotEqual(raw.outer, tinted.outer)
     XCTAssertNotEqual(authentic.outer, tinted.outer)
   }
-  func testGameplayScreenGlowPaletteUsesRetunedHardwareFriendlyValues() {
+  func testGameplayScreenGlowPaletteUsesRestoredTintedValues() {
     let tinted = PokeThemePalette.gameplayScreenGlowPalette(
       displayStyle: .dmgTinted,
       appearanceMode: .retroDark,
@@ -1480,12 +1502,12 @@ extension PokeUITests {
       colorScheme: .dark
     )
 
-    XCTAssertEqual(tinted.outer.red, 0.34, accuracy: 0.0001)
-    XCTAssertEqual(tinted.outer.green, 0.78, accuracy: 0.0001)
-    XCTAssertEqual(tinted.outer.blue, 0.26, accuracy: 0.0001)
-    XCTAssertEqual(tinted.inner.red, 0.71, accuracy: 0.0001)
-    XCTAssertEqual(tinted.inner.green, 0.87, accuracy: 0.0001)
-    XCTAssertEqual(tinted.inner.blue, 0.58, accuracy: 0.0001)
+    XCTAssertEqual(tinted.outer.red, 0.22, accuracy: 0.0001)
+    XCTAssertEqual(tinted.outer.green, 0.96, accuracy: 0.0001)
+    XCTAssertEqual(tinted.outer.blue, 0.24, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.red, 0.74, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.green, 1.0, accuracy: 0.0001)
+    XCTAssertEqual(tinted.inner.blue, 0.72, accuracy: 0.0001)
 
     XCTAssertEqual(authentic.outer.red, 0.42, accuracy: 0.0001)
     XCTAssertEqual(authentic.outer.green, 0.55, accuracy: 0.0001)

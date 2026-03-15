@@ -7395,6 +7395,10 @@
         "sourceConstant" : "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2"
       },
       {
+        "id" : "EVENT_BOUGHT_MUSEUM_TICKET",
+        "sourceConstant" : "EVENT_BOUGHT_MUSEUM_TICKET"
+      },
+      {
         "id" : "EVENT_FOLLOWED_OAK_INTO_LAB",
         "sourceConstant" : "EVENT_FOLLOWED_OAK_INTO_LAB"
       },
@@ -7494,6 +7498,28 @@
         "kind" : "yesNo"
       },
       "successDialogueID" : "pokemon_center_fighting_fit"
+    },
+    {
+      "acceptedDialogueID" : "museum1_f_scientist1_thank_you",
+      "declinedDialogueID" : "museum1_f_scientist1_come_again",
+      "farewellDialogueID" : "museum1_f_scientist1_come_again",
+      "id" : "museum_1f_admission",
+      "introDialogueID" : "museum1_f_scientist1_would_you_like_to_come_in",
+      "kind" : "paidAdmission",
+      "paidAdmission" : {
+        "deniedExitPath" : [
+          "down"
+        ],
+        "insufficientFundsDialogueID" : "museum1_f_scientist1_dont_have_enough_money",
+        "price" : 50,
+        "purchaseSoundEffectID" : "SFX_PURCHASE",
+        "successFlagID" : "EVENT_BOUGHT_MUSEUM_TICKET"
+      },
+      "prompt" : {
+        "dialogueID" : "museum1_f_scientist1_would_you_like_to_come_in",
+        "kind" : "yesNo"
+      },
+      "successDialogueID" : "museum1_f_scientist1_take_plenty_of_time"
     }
   ],
   "items" : [
@@ -8268,6 +8294,88 @@
           ],
           "id" : "oaks_parcel_entry",
           "scriptID" : "viridian_mart_oaks_parcel"
+        }
+      ]
+    },
+    {
+      "mapID" : "MUSEUM_1F",
+      "triggers" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+              "kind" : "flagUnset"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "intValue" : 9,
+              "kind" : "playerXEquals"
+            }
+          ],
+          "id" : "museum_admission_entry_left",
+          "scriptID" : "museum_1f_entrance_admission"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+              "kind" : "flagUnset"
+            },
+            {
+              "intValue" : 4,
+              "kind" : "playerYEquals"
+            },
+            {
+              "intValue" : 10,
+              "kind" : "playerXEquals"
+            }
+          ],
+          "id" : "museum_admission_entry_right",
+          "scriptID" : "museum_1f_entrance_admission"
+        }
+      ]
+    },
+    {
+      "mapID" : "PEWTER_CITY",
+      "triggers" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 8,
+              "kind" : "playerYEquals"
+            },
+            {
+              "intValue" : 14,
+              "kind" : "playerXEquals"
+            }
+          ],
+          "id" : "museum_exit_resets_ticket_main",
+          "scriptID" : "pewter_city_reset_museum_ticket"
+        },
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+              "kind" : "flagSet"
+            },
+            {
+              "intValue" : 6,
+              "kind" : "playerYEquals"
+            },
+            {
+              "intValue" : 19,
+              "kind" : "playerXEquals"
+            }
+          ],
+          "id" : "museum_exit_resets_ticket_back",
+          "scriptID" : "pewter_city_reset_museum_ticket"
         }
       ]
     },
@@ -16609,7 +16717,7 @@
       "id" : "ROUTE_22_GATE",
       "objects" : [
         {
-          "displayName" : "Route 22 Gate Guard",
+          "displayName" : "Guard",
           "facing" : "left",
           "id" : "route_22_gate_guard",
           "interactionDialogueID" : "route_22_gate_guard_no_boulder_badge",
@@ -27266,7 +27374,7 @@
           "visibleByDefault" : true
         },
         {
-          "displayName" : "Pewter Nidoran House Little Boy",
+          "displayName" : "Little Boy",
           "facing" : "right",
           "id" : "pewter_nidoran_house_little_boy",
           "interactionDialogueID" : "pewter_nidoran_house_little_boy",
@@ -27656,9 +27764,60 @@
           "facing" : "left",
           "id" : "museum1_f_scientist1_come_again",
           "interactionDialogueID" : "museum1_f_scientist1_come_again",
-          "interactionReach" : "adjacent",
+          "interactionReach" : "overCounter",
           "interactionTriggers" : [
-
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+                  "kind" : "flagUnset"
+                },
+                {
+                  "intValue" : 4,
+                  "kind" : "playerYEquals"
+                },
+                {
+                  "intValue" : 10,
+                  "kind" : "playerXEquals"
+                }
+              ],
+              "scriptID" : "museum_1f_scientist1_interaction"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+                  "kind" : "flagUnset"
+                },
+                {
+                  "intValue" : 4,
+                  "kind" : "playerYEquals"
+                },
+                {
+                  "intValue" : 11,
+                  "kind" : "playerXEquals"
+                }
+              ],
+              "scriptID" : "museum_1f_scientist1_interaction"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "museum1_f_scientist1_take_plenty_of_time"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "dialogueID" : "museum1_f_scientist1_go_to_other_side"
+            }
           ],
           "movementBehavior" : {
             "axis" : "none",
@@ -34434,21 +34593,21 @@
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "right" : {
-          "flippedHorizontally" : true,
+          "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "up" : {
           "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 16
+          "y" : 0
         }
       },
       "frameHeight" : 16,
@@ -34746,21 +34905,21 @@
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "right" : {
-          "flippedHorizontally" : true,
+          "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 32
+          "y" : 0
         },
         "up" : {
           "flippedHorizontally" : false,
           "height" : 16,
           "width" : 16,
           "x" : 0,
-          "y" : 16
+          "y" : 0
         }
       },
       "frameHeight" : 16,
@@ -34975,6 +35134,210 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_FAIRY",
+      "imagePath" : "Assets/field/sprites/fairy.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GRAMPS",
+      "imagePath" : "Assets/field/sprites/gramps.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GUARD",
+      "imagePath" : "Assets/field/sprites/guard.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_HIKER",
+      "imagePath" : "Assets/field/sprites/hiker.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_GYM_GUIDE",
       "imagePath" : "Assets/field/sprites/gym_guide.png"
     },
@@ -35011,8 +35374,212 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_LITTLE_BOY",
+      "imagePath" : "Assets/field/sprites/little_boy.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LINK_RECEPTIONIST",
       "imagePath" : "Assets/field/sprites/link_receptionist.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MIDDLE_AGED_MAN",
+      "imagePath" : "Assets/field/sprites/middle_aged_man.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MONSTER",
+      "imagePath" : "Assets/field/sprites/monster.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "right" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_OLD_AMBER",
+      "imagePath" : "Assets/field/sprites/old_amber.png"
     },
     {
       "facingFrames" : {
@@ -35133,6 +35700,42 @@
         {
           "action" : "startFieldInteraction",
           "fieldInteractionID" : "pokemon_center_healing",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "museum_1f_scientist1_interaction",
+      "steps" : [
+        {
+          "action" : "startFieldInteraction",
+          "fieldInteractionID" : "museum_1f_admission",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "museum_1f_entrance_admission",
+      "steps" : [
+        {
+          "action" : "startFieldInteraction",
+          "fieldInteractionID" : "museum_1f_admission",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "pewter_city_reset_museum_ticket",
+      "steps" : [
+        {
+          "action" : "clearFlag",
+          "flagID" : "EVENT_BOUGHT_MUSEUM_TICKET",
           "path" : [
 
           ]

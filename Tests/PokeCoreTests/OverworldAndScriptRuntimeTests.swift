@@ -128,6 +128,52 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.mapID, "PEWTER_CITY")
         XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "PEWTER_CITY")
     }
+
+    func testRepoGeneratedMuseum1FOldAmberExhibitShowsDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_1F"
+        runtime.gameplayState?.playerPosition = .init(x: 15, y: 2)
+        runtime.gameplayState?.facing = .right
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_old_amber")
+    }
+
+    func testRepoGeneratedMuseum2FSpaceShuttleExhibitShowsDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_2F"
+        runtime.gameplayState?.playerPosition = .init(x: 11, y: 3)
+        runtime.gameplayState?.facing = .up
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum2_f_space_shuttle_sign")
+    }
+
+    func testRepoGeneratedMuseum2FMoonStoneExhibitShowsDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_2F"
+        runtime.gameplayState?.playerPosition = .init(x: 2, y: 6)
+        runtime.gameplayState?.facing = .up
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum2_f_moon_stone_sign")
+    }
+
     func testRepoGeneratedRoute1GrassCanTriggerWildEncounterAndEscapeForFixedRandomBytes() throws {
         let runtime = try makeRepoRuntime()
         let grassTile = try findGrassTile(in: runtime, mapID: "ROUTE_1")
@@ -298,6 +344,126 @@ extension PokeCoreTests {
         XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
         XCTAssertNil(runtime.currentSnapshot().fieldHealing)
     }
+
+    func testRepoGeneratedMuseumScientistSupportsOverCounterAdmissionTalk() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_1F"
+        runtime.gameplayState?.playerPosition = .init(x: 10, y: 4)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.money = 100
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_would_you_like_to_come_in")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.focusedIndex, 0)
+    }
+
+    func testRepoGeneratedMuseumEntryPromptChargesTicketAndSetsFlag() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_1F"
+        runtime.gameplayState?.playerPosition = .init(x: 9, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.money = 100
+
+        runtime.evaluateMapScriptsIfNeeded()
+
+        XCTAssertEqual(runtime.gameplayState?.activeMapScriptTriggerID, "museum_admission_entry_left")
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_would_you_like_to_come_in")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_thank_you")
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.currentSnapshot().dialogue)
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_BOUGHT_MUSEUM_TICKET") ?? false)
+        XCTAssertEqual(runtime.gameplayState?.money, 50)
+        XCTAssertTrue(audioPlayer.soundEffectRequests.contains { $0.soundEffectID == "SFX_PURCHASE" })
+    }
+
+    func testRepoGeneratedMuseumDecliningAdmissionPushesPlayerBack() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_1F"
+        runtime.gameplayState?.playerPosition = .init(x: 10, y: 4)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.money = 100
+
+        runtime.interactAhead()
+        runtime.handle(button: .right)
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_come_again")
+
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.field?.playerPosition == .init(x: 10, y: 5)
+        }
+
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_BOUGHT_MUSEUM_TICKET") ?? false)
+        XCTAssertEqual(runtime.gameplayState?.money, 100)
+    }
+
+    func testRepoGeneratedMuseumInsufficientFundsPushesPlayerBack() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MUSEUM_1F"
+        runtime.gameplayState?.playerPosition = .init(x: 10, y: 4)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.money = 40
+
+        runtime.interactAhead()
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_dont_have_enough_money")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "museum1_f_scientist1_come_again")
+
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.field?.playerPosition == .init(x: 10, y: 5)
+        }
+
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_BOUGHT_MUSEUM_TICKET") ?? false)
+        XCTAssertEqual(runtime.gameplayState?.money, 40)
+    }
+
+    func testRepoGeneratedPewterMuseumExitResetsTicketFlag() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "PEWTER_CITY"
+        runtime.gameplayState?.playerPosition = .init(x: 14, y: 8)
+        runtime.gameplayState?.facing = .down
+        runtime.gameplayState?.activeFlags.insert("EVENT_BOUGHT_MUSEUM_TICKET")
+
+        runtime.evaluateMapScriptsIfNeeded()
+
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_BOUGHT_MUSEUM_TICKET") ?? false)
+    }
+
     func testRepoGeneratedViridianInteriorsLoadNpcDialogue() throws {
         let runtime = try makeRepoRuntime()
 

@@ -26,6 +26,13 @@ final class RepoContentContractTests: XCTestCase {
                 spriteIDs: ["SPRITE_RED", "SPRITE_OAK", "SPRITE_BLUE", "SPRITE_SCIENTIST", "SPRITE_POKE_BALL", "SPRITE_POKEDEX"]
             ).isEmpty
         )
+        for map in loaded.gameplayManifest.maps {
+            let spriteIDs = Array(Set(map.objects.map(\.sprite))).sorted()
+            XCTAssertTrue(
+                loaded.fieldRenderIssues(map: map, spriteIDs: spriteIDs).isEmpty,
+                "field render issues for \(map.id): \(loaded.fieldRenderIssues(map: map, spriteIDs: spriteIDs))"
+            )
+        }
     }
 
     func testLoaderReadsRepoGeneratedAudioContract() throws {
@@ -128,6 +135,35 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
         XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")
+    }
+
+    func testLoaderReadsRepoGeneratedMuseumExhibitContracts() throws {
+        let root = PokeContentTestSupport.repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+        let loaded = try FileSystemContentLoader(rootURL: root).load()
+
+        let museum1F = try XCTUnwrap(loaded.map(id: "MUSEUM_1F"))
+        let museum2F = try XCTUnwrap(loaded.map(id: "MUSEUM_2F"))
+
+        XCTAssertEqual(
+            museum1F.objects.first { $0.id == "museum1_f_old_amber" }?.interactionDialogueID,
+            "museum1_f_old_amber"
+        )
+        XCTAssertEqual(
+            museum2F.backgroundEvents.map(\.dialogueID),
+            ["museum2_f_space_shuttle_sign", "museum2_f_moon_stone_sign"]
+        )
+        XCTAssertEqual(
+            loaded.dialogue(id: "museum1_f_old_amber")?.pages.first?.lines,
+            ["The AMBER is", "clear and gold!"]
+        )
+        XCTAssertEqual(
+            loaded.dialogue(id: "museum2_f_space_shuttle_sign")?.pages.first?.lines,
+            ["SPACE SHUTTLE", "COLUMBIA"]
+        )
+        XCTAssertEqual(
+            loaded.dialogue(id: "museum2_f_moon_stone_sign")?.pages.first?.lines,
+            ["Meteorite that", "fell on MT.MOON.", "(MOON STONE?)"]
+        )
     }
 
     func testLoaderReadsRepoGeneratedPokemonCenterInteractionContract() throws {

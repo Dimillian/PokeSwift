@@ -9,10 +9,10 @@ constant float3 kDMGAuthenticDark = float3(14.0 / 255.0, 69.0 / 255.0, 11.0 / 25
 constant float3 kDMGAuthenticLight = float3(73.0 / 255.0, 107.0 / 255.0, 34.0 / 255.0);
 constant float3 kDMGAuthenticLightest = float3(154.0 / 255.0, 158.0 / 255.0, 63.0 / 255.0);
 
-constant float3 kDMGTintedDarkest = float3(22.0 / 255.0, 47.0 / 255.0, 17.0 / 255.0);
-constant float3 kDMGTintedDark = float3(52.0 / 255.0, 89.0 / 255.0, 34.0 / 255.0);
-constant float3 kDMGTintedLight = float3(118.0 / 255.0, 147.0 / 255.0, 60.0 / 255.0);
-constant float3 kDMGTintedLightest = float3(175.0 / 255.0, 186.0 / 255.0, 104.0 / 255.0);
+constant float3 kDMGTintedDarkest = float3(15.0 / 255.0, 56.0 / 255.0, 15.0 / 255.0);
+constant float3 kDMGTintedDark = float3(48.0 / 255.0, 98.0 / 255.0, 48.0 / 255.0);
+constant float3 kDMGTintedLight = float3(139.0 / 255.0, 172.0 / 255.0, 15.0 / 255.0);
+constant float3 kDMGTintedLightest = float3(155.0 / 255.0, 188.0 / 255.0, 15.0 / 255.0);
 
 float3 rawPalette(float luminance) {
     return float3(luminance);
@@ -30,7 +30,7 @@ float3 authenticPalette(float luminance) {
 }
 
 float3 tintedPalette(float luminance) {
-    float t = clamp(pow(luminance, 0.94), 0.0, 1.0);
+    float t = clamp(pow(luminance, 0.92), 0.0, 1.0);
     float lowMix = smoothstep(0.0, 0.38, t);
     float highMix = smoothstep(0.38, 1.0, t);
     float3 lowBand = mix(kDMGTintedDarkest, kDMGTintedDark, lowMix);
@@ -107,15 +107,15 @@ float3 applyLCDCell(float3 baseColor, float2 cellFraction, float preset) {
 
 float3 applyTintedReflection(float3 baseColor, float2 uv) {
     float diagonal = (uv.x * 0.82) + ((1.0 - uv.y) * 0.58);
-    float primaryBand = exp(-pow((diagonal - 0.52) / 0.17, 2.0)) * 0.07;
-    float topSheen = exp(-pow((uv.y - 0.08) / 0.055, 2.0)) * (1.0 - (uv.x * 0.45)) * 0.022;
+    float primaryBand = exp(-pow((diagonal - 0.52) / 0.17, 2.0)) * 0.09;
+    float topSheen = exp(-pow((uv.y - 0.08) / 0.055, 2.0)) * (1.0 - (uv.x * 0.45)) * 0.03;
 
     float edgeDistance = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
     float vignette = smoothstep(0.0, 0.22, edgeDistance);
-    float edgeShade = mix(0.95, 1.0, vignette);
-    float panelVariation = 0.992 + (uv.y * 0.012) - (uv.x * 0.008);
+    float edgeShade = mix(0.93, 1.0, vignette);
+    float panelVariation = 0.985 + (uv.y * 0.02) - (uv.x * 0.012);
 
-    float3 glassTint = float3(0.95, 0.94, 0.84);
+    float3 glassTint = float3(0.96, 1.0, 0.9);
     float reflection = primaryBand + topSheen;
     return (baseColor * edgeShade * panelVariation) + (glassTint * reflection);
 }

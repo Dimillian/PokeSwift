@@ -119,6 +119,10 @@ extension GameRuntime {
             )
         case let .startFieldHealing(interactionID, completionAction):
             startFieldHealing(interactionID: interactionID, completionAction: completionAction)
+        case let .beginScriptedMovement(path):
+            scene = .field
+            substate = "field"
+            beginScriptedPlayerMovement(path)
         }
     }
 

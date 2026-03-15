@@ -604,6 +604,7 @@ struct DialogueState {
         case continueCaptureAftermath(RuntimeCaptureAftermathState)
         case fieldPrompt(interactionID: String, completionAction: CompletionAction)
         case startFieldHealing(interactionID: String, completionAction: CompletionAction)
+        case beginScriptedMovement(path: [FacingDirection])
     }
 
     let dialogueID: String

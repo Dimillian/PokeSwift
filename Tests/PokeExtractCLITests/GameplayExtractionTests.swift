@@ -44,33 +44,14 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.imagePath, "Assets/field/tilesets/gym.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "MUSEUM" }?.blocksetPath, "Assets/field/blocksets/gate.bst")
-        XCTAssertEqual(manifest.overworldSprites.map(\.id), [
-            "SPRITE_RED",
-            "SPRITE_OAK",
-            "SPRITE_BLUE",
-            "SPRITE_MOM",
-            "SPRITE_GIRL",
-            "SPRITE_FISHER",
-            "SPRITE_SCIENTIST",
-            "SPRITE_YOUNGSTER",
-            "SPRITE_GAMBLER",
-            "SPRITE_GAMBLER_ASLEEP",
-            "SPRITE_SUPER_NERD",
-            "SPRITE_BRUNETTE_GIRL",
-            "SPRITE_COOLTRAINER_F",
-            "SPRITE_BALDING_GUY",
-            "SPRITE_LITTLE_GIRL",
-            "SPRITE_BIRD",
-            "SPRITE_CLIPBOARD",
-            "SPRITE_CLERK",
-            "SPRITE_COOLTRAINER_M",
-            "SPRITE_NURSE",
-            "SPRITE_GENTLEMAN",
-            "SPRITE_GYM_GUIDE",
-            "SPRITE_LINK_RECEPTIONIST",
-            "SPRITE_POKE_BALL",
-            "SPRITE_POKEDEX",
-        ])
+        let overworldSpriteIDs = manifest.overworldSprites.map(\.id)
+        XCTAssertEqual(Set(overworldSpriteIDs).count, overworldSpriteIDs.count)
+        let referencedSpriteIDs = Set(manifest.maps.flatMap(\.objects).map(\.sprite))
+        let missingSpriteIDs = referencedSpriteIDs.subtracting(overworldSpriteIDs)
+        XCTAssertTrue(
+            missingSpriteIDs.isEmpty,
+            "missing overworld sprite manifests for current-slice objects: \(missingSpriteIDs.sorted())"
+        )
 
         let palletTown = try XCTUnwrap(manifest.maps.first { $0.id == "PALLET_TOWN" })
         XCTAssertEqual(palletTown.borderBlockID, 0x0B)
@@ -151,6 +132,7 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0",
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1",
                 "EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2",
+                "EVENT_BOUGHT_MUSEUM_TICKET",
                 "EVENT_FOLLOWED_OAK_INTO_LAB",
                 "EVENT_FOLLOWED_OAK_INTO_LAB_2",
                 "EVENT_GOT_OAKS_PARCEL",
@@ -168,6 +150,9 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.scripts.map(\.id), [
             "reds_house_1f_mom_heal",
             "viridian_pokecenter_nurse_heal",
+            "museum_1f_scientist1_interaction",
+            "museum_1f_entrance_admission",
+            "pewter_city_reset_museum_ticket",
             "route_1_potion_sample",
             "viridian_city_old_man_blocks_north_exit",
             "viridian_city_gym_locked_pushback",
@@ -238,6 +223,23 @@ final class GameplayExtractionTests: XCTestCase {
                             position: .init(x: 13, y: 26),
                             facing: .down
                         )
+                    )
+                ),
+                .init(
+                    id: "museum_1f_admission",
+                    kind: .paidAdmission,
+                    introDialogueID: "museum1_f_scientist1_would_you_like_to_come_in",
+                    prompt: .init(kind: .yesNo, dialogueID: "museum1_f_scientist1_would_you_like_to_come_in"),
+                    acceptedDialogueID: "museum1_f_scientist1_thank_you",
+                    successDialogueID: "museum1_f_scientist1_take_plenty_of_time",
+                    declinedDialogueID: "museum1_f_scientist1_come_again",
+                    farewellDialogueID: "museum1_f_scientist1_come_again",
+                    paidAdmission: .init(
+                        price: 50,
+                        successFlagID: "EVENT_BOUGHT_MUSEUM_TICKET",
+                        insufficientFundsDialogueID: "museum1_f_scientist1_dont_have_enough_money",
+                        purchaseSoundEffectID: "SFX_PURCHASE",
+                        deniedExitPath: [.down]
                     )
                 ),
             ]
@@ -781,6 +783,122 @@ final class GameplayExtractionTests: XCTestCase {
             "museum1_f_scientist3",
             "museum1_f_old_amber",
         ])
+        XCTAssertEqual(museum1F.objects.first { $0.id == "museum1_f_scientist1_come_again" }?.interactionReach, .overCounter)
+        XCTAssertEqual(
+            museum1F.objects.first { $0.id == "museum1_f_scientist1_come_again" }?.interactionTriggers,
+            [
+                .init(
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 10),
+                    ],
+                    scriptID: "museum_1f_scientist1_interaction"
+                ),
+                .init(
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 11),
+                    ],
+                    scriptID: "museum_1f_scientist1_interaction"
+                ),
+                .init(
+                    conditions: [.init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET")],
+                    dialogueID: "museum1_f_scientist1_take_plenty_of_time"
+                ),
+                .init(
+                    conditions: [.init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET")],
+                    dialogueID: "museum1_f_scientist1_go_to_other_side"
+                ),
+            ]
+        )
+
+        XCTAssertEqual(manifest.fieldInteractions.first { $0.id == "museum_1f_admission" }?.kind, .paidAdmission)
+        XCTAssertEqual(
+            manifest.fieldInteractions.first { $0.id == "museum_1f_admission" }?.paidAdmission,
+            .init(
+                price: 50,
+                successFlagID: "EVENT_BOUGHT_MUSEUM_TICKET",
+                insufficientFundsDialogueID: "museum1_f_scientist1_dont_have_enough_money",
+                purchaseSoundEffectID: "SFX_PURCHASE",
+                deniedExitPath: [.down]
+            )
+        )
+        XCTAssertEqual(
+            museum1F.objects.first { $0.id == "museum1_f_old_amber" }?.interactionDialogueID,
+            "museum1_f_old_amber"
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "museum1_f_old_amber" }?.pages.first?.lines,
+            ["The AMBER is", "clear and gold!"]
+        )
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "MUSEUM_1F" }?.triggers,
+            [
+                .init(
+                    id: "museum_admission_entry_left",
+                    scriptID: "museum_1f_entrance_admission",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 9),
+                    ]
+                ),
+                .init(
+                    id: "museum_admission_entry_right",
+                    scriptID: "museum_1f_entrance_admission",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 4),
+                        .init(kind: "playerXEquals", intValue: 10),
+                    ]
+                ),
+            ]
+        )
+
+        let museum2F = try XCTUnwrap(manifest.maps.first { $0.id == "MUSEUM_2F" })
+        XCTAssertEqual(museum2F.tileset, "MUSEUM")
+        XCTAssertEqual(
+            museum2F.backgroundEvents.map(\.dialogueID),
+            ["museum2_f_space_shuttle_sign", "museum2_f_moon_stone_sign"]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "museum2_f_space_shuttle_sign" }?.pages.first?.lines,
+            ["SPACE SHUTTLE", "COLUMBIA"]
+        )
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "museum2_f_moon_stone_sign" }?.pages.first?.lines,
+            ["Meteorite that", "fell on MT.MOON.", "(MOON STONE?)"]
+        )
+
+        XCTAssertEqual(
+            manifest.mapScripts.first { $0.mapID == "PEWTER_CITY" }?.triggers,
+            [
+                .init(
+                    id: "museum_exit_resets_ticket_main",
+                    scriptID: "pewter_city_reset_museum_ticket",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 8),
+                        .init(kind: "playerXEquals", intValue: 14),
+                    ]
+                ),
+                .init(
+                    id: "museum_exit_resets_ticket_back",
+                    scriptID: "pewter_city_reset_museum_ticket",
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BOUGHT_MUSEUM_TICKET"),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "playerXEquals", intValue: 19),
+                    ]
+                ),
+            ]
+        )
+        XCTAssertTrue(manifest.eventFlags.flags.contains { $0.id == "EVENT_BOUGHT_MUSEUM_TICKET" })
+        XCTAssertNotNil(manifest.scripts.first { $0.id == "museum_1f_scientist1_interaction" })
+        XCTAssertNotNil(manifest.scripts.first { $0.id == "museum_1f_entrance_admission" })
+        XCTAssertNotNil(manifest.scripts.first { $0.id == "pewter_city_reset_museum_ticket" })
 
         let pewterGym = try XCTUnwrap(manifest.maps.first { $0.id == "PEWTER_GYM" })
         XCTAssertEqual(pewterGym.tileset, "GYM")
@@ -918,13 +1036,13 @@ final class GameplayExtractionTests: XCTestCase {
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
         XCTAssertEqual(decoded.maps.count, 25)
         XCTAssertEqual(decoded.tilesets.count, 12)
-        XCTAssertEqual(decoded.overworldSprites.count, 25)
+        XCTAssertEqual(decoded.overworldSprites.count, 33)
         XCTAssertEqual(decoded.items.count, 99)
         XCTAssertEqual(decoded.marts.count, 2)
         XCTAssertEqual(decoded.wildEncounterTables.count, 5)
-        XCTAssertEqual(decoded.fieldInteractions.count, 2)
+        XCTAssertEqual(decoded.fieldInteractions.count, 3)
         XCTAssertEqual(decoded.trainerBattles.count, 22)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 30)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 31)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
