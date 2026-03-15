@@ -513,13 +513,27 @@ func repoRoot() -> URL {
 }
 
 @MainActor
+func loadRepoContent() throws -> LoadedContent {
+    let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
+    return try FileSystemContentLoader(rootURL: contentRoot).load()
+}
+
+@MainActor
+func makeRepoRuntime(
+    content: LoadedContent,
+    telemetryPublisher: (any TelemetryPublisher)? = nil,
+    audioPlayer: RuntimeAudioPlaying? = nil
+) -> GameRuntime {
+    GameRuntime(content: content, telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
+}
+
+@MainActor
 func makeRepoRuntime(
     telemetryPublisher: (any TelemetryPublisher)? = nil,
     audioPlayer: RuntimeAudioPlaying? = nil
 ) throws -> GameRuntime {
-    let contentRoot = repoRoot().appendingPathComponent("Content/Red", isDirectory: true)
-    let content = try FileSystemContentLoader(rootURL: contentRoot).load()
-    return GameRuntime(content: content, telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
+    let content = try loadRepoContent()
+    return makeRepoRuntime(content: content, telemetryPublisher: telemetryPublisher, audioPlayer: audioPlayer)
 }
 
 @MainActor
@@ -529,12 +543,12 @@ func findConnectionStart(
     expecting targetMapID: String,
     requiredFlags: [String] = []
 ) throws -> TilePoint {
-    let probe = try makeRepoRuntime()
-    let map = try XCTUnwrap(probe.content.map(id: sourceMapID))
+    let content = try loadRepoContent()
+    let map = try XCTUnwrap(content.map(id: sourceMapID))
 
     for y in 0..<map.stepHeight {
         for x in 0..<map.stepWidth {
-            let probe = try makeRepoRuntime()
+            let probe = makeRepoRuntime(content: content)
             probe.gameplayState = probe.makeInitialGameplayState()
             probe.scene = .field
             probe.substate = "field"
