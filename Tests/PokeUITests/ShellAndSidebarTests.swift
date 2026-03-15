@@ -281,6 +281,52 @@ extension PokeUITests {
     XCTAssertEqual(entry.detailFields.last?.value, "3")
   }
 
+  func testPokedexSidebarBuilderExposesOwnedEvolutionAndLearnsetDetails() {
+    let props = GameplaySidebarPropsBuilder.makePokedex(
+      allSpecies: [
+        .init(
+          id: "IVYSAUR",
+          dexNumber: 2,
+          displayName: "Ivysaur",
+          primaryType: "GRASS",
+          secondaryType: "POISON",
+          spriteURL: nil,
+          speciesCategory: "Seed",
+          heightText: "3'03\"",
+          weightText: "28.7 LB",
+          descriptionText: "When the bulb grows large, it appears to lose the ability to stand on its hind legs.",
+          preEvolution: .init(id: "BULBASAUR", displayName: "Bulbasaur", triggerText: "Lv 16"),
+          evolutions: [
+            .init(id: "VENUSAUR", displayName: "Venusaur", triggerText: "Lv 32")
+          ],
+          learnedMoves: [
+            .init(id: "IVYSAUR-LEECH_SEED-7", levelText: "Lv 7", displayName: "Leech Seed"),
+            .init(id: "IVYSAUR-VINE_WHIP-13", levelText: "Lv 13", displayName: "Vine Whip")
+          ],
+          baseHP: 60,
+          baseAttack: 62,
+          baseDefense: 63,
+          baseSpeed: 60,
+          baseSpecial: 80
+        )
+      ],
+      ownedSpeciesIDs: ["IVYSAUR"],
+      seenSpeciesIDs: ["IVYSAUR"]
+    )
+
+    guard let entry = props.entries.first else {
+      XCTFail("Expected a Pokedex entry")
+      return
+    }
+
+    XCTAssertEqual(entry.preEvolution?.displayName, "Bulbasaur")
+    XCTAssertEqual(entry.preEvolution?.triggerText, "Lv 16")
+    XCTAssertEqual(entry.evolutions.map(\.displayName), ["Venusaur"])
+    XCTAssertEqual(entry.evolutions.map(\.triggerText), ["Lv 32"])
+    XCTAssertEqual(entry.learnedMoves.map(\.levelText), ["Lv 7", "Lv 13"])
+    XCTAssertEqual(entry.learnedMoves.map(\.displayName), ["Leech Seed", "Vine Whip"])
+  }
+
   func testPokedexSidebarBuilderCarriesSelectedEntryID() {
     let props = GameplaySidebarPropsBuilder.makePokedex(
       allSpecies: [
@@ -356,6 +402,9 @@ extension PokeUITests {
     XCTAssertNil(entry.heightText)
     XCTAssertNil(entry.weightText)
     XCTAssertNil(entry.descriptionText)
+    XCTAssertNil(entry.preEvolution)
+    XCTAssertTrue(entry.evolutions.isEmpty)
+    XCTAssertTrue(entry.learnedMoves.isEmpty)
     XCTAssertTrue(entry.detailFields.isEmpty)
     XCTAssertEqual(entry.baseHP, 0)
     XCTAssertEqual(entry.baseAttack, 0)

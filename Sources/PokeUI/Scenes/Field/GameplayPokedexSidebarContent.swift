@@ -527,6 +527,12 @@ private struct PokedexDetailContent: View {
             if let description = entry.descriptionText {
                 descriptionSection(description)
             }
+            if entry.preEvolution != nil || entry.evolutions.isEmpty == false {
+                evolutionSection
+            }
+            if entry.learnedMoves.isEmpty == false {
+                levelUpMovesSection
+            }
         }
     }
 
@@ -586,6 +592,47 @@ private struct PokedexDetailContent: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(entry.detailFields) { field in
                     PokedexDetailFieldRow(field: field)
+                }
+            }
+        }
+    }
+
+    private var evolutionSection: some View {
+        GameplaySidebarInsetSurface(
+            padding: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12),
+            tint: FieldRetroPalette.accentGlassTint
+        ) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("EVOLUTION")
+                    .font(.system(size: 9, weight: .bold, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
+
+                VStack(alignment: .leading, spacing: 5) {
+                    if let preEvolution = entry.preEvolution {
+                        PokedexEvolutionRow(label: "FROM", evolution: preEvolution)
+                    }
+
+                    ForEach(entry.evolutions) { evolution in
+                        PokedexEvolutionRow(label: "TO", evolution: evolution)
+                    }
+                }
+            }
+        }
+    }
+
+    private var levelUpMovesSection: some View {
+        GameplaySidebarInsetSurface(
+            padding: EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+        ) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("LEVEL-UP MOVES")
+                    .font(.system(size: 9, weight: .bold, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.48))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(entry.learnedMoves) { learnedMove in
+                        PokedexLearnedMoveRow(learnedMove: learnedMove)
+                    }
                 }
             }
         }
@@ -683,6 +730,55 @@ private struct PokedexDetailFieldRow: View {
                 .frame(width: 84, alignment: .leading)
 
             Text(field.value)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.84))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct PokedexEvolutionRow: View {
+    let label: String
+    let evolution: PokedexSidebarEvolutionProps
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(label)
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.5))
+                .frame(width: 42, alignment: .leading)
+
+            Text(evolution.displayName.uppercased())
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.84))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Spacer(minLength: 4)
+
+            Text(evolution.triggerText.uppercased())
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+    }
+}
+
+private struct PokedexLearnedMoveRow: View {
+    let learnedMove: PokedexSidebarLearnedMoveProps
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(learnedMove.levelText.uppercased())
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.5))
+                .frame(width: 42, alignment: .leading)
+
+            Text(learnedMove.displayName.uppercased())
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundStyle(FieldRetroPalette.ink.opacity(0.84))
                 .lineLimit(1)
