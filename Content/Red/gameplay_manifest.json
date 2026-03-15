@@ -59759,6 +59759,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "ROUTE_1",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -59846,6 +59849,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "ROUTE_22",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -59917,6 +59923,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "ROUTE_2",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60000,6 +60009,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "VIRIDIAN_FOREST",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60051,6 +60063,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "ROUTE_3",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60130,6 +60145,9 @@
       ],
       "landEncounterSurface" : "grass",
       "mapID" : "ROUTE_4",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60181,6 +60199,9 @@
       ],
       "landEncounterSurface" : "floor",
       "mapID" : "MT_MOON_1F",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60232,6 +60253,9 @@
       ],
       "landEncounterSurface" : "floor",
       "mapID" : "MT_MOON_B1F",
+      "suppressionZones" : [
+
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 
@@ -60283,6 +60307,83 @@
       ],
       "landEncounterSurface" : "floor",
       "mapID" : "MT_MOON_B2F",
+      "suppressionZones" : [
+        {
+          "conditions" : [
+            {
+              "flagID" : "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD",
+              "kind" : "flagSet"
+            }
+          ],
+          "id" : "mt_moon_b2f_post_super_nerd_fossil_area",
+          "positions" : [
+            {
+              "x" : 11,
+              "y" : 5
+            },
+            {
+              "x" : 12,
+              "y" : 5
+            },
+            {
+              "x" : 13,
+              "y" : 5
+            },
+            {
+              "x" : 14,
+              "y" : 5
+            },
+            {
+              "x" : 11,
+              "y" : 6
+            },
+            {
+              "x" : 12,
+              "y" : 6
+            },
+            {
+              "x" : 13,
+              "y" : 6
+            },
+            {
+              "x" : 14,
+              "y" : 6
+            },
+            {
+              "x" : 11,
+              "y" : 7
+            },
+            {
+              "x" : 12,
+              "y" : 7
+            },
+            {
+              "x" : 13,
+              "y" : 7
+            },
+            {
+              "x" : 14,
+              "y" : 7
+            },
+            {
+              "x" : 11,
+              "y" : 8
+            },
+            {
+              "x" : 12,
+              "y" : 8
+            },
+            {
+              "x" : 13,
+              "y" : 8
+            },
+            {
+              "x" : 14,
+              "y" : 8
+            }
+          ]
+        }
+      ],
       "waterEncounterRate" : 0,
       "waterSlots" : [
 

@@ -35,12 +35,17 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let species = try buildSpecies(repoRoot: source.repoRoot)
     let moves = try buildMoves(repoRoot: source.repoRoot)
     let typeEffectiveness = try buildTypeEffectiveness(repoRoot: source.repoRoot)
-    let wildEncounterTables = try buildWildEncounterTables(repoRoot: source.repoRoot, maps: maps)
+    let wildEncounterTables = try buildWildEncounterTables(
+        repoRoot: source.repoRoot,
+        maps: maps,
+        mapScriptMetadataByMapID: mapScriptMetadataByMapID
+    )
     let trainerAIMoveChoiceModifications = try buildTrainerAIMoveChoiceModifications(repoRoot: source.repoRoot)
     let trainerBattles = try buildTrainerBattles(repoRoot: source.repoRoot, mapScriptMetadataByMapID: mapScriptMetadataByMapID)
     let eventFlags = try parseEventFlags(
         repoRoot: source.repoRoot,
         maps: maps,
+        wildEncounterTables: wildEncounterTables,
         fieldInteractions: fieldInteractions,
         mapScripts: mapScripts,
         scripts: scripts,
@@ -115,6 +120,7 @@ private struct MapScriptMetadata {
     let trainerHeadersByLabel: [String: StandardTrainerHeaderMetadata]
     let trainerHeaderLabelByTextLabel: [String: String]
     let usesStandardTrainerLoop: Bool
+    let wildEncounterSuppressionZones: [WildEncounterSuppressionZoneManifest]
 }
 
 private func fallbackMapSize(for mapID: String) -> TileSize {
@@ -206,6 +212,7 @@ private func parseMapSizes(repoRoot: URL) throws -> [String: TileSize] {
 private func parseEventFlags(
     repoRoot: URL,
     maps: [MapManifest],
+    wildEncounterTables: [WildEncounterTableManifest],
     fieldInteractions: [FieldInteractionManifest],
     mapScripts: [MapScriptManifest],
     scripts: [ScriptManifest],
@@ -215,6 +222,7 @@ private func parseEventFlags(
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/event_constants.asm"))
     let requiredFlags = referencedEventFlagIDs(
         maps: maps,
+        wildEncounterTables: wildEncounterTables,
         fieldInteractions: fieldInteractions,
         mapScripts: mapScripts,
         scripts: scripts,
@@ -232,6 +240,7 @@ private func parseEventFlags(
 
 private func referencedEventFlagIDs(
     maps: [MapManifest],
+    wildEncounterTables: [WildEncounterTableManifest],
     fieldInteractions: [FieldInteractionManifest],
     mapScripts: [MapScriptManifest],
     scripts: [ScriptManifest],
@@ -245,6 +254,9 @@ private func referencedEventFlagIDs(
     }
     let fieldInteractionFlags = fieldInteractions.compactMap { interaction in
         interaction.paidAdmission?.successFlagID
+    }
+    let encounterZoneFlags = wildEncounterTables.flatMap { table in
+        table.suppressionZones.flatMap { $0.conditions.compactMap(\.flagID) }
     }
     let mapScriptFlags = mapScripts.flatMap { $0.triggers.flatMap { $0.conditions.compactMap(\.flagID) } }
     let scriptStepFlags = scripts.flatMap { script in
@@ -260,6 +272,7 @@ private func referencedEventFlagIDs(
         playerStart.initialFlags
         + objectTriggerFlags
         + fieldInteractionFlags
+        + encounterZoneFlags
         + mapScriptFlags
         + scriptStepFlags
         + trainerBattleFlags
@@ -432,8 +445,59 @@ private func parseMapScriptMetadata(contents: String) -> MapScriptMetadata {
         referencedFarTextLabels: referencedFarTextLabels,
         trainerHeadersByLabel: trainerHeadersByLabel,
         trainerHeaderLabelByTextLabel: trainerHeaderLabelByTextLabel,
-        usesStandardTrainerLoop: usesStandardTrainerLoop
+        usesStandardTrainerLoop: usesStandardTrainerLoop,
+        wildEncounterSuppressionZones: parseWildEncounterSuppressionZones(contents: contents)
     )
+}
+
+private func parseWildEncounterSuppressionZones(contents: String) -> [WildEncounterSuppressionZoneManifest] {
+    guard
+        contents.contains("CheckEvent EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD"),
+        contents.contains("set BIT_NO_BATTLES"),
+        contents.contains("MtMoonB2FFossilAreaCoords"),
+        let positions = parseCoordinateArray(label: "MtMoonB2FFossilAreaCoords", in: contents),
+        positions.isEmpty == false
+    else {
+        return []
+    }
+
+    return [
+        .init(
+            id: "mt_moon_b2f_post_super_nerd_fossil_area",
+            conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")],
+            positions: positions
+        )
+    ]
+}
+
+private func parseCoordinateArray(label: String, in contents: String) -> [TilePoint]? {
+    guard let labelRange = contents.range(of: "\(label):") else {
+        return nil
+    }
+
+    var positions: [TilePoint] = []
+    let lines = contents[labelRange.upperBound...].split(separator: "\n", omittingEmptySubsequences: false)
+    for rawLine in lines {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if line == "db -1" {
+            return positions
+        }
+
+        guard let match = line.firstMatch(of: /dbmapcoord\s+(\d+),\s+(\d+)/) else {
+            if line.hasSuffix(":") {
+                break
+            }
+            continue
+        }
+
+        positions.append(.init(x: Int(match.output.1) ?? 0, y: Int(match.output.2) ?? 0))
+    }
+
+    return positions.isEmpty ? nil : positions
 }
 
 private func parseMapTextPointerLabels(contents: String) -> [String: String] {
@@ -4830,7 +4894,11 @@ private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {
     }
 }
 
-private func buildWildEncounterTables(repoRoot: URL, maps: [MapManifest]) throws -> [WildEncounterTableManifest] {
+private func buildWildEncounterTables(
+    repoRoot: URL,
+    maps: [MapManifest],
+    mapScriptMetadataByMapID: [String: MapScriptMetadata]
+) throws -> [WildEncounterTableManifest] {
     let mapsByID = Dictionary(uniqueKeysWithValues: maps.map { ($0.id, $0) })
 
     return try gameplayCoverageMaps.compactMap { definition in
@@ -4843,12 +4911,18 @@ private func buildWildEncounterTables(repoRoot: URL, maps: [MapManifest]) throws
         return try parseWildEncounterTable(
             repoRoot: repoRoot,
             map: map,
+            mapScriptMetadata: mapScriptMetadataByMapID[definition.mapID],
             path: path
         )
     }
 }
 
-private func parseWildEncounterTable(repoRoot: URL, map: MapManifest, path: String) throws -> WildEncounterTableManifest {
+private func parseWildEncounterTable(
+    repoRoot: URL,
+    map: MapManifest,
+    mapScriptMetadata: MapScriptMetadata?,
+    path: String
+) throws -> WildEncounterTableManifest {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent(path))
     return WildEncounterTableManifest(
         mapID: map.id,
@@ -4856,7 +4930,8 @@ private func parseWildEncounterTable(repoRoot: URL, map: MapManifest, path: Stri
         grassEncounterRate: try parseEncounterRate(label: "def_grass_wildmons", in: contents),
         waterEncounterRate: try parseEncounterRate(label: "def_water_wildmons", in: contents),
         grassSlots: parseEncounterSlots(from: contents, startMarker: "def_grass_wildmons", endMarker: "end_grass_wildmons"),
-        waterSlots: parseEncounterSlots(from: contents, startMarker: "def_water_wildmons", endMarker: "end_water_wildmons")
+        waterSlots: parseEncounterSlots(from: contents, startMarker: "def_water_wildmons", endMarker: "end_water_wildmons"),
+        suppressionZones: mapScriptMetadata?.wildEncounterSuppressionZones ?? []
     )
 }
 

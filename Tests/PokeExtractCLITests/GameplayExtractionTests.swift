@@ -1101,6 +1101,13 @@ final class GameplayExtractionTests: XCTestCase {
         let mtMoonB2FEncounters = try XCTUnwrap(manifest.wildEncounterTables.first { $0.mapID == "MT_MOON_B2F" })
         XCTAssertEqual(mtMoonB2FEncounters.landEncounterSurface, .floor)
         XCTAssertEqual(mtMoonB2FEncounters.grassEncounterRate, 10)
+        XCTAssertEqual(mtMoonB2FEncounters.suppressionZones.map(\.id), ["mt_moon_b2f_post_super_nerd_fossil_area"])
+        XCTAssertEqual(
+            mtMoonB2FEncounters.suppressionZones.first?.conditions,
+            [.init(kind: "flagSet", flagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")]
+        )
+        XCTAssertEqual(mtMoonB2FEncounters.suppressionZones.first?.positions.first, .init(x: 11, y: 5))
+        XCTAssertEqual(mtMoonB2FEncounters.suppressionZones.first?.positions.last, .init(x: 14, y: 8))
 
         let redSprite = try XCTUnwrap(manifest.overworldSprites.first { $0.id == "SPRITE_RED" })
         XCTAssertEqual(redSprite.walkingFrames?.down, .init(x: 0, y: 48, width: 16, height: 16))

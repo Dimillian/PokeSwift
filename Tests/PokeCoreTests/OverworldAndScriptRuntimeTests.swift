@@ -285,6 +285,40 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.mapID, "MT_MOON_1F")
         XCTAssertEqual(runtime.gameplayState?.playerPosition, encounterTile)
     }
+    func testRepoGeneratedMtMoonB2FFossilAreaSuppressesEncountersAfterSuperNerd() throws {
+        let runtime = try makeRepoRuntime()
+        let fossilAreaPositions = (5...8).flatMap { y in
+            (11...14).map { x in TilePoint(x: x, y: y) }
+        }
+        let outsideEncounterTile = try findLandEncounterFloorTile(
+            in: runtime,
+            mapID: "MT_MOON_B2F",
+            excluding: fossilAreaPositions
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "MT_MOON_B2F"
+        runtime.gameplayState?.playerPosition = .init(x: 11, y: 5)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 12, nickname: "Squirtle")]
+        runtime.gameplayState?.activeFlags.insert("EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
+        runtime.setAcquisitionRandomOverrides([0, 0, 0, 0])
+
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.currentSnapshot().battle)
+        XCTAssertEqual(runtime.gameplayState?.encounterStepCounter, 0)
+
+        runtime.gameplayState?.playerPosition = outsideEncounterTile
+        runtime.evaluateWildEncounterIfNeeded()
+
+        XCTAssertEqual(runtime.scene, .battle)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.kind, .wild)
+    }
     func testWildEncounterSlotThresholdsMatchGBTableForFixedRolls() {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
         let slots = (0..<10).map { index in

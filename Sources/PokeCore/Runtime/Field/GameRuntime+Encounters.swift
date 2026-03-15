@@ -44,11 +44,25 @@ extension GameRuntime {
         position: TilePoint,
         encounterTable: WildEncounterTableManifest
     ) -> Bool {
+        guard isLandEncounterSuppressed(at: position, encounterTable: encounterTable) == false else {
+            return false
+        }
+
         switch encounterTable.landEncounterSurface {
         case .grass:
             return isStandingOnGrass(in: map, position: position)
         case .floor:
             return isStandingOnLandEncounterFloor(in: map, position: position)
+        }
+    }
+
+    func isLandEncounterSuppressed(
+        at position: TilePoint,
+        encounterTable: WildEncounterTableManifest
+    ) -> Bool {
+        encounterTable.suppressionZones.contains { zone in
+            zone.positions.contains(position) &&
+            zone.conditions.allSatisfy { conditionMatches($0, blockedMoveFacing: nil) }
         }
     }
 

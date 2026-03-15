@@ -570,12 +570,17 @@ func findGrassTile(in runtime: GameRuntime, mapID: String) throws -> TilePoint {
 }
 
 @MainActor
-func findLandEncounterFloorTile(in runtime: GameRuntime, mapID: String) throws -> TilePoint {
+func findLandEncounterFloorTile(
+    in runtime: GameRuntime,
+    mapID: String,
+    excluding excludedPositions: [TilePoint] = []
+) throws -> TilePoint {
     let map = try XCTUnwrap(runtime.content.map(id: mapID))
     for y in 0..<map.stepHeight {
         for x in 0..<map.stepWidth {
             let point = TilePoint(x: x, y: y)
-            if runtime.isStandingOnLandEncounterFloor(in: map, position: point) {
+            if runtime.isStandingOnLandEncounterFloor(in: map, position: point),
+               excludedPositions.contains(point) == false {
                 return point
             }
         }

@@ -114,6 +114,7 @@ final class RepoContentContractTests: XCTestCase {
         let route3Youngster = try XCTUnwrap(loaded.trainerBattle(id: "opp_youngster_1"))
         let superNerd = try XCTUnwrap(loaded.trainerBattle(id: "opp_super_nerd_2"))
         let mtMoon1FEncounters = try XCTUnwrap(loaded.wildEncounterTable(mapID: "MT_MOON_1F"))
+        let mtMoonB2FEncounters = try XCTUnwrap(loaded.wildEncounterTable(mapID: "MT_MOON_B2F"))
 
         XCTAssertEqual(viridianMart.mapID, "VIRIDIAN_MART")
         XCTAssertEqual(viridianMart.clerkObjectID, "viridian_mart_clerk")
@@ -154,6 +155,8 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(superNerd.completionFlagID, "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
         XCTAssertEqual(mtMoon1FEncounters.landEncounterSurface, .floor)
         XCTAssertEqual(mtMoon1FEncounters.grassEncounterRate, 10)
+        XCTAssertEqual(mtMoonB2FEncounters.suppressionZones.map(\.id), ["mt_moon_b2f_post_super_nerd_fossil_area"])
+        XCTAssertEqual(mtMoonB2FEncounters.suppressionZones.first?.positions.count, 16)
     }
 
     func testLoaderReadsRepoGeneratedMuseumExhibitContracts() throws {
