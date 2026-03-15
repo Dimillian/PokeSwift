@@ -1446,7 +1446,7 @@ extension PokeUITests {
     XCTAssertTrue(save.actions.allSatisfy { $0.isEnabled == false })
     XCTAssertEqual(
       options.rows.map(\.title), ["Appearance", "HDR Effects", "Text Speed", "Battle Scene", "Battle Style", "Music"])
-    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, false, false, false, true])
+    XCTAssertEqual(options.rows.map(\.isEnabled), [true, true, true, true, true, true])
     XCTAssertEqual(options.shellPickerTitle, "GB Shell")
     XCTAssertEqual(options.shellOptions.map(\.shellStyle), [.classic, .kiwi, .dandelion, .teal, .grape])
     XCTAssertEqual(options.shellOptions.filter(\.isSelected).map(\.shellStyle), [.classic])

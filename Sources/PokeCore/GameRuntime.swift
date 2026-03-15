@@ -20,6 +20,11 @@ public final class GameRuntime {
     public internal(set) var focusedIndex = 0
     public internal(set) var placeholderTitle: String?
     public internal(set) var starterChoiceFocusedIndex = 0
+    public internal(set) var optionsFocusedRow = 0
+    public var optionsTextSpeed: TextSpeed = .medium
+    public var optionsBattleAnimation: BattleAnimation = .on
+    public var optionsBattleStyle: BattleStyle = .shift
+    public var dialogueTextFullyRevealed = true
 
     let telemetryPublisher: (any TelemetryPublisher)?
     let audioPlayer: (any RuntimeAudioPlaying)?
@@ -370,6 +375,8 @@ public final class GameRuntime {
             }
         case .titleMenu:
             handleTitleMenu(button: button)
+        case .titleOptions:
+            handleTitleOptions(button: button)
         case .field:
             handleField(button: button)
         case .dialogue:

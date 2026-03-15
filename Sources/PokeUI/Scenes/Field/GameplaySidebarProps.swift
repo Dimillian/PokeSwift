@@ -1123,7 +1123,10 @@ public enum GameplaySidebarPropsBuilder {
         isMusicEnabled: Bool,
         appearanceMode: AppAppearanceMode,
         gameBoyShellStyle: GameBoyShellStyle,
-        gameplayHDREnabled: Bool
+        gameplayHDREnabled: Bool,
+        textSpeed: TextSpeed = .medium,
+        battleAnimation: BattleAnimation = .on,
+        battleStyle: BattleStyle = .shift
     ) -> OptionsSidebarProps {
         OptionsSidebarProps(
             title: "Options",
@@ -1139,9 +1142,9 @@ public enum GameplaySidebarPropsBuilder {
             rows: [
                 .init(id: "appearanceMode", title: "Appearance", detail: appearanceMode.optionsLabel, isEnabled: true),
                 .init(id: "gameplayHDR", title: "HDR Effects", detail: gameplayHDREnabled ? "On" : "Off", isEnabled: true),
-                .init(id: "textSpeed", title: "Text Speed", detail: "Medium", isEnabled: false),
-                .init(id: "battleScene", title: "Battle Scene", detail: "On", isEnabled: false),
-                .init(id: "battleStyle", title: "Battle Style", detail: "Shift", isEnabled: false),
+                .init(id: "textSpeed", title: "Text Speed", detail: textSpeed.label, isEnabled: true),
+                .init(id: "battleScene", title: "Battle Scene", detail: battleAnimation.label, isEnabled: true),
+                .init(id: "battleStyle", title: "Battle Style", detail: battleStyle.label, isEnabled: true),
                 .init(id: "music", title: "Music", detail: isMusicEnabled ? "On" : "Off", isEnabled: true),
             ]
         )
@@ -1173,6 +1176,8 @@ public enum GameplaySidebarPropsBuilder {
             "NAMING"
         case .oakIntro:
             "INTRO"
+        case .titleOptions:
+            "OPTIONS"
         case .placeholder:
             "PLACEHOLDER"
         }

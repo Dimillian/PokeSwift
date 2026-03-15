@@ -13,6 +13,7 @@ public enum RuntimeScene: String, Codable, Sendable {
     case evolution
     case naming
     case oakIntro
+    case titleOptions
     case placeholder
 }
 

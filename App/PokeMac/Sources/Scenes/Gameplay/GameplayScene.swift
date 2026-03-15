@@ -100,6 +100,15 @@ private extension GameplayScene {
         case "music":
             preferences.toggleMusicEnabled()
             return
+        case "textSpeed":
+            preferences.cycleTextSpeed()
+            return
+        case "battleScene":
+            preferences.cycleBattleAnimation()
+            return
+        case "battleStyle":
+            preferences.cycleBattleStyle()
+            return
         default:
             break
         }

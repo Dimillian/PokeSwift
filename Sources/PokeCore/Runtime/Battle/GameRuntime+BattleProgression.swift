@@ -68,9 +68,12 @@ extension GameRuntime {
 
         let rewardContinuation: RuntimeBattleRewardContinuation
         if battle.enemyActiveIndex + 1 < battle.enemyParty.count {
-            rewardContinuation = battle.kind == .trainer
-                ? .aboutToUse(index: battle.enemyActiveIndex + 1, previousMoveIndex: battle.focusedMoveIndex)
-                : .sendNextEnemy(index: battle.enemyActiveIndex + 1)
+            let nextIndex = battle.enemyActiveIndex + 1
+            if battle.kind == .trainer, optionsBattleStyle == .shift {
+                rewardContinuation = .aboutToUse(index: nextIndex, previousMoveIndex: battle.focusedMoveIndex)
+            } else {
+                rewardContinuation = .sendNextEnemy(index: nextIndex)
+            }
         } else if battle.kind == .trainer {
             rewardContinuation = .finishTrainerWin(
                 payout: trainerBattlePayoutAmount(battle: battle, defeatedEnemy: defeatedEnemy)

@@ -10,6 +10,13 @@ struct TitleMenuSceneProps {
     let focusedIndex: Int
 }
 
+struct TitleOptionsSceneProps {
+    let focusedRow: Int
+    let textSpeed: TextSpeed
+    let battleAnimation: BattleAnimation
+    let battleStyle: BattleStyle
+}
+
 struct SplashView: View {
     let rootURL: URL
 
@@ -143,5 +150,141 @@ private struct TitleSaveSummaryCard: View {
         let hours = max(0, seconds) / 3600
         let minutes = (max(0, seconds) % 3600) / 60
         return String(format: "%03d:%02d", hours, minutes)
+    }
+}
+
+struct TitleOptionsScene: View {
+    let props: TitleOptionsSceneProps
+
+    @State private var cursorVisible = true
+
+    private let palette = PokeThemePalette.lightPalette
+    private let panelShape = RoundedRectangle(cornerRadius: 14, style: .continuous)
+
+    var body: some View {
+        GameBoyScreen {
+            VStack(spacing: 0) {
+                OptionsSection(
+                    title: "TEXT SPEED",
+                    options: TextSpeed.allCases.map(\.label),
+                    selectedIndex: TextSpeed.allCases.firstIndex(of: props.textSpeed) ?? 1,
+                    isFocused: props.focusedRow == 0,
+                    cursorVisible: cursorVisible
+                )
+
+                OptionsSectionBorder()
+
+                OptionsSection(
+                    title: "BATTLE ANIMATION",
+                    options: BattleAnimation.allCases.map(\.label),
+                    selectedIndex: BattleAnimation.allCases.firstIndex(of: props.battleAnimation) ?? 0,
+                    isFocused: props.focusedRow == 1,
+                    cursorVisible: cursorVisible
+                )
+
+                OptionsSectionBorder()
+
+                OptionsSection(
+                    title: "BATTLE STYLE",
+                    options: BattleStyle.allCases.map(\.label),
+                    selectedIndex: BattleStyle.allCases.firstIndex(of: props.battleStyle) ?? 0,
+                    isFocused: props.focusedRow == 2,
+                    cursorVisible: cursorVisible
+                )
+
+                OptionsSectionBorder()
+
+                OptionsCancelRow(isFocused: props.focusedRow == 3, cursorVisible: cursorVisible)
+            }
+            .padding(20)
+            .background(palette.dialoguePaper.color, in: panelShape)
+            .overlay {
+                panelShape.stroke(palette.dialogueBorder.color, lineWidth: 3)
+            }
+            .overlay {
+                panelShape.inset(by: 5).stroke(palette.dialogueBorder.color, lineWidth: 1.5)
+            }
+            .frame(width: 500)
+            .shadow(color: palette.dialogueShadow.color, radius: 12, y: 6)
+        }
+        .task {
+            while Task.isCancelled == false {
+                try? await Task.sleep(nanoseconds: 320_000_000)
+                if Task.isCancelled { break }
+                cursorVisible.toggle()
+            }
+        }
+        .onChange(of: props.focusedRow) { _, _ in
+            cursorVisible = true
+        }
+    }
+}
+
+private struct OptionsSection: View {
+    let title: String
+    let options: [String]
+    let selectedIndex: Int
+    let isFocused: Bool
+    let cursorVisible: Bool
+
+    private let palette = PokeThemePalette.lightPalette
+    private let ink: Color = .black
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            GameBoyPixelText(title, scale: 2.5, color: ink)
+                .padding(.leading, 10)
+                .padding(.top, 12)
+
+            HStack(spacing: 24) {
+                ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                    HStack(spacing: 2) {
+                        GameBoyPixelText(">", scale: 2.5, color: ink)
+                            .opacity(cursorOpacity(for: index))
+                        GameBoyPixelText(option, scale: 2.5, color: ink)
+                            .opacity(index == selectedIndex ? 1 : 0.4)
+                    }
+                }
+            }
+            .padding(.leading, 24)
+            .padding(.bottom, 12)
+        }
+    }
+
+    private func cursorOpacity(for index: Int) -> Double {
+        guard index == selectedIndex else { return 0 }
+        if isFocused {
+            return cursorVisible ? 1 : 0
+        }
+        return 1
+    }
+}
+
+private struct OptionsSectionBorder: View {
+    var body: some View {
+        VStack(spacing: 2) {
+            Rectangle().fill(.black)
+            Rectangle().fill(.black)
+        }
+        .frame(height: 5)
+        .padding(.horizontal, 6)
+    }
+}
+
+private struct OptionsCancelRow: View {
+    let isFocused: Bool
+    let cursorVisible: Bool
+
+    private let ink: Color = .black
+
+    var body: some View {
+        HStack(spacing: 2) {
+            GameBoyPixelText(">", scale: 2.5, color: ink)
+                .opacity(isFocused ? (cursorVisible ? 1 : 0) : 0)
+            GameBoyPixelText("CANCEL", scale: 2.5, color: ink)
+        }
+        .padding(.leading, 24)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

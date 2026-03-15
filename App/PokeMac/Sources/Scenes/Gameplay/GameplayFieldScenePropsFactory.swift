@@ -52,7 +52,10 @@ enum GameplayScenePropsFactory {
                         isMusicEnabled: runtime.isMusicEnabled,
                         appearanceMode: appearanceMode,
                         gameBoyShellStyle: gameBoyShellStyle,
-                        gameplayHDREnabled: gameplayHDREnabled
+                        gameplayHDREnabled: gameplayHDREnabled,
+                        textSpeed: runtime.optionsTextSpeed,
+                        battleAnimation: runtime.optionsBattleAnimation,
+                        battleStyle: runtime.optionsBattleStyle
                     ),
                     preferredExpandedSection: runtime.scene == .evolution ? .party : (
                         runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex
@@ -94,6 +97,8 @@ enum GameplayScenePropsFactory {
                         fieldTransition: fieldState.transition,
                         fieldAlert: fieldState.fieldAlert,
                         dialogueLines: runtime.currentDialoguePage?.lines,
+                        dialogueInstantReveal: runtime.dialogueTextFullyRevealed,
+                        onDialogueRevealed: { [weak runtime] in runtime?.dialogueTextFullyRevealed = true },
                         fieldPrompt: fieldState.fieldPrompt,
                         fieldHealing: fieldState.fieldHealing,
                         shop: fieldState.shop,

@@ -253,12 +253,7 @@ extension GameRuntime {
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
-        let scale: Double
-        if validationMode || isTestEnvironment {
-            scale = 0.12
-        } else {
-            scale = 1
-        }
+        let scale: Double = validationMode || isTestEnvironment ? 0.12 : 1.0
         return max(0, base * scale)
     }
 
@@ -679,10 +674,11 @@ extension GameRuntime {
         } else {
             moveAudioRequest = nil
         }
+        let skipAnimation = optionsBattleAnimation == .off
         var beats: [RuntimeBattlePresentationBeat] = [
             .init(
                 delay: battlePresentationDelay(base: 0),
-                stage: .attackWindup,
+                stage: skipAnimation ? .resultText : .attackWindup,
                 uiVisibility: .visible,
                 activeSide: action.side,
                 message: action.messages.first,
@@ -690,14 +686,19 @@ extension GameRuntime {
                 playerPokemon: attackerPokemon,
                 enemyPokemon: enemyAttacker
             ),
-            .init(
-                delay: battlePresentationDelay(base: 0.22),
-                stage: .attackImpact,
-                uiVisibility: .visible,
-                activeSide: action.side,
-                soundEffectRequest: moveAudioRequest
-            ),
         ]
+
+        if skipAnimation == false {
+            beats.append(
+                .init(
+                    delay: battlePresentationDelay(base: 0.22),
+                    stage: .attackImpact,
+                    uiVisibility: .visible,
+                    activeSide: action.side,
+                    soundEffectRequest: moveAudioRequest
+                )
+            )
+        }
 
         let trailingMessages = Array(action.messages.dropFirst())
         if action.dealtDamage > 0 {

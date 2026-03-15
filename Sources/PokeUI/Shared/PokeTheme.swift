@@ -1,4 +1,5 @@
 import AppKit
+import PokeDataModel
 import SwiftUI
 import PokeRender
 
@@ -540,6 +541,10 @@ private struct PokeGameplayHDREnabledKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct PokeTextSpeedKey: EnvironmentKey {
+    static let defaultValue: TextSpeed = .medium
+}
+
 private struct PokeGameBoyShellStyleKey: EnvironmentKey {
     static let defaultValue: GameBoyShellStyle = .classic
 }
@@ -555,6 +560,11 @@ public extension EnvironmentValues {
         set { self[PokeGameplayHDREnabledKey.self] = newValue }
     }
 
+    var pokeTextSpeed: TextSpeed {
+        get { self[PokeTextSpeedKey.self] }
+        set { self[PokeTextSpeedKey.self] = newValue }
+    }
+
     var pokeGameBoyShellStyle: GameBoyShellStyle {
         get { self[PokeGameBoyShellStyleKey.self] }
         set { self[PokeGameBoyShellStyleKey.self] = newValue }
@@ -568,6 +578,10 @@ public extension View {
 
     func pokeGameplayHDREnabled(_ isEnabled: Bool) -> some View {
         environment(\.pokeGameplayHDREnabled, isEnabled)
+    }
+
+    func pokeTextSpeed(_ speed: TextSpeed) -> some View {
+        environment(\.pokeTextSpeed, speed)
     }
 
     func pokeGameBoyShellStyle(_ shellStyle: GameBoyShellStyle) -> some View {

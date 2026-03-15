@@ -96,6 +96,43 @@ public struct TitleMenuEntry: Codable, Equatable, Hashable, Sendable {
     }
 }
 
+public enum TextSpeed: String, CaseIterable, Codable, Sendable {
+    case fast
+    case medium
+    case slow
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+
+    /// Per-character reveal delay in seconds, matching original Game Boy frame timings.
+    public var characterDelay: TimeInterval {
+        switch self {
+        case .fast: return 1.0 / 60.0   // 1 frame
+        case .medium: return 3.0 / 60.0  // 3 frames
+        case .slow: return 5.0 / 60.0    // 5 frames
+        }
+    }
+}
+
+public enum BattleAnimation: String, CaseIterable, Codable, Sendable {
+    case on
+    case off
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+}
+
+public enum BattleStyle: String, CaseIterable, Codable, Sendable {
+    case shift
+    case set
+
+    public var label: String {
+        rawValue.uppercased()
+    }
+}
+
 public struct LogoBounceStep: Codable, Equatable, Hashable, Sendable {
     public let yDelta: Int
     public let frames: Int

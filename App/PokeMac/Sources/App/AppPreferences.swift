@@ -1,5 +1,6 @@
 import Observation
 import PokeCore
+import PokeDataModel
 import PokeUI
 
 @MainActor
@@ -9,6 +10,9 @@ final class AppPreferences {
     var gameBoyShellStyle: GameBoyShellStyle
     var gameplayHDREnabled: Bool
     var musicEnabled: Bool
+    var textSpeed: TextSpeed
+    var battleAnimation: BattleAnimation
+    var battleStyle: BattleStyle
 
     private let settingsStore: AppSettingsStore
     private weak var runtime: GameRuntime?
@@ -19,11 +23,17 @@ final class AppPreferences {
         gameBoyShellStyle = settingsStore.gameBoyShellStyle
         gameplayHDREnabled = settingsStore.gameplayHDREnabled
         musicEnabled = settingsStore.musicEnabled
+        textSpeed = settingsStore.textSpeed
+        battleAnimation = settingsStore.battleAnimation
+        battleStyle = settingsStore.battleStyle
     }
 
     func attachRuntime(_ runtime: GameRuntime?) {
         self.runtime = runtime
         runtime?.setMusicEnabled(musicEnabled)
+        runtime?.optionsTextSpeed = textSpeed
+        runtime?.optionsBattleAnimation = battleAnimation
+        runtime?.optionsBattleStyle = battleStyle
     }
 
     func cycleAppearanceMode() {
@@ -51,5 +61,40 @@ final class AppPreferences {
         musicEnabled = nextValue
         settingsStore.musicEnabled = nextValue
         runtime?.setMusicEnabled(nextValue)
+    }
+
+    func setTextSpeed(_ value: TextSpeed) {
+        textSpeed = value
+        settingsStore.textSpeed = value
+        runtime?.optionsTextSpeed = value
+    }
+
+    func setBattleAnimation(_ value: BattleAnimation) {
+        battleAnimation = value
+        settingsStore.battleAnimation = value
+        runtime?.optionsBattleAnimation = value
+    }
+
+    func setBattleStyle(_ value: BattleStyle) {
+        battleStyle = value
+        settingsStore.battleStyle = value
+        runtime?.optionsBattleStyle = value
+    }
+
+    func cycleTextSpeed() {
+        setTextSpeed(nextOption(after: textSpeed, in: TextSpeed.allCases))
+    }
+
+    func cycleBattleAnimation() {
+        setBattleAnimation(nextOption(after: battleAnimation, in: BattleAnimation.allCases))
+    }
+
+    func cycleBattleStyle() {
+        setBattleStyle(nextOption(after: battleStyle, in: BattleStyle.allCases))
+    }
+
+    private func nextOption<T: Equatable>(after current: T, in options: [T]) -> T {
+        guard let idx = options.firstIndex(of: current) else { return current }
+        return options[(idx + 1) % options.count]
     }
 }

@@ -9,6 +9,23 @@ struct RuntimeSceneRouter: View {
     @Bindable var runtime: GameRuntime
 
     var body: some View {
+        sceneContent
+            .pokeTextSpeed(preferences.textSpeed)
+            .onChange(of: runtime.scene) { oldValue, newValue in
+                if oldValue != .titleOptions, newValue == .titleOptions {
+                    runtime.optionsTextSpeed = preferences.textSpeed
+                    runtime.optionsBattleAnimation = preferences.battleAnimation
+                    runtime.optionsBattleStyle = preferences.battleStyle
+                } else if oldValue == .titleOptions, newValue != .titleOptions {
+                    preferences.setTextSpeed(runtime.optionsTextSpeed)
+                    preferences.setBattleAnimation(runtime.optionsBattleAnimation)
+                    preferences.setBattleStyle(runtime.optionsBattleStyle)
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var sceneContent: some View {
         switch runtime.scene {
         case .launch:
             LaunchScene()
@@ -29,6 +46,17 @@ struct RuntimeSceneRouter: View {
                     entries: runtime.menuEntries,
                     saveMetadata: runtime.currentSaveMetadata,
                     focusedIndex: runtime.focusedIndex
+                )
+            )
+            .preferredColorScheme(.light)
+            .pokeAppearanceMode(.light)
+        case .titleOptions:
+            TitleOptionsScene(
+                props: .init(
+                    focusedRow: runtime.optionsFocusedRow,
+                    textSpeed: runtime.optionsTextSpeed,
+                    battleAnimation: runtime.optionsBattleAnimation,
+                    battleStyle: runtime.optionsBattleStyle
                 )
             )
             .preferredColorScheme(.light)

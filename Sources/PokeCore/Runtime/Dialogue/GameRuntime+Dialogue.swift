@@ -30,10 +30,18 @@ extension GameRuntime {
             return
         }
 
+        if dialogueTextFullyRevealed == false, isTestEnvironment == false {
+            dialogueTextFullyRevealed = true
+            return
+        }
+
         playUIConfirmSound()
 
         if dialogueState.pageIndex < dialogue.pages.count - 1 {
             dialogueState.pageIndex += 1
+            if isTestEnvironment == false {
+                dialogueTextFullyRevealed = false
+            }
             self.dialogueState = dialogueState
             substate = "dialogue_\(dialogueState.dialogueID)"
             executeDialoguePageEventsIfNeeded()
@@ -174,6 +182,9 @@ extension GameRuntime {
         } else {
             fieldPromptState = nil
         }
+        if isTestEnvironment == false {
+            dialogueTextFullyRevealed = false
+        }
         dialogueState = DialogueState(
             dialogueID: dialogue.id,
             pages: nil,
@@ -193,6 +204,9 @@ extension GameRuntime {
         completion: DialogueState.CompletionAction
     ) {
         fieldPromptState = nil
+        if isTestEnvironment == false {
+            dialogueTextFullyRevealed = false
+        }
         dialogueState = DialogueState(
             dialogueID: id,
             pages: pages,

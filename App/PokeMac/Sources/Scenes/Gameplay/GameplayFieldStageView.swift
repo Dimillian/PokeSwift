@@ -71,8 +71,12 @@ struct FieldStageView: View {
         if let confirmation = props.nicknameConfirmation {
             NicknameConfirmationFooter(confirmation: confirmation)
         } else if let dialogueLines = props.dialogueLines {
-            DialogueBoxView(lines: dialogueLines)
-                .frame(maxWidth: GameplayFieldStageLayout.dialogueMaxWidth)
+            DialogueBoxView(
+                lines: dialogueLines,
+                instantReveal: props.dialogueInstantReveal,
+                onFullyRevealed: props.onDialogueRevealed
+            )
+            .frame(maxWidth: GameplayFieldStageLayout.dialogueMaxWidth)
         }
     }
 
