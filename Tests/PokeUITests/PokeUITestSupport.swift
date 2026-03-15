@@ -83,7 +83,7 @@ func averageGrayscale(in image: CGImage, startRow: Int, rowCount: Int) -> Double
   return Double(sum) / Double(count)
 }
 
-func grayscaleValues(in image: CGImage) -> Set<Int> {
+func grayscalePixels(in image: CGImage) -> [UInt8] {
   guard let provider = image.dataProvider,
     let data = provider.data,
     let bytes = CFDataGetBytePtr(data)
@@ -91,14 +91,19 @@ func grayscaleValues(in image: CGImage) -> Set<Int> {
     return []
   }
 
-  var values: Set<Int> = []
+  var pixels: [UInt8] = []
+  pixels.reserveCapacity(image.width * image.height)
   for row in 0..<image.height {
     let rowStart = row * image.bytesPerRow
     for column in 0..<image.width {
-      values.insert(Int(bytes[rowStart + column]))
+      pixels.append(bytes[rowStart + column])
     }
   }
-  return values
+  return pixels
+}
+
+func grayscaleValues(in image: CGImage) -> Set<Int> {
+  Set(grayscalePixels(in: image).map(Int.init))
 }
 
 func rgbValues(in image: CGImage) -> Set<RGBTriplet> {

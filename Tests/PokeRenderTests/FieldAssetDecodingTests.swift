@@ -24,13 +24,18 @@ extension PokeRenderTests {
     let tileZero = try cropTopLeftTile(from: image, tileSize: 8, index: 0)
     XCTAssertGreaterThan(averageGrayscale(for: tileZero), 240)
   }
-  func testTileAtlasPreparesTilesForFlippedFieldContext() throws {
-    let sourceTile = try makeTestTileImage(topHalf: 0, bottomHalf: 255)
-    let atlas = FieldSceneRenderer.TileAtlas(image: sourceTile, tileSize: 8)
+  func testTileAtlasPreservesExactPixelsForBlockEightQuadrantTiles() throws {
+    let image = try loadImage(repoRoot().appendingPathComponent("gfx/tilesets/overworld.png"))
+    let atlas = FieldSceneRenderer.TileAtlas(image: image, tileSize: 8)
 
-    let preparedTile = try atlas.tile(at: 0)
+    for tileIndex in [70, 71, 86, 87] {
+      let atlasTile = try atlas.tile(at: tileIndex)
+      let rawTile = try cropTopLeftTile(from: image, tileSize: 8, index: tileIndex)
 
-    XCTAssertGreaterThan(averageGrayscale(forTopRowsOf: preparedTile, rowCount: 4), 240)
-    XCTAssertLessThan(averageGrayscale(forBottomRowsOf: preparedTile, rowCount: 4), 15)
+      XCTAssertEqual(
+        grayscalePixels(in: atlasTile),
+        grayscalePixels(in: rawTile),
+        "Tile \(tileIndex) should match the source atlas crop exactly.")
+    }
   }
 }

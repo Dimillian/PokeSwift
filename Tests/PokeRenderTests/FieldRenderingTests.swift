@@ -112,6 +112,80 @@ extension PokeRenderTests {
     XCTAssertEqual(image.height, 64)
     XCTAssertFalse(grayscaleValues(in: image).isEmpty)
   }
+  func testRendererPreservesExactPixelsForOverworldBlockEight() throws {
+    let root = repoRoot()
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "OVERWORLD",
+        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
+        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
+      ),
+      overworldSprites: [:]
+    )
+    let map = makeFieldRegressionMap(
+      id: "BLOCK_EIGHT",
+      blockWidth: 1,
+      blockHeight: 1,
+      stepWidth: 2,
+      stepHeight: 2,
+      borderBlockID: 0,
+      tileset: "OVERWORLD",
+      blockIDs: [8]
+    )
+
+    let image = try FieldSceneRenderer.render(
+      map: map,
+      playerPosition: .init(x: 0, y: 0),
+      playerFacing: .down,
+      playerSpriteID: "MISSING",
+      objects: [],
+      assets: assets
+    )
+
+    let expectedPixels = try assembleReferenceFieldPixels(
+      map: map,
+      tilesetURL: assets.tileset.imageURL,
+      blocksetURL: assets.tileset.blocksetURL,
+      paddingBlocks: .init(width: 0, height: 0),
+      includeConnections: false
+    )
+
+    XCTAssertEqual(grayscalePixels(in: image), expectedPixels)
+  }
+  func testRenderSceneMatchesReferenceAssemblyForPalletTownBackground() throws {
+    let root = repoRoot()
+    let assets = FieldRenderAssets(
+      tileset: .init(
+        id: "OVERWORLD",
+        imageURL: root.appendingPathComponent("gfx/tilesets/overworld.png"),
+        blocksetURL: root.appendingPathComponent("gfx/blocksets/overworld.bst")
+      ),
+      overworldSprites: [:]
+    )
+    let map = try makePalletTownRegressionMap()
+
+    let scene = try FieldSceneRenderer.renderScene(
+      map: map,
+      playerPosition: .init(x: 0, y: 0),
+      playerFacing: .down,
+      playerSpriteID: "MISSING",
+      objects: [],
+      assets: assets
+    )
+
+    let paddingBlocks = FieldPixelSize(
+      width: scene.metrics.paddingPixels.width / FieldSceneRenderer.blockPixelSize,
+      height: scene.metrics.paddingPixels.height / FieldSceneRenderer.blockPixelSize
+    )
+    let expectedPixels = try assembleReferenceFieldPixels(
+      map: map,
+      tilesetURL: assets.tileset.imageURL,
+      blocksetURL: assets.tileset.blocksetURL,
+      paddingBlocks: paddingBlocks
+    )
+
+    XCTAssertEqual(grayscalePixels(in: scene.backgroundImage), expectedPixels)
+  }
   func testRenderSceneBuildsBorderPaddedBackgroundAndLayeredActors() throws {
     let fixtureRoot = try makeSyntheticFieldFixture(tileValue: 85, spriteBodyValue: 170)
     defer { try? FileManager.default.removeItem(at: fixtureRoot) }
@@ -648,4 +722,105 @@ extension PokeRenderTests {
     )
     XCTAssertNotNil(playerActor.walkingImage)
   }
+}
+
+private func makeFieldRegressionMap(
+  id: String,
+  blockWidth: Int,
+  blockHeight: Int,
+  stepWidth: Int,
+  stepHeight: Int,
+  borderBlockID: Int,
+  tileset: String,
+  blockIDs: [Int]
+) -> MapManifest {
+  MapManifest(
+    id: id,
+    displayName: id,
+    defaultMusicID: "MUSIC_PALLET_TOWN",
+    borderBlockID: borderBlockID,
+    blockWidth: blockWidth,
+    blockHeight: blockHeight,
+    stepWidth: stepWidth,
+    stepHeight: stepHeight,
+    tileset: tileset,
+    blockIDs: blockIDs,
+    stepCollisionTileIDs: Array(repeating: 0x00, count: stepWidth * stepHeight),
+    warps: [],
+    backgroundEvents: [],
+    objects: []
+  )
+}
+
+private func makePalletTownRegressionMap() throws -> MapManifest {
+  let blockIDs = try Data(contentsOf: repoRoot().appendingPathComponent("maps/PalletTown.blk"))
+    .map(Int.init)
+  return makeFieldRegressionMap(
+    id: "PALLET_TOWN",
+    blockWidth: 10,
+    blockHeight: 9,
+    stepWidth: 20,
+    stepHeight: 18,
+    borderBlockID: 0x0B,
+    tileset: "OVERWORLD",
+    blockIDs: blockIDs
+  )
+}
+
+private func assembleReferenceFieldPixels(
+  map: MapManifest,
+  tilesetURL: URL,
+  blocksetURL: URL,
+  paddingBlocks: FieldPixelSize,
+  includeConnections: Bool = true
+) throws -> [UInt8] {
+  let tilesetImage = try loadImage(tilesetURL)
+  let atlasPixels = grayscalePixels(in: tilesetImage)
+  let blocksetData = [UInt8](try Data(contentsOf: blocksetURL))
+  let atlasColumns = max(1, tilesetImage.width / FieldSceneRenderer.tilePixelSize)
+  let tilesPerBlock = FieldSceneRenderer.blockTileWidth * FieldSceneRenderer.blockTileHeight
+  let totalBlocksX = map.blockWidth + (paddingBlocks.width * 2)
+  let totalBlocksY = map.blockHeight + (paddingBlocks.height * 2)
+  let width = totalBlocksX * FieldSceneRenderer.blockPixelSize
+  let height = totalBlocksY * FieldSceneRenderer.blockPixelSize
+  var pixels = [UInt8](repeating: 0, count: width * height)
+
+  for renderedBlockY in 0..<totalBlocksY {
+    for renderedBlockX in 0..<totalBlocksX {
+      let mapBlockX = renderedBlockX - paddingBlocks.width
+      let mapBlockY = renderedBlockY - paddingBlocks.height
+      let blockID = map.blockID(
+        atBlockX: mapBlockX,
+        blockY: mapBlockY,
+        includeConnections: includeConnections
+      )
+      let blockStart = blockID * tilesPerBlock
+      guard blocksetData.indices.contains(blockStart + (tilesPerBlock - 1)) else {
+        throw XCTSkip("Missing block \(blockID) in \(blocksetURL.lastPathComponent)")
+      }
+
+      for tileRow in 0..<FieldSceneRenderer.blockTileHeight {
+        for tileColumn in 0..<FieldSceneRenderer.blockTileWidth {
+          let tileIndex = Int(blocksetData[blockStart + (tileRow * FieldSceneRenderer.blockTileWidth) + tileColumn])
+          let tileOriginX = (tileIndex % atlasColumns) * FieldSceneRenderer.tilePixelSize
+          let tileOriginY = (tileIndex / atlasColumns) * FieldSceneRenderer.tilePixelSize
+
+          for pixelY in 0..<FieldSceneRenderer.tilePixelSize {
+            for pixelX in 0..<FieldSceneRenderer.tilePixelSize {
+              let sourceIndex = ((tileOriginY + pixelY) * tilesetImage.width) + tileOriginX + pixelX
+              let destinationX = (renderedBlockX * FieldSceneRenderer.blockPixelSize)
+                + (tileColumn * FieldSceneRenderer.tilePixelSize)
+                + pixelX
+              let destinationY = (renderedBlockY * FieldSceneRenderer.blockPixelSize)
+                + (tileRow * FieldSceneRenderer.tilePixelSize)
+                + pixelY
+              pixels[(destinationY * width) + destinationX] = atlasPixels[sourceIndex]
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return pixels
 }
