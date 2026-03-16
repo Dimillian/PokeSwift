@@ -15,6 +15,7 @@ func buildDialogues(
     let route25Text = textContentsByMapID["ROUTE_25"]
     let billsHouseText = textContentsByMapID["BILLS_HOUSE"]
     let pewterGymText = textContentsByMapID["PEWTER_GYM"]
+    let ceruleanGymText = textContentsByMapID["CERULEAN_GYM"]
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
     let redsHouse = try String(contentsOf: repoRoot.appendingPathComponent("text/RedsHouse1F.asm"))
@@ -519,6 +520,46 @@ func buildDialogues(
                     (label: "_PewterGymBrockBoulderBadgeInfoText", contents: pewterGymText),
                 ],
                 trailingEventsBySegmentIndex: [0: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_1")]]
+            )
+        )
+    }
+
+    if let ceruleanGymText {
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_gym_misty_tm11_explanation",
+                label: "_CeruleanGymMistyTM11ExplanationText",
+                from: ceruleanGymText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_gym_misty_cascade_badge_info",
+                label: "_CeruleanGymMistyCascadeBadgeInfoText",
+                from: ceruleanGymText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_gym_misty_received_tm11",
+                label: "_CeruleanGymMistyReceivedTM11Text",
+                from: ceruleanGymText,
+                extraEvents: scriptDialogueEvents["_CeruleanGymMistyReceivedTM11Text"] ?? []
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_gym_misty_tm11_no_room",
+                label: "_CeruleanGymMistyTM11NoRoomText",
+                from: ceruleanGymText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_gym_misty_received_cascade_badge",
+                label: "_CeruleanGymMistyReceivedCascadeBadgeText",
+                from: ceruleanGymText,
+                extraEvents: scriptDialogueEvents["_CeruleanGymMistyReceivedCascadeBadgeText"] ?? []
             )
         )
     }

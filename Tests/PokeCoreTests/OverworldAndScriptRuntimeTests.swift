@@ -1224,6 +1224,123 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BIDE" }?.quantity, 1)
     }
 
+    func testRepoGeneratedMistyInteractionStartsBattleAndAwardsCascadeBadgeAndTM11() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_GYM"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 3)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "BULBASAUR"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "IVYSAUR", level: 26, nickname: "Ivysaur")]
+
+        let misty = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_gym_misty" })
+        runtime.interact(with: misty)
+
+        drainDialogueAndScripts(runtime, until: {
+            $0.scene == .battle
+        })
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_misty_1")
+        XCTAssertEqual(battle.postBattleScriptID, "cerulean_gym_misty_reward")
+
+        runtime.finishBattle(battle: battle, won: true)
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_TM11") ?? false)
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["cascade"]))
+        XCTAssertTrue(runtime.hasFlag("EVENT_BEAT_MISTY"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_TM11"))
+        XCTAssertEqual(runtime.itemQuantity("TM_BUBBLEBEAM"), 1)
+    }
+
+    func testRepoGeneratedMistyRewardScriptRetriesTMUntilBagHasRoomAndPersistsCascadeBadge() throws {
+        let saveStore = InMemorySaveStore()
+        let content = try loadRepoContent()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_GYM"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 3)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.inventory = fullBagInventory(for: runtime, excluding: ["TM_BUBBLEBEAM"])
+
+        runtime.beginScript(id: "cerulean_gym_misty_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_MISTY") ?? false)
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["cascade"]))
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_BEAT_MISTY") ?? false)
+        XCTAssertFalse(runtime.gameplayState?.activeFlags.contains("EVENT_GOT_TM11") ?? true)
+        XCTAssertNil(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BUBBLEBEAM" })
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "cerulean_gym_misty_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_TM11") ?? false)
+        }
+
+        XCTAssertEqual(runtime.gameplayState?.earnedBadgeIDs, Set(["cascade"]))
+        XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_GOT_TM11") ?? false)
+        XCTAssertEqual(runtime.gameplayState?.inventory.first { $0.itemID == "TM_BUBBLEBEAM" }?.quantity, 1)
+
+        let envelope = try runtime.makeSaveEnvelope()
+        saveStore.envelope = envelope
+
+        let resumed = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+        XCTAssertTrue(resumed.continueFromTitleMenu())
+        XCTAssertEqual(resumed.earnedBadgeIDs, Set(["cascade"]))
+        XCTAssertTrue(resumed.hasFlag("EVENT_BEAT_MISTY"))
+        XCTAssertTrue(resumed.hasFlag("EVENT_GOT_TM11"))
+        XCTAssertEqual(resumed.itemQuantity("TM_BUBBLEBEAM"), 1)
+    }
+
+    func testRepoGeneratedCeruleanGymSwimmerSightlineStartsBattle() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_GYM"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 8)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 26, nickname: "Wartortle")]
+
+        runtime.movePlayer(in: .up)
+
+        _ = try await waitForSnapshot(runtime, timeout: 2.5) { _ in
+            runtime.dialogueState != nil || runtime.gameplayState?.battle != nil
+        }
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_swimmer_1")
+    }
+
     func testRepoGeneratedMtMoonSuperNerdBattleThenDomeFossilChoiceUpdatesState() throws {
         let runtime = try makeRepoRuntime()
 

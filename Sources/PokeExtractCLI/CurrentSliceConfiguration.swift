@@ -225,6 +225,14 @@ let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
         isOutdoor: true
     ),
     .init(
+        mapID: "CERULEAN_GYM",
+        displayName: "Cerulean Gym",
+        objectFile: "data/maps/objects/CeruleanGym.asm",
+        blockFile: "maps/CeruleanGym.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
         mapID: "ROUTE_24",
         displayName: "Route 24",
         objectFile: "data/maps/objects/Route24.asm",

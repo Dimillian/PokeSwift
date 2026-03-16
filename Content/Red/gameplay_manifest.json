@@ -1202,6 +1202,469 @@
       ]
     },
     {
+      "id" : "cerulean_gym_after_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You have to face",
+            "other trainers to",
+            "find out how good",
+            "you really are."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_after_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "MISTY is going to",
+            "keep improving!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "She won't lose to",
+            "someone like you!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I'm more than good",
+            "enough for you!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "MISTY can wait!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Splash!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I'm first up!",
+            "Let's do it!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_end_battle_text1",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You",
+            "overwhelmed me!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_end_battle_text2",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That",
+            "can't be!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_gym_guide_beat_misty",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You beat MISTY!",
+            "What'd I tell ya?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You and me kid,",
+            "we make a pretty",
+            "darn good team!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_gym_guide_champ_in_making",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Yo! Champ in",
+            "making!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Here's my advice!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The LEADER, MISTY,",
+            "is a pro who uses",
+            "water POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can drain all",
+            "their water with",
+            "plant POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Or, zap them with",
+            "electricity!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_cascade_badge_info",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The CASCADEBADGE",
+            "makes all POKéMON",
+            "up to L30 obey!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That includes",
+            "even outsiders!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "There's more, you",
+            "can now use CUT",
+            "any time!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can CUT down",
+            "small bushes to",
+            "open new paths!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can also have",
+            "my favorite TM!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_pre_battle",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Hi, you're a new",
+            "face!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Trainers who want",
+            "to turn pro have",
+            "to have a policy",
+            "about POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "What is your",
+            "approach when you",
+            "catch POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "My policy is an",
+            "all-out offensive",
+            "with water-type",
+            "POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_received_cascade_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Wow!",
+            "You're too much!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "All right!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can have the",
+            "CASCADEBADGE to",
+            "show you beat me!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_received_t_m11",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> received",
+            "TM11!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_received_tm11",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_ITEM_1",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> received",
+            "TM11!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_t_m11_explanation",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TM11 teaches",
+            "BUBBLEBEAM!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Use it on an",
+            "aquatic POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_t_m11_no_room",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You better make",
+            "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_tm11_explanation",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TM11 teaches",
+            "BUBBLEBEAM!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Use it on an",
+            "aquatic POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_tm11_no_room",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You better make",
+            "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "evolution_evolved",
       "pages" : [
         {
@@ -10566,12 +11029,24 @@
         "sourceConstant" : "EVENT_BEAT_BROCK"
       },
       {
+        "id" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_0",
+        "sourceConstant" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_0"
+      },
+      {
+        "id" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_1",
+        "sourceConstant" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_1"
+      },
+      {
         "id" : "EVENT_BEAT_CERULEAN_RIVAL",
         "sourceConstant" : "EVENT_BEAT_CERULEAN_RIVAL"
       },
       {
         "id" : "EVENT_BEAT_CERULEAN_ROCKET_THIEF",
         "sourceConstant" : "EVENT_BEAT_CERULEAN_ROCKET_THIEF"
+      },
+      {
+        "id" : "EVENT_BEAT_MISTY",
+        "sourceConstant" : "EVENT_BEAT_MISTY"
       },
       {
         "id" : "EVENT_BEAT_MT_MOON_1_TRAINER_0",
@@ -10788,6 +11263,10 @@
       {
         "id" : "EVENT_GOT_STARTER",
         "sourceConstant" : "EVENT_GOT_STARTER"
+      },
+      {
+        "id" : "EVENT_GOT_TM11",
+        "sourceConstant" : "EVENT_GOT_TM11"
       },
       {
         "id" : "EVENT_GOT_TM34",
@@ -11610,6 +12089,13 @@
       "battleUse" : "none",
       "displayName" : "TM34",
       "id" : "TM_BIDE",
+      "isKeyItem" : false,
+      "price" : 2000
+    },
+    {
+      "battleUse" : "none",
+      "displayName" : "TM11",
+      "id" : "TM_BUBBLEBEAM",
       "isKeyItem" : false,
       "price" : 2000
     },
@@ -41486,8 +41972,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_GYM",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 4,
+            "y" : 13
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -41580,6 +42066,395 @@
             "y" : 0
           },
           "targetWarpIndex" : 0,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 7,
+      "blockIDs" : [
+        20,
+        20,
+        33,
+        20,
+        20,
+        21,
+        35,
+        34,
+        35,
+        22,
+        21,
+        30,
+        30,
+        31,
+        22,
+        21,
+        28,
+        29,
+        32,
+        22,
+        21,
+        27,
+        5,
+        23,
+        22,
+        21,
+        26,
+        5,
+        25,
+        22,
+        24,
+        24,
+        4,
+        24,
+        24
+      ],
+      "blockWidth" : 5,
+      "borderBlockID" : 3,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_GYM",
+      "displayName" : "Cerulean Gym",
+      "id" : "CERULEAN_GYM",
+      "objects" : [
+        {
+          "displayName" : "Misty",
+          "facing" : "down",
+          "id" : "cerulean_gym_misty",
+          "interactionDialogueID" : "cerulean_gym_misty_pre_battle",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_MISTY",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM11",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "cerulean_gym_misty_tm11_explanation"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_MISTY",
+                  "kind" : "flagSet"
+                },
+                {
+                  "flagID" : "EVENT_GOT_TM11",
+                  "kind" : "flagUnset"
+                }
+              ],
+              "scriptID" : "cerulean_gym_misty_reward"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "cerulean_gym_misty_battle"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 4,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 4,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_BRUNETTE_GIRL",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Cooltrainer",
+          "facing" : "right",
+          "id" : "cerulean_gym_cooltrainer_f",
+          "interactionDialogueID" : "cerulean_gym_cooltrainer_f",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 2,
+              "y" : 3
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 2,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_COOLTRAINER_F",
+          "trainerAfterBattleDialogueID" : "cerulean_gym_after_battle_text1",
+          "trainerBattleID" : "opp_jr_trainer_f_1",
+          "trainerClass" : "OPP_JR_TRAINER_F",
+          "trainerEndBattleDialogueID" : "cerulean_gym_end_battle_text1",
+          "trainerEngageDistance" : 3,
+          "trainerIntroDialogueID" : "cerulean_gym_battle_text1",
+          "trainerNumber" : 1,
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Swimmer",
+          "facing" : "left",
+          "id" : "cerulean_gym_swimmer",
+          "interactionDialogueID" : "cerulean_gym_swimmer",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 8,
+              "y" : 7
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 8,
+            "y" : 7
+          },
+          "sprite" : "SPRITE_SWIMMER",
+          "trainerAfterBattleDialogueID" : "cerulean_gym_after_battle_text2",
+          "trainerBattleID" : "opp_swimmer_1",
+          "trainerClass" : "OPP_SWIMMER",
+          "trainerEndBattleDialogueID" : "cerulean_gym_end_battle_text2",
+          "trainerEngageDistance" : 3,
+          "trainerIntroDialogueID" : "cerulean_gym_battle_text2",
+          "trainerNumber" : 1,
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Gym Guide",
+          "facing" : "down",
+          "id" : "cerulean_gym_gym_guide",
+          "interactionDialogueID" : "cerulean_gym_gym_guide_champ_in_making",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_BEAT_MISTY",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "cerulean_gym_gym_guide_beat_misty"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "dialogueID" : "cerulean_gym_gym_guide_champ_in_making"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 7,
+              "y" : 10
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 7,
+            "y" : 10
+          },
+          "sprite" : "SPRITE_GYM_GUIDE",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        25,
+        25,
+        25,
+        25,
+        20,
+        20,
+        25,
+        25,
+        25,
+        25,
+        25,
+        20,
+        20,
+        20,
+        17,
+        17,
+        20,
+        20,
+        20,
+        25,
+        25,
+        20,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        20,
+        25,
+        25,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        17,
+        20,
+        25,
+        25,
+        20,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        20,
+        25,
+        25,
+        20,
+        17,
+        20,
+        20,
+        17,
+        20,
+        20,
+        20,
+        25,
+        25,
+        20,
+        17,
+        20,
+        20,
+        17,
+        20,
+        20,
+        20,
+        25,
+        25,
+        20,
+        17,
+        17,
+        17,
+        17,
+        20,
+        20,
+        20,
+        25,
+        25,
+        20,
+        20,
+        20,
+        17,
+        17,
+        20,
+        20,
+        20,
+        25,
+        25,
+        20,
+        20,
+        18,
+        17,
+        17,
+        18,
+        17,
+        20,
+        25,
+        25,
+        20,
+        20,
+        50,
+        17,
+        17,
+        50,
+        17,
+        20,
+        25,
+        25,
+        25,
+        25,
+        25,
+        17,
+        17,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        22,
+        22,
+        25,
+        25,
+        25,
+        25
+      ],
+      "stepHeight" : 14,
+      "stepWidth" : 10,
+      "tileset" : "GYM",
+      "warps" : [
+        {
+          "id" : "cerulean_gym_warp_0",
+          "origin" : {
+            "x" : 4,
+            "y" : 13
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 30,
+            "y" : 19
+          },
+          "targetWarpIndex" : 3,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_gym_warp_1",
+          "origin" : {
+            "x" : 5,
+            "y" : 13
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 30,
+            "y" : 19
+          },
+          "targetWarpIndex" : 3,
           "usesPreviousMapTarget" : false
         }
       ]
@@ -55334,6 +56209,72 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_SWIMMER",
+      "imagePath" : "Assets/field/sprites/swimmer.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LITTLE_BOY",
       "imagePath" : "Assets/field/sprites/little_boy.png"
     },
@@ -57293,6 +58234,97 @@
         {
           "action" : "setFlag",
           "flagID" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "restoreMapMusic",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_battle",
+      "steps" : [
+        {
+          "action" : "faceObject",
+          "objectID" : "cerulean_gym_misty",
+          "path" : [
+
+          ],
+          "stringValue" : "down"
+        },
+        {
+          "action" : "facePlayer",
+          "path" : [
+
+          ],
+          "stringValue" : "up"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "cerulean_gym_misty_pre_battle",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "startBattle",
+          "battleID" : "opp_misty_1",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_gym_misty_reward",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "cerulean_gym_misty_cascade_badge_info",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_MISTY",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "giveItem",
+          "failureDialogueID" : "cerulean_gym_misty_tm11_no_room",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "TM_BUBBLEBEAM",
+          "successDialogueID" : "cerulean_gym_misty_received_tm11",
+          "successFlagID" : "EVENT_GOT_TM11"
+        },
+        {
+          "action" : "awardBadge",
+          "badgeID" : "CASCADEBADGE",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_0",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_1",
           "path" : [
 
           ]
@@ -69433,6 +70465,26 @@
     },
     {
       "baseRewardMoney" : 20,
+      "completionFlagID" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_0",
+      "displayName" : "JR.TRAINER♀",
+      "encounterAudioCueID" : "trainer_intro_female",
+      "healsPartyAfterBattle" : false,
+      "id" : "opp_jr_trainer_f_1",
+      "party" : [
+        {
+          "level" : 19,
+          "speciesID" : "GOLDEEN"
+        }
+      ],
+      "playerWinDialogueID" : "cerulean_gym_end_battle_text1",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_JR_TRAINER_F",
+      "trainerNumber" : 1,
+      "trainerSpritePath" : "Assets/battle/trainers/jr.trainerf.png"
+    },
+    {
+      "baseRewardMoney" : 20,
       "completionFlagID" : "EVENT_BEAT_PEWTER_GYM_TRAINER_0",
       "displayName" : "JR.TRAINER♂",
       "encounterAudioCueID" : "trainer_intro_male",
@@ -69740,6 +70792,30 @@
       "trainerSpritePath" : "Assets/battle/trainers/lass.png"
     },
     {
+      "baseRewardMoney" : 99,
+      "completionFlagID" : "EVENT_BEAT_MISTY",
+      "displayName" : "MISTY",
+      "healsPartyAfterBattle" : false,
+      "id" : "opp_misty_1",
+      "party" : [
+        {
+          "level" : 18,
+          "speciesID" : "STARYU"
+        },
+        {
+          "level" : 21,
+          "speciesID" : "STARMIE"
+        }
+      ],
+      "playerWinDialogueID" : "cerulean_gym_misty_received_cascade_badge",
+      "postBattleScriptID" : "cerulean_gym_misty_reward",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_MISTY",
+      "trainerNumber" : 1,
+      "trainerSpritePath" : "Assets/battle/trainers/misty.png"
+    },
+    {
       "baseRewardMoney" : 35,
       "completionFlagID" : "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
       "displayName" : "BLUE",
@@ -69999,6 +71075,30 @@
       "trainerClass" : "OPP_SUPER_NERD",
       "trainerNumber" : 2,
       "trainerSpritePath" : "Assets/battle/trainers/supernerd.png"
+    },
+    {
+      "baseRewardMoney" : 5,
+      "completionFlagID" : "EVENT_BEAT_CERULEAN_GYM_TRAINER_1",
+      "displayName" : "SWIMMER",
+      "encounterAudioCueID" : "trainer_intro_male",
+      "healsPartyAfterBattle" : false,
+      "id" : "opp_swimmer_1",
+      "party" : [
+        {
+          "level" : 16,
+          "speciesID" : "HORSEA"
+        },
+        {
+          "level" : 16,
+          "speciesID" : "SHELLDER"
+        }
+      ],
+      "playerWinDialogueID" : "cerulean_gym_end_battle_text2",
+      "preventsBlackoutOnLoss" : false,
+      "runsPostBattleScriptOnLoss" : false,
+      "trainerClass" : "OPP_SWIMMER",
+      "trainerNumber" : 1,
+      "trainerSpritePath" : "Assets/battle/trainers/swimmer.png"
     },
     {
       "baseRewardMoney" : 15,

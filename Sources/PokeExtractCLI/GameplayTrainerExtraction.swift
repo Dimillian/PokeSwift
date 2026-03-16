@@ -11,6 +11,8 @@ func buildTrainerBattles(
         .value(for: "OPP_RIVAL1", missingMessage: "missing trainer metadata for OPP_RIVAL1")
     let brockClassMetadata = try trainerClassMetadataByID
         .value(for: "OPP_BROCK", missingMessage: "missing trainer metadata for OPP_BROCK")
+    let mistyClassMetadata = try trainerClassMetadataByID
+        .value(for: "OPP_MISTY", missingMessage: "missing trainer metadata for OPP_MISTY")
     let superNerdClassMetadata = try trainerClassMetadataByID
         .value(for: "OPP_SUPER_NERD", missingMessage: "missing trainer metadata for OPP_SUPER_NERD")
     let rocketClassMetadata = try trainerClassMetadataByID
@@ -118,6 +120,27 @@ func buildTrainerBattles(
         preventsBlackoutOnLoss: false,
         completionFlagID: "EVENT_BEAT_BROCK",
         postBattleScriptID: "pewter_gym_brock_reward"
+    )
+
+    guard mistyClassMetadata.parties.indices.contains(0) else {
+        throw ExtractorError.invalidArguments("missing Misty trainer party 1")
+    }
+
+    battlesByID["opp_misty_1"] = TrainerBattleManifest(
+        id: "opp_misty_1",
+        trainerClass: "OPP_MISTY",
+        trainerNumber: 1,
+        displayName: mistyClassMetadata.displayName,
+        party: mistyClassMetadata.parties[0],
+        trainerSpritePath: mistyClassMetadata.trainerSpritePath,
+        baseRewardMoney: mistyClassMetadata.baseRewardMoney,
+        encounterAudioCueID: trainerEncounterCueByClass["OPP_MISTY"],
+        playerWinDialogueID: "cerulean_gym_misty_received_cascade_badge",
+        playerLoseDialogueID: nil,
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_MISTY",
+        postBattleScriptID: "cerulean_gym_misty_reward"
     )
 
     guard superNerdClassMetadata.parties.indices.contains(1) else {

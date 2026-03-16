@@ -33,6 +33,7 @@ final class GameplayExtractionTests: XCTestCase {
             "ROUTE_3",
             "ROUTE_4",
             "CERULEAN_CITY",
+            "CERULEAN_GYM",
             "ROUTE_24",
             "ROUTE_25",
             "BILLS_HOUSE",
@@ -160,7 +161,9 @@ final class GameplayExtractionTests: XCTestCase {
                 "EVENT_BEAT_CERULEAN_RIVAL",
                 "EVENT_BEAT_CERULEAN_ROCKET_THIEF",
                 "EVENT_BEAT_ROUTE24_ROCKET",
+                "EVENT_BEAT_MISTY",
                 "EVENT_GOT_NUGGET",
+                "EVENT_GOT_TM11",
                 "EVENT_GOT_SS_TICKET",
                 "EVENT_MET_BILL",
                 "EVENT_MET_BILL_2",
@@ -175,6 +178,8 @@ final class GameplayExtractionTests: XCTestCase {
                 "pallet_town_oak_intro",
                 "oaks_lab_rival_exit_after_battle",
                 "pewter_gym_brock_reward",
+                "cerulean_gym_misty_battle",
+                "cerulean_gym_misty_reward",
                 "mt_moon_b2f_take_dome_fossil",
                 "cerulean_city_rival_vs_squirtle",
                 "cerulean_city_rival_vs_bulbasaur",
@@ -481,7 +486,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(manifest.moves.first { $0.id == "CUT" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "SURF" })
         XCTAssertNotNil(manifest.moves.first { $0.id == "THUNDERBOLT" })
-        XCTAssertEqual(manifest.items.count, 105)
+        XCTAssertEqual(manifest.items.count, 106)
         XCTAssertFalse(manifest.items.contains { $0.id.contains("\\") })
         XCTAssertEqual(manifest.items.first?.id, "MASTER_BALL")
         XCTAssertEqual(manifest.items.first?.displayName, "MASTER BALL")
@@ -493,6 +498,9 @@ final class GameplayExtractionTests: XCTestCase {
         let boulderBadge = try XCTUnwrap(manifest.items.first { $0.id == "BOULDERBADGE" })
         XCTAssertEqual(boulderBadge.isKeyItem, true)
         XCTAssertEqual(boulderBadge.price, 0)
+        let cascadeBadge = try XCTUnwrap(manifest.items.first { $0.id == "CASCADEBADGE" })
+        XCTAssertEqual(cascadeBadge.isKeyItem, true)
+        XCTAssertEqual(cascadeBadge.price, 0)
         let oaksParcel = try XCTUnwrap(manifest.items.first { $0.id == "OAKS_PARCEL" })
         XCTAssertEqual(oaksParcel.displayName, "OAK's PARCEL")
         XCTAssertEqual(oaksParcel.isKeyItem, true)
@@ -501,6 +509,10 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(tmBide.displayName, "TM34")
         XCTAssertFalse(tmBide.isKeyItem)
         XCTAssertEqual(tmBide.price, 2000)
+        let tmBubblebeam = try XCTUnwrap(manifest.items.first { $0.id == "TM_BUBBLEBEAM" })
+        XCTAssertEqual(tmBubblebeam.displayName, "TM11")
+        XCTAssertFalse(tmBubblebeam.isKeyItem)
+        XCTAssertEqual(tmBubblebeam.price, 2000)
         XCTAssertEqual(manifest.items.last?.id, "TM_WHIRLWIND")
         XCTAssertEqual(manifest.items.last?.displayName, "TM04")
         XCTAssertEqual(charmander.catchRate, 45)
@@ -519,6 +531,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertTrue(
             Set([
                 "opp_brock_1",
+                "opp_misty_1",
                 "opp_super_nerd_2",
                 "opp_rocket_5",
                 "opp_rocket_6",
@@ -555,6 +568,13 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.trainerSpritePath, "Assets/battle/trainers/brock.png")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.completionFlagID, "EVENT_BEAT_BROCK")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_brock_1" }?.postBattleScriptID, "pewter_gym_brock_reward")
+        XCTAssertEqual(
+            manifest.trainerBattles.first { $0.id == "opp_misty_1" }?.party,
+            [.init(speciesID: "STARYU", level: 18), .init(speciesID: "STARMIE", level: 21)]
+        )
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_misty_1" }?.trainerSpritePath, "Assets/battle/trainers/misty.png")
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_misty_1" }?.completionFlagID, "EVENT_BEAT_MISTY")
+        XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_misty_1" }?.postBattleScriptID, "cerulean_gym_misty_reward")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rocket_5" }?.completionFlagID, "EVENT_BEAT_CERULEAN_ROCKET_THIEF")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rocket_5" }?.postBattleScriptID, "cerulean_city_rocket_reward")
         XCTAssertEqual(manifest.trainerBattles.first { $0.id == "opp_rocket_6" }?.completionFlagID, "EVENT_BEAT_ROUTE24_ROCKET")
@@ -1005,6 +1025,48 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNil(pewterGym.objects.first { $0.id == "pewter_gym_brock" }?.trainerBattleID)
         XCTAssertEqual(pewterGym.objects.first { $0.id == "pewter_gym_cooltrainer_m" }?.trainerBattleID, "opp_jr_trainer_m_1")
 
+        let ceruleanGym = try XCTUnwrap(manifest.maps.first { $0.id == "CERULEAN_GYM" })
+        XCTAssertEqual(ceruleanGym.tileset, "GYM")
+        XCTAssertEqual(ceruleanGym.defaultMusicID, "MUSIC_GYM")
+        XCTAssertEqual(ceruleanGym.warps.map(\.targetMapID), ["CERULEAN_CITY", "CERULEAN_CITY"])
+        XCTAssertEqual(
+            ceruleanGym.objects.map(\.id),
+            ["cerulean_gym_misty", "cerulean_gym_cooltrainer_f", "cerulean_gym_swimmer", "cerulean_gym_gym_guide"]
+        )
+        XCTAssertEqual(
+            ceruleanGym.objects.first { $0.id == "cerulean_gym_misty" }?.interactionTriggers,
+            [
+                .init(
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY"),
+                        .init(kind: "flagSet", flagID: "EVENT_GOT_TM11"),
+                    ],
+                    dialogueID: "cerulean_gym_misty_tm11_explanation"
+                ),
+                .init(
+                    conditions: [
+                        .init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY"),
+                        .init(kind: "flagUnset", flagID: "EVENT_GOT_TM11"),
+                    ],
+                    scriptID: "cerulean_gym_misty_reward"
+                ),
+                .init(scriptID: "cerulean_gym_misty_battle"),
+            ]
+        )
+        XCTAssertNil(ceruleanGym.objects.first { $0.id == "cerulean_gym_misty" }?.trainerBattleID)
+        XCTAssertEqual(ceruleanGym.objects.first { $0.id == "cerulean_gym_cooltrainer_f" }?.trainerBattleID, "opp_jr_trainer_f_1")
+        XCTAssertEqual(ceruleanGym.objects.first { $0.id == "cerulean_gym_swimmer" }?.trainerBattleID, "opp_swimmer_1")
+        XCTAssertEqual(
+            ceruleanGym.objects.first { $0.id == "cerulean_gym_gym_guide" }?.interactionTriggers,
+            [
+                .init(
+                    conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY")],
+                    dialogueID: "cerulean_gym_gym_guide_beat_misty"
+                ),
+                .init(dialogueID: "cerulean_gym_gym_guide_champ_in_making"),
+            ]
+        )
+
         let route3 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_3" })
         XCTAssertEqual(route3.defaultMusicID, "MUSIC_ROUTES3")
         XCTAssertEqual(route3.connections.map(\.targetMapID), ["ROUTE_4", "PEWTER_CITY"])
@@ -1148,6 +1210,12 @@ final class GameplayExtractionTests: XCTestCase {
             manifest.dialogues.first { $0.id == "pewter_gym_brock_received_boulder_badge" }?.pages[2].lines,
             ["<PLAYER> received", "the BOULDERBADGE!"]
         )
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "cerulean_gym_misty_received_tm11" }?.pages.first?.lines, ["<PLAYER> received", "TM11!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "cerulean_gym_misty_tm11_no_room" }?.pages.first?.lines, ["You better make", "room for this!"])
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "cerulean_gym_misty_received_cascade_badge" }?.pages[2].lines,
+            ["You can have the", "CASCADEBADGE to", "show you beat me!"]
+        )
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.lines, ["All right!", "{capturedPokemon} was", "caught!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_caught" }?.pages.first?.events, [.init(kind: .soundEffect, soundEffectID: "SFX_CAUGHT_MON")])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "capture_dex_added" }?.pages.first?.lines, ["New POKéDEX data", "will be added for", "{capturedPokemon}!"])
@@ -1202,19 +1270,20 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(first, second)
 
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
-        XCTAssertEqual(decoded.maps.count, 34)
+        XCTAssertEqual(decoded.maps.count, 35)
         XCTAssertEqual(decoded.tilesets.count, 14)
-        XCTAssertEqual(decoded.overworldSprites.count, 35)
-        XCTAssertEqual(decoded.items.count, 105)
+        XCTAssertEqual(decoded.overworldSprites.count, 36)
+        XCTAssertEqual(decoded.items.count, 106)
         XCTAssertEqual(decoded.marts.count, 2)
         XCTAssertEqual(decoded.wildEncounterTables.count, 11)
         XCTAssertEqual(decoded.fieldInteractions.count, 4)
-        XCTAssertEqual(decoded.trainerBattles.count, 54)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 69)
+        XCTAssertEqual(decoded.trainerBattles.count, 57)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 73)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "pewter_gym_brock_pre_battle" })
+        XCTAssertNotNil(decoded.dialogues.first { $0.id == "cerulean_gym_misty_received_cascade_badge" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "route3_youngster1_battle" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "pokemon_center_welcome" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "viridian_forest_youngster2_battle" })
@@ -1228,13 +1297,16 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "VIRIDIAN_CITY" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "CERULEAN_CITY" })
         XCTAssertNotNil(decoded.mapScripts.first { $0.mapID == "ROUTE_24" })
+        XCTAssertNotNil(decoded.maps.first { $0.id == "CERULEAN_GYM" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rival1_1" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_rocket_5" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "cerulean_city_rival_7" })
         XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_brock_1" })
+        XCTAssertNotNil(decoded.trainerBattles.first { $0.id == "opp_misty_1" })
         XCTAssertEqual(decoded.trainerBattles.first { $0.id == "opp_bug_catcher_1" }?.trainerSpritePath, "Assets/battle/trainers/bugcatcher.png")
         XCTAssertEqual(decoded.trainerBattles.first { $0.id == "opp_brock_1" }?.trainerSpritePath, "Assets/battle/trainers/brock.png")
+        XCTAssertEqual(decoded.trainerBattles.first { $0.id == "opp_misty_1" }?.trainerSpritePath, "Assets/battle/trainers/misty.png")
         XCTAssertEqual(decoded.commonBattleText.trainerSentOut, "{trainerName} sent out {enemyPokemon}!")
         XCTAssertGreaterThan(decoded.typeEffectiveness.count, 0)
         XCTAssertFalse(decoded.items.contains { $0.id.contains("\\") })

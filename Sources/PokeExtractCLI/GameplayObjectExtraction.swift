@@ -293,6 +293,10 @@ func objectIDFor(
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_COOLTRAINER_M"): return "pewter_gym_cooltrainer_m"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_gym_guide"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_MISTY"): return "cerulean_gym_misty"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_COOLTRAINER_F"): return "cerulean_gym_cooltrainer_f"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_SWIMMER"): return "cerulean_gym_swimmer"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_GYM_GUIDE"): return "cerulean_gym_gym_guide"
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_RIVAL"): return "cerulean_city_rival"
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_ROCKET"): return "cerulean_city_rocket"
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_COOLTRAINER_M"): return "cerulean_city_cooltrainer_m"
@@ -622,6 +626,32 @@ private func interactionTriggers(
             ),
             .init(dialogueID: "pewter_gym_guide_pre_advice"),
         ]
+    case "cerulean_gym_misty":
+        return [
+            .init(
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY"),
+                    .init(kind: "flagSet", flagID: "EVENT_GOT_TM11"),
+                ],
+                dialogueID: "cerulean_gym_misty_tm11_explanation"
+            ),
+            .init(
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY"),
+                    .init(kind: "flagUnset", flagID: "EVENT_GOT_TM11"),
+                ],
+                scriptID: "cerulean_gym_misty_reward"
+            ),
+            .init(scriptID: "cerulean_gym_misty_battle"),
+        ]
+    case "cerulean_gym_gym_guide":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_MISTY")],
+                dialogueID: "cerulean_gym_gym_guide_beat_misty"
+            ),
+            .init(dialogueID: "cerulean_gym_gym_guide_champ_in_making"),
+        ]
     default:
         if sprite == "SPRITE_CLERK", let textLabel, martStockLabels.contains(textLabel) {
             return [.init(martID: martID(for: mapID))]
@@ -702,6 +732,10 @@ private func displayNameForObject(
     case "pewter_gym_brock": return "Brock"
     case "pewter_gym_cooltrainer_m": return "Cooltrainer"
     case "pewter_gym_gym_guide": return "Gym Guide"
+    case "cerulean_gym_misty": return "Misty"
+    case "cerulean_gym_cooltrainer_f": return "Cooltrainer"
+    case "cerulean_gym_swimmer": return "Swimmer"
+    case "cerulean_gym_gym_guide": return "Gym Guide"
     default:
         if let pickupItemID {
             return humanizedIdentifier(pickupItemID)
@@ -724,6 +758,7 @@ private func usesScriptedTrainerBattle(objectID: String) -> Bool {
         "route_22_rival_1",
         "route_22_rival_2",
         "pewter_gym_brock",
+        "cerulean_gym_misty",
         "mt_moon_b2f_super_nerd",
         "cerulean_city_rival",
         "cerulean_city_rocket",
@@ -828,6 +863,8 @@ func dialogueID(for mapID: String, textID: String, mapScriptMetadata: MapScriptM
     case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_CHECK_OUT_MY_RARE_POKEMON"): return "bills_house_bill_check_out_my_rare_pokemon"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock_pre_battle"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_guide_pre_advice"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_MISTY"): return "cerulean_gym_misty_pre_battle"
+    case ("CERULEAN_GYM", "TEXT_CERULEANGYM_GYM_GUIDE"): return "cerulean_gym_gym_guide_champ_in_making"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_COOLTRAINER_M"): return "viridian_pokecenter_cooltrainer"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_LINK_RECEPTIONIST"): return "viridian_pokecenter_link_receptionist"

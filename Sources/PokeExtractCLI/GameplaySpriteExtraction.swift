@@ -29,6 +29,7 @@ func buildOverworldSprites() -> [OverworldSpriteManifest] {
         buildCharacterSprite(id: "SPRITE_GUARD", imagePath: "Assets/field/sprites/guard.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_HIKER", imagePath: "Assets/field/sprites/hiker.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_GYM_GUIDE", imagePath: "Assets/field/sprites/gym_guide.png", hasWalkingFrames: false),
+        buildCharacterSprite(id: "SPRITE_SWIMMER", imagePath: "Assets/field/sprites/swimmer.png", hasWalkingFrames: true),
         buildCharacterSprite(id: "SPRITE_LITTLE_BOY", imagePath: "Assets/field/sprites/little_boy.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_LINK_RECEPTIONIST", imagePath: "Assets/field/sprites/link_receptionist.png", hasWalkingFrames: false),
         buildCharacterSprite(id: "SPRITE_MIDDLE_AGED_MAN", imagePath: "Assets/field/sprites/middle_aged_man.png", hasWalkingFrames: true),

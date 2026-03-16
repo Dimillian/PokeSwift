@@ -157,7 +157,15 @@ extension GameRuntime {
 
         for _ in 0..<max(0, distance - 1) {
             let next = translated(current, by: direction)
-            guard canActorOccupy(next, from: current, in: map, facing: direction, occupiedTiles: occupiedTiles, reservedTiles: []) else {
+            guard canTrainerEngageThroughTile(
+                next,
+                from: current,
+                manifest: objectManifest,
+                in: map,
+                facing: direction,
+                occupiedTiles: occupiedTiles,
+                reservedTiles: []
+            ) else {
                 return nil
             }
             path.append(direction)
@@ -165,6 +173,74 @@ extension GameRuntime {
         }
 
         return current == translated(gameplayState.playerPosition, by: oppositeFacingDirection(of: direction)) ? path : nil
+    }
+
+    private func canTrainerEngageThroughTile(
+        _ nextPoint: TilePoint,
+        from currentPoint: TilePoint,
+        manifest: MapObjectManifest,
+        in map: MapManifest,
+        facing: FacingDirection,
+        occupiedTiles: Set<TilePoint>,
+        reservedTiles: Set<TilePoint>
+    ) -> Bool {
+        if canActorOccupy(
+            nextPoint,
+            from: currentPoint,
+            in: map,
+            facing: facing,
+            occupiedTiles: occupiedTiles,
+            reservedTiles: reservedTiles
+        ) {
+            return true
+        }
+
+        guard manifest.sprite == "SPRITE_SWIMMER" else {
+            return false
+        }
+
+        return canSwimmerOccupyWaterTile(
+            nextPoint,
+            from: currentPoint,
+            in: map,
+            occupiedTiles: occupiedTiles,
+            reservedTiles: reservedTiles
+        )
+    }
+
+    private func canSwimmerOccupyWaterTile(
+        _ nextPoint: TilePoint,
+        from currentPoint: TilePoint,
+        in map: MapManifest,
+        occupiedTiles: Set<TilePoint>,
+        reservedTiles: Set<TilePoint>
+    ) -> Bool {
+        guard isWithinFieldBounds(nextPoint, in: map) else {
+            return false
+        }
+        guard occupiedTiles.contains(nextPoint) == false, reservedTiles.contains(nextPoint) == false else {
+            return false
+        }
+        guard
+            let tileset = content.tileset(id: map.tileset),
+            let currentTileID = collisionTileID(at: currentPoint, in: map),
+            let nextTileID = collisionTileID(at: nextPoint, in: map)
+        else {
+            return false
+        }
+
+        let passableTileIDs = Set(tileset.collision.passableTileIDs)
+        guard passableTileIDs.contains(nextTileID) == false else {
+            return false
+        }
+        guard nextTileID == currentTileID else {
+            return false
+        }
+
+        return tileset.collision.tilePairCollisions.contains(where: {
+            ($0.fromTileID == currentTileID && $0.toTileID == nextTileID) ||
+                ($0.fromTileID == nextTileID && $0.toTileID == currentTileID)
+        }) == false
     }
 
     func isTrainerDefeated(_ manifest: MapObjectManifest) -> Bool {

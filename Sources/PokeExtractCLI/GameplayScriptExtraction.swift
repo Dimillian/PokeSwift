@@ -792,6 +792,38 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
             ]
         )
     )
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_gym_misty_battle",
+            steps: [
+                .init(action: "faceObject", stringValue: "down", objectID: "cerulean_gym_misty"),
+                .init(action: "facePlayer", stringValue: "up"),
+                .init(action: "showDialogue", dialogueID: "cerulean_gym_misty_pre_battle"),
+                .init(action: "startBattle", battleID: "opp_misty_1"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_gym_misty_reward",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "cerulean_gym_misty_cascade_badge_info"),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_MISTY"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "TM_BUBBLEBEAM",
+                    intValue: 1,
+                    successDialogueID: "cerulean_gym_misty_received_tm11",
+                    failureDialogueID: "cerulean_gym_misty_tm11_no_room",
+                    successFlagID: "EVENT_GOT_TM11"
+                ),
+                .init(action: "awardBadge", badgeID: "CASCADEBADGE"),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_CERULEAN_GYM_TRAINER_0"),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_CERULEAN_GYM_TRAINER_1"),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
 
     let route22ChallengeVariants: [(scriptID: String, battleID: String, offset: TilePoint, rivalFacing: String, playerFacing: String)] = [
         ("route_22_rival_1_challenge_4_upper", "route_22_rival_1_4_upper", .init(x: 0, y: 1), "right", "left"),

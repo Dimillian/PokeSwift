@@ -168,10 +168,12 @@ final class RepoContentContractTests: XCTestCase {
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
         let pokeBall = try XCTUnwrap(loaded.item(id: "POKE_BALL"))
         let boulderBadge = try XCTUnwrap(loaded.item(id: "BOULDERBADGE"))
+        let cascadeBadge = try XCTUnwrap(loaded.item(id: "CASCADEBADGE"))
         let floorB2F = try XCTUnwrap(loaded.item(id: "FLOOR_B2F"))
         let pidgey = try XCTUnwrap(loaded.species(id: "PIDGEY"))
         let squirtle = try XCTUnwrap(loaded.species(id: "SQUIRTLE"))
         let brock = try XCTUnwrap(loaded.trainerBattle(id: "opp_brock_1"))
+        let misty = try XCTUnwrap(loaded.trainerBattle(id: "opp_misty_1"))
         let route3Youngster = try XCTUnwrap(loaded.trainerBattle(id: "opp_youngster_1"))
         let superNerd = try XCTUnwrap(loaded.trainerBattle(id: "opp_super_nerd_2"))
         let mtMoon1FEncounters = try XCTUnwrap(loaded.wildEncounterTable(mapID: "MT_MOON_1F"))
@@ -192,6 +194,7 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(pokeBall.price, 200)
         XCTAssertEqual(pokeBall.battleUse, .ball)
         XCTAssertEqual(boulderBadge.isKeyItem, true)
+        XCTAssertEqual(cascadeBadge.isKeyItem, true)
         XCTAssertEqual(floorB2F.displayName, "B2F")
         XCTAssertEqual(pidgey.catchRate, 255)
         XCTAssertEqual(
@@ -211,6 +214,9 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.dialogue(id: "evolution_into")?.pages.first?.lines, ["into {evolvedPokemon}!"])
         XCTAssertEqual(brock.party, [.init(speciesID: "GEODUDE", level: 12), .init(speciesID: "ONIX", level: 14)])
         XCTAssertEqual(brock.trainerSpritePath, "Assets/battle/trainers/brock.png")
+        XCTAssertEqual(misty.party, [.init(speciesID: "STARYU", level: 18), .init(speciesID: "STARMIE", level: 21)])
+        XCTAssertEqual(misty.trainerSpritePath, "Assets/battle/trainers/misty.png")
+        XCTAssertEqual(misty.completionFlagID, "EVENT_BEAT_MISTY")
         XCTAssertEqual(route3Youngster.trainerSpritePath, "Assets/battle/trainers/youngster.png")
         XCTAssertEqual(superNerd.trainerSpritePath, "Assets/battle/trainers/supernerd.png")
         XCTAssertEqual(superNerd.completionFlagID, "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD")
@@ -303,6 +309,11 @@ final class RepoContentContractTests: XCTestCase {
             loaded.mapScript(for: "ROUTE_24")?.triggers.map(\.scriptID),
             ["route24_nugget_bridge_reward"]
         )
+        XCTAssertEqual(loaded.map(id: "CERULEAN_GYM")?.defaultMusicID, "MUSIC_GYM")
+        XCTAssertEqual(
+            loaded.map(id: "CERULEAN_GYM")?.objects.map(\.id),
+            ["cerulean_gym_misty", "cerulean_gym_cooltrainer_f", "cerulean_gym_swimmer", "cerulean_gym_gym_guide"]
+        )
         XCTAssertEqual(loaded.map(id: "ROUTE_4")?.objects.first { $0.id == "route_4_tm_whirlwind" }?.pickupItemID, "TM_WHIRLWIND")
         XCTAssertEqual(loaded.map(id: "ROUTE_24")?.objects.first { $0.id == "route_24_tm_thunder_wave" }?.pickupItemID, "TM_THUNDER_WAVE")
         XCTAssertEqual(loaded.map(id: "ROUTE_25")?.warps.first?.targetMapID, "BILLS_HOUSE")
@@ -340,7 +351,14 @@ final class RepoContentContractTests: XCTestCase {
             ["showDialogue", "giveItem", "setObjectVisibility", "setObjectVisibility", "setObjectVisibility", "showDialogue"]
         )
         XCTAssertEqual(loaded.script(id: "bills_house_bill_ss_ticket")?.steps[1].continueOnFailure, false)
+        XCTAssertEqual(
+            loaded.script(id: "cerulean_gym_misty_reward")?.steps.map(\.action),
+            ["showDialogue", "setFlag", "giveItem", "awardBadge", "setFlag", "setFlag", "restoreMapMusic"]
+        )
+        XCTAssertNil(loaded.script(id: "cerulean_gym_misty_reward")?.steps[2].continueOnFailure)
         XCTAssertNotNil(loaded.dialogue(id: "cerulean_city_rival_pre_battle"))
+        XCTAssertNotNil(loaded.dialogue(id: "cerulean_gym_misty_received_cascade_badge"))
+        XCTAssertNotNil(loaded.dialogue(id: "cerulean_gym_misty_tm11_explanation"))
         XCTAssertNotNil(loaded.dialogue(id: "route24_cooltrainer_m1_contest_prize"))
         XCTAssertNotNil(loaded.dialogue(id: "bills_house_ss_ticket_received"))
         XCTAssertEqual(
