@@ -308,6 +308,21 @@ func objectIDFor(
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_COOLTRAINER_F2"): return "cerulean_city_cooltrainer_f_2"
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SUPER_NERD3"): return "cerulean_city_super_nerd_3"
     case ("CERULEAN_CITY", "TEXT_CERULEANCITY_GUARD2"): return "cerulean_city_guard_2"
+    case ("CERULEAN_POKECENTER", "TEXT_CERULEANPOKECENTER_NURSE"): return "cerulean_pokecenter_nurse"
+    case ("CERULEAN_POKECENTER", "TEXT_CERULEANPOKECENTER_SUPER_NERD"): return "cerulean_pokecenter_super_nerd"
+    case ("CERULEAN_POKECENTER", "TEXT_CERULEANPOKECENTER_GENTLEMAN"): return "cerulean_pokecenter_gentleman"
+    case ("CERULEAN_POKECENTER", "TEXT_CERULEANPOKECENTER_LINK_RECEPTIONIST"): return "cerulean_pokecenter_link_receptionist"
+    case ("CERULEAN_MART", "TEXT_CERULEANMART_CLERK"): return "cerulean_mart_clerk"
+    case ("CERULEAN_MART", "TEXT_CERULEANMART_COOLTRAINER_M"): return "cerulean_mart_cooltrainer_m"
+    case ("CERULEAN_MART", "TEXT_CERULEANMART_COOLTRAINER_F"): return "cerulean_mart_cooltrainer_f"
+    case ("BIKE_SHOP", "TEXT_BIKESHOP_CLERK"): return "bike_shop_clerk"
+    case ("BIKE_SHOP", "TEXT_BIKESHOP_MIDDLE_AGED_WOMAN"): return "bike_shop_middle_aged_woman"
+    case ("BIKE_SHOP", "TEXT_BIKESHOP_YOUNGSTER"): return "bike_shop_youngster"
+    case ("CERULEAN_TRADE_HOUSE", "TEXT_CERULEANTRADEHOUSE_GRANNY"): return "cerulean_trade_house_granny"
+    case ("CERULEAN_TRADE_HOUSE", "TEXT_CERULEANTRADEHOUSE_GAMBLER"): return "cerulean_trade_house_gambler"
+    case ("CERULEAN_BADGE_HOUSE", "TEXT_CERULEANBADGEHOUSE_MIDDLE_AGED_MAN"): return "cerulean_badge_house_middle_aged_man"
+    case ("CERULEAN_TRASHED_HOUSE", "TEXT_CERULEANTRASHEDHOUSE_FISHING_GURU"): return "cerulean_trashed_house_fishing_guru"
+    case ("CERULEAN_TRASHED_HOUSE", "TEXT_CERULEANTRASHEDHOUSE_GIRL"): return "cerulean_trashed_house_girl"
     case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M1"): return "route24_nugget_bridge_guy"
     case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M2"): return "route24_cooltrainer_m_2"
     case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M3"): return "route24_cooltrainer_m_3"
@@ -390,7 +405,7 @@ private func fallbackObjectIDBase(for textID: String, mapScriptMetadata: MapScri
 
 private func interactionReach(for objectID: String, sprite: String) -> ObjectInteractionReach {
     switch objectID {
-    case "viridian_mart_clerk", "viridian_pokecenter_nurse", "museum1_f_scientist1_come_again":
+    case "viridian_mart_clerk", "viridian_pokecenter_nurse", "museum1_f_scientist1_come_again", "bike_shop_clerk":
         return .overCounter
     default:
         switch sprite {
@@ -566,6 +581,37 @@ private func interactionTriggers(
                 conditions: [.init(kind: "flagSet", flagID: "EVENT_OAK_GOT_PARCEL")],
                 martID: "viridian_mart"
             ),
+        ]
+    case "bike_shop_clerk":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_BICYCLE")],
+                dialogueID: "bike_shop_clerk_how_do_you_like_your_bicycle"
+            ),
+            .init(
+                conditions: [
+                    .init(kind: "flagUnset", flagID: "EVENT_GOT_BICYCLE"),
+                    .init(kind: "itemPresent", stringValue: "BIKE_VOUCHER"),
+                ],
+                scriptID: "bike_shop_exchange_voucher"
+            ),
+            .init(scriptID: "bike_shop_offer_purchase"),
+        ]
+    case "bike_shop_youngster":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_BICYCLE")],
+                dialogueID: "bike_shop_youngster_cool_bike"
+            ),
+            .init(dialogueID: "bike_shop_youngster_these_bikes_are_expensive"),
+        ]
+    case "cerulean_trashed_house_fishing_guru":
+        return [
+            .init(
+                conditions: [.init(kind: "itemPresent", stringValue: "TM_DIG")],
+                dialogueID: "cerulean_trashed_house_fishing_guru_whats_lost_is_lost"
+            ),
+            .init(dialogueID: "cerulean_trashed_house_fishing_guru_they_stole_a_t_m"),
         ]
     case "museum1_f_scientist1_come_again":
         return [
@@ -915,12 +961,16 @@ private func displayName(forSprite sprite: String) -> String? {
     case "SPRITE_SUPER_NERD": return "Super Nerd"
     case "SPRITE_COOLTRAINER_F": return "Cooltrainer"
     case "SPRITE_COOLTRAINER_M": return "Cooltrainer"
+    case "SPRITE_BIKE_SHOP_CLERK": return "Clerk"
     case "SPRITE_GAMBLER": return "Gambler"
     case "SPRITE_GIRL": return "Girl"
     case "SPRITE_GUARD": return "Guard"
+    case "SPRITE_GRANNY": return "Granny"
+    case "SPRITE_FISHING_GURU": return "Fishing Guru"
     case "SPRITE_LITTLE_BOY": return "Little Boy"
     case "SPRITE_LITTLE_GIRL": return "Little Girl"
     case "SPRITE_MIDDLE_AGED_MAN": return "Middle Aged Man"
+    case "SPRITE_MIDDLE_AGED_WOMAN": return "Middle Aged Woman"
     case "SPRITE_MONSTER": return "Monster"
     case "SPRITE_FAIRY": return "Jigglypuff"
     case "SPRITE_SCIENTIST": return "Scientist"

@@ -50,6 +50,20 @@ func buildFieldInteractions(maps: [MapManifest], repoRoot: URL) throws -> [Field
         )
     }
 
+    if maps.contains(where: { $0.id == "BIKE_SHOP" }) {
+        interactions.append(
+            FieldInteractionManifest(
+                id: bikeShopPurchaseFieldInteractionID(),
+                kind: .dialogueChoice,
+                introDialogueID: "bike_shop_clerk_welcome",
+                prompt: .init(kind: .yesNo, dialogueID: "bike_shop_clerk_do_you_like_it"),
+                acceptedDialogueID: "bike_shop_cant_afford",
+                successDialogueID: "bike_shop_come_again",
+                farewellDialogueID: "bike_shop_come_again"
+            )
+        )
+    }
+
     return interactions
 }
 
@@ -77,6 +91,10 @@ func pokemonCenterFieldInteractionID(for mapID: String) -> String {
 
 func museumAdmissionFieldInteractionID(for mapID: String) -> String {
     "\(mapID.lowercased())_admission"
+}
+
+func bikeShopPurchaseFieldInteractionID() -> String {
+    "bike_shop_purchase_offer"
 }
 
 // MARK: - Private helpers

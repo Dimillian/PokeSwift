@@ -791,6 +791,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
 public enum FieldInteractionKind: String, Codable, Equatable, Sendable {
     case pokemonCenterHealing
     case paidAdmission
+    case dialogueChoice
 }
 
 public enum FieldPromptKind: String, Codable, Equatable, Sendable {

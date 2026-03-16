@@ -113,7 +113,10 @@ func parseMartStocks(repoRoot: URL) throws -> [String: [String]] {
     var currentLabel: String?
 
     for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
-        let line = rawLine.trimmingCharacters(in: .whitespaces)
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
         if line.hasSuffix("::") {
             currentLabel = String(line.dropLast(2))
             continue

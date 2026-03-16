@@ -46,6 +46,12 @@ extension GameRuntime {
         case "chosenStarterEquals":
             guard let stringValue = condition.stringValue else { return false }
             return gameplayState?.chosenStarterSpeciesID == stringValue
+        case "itemPresent":
+            guard let stringValue = condition.stringValue else { return false }
+            return hasItem(stringValue)
+        case "itemAbsent":
+            guard let stringValue = condition.stringValue else { return false }
+            return hasItem(stringValue) == false
         case "blockedMoveFacingEquals":
             guard let stringValue = condition.stringValue else { return false }
             return blockedMoveFacing?.rawValue == stringValue

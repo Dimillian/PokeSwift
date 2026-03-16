@@ -1,7 +1,7 @@
 {
   "contentVersion" : "m6_5_red_bag_grid_v1",
   "extractorVersion" : "0.1.0",
-  "sourceCommit" : "fd7d025a35f6",
+  "sourceCommit" : "50c01e18612a",
   "sourceFiles" : [
     {
       "path" : "constants/charmap.asm",

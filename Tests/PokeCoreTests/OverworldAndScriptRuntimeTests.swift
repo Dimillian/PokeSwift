@@ -229,21 +229,35 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.gameplayState?.mapID, "BILLS_HOUSE")
     }
 
-    func testRepoGeneratedCeruleanSupportInteriorDoorsRemainBoundedOutForDim33() throws {
-        let runtime = try makeRepoRuntime()
+    func testRepoGeneratedCeruleanCityInteriorDoorsEnterExpectedMaps() async throws {
+        let cases: [(start: TilePoint, targetMapID: String)] = [
+            (.init(x: 27, y: 12), "CERULEAN_TRASHED_HOUSE"),
+            (.init(x: 13, y: 16), "CERULEAN_TRADE_HOUSE"),
+            (.init(x: 19, y: 18), "CERULEAN_POKECENTER"),
+            (.init(x: 13, y: 26), "BIKE_SHOP"),
+            (.init(x: 25, y: 26), "CERULEAN_MART"),
+            (.init(x: 9, y: 12), "CERULEAN_BADGE_HOUSE"),
+        ]
 
-        runtime.gameplayState = runtime.makeInitialGameplayState()
-        runtime.scene = .field
-        runtime.substate = "field"
-        runtime.gameplayState?.mapID = "CERULEAN_CITY"
-        runtime.gameplayState?.playerPosition = .init(x: 19, y: 18)
-        runtime.gameplayState?.facing = .up
+        for testCase in cases {
+            let runtime = try makeRepoRuntime()
 
-        runtime.movePlayer(in: .up)
+            runtime.gameplayState = runtime.makeInitialGameplayState()
+            runtime.scene = .field
+            runtime.substate = "field"
+            runtime.gameplayState?.mapID = "CERULEAN_CITY"
+            runtime.gameplayState?.playerPosition = testCase.start
+            runtime.gameplayState?.facing = .up
 
-        XCTAssertEqual(runtime.gameplayState?.mapID, "CERULEAN_CITY")
-        XCTAssertEqual(runtime.gameplayState?.playerPosition, .init(x: 19, y: 17))
-        XCTAssertNil(runtime.fieldTransitionState)
+            runtime.movePlayer(in: .up)
+
+            let snapshot = try await waitForSnapshot(runtime) { runtime in
+                runtime.field?.mapID == testCase.targetMapID && runtime.field?.transition == nil
+            }
+
+            XCTAssertEqual(snapshot.field?.mapID, testCase.targetMapID)
+            XCTAssertEqual(runtime.gameplayState?.mapID, testCase.targetMapID)
+        }
     }
 
     func testRepoGeneratedMuseum1FOldAmberExhibitShowsDialogue() throws {
@@ -526,6 +540,39 @@ extension PokeCoreTests {
         XCTAssertNil(runtime.currentSnapshot().fieldHealing)
     }
 
+    func testRepoGeneratedCeruleanPokecenterHealingUpdatesBlackoutCheckpointOnAcceptance() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_POKECENTER"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+
+        let nurse = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_pokecenter_nurse" })
+        runtime.interact(with: nurse)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_welcome")
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "pokemon_center_shall_we_heal")
+
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        _ = try await waitForSnapshot(runtime) {
+            $0.fieldHealing?.phase == "priming" || $0.fieldHealing?.phase == "machineActive"
+        }
+
+        XCTAssertEqual(
+            runtime.gameplayState?.blackoutCheckpoint,
+            .init(mapID: "CERULEAN_CITY", position: .init(x: 19, y: 18), facing: .down)
+        )
+    }
+
     func testRepoGeneratedMuseumScientistSupportsOverCounterAdmissionTalk() throws {
         let runtime = try makeRepoRuntime()
 
@@ -668,6 +715,45 @@ extension PokeCoreTests {
         let spearow = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_nickname_house_spearow" })
         runtime.interact(with: spearow)
         XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "viridian_nickname_house_spearow")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.mapID = "CERULEAN_TRADE_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 4)
+        runtime.gameplayState?.facing = .right
+        let granny = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_trade_house_granny" })
+        runtime.interact(with: granny)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_trade_house_granny")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.playerPosition = .init(x: 2, y: 2)
+        runtime.gameplayState?.facing = .left
+        let gambler = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_trade_house_gambler" })
+        runtime.interact(with: gambler)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_trade_house_gambler")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.mapID = "CERULEAN_BADGE_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 3)
+        runtime.gameplayState?.facing = .right
+        let badgeHouseGuide = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_badge_house_middle_aged_man" })
+        runtime.interact(with: badgeHouseGuide)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_badge_house_middle_aged_man")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.mapID = "CERULEAN_TRASHED_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .left
+        let girl = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_trashed_house_girl" })
+        runtime.interact(with: girl)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_trashed_house_girl")
     }
     func testRepoGeneratedViridianParcelAndOakHandoffAdvanceFlagsAndInventory() throws {
         let runtime = try makeRepoRuntime()
@@ -816,6 +902,147 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "result")
         XCTAssertEqual(runtime.itemQuantity("ANTIDOTE"), 1)
         XCTAssertEqual(runtime.playerMoney, 3050)
+    }
+
+    func testRepoGeneratedCeruleanMartClerkOpensSharedShopWithCeruleanStock() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_MART"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 7)
+        runtime.gameplayState?.facing = .up
+
+        let clerk = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_mart_clerk" })
+        runtime.interact(with: clerk)
+
+        let shop = try XCTUnwrap(runtime.currentSnapshot().shop)
+        XCTAssertEqual(shop.martID, "cerulean_mart")
+        XCTAssertEqual(shop.phase, "mainMenu")
+        XCTAssertEqual(shop.menuOptions, ["BUY", "SELL", "QUIT"])
+        XCTAssertEqual(
+            shop.buyItems.map(\.itemID),
+            ["POKE_BALL", "POTION", "REPEL", "ANTIDOTE", "BURN_HEAL", "AWAKENING", "PARLYZ_HEAL"]
+        )
+        XCTAssertEqual(runtime.substate, "shop_cerulean_mart")
+    }
+
+    func testRepoGeneratedBikeShopVoucherExchangeAwardsBicycleAndConsumesVoucher() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "BIKE_SHOP"
+        runtime.gameplayState?.playerPosition = .init(x: 6, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.inventory = [.init(itemID: "BIKE_VOUCHER", quantity: 1)]
+
+        runtime.interactAhead()
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field && $0.inventory?.items.contains(where: { $0.itemID == "BICYCLE" && $0.quantity == 1 }) == true
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("BIKE_VOUCHER"), 0)
+        XCTAssertEqual(runtime.itemQuantity("BICYCLE"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_BICYCLE"))
+    }
+
+    func testRepoGeneratedBikeShopBagFullKeepsVoucherAndBlocksBicycle() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "BIKE_SHOP"
+        runtime.gameplayState?.playerPosition = .init(x: 6, y: 4)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.inventory = [
+            .init(itemID: "BIKE_VOUCHER", quantity: 1),
+            .init(itemID: "POKE_BALL", quantity: 1),
+            .init(itemID: "POTION", quantity: 1),
+            .init(itemID: "ANTIDOTE", quantity: 1),
+            .init(itemID: "BURN_HEAL", quantity: 1),
+            .init(itemID: "AWAKENING", quantity: 1),
+            .init(itemID: "PARLYZ_HEAL", quantity: 1),
+            .init(itemID: "ESCAPE_ROPE", quantity: 1),
+            .init(itemID: "REPEL", quantity: 1),
+            .init(itemID: "TM_BIDE", quantity: 1),
+            .init(itemID: "TM_DIG", quantity: 1),
+            .init(itemID: "TM_BUBBLEBEAM", quantity: 1),
+            .init(itemID: "TM_WHIRLWIND", quantity: 1),
+            .init(itemID: "TM_THUNDER_WAVE", quantity: 1),
+            .init(itemID: "TM_SEISMIC_TOSS", quantity: 1),
+            .init(itemID: "MOON_STONE", quantity: 1),
+            .init(itemID: "NUGGET", quantity: 1),
+            .init(itemID: "S_S_TICKET", quantity: 1),
+            .init(itemID: "HELIX_FOSSIL", quantity: 1),
+            .init(itemID: "DOME_FOSSIL", quantity: 1),
+        ]
+
+        runtime.interactAhead()
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field && $0.dialogue == nil
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("BIKE_VOUCHER"), 1)
+        XCTAssertEqual(runtime.itemQuantity("BICYCLE"), 0)
+        XCTAssertFalse(runtime.hasFlag("EVENT_GOT_BICYCLE"))
+    }
+
+    func testRepoGeneratedBikeShopOfferWithoutVoucherShowsBlockedPurchaseFlow() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "BIKE_SHOP"
+        runtime.gameplayState?.playerPosition = .init(x: 6, y: 4)
+        runtime.gameplayState?.facing = .up
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bike_shop_clerk_welcome")
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bike_shop_clerk_do_you_like_it")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bike_shop_cant_afford")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bike_shop_come_again")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.itemQuantity("BICYCLE"), 0)
+        XCTAssertFalse(runtime.hasFlag("EVENT_GOT_BICYCLE"))
+    }
+
+    func testRepoGeneratedCeruleanTrashedHouseFishingGuruDialogueChangesAfterReceivingTMDig() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_TRASHED_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 2, y: 2)
+        runtime.gameplayState?.facing = .up
+
+        let fishingGuru = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "cerulean_trashed_house_fishing_guru" })
+        runtime.interact(with: fishingGuru)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_trashed_house_fishing_guru_they_stole_a_t_m")
+
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.dialogueState = nil
+        runtime.gameplayState?.inventory = [.init(itemID: "TM_DIG", quantity: 1)]
+        runtime.interact(with: fishingGuru)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "cerulean_trashed_house_fishing_guru_whats_lost_is_lost")
     }
 
     func testSellFlowRejectsUnsellableItemsAndReturnsToMartLoop() {

@@ -33,6 +33,12 @@ final class GameplayExtractionTests: XCTestCase {
             "ROUTE_3",
             "ROUTE_4",
             "CERULEAN_CITY",
+            "CERULEAN_POKECENTER",
+            "CERULEAN_MART",
+            "BIKE_SHOP",
+            "CERULEAN_TRADE_HOUSE",
+            "CERULEAN_BADGE_HOUSE",
+            "CERULEAN_TRASHED_HOUSE",
             "CERULEAN_GYM",
             "ROUTE_24",
             "ROUTE_25",
@@ -48,7 +54,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.playerStart.rivalName, "BLUE")
         XCTAssertEqual(
             manifest.tilesets.map(\.id),
-            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "CAVERN", "DOJO", "GYM", "FOREST", "FOREST_GATE", "GATE", "MUSEUM", "HOUSE", "INTERIOR", "MART", "POKECENTER"]
+            ["REDS_HOUSE_1", "REDS_HOUSE_2", "OVERWORLD", "CAVERN", "DOJO", "GYM", "FOREST", "FOREST_GATE", "GATE", "MUSEUM", "HOUSE", "INTERIOR", "MART", "CLUB", "POKECENTER", "SHIP"]
         )
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.imagePath, "Assets/field/tilesets/house.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
@@ -188,6 +194,8 @@ final class GameplayExtractionTests: XCTestCase {
                 "cerulean_city_rocket_battle_upper",
                 "cerulean_city_rocket_battle_lower",
                 "cerulean_city_rocket_reward",
+                "bike_shop_offer_purchase",
+                "bike_shop_exchange_voucher",
                 "route24_nugget_bridge_reward",
                 "route24_after_rocket_battle",
                 "bills_house_bill_pokemon_interaction",
@@ -236,6 +244,25 @@ final class GameplayExtractionTests: XCTestCase {
                     )
                 ),
                 .init(
+                    id: "cerulean_pokecenter_pokemon_center_healing",
+                    kind: .pokemonCenterHealing,
+                    introDialogueID: "pokemon_center_welcome",
+                    prompt: .init(kind: .yesNo, dialogueID: "pokemon_center_shall_we_heal"),
+                    acceptedDialogueID: "pokemon_center_need_your_pokemon",
+                    successDialogueID: "pokemon_center_fighting_fit",
+                    farewellDialogueID: "pokemon_center_farewell",
+                    healingSequence: .init(
+                        nurseObjectID: "cerulean_pokecenter_nurse",
+                        machineSoundEffectID: "SFX_HEALING_MACHINE",
+                        healedAudioCueID: "pokemon_center_healed",
+                        blackoutCheckpoint: .init(
+                            mapID: "CERULEAN_CITY",
+                            position: .init(x: 19, y: 18),
+                            facing: .down
+                        )
+                    )
+                ),
+                .init(
                     id: "mt_moon_pokecenter_pokemon_center_healing",
                     kind: .pokemonCenterHealing,
                     introDialogueID: "pokemon_center_welcome",
@@ -271,6 +298,15 @@ final class GameplayExtractionTests: XCTestCase {
                         deniedExitPath: [.down]
                     )
                 ),
+                .init(
+                    id: "bike_shop_purchase_offer",
+                    kind: .dialogueChoice,
+                    introDialogueID: "bike_shop_clerk_welcome",
+                    prompt: .init(kind: .yesNo, dialogueID: "bike_shop_clerk_do_you_like_it"),
+                    acceptedDialogueID: "bike_shop_cant_afford",
+                    successDialogueID: "bike_shop_come_again",
+                    farewellDialogueID: "bike_shop_come_again"
+                ),
             ]
         )
         XCTAssertEqual(
@@ -282,8 +318,20 @@ final class GameplayExtractionTests: XCTestCase {
             [.init(action: "startFieldInteraction", fieldInteractionID: "pewter_pokecenter_pokemon_center_healing")]
         )
         XCTAssertEqual(
+            manifest.scripts.first { $0.id == "cerulean_pokecenter_nurse_heal" }?.steps,
+            [.init(action: "startFieldInteraction", fieldInteractionID: "cerulean_pokecenter_pokemon_center_healing")]
+        )
+        XCTAssertEqual(
             manifest.scripts.first { $0.id == "mt_moon_pokecenter_nurse_heal" }?.steps,
             [.init(action: "startFieldInteraction", fieldInteractionID: "mt_moon_pokecenter_pokemon_center_healing")]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "bike_shop_offer_purchase" }?.steps,
+            [.init(action: "startFieldInteraction", fieldInteractionID: "bike_shop_purchase_offer")]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "bike_shop_exchange_voucher" }?.steps.map(\.action),
+            ["showDialogue", "giveItem", "removeItem"]
         )
         XCTAssertEqual(
             oaksLab.objects.first { $0.id == "oaks_lab_girl" }?.movementBehavior,
@@ -299,6 +347,31 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(ceruleanCity.objects.first { $0.id == "cerulean_city_rival" }?.visibleByDefault, false)
         XCTAssertEqual(ceruleanCity.objects.first { $0.id == "cerulean_city_rocket" }?.visibleByDefault, true)
         XCTAssertEqual(manifest.mapScripts.first { $0.mapID == "CERULEAN_CITY" }?.triggers.count, 8)
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "CERULEAN_POKECENTER" }?.objects.map(\.id),
+            [
+                "cerulean_pokecenter_nurse",
+                "cerulean_pokecenter_super_nerd",
+                "cerulean_pokecenter_gentleman",
+                "cerulean_pokecenter_link_receptionist",
+            ]
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "CERULEAN_MART" }?.objects.map(\.id),
+            ["cerulean_mart_clerk", "cerulean_mart_cooltrainer_m", "cerulean_mart_cooltrainer_f"]
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "BIKE_SHOP" }?.objects.map(\.id),
+            ["bike_shop_clerk", "bike_shop_middle_aged_woman", "bike_shop_youngster"]
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "BIKE_SHOP" }?.objects.first { $0.id == "bike_shop_clerk" }?.interactionReach,
+            .overCounter
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "CERULEAN_TRASHED_HOUSE" }?.backgroundEvents.map(\.dialogueID),
+            ["cerulean_trashed_house_wall_hole"]
+        )
         let route24 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_24" })
         XCTAssertEqual(route24.connections.map(\.targetMapID), ["CERULEAN_CITY", "ROUTE_25"])
         XCTAssertEqual(
@@ -808,6 +881,12 @@ final class GameplayExtractionTests: XCTestCase {
             manifest.marts,
             [
                 .init(
+                    id: "cerulean_mart",
+                    mapID: "CERULEAN_MART",
+                    clerkObjectID: "cerulean_mart_clerk",
+                    stockItemIDs: ["POKE_BALL", "POTION", "REPEL", "ANTIDOTE", "BURN_HEAL", "AWAKENING", "PARLYZ_HEAL"]
+                ),
+                .init(
                     id: "pewter_mart",
                     mapID: "PEWTER_MART",
                     clerkObjectID: "pewter_mart_clerk",
@@ -1282,15 +1361,15 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(first, second)
 
         let decoded = try JSONDecoder().decode(GameplayManifest.self, from: first)
-        XCTAssertEqual(decoded.maps.count, 35)
-        XCTAssertEqual(decoded.tilesets.count, 14)
-        XCTAssertEqual(decoded.overworldSprites.count, 36)
+        XCTAssertEqual(decoded.maps.count, 41)
+        XCTAssertEqual(decoded.tilesets.count, 16)
+        XCTAssertEqual(decoded.overworldSprites.count, 40)
         XCTAssertEqual(decoded.items.count, 106)
-        XCTAssertEqual(decoded.marts.count, 2)
+        XCTAssertEqual(decoded.marts.count, 3)
         XCTAssertEqual(decoded.wildEncounterTables.count, 11)
-        XCTAssertEqual(decoded.fieldInteractions.count, 4)
+        XCTAssertEqual(decoded.fieldInteractions.count, 6)
         XCTAssertEqual(decoded.trainerBattles.count, 57)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 73)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 74)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })

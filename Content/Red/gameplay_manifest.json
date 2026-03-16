@@ -15,6 +15,227 @@
   },
   "dialogues" : [
     {
+      "id" : "bike_shop_bag_full",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You better make",
+            "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_cant_afford",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Sorry! You can't",
+            "afford it!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_clerk_do_you_like_it",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It's a cool BIKE!",
+            "Do you want it?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_clerk_how_do_you_like_your_bicycle",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "How do you like",
+            "your new BICYCLE?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can take it",
+            "on CYCLING ROAD",
+            "and in caves!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_clerk_oh_thats_a_voucher",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Oh, that's..."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A BIKE VOUCHER!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "OK! Here you go!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_clerk_welcome",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Hi! Welcome to",
+            "our BIKE SHOP."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Have we got just",
+            "the BIKE for you!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_come_again",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come back again",
+            "some time!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_exchanged_voucher",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> exchanged",
+            "the BIKE VOUCHER",
+            "for a BICYCLE."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_middle_aged_woman",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "A plain city BIKE",
+            "is good enough",
+            "for me!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You can't put a",
+            "shopping basket",
+            "on an MTB!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_youngster_cool_bike",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Wow. Your BIKE is",
+            "really cool!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_youngster_these_bikes_are_expensive",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "These BIKEs are",
+            "cool, but they're",
+            "way expensive!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "bills_house_bill_check_out_my_rare_pokemon",
       "pages" : [
         {
@@ -434,6 +655,291 @@
           "lines" : [
             "This POKéMON",
             "can't be caught!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_boulder_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The ATTACK of all",
+            "POKéMON increases",
+            "a little bit."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It also lets you",
+            "use FLASH any",
+            "time you desire."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_cascade_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON up to L30",
+            "will obey you."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Any higher, they",
+            "become unruly!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It also lets you",
+            "use CUT outside",
+            "of battle."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_earth_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "All POKéMON will",
+            "obey you!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_marsh_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON up to L70",
+            "will obey you."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Any higher, they",
+            "become unruly!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_middle_aged_man",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON BADGEs",
+            "are owned only by",
+            "skilled trainers."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I see you have",
+            "at least one."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Those BADGEs have",
+            "amazing secrets!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_middle_aged_man_visit_any_time",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Come visit me any",
+            "time you wish."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_middle_aged_man_which_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Now then..."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Which of the 8",
+            "BADGEs should I",
+            "describe?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_rainbow_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "POKéMON up to L50",
+            "will obey you."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Any higher, they",
+            "become unruly!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It also lets you",
+            "use STRENGTH out-",
+            "side of battle."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_soul_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The DEFENSE of all",
+            "POKéMON increases",
+            "a little bit."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It also lets you",
+            "use SURF outside",
+            "of battle."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_thunder_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "The SPEED of all",
+            "POKéMON increases",
+            "a little bit."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It also lets you",
+            "use FLY outside",
+            "of battle."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_badge_house_volcano_badge",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Your POKéMON's",
+            "SPECIAL abilities",
+            "increase a bit."
           ],
           "waitsForPrompt" : true
         }
@@ -1659,6 +2165,290 @@
           "lines" : [
             "You better make",
             "room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_mart_cooltrainer_f",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Have you seen any",
+            "RARE CANDY?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "It's supposed to",
+            "make POKéMON go",
+            "up one level!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_mart_cooltrainer_m",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Use REPEL to keep",
+            "bugs and weak",
+            "POKéMON away."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Put your strongest",
+            "POKéMON at the",
+            "top of the list",
+            "for best results!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_pokecenter_gentleman",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Have you heard",
+            "about BILL?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Everyone calls",
+            "him a POKéMANIAC!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I think people",
+            "are just jealous",
+            "of BILL, though."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Who wouldn't want",
+            "to boast about",
+            "their POKéMON?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_pokecenter_super_nerd",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That BILL!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I heard that",
+            "he'll do whatever",
+            "it takes to get",
+            "rare POKéMON!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trade_house_gambler",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Hello there! Do",
+            "you want to trade"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "your Poliwhirl",
+            "for Jynx?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trade_house_granny",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "My husband likes",
+            "trading POKéMON."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "If you are a",
+            "collector, would",
+            "you please trade",
+            "with him?"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trashed_house_fishing_guru_they_stole_a_t_m",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Those miserable",
+            "ROCKETs!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Look what they",
+            "did here!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "They stole a TM",
+            "for teaching",
+            "POKéMON how to",
+            "DIG holes!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "That cost me a",
+            "bundle, it did!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trashed_house_fishing_guru_whats_lost_is_lost",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I figure what's",
+            "lost is lost!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I decided to teach",
+            "DIGLETT how to",
+            "DIG without a TM!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trashed_house_girl",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TEAM ROCKET must",
+            "be trying to DIG",
+            "their way into no",
+            "good!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_trashed_house_wall_hole",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "TEAM ROCKET left",
+            "a way out!"
           ],
           "waitsForPrompt" : true
         }
@@ -11233,6 +12023,10 @@
         "sourceConstant" : "EVENT_FOLLOWED_OAK_INTO_LAB_2"
       },
       {
+        "id" : "EVENT_GOT_BICYCLE",
+        "sourceConstant" : "EVENT_GOT_BICYCLE"
+      },
+      {
         "id" : "EVENT_GOT_DOME_FOSSIL",
         "sourceConstant" : "EVENT_GOT_DOME_FOSSIL"
       },
@@ -11363,6 +12157,31 @@
       "healingSequence" : {
         "blackoutCheckpoint" : {
           "facing" : "down",
+          "mapID" : "CERULEAN_CITY",
+          "position" : {
+            "x" : 19,
+            "y" : 18
+          }
+        },
+        "healedAudioCueID" : "pokemon_center_healed",
+        "machineSoundEffectID" : "SFX_HEALING_MACHINE",
+        "nurseObjectID" : "cerulean_pokecenter_nurse"
+      },
+      "id" : "cerulean_pokecenter_pokemon_center_healing",
+      "introDialogueID" : "pokemon_center_welcome",
+      "kind" : "pokemonCenterHealing",
+      "prompt" : {
+        "dialogueID" : "pokemon_center_shall_we_heal",
+        "kind" : "yesNo"
+      },
+      "successDialogueID" : "pokemon_center_fighting_fit"
+    },
+    {
+      "acceptedDialogueID" : "pokemon_center_need_your_pokemon",
+      "farewellDialogueID" : "pokemon_center_farewell",
+      "healingSequence" : {
+        "blackoutCheckpoint" : {
+          "facing" : "down",
           "mapID" : "ROUTE_4",
           "position" : {
             "x" : 11,
@@ -11403,6 +12222,18 @@
         "kind" : "yesNo"
       },
       "successDialogueID" : "museum1_f_scientist1_take_plenty_of_time"
+    },
+    {
+      "acceptedDialogueID" : "bike_shop_cant_afford",
+      "farewellDialogueID" : "bike_shop_come_again",
+      "id" : "bike_shop_purchase_offer",
+      "introDialogueID" : "bike_shop_clerk_welcome",
+      "kind" : "dialogueChoice",
+      "prompt" : {
+        "dialogueID" : "bike_shop_clerk_do_you_like_it",
+        "kind" : "yesNo"
+      },
+      "successDialogueID" : "bike_shop_come_again"
     }
   ],
   "items" : [
@@ -42254,8 +43085,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_TRASHED_HOUSE",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -42269,8 +43100,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_TRADE_HOUSE",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -42284,8 +43115,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_POKECENTER",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 3,
+            "y" : 7
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -42314,8 +43145,8 @@
           "targetFacing" : "up",
           "targetMapID" : "BIKE_SHOP",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -42329,8 +43160,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_MART",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 3,
+            "y" : 7
           },
           "targetWarpIndex" : 0,
           "usesPreviousMapTarget" : false
@@ -42356,10 +43187,10 @@
             "x" : 27,
             "y" : 9
           },
-          "targetFacing" : "up",
+          "targetFacing" : "down",
           "targetMapID" : "CERULEAN_TRASHED_HOUSE",
           "targetPosition" : {
-            "x" : 0,
+            "x" : 3,
             "y" : 0
           },
           "targetWarpIndex" : 2,
@@ -42374,8 +43205,8 @@
           "targetFacing" : "up",
           "targetMapID" : "CERULEAN_BADGE_HOUSE",
           "targetPosition" : {
-            "x" : 0,
-            "y" : 0
+            "x" : 2,
+            "y" : 7
           },
           "targetWarpIndex" : 1,
           "usesPreviousMapTarget" : false
@@ -42386,13 +43217,1356 @@
             "x" : 9,
             "y" : 9
           },
-          "targetFacing" : "up",
+          "targetFacing" : "down",
           "targetMapID" : "CERULEAN_BADGE_HOUSE",
           "targetPosition" : {
-            "x" : 0,
+            "x" : 2,
             "y" : 0
           },
           "targetWarpIndex" : 0,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        32,
+        16,
+        1,
+        2,
+        12,
+        13,
+        13,
+        33,
+        4,
+        5,
+        7,
+        7,
+        34,
+        35,
+        8,
+        15,
+        15,
+        15,
+        15,
+        15,
+        27,
+        14,
+        10,
+        11,
+        14,
+        15,
+        15,
+        14
+      ],
+      "blockWidth" : 7,
+      "borderBlockID" : 0,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_POKECENTER",
+      "displayName" : "Cerulean Pokecenter",
+      "id" : "CERULEAN_POKECENTER",
+      "objects" : [
+        {
+          "displayName" : "Nurse",
+          "facing" : "down",
+          "id" : "cerulean_pokecenter_nurse",
+          "interactionDialogueID" : "cerulean_pokecenter_nurse",
+          "interactionReach" : "overCounter",
+          "interactionScriptID" : "cerulean_pokecenter_nurse_heal",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 3,
+              "y" : 1
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 3,
+            "y" : 1
+          },
+          "sprite" : "SPRITE_NURSE",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Super Nerd",
+          "facing" : "down",
+          "id" : "cerulean_pokecenter_super_nerd",
+          "interactionDialogueID" : "cerulean_pokecenter_super_nerd",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "any",
+            "home" : {
+              "x" : 10,
+              "y" : 5
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 10,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_SUPER_NERD",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Gentleman",
+          "facing" : "down",
+          "id" : "cerulean_pokecenter_gentleman",
+          "interactionDialogueID" : "cerulean_pokecenter_gentleman",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 4,
+              "y" : 3
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 4,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_GENTLEMAN",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Receptionist",
+          "facing" : "down",
+          "id" : "cerulean_pokecenter_link_receptionist",
+          "interactionDialogueID" : "cerulean_pokecenter_link_receptionist",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 11,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 11,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_LINK_RECEPTIONIST",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        16,
+        40,
+        75,
+        40,
+        19,
+        16,
+        40,
+        75,
+        40,
+        40,
+        94,
+        40,
+        94,
+        40,
+        16,
+        72,
+        22,
+        26,
+        17,
+        16,
+        72,
+        22,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        20,
+        24,
+        24,
+        24,
+        24,
+        20,
+        24,
+        24,
+        24,
+        24,
+        25,
+        17,
+        25,
+        24,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        82,
+        52,
+        60,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        42,
+        26,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        48,
+        48,
+        17,
+        17,
+        17,
+        17,
+        48,
+        48,
+        17,
+        17,
+        17,
+        17,
+        48,
+        48,
+        50,
+        50,
+        17,
+        28,
+        28,
+        17,
+        50,
+        50,
+        17,
+        17,
+        17,
+        17,
+        50,
+        50
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 14,
+      "tileset" : "POKECENTER",
+      "warps" : [
+        {
+          "id" : "cerulean_pokecenter_warp_0",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 19,
+            "y" : 17
+          },
+          "targetWarpIndex" : 2,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_pokecenter_warp_1",
+          "origin" : {
+            "x" : 4,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 19,
+            "y" : 17
+          },
+          "targetWarpIndex" : 2,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        18,
+        19,
+        19,
+        9,
+        22,
+        15,
+        20,
+        20,
+        24,
+        25,
+        21,
+        21,
+        23,
+        26,
+        11,
+        15
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 0,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_POKECENTER",
+      "displayName" : "Cerulean Mart",
+      "id" : "CERULEAN_MART",
+      "objects" : [
+        {
+          "displayName" : "Clerk",
+          "facing" : "right",
+          "id" : "cerulean_mart_clerk",
+          "interactionDialogueID" : "cerulean_mart_clerk",
+          "interactionReach" : "overCounter",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+
+              ],
+              "martID" : "cerulean_mart"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 0,
+              "y" : 5
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 0,
+            "y" : 5
+          },
+          "sprite" : "SPRITE_CLERK",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Cooltrainer",
+          "facing" : "down",
+          "id" : "cerulean_mart_cooltrainer_m",
+          "interactionDialogueID" : "cerulean_mart_cooltrainer_m",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "upDown",
+            "home" : {
+              "x" : 3,
+              "y" : 4
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 3,
+            "y" : 4
+          },
+          "sprite" : "SPRITE_COOLTRAINER_M",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Cooltrainer",
+          "facing" : "down",
+          "id" : "cerulean_mart_cooltrainer_f",
+          "interactionDialogueID" : "cerulean_mart_cooltrainer_f",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "leftRight",
+            "home" : {
+              "x" : 6,
+              "y" : 2
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 6,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_COOLTRAINER_F",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        78,
+        78,
+        44,
+        44,
+        44,
+        44,
+        78,
+        78,
+        23,
+        23,
+        62,
+        62,
+        62,
+        62,
+        23,
+        23,
+        26,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        17,
+        80,
+        81,
+        17,
+        17,
+        80,
+        81,
+        80,
+        81,
+        40,
+        16,
+        26,
+        17,
+        84,
+        85,
+        84,
+        85,
+        26,
+        30,
+        26,
+        17,
+        17,
+        17,
+        17,
+        17,
+        25,
+        25,
+        26,
+        17,
+        17,
+        17,
+        17,
+        17,
+        26,
+        17,
+        17,
+        28,
+        28,
+        17,
+        17,
+        17
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "MART",
+      "warps" : [
+        {
+          "id" : "cerulean_mart_warp_0",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 25,
+            "y" : 25
+          },
+          "targetWarpIndex" : 5,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_mart_warp_1",
+          "origin" : {
+            "x" : 4,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 25,
+            "y" : 25
+          },
+          "targetWarpIndex" : 5,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        4,
+        5,
+        2,
+        3,
+        8,
+        8,
+        6,
+        7,
+        11,
+        10,
+        10,
+        10,
+        10,
+        1,
+        10,
+        9
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 14,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES2",
+      "displayName" : "Bike Shop",
+      "id" : "BIKE_SHOP",
+      "objects" : [
+        {
+          "displayName" : "Clerk",
+          "facing" : "down",
+          "id" : "bike_shop_clerk",
+          "interactionDialogueID" : "bike_shop_clerk",
+          "interactionReach" : "overCounter",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_BICYCLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "bike_shop_clerk_how_do_you_like_your_bicycle"
+            },
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_BICYCLE",
+                  "kind" : "flagUnset"
+                },
+                {
+                  "kind" : "itemPresent",
+                  "stringValue" : "BIKE_VOUCHER"
+                }
+              ],
+              "scriptID" : "bike_shop_exchange_voucher"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "scriptID" : "bike_shop_offer_purchase"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 6,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 6,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_BIKE_SHOP_CLERK",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Middle Aged Woman",
+          "facing" : "down",
+          "id" : "bike_shop_middle_aged_woman",
+          "interactionDialogueID" : "bike_shop_middle_aged_woman",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "upDown",
+            "home" : {
+              "x" : 5,
+              "y" : 6
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 6
+          },
+          "sprite" : "SPRITE_MIDDLE_AGED_WOMAN",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Youngster",
+          "facing" : "up",
+          "id" : "bike_shop_youngster",
+          "interactionDialogueID" : "bike_shop_youngster_these_bikes_are_expensive",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "flagID" : "EVENT_GOT_BICYCLE",
+                  "kind" : "flagSet"
+                }
+              ],
+              "dialogueID" : "bike_shop_youngster_cool_bike"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "dialogueID" : "bike_shop_youngster_these_bikes_are_expensive"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 1,
+              "y" : 3
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 1,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_YOUNGSTER",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        6,
+        18,
+        6,
+        17,
+        19,
+        7,
+        6,
+        6,
+        27,
+        9,
+        30,
+        28,
+        31,
+        7,
+        31,
+        31,
+        30,
+        28,
+        30,
+        28,
+        31,
+        7,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        23,
+        23,
+        23,
+        30,
+        28,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        30,
+        28,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+        21,
+        31,
+        31,
+        31,
+        26,
+        26,
+        31,
+        31,
+        31,
+        21
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "CLUB",
+      "warps" : [
+        {
+          "id" : "bike_shop_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 13,
+            "y" : 25
+          },
+          "targetWarpIndex" : 4,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "bike_shop_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 13,
+            "y" : 25
+          },
+          "targetWarpIndex" : 4,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        4,
+        14,
+        5,
+        9,
+        15,
+        1,
+        2,
+        15,
+        15,
+        12,
+        13,
+        15,
+        6,
+        11,
+        15,
+        7
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES2",
+      "displayName" : "Cerulean Trade House",
+      "id" : "CERULEAN_TRADE_HOUSE",
+      "objects" : [
+        {
+          "displayName" : "Granny",
+          "facing" : "left",
+          "id" : "cerulean_trade_house_granny",
+          "interactionDialogueID" : "cerulean_trade_house_granny",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 5,
+              "y" : 4
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 4
+          },
+          "sprite" : "SPRITE_GRANNY",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Gambler",
+          "facing" : "down",
+          "id" : "cerulean_trade_house_gambler",
+          "interactionDialogueID" : "cerulean_trade_house_gambler",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 1,
+              "y" : 2
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 1,
+            "y" : 2
+          },
+          "sprite" : "SPRITE_GAMBLER",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        14,
+        14,
+        0,
+        61,
+        0,
+        52,
+        0,
+        48,
+        30,
+        30,
+        1,
+        1,
+        1,
+        1,
+        1,
+        30,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        54,
+        47,
+        18,
+        1,
+        1,
+        1,
+        1,
+        18,
+        60,
+        58,
+        18,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        24,
+        1,
+        20,
+        20,
+        1,
+        1,
+        1,
+        24
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "HOUSE",
+      "warps" : [
+        {
+          "id" : "cerulean_trade_house_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 13,
+            "y" : 15
+          },
+          "targetWarpIndex" : 1,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_trade_house_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 13,
+            "y" : 15
+          },
+          "targetWarpIndex" : 1,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        61,
+        9,
+        61,
+        61,
+        11,
+        11,
+        7,
+        6,
+        11,
+        11,
+        11,
+        44,
+        11,
+        27,
+        11,
+        53
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 12,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES1",
+      "displayName" : "Cerulean Badge House",
+      "id" : "CERULEAN_BADGE_HOUSE",
+      "objects" : [
+        {
+          "displayName" : "Middle Aged Man",
+          "facing" : "right",
+          "id" : "cerulean_badge_house_middle_aged_man",
+          "interactionDialogueID" : "cerulean_badge_house_middle_aged_man",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 5,
+              "y" : 3
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 3
+          },
+          "sprite" : "SPRITE_MIDDLE_AGED_MAN",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        18,
+        18,
+        30,
+        18,
+        18,
+        18,
+        18,
+        18,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        23,
+        25,
+        44,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        11,
+        60,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        29,
+        52,
+        52,
+        29,
+        29,
+        29,
+        88
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "SHIP",
+      "warps" : [
+        {
+          "id" : "cerulean_badge_house_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 9,
+            "y" : 9
+          },
+          "targetWarpIndex" : 9,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_badge_house_warp_1",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 9,
+            "y" : 11
+          },
+          "targetWarpIndex" : 8,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_badge_house_warp_2",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 9,
+            "y" : 11
+          },
+          "targetWarpIndex" : 8,
+          "usesPreviousMapTarget" : false
+        }
+      ]
+    },
+    {
+      "backgroundEvents" : [
+        {
+          "dialogueID" : "cerulean_trashed_house_wall_hole",
+          "id" : "cerulean_trashed_house_bg_0",
+          "position" : {
+            "x" : 3,
+            "y" : 0
+          }
+        }
+      ],
+      "blockHeight" : 4,
+      "blockIDs" : [
+        26,
+        31,
+        22,
+        23,
+        30,
+        28,
+        29,
+        27,
+        15,
+        32,
+        33,
+        15,
+        6,
+        11,
+        27,
+        34
+      ],
+      "blockWidth" : 4,
+      "borderBlockID" : 10,
+      "connections" : [
+
+      ],
+      "defaultMusicID" : "MUSIC_CITIES2",
+      "displayName" : "Cerulean Trashed House",
+      "id" : "CERULEAN_TRASHED_HOUSE",
+      "objects" : [
+        {
+          "displayName" : "Fishing Guru",
+          "facing" : "down",
+          "id" : "cerulean_trashed_house_fishing_guru",
+          "interactionDialogueID" : "cerulean_trashed_house_fishing_guru_they_stole_a_t_m",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+            {
+              "conditions" : [
+                {
+                  "kind" : "itemPresent",
+                  "stringValue" : "TM_DIG"
+                }
+              ],
+              "dialogueID" : "cerulean_trashed_house_fishing_guru_whats_lost_is_lost"
+            },
+            {
+              "conditions" : [
+
+              ],
+              "dialogueID" : "cerulean_trashed_house_fishing_guru_they_stole_a_t_m"
+            }
+          ],
+          "movementBehavior" : {
+            "axis" : "none",
+            "home" : {
+              "x" : 2,
+              "y" : 1
+            },
+            "idleMode" : "stay",
+            "maxDistanceFromHome" : 0
+          },
+          "position" : {
+            "x" : 2,
+            "y" : 1
+          },
+          "sprite" : "SPRITE_FISHING_GURU",
+          "visibleByDefault" : true
+        },
+        {
+          "displayName" : "Girl",
+          "facing" : "down",
+          "id" : "cerulean_trashed_house_girl",
+          "interactionDialogueID" : "cerulean_trashed_house_girl",
+          "interactionReach" : "adjacent",
+          "interactionTriggers" : [
+
+          ],
+          "movementBehavior" : {
+            "axis" : "leftRight",
+            "home" : {
+              "x" : 5,
+              "y" : 6
+            },
+            "idleMode" : "walk",
+            "maxDistanceFromHome" : 1
+          },
+          "position" : {
+            "x" : 5,
+            "y" : 6
+          },
+          "sprite" : "SPRITE_GIRL",
+          "visibleByDefault" : true
+        }
+      ],
+      "stepCollisionTileIDs" : [
+        48,
+        48,
+        63,
+        84,
+        52,
+        0,
+        63,
+        63,
+        30,
+        30,
+        1,
+        55,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        55,
+        40,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        18,
+        54,
+        47,
+        68,
+        1,
+        1,
+        1,
+        1,
+        68,
+        82,
+        58,
+        18,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        8,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        24,
+        1,
+        20,
+        20,
+        1,
+        1,
+        12,
+        53
+      ],
+      "stepHeight" : 8,
+      "stepWidth" : 8,
+      "tileset" : "HOUSE",
+      "warps" : [
+        {
+          "id" : "cerulean_trashed_house_warp_0",
+          "origin" : {
+            "x" : 2,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 27,
+            "y" : 11
+          },
+          "targetWarpIndex" : 0,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_trashed_house_warp_1",
+          "origin" : {
+            "x" : 3,
+            "y" : 7
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 27,
+            "y" : 11
+          },
+          "targetWarpIndex" : 0,
+          "usesPreviousMapTarget" : false
+        },
+        {
+          "id" : "cerulean_trashed_house_warp_2",
+          "origin" : {
+            "x" : 3,
+            "y" : 0
+          },
+          "targetFacing" : "down",
+          "targetMapID" : "CERULEAN_CITY",
+          "targetPosition" : {
+            "x" : 27,
+            "y" : 9
+          },
+          "targetWarpIndex" : 7,
           "usesPreviousMapTarget" : false
         }
       ]
@@ -52676,6 +54850,20 @@
   ],
   "marts" : [
     {
+      "clerkObjectID" : "cerulean_mart_clerk",
+      "id" : "cerulean_mart",
+      "mapID" : "CERULEAN_MART",
+      "stockItemIDs" : [
+        "POKE_BALL",
+        "POTION",
+        "REPEL",
+        "ANTIDOTE",
+        "BURN_HEAL",
+        "AWAKENING",
+        "PARLYZ_HEAL"
+      ]
+    },
+    {
       "clerkObjectID" : "pewter_mart_clerk",
       "id" : "pewter_mart",
       "mapID" : "PEWTER_MART",
@@ -56398,6 +58586,78 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_FISHING_GURU",
+      "imagePath" : "Assets/field/sprites/fishing_guru.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_GRANNY",
+      "imagePath" : "Assets/field/sprites/granny.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_GUARD",
       "imagePath" : "Assets/field/sprites/guard.png"
     },
@@ -56602,6 +58862,42 @@
       },
       "frameHeight" : 16,
       "frameWidth" : 16,
+      "id" : "SPRITE_BIKE_SHOP_CLERK",
+      "imagePath" : "Assets/field/sprites/bike_shop_clerk.png"
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
       "id" : "SPRITE_LITTLE_BOY",
       "imagePath" : "Assets/field/sprites/little_boy.png"
     },
@@ -56676,6 +58972,72 @@
       "frameWidth" : 16,
       "id" : "SPRITE_MIDDLE_AGED_MAN",
       "imagePath" : "Assets/field/sprites/middle_aged_man.png",
+      "walkingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 48
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 80
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 64
+        }
+      }
+    },
+    {
+      "facingFrames" : {
+        "down" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 0
+        },
+        "left" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "right" : {
+          "flippedHorizontally" : true,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 32
+        },
+        "up" : {
+          "flippedHorizontally" : false,
+          "height" : 16,
+          "width" : 16,
+          "x" : 0,
+          "y" : 16
+        }
+      },
+      "frameHeight" : 16,
+      "frameWidth" : 16,
+      "id" : "SPRITE_MIDDLE_AGED_WOMAN",
+      "imagePath" : "Assets/field/sprites/middle_aged_woman.png",
       "walkingFrames" : {
         "down" : {
           "flippedHorizontally" : false,
@@ -59980,11 +62342,67 @@
       ]
     },
     {
+      "id" : "bike_shop_offer_purchase",
+      "steps" : [
+        {
+          "action" : "startFieldInteraction",
+          "fieldInteractionID" : "bike_shop_purchase_offer",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "bike_shop_exchange_voucher",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "bike_shop_clerk_oh_thats_a_voucher",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "giveItem",
+          "continueOnFailure" : false,
+          "failureDialogueID" : "bike_shop_bag_full",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "BICYCLE",
+          "successDialogueID" : "bike_shop_exchanged_voucher",
+          "successFlagID" : "EVENT_GOT_BICYCLE"
+        },
+        {
+          "action" : "removeItem",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "BIKE_VOUCHER"
+        }
+      ]
+    },
+    {
       "id" : "pewter_pokecenter_nurse_heal",
       "steps" : [
         {
           "action" : "startFieldInteraction",
           "fieldInteractionID" : "pewter_pokecenter_pokemon_center_healing",
+          "path" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "cerulean_pokecenter_nurse_heal",
+      "steps" : [
+        {
+          "action" : "startFieldInteraction",
+          "fieldInteractionID" : "cerulean_pokecenter_pokemon_center_healing",
           "path" : [
 
           ]
@@ -69951,6 +72369,86 @@
       },
       "blockTileHeight" : 4,
       "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/club.bst",
+      "collision" : {
+        "doorTileIDs" : [
+
+        ],
+        "ledges" : [
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 54,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 29,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 57
+          }
+        ],
+        "passableTileIDs" : [
+          15,
+          26,
+          31,
+          38,
+          40,
+          41,
+          44,
+          45,
+          46,
+          47,
+          65
+        ],
+        "tilePairCollisions" : [
+
+        ],
+        "warpTileIDs" : [
+
+        ]
+      },
+      "id" : "CLUB",
+      "imagePath" : "Assets/field/tilesets/club.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "animation" : {
+        "animatedTiles" : [
+
+        ],
+        "kind" : "none"
+      },
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
       "blocksetPath" : "Assets/field/blocksets/pokecenter.bst",
       "collision" : {
         "doorTileIDs" : [
@@ -70014,6 +72512,93 @@
       },
       "id" : "POKECENTER",
       "imagePath" : "Assets/field/tilesets/pokecenter.png",
+      "sourceTileSize" : 8
+    },
+    {
+      "animation" : {
+        "animatedTiles" : [
+          {
+            "frameImagePaths" : [
+
+            ],
+            "tileID" : 20
+          }
+        ],
+        "kind" : "water"
+      },
+      "blockTileHeight" : 4,
+      "blockTileWidth" : 4,
+      "blocksetPath" : "Assets/field/blocksets/ship.bst",
+      "collision" : {
+        "doorTileIDs" : [
+          30
+        ],
+        "ledges" : [
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 54,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "down",
+            "ledgeTileID" : 55,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "left",
+            "ledgeTileID" : 39,
+            "standingTileID" : 57
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 29,
+            "standingTileID" : 44
+          },
+          {
+            "facing" : "right",
+            "ledgeTileID" : 13,
+            "standingTileID" : 57
+          }
+        ],
+        "passableTileIDs" : [
+          4,
+          13,
+          23,
+          29,
+          30,
+          35,
+          52,
+          55,
+          57,
+          74
+        ],
+        "tilePairCollisions" : [
+
+        ],
+        "warpTileIDs" : [
+          55,
+          57,
+          30,
+          74
+        ]
+      },
+      "id" : "SHIP",
+      "imagePath" : "Assets/field/tilesets/ship.png",
       "sourceTileSize" : 8
     }
   ],

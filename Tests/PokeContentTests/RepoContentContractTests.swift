@@ -271,7 +271,9 @@ final class RepoContentContractTests: XCTestCase {
 
         let interaction = try XCTUnwrap(loaded.fieldInteraction(id: "pokemon_center_healing"))
         let pewterInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "pewter_pokecenter_pokemon_center_healing"))
+        let ceruleanInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "cerulean_pokecenter_pokemon_center_healing"))
         let mtMoonInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "mt_moon_pokecenter_pokemon_center_healing"))
+        let bikeShopInteraction = try XCTUnwrap(loaded.fieldInteraction(id: "bike_shop_purchase_offer"))
         XCTAssertEqual(interaction.kind, .pokemonCenterHealing)
         XCTAssertEqual(interaction.introDialogueID, "pokemon_center_welcome")
         XCTAssertEqual(interaction.prompt.dialogueID, "pokemon_center_shall_we_heal")
@@ -292,10 +294,45 @@ final class RepoContentContractTests: XCTestCase {
             mtMoonInteraction.healingSequence?.blackoutCheckpoint,
             .init(mapID: "ROUTE_4", position: .init(x: 11, y: 6), facing: .down)
         )
+        XCTAssertEqual(
+            ceruleanInteraction.healingSequence?.blackoutCheckpoint,
+            .init(mapID: "CERULEAN_CITY", position: .init(x: 19, y: 18), facing: .down)
+        )
+        XCTAssertEqual(bikeShopInteraction.kind, .dialogueChoice)
+        XCTAssertEqual(bikeShopInteraction.introDialogueID, "bike_shop_clerk_welcome")
+        XCTAssertEqual(bikeShopInteraction.prompt.dialogueID, "bike_shop_clerk_do_you_like_it")
+        XCTAssertEqual(bikeShopInteraction.acceptedDialogueID, "bike_shop_cant_afford")
+        XCTAssertEqual(bikeShopInteraction.successDialogueID, "bike_shop_come_again")
         XCTAssertEqual(loaded.map(id: "PEWTER_GYM")?.defaultMusicID, "MUSIC_GYM")
         XCTAssertEqual(loaded.map(id: "ROUTE_3")?.defaultMusicID, "MUSIC_ROUTES3")
+        XCTAssertEqual(loaded.map(id: "CERULEAN_POKECENTER")?.defaultMusicID, "MUSIC_POKECENTER")
+        XCTAssertEqual(loaded.map(id: "CERULEAN_MART")?.defaultMusicID, "MUSIC_POKECENTER")
+        XCTAssertEqual(loaded.map(id: "BIKE_SHOP")?.defaultMusicID, "MUSIC_CITIES2")
+        XCTAssertEqual(loaded.map(id: "CERULEAN_BADGE_HOUSE")?.defaultMusicID, "MUSIC_CITIES1")
         XCTAssertEqual(loaded.map(id: "MT_MOON_POKECENTER")?.warps.allSatisfy { $0.usesPreviousMapTarget == false }, true)
         XCTAssertEqual(loaded.map(id: "REDS_HOUSE_1F")?.warps.prefix(2).allSatisfy { $0.usesPreviousMapTarget == false }, true)
+        XCTAssertEqual(
+            loaded.map(id: "CERULEAN_POKECENTER")?.objects.map(\.id),
+            [
+                "cerulean_pokecenter_nurse",
+                "cerulean_pokecenter_super_nerd",
+                "cerulean_pokecenter_gentleman",
+                "cerulean_pokecenter_link_receptionist",
+            ]
+        )
+        XCTAssertEqual(
+            loaded.map(id: "BIKE_SHOP")?.objects.map(\.id),
+            ["bike_shop_clerk", "bike_shop_middle_aged_woman", "bike_shop_youngster"]
+        )
+        XCTAssertEqual(
+            loaded.map(id: "BIKE_SHOP")?.objects.first { $0.id == "bike_shop_clerk" }?.interactionReach,
+            .overCounter
+        )
+        XCTAssertEqual(
+            loaded.map(id: "CERULEAN_TRASHED_HOUSE")?.backgroundEvents.map(\.dialogueID),
+            ["cerulean_trashed_house_wall_hole"]
+        )
+        XCTAssertNotNil(loaded.dialogue(id: "cerulean_trade_house_gambler"))
         XCTAssertEqual(
             loaded.mapScript(for: "MT_MOON_B2F")?.triggers.map(\.scriptID),
             ["mt_moon_b2f_super_nerd_battle"]
@@ -340,6 +377,15 @@ final class RepoContentContractTests: XCTestCase {
             ["showDialogue", "giveItem", "showDialogue", "startBattle"]
         )
         XCTAssertEqual(loaded.script(id: "route24_nugget_bridge_reward")?.steps[1].continueOnFailure, false)
+        XCTAssertEqual(
+            loaded.script(id: "bike_shop_offer_purchase")?.steps.map(\.action),
+            ["startFieldInteraction"]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "bike_shop_exchange_voucher")?.steps.map(\.action),
+            ["showDialogue", "giveItem", "removeItem"]
+        )
+        XCTAssertEqual(loaded.script(id: "bike_shop_exchange_voucher")?.steps[1].continueOnFailure, false)
         XCTAssertEqual(
             loaded.script(id: "bills_house_bill_pokemon_interaction")?.steps.map(\.action),
             [

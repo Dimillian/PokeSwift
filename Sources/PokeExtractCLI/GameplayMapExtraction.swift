@@ -3,7 +3,15 @@ import PokeDataModel
 
 func fallbackMapSize(for mapID: String) -> TileSize {
     switch mapID {
-    case "REDS_HOUSE_2F", "REDS_HOUSE_1F", "VIRIDIAN_MART":
+    case
+        "REDS_HOUSE_2F",
+        "REDS_HOUSE_1F",
+        "VIRIDIAN_MART",
+        "CERULEAN_MART",
+        "BIKE_SHOP",
+        "CERULEAN_TRADE_HOUSE",
+        "CERULEAN_BADGE_HOUSE",
+        "CERULEAN_TRASHED_HOUSE":
         return .init(width: 4, height: 4)
     case "PALLET_TOWN":
         return .init(width: 10, height: 9)
@@ -13,7 +21,7 @@ func fallbackMapSize(for mapID: String) -> TileSize {
         return .init(width: 10, height: 36)
     case "VIRIDIAN_CITY":
         return .init(width: 20, height: 18)
-    case "VIRIDIAN_POKECENTER":
+    case "VIRIDIAN_POKECENTER", "CERULEAN_POKECENTER":
         return .init(width: 7, height: 4)
     case "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
         return .init(width: 4, height: 4)
@@ -34,10 +42,20 @@ func fallbackMusicID(for mapID: String) -> String {
         return "MUSIC_PALLET_TOWN"
     case "ROUTE_1", "ROUTE_2":
         return "MUSIC_ROUTES1"
-    case "VIRIDIAN_CITY", "VIRIDIAN_SCHOOL_HOUSE", "VIRIDIAN_NICKNAME_HOUSE":
+    case
+        "VIRIDIAN_CITY",
+        "VIRIDIAN_SCHOOL_HOUSE",
+        "VIRIDIAN_NICKNAME_HOUSE",
+        "CERULEAN_CITY",
+        "CERULEAN_TRADE_HOUSE",
+        "CERULEAN_TRASHED_HOUSE":
         return "MUSIC_CITIES1"
-    case "VIRIDIAN_POKECENTER", "VIRIDIAN_MART":
+    case "VIRIDIAN_POKECENTER", "VIRIDIAN_MART", "CERULEAN_POKECENTER", "CERULEAN_MART":
         return "MUSIC_POKECENTER"
+    case "BIKE_SHOP":
+        return "MUSIC_CITIES2"
+    case "CERULEAN_BADGE_HOUSE":
+        return "MUSIC_CITIES1"
     case "VIRIDIAN_FOREST_SOUTH_GATE", "VIRIDIAN_FOREST_NORTH_GATE":
         return "MUSIC_CITIES1"
     case "VIRIDIAN_FOREST":
@@ -446,6 +464,8 @@ private func collisionKey(for tileset: String) -> String {
     case "INTERIOR": return "Interior_Coll"
     case "MART": return "Mart_Coll"
     case "POKECENTER": return "Pokecenter_Coll"
+    case "CLUB": return "Club_Coll"
+    case "SHIP": return "Ship_Coll"
     default: return "Overworld_Coll"
     }
 }
@@ -466,6 +486,8 @@ private func tilesetLabel(for tileset: String) -> String {
     case "INTERIOR": return "Interior"
     case "MART": return "Mart"
     case "POKECENTER": return "Pokecenter"
+    case "CLUB": return "Club"
+    case "SHIP": return "Ship"
     default: return "Overworld"
     }
 }
@@ -931,6 +953,16 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             animation: tilesetAnimationManifest(for: "MART", parsed: collisionData)
         ),
         .init(
+            id: "CLUB",
+            imagePath: "Assets/field/tilesets/club.png",
+            blocksetPath: "Assets/field/blocksets/club.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "CLUB", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "CLUB", parsed: collisionData)
+        ),
+        .init(
             id: "POKECENTER",
             imagePath: "Assets/field/tilesets/pokecenter.png",
             blocksetPath: "Assets/field/blocksets/pokecenter.bst",
@@ -939,6 +971,16 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             blockTileHeight: 4,
             collision: tilesetCollisionManifest(for: "POKECENTER", parsed: collisionData),
             animation: tilesetAnimationManifest(for: "POKECENTER", parsed: collisionData)
+        ),
+        .init(
+            id: "SHIP",
+            imagePath: "Assets/field/tilesets/ship.png",
+            blocksetPath: "Assets/field/blocksets/ship.bst",
+            sourceTileSize: 8,
+            blockTileWidth: 4,
+            blockTileHeight: 4,
+            collision: tilesetCollisionManifest(for: "SHIP", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "SHIP", parsed: collisionData)
         ),
     ]
 }

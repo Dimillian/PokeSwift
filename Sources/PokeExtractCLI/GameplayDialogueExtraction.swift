@@ -578,6 +578,7 @@ func buildDialogues(
         itemIDs: referencedVisiblePickupItemIDs(repoRoot: repoRoot),
         itemNamesByID: itemNamesByID
     ))
+    dialogues.append(contentsOf: try buildNPCTradeOfferDialogues(repoRoot: repoRoot))
 
     var dialogueByID: [String: DialogueManifest] = [:]
     for dialogue in dialogues where dialogueByID[dialogue.id] == nil {
@@ -707,6 +708,160 @@ private func specialCoverageDialogue(
         id: dialogueID(for: mapID, textID: textID, mapScriptMetadata: mapScriptMetadata),
         pages: [.init(lines: [line], waitsForPrompt: true)]
     )
+}
+
+private struct NPCTradeOffer {
+    let giveSpeciesID: String
+    let receiveSpeciesID: String
+    let dialogSetID: String
+}
+
+private func buildNPCTradeOfferDialogues(repoRoot: URL) throws -> [DialogueManifest] {
+    guard gameplayCoverageMapIDs.contains("CERULEAN_TRADE_HOUSE") else {
+        return []
+    }
+
+    let tradeConstants = try parseNPCTradeConstantIndexes(repoRoot: repoRoot)
+    let tradeOffers = try parseNPCTradeOffers(repoRoot: repoRoot)
+    guard
+        let tradeIndex = tradeConstants["TRADE_FOR_LOLA"],
+        let tradeOffer = tradeOffers[tradeIndex]
+    else {
+        return []
+    }
+
+    let syntheticText = syntheticNPCTradeOfferText(
+        dialogSetID: tradeOffer.dialogSetID,
+        giveSpeciesName: npcTradeSpeciesDisplayName(tradeOffer.giveSpeciesID),
+        receiveSpeciesName: npcTradeSpeciesDisplayName(tradeOffer.receiveSpeciesID)
+    )
+    return [try extractDialogue(
+        id: "cerulean_trade_house_gambler",
+        label: "_CeruleanTradeHouseGamblerTradeOfferText",
+        from: syntheticText
+    )]
+}
+
+private func parseNPCTradeConstantIndexes(repoRoot: URL) throws -> [String: Int] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("constants/script_constants.asm"))
+    var result: [String: Int] = [:]
+    var currentIndex = 0
+    var inTradeConstants = false
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let rawLineString = String(rawLine)
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if rawLineString.contains("; TradeMons indexes (see data/events/trades.asm)") {
+            inTradeConstants = true
+            currentIndex = 0
+            continue
+        }
+        if inTradeConstants == false {
+            continue
+        }
+        if line.hasPrefix("DEF NUM_NPC_TRADES") {
+            break
+        }
+        guard line.hasPrefix("const ") else {
+            continue
+        }
+        let constant = line
+            .replacingOccurrences(of: "const", with: "")
+            .trimmingCharacters(in: .whitespaces)
+            .components(separatedBy: .whitespaces)
+            .first ?? ""
+        guard constant.isEmpty == false else {
+            continue
+        }
+        result[constant] = currentIndex
+        currentIndex += 1
+    }
+
+    return result
+}
+
+private func parseNPCTradeOffers(repoRoot: URL) throws -> [Int: NPCTradeOffer] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/events/trades.asm"))
+    var result: [Int: NPCTradeOffer] = [:]
+    var currentIndex = 0
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        guard let match = line.firstMatch(of: /npctrade\s+([A-Z0-9_]+),\s+([A-Z0-9_]+),\s+(TRADE_DIALOGSET_[A-Z0-9_]+),\s+"[^"]+"/) else {
+            continue
+        }
+        result[currentIndex] = NPCTradeOffer(
+            giveSpeciesID: String(match.output.1),
+            receiveSpeciesID: String(match.output.2),
+            dialogSetID: String(match.output.3)
+        )
+        currentIndex += 1
+    }
+
+    return result
+}
+
+private func syntheticNPCTradeOfferText(
+    dialogSetID: String,
+    giveSpeciesName: String,
+    receiveSpeciesName: String
+) -> String {
+    let body: String
+    switch dialogSetID {
+    case "TRADE_DIALOGSET_CASUAL":
+        body = """
+\ttext "I'm looking for"
+\tline "\(giveSpeciesName)! Wanna"
+
+\tpara "trade one for"
+\tline "\(receiveSpeciesName)?"
+\tdone
+"""
+    case "TRADE_DIALOGSET_HAPPY":
+        body = """
+\ttext "Hi! Do you have"
+\tline "\(giveSpeciesName)?"
+
+\tpara "Want to trade it"
+\tline "for \(receiveSpeciesName)?"
+\tdone
+"""
+    default:
+        body = """
+\ttext "Hello there! Do"
+\tline "you want to trade"
+
+\tpara "your \(giveSpeciesName)"
+\tline "for \(receiveSpeciesName)?"
+\tdone
+"""
+    }
+
+    return """
+_CeruleanTradeHouseGamblerTradeOfferText::
+\(body)
+"""
+}
+
+private func npcTradeSpeciesDisplayName(_ speciesID: String) -> String {
+    switch speciesID {
+    case "MR_MIME": return "MR. MIME"
+    case "NIDORAN_M": return "NIDORAN M"
+    case "NIDORAN_F": return "NIDORAN F"
+    case "FARFETCHD": return "FARFETCH'D"
+    default:
+        return speciesID
+            .split(separator: "_")
+            .map { $0.lowercased().capitalized }
+            .joined(separator: " ")
+    }
 }
 
 private func extractDialogueIfPresent(

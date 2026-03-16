@@ -225,6 +225,54 @@ let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
         isOutdoor: true
     ),
     .init(
+        mapID: "CERULEAN_POKECENTER",
+        displayName: "Cerulean Pokecenter",
+        objectFile: "data/maps/objects/CeruleanPokecenter.asm",
+        blockFile: "maps/CeruleanPokecenter.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "CERULEAN_MART",
+        displayName: "Cerulean Mart",
+        objectFile: "data/maps/objects/CeruleanMart.asm",
+        blockFile: "maps/CeruleanMart.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "BIKE_SHOP",
+        displayName: "Bike Shop",
+        objectFile: "data/maps/objects/BikeShop.asm",
+        blockFile: "maps/BikeShop.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "CERULEAN_TRADE_HOUSE",
+        displayName: "Cerulean Trade House",
+        objectFile: "data/maps/objects/CeruleanTradeHouse.asm",
+        blockFile: "maps/CeruleanTradeHouse.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "CERULEAN_BADGE_HOUSE",
+        displayName: "Cerulean Badge House",
+        objectFile: "data/maps/objects/CeruleanBadgeHouse.asm",
+        blockFile: "maps/CeruleanBadgeHouse.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
+        mapID: "CERULEAN_TRASHED_HOUSE",
+        displayName: "Cerulean Trashed House",
+        objectFile: "data/maps/objects/CeruleanTrashedHouse.asm",
+        blockFile: "maps/CeruleanTrashedHouse.blk",
+        parentMapID: "CERULEAN_CITY",
+        isOutdoor: false
+    ),
+    .init(
         mapID: "CERULEAN_GYM",
         displayName: "Cerulean Gym",
         objectFile: "data/maps/objects/CeruleanGym.asm",

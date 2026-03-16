@@ -1127,6 +1127,36 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
         )
     )
 
+    scripts.append(
+        ScriptManifest(
+            id: "bike_shop_offer_purchase",
+            steps: [
+                .init(
+                    action: "startFieldInteraction",
+                    fieldInteractionID: bikeShopPurchaseFieldInteractionID()
+                ),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "bike_shop_exchange_voucher",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "bike_shop_clerk_oh_thats_a_voucher"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "BICYCLE",
+                    intValue: 1,
+                    successDialogueID: "bike_shop_exchanged_voucher",
+                    failureDialogueID: "bike_shop_bag_full",
+                    successFlagID: "EVENT_GOT_BICYCLE",
+                    continueOnFailure: false
+                ),
+                .init(action: "removeItem", stringValue: "BIKE_VOUCHER", intValue: 1),
+            ]
+        )
+    )
+
     scripts.append(contentsOf: buildPokemonCenterHealingScripts(maps: maps))
     return scripts
 }

@@ -26,6 +26,17 @@ extension GameRuntime {
                     )
                 )
             )
+        case .dialogueChoice:
+            showDialogue(
+                id: interaction.introDialogueID,
+                completion: .showDialogue(
+                    dialogueID: interaction.prompt.dialogueID,
+                    completionAction: .fieldPrompt(
+                        interactionID: interaction.id,
+                        completionAction: completionAction
+                    )
+                )
+            )
         case .paidAdmission:
             guard let paidAdmission = interaction.paidAdmission else {
                 scene = .field
@@ -211,6 +222,24 @@ extension GameRuntime {
                         completionAction: promptState.completionAction
                     )
                 )
+                return
+            }
+
+            showDialogue(id: interaction.farewellDialogueID, completion: promptState.completionAction)
+        case .dialogueChoice:
+            if accepted {
+                showDialogue(
+                    id: interaction.acceptedDialogueID,
+                    completion: .showDialogue(
+                        dialogueID: interaction.successDialogueID,
+                        completionAction: promptState.completionAction
+                    )
+                )
+                return
+            }
+
+            if let declinedDialogueID = interaction.declinedDialogueID {
+                showDialogue(id: declinedDialogueID, completion: promptState.completionAction)
                 return
             }
 
