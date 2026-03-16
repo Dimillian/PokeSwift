@@ -227,7 +227,10 @@ enum GameplayScenePropsFactory {
             facing: runtime.playerPosition == nil ? nil : runtime.playerFacing,
             portrait: makeTrainerPortrait(runtime: runtime),
             money: runtime.playerMoney,
-            ownedBadgeIDs: runtime.earnedBadgeIDs
+            ownedBadgeIDs: runtime.earnedBadgeIDs,
+            totalStepCount: runtime.totalStepCount,
+            wildEncounterCount: runtime.wildEncounterCount,
+            trainerBattleCount: runtime.trainerBattleCount
         )
     }
 

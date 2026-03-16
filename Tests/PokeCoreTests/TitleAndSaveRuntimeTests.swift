@@ -22,6 +22,9 @@ extension PokeCoreTests {
         runtime.gameplayState?.speciesEncounterCounts = ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7, "MISSINGNO": 0]
         runtime.gameplayState?.currentBoxIndex = 1
         runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.totalStepCount = 3210
+        runtime.gameplayState?.wildEncounterCount = 42
+        runtime.gameplayState?.trainerBattleCount = 9
         runtime.gameplayState?.blackoutCheckpoint = .init(
             mapID: "VIRIDIAN_POKECENTER",
             position: .init(x: 3, y: 7),
@@ -67,7 +70,7 @@ extension PokeCoreTests {
 
         XCTAssertTrue(runtime.saveCurrentGame())
         XCTAssertNotNil(saveStore.envelope)
-        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 9)
+        XCTAssertEqual(saveStore.envelope?.metadata.schemaVersion, 10)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.experience, 202)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.dvs, savedPokemon?.dvs)
         XCTAssertEqual(saveStore.envelope?.snapshot.playerParty.first?.statExp, savedPokemon?.statExp)
@@ -81,6 +84,9 @@ extension PokeCoreTests {
         XCTAssertEqual(saveStore.envelope?.snapshot.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
         XCTAssertEqual(saveStore.envelope?.snapshot.earnedBadgeIDs, ["boulder"])
         XCTAssertEqual(saveStore.envelope?.snapshot.previousMapID, "PALLET_TOWN")
+        XCTAssertEqual(saveStore.envelope?.snapshot.totalStepCount, 3210)
+        XCTAssertEqual(saveStore.envelope?.snapshot.wildEncounterCount, 42)
+        XCTAssertEqual(saveStore.envelope?.snapshot.trainerBattleCount, 9)
         XCTAssertEqual(
             saveStore.envelope?.snapshot.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -111,6 +117,9 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.gameplayState?.seenSpeciesIDs, Set(["SQUIRTLE", "PIDGEY", "RATTATA"]))
         XCTAssertEqual(resumed.gameplayState?.speciesEncounterCounts, ["SQUIRTLE": 4, "PIDGEY": 2, "RATTATA": 7])
         XCTAssertEqual(resumed.gameplayState?.previousMapID, "PALLET_TOWN")
+        XCTAssertEqual(resumed.gameplayState?.totalStepCount, 3210)
+        XCTAssertEqual(resumed.gameplayState?.wildEncounterCount, 42)
+        XCTAssertEqual(resumed.gameplayState?.trainerBattleCount, 9)
         XCTAssertEqual(
             resumed.gameplayState?.blackoutCheckpoint,
             .init(mapID: "VIRIDIAN_POKECENTER", position: .init(x: 3, y: 7), facing: .down)
@@ -118,6 +127,9 @@ extension PokeCoreTests {
         XCTAssertEqual(snapshot.eventFlags?.activeFlags, [])
         XCTAssertEqual(resumed.playerMoney, 4242)
         XCTAssertEqual(resumed.earnedBadgeIDs, Set(["boulder"]))
+        XCTAssertEqual(resumed.totalStepCount, 3210)
+        XCTAssertEqual(resumed.wildEncounterCount, 42)
+        XCTAssertEqual(resumed.trainerBattleCount, 9)
         XCTAssertFalse(resumed.currentFieldObjects.contains(where: { $0.id == "test_object" }))
     }
 
@@ -212,6 +224,9 @@ extension PokeCoreTests {
         let envelope = try JSONDecoder().decode(GameSaveEnvelope.self, from: Data(json.utf8))
         XCTAssertEqual(envelope.metadata.playTimeSeconds, 0)
         XCTAssertEqual(envelope.snapshot.playTimeSeconds, 0)
+        XCTAssertEqual(envelope.snapshot.totalStepCount, 0)
+        XCTAssertEqual(envelope.snapshot.wildEncounterCount, 0)
+        XCTAssertEqual(envelope.snapshot.trainerBattleCount, 0)
 
         let saveStore = InMemorySaveStore()
         saveStore.envelope = envelope
@@ -220,6 +235,9 @@ extension PokeCoreTests {
 
         XCTAssertTrue(runtime.continueFromTitleMenu())
         XCTAssertEqual(runtime.gameplayState?.playTimeSeconds, 0)
+        XCTAssertEqual(runtime.gameplayState?.totalStepCount, 0)
+        XCTAssertEqual(runtime.gameplayState?.wildEncounterCount, 0)
+        XCTAssertEqual(runtime.gameplayState?.trainerBattleCount, 0)
         XCTAssertEqual(runtime.currentSaveMetadata?.playTimeSeconds, 0)
     }
 

@@ -25,10 +25,23 @@ public struct TrainerBadgeProps: Identifiable, Equatable, Sendable {
     }
 }
 
+public struct TrainerStatProps: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let label: String
+    public let valueText: String
+
+    public init(id: String, label: String, valueText: String) {
+        self.id = id
+        self.label = label
+        self.valueText = valueText
+    }
+}
+
 public struct TrainerProfileProps: Equatable, Sendable {
     public let trainerName: String
     public let locationName: String
     public let portrait: TrainerPortraitProps
+    public let stats: [TrainerStatProps]
     public let badges: [TrainerBadgeProps]
     public let badgeSummaryText: String
     public let moneyText: String
@@ -38,6 +51,7 @@ public struct TrainerProfileProps: Equatable, Sendable {
         trainerName: String,
         locationName: String,
         portrait: TrainerPortraitProps,
+        stats: [TrainerStatProps] = [],
         badges: [TrainerBadgeProps],
         badgeSummaryText: String,
         moneyText: String,
@@ -46,6 +60,7 @@ public struct TrainerProfileProps: Equatable, Sendable {
         self.trainerName = trainerName
         self.locationName = locationName
         self.portrait = portrait
+        self.stats = stats
         self.badges = badges
         self.badgeSummaryText = badgeSummaryText
         self.moneyText = moneyText

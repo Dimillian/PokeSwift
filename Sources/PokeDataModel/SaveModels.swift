@@ -90,6 +90,9 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
     public let activeScriptID: String?
     public let activeScriptStep: Int?
     public let encounterStepCounter: Int
+    public let totalStepCount: Int
+    public let wildEncounterCount: Int
+    public let trainerBattleCount: Int
     public let playTimeSeconds: Int
 
     public init(
@@ -118,6 +121,9 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         activeScriptID: String?,
         activeScriptStep: Int?,
         encounterStepCounter: Int,
+        totalStepCount: Int = 0,
+        wildEncounterCount: Int = 0,
+        trainerBattleCount: Int = 0,
         playTimeSeconds: Int
     ) {
         self.mapID = mapID
@@ -145,6 +151,9 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         self.activeScriptID = activeScriptID
         self.activeScriptStep = activeScriptStep
         self.encounterStepCounter = encounterStepCounter
+        self.totalStepCount = totalStepCount
+        self.wildEncounterCount = wildEncounterCount
+        self.trainerBattleCount = trainerBattleCount
         self.playTimeSeconds = playTimeSeconds
     }
 
@@ -174,6 +183,9 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         case activeScriptID
         case activeScriptStep
         case encounterStepCounter
+        case totalStepCount
+        case wildEncounterCount
+        case trainerBattleCount
         case playTimeSeconds
     }
 
@@ -204,6 +216,9 @@ public struct GameSaveSnapshot: Codable, Equatable, Sendable {
         activeScriptID = try container.decodeIfPresent(String.self, forKey: .activeScriptID)
         activeScriptStep = try container.decodeIfPresent(Int.self, forKey: .activeScriptStep)
         encounterStepCounter = try container.decodeIfPresent(Int.self, forKey: .encounterStepCounter) ?? 0
+        totalStepCount = try container.decodeIfPresent(Int.self, forKey: .totalStepCount) ?? 0
+        wildEncounterCount = try container.decodeIfPresent(Int.self, forKey: .wildEncounterCount) ?? 0
+        trainerBattleCount = try container.decodeIfPresent(Int.self, forKey: .trainerBattleCount) ?? 0
         playTimeSeconds = try container.decodeIfPresent(Int.self, forKey: .playTimeSeconds) ?? 0
     }
 }

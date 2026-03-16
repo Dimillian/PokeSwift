@@ -27,6 +27,10 @@ struct TrainerProfileContent: View {
 
             TrainerInfoRow(label: "Money", value: props.moneyText)
 
+            if props.stats.isEmpty == false {
+                TrainerStatsSection(stats: props.stats)
+            }
+
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     GameBoyPixelText(
@@ -47,8 +51,40 @@ struct TrainerProfileContent: View {
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(FieldRetroPalette.ink.opacity(0.66))
             }
+        }
+    }
+}
 
-            StatusStrip(items: props.statusItems)
+struct TrainerStatsSection: View {
+    let stats: [TrainerStatProps]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            GameBoyPixelText(
+                "STATS",
+                scale: 1.5,
+                color: FieldRetroPalette.ink.opacity(0.52),
+                fallbackFont: .system(size: 11, weight: .bold, design: .rounded)
+            )
+
+            HStack(spacing: 8) {
+                ForEach(stats) { stat in
+                    GameplaySidebarInsetSurface(tint: FieldRetroPalette.accentGlassTint) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            GameBoyPixelText(
+                                stat.label.uppercased(),
+                                scale: 1,
+                                color: FieldRetroPalette.ink.opacity(0.52),
+                                fallbackFont: .system(size: 10, weight: .bold, design: .rounded)
+                            )
+                            Text(stat.valueText)
+                                .font(.system(size: 15, weight: .bold, design: .monospaced))
+                                .foregroundStyle(FieldRetroPalette.ink)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
         }
     }
 }
@@ -93,28 +129,6 @@ struct TrainerBadgeStrip: View {
                 }
             }
         }
-    }
-}
-
-struct StatusStrip: View {
-    let items: [String]
-
-    var body: some View {
-        GlassEffectContainer(spacing: 8) {
-            HStack(spacing: 6) {
-                ForEach(items, id: \.self) { item in
-                    GameplaySidebarChipSurface {
-                        GameBoyPixelText(
-                            item.uppercased(),
-                            scale: 1,
-                            color: FieldRetroPalette.ink.opacity(0.74),
-                            fallbackFont: .system(size: 10, weight: .bold, design: .monospaced)
-                        )
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

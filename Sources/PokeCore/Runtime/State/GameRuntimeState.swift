@@ -859,5 +859,8 @@ struct GameplayState {
     var activeScriptStep: Int?
     var battle: RuntimeBattleState?
     var encounterStepCounter: Int
+    var totalStepCount: Int
+    var wildEncounterCount: Int
+    var trainerBattleCount: Int
     var playTimeSeconds: Int
 }

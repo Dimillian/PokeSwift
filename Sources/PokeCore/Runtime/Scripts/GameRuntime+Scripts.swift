@@ -370,6 +370,9 @@ extension GameRuntime {
             activeScriptStep: nil,
             battle: nil,
             encounterStepCounter: 0,
+            totalStepCount: 0,
+            wildEncounterCount: 0,
+            trainerBattleCount: 0,
             playTimeSeconds: 0
         )
     }

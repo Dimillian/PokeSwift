@@ -95,6 +95,7 @@ extension GameRuntime {
         gameplayState.mapID = destination.map.id
         gameplayState.playerPosition = destination.point
         gameplayState.activeMapScriptTriggerID = nil
+        gameplayState.totalStepCount += 1
         self.gameplayState = gameplayState
         if mapChanged {
             requestDefaultMapMusic()

@@ -276,12 +276,23 @@ extension PokeUITests {
       facing: .down,
       portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
       money: 3000,
-      ownedBadgeIDs: []
+      ownedBadgeIDs: [],
+      totalStepCount: 1234,
+      wildEncounterCount: 56,
+      trainerBattleCount: 7
     )
     let party = GameplaySidebarPropsBuilder.makeParty(from: nil)
     let inventory = GameplaySidebarPropsBuilder.makeInventory()
 
     XCTAssertEqual(profile.moneyText, "¥3,000")
+    XCTAssertEqual(
+      profile.stats,
+      [
+        .init(id: "steps", label: "Steps", valueText: "1,234"),
+        .init(id: "wild", label: "Wild", valueText: "56"),
+        .init(id: "trainer", label: "Trainers", valueText: "7"),
+      ]
+    )
     XCTAssertEqual(profile.badgeSummaryText, "0/8")
     XCTAssertEqual(profile.badges.count, 8)
     XCTAssertEqual(profile.statusItems, ["FIELD", "X4 Y4", "DOWN"])
@@ -471,7 +482,10 @@ extension PokeUITests {
       facing: .down,
       portrait: .init(label: "RED", spriteURL: nil, spriteFrame: nil),
       money: 3000,
-      ownedBadgeIDs: []
+      ownedBadgeIDs: [],
+      totalStepCount: 0,
+      wildEncounterCount: 0,
+      trainerBattleCount: 0
     )
 
     XCTAssertEqual(profile.statusItems, ["EVOLVE", "X4 Y4", "DOWN"])
@@ -1605,7 +1619,10 @@ extension PokeUITests {
         spriteFrame: .init(x: 0, y: 16, width: 16, height: 16)
       ),
       money: 4242,
-      ownedBadgeIDs: ["CASCADE_BADGE", "BoulderBadge"]
+      ownedBadgeIDs: ["CASCADE_BADGE", "BoulderBadge"],
+      totalStepCount: 9876,
+      wildEncounterCount: 12,
+      trainerBattleCount: 3
     )
     let sidebarParty = GameplaySidebarPropsBuilder.makeParty(
       from: party,
@@ -1615,6 +1632,7 @@ extension PokeUITests {
 
     XCTAssertEqual(profile.locationName, "Oak's Lab")
     XCTAssertEqual(profile.moneyText, "¥4,242")
+    XCTAssertEqual(profile.stats.map(\.valueText), ["9,876", "12", "3"])
     XCTAssertEqual(profile.badgeSummaryText, "2/8")
     XCTAssertEqual(profile.badges.prefix(2).map(\.isEarned), [true, true])
     XCTAssertEqual(profile.portrait.spriteURL?.path, "/tmp/red.png")

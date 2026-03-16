@@ -10,7 +10,10 @@ public enum GameplaySidebarPropsBuilder {
         facing: FacingDirection?,
         portrait: TrainerPortraitProps,
         money: Int,
-        ownedBadgeIDs: Set<String>
+        ownedBadgeIDs: Set<String>,
+        totalStepCount: Int,
+        wildEncounterCount: Int,
+        trainerBattleCount: Int
     ) -> TrainerProfileProps {
         var statusItems = [sceneStatusLabel(scene)]
         if let playerPosition {
@@ -26,6 +29,11 @@ public enum GameplaySidebarPropsBuilder {
             trainerName: trainerName,
             locationName: locationName,
             portrait: portrait,
+            stats: makeTrainerStats(
+                totalStepCount: totalStepCount,
+                wildEncounterCount: wildEncounterCount,
+                trainerBattleCount: trainerBattleCount
+            ),
             badges: badges,
             badgeSummaryText: "\(badges.filter(\.isEarned).count)/\(badges.count)",
             moneyText: formatMoney(money),
@@ -331,6 +339,22 @@ extension GameplaySidebarPropsBuilder {
 
     private static func formatMoney(_ amount: Int) -> String {
         "¥\(moneyFormatter.string(from: NSNumber(value: amount)) ?? "\(amount)")"
+    }
+
+    private static func formatCount(_ amount: Int) -> String {
+        moneyFormatter.string(from: NSNumber(value: max(0, amount))) ?? "\(max(0, amount))"
+    }
+
+    private static func makeTrainerStats(
+        totalStepCount: Int,
+        wildEncounterCount: Int,
+        trainerBattleCount: Int
+    ) -> [TrainerStatProps] {
+        [
+            .init(id: "steps", label: "Steps", valueText: formatCount(totalStepCount)),
+            .init(id: "wild", label: "Wild", valueText: formatCount(wildEncounterCount)),
+            .init(id: "trainer", label: "Trainers", valueText: formatCount(trainerBattleCount)),
+        ]
     }
 
     private static let moneyFormatter: NumberFormatter = {

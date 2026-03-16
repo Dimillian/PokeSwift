@@ -150,6 +150,9 @@ extension GameRuntime {
             activeScriptID: gameplayState.activeScriptID,
             activeScriptStep: gameplayState.activeScriptStep,
             encounterStepCounter: gameplayState.encounterStepCounter,
+            totalStepCount: gameplayState.totalStepCount,
+            wildEncounterCount: gameplayState.wildEncounterCount,
+            trainerBattleCount: gameplayState.trainerBattleCount,
             playTimeSeconds: gameplayState.playTimeSeconds
         )
 
@@ -205,6 +208,9 @@ extension GameRuntime {
             activeScriptStep: envelope.snapshot.activeScriptStep,
             battle: nil,
             encounterStepCounter: envelope.snapshot.encounterStepCounter,
+            totalStepCount: envelope.snapshot.totalStepCount,
+            wildEncounterCount: envelope.snapshot.wildEncounterCount,
+            trainerBattleCount: envelope.snapshot.trainerBattleCount,
             playTimeSeconds: envelope.snapshot.playTimeSeconds
         )
         reseedRuntimeRNG()

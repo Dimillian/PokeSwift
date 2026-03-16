@@ -6,7 +6,7 @@ import PokeDataModel
 @MainActor
 @Observable
 public final class GameRuntime {
-    nonisolated public static let saveSchemaVersion = 9
+    nonisolated public static let saveSchemaVersion = 10
 
     public let content: LoadedContent
 
@@ -172,6 +172,18 @@ public final class GameRuntime {
 
     public var encounterCountsBySpeciesID: [String: Int] {
         gameplayState?.speciesEncounterCounts ?? [:]
+    }
+
+    public var totalStepCount: Int {
+        gameplayState?.totalStepCount ?? 0
+    }
+
+    public var wildEncounterCount: Int {
+        gameplayState?.wildEncounterCount ?? 0
+    }
+
+    public var trainerBattleCount: Int {
+        gameplayState?.trainerBattleCount ?? 0
     }
 
     var currentInventoryItems: [RuntimeInventoryItemState] {

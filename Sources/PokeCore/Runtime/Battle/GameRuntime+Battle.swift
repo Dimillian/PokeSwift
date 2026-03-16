@@ -325,6 +325,7 @@ extension GameRuntime {
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
         recordSpeciesEncounter(battle.enemyPokemon.speciesID, in: &gameplayState)
+        gameplayState.trainerBattleCount += 1
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
@@ -421,6 +422,7 @@ extension GameRuntime {
         ]
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)
         recordSpeciesEncounter(battle.enemyPokemon.speciesID, in: &gameplayState)
+        gameplayState.wildEncounterCount += 1
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         scene = .battle
