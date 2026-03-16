@@ -281,12 +281,15 @@ extension GameRuntime {
         }
         guard enemyParty.isEmpty == false else { return }
 
-        let wantsToFightMessage = trainerWantsToFightText(trainerName: battleManifest.displayName)
+        let isRival = battleManifest.trainerClass.hasPrefix("OPP_RIVAL")
+        let trainerName = isRival ? gameplayState.rivalName : battleManifest.displayName
+
+        let wantsToFightMessage = trainerWantsToFightText(trainerName: trainerName)
 
         var battle = RuntimeBattleState(
             battleID: battleManifest.id,
             kind: .trainer,
-            trainerName: battleManifest.displayName,
+            trainerName: trainerName,
             trainerSpritePath: battleManifest.trainerSpritePath,
             baseRewardMoney: battleManifest.baseRewardMoney,
             completionFlagID: battleManifest.completionFlagID,
