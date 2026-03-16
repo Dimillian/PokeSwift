@@ -204,8 +204,10 @@ extension GameRuntime {
             rivalStarterSpeciesID: envelope.snapshot.rivalStarterSpeciesID,
             pendingStarterSpeciesID: envelope.snapshot.pendingStarterSpeciesID,
             activeMapScriptTriggerID: nil,
-            activeScriptID: envelope.snapshot.activeScriptID,
-            activeScriptStep: envelope.snapshot.activeScriptStep,
+            // Field saves should resume in a settled exploration state. If an
+            // earlier bug serialized stale script progress, drop it on load.
+            activeScriptID: nil,
+            activeScriptStep: nil,
             battle: nil,
             encounterStepCounter: envelope.snapshot.encounterStepCounter,
             totalStepCount: envelope.snapshot.totalStepCount,

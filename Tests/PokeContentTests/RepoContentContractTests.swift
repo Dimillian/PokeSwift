@@ -146,11 +146,13 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertNotNil(loaded.audioEntry(trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"))
         let mapRouteIDs = loaded.audioManifest.mapRoutes.map(\.mapID)
         XCTAssertEqual(Set(mapRouteIDs).count, mapRouteIDs.count)
+        XCTAssertEqual(loaded.map(id: "ROUTE_4")?.defaultMusicID, "MUSIC_ROUTES3")
         XCTAssertEqual(loaded.map(id: "CERULEAN_CITY")?.defaultMusicID, "MUSIC_CITIES2")
         XCTAssertEqual(loaded.map(id: "ROUTE_24")?.defaultMusicID, "MUSIC_ROUTES2")
         XCTAssertEqual(loaded.map(id: "ROUTE_25")?.defaultMusicID, "MUSIC_ROUTES2")
         XCTAssertEqual(loaded.map(id: "BILLS_HOUSE")?.defaultMusicID, "MUSIC_CITIES2")
         XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB")))
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "ROUTE_4", musicID: "MUSIC_ROUTES3")))
         XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "CERULEAN_CITY", musicID: "MUSIC_CITIES2")))
         XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "ROUTE_24", musicID: "MUSIC_ROUTES2")))
         XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "ROUTE_25", musicID: "MUSIC_ROUTES2")))
@@ -301,6 +303,13 @@ final class RepoContentContractTests: XCTestCase {
             loaded.mapScript(for: "ROUTE_24")?.triggers.map(\.scriptID),
             ["route24_nugget_bridge_reward"]
         )
+        XCTAssertEqual(loaded.map(id: "ROUTE_4")?.objects.first { $0.id == "route_4_tm_whirlwind" }?.pickupItemID, "TM_WHIRLWIND")
+        XCTAssertEqual(loaded.map(id: "ROUTE_24")?.objects.first { $0.id == "route_24_tm_thunder_wave" }?.pickupItemID, "TM_THUNDER_WAVE")
+        XCTAssertEqual(loaded.map(id: "ROUTE_25")?.warps.first?.targetMapID, "BILLS_HOUSE")
+        XCTAssertEqual(loaded.map(id: "ROUTE_25")?.objects.first { $0.id == "route_25_tm_seismic_toss" }?.pickupItemID, "TM_SEISMIC_TOSS")
+        XCTAssertNotNil(loaded.trainerBattle(id: "opp_lass_4"))
+        XCTAssertNotNil(loaded.trainerBattle(id: "opp_jr_trainer_m_2"))
+        XCTAssertNotNil(loaded.trainerBattle(id: "opp_youngster_5"))
         XCTAssertEqual(
             loaded.script(id: "cerulean_city_rocket_reward")?.steps.map(\.action),
             ["showDialogue", "giveItem", "setObjectVisibility", "setObjectVisibility", "setObjectVisibility", "showDialogue"]

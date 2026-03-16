@@ -64,6 +64,11 @@ extension GameRuntime {
             return
         }
 
+        // Battles launched from a parent field script must clear that script when
+        // no post-battle script takes over, otherwise field input stays blocked.
+        if gameplayState?.activeScriptID != nil {
+            finishScript()
+        }
         scene = .field
         substate = "field"
         requestDefaultMapMusic()

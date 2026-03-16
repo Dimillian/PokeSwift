@@ -146,6 +146,106 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_4")
     }
 
+    func testRepoGeneratedRoute4EastConnectionCrossesIntoCeruleanCity() throws {
+        let runtime = try makeRepoRuntime()
+        let start = try findConnectionStart(
+            from: "ROUTE_4",
+            moving: .right,
+            expecting: "CERULEAN_CITY"
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_4"
+        runtime.gameplayState?.playerPosition = start
+        runtime.gameplayState?.facing = .right
+
+        runtime.movePlayer(in: .right)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "CERULEAN_CITY")
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "CERULEAN_CITY")
+    }
+
+    func testRepoGeneratedCeruleanCityNorthConnectionCrossesIntoRoute24() throws {
+        let runtime = try makeRepoRuntime()
+        let start = try findConnectionStart(
+            from: "CERULEAN_CITY",
+            moving: .up,
+            expecting: "ROUTE_24"
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_CITY"
+        runtime.gameplayState?.playerPosition = start
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_24")
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_24")
+    }
+
+    func testRepoGeneratedRoute24EastConnectionCrossesIntoRoute25() throws {
+        let runtime = try makeRepoRuntime()
+        let start = try findConnectionStart(
+            from: "ROUTE_24",
+            moving: .right,
+            expecting: "ROUTE_25"
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_24"
+        runtime.gameplayState?.playerPosition = start
+        runtime.gameplayState?.facing = .right
+
+        runtime.movePlayer(in: .right)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "ROUTE_25")
+        XCTAssertEqual(runtime.currentSnapshot().field?.mapID, "ROUTE_25")
+    }
+
+    func testRepoGeneratedRoute25WarpEntersBillsHouse() async throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_25"
+        runtime.gameplayState?.playerPosition = .init(x: 45, y: 4)
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        let snapshot = try await waitForSnapshot(runtime) { runtime in
+            runtime.field?.mapID == "BILLS_HOUSE" && runtime.field?.transition == nil
+        }
+
+        XCTAssertEqual(snapshot.field?.mapID, "BILLS_HOUSE")
+        XCTAssertEqual(runtime.gameplayState?.mapID, "BILLS_HOUSE")
+    }
+
+    func testRepoGeneratedCeruleanSupportInteriorDoorsRemainBoundedOutForDim33() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_CITY"
+        runtime.gameplayState?.playerPosition = .init(x: 19, y: 18)
+        runtime.gameplayState?.facing = .up
+
+        runtime.movePlayer(in: .up)
+
+        XCTAssertEqual(runtime.gameplayState?.mapID, "CERULEAN_CITY")
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, .init(x: 19, y: 17))
+        XCTAssertNil(runtime.fieldTransitionState)
+    }
+
     func testRepoGeneratedMuseum1FOldAmberExhibitShowsDialogue() throws {
         let runtime = try makeRepoRuntime()
 
@@ -1145,14 +1245,14 @@ extension PokeCoreTests {
         XCTAssertEqual(battle.battleID, "opp_super_nerd_2")
 
         runtime.finishBattle(battle: battle, won: true)
-        drainDialogueAndScripts(runtime) {
-            $0.scene == .field
-                && $0.dialogue == nil
-                && runtime.gameplayState?.activeScriptID == nil
-                && runtime.gameplayState?.activeScriptStep == nil
-                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD") ?? false)
-        }
+        advanceDialogueUntilComplete(runtime)
 
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.dialogueState)
+        XCTAssertNil(runtime.gameplayState?.activeScriptID)
+        XCTAssertNil(runtime.gameplayState?.activeScriptStep)
+        XCTAssertTrue(runtime.hasFlag("EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD"))
+        XCTAssertTrue(runtime.isReadyForFreeFieldStep)
         runtime.gameplayState?.playerPosition = .init(x: 12, y: 7)
         runtime.gameplayState?.facing = .up
 
@@ -1175,6 +1275,113 @@ extension PokeCoreTests {
         XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_dome_fossil" }))
         XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_helix_fossil" }))
         XCTAssertTrue(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_super_nerd" }))
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertNil(runtime.dialogueState)
+        XCTAssertNil(runtime.gameplayState?.activeScriptID)
+        XCTAssertNil(runtime.gameplayState?.activeScriptStep)
+        XCTAssertTrue(runtime.isReadyForFreeFieldStep)
+    }
+
+    func testRepoGeneratedRoute4TrainerAndPickupResolveInField() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_4"
+        runtime.gameplayState?.playerPosition = .init(x: 62, y: 3)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 24, nickname: "Wartortle")]
+
+        let trainer = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "route4_cooltrainer_f2" })
+        runtime.interact(with: trainer)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_lass_4")
+        let completionFlagID = try XCTUnwrap(runtime.content.trainerBattle(id: battle.battleID)?.completionFlagID)
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && runtime.hasFlag(completionFlagID)
+        }
+
+        let pickup = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "route_4_tm_whirlwind" })
+        runtime.interact(with: pickup)
+
+        XCTAssertEqual(runtime.itemQuantity("TM_WHIRLWIND"), 1)
+        XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "route_4_tm_whirlwind" }))
+    }
+
+    func testRepoGeneratedRoute24GenericTrainerBattleCompletes() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_24"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 20)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 26, nickname: "Wartortle")]
+
+        let trainer = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "route24_cooltrainer_m_2" })
+        runtime.interact(with: trainer)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_jr_trainer_m_2")
+        let completionFlagID = try XCTUnwrap(runtime.content.trainerBattle(id: battle.battleID)?.completionFlagID)
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && runtime.hasFlag(completionFlagID)
+        }
+    }
+
+    func testRepoGeneratedRoute25GenericTrainerBattleCompletes() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_25"
+        runtime.gameplayState?.playerPosition = .init(x: 13, y: 2)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 26, nickname: "Wartortle")]
+
+        let trainer = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "route25_youngster_1" })
+        runtime.interact(with: trainer)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_youngster_5")
+        let completionFlagID = try XCTUnwrap(runtime.content.trainerBattle(id: battle.battleID)?.completionFlagID)
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && runtime.hasFlag(completionFlagID)
+        }
     }
 
     func testRepoGeneratedCeruleanRivalTriggerStartsBattleAndHidesRivalAfterWin() throws {

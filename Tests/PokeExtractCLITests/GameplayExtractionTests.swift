@@ -296,9 +296,35 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.mapScripts.first { $0.mapID == "CERULEAN_CITY" }?.triggers.count, 8)
         let route24 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_24" })
         XCTAssertEqual(route24.connections.map(\.targetMapID), ["CERULEAN_CITY", "ROUTE_25"])
+        XCTAssertEqual(
+            route24.objects.map(\.id),
+            [
+                "route24_nugget_bridge_guy",
+                "route24_cooltrainer_m_2",
+                "route24_cooltrainer_m_3",
+                "route24_cooltrainer_f_1",
+                "route24_youngster_1",
+                "route24_cooltrainer_f_2",
+                "route24_youngster_2",
+                "route_24_tm_thunder_wave",
+            ]
+        )
         XCTAssertEqual(route24.objects.first { $0.id == "route24_nugget_bridge_guy" }?.trainerBattleID, nil)
         XCTAssertEqual(route24.objects.first { $0.id == "route24_nugget_bridge_guy" }?.interactionTriggers.count, 2)
+        XCTAssertEqual(route24.objects.first { $0.id == "route24_cooltrainer_m_2" }?.trainerBattleID, "opp_jr_trainer_m_2")
+        XCTAssertEqual(route24.objects.first { $0.id == "route24_cooltrainer_m_3" }?.trainerBattleID, "opp_jr_trainer_m_3")
+        XCTAssertEqual(route24.objects.first { $0.id == "route24_cooltrainer_f_1" }?.trainerBattleID, "opp_lass_7")
+        XCTAssertEqual(route24.objects.first { $0.id == "route24_youngster_2" }?.trainerBattleID, "opp_bug_catcher_9")
+        XCTAssertEqual(route24.objects.first { $0.id == "route_24_tm_thunder_wave" }?.pickupItemID, "TM_THUNDER_WAVE")
         XCTAssertEqual(manifest.mapScripts.first { $0.mapID == "ROUTE_24" }?.triggers.map(\.scriptID), ["route24_nugget_bridge_reward"])
+        let route25 = try XCTUnwrap(manifest.maps.first { $0.id == "ROUTE_25" })
+        XCTAssertEqual(route25.connections.map(\.targetMapID), ["ROUTE_24"])
+        XCTAssertEqual(route25.warps.first?.targetMapID, "BILLS_HOUSE")
+        XCTAssertEqual(route25.backgroundEvents.map(\.dialogueID), ["route25_bill_sign"])
+        XCTAssertEqual(route25.objects.count, 10)
+        XCTAssertEqual(route25.objects.first { $0.id == "route25_youngster_1" }?.trainerBattleID, "opp_youngster_5")
+        XCTAssertEqual(route25.objects.first { $0.id == "route25_hiker_1" }?.trainerBattleID, "opp_hiker_2")
+        XCTAssertEqual(route25.objects.first { $0.id == "route_25_tm_seismic_toss" }?.pickupItemID, "TM_SEISMIC_TOSS")
         let billsHouse = try XCTUnwrap(manifest.maps.first { $0.id == "BILLS_HOUSE" })
         XCTAssertEqual(billsHouse.tileset, "INTERIOR")
         XCTAssertEqual(

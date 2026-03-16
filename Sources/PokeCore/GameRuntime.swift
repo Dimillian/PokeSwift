@@ -314,6 +314,8 @@ public final class GameRuntime {
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
             trainerEngagementTask == nil &&
+            gameplayState?.activeScriptID == nil &&
+            gameplayState?.activeScriptStep == nil &&
             gameplayState?.battle == nil
     }
 

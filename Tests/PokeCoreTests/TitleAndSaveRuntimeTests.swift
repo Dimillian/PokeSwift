@@ -442,6 +442,51 @@ extension PokeCoreTests {
         XCTAssertTrue(runtime.saveCurrentGame())
         XCTAssertTrue(runtime.loadSavedGameFromSidebar())
     }
+
+    func testContinueClearsStaleFieldScriptStateFromSavedGame() throws {
+        let saveStore = InMemorySaveStore()
+        saveStore.envelope = GameSaveEnvelope(
+            metadata: .init(
+                schemaVersion: GameRuntime.saveSchemaVersion,
+                variant: .red,
+                playthroughID: "stale-script",
+                playerName: "RED",
+                locationName: "Red's House 2F",
+                badgeCount: 0,
+                playTimeSeconds: 12,
+                savedAt: "2026-03-16T12:00:00Z"
+            ),
+            snapshot: .init(
+                mapID: "REDS_HOUSE_2F",
+                previousMapID: nil,
+                playerPosition: .init(x: 4, y: 4),
+                facing: .down,
+                objectStates: [:],
+                activeFlags: [],
+                money: 3000,
+                inventory: [],
+                earnedBadgeIDs: [],
+                playerName: "RED",
+                rivalName: "BLUE",
+                playerParty: [],
+                chosenStarterSpeciesID: "SQUIRTLE",
+                rivalStarterSpeciesID: "BULBASAUR",
+                pendingStarterSpeciesID: nil,
+                activeMapScriptTriggerID: nil,
+                activeScriptID: "mt_moon_b2f_super_nerd_battle",
+                activeScriptStep: 4,
+                encounterStepCounter: 0,
+                playTimeSeconds: 12
+            )
+        )
+
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)
+
+        XCTAssertTrue(runtime.continueFromTitleMenu())
+        XCTAssertNil(runtime.gameplayState?.activeScriptID)
+        XCTAssertNil(runtime.gameplayState?.activeScriptStep)
+        XCTAssertTrue(runtime.canSaveGame)
+    }
     func testUnsupportedSaveSchemaFailsDuringContinue() async throws {
         let saveStore = InMemorySaveStore()
         saveStore.envelope = GameSaveEnvelope(
