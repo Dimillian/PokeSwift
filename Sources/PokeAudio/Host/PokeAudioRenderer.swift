@@ -1,5 +1,4 @@
 import AVFAudio
-import PokeCore
 import PokeDataModel
 
 enum PokeAudioRenderer {

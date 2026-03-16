@@ -11,10 +11,12 @@ The current implementation lives primarily in:
 - `Sources/PokeExtractCLI/AudioExtraction.swift`
 - `Sources/PokeDataModel/ContentModels.swift`
 - `Sources/PokeContent/Loading/ContentLoading.swift`
-- `Sources/PokeCore/Runtime/Audio/RuntimeAudio.swift`
-- `App/PokeMac/Sources/App/Audio/PokeAudioService.swift`
-- `App/PokeMac/Sources/App/Audio/PokeAudioRenderer.swift`
-- `App/PokeMac/Sources/App/Audio/PokeAudioRenderTypes.swift`
+- `Sources/PokeAudio/Contracts/RuntimeAudio.swift`
+- `Sources/PokeAudio/RuntimeState/RuntimeAudioState.swift`
+- `Sources/PokeAudio/Host/PokeAudioService.swift`
+- `Sources/PokeAudio/Host/PokeAudioRenderer.swift`
+- `Sources/PokeAudio/Host/PokeAudioRenderTypes.swift`
+- `Sources/PokeCore/Runtime/Audio/GameRuntime+Audio.swift`
 
 ## End-To-End Pipeline
 
@@ -23,7 +25,7 @@ The audio path has four stages:
 1. The extractor parses `pret/pokered` audio headers, channel scripts, pitch tables, wave tables, noise instruments, map music routes, and cue definitions.
 2. The extractor converts that source data into `AudioManifest`, which is written to `Content/Red/audio_manifest.json`.
 3. Runtime systems issue `MusicPlaybackRequest` and `SoundEffectPlaybackRequest` values against the loaded manifest.
-4. `PokeAudioService` renders the requested manifest slice into stereo PCM buffers and schedules them on `AVAudioEngine`.
+4. `PokeCore` gameplay orchestration talks to the shared `PokeAudio` contract, and `PokeAudioService` renders the requested manifest slice into stereo PCM buffers and schedules them on `AVAudioEngine`.
 
 That means the runtime app never parses `.asm` directly. It only consumes the extracted artifact.
 
@@ -111,7 +113,7 @@ The extractor also resolves drum instruments into concrete timed noise events. T
 
 ## Runtime Contract
 
-Runtime code talks to audio through `RuntimeAudioPlaying` in `Sources/PokeCore/Runtime/Audio/RuntimeAudio.swift`.
+Runtime code talks to audio through `RuntimeAudioPlaying` in `Sources/PokeAudio/Contracts/RuntimeAudio.swift`.
 
 The API is intentionally small:
 
@@ -130,11 +132,11 @@ Those modifiers exist because some GB sound effects are parameterized at playbac
 
 ## Runtime Architecture
 
-The runtime audio host is split into three pieces.
+The runtime audio module is split into three pieces, while gameplay ownership stays in `PokeCore`.
 
 ### 1. `PokeAudioService`
 
-`App/PokeMac/Sources/App/Audio/PokeAudioService.swift` owns orchestration:
+`Sources/PokeAudio/Host/PokeAudioService.swift` owns native host orchestration:
 
 - `AVAudioEngine`
 - separate music and SFX mixer nodes
@@ -148,7 +150,7 @@ It does not synthesize samples directly anymore.
 
 ### 2. `PokeAudioRenderer`
 
-`App/PokeMac/Sources/App/Audio/PokeAudioRenderer.swift` owns the actual offline render path:
+`Sources/PokeAudio/Host/PokeAudioRenderer.swift` owns the actual offline render path:
 
 - event adjustment for runtime SFX modifiers
 - event-to-sample rendering
@@ -159,13 +161,24 @@ It does not synthesize samples directly anymore.
 
 ### 3. `PokeAudioRenderTypes`
 
-`App/PokeMac/Sources/App/Audio/PokeAudioRenderTypes.swift` defines shared render settings and data structures:
+`Sources/PokeAudio/Host/PokeAudioRenderTypes.swift` defines shared render settings and data structures:
 
 - `PokeAudioMixDefaults`
 - `PokeAudioRenderOptions`
 - `PokeAudioRenderedSamples`
 - `PokeAudioRenderedChannelBuffers`
 - `PokeAudioRenderedAsset`
+
+### 4. `PokeCore` Audio Orchestration
+
+`Sources/PokeCore/Runtime/Audio/GameRuntime+Audio.swift` still owns gameplay-level audio decisions:
+
+- which cue or track should play for a given game state
+- when map music should resume after one-shot cues
+- when battle presentation should request staged sound effects
+- when UI, dialogue, and field interactions should block on audio completion
+
+That split is intentional: `PokeAudio` owns the reusable audio engine and contract, while `PokeCore` owns gameplay timing and intent.
 
 ## Engine Graph And Playback Model
 
@@ -455,13 +468,62 @@ When audio sounds wrong, the fastest way to localize the issue is:
 
 For this codebase, many of the hardest parity bugs have turned out to be extractor or synthesis issues, not mixer-bus issues.
 
+## Validation
+
+When validating audio work, prefer running extraction and runtime audio separately.
+
+### Extraction Audio Tests
+
+This repo's extractor audio tests have a normal XCTest class name, so the target-level selector works:
+
+```bash
+tuist test PokeSwift-Workspace --derived-data-path .build/DerivedData --no-selective-testing -- \
+  -only-testing:PokeExtractCLITests/AudioExtractionTests
+```
+
+### Runtime Audio Tests
+
+The runtime audio tests live in `Tests/PokeCoreTests/AudioRuntimeTests.swift`, but the test methods are declared on `extension PokeCoreTests`, so file-style selectors such as `PokeCoreTests/AudioRuntimeTests` do not select any real tests.
+
+Use explicit method selectors instead:
+
+```bash
+tuist test PokeSwift-Workspace --derived-data-path .build/DerivedData --no-selective-testing -- \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedWildBattleExitRestoresRouteMusic \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedDoorAndWarpTransitionsChooseExpectedSoundEffects \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedOakIntroAndLabArrivalUpdateAudioTelemetry \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedManualTrainerInteractionUsesEncounterMusicThenFieldIntroBeforeBattle \
+  -only-testing:PokeCoreTests/PokeCoreTests/testDialoguePageEventsBlockProgressUntilSoundCompletes \
+  -only-testing:PokeCoreTests/PokeCoreTests/testBlockedMovementCollisionSoundDoesNotStackUntilPlaybackCompletes \
+  -only-testing:PokeCoreTests/PokeCoreTests/testDialogueWithoutBlockingEventsAdvancesEvenIfBlockingFlagLeaked \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedRivalBattleAudioTransitionsFromIntroToBattleToExitAndBack \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedBattleMoveUsesExtractedMoveSoundEffect \
+  -only-testing:PokeCoreTests/PokeCoreTests/testWildCaptureUsesCaughtAndDexAddedSoundEffects \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedOrdinaryTrainerLossBlackoutsToViridianCityAndRestartsMapMusic \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedWildLossUsesFallbackBlackoutCheckpointAndMoneyPenalty \
+  -only-testing:PokeCoreTests/PokeCoreTests/testRepoGeneratedTrainerLossResetsAutoMovedTrainerBeforeBlackout \
+  -only-testing:PokeCoreTests/PokeCoreTests/testTrainerVictoryMusicStartsInBattleBeforePostBattleDialogue \
+  -only-testing:PokeCoreTests/PokeCoreTests/testMomHealJingleRestoresMapDefaultAfterCompletion \
+  -only-testing:PokeCoreTests/PokeCoreTests/testWildVictoryMusicStartsBeforeExperienceAndLevelUpSoundUsesLevelMessage \
+  -only-testing:PokeCoreTests/PokeCoreTests/testMusicToggleStopsPlaybackAndResumesCurrentTrack \
+  -only-testing:PokeCoreTests/PokeCoreTests/testDisabledMusicDefersPlaybackUntilReenabled
+```
+
+### App Host Build
+
+After audio engine or target-boundary changes, also confirm the native app still links the audio host correctly:
+
+```bash
+tuist build PokeMac --path .
+```
+
 ## Extension Guidelines
 
 If you change this engine, keep these rules in mind:
 
 - Preserve the extractor/runtime contract in `AudioManifest`.
 - Prefer source-driven fixes over hardcoded runtime exceptions.
-- Keep runtime playback inside `PokeMac`; do not start parsing `.asm` in the app.
+- Keep runtime playback inside `PokeAudio`; do not start parsing `.asm` in the app.
 - Treat waveform parity and timing parity as first-class correctness issues.
 - Validate both extraction and runtime when touching noise, vibrato, pitch, or looping behavior.
 
@@ -469,4 +531,4 @@ If you change this engine, keep these rules in mind:
 
 PokeSwift's audio engine is a native Swift reconstruction of Pokemon Red's sound behavior built from extracted source data rather than live hardware emulation.
 
-The extractor converts GB audio scripts into timed channel events. The runtime host renders those events into stereo PCM with waveform-specific synthesis, Game Boy-aware modulation, and a small amount of conditioning needed for clean native playback. `PokeAudioService` then schedules the rendered buffers through `AVAudioEngine` while preserving channel contention and priority behavior close to the original game.
+The extractor converts GB audio scripts into timed channel events. `PokeCore` decides when gameplay should request music or sound effects, and the shared `PokeAudio` host renders those events into stereo PCM with waveform-specific synthesis, Game Boy-aware modulation, and a small amount of conditioning needed for clean native playback. `PokeAudioService` then schedules the rendered buffers through `AVAudioEngine` while preserving channel contention and priority behavior close to the original game.

@@ -1,5 +1,6 @@
 import XCTest
 @testable import PokeCore
+import PokeAudio
 import PokeContent
 import PokeDataModel
 

@@ -1,10 +1,9 @@
 import AVFAudio
 import Foundation
-import PokeCore
 import PokeDataModel
 
 @MainActor
-final class PokeAudioService: RuntimeAudioPlaying {
+public final class PokeAudioService: RuntimeAudioPlaying {
     private struct PendingMusicPlayback {
         let requestID: Int
         let cacheKey: String
@@ -51,7 +50,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
     private var playbackRequestID = 0
     private var activeMusicRequestID = 0
 
-    init(manifest: AudioManifest) {
+    public init(manifest: AudioManifest) {
         self.manifest = manifest
         configureEngineGraph()
         startEngineIfPossible()
@@ -59,7 +58,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         prewarmMusicManifest()
     }
 
-    func playMusic(request: MusicPlaybackRequest, completion: (@MainActor () -> Void)?) {
+    public func playMusic(request: MusicPlaybackRequest, completion: (@MainActor () -> Void)?) {
         guard let track = manifest.tracks.first(where: { $0.id == request.trackID }),
               let entry = track.entries.first(where: { $0.id == request.entryID }) else {
             completion?()
@@ -95,7 +94,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         scheduleMusicRenderIfNeeded(cacheKey: cacheKey, entry: entry)
     }
 
-    func playSFX(
+    public func playSFX(
         request: SoundEffectPlaybackRequest,
         completion: (@MainActor () -> Void)?
     ) -> SoundEffectPlaybackResult {
@@ -149,7 +148,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return .init(soundEffectID: request.soundEffectID, status: .started, replacedSoundEffectID: replacedID)
     }
 
-    func stopAllMusic() {
+    public func stopAllMusic() {
         playbackRequestID += 1
         activeMusicRequestID = playbackRequestID
         pendingMusicPlayback = nil

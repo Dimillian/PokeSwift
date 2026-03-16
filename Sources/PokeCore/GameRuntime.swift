@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PokeAudio
 import PokeContent
 import PokeDataModel
 

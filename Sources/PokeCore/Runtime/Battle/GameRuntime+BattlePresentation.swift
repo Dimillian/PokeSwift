@@ -1,4 +1,5 @@
 import Foundation
+import PokeAudio
 import PokeDataModel
 
 extension GameRuntime {

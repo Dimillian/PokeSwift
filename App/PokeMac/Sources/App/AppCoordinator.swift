@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import PokeAudio
 import PokeContent
 import PokeCore
 import PokeTelemetry

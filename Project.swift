@@ -20,6 +20,17 @@ let project = Project(
             sources: ["Sources/PokeDataModel/**"]
         ),
         .target(
+            name: "PokeAudio",
+            destinations: .macOS,
+            product: .staticFramework,
+            bundleId: "com.dimillian.PokeSwift.PokeAudio",
+            deploymentTargets: .macOS("26.0"),
+            sources: ["Sources/PokeAudio/**"],
+            dependencies: [
+                .target(name: "PokeDataModel"),
+            ]
+        ),
+        .target(
             name: "PokeContent",
             destinations: .macOS,
             product: .staticFramework,
@@ -49,6 +60,7 @@ let project = Project(
             deploymentTargets: .macOS("26.0"),
             sources: ["Sources/PokeCore/**"],
             dependencies: [
+                .target(name: "PokeAudio"),
                 .target(name: "PokeContent"),
                 .target(name: "PokeDataModel"),
                 .target(name: "PokeTelemetry"),
@@ -105,6 +117,7 @@ let project = Project(
                 .folderReference(path: "Content"),
             ],
             dependencies: [
+                .target(name: "PokeAudio"),
                 .target(name: "PokeCore"),
                 .target(name: "PokeUI"),
                 .target(name: "PokeContent"),
@@ -135,6 +148,7 @@ let project = Project(
             deploymentTargets: .macOS("26.0"),
             sources: ["Tests/PokeCoreTests/**"],
             dependencies: [
+                .target(name: "PokeAudio"),
                 .target(name: "PokeCore"),
                 .target(name: "PokeContent"),
                 .target(name: "PokeDataModel"),

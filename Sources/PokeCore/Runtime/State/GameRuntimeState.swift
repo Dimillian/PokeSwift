@@ -1,4 +1,5 @@
 import Foundation
+import PokeAudio
 import PokeDataModel
 
 struct RuntimeObjectState {
@@ -482,11 +483,6 @@ struct RuntimeBattlePresentationBeat {
     }
 }
 
-struct RuntimeStagedSoundEffectRequest {
-    let delay: TimeInterval
-    let request: SoundEffectPlaybackRequest
-}
-
 struct RuntimeBattleState {
     let battleID: String
     let kind: BattleKind
@@ -680,21 +676,6 @@ enum DeferredAction {
     case script(String)
     case hideObject(String)
     case restoreMapMusic
-}
-
-struct RuntimeAudioState: Equatable {
-    var trackID: String
-    var entryID: String
-    var reason: String
-    var playbackRevision: Int
-}
-
-struct RuntimeSoundEffectState: Equatable {
-    var soundEffectID: String
-    var reason: String
-    var playbackRevision: Int
-    var status: SoundEffectPlaybackStatusTelemetry
-    var replacedSoundEffectID: String?
 }
 
 enum RuntimeFieldTransitionKind: String {
