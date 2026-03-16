@@ -26,16 +26,16 @@ struct ShopOverlayPanel: View {
                         )
                     }
                 case "buyList":
-                    itemRows(shop.buyItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: true)
+                    itemRows(shop.buyItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: false)
                 case "sellList":
                     itemRows(shop.sellItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: true)
                 case "quantity":
-                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: true)
+                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == "sell")
                     Text("QTY \(shop.selectedQuantity)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(0.68))
                 case "confirmation":
-                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: true)
+                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == "sell")
                     Text("QTY \(shop.selectedQuantity)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(0.68))

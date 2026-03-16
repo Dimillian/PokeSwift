@@ -64,6 +64,200 @@ extension PokeCoreTests {
         XCTAssertFalse(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? true)
     }
 
+    func testBattleMedicineSelectionTargetsPartyAndConsumesTurn() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "LEAD", displayName: "Lead", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                        .init(id: "BENCH", displayName: "Bench", baseHP: 35, baseAttack: 35, baseDefense: 35, baseSpeed: 35, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                        .init(id: "ENEMY", displayName: "Enemy", baseHP: 40, baseAttack: 35, baseDefense: 35, baseSpeed: 35, baseSpecial: 35, startingMoves: ["GROWL"]),
+                    ],
+                    items: [
+                        .init(
+                            id: "POTION",
+                            displayName: "POTION",
+                            battleUse: .medicine,
+                            medicine: .init(hpMode: .fixed, hpAmount: 20)
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "GROWL", power: 0, accuracy: 100, maxPP: 40, effect: "ATTACK_DOWN1_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "LEAD", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "BENCH", level: 5, nickname: "Bench"),
+        ]
+        let leadMaxHP = runtime.gameplayState?.playerParty[0].maxHP ?? 20
+        runtime.gameplayState?.playerParty[0].currentHP = max(
+            1,
+            leadMaxHP - 6
+        )
+        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "ENEMY", level: 5)
+        drainBattleText(runtime)
+
+        let battle = try! XCTUnwrap(runtime.gameplayState?.battle)
+        let bagIndex = runtime.bagActionIndex(for: battle)
+        for _ in 0..<bagIndex {
+            runtime.handle(button: .down)
+        }
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "bagSelection")
+
+        runtime.setBattleRandomOverrides([0, 0, 0, 0])
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 0)
+
+        runtime.handle(button: .confirm)
+        advanceBattleTextUntilMoveSelection(runtime)
+
+        let activePokemon = try! XCTUnwrap(runtime.currentSnapshot().battle?.playerPokemon)
+        XCTAssertEqual(activePokemon.currentHP, activePokemon.maxHP)
+        XCTAssertEqual(runtime.gameplayState?.battle?.playerPokemon.attackStage, -1)
+        XCTAssertEqual(runtime.itemQuantity("POTION"), 0)
+    }
+
+    func testBattleMedicineWithoutEligibleTargetsShowsNoEffect() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "LEAD", displayName: "Lead", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                        .init(id: "ENEMY", displayName: "Enemy", baseHP: 40, baseAttack: 35, baseDefense: 35, baseSpeed: 35, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    items: [
+                        .init(
+                            id: "POTION",
+                            displayName: "POTION",
+                            battleUse: .medicine,
+                            medicine: .init(hpMode: .fixed, hpAmount: 20)
+                        ),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "LEAD", level: 5, nickname: "Lead"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "ENEMY", level: 5)
+        drainBattleText(runtime)
+
+        let battle = try! XCTUnwrap(runtime.gameplayState?.battle)
+        let bagIndex = runtime.bagActionIndex(for: battle)
+        for _ in 0..<bagIndex {
+            runtime.handle(button: .down)
+        }
+
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "It won't have any effect.")
+        XCTAssertEqual(runtime.itemQuantity("POTION"), 1)
+    }
+
+    func testBattleBagNavigationUsesGridDirections() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "LEAD", displayName: "Lead", baseHP: 45, baseAttack: 49, baseDefense: 49, baseSpeed: 45, baseSpecial: 65, startingMoves: ["TACKLE"]),
+                        .init(id: "ENEMY", displayName: "Enemy", baseHP: 40, baseAttack: 35, baseDefense: 35, baseSpeed: 35, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    items: [
+                        .init(id: "ITEM_A", displayName: "A", battleUse: .medicine, medicine: .init(hpMode: .fixed, hpAmount: 20)),
+                        .init(id: "ITEM_B", displayName: "B", battleUse: .medicine, medicine: .init(hpMode: .fixed, hpAmount: 20)),
+                        .init(id: "ITEM_C", displayName: "C", battleUse: .medicine, medicine: .init(hpMode: .fixed, hpAmount: 20)),
+                        .init(id: "ITEM_D", displayName: "D", battleUse: .medicine, medicine: .init(hpMode: .fixed, hpAmount: 20)),
+                        .init(id: "ITEM_E", displayName: "E", battleUse: .medicine, medicine: .init(hpMode: .fixed, hpAmount: 20)),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "LEAD", level: 5, nickname: "Lead"),
+        ]
+        runtime.gameplayState?.inventory = [
+            .init(itemID: "ITEM_E", quantity: 1),
+            .init(itemID: "ITEM_B", quantity: 1),
+            .init(itemID: "ITEM_D", quantity: 1),
+            .init(itemID: "ITEM_A", quantity: 1),
+            .init(itemID: "ITEM_C", quantity: 1),
+        ]
+
+        runtime.startWildBattle(speciesID: "ENEMY", level: 5)
+        drainBattleText(runtime)
+
+        let battle = try! XCTUnwrap(runtime.gameplayState?.battle)
+        let bagIndex = runtime.bagActionIndex(for: battle)
+        for _ in 0..<bagIndex {
+            runtime.handle(button: .down)
+        }
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "bagSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.bagItems.map(\.itemID), ["ITEM_A", "ITEM_B", "ITEM_C", "ITEM_D", "ITEM_E"])
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 0)
+
+        runtime.handle(button: .right)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 1)
+
+        runtime.handle(button: .right)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 2)
+
+        runtime.handle(button: .down)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 2)
+
+        runtime.handle(button: .left)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 1)
+
+        runtime.handle(button: .up)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 1)
+
+        runtime.handle(button: .left)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 0)
+
+        runtime.handle(button: .down)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 4)
+
+        runtime.handle(button: .right)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 4)
+
+        runtime.handle(button: .up)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 0)
+    }
+
     func testWildBattleCaptureShowsDexRevealThenNicknameThenPartyDestination() throws {
         let runtime = try makeRepoRuntime()
 

@@ -12,6 +12,7 @@ public struct GameplayShell<Stage: View>: View {
     private let sidebarMode: GameplaySidebarMode
     private let onSidebarAction: ((String) -> Void)?
     private let onPartyRowSelected: ((Int) -> Void)?
+    private let onInventoryItemSelected: ((String) -> Void)?
     @Binding private var fieldDisplayStyle: FieldDisplayStyle
     @Binding private var sidebarExpansionState: GameplaySidebarExpansionState
     private let stage: Stage
@@ -20,6 +21,7 @@ public struct GameplayShell<Stage: View>: View {
         sidebarMode: GameplaySidebarMode,
         onSidebarAction: ((String) -> Void)? = nil,
         onPartyRowSelected: ((Int) -> Void)? = nil,
+        onInventoryItemSelected: ((String) -> Void)? = nil,
         fieldDisplayStyle: Binding<FieldDisplayStyle>,
         sidebarExpansionState: Binding<GameplaySidebarExpansionState>,
         @ViewBuilder stage: () -> Stage
@@ -27,6 +29,7 @@ public struct GameplayShell<Stage: View>: View {
         self.sidebarMode = sidebarMode
         self.onSidebarAction = onSidebarAction
         self.onPartyRowSelected = onPartyRowSelected
+        self.onInventoryItemSelected = onInventoryItemSelected
         _fieldDisplayStyle = fieldDisplayStyle
         _sidebarExpansionState = sidebarExpansionState
         self.stage = stage()
@@ -41,6 +44,7 @@ public struct GameplayShell<Stage: View>: View {
                 mode: sidebarMode,
                 onSidebarAction: onSidebarAction,
                 onPartyRowSelected: onPartyRowSelected,
+                onInventoryItemSelected: onInventoryItemSelected,
                 fieldDisplayStyle: $fieldDisplayStyle,
                 expansionState: $sidebarExpansionState
             )

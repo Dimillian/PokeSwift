@@ -278,6 +278,7 @@ enum RuntimeBattlePartySelectionMode: Equatable {
     case optionalSwitch
     case forcedReplacement
     case trainerShift(nextEnemyIndex: Int)
+    case itemUse(itemID: String)
 }
 
 struct RuntimeBattleLearnMoveState {
@@ -359,6 +360,10 @@ struct RuntimeShopState {
 
 struct RuntimeFieldPartyReorderState {
     var selectedIndex: Int
+}
+
+struct RuntimeFieldItemUseState {
+    let itemID: String
 }
 
 struct RuntimeBattlePresentationState {

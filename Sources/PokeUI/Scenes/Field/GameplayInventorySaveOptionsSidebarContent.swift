@@ -14,9 +14,14 @@ private enum InventorySidebarLayout {
 
 public struct InventorySidebarContent: View {
     let props: InventorySidebarProps
+    let onItemSelected: ((String) -> Void)?
 
-    public init(props: InventorySidebarProps) {
+    public init(
+        props: InventorySidebarProps,
+        onItemSelected: ((String) -> Void)? = nil
+    ) {
         self.props = props
+        self.onItemSelected = onItemSelected
     }
 
     public var body: some View {
@@ -39,7 +44,10 @@ public struct InventorySidebarContent: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     ForEach(props.sections) { section in
-                        InventorySidebarSection(section: section)
+                        InventorySidebarSection(
+                            section: section,
+                            onItemSelected: onItemSelected
+                        )
                     }
                 }
             }
@@ -56,6 +64,7 @@ public struct InventorySidebarContent: View {
 
 private struct InventorySidebarSection: View {
     let section: InventorySidebarSectionProps
+    let onItemSelected: ((String) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -74,7 +83,10 @@ private struct InventorySidebarSection: View {
 
             LazyVGrid(columns: InventorySidebarLayout.columns, spacing: 6) {
                 ForEach(section.items) { item in
-                    InventorySidebarTile(item: item)
+                    InventorySidebarTile(
+                        item: item,
+                        onItemSelected: onItemSelected
+                    )
                 }
             }
         }
@@ -83,6 +95,7 @@ private struct InventorySidebarSection: View {
 
 private struct InventorySidebarTile: View {
     let item: InventorySidebarItemProps
+    let onItemSelected: ((String) -> Void)?
 
     @State private var isHovered = false
 
@@ -181,7 +194,12 @@ private struct InventorySidebarTile: View {
                 y: 2
             )
             .contentShape(.rect)
+            .onTapGesture {
+                guard item.isEnabled else { return }
+                onItemSelected?(item.id)
+            }
             .onHover(perform: updateHoverState)
+            .opacity(item.isEnabled ? 1 : 0.58)
         } hoverCard: {
             InventorySidebarHoverCard(item: item)
         }

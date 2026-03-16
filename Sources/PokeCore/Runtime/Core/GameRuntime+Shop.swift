@@ -8,6 +8,7 @@ extension GameRuntime {
         guard content.mart(id: martID) != nil else { return }
         clearHeldFieldDirections()
         fieldPartyReorderState = nil
+        fieldItemUseState = nil
         shopState = RuntimeShopState(
             martID: martID,
             phase: .mainMenu,

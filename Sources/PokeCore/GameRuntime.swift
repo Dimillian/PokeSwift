@@ -55,6 +55,7 @@ public final class GameRuntime {
     var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
+    var fieldItemUseState: RuntimeFieldItemUseState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
     var evolutionState: RuntimeEvolutionState?
@@ -150,6 +151,21 @@ public final class GameRuntime {
         fieldPartyReorderState?.selectedIndex
     }
 
+    public var fieldItemUseItemID: String? {
+        fieldItemUseState?.itemID
+    }
+
+    public var currentBattlePlayerActiveIndex: Int? {
+        gameplayState?.battle?.playerActiveIndex
+    }
+
+    public var currentBattlePartySelectionItemID: String? {
+        guard case let .itemUse(itemID) = gameplayState?.battle?.partySelectionMode else {
+            return nil
+        }
+        return itemID
+    }
+
     public var playerName: String {
         gameplayState?.playerName ?? "RED"
     }
@@ -195,8 +211,31 @@ public final class GameRuntime {
     }
 
     var currentBattleBagItems: [RuntimeInventoryItemState] {
-        currentInventoryItems.filter { item in
-            content.item(id: item.itemID)?.battleUse == .ball
+        guard let battle = gameplayState?.battle else {
+            return []
+        }
+
+        return currentInventoryItems.filter { item in
+            guard let manifest = content.item(id: item.itemID) else {
+                return false
+            }
+
+            switch (battle.kind, manifest.battleUse) {
+            case (_, .none):
+                return false
+            case (.wild, .ball), (.wild, .medicine), (.trainer, .medicine):
+                return true
+            case (.trainer, .ball):
+                return false
+            }
+        }
+        .sorted { lhs, rhs in
+            let lhsSectionRank = battleBagSectionRank(for: lhs.itemID)
+            let rhsSectionRank = battleBagSectionRank(for: rhs.itemID)
+            if lhsSectionRank != rhsSectionRank {
+                return lhsSectionRank < rhsSectionRank
+            }
+            return lhs.itemID < rhs.itemID
         }
     }
 
@@ -311,6 +350,7 @@ public final class GameRuntime {
             scriptItemPromptState == nil &&
             scriptChoicePromptState == nil &&
             fieldHealingState == nil &&
+            fieldItemUseState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&
             trainerEngagementTask == nil &&
@@ -435,7 +475,7 @@ public final class GameRuntime {
             return
         }
 
-        guard scene == .field else {
+        guard scene == .field, canContinueHeldFieldMovement else {
             if isPressed {
                 handle(button: button)
             }
@@ -472,6 +512,16 @@ public final class GameRuntime {
         }
     }
 
+}
+
+private extension GameRuntime {
+    func battleBagSectionRank(for itemID: String) -> Int {
+        guard let section = content.item(id: itemID)?.bagSection,
+              let index = ItemManifest.BagSection.allCases.firstIndex(of: section) else {
+            return 0
+        }
+        return index
+    }
 }
 
 private extension GameRuntime {

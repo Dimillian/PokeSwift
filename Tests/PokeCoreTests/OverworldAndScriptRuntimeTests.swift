@@ -855,6 +855,30 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().inventory?.items.first { $0.itemID == "POKE_BALL" }?.quantity, 1)
     }
 
+    func testViridianMartDirectionalKeyBridgePathNavigatesMainMenu() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "VIRIDIAN_MART"
+        runtime.gameplayState?.playerPosition = .init(x: 3, y: 7)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.activeFlags.insert("EVENT_GOT_OAKS_PARCEL")
+        runtime.gameplayState?.activeFlags.insert("EVENT_OAK_GOT_PARCEL")
+
+        let clerk = try XCTUnwrap(runtime.currentFieldObjects.first { $0.id == "viridian_mart_clerk" })
+        runtime.interact(with: clerk)
+
+        XCTAssertEqual(runtime.currentSnapshot().shop?.focusedMainMenuIndex, 0)
+
+        runtime.setDirectionalButton(.right, isPressed: true)
+
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "mainMenu")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.focusedMainMenuIndex, 1)
+        XCTAssertEqual(runtime.substate, "shop_viridian_mart")
+    }
+
     func testViridianMartQuitClosesShopUI() throws {
         let runtime = try makeRepoRuntime()
 
@@ -1132,6 +1156,63 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.fieldPartyReorderState?.selectedIndex, 2)
         XCTAssertEqual(runtime.gameplayState?.playerParty[0].nickname, "Lead")
         XCTAssertEqual(runtime.gameplayState?.playerParty[2].nickname, "Fang")
+    }
+
+    func testFieldMedicineSelectionAppliesPotionAndShowsDialogue() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "PIDGEY", level: 3, nickname: "Wing"),
+        ]
+        let wingMaxHP = runtime.gameplayState?.playerParty[1].maxHP ?? 12
+        runtime.gameplayState?.playerParty[1].currentHP = max(
+            1,
+            wingMaxHP - 5
+        )
+        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("POTION")
+
+        XCTAssertEqual(runtime.fieldItemUseItemID, "POTION")
+
+        runtime.handlePartySidebarSelection(1)
+
+        XCTAssertNil(runtime.fieldItemUseItemID)
+        XCTAssertEqual(runtime.itemQuantity("POTION"), 0)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(
+            runtime.currentDialoguePage?.lines.joined(separator: " "),
+            "Wing recovered by 5!"
+        )
+
+        advanceDialogueUntilComplete(runtime)
+        XCTAssertEqual(runtime.scene, .field)
+    }
+
+    func testFieldMedicineSelectionShowsNoEffectWithoutEnteringTargeting() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Lead"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("POTION")
+
+        XCTAssertNil(runtime.fieldItemUseItemID)
+        XCTAssertEqual(runtime.itemQuantity("POTION"), 1)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(
+            runtime.currentDialoguePage?.lines.joined(separator: " "),
+            "It won't have any effect."
+        )
     }
 
     func testPurchaseItemRejectsNewSlotWhenBagIsFull() {

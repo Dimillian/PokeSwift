@@ -7,9 +7,11 @@ func buildItems(repoRoot: URL) throws -> [ItemManifest] {
     let pricesByID = try parseItemPrices(repoRoot: repoRoot)
     let movesByID = Dictionary(uniqueKeysWithValues: try buildMoves(repoRoot: repoRoot).map { ($0.id, $0) })
     let tmhmMoveIDByItemID = try parseTMHMMoveIDs(repoRoot: repoRoot)
+    let partyMenuItemIDs = try parsePartyMenuItemIDs(repoRoot: repoRoot)
 
     return try parseDefinedItemIDs(repoRoot: repoRoot).map { itemID in
-        let battleUse = battleUseKind(for: itemID)
+        let medicine = medicineAttributes(for: itemID, partyMenuItemIDs: partyMenuItemIDs)
+        let battleUse = battleUseKind(for: itemID, medicine: medicine)
         let tmhmMoveID = tmhmMoveIDByItemID[itemID]
         let move = tmhmMoveID.flatMap { movesByID[$0] }
         let supplementalMetadata = buildSupplementalItemMetadata(
@@ -30,7 +32,8 @@ func buildItems(repoRoot: URL) throws -> [ItemManifest] {
             shortDescription: supplementalMetadata.shortDescription,
             iconAssetPath: supplementalMetadata.iconAssetPath,
             tmhmMoveID: supplementalMetadata.tmhmMoveID,
-            battleUse: battleUse
+            battleUse: battleUse,
+            medicine: medicine
         )
     }
 }
@@ -281,11 +284,82 @@ private func parseTMHMMoveIDs(repoRoot: URL) throws -> [String: String] {
     return result
 }
 
-private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {
+private func parsePartyMenuItemIDs(repoRoot: URL) throws -> Set<String> {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/items/use_party.asm"))
+    return Set(
+        contents
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .compactMap { rawLine -> String? in
+                let line = rawLine
+                    .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+                    .first?
+                    .trimmingCharacters(in: .whitespaces) ?? ""
+                guard line.hasPrefix("db ") else { return nil }
+                let identifier = line
+                    .replacingOccurrences(of: "db", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                guard identifier != "-1", identifier.isEmpty == false else {
+                    return nil
+                }
+                return identifier
+            }
+    )
+}
+
+private func medicineAttributes(
+    for itemID: String,
+    partyMenuItemIDs: Set<String>
+) -> ItemManifest.MedicineAttributes? {
+    guard partyMenuItemIDs.contains(itemID) else {
+        return nil
+    }
+
+    switch itemID {
+    case "POTION":
+        return .init(hpMode: .fixed, hpAmount: 20)
+    case "SUPER_POTION":
+        return .init(hpMode: .fixed, hpAmount: 50)
+    case "HYPER_POTION":
+        return .init(hpMode: .fixed, hpAmount: 200)
+    case "MAX_POTION":
+        return .init(hpMode: .healToFull)
+    case "FULL_RESTORE":
+        return .init(hpMode: .healToFull, statusMode: .all)
+    case "REVIVE":
+        return .init(hpMode: .reviveHalfMax)
+    case "MAX_REVIVE":
+        return .init(hpMode: .reviveFull)
+    case "FRESH_WATER":
+        return .init(hpMode: .fixed, hpAmount: 50)
+    case "SODA_POP":
+        return .init(hpMode: .fixed, hpAmount: 60)
+    case "LEMONADE":
+        return .init(hpMode: .fixed, hpAmount: 80)
+    case "ANTIDOTE":
+        return .init(statusMode: .poison)
+    case "BURN_HEAL":
+        return .init(statusMode: .burn)
+    case "ICE_HEAL":
+        return .init(statusMode: .freeze)
+    case "AWAKENING":
+        return .init(statusMode: .sleep)
+    case "PARLYZ_HEAL":
+        return .init(statusMode: .paralysis)
+    case "FULL_HEAL":
+        return .init(statusMode: .all)
+    default:
+        return nil
+    }
+}
+
+private func battleUseKind(
+    for itemID: String,
+    medicine: ItemManifest.MedicineAttributes?
+) -> ItemManifest.BattleUseKind {
     switch itemID {
     case "MASTER_BALL", "ULTRA_BALL", "GREAT_BALL", "POKE_BALL", "SAFARI_BALL":
         return .ball
     default:
-        return .none
+        return medicine == nil ? .none : .medicine
     }
 }

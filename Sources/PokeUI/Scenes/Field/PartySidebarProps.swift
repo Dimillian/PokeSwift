@@ -218,6 +218,7 @@ public enum PartySidebarInteractionMode: String, Equatable, Sendable {
     case fieldReorderSource
     case fieldReorderDestination
     case battleSwitch
+    case itemUseTarget
 }
 
 public struct PartySidebarProps: Equatable, Sendable {

@@ -25,6 +25,7 @@ struct GameplayScene: View {
                 sidebarMode: props.sidebarMode,
                 onSidebarAction: handleSidebarAction(_:),
                 onPartyRowSelected: props.onPartyRowSelected,
+                onInventoryItemSelected: props.onInventoryItemSelected,
                 fieldDisplayStyle: $fieldDisplayStyle,
                 sidebarExpansionState: $sidebarExpansionState
             ) {
