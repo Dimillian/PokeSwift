@@ -224,6 +224,20 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertGreaterThan(targetHz, 128)
     }
 
+    func testAudioExtractorCarriesDutyCyclePatternIntoCrySquareChannel() throws {
+        let manifest = Self.repoManifest
+
+        let cry = try XCTUnwrap(manifest.soundEffects.first { $0.id == "SFX_CRY_00" })
+        let channelFive = try XCTUnwrap(cry.channels.first { $0.channelNumber == 5 })
+        let firstEvent = try XCTUnwrap(channelFive.prelude.first)
+        let dutyCycle = try XCTUnwrap(firstEvent.dutyCycle)
+
+        XCTAssertEqual(firstEvent.waveform, .square)
+        XCTAssertEqual(dutyCycle, 0.75, accuracy: 0.000_001)
+        XCTAssertEqual(firstEvent.dutyCyclePattern, 0xF5)
+        XCTAssertEqual(firstEvent.dutyCyclePatternStepOffset, 0)
+    }
+
     func testExtractorWritesDeterministicAudioManifestJSON() throws {
         let first = try Self.encodeJSON(Self.makeFreshManifest())
         let second = try Self.encodeJSON(Self.makeFreshManifest())

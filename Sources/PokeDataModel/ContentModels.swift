@@ -219,9 +219,13 @@ public struct AudioManifest: Codable, Equatable, Sendable {
         public let frequencyRegister: Int?
         public let amplitude: Double
         public let dutyCycle: Double?
+        public let dutyCyclePattern: Int?
+        public let dutyCyclePatternStepOffset: Int
         public let envelopeStepDuration: Double?
         public let envelopeDirection: Int
         public let waveSamples: [Double]?
+        public let stereoLeftEnabled: Bool
+        public let stereoRightEnabled: Bool
         public let vibratoDelaySeconds: Double
         public let vibratoDepthSemitones: Double
         public let vibratoRateHz: Double
@@ -242,9 +246,13 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             frequencyRegister: Int? = nil,
             amplitude: Double,
             dutyCycle: Double? = nil,
+            dutyCyclePattern: Int? = nil,
+            dutyCyclePatternStepOffset: Int = 0,
             envelopeStepDuration: Double? = nil,
             envelopeDirection: Int = 0,
             waveSamples: [Double]? = nil,
+            stereoLeftEnabled: Bool = true,
+            stereoRightEnabled: Bool = true,
             vibratoDelaySeconds: Double = 0,
             vibratoDepthSemitones: Double = 0,
             vibratoRateHz: Double = 0,
@@ -264,9 +272,13 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             self.frequencyRegister = frequencyRegister
             self.amplitude = amplitude
             self.dutyCycle = dutyCycle
+            self.dutyCyclePattern = dutyCyclePattern
+            self.dutyCyclePatternStepOffset = dutyCyclePatternStepOffset
             self.envelopeStepDuration = envelopeStepDuration
             self.envelopeDirection = envelopeDirection
             self.waveSamples = waveSamples
+            self.stereoLeftEnabled = stereoLeftEnabled
+            self.stereoRightEnabled = stereoRightEnabled
             self.vibratoDelaySeconds = vibratoDelaySeconds
             self.vibratoDepthSemitones = vibratoDepthSemitones
             self.vibratoRateHz = vibratoRateHz

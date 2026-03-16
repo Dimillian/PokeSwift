@@ -365,6 +365,7 @@ private enum MusicInstruction {
     case tempo(Int)
     case volume(Int, Int)
     case dutyCycle(Int)
+    case dutyCyclePattern(Int, Int, Int, Int)
     case pitchSweep(Int, Int)
     case vibrato(Int, Int, Int)
     case pitchSlide(Int, Int, String)
@@ -394,9 +395,14 @@ private struct ChannelState {
     var envelopeStepDuration: Double?
     var envelopeDirection: Int = 0
     var octave: Int = 4
+    var hardwareChannelIndex: Int = 0
     var dutyCycle: Double = 0.5
+    var dutyCyclePattern: Int?
+    var dutyCyclePatternStepOffset: Int = 0
     var waveSamples: [Double]?
     var perfectPitchEnabled = false
+    var stereoLeftEnabled = true
+    var stereoRightEnabled = true
     var vibratoDelayFrames: Int = 0
     var vibratoExtentUp: Int = 0
     var vibratoExtentDown: Int = 0
@@ -413,9 +419,13 @@ private struct TimedEvent {
     let frequencyRegister: Int?
     let amplitude: Double
     let dutyCycle: Double?
+    let dutyCyclePattern: Int?
+    let dutyCyclePatternStepOffset: Int
     let envelopeStepDuration: Double?
     let envelopeDirection: Int
     let waveSamples: [Double]?
+    let stereoLeftEnabled: Bool
+    let stereoRightEnabled: Bool
     let vibratoDelaySeconds: Double
     let vibratoDepthSemitones: Double
     let vibratoRateHz: Double
@@ -523,6 +533,13 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
     if let match = line.firstMatch(of: /duty_cycle\s+(-?\d+)/), let value = Int(match.output.1) {
         return .dutyCycle(value)
     }
+    if let match = line.firstMatch(of: /duty_cycle_pattern\s+(-?\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)/),
+       let first = Int(match.output.1),
+       let second = Int(match.output.2),
+       let third = Int(match.output.3),
+       let fourth = Int(match.output.4) {
+        return .dutyCyclePattern(first, second, third, fourth)
+    }
     if let match = line.firstMatch(of: /pitch_sweep\s+(-?\d+),\s*(-?\d+)/),
        let time = Int(match.output.1),
        let shift = Int(match.output.2) {
@@ -621,6 +638,7 @@ private func renderTrackEntry(
             initialState: ChannelState(
                 tempo: globalState.tempo,
                 masterVolume: globalState.masterVolume,
+                hardwareChannelIndex: hardwareChannelBitIndex(forSoftwareChannel: header.channelNumber),
                 waveSamples: waveform == .wave ? waveTables[0] : nil,
                 waveform: waveform
             ),
@@ -654,6 +672,21 @@ private func waveform(for channelNumber: Int) -> AudioManifest.Waveform {
         return .noise
     default:
         return .noise
+    }
+}
+
+private func hardwareChannelBitIndex(forSoftwareChannel channelNumber: Int) -> Int {
+    switch channelNumber {
+    case 1, 5:
+        return 0
+    case 2, 6:
+        return 1
+    case 3, 7:
+        return 2
+    case 4, 8:
+        return 3
+    default:
+        return max(0, min(3, channelNumber - 1))
     }
 }
 
@@ -715,6 +748,15 @@ private func renderChannelEntry(
                 state.masterVolume = max(0, min(1, (Double(left + right) / 2) / 7))
             case let .dutyCycle(value):
                 state.dutyCycle = dutyCycle(for: value)
+            case let .dutyCyclePattern(first, second, third, fourth):
+                state.dutyCycle = dutyCycle(for: first)
+                state.dutyCyclePattern = dutyCyclePatternByte(
+                    first: first,
+                    second: second,
+                    third: third,
+                    fourth: fourth
+                )
+                state.dutyCyclePatternStepOffset = 0
             case let .pitchSweep(time, shift):
                 state.channel1PitchSweep = makeChannel1PitchSweepState(
                     timeNibble: time,
@@ -738,7 +780,10 @@ private func renderChannelEntry(
                     targetRegister: targetRegister,
                     lengthModifier: max(0, length - 1)
                 )
-            case .stereoPanning, .executeMusic:
+            case let .stereoPanning(left, right):
+                state.stereoLeftEnabled = stereoPanningEnabled(mask: left, hardwareChannelIndex: state.hardwareChannelIndex)
+                state.stereoRightEnabled = stereoPanningEnabled(mask: right, hardwareChannelIndex: state.hardwareChannelIndex)
+            case .executeMusic:
                 continue
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
@@ -762,6 +807,7 @@ private func renderChannelEntry(
                     events.append(contentsOf: renderNoiseInstrument(instrumentEvents, startingAt: state.currentTime))
                 }
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .octave(value):
                 state.octave = value
             case let .note(name, length):
@@ -782,9 +828,13 @@ private func renderChannelEntry(
                         frequencyRegister: noteRegister,
                         amplitude: state.masterVolume * state.noteVolume,
                         dutyCycle: state.waveform == .square ? state.dutyCycle : nil,
+                        dutyCyclePattern: state.waveform == .square ? state.dutyCyclePattern : nil,
+                        dutyCyclePatternStepOffset: state.waveform == .square ? state.dutyCyclePatternStepOffset : 0,
                         envelopeStepDuration: state.envelopeStepDuration,
                         envelopeDirection: state.envelopeDirection,
                         waveSamples: state.waveSamples,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: Double(state.vibratoDelayFrames) / 60,
                         vibratoDepthSemitones: Double(state.vibratoExtentUp + state.vibratoExtentDown) / 64,
                         vibratoRateHz: approximateVibratoRateHz(rateFrames: state.vibratoRateFrames),
@@ -800,6 +850,7 @@ private func renderChannelEntry(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .squareNote(length, volume, fade, register):
                 let duration = Double(max(1, length + 1)) / 60
                 let noteRegister = register == 0 ? nil : register
@@ -820,9 +871,13 @@ private func renderChannelEntry(
                         frequencyRegister: noteRegister,
                         amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
                         dutyCycle: state.dutyCycle,
+                        dutyCyclePattern: state.dutyCyclePattern,
+                        dutyCyclePatternStepOffset: state.dutyCyclePatternStepOffset,
                         envelopeStepDuration: envelopeStepDuration(for: fade),
                         envelopeDirection: envelopeDirection(for: fade),
                         waveSamples: nil,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
@@ -838,6 +893,7 @@ private func renderChannelEntry(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .noiseNote(length, volume, fade, polynomialCounter):
                 let duration = Double(max(1, length + 1)) / 60
                 let (clockHz, shortMode) = noiseClockParameters(for: polynomialCounter)
@@ -849,9 +905,13 @@ private func renderChannelEntry(
                         frequencyRegister: nil,
                         amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
                         dutyCycle: nil,
+                        dutyCyclePattern: nil,
+                        dutyCyclePatternStepOffset: 0,
                         envelopeStepDuration: envelopeStepDuration(for: fade),
                         envelopeDirection: envelopeDirection(for: fade),
                         waveSamples: nil,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
@@ -867,8 +927,11 @@ private func renderChannelEntry(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .rest(length):
-                state.currentTime += advanceNoteDurationSeconds(length: length, state: &state)
+                let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .soundCall(target):
                 let resolved = resolveLabelReference(target, from: currentLabel)
                 let subroutine = try renderSubroutine(
@@ -924,7 +987,7 @@ private func renderChannelEntry(
                         events: &events,
                         state: &state,
                         startIndex: startIndex,
-                        segmentStartTime: segmentStartTime ?? state.currentTime,
+                        segmentStartTime: segmentStartTime,
                         waveform: state.waveform,
                         additionalRepeats: max(0, count - 1)
                     )
@@ -979,6 +1042,15 @@ private func renderSubroutine(
                 state.masterVolume = max(0, min(1, (Double(left + right) / 2) / 7))
             case let .dutyCycle(value):
                 state.dutyCycle = dutyCycle(for: value)
+            case let .dutyCyclePattern(first, second, third, fourth):
+                state.dutyCycle = dutyCycle(for: first)
+                state.dutyCyclePattern = dutyCyclePatternByte(
+                    first: first,
+                    second: second,
+                    third: third,
+                    fourth: fourth
+                )
+                state.dutyCyclePatternStepOffset = 0
             case let .pitchSweep(time, shift):
                 state.channel1PitchSweep = makeChannel1PitchSweepState(
                     timeNibble: time,
@@ -1002,7 +1074,10 @@ private func renderSubroutine(
                     targetRegister: targetRegister,
                     lengthModifier: max(0, length - 1)
                 )
-            case .stereoPanning, .executeMusic:
+            case let .stereoPanning(left, right):
+                state.stereoLeftEnabled = stereoPanningEnabled(mask: left, hardwareChannelIndex: state.hardwareChannelIndex)
+                state.stereoRightEnabled = stereoPanningEnabled(mask: right, hardwareChannelIndex: state.hardwareChannelIndex)
+            case .executeMusic:
                 continue
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
@@ -1026,6 +1101,7 @@ private func renderSubroutine(
                     events.append(contentsOf: renderNoiseInstrument(instrumentEvents, startingAt: state.currentTime))
                 }
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .octave(value):
                 state.octave = value
             case let .note(name, length):
@@ -1046,9 +1122,13 @@ private func renderSubroutine(
                         frequencyRegister: noteRegister,
                         amplitude: state.masterVolume * state.noteVolume,
                         dutyCycle: state.waveform == .square ? state.dutyCycle : nil,
+                        dutyCyclePattern: state.waveform == .square ? state.dutyCyclePattern : nil,
+                        dutyCyclePatternStepOffset: state.waveform == .square ? state.dutyCyclePatternStepOffset : 0,
                         envelopeStepDuration: state.envelopeStepDuration,
                         envelopeDirection: state.envelopeDirection,
                         waveSamples: state.waveSamples,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: Double(state.vibratoDelayFrames) / 60,
                         vibratoDepthSemitones: Double(state.vibratoExtentUp + state.vibratoExtentDown) / 64,
                         vibratoRateHz: approximateVibratoRateHz(rateFrames: state.vibratoRateFrames),
@@ -1064,6 +1144,7 @@ private func renderSubroutine(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .squareNote(length, volume, fade, register):
                 let duration = Double(max(1, length + 1)) / 60
                 let noteRegister = register == 0 ? nil : register
@@ -1084,9 +1165,13 @@ private func renderSubroutine(
                         frequencyRegister: noteRegister,
                         amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
                         dutyCycle: state.dutyCycle,
+                        dutyCyclePattern: state.dutyCyclePattern,
+                        dutyCyclePatternStepOffset: state.dutyCyclePatternStepOffset,
                         envelopeStepDuration: envelopeStepDuration(for: fade),
                         envelopeDirection: envelopeDirection(for: fade),
                         waveSamples: nil,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
@@ -1102,6 +1187,7 @@ private func renderSubroutine(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .noiseNote(length, volume, fade, polynomialCounter):
                 let duration = Double(max(1, length + 1)) / 60
                 let (clockHz, shortMode) = noiseClockParameters(for: polynomialCounter)
@@ -1113,9 +1199,13 @@ private func renderSubroutine(
                         frequencyRegister: nil,
                         amplitude: state.masterVolume * max(0, min(1, Double(volume) / 15)),
                         dutyCycle: nil,
+                        dutyCyclePattern: nil,
+                        dutyCyclePatternStepOffset: 0,
                         envelopeStepDuration: envelopeStepDuration(for: fade),
                         envelopeDirection: envelopeDirection(for: fade),
                         waveSamples: nil,
+                        stereoLeftEnabled: state.stereoLeftEnabled,
+                        stereoRightEnabled: state.stereoRightEnabled,
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
@@ -1131,8 +1221,11 @@ private func renderSubroutine(
                     )
                 )
                 state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .rest(length):
-                state.currentTime += advanceNoteDurationSeconds(length: length, state: &state)
+                let duration = advanceNoteDurationSeconds(length: length, state: &state)
+                state.currentTime += duration
+                advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: duration))
             case let .soundCall(target):
                 let subroutine = try renderSubroutine(
                     label: resolveLabelReference(target, from: currentLabel),
@@ -1159,7 +1252,7 @@ private func renderSubroutine(
                         events: &events,
                         state: &state,
                         startIndex: startIndex,
-                        segmentStartTime: segmentStartTime ?? state.currentTime,
+                        segmentStartTime: segmentStartTime,
                         waveform: state.waveform,
                         additionalRepeats: max(0, count - 1)
                     )
@@ -1205,6 +1298,7 @@ private func appendRepeatedSegment(
     for _ in 0..<additionalRepeats {
         events.append(contentsOf: normalized.map { shiftTimedEvent($0, by: state.currentTime) })
         state.currentTime += segmentDuration
+        advanceDutyCyclePattern(state: &state, frameCount: noteFrameCount(for: segmentDuration))
     }
 }
 
@@ -1234,9 +1328,13 @@ private func silentTimedEvent(duration: Double, waveform: AudioManifest.Waveform
         frequencyRegister: nil,
         amplitude: 0,
         dutyCycle: nil,
+        dutyCyclePattern: nil,
+        dutyCyclePatternStepOffset: 0,
         envelopeStepDuration: nil,
         envelopeDirection: 0,
         waveSamples: nil,
+        stereoLeftEnabled: true,
+        stereoRightEnabled: true,
         vibratoDelaySeconds: 0,
         vibratoDepthSemitones: 0,
         vibratoRateHz: 0,
@@ -1269,9 +1367,13 @@ private func audioEvent(from event: TimedEvent) -> AudioManifest.Event {
         frequencyRegister: event.frequencyRegister,
         amplitude: event.amplitude,
         dutyCycle: event.dutyCycle,
+        dutyCyclePattern: event.dutyCyclePattern,
+        dutyCyclePatternStepOffset: event.dutyCyclePatternStepOffset,
         envelopeStepDuration: event.envelopeStepDuration,
         envelopeDirection: event.envelopeDirection,
         waveSamples: event.waveSamples,
+        stereoLeftEnabled: event.stereoLeftEnabled,
+        stereoRightEnabled: event.stereoRightEnabled,
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
@@ -1288,16 +1390,24 @@ private func audioEvent(from event: TimedEvent) -> AudioManifest.Event {
 }
 
 private func shiftTimedEvent(_ event: TimedEvent, by offset: Double) -> TimedEvent {
-    TimedEvent(
+    let frameOffset = Int((offset * 60).rounded())
+    return TimedEvent(
         startTime: max(0, event.startTime + offset),
         duration: event.duration,
         frequencyHz: event.frequencyHz,
         frequencyRegister: event.frequencyRegister,
         amplitude: event.amplitude,
         dutyCycle: event.dutyCycle,
+        dutyCyclePattern: event.dutyCyclePattern,
+        dutyCyclePatternStepOffset: shiftedDutyCyclePatternStepOffset(
+            event.dutyCyclePatternStepOffset,
+            by: frameOffset
+        ),
         envelopeStepDuration: event.envelopeStepDuration,
         envelopeDirection: event.envelopeDirection,
         waveSamples: event.waveSamples,
+        stereoLeftEnabled: event.stereoLeftEnabled,
+        stereoRightEnabled: event.stereoRightEnabled,
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
@@ -1325,9 +1435,13 @@ private func renderNoiseInstrument(
             frequencyRegister: nil,
             amplitude: template.amplitude,
             dutyCycle: nil,
+            dutyCyclePattern: nil,
+            dutyCyclePatternStepOffset: 0,
             envelopeStepDuration: template.envelopeStepDuration,
             envelopeDirection: template.envelopeDirection,
             waveSamples: nil,
+            stereoLeftEnabled: true,
+            stereoRightEnabled: true,
             vibratoDelaySeconds: 0,
             vibratoDepthSemitones: 0,
             vibratoRateHz: 0,
@@ -1351,6 +1465,28 @@ private func dutyCycle(for value: Int) -> Double {
     case 3: return 0.75
     default: return 0.5
     }
+}
+
+private func dutyCyclePatternByte(first: Int, second: Int, third: Int, fourth: Int) -> Int {
+    ((first & 0x3) << 6) | ((second & 0x3) << 4) | ((third & 0x3) << 2) | (fourth & 0x3)
+}
+
+private func stereoPanningEnabled(mask: Int, hardwareChannelIndex: Int) -> Bool {
+    let bit = 1 << max(0, min(3, hardwareChannelIndex))
+    return (mask & bit) != 0
+}
+
+private func advanceDutyCyclePattern(state: inout ChannelState, frameCount: Int) {
+    guard state.dutyCyclePattern != nil else { return }
+    state.dutyCyclePatternStepOffset = shiftedDutyCyclePatternStepOffset(
+        state.dutyCyclePatternStepOffset,
+        by: frameCount
+    )
+}
+
+private func shiftedDutyCyclePatternStepOffset(_ stepOffset: Int, by frameOffset: Int) -> Int {
+    let shifted = (stepOffset + frameOffset) % 4
+    return shifted >= 0 ? shifted : shifted + 4
 }
 
 private func waveChannelVolume(for value: Int) -> Double {

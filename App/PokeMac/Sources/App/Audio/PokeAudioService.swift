@@ -9,12 +9,18 @@ final class PokeAudioService: RuntimeAudioPlaying {
         static let masterVolume: Float = 0.6
         static let musicVolume: Float = 0.4
         static let soundEffectVolume: Float = 1.0
+        static let renderedSampleGain: Float = 0.16
     }
 
     private struct RenderedChannelBuffers: @unchecked Sendable {
         let prelude: AVAudioPCMBuffer?
         let loop: AVAudioPCMBuffer?
         let duration: Double
+    }
+
+    private struct RenderedSamples {
+        var left: [Float]
+        var right: [Float]
     }
 
     private struct RenderedAudioAsset: @unchecked Sendable {
@@ -48,7 +54,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     private let manifest: AudioManifest
     private let engine = AVAudioEngine()
-    private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
+    private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 2)!
     private let musicMixerNode = AVAudioMixerNode()
     private let soundEffectMixerNode = AVAudioMixerNode()
     private let renderQueue = DispatchQueue(
@@ -510,9 +516,13 @@ final class PokeAudioService: RuntimeAudioPlaying {
             frequencyRegister: adjustedRegister,
             amplitude: event.amplitude,
             dutyCycle: event.dutyCycle,
+            dutyCyclePattern: event.dutyCyclePattern,
+            dutyCyclePatternStepOffset: event.dutyCyclePatternStepOffset,
             envelopeStepDuration: event.envelopeStepDuration,
             envelopeDirection: event.envelopeDirection,
             waveSamples: event.waveSamples,
+            stereoLeftEnabled: event.stereoLeftEnabled,
+            stereoRightEnabled: event.stereoRightEnabled,
             vibratoDelaySeconds: event.vibratoDelaySeconds,
             vibratoDepthSemitones: event.vibratoDepthSemitones,
             vibratoRateHz: event.vibratoRateHz,
@@ -564,16 +574,22 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    nonisolated private static func makeBuffer(from samples: [Float]?, sampleRate: Double) -> AVAudioPCMBuffer? {
-        guard let samples, samples.isEmpty == false,
-              let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1),
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)),
-              let channelData = buffer.floatChannelData?[0] else {
+    nonisolated private static func makeBuffer(from samples: RenderedSamples?, sampleRate: Double) -> AVAudioPCMBuffer? {
+        guard let samples,
+              samples.left.isEmpty == false,
+              samples.left.count == samples.right.count,
+              let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2),
+              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.left.count)),
+              let leftChannelData = buffer.floatChannelData?[0],
+              let rightChannelData = buffer.floatChannelData?[1] else {
             return nil
         }
-        buffer.frameLength = AVAudioFrameCount(samples.count)
-        samples.withUnsafeBufferPointer { source in
-            channelData.update(from: source.baseAddress!, count: source.count)
+        buffer.frameLength = AVAudioFrameCount(samples.left.count)
+        samples.left.withUnsafeBufferPointer { source in
+            leftChannelData.update(from: source.baseAddress!, count: source.count)
+        }
+        samples.right.withUnsafeBufferPointer { source in
+            rightChannelData.update(from: source.baseAddress!, count: source.count)
         }
         return buffer
     }
@@ -582,27 +598,31 @@ final class PokeAudioService: RuntimeAudioPlaying {
         events: [AudioManifest.Event],
         sampleRate: Double,
         seed: UInt64
-    ) -> [Float]? {
+    ) -> RenderedSamples? {
         let totalDuration = renderedDuration(for: events)
         guard totalDuration > 0 else { return nil }
         let frameCount = max(1, Int(ceil(totalDuration * sampleRate)))
-        var samples = Array(repeating: Float.zero, count: frameCount)
+        var leftSamples = Array(repeating: Float.zero, count: frameCount)
+        var rightSamples = Array(repeating: Float.zero, count: frameCount)
 
-        samples.withUnsafeMutableBufferPointer { buffer in
-            guard let baseAddress = buffer.baseAddress else { return }
-            for event in events {
-                render(
-                    event: event,
-                    into: baseAddress,
-                    frameCount: frameCount,
-                    sampleRate: sampleRate,
-                    seed: seed
-                )
+        leftSamples.withUnsafeMutableBufferPointer { leftBuffer in
+            guard let leftBaseAddress = leftBuffer.baseAddress else { return }
+            rightSamples.withUnsafeMutableBufferPointer { rightBuffer in
+                guard let rightBaseAddress = rightBuffer.baseAddress else { return }
+                for event in events {
+                    render(
+                        event: event,
+                        leftChannel: leftBaseAddress,
+                        rightChannel: rightBaseAddress,
+                        frameCount: frameCount,
+                        sampleRate: sampleRate,
+                        seed: seed
+                    )
+                }
             }
-            normalize(samples: baseAddress, frameCount: frameCount)
         }
 
-        return samples
+        return RenderedSamples(left: leftSamples, right: rightSamples)
     }
 
     nonisolated private static func renderedDuration(for events: [AudioManifest.Event]) -> Double {
@@ -611,7 +631,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     nonisolated private static func render(
         event: AudioManifest.Event,
-        into samples: UnsafeMutablePointer<Float>,
+        leftChannel: UnsafeMutablePointer<Float>,
+        rightChannel: UnsafeMutablePointer<Float>,
         frameCount: Int,
         sampleRate: Double,
         seed: UInt64
@@ -620,28 +641,17 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let startFrame = max(0, Int(event.startTime * sampleRate))
         let endFrame = min(frameCount, Int((event.startTime + event.duration) * sampleRate))
         guard endFrame > startFrame else { return }
-
-        let attackFrames = max(1, Int(sampleRate * 0.003))
-        let releaseFrames = max(1, Int(sampleRate * 0.01))
-        let effectiveDuty = event.dutyCycle ?? 0.5
+        guard event.stereoLeftEnabled || event.stereoRightEnabled else { return }
+        let declickFrames = max(1, Int(sampleRate * 0.00035))
 
         for frame in startFrame..<endFrame {
             let localTime = Double(frame - startFrame) / sampleRate
-            let envelope: Double
-            if frame - startFrame < attackFrames {
-                envelope = Double(frame - startFrame) / Double(attackFrames)
-            } else if endFrame - frame < releaseFrames {
-                envelope = Double(endFrame - frame) / Double(releaseFrames)
-            } else {
-                envelope = 1
-            }
-
             let sampleValue: Double
             switch event.waveform {
             case .square:
                 let frequency = modulatedFrequency(for: event, localTime: localTime)
                 let phase = (localTime * frequency).truncatingRemainder(dividingBy: 1)
-                sampleValue = phase < effectiveDuty ? 1 : -1
+                sampleValue = phase < effectiveDutyCycle(for: event, localTime: localTime) ? 1 : -1
             case .wave:
                 let frequency = modulatedFrequency(for: event, localTime: localTime)
                 sampleValue = waveTableSample(event.waveSamples, localTime: localTime, frequency: frequency)
@@ -655,7 +665,23 @@ final class PokeAudioService: RuntimeAudioPlaying {
             }
 
             let amplitude = envelopeAdjustedAmplitude(for: event, localTime: localTime)
-            samples[frame] += Float(sampleValue * amplitude * envelope * 0.18)
+            let startDistance = frame - startFrame
+            let endDistance = (endFrame - 1) - frame
+            let edgeFrames = min(startDistance, endDistance)
+            let declickEnvelope: Float
+            if edgeFrames < declickFrames {
+                declickEnvelope = Float(edgeFrames + 1) / Float(declickFrames + 1)
+            } else {
+                declickEnvelope = 1
+            }
+
+            let sample = Float(sampleValue * amplitude) * MixDefaults.renderedSampleGain * declickEnvelope
+            if event.stereoLeftEnabled {
+                leftChannel[frame] += sample
+            }
+            if event.stereoRightEnabled {
+                rightChannel[frame] += sample
+            }
         }
     }
 
@@ -747,6 +773,32 @@ final class PokeAudioService: RuntimeAudioPlaying {
         return max(0, min(1, event.amplitude + delta))
     }
 
+    nonisolated private static func effectiveDutyCycle(for event: AudioManifest.Event, localTime: Double) -> Double {
+        guard let pattern = event.dutyCyclePattern else {
+            return event.dutyCycle ?? 0.5
+        }
+
+        let elapsedFrames = max(0, Int((localTime * 60).rounded(.down)))
+        let stepOffset = (event.dutyCyclePatternStepOffset + elapsedFrames) & 0x3
+        let rotatedPattern = rotateDutyCyclePattern(pattern, stepOffset: stepOffset)
+        return dutyCycle(forPatternValue: (rotatedPattern >> 6) & 0x3)
+    }
+
+    nonisolated private static func rotateDutyCyclePattern(_ pattern: Int, stepOffset: Int) -> Int {
+        let rotation = (stepOffset & 0x3) * 2
+        let byte = pattern & 0xff
+        return ((byte << rotation) | (byte >> (8 - rotation))) & 0xff
+    }
+
+    nonisolated private static func dutyCycle(forPatternValue value: Int) -> Double {
+        switch value {
+        case 0: return 0.125
+        case 1: return 0.25
+        case 3: return 0.75
+        default: return 0.5
+        }
+    }
+
     nonisolated private static func noiseSample(
         event: AudioManifest.Event,
         localTime: Double,
@@ -756,21 +808,11 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let clockHz = max(1, min(event.frequencyHz ?? 4_096, sampleRate * 0.45))
         let stepPosition = localTime * clockHz
         let stepIndex = Int(stepPosition.rounded(.down))
-        let nextIndex = stepIndex + 1
-        let mix = stepPosition - floor(stepPosition)
-
-        let current = heldNoiseValue(
+        return heldNoiseValue(
             stepIndex: stepIndex,
             seed: seed,
             shortMode: event.noiseShortMode ?? false
         )
-        let next = heldNoiseValue(
-            stepIndex: nextIndex,
-            seed: seed,
-            shortMode: event.noiseShortMode ?? false
-        )
-
-        return current + ((next - current) * mix * 0.2)
     }
 
     nonisolated private static func heldNoiseValue(stepIndex: Int, seed: UInt64, shortMode: Bool) -> Double {
@@ -791,24 +833,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
         let phase = (localTime * frequency).truncatingRemainder(dividingBy: 1)
         let position = phase * Double(waveSamples.count)
-        let lowerIndex = Int(position) % waveSamples.count
-        let upperIndex = (lowerIndex + 1) % waveSamples.count
-        let fraction = position - floor(position)
-        let lowerValue = waveSamples[lowerIndex]
-        let upperValue = waveSamples[upperIndex]
-        return lowerValue + ((upperValue - lowerValue) * fraction)
-    }
-
-    nonisolated private static func normalize(samples: UnsafeMutablePointer<Float>, frameCount: Int) {
-        var peak: Float = 0
-        for index in 0..<frameCount {
-            peak = max(peak, abs(samples[index]))
-        }
-        guard peak > 0.95 else { return }
-        let scale = 0.95 / peak
-        for index in 0..<frameCount {
-            samples[index] *= scale
-        }
+        let sampleIndex = Int(position.rounded(.down)) % waveSamples.count
+        return waveSamples[sampleIndex]
     }
 
     nonisolated private static func frequencyHz(forRegister hardwareRegister: Int, waveform: AudioManifest.Waveform) -> Double {
