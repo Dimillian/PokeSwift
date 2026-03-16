@@ -44,11 +44,11 @@ public struct GameplayShell<Stage: View>: View {
                 fieldDisplayStyle: $fieldDisplayStyle,
                 expansionState: $sidebarExpansionState
             )
+            .id(themeRefreshKey)
             .frame(width: GameplayFieldMetrics.sidebarWidth)
         }
         .padding(GameplayFieldMetrics.outerPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .id(themeRefreshKey)
     }
 
     private var themeRefreshKey: String {
@@ -106,12 +106,12 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
                 .fill(shellPalette.backdrop.color)
         )
         .glassEffect(
-            .regular.tint(FieldRetroPalette.glassTint),
+            .regular.tint(resolvedPalette.field.glassTint.color),
             in: RoundedRectangle(cornerRadius: 34, style: .continuous)
         )
         .overlay {
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .stroke(FieldRetroPalette.outline.opacity(0.16), lineWidth: 1)
+                .stroke(resolvedPalette.field.outline.color.opacity(0.16), lineWidth: 1)
                 .overlay {
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
                         .stroke(.white.opacity(0.3), lineWidth: 1)
@@ -126,6 +126,14 @@ public struct GameplayShellStage<ScreenContent: View, Footer: View, OverlayConte
         FieldRetroPalette.gameBoyShellPalette(
             shellStyle: gameBoyShellStyle,
             appearanceMode: appearanceMode,
+            colorScheme: colorScheme
+        )
+    }
+
+    private var resolvedPalette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
             colorScheme: colorScheme
         )
     }
@@ -252,6 +260,7 @@ private struct GameplayDisplayShell<Content: View, Footer: View>: View {
 
 private struct GameplayScreenWell<Content: View, Footer: View>: View {
     @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
     @Environment(\.pokeGameplayHDREnabled) private var gameplayHDREnabled
     @Environment(\.colorScheme) private var colorScheme
 
@@ -275,7 +284,6 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
     var body: some View {
         GeometryReader { proxy in
             let size = proxy.size
-            let resolvedPalette = PokeThemePalette.resolve(for: appearanceMode.resolved(for: colorScheme))
             let glowPalette = PokeThemePalette.gameplayScreenGlowPalette(
                 displayStyle: displayStyle,
                 appearanceMode: appearanceMode,
@@ -325,7 +333,7 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
 
             ZStack(alignment: .topLeading) {
                 wellShape
-                    .fill(PokeThemePalette.screenWellFill)
+                    .fill(resolvedPalette.screenWellFill.color)
 
                 if hdrProfile.rendersBloom {
                     ZStack {
@@ -364,7 +372,10 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                 }
 
                 HStack(spacing: 12) {
-                    DMGAccentBarStack()
+                    DMGAccentBarStack(
+                        magenta: resolvedPalette.accentBarMagenta.color,
+                        blue: resolvedPalette.accentBarBlue.color
+                    )
                         .frame(maxWidth: .infinity, alignment: .trailing)
 
                     Text("DOT MATRIX WITH STEREO SOUND")
@@ -374,10 +385,13 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                                 design: .rounded)
                         )
                         .tracking(0.22)
-                        .foregroundStyle(PokeThemePalette.screenLabel)
+                        .foregroundStyle(resolvedPalette.screenLabel.color)
                         .fixedSize()
 
-                    DMGAccentBarStack()
+                    DMGAccentBarStack(
+                        magenta: resolvedPalette.accentBarMagenta.color,
+                        blue: resolvedPalette.accentBarBlue.color
+                    )
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity)
@@ -389,14 +403,14 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                         .fill(
                             hdrProfile.isEnabled
                                 ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryExposure)
-                                : PokeThemePalette.batteryIndicator
+                                : resolvedPalette.batteryIndicator.color
                         )
                         .frame(width: 10, height: 10)
                         .shadow(
                             color: (
                                 hdrProfile.isEnabled
                                     ? resolvedPalette.batteryIndicator.hdrColor(linearExposure: hdrProfile.batteryShadowExposure)
-                                    : PokeThemePalette.batteryIndicator
+                                    : resolvedPalette.batteryIndicator.color
                             ).opacity(hdrProfile.isEnabled ? hdrProfile.batteryShadowOpacity : 0.35),
                             radius: 6
                         )
@@ -410,7 +424,7 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
                             .system(
                                 size: max(7, size.width * 0.013), weight: .bold, design: .rounded)
                         )
-                        .foregroundStyle(PokeThemePalette.screenLabel.opacity(0.95))
+                        .foregroundStyle(resolvedPalette.screenLabel.color.opacity(0.95))
                 }
                 .position(x: size.width * 0.07, y: screenRect.midY)
 
@@ -440,6 +454,14 @@ private struct GameplayScreenWell<Content: View, Footer: View>: View {
         }
         .aspectRatio(1.14, contentMode: .fit)
     }
+
+    private var resolvedPalette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 private struct DMGAccentBar: View {
@@ -454,10 +476,13 @@ private struct DMGAccentBar: View {
 }
 
 private struct DMGAccentBarStack: View {
+    let magenta: Color
+    let blue: Color
+
     var body: some View {
         VStack(spacing: 4) {
-            DMGAccentBar(color: PokeThemePalette.accentBarMagenta)
-            DMGAccentBar(color: PokeThemePalette.accentBarBlue)
+            DMGAccentBar(color: magenta)
+            DMGAccentBar(color: blue)
         }
         .frame(minWidth: 56, maxWidth: .infinity)
     }

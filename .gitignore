@@ -41,3 +41,4 @@ PokeSwift.xcworkspace/
 # runtime traces
 .runtime-traces/
 *.DS_Store
+build/*
