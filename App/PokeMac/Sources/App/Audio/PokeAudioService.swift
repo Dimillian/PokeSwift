@@ -10,6 +10,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         static let musicVolume: Float = 0.4
         static let soundEffectVolume: Float = 1.0
         static let renderedSampleGain: Float = 0.16
+        static let maxRenderableFrequencyRatio = 0.45
+        static let dcBlockPole: Double = 0.995
     }
 
     private struct RenderedChannelBuffers: @unchecked Sendable {
@@ -447,13 +449,11 @@ final class PokeAudioService: RuntimeAudioPlaying {
             )
             let preludeSamples = renderSegment(
                 events: preludeEvents,
-                sampleRate: sampleRate,
-                seed: UInt64(channel.channelNumber * 7919)
+                sampleRate: sampleRate
             )
             let loopSamples = renderSegment(
                 events: loopEvents,
-                sampleRate: sampleRate,
-                seed: UInt64(channel.channelNumber * 7919)
+                sampleRate: sampleRate
             )
             let preludeDuration = renderedDuration(for: preludeEvents)
             let loopDuration = renderedDuration(for: loopEvents)
@@ -596,8 +596,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     nonisolated private static func renderSegment(
         events: [AudioManifest.Event],
-        sampleRate: Double,
-        seed: UInt64
+        sampleRate: Double
     ) -> RenderedSamples? {
         let totalDuration = renderedDuration(for: events)
         guard totalDuration > 0 else { return nil }
@@ -615,13 +614,14 @@ final class PokeAudioService: RuntimeAudioPlaying {
                         leftChannel: leftBaseAddress,
                         rightChannel: rightBaseAddress,
                         frameCount: frameCount,
-                        sampleRate: sampleRate,
-                        seed: seed
+                        sampleRate: sampleRate
                     )
                 }
             }
         }
 
+        conditionRenderedSamples(&leftSamples)
+        conditionRenderedSamples(&rightSamples)
         return RenderedSamples(left: leftSamples, right: rightSamples)
     }
 
@@ -634,8 +634,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         leftChannel: UnsafeMutablePointer<Float>,
         rightChannel: UnsafeMutablePointer<Float>,
         frameCount: Int,
-        sampleRate: Double,
-        seed: UInt64
+        sampleRate: Double
     ) {
         guard event.duration > 0 else { return }
         let startFrame = max(0, Int(event.startTime * sampleRate))
@@ -644,44 +643,37 @@ final class PokeAudioService: RuntimeAudioPlaying {
         guard event.stereoLeftEnabled || event.stereoRightEnabled else { return }
         let declickFrames = max(1, Int(sampleRate * 0.00035))
 
-        for frame in startFrame..<endFrame {
-            let localTime = Double(frame - startFrame) / sampleRate
-            let sampleValue: Double
-            switch event.waveform {
-            case .square:
-                let frequency = modulatedFrequency(for: event, localTime: localTime)
-                let phase = (localTime * frequency).truncatingRemainder(dividingBy: 1)
-                sampleValue = phase < effectiveDutyCycle(for: event, localTime: localTime) ? 1 : -1
-            case .wave:
-                let frequency = modulatedFrequency(for: event, localTime: localTime)
-                sampleValue = waveTableSample(event.waveSamples, localTime: localTime, frequency: frequency)
-            case .noise:
-                sampleValue = noiseSample(
-                    event: event,
-                    localTime: localTime,
-                    sampleRate: sampleRate,
-                    seed: seed &+ UInt64(truncatingIfNeeded: startFrame)
-                )
-            }
-
-            let amplitude = envelopeAdjustedAmplitude(for: event, localTime: localTime)
-            let startDistance = frame - startFrame
-            let endDistance = (endFrame - 1) - frame
-            let edgeFrames = min(startDistance, endDistance)
-            let declickEnvelope: Float
-            if edgeFrames < declickFrames {
-                declickEnvelope = Float(edgeFrames + 1) / Float(declickFrames + 1)
-            } else {
-                declickEnvelope = 1
-            }
-
-            let sample = Float(sampleValue * amplitude) * MixDefaults.renderedSampleGain * declickEnvelope
-            if event.stereoLeftEnabled {
-                leftChannel[frame] += sample
-            }
-            if event.stereoRightEnabled {
-                rightChannel[frame] += sample
-            }
+        switch event.waveform {
+        case .square:
+            renderSquareEvent(
+                event: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                sampleRate: sampleRate,
+                declickFrames: declickFrames
+            )
+        case .wave:
+            renderWaveEvent(
+                event: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                sampleRate: sampleRate,
+                declickFrames: declickFrames
+            )
+        case .noise:
+            renderNoiseEvent(
+                event: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                sampleRate: sampleRate,
+                declickFrames: declickFrames
+            )
         }
     }
 
@@ -799,42 +791,198 @@ final class PokeAudioService: RuntimeAudioPlaying {
         }
     }
 
-    nonisolated private static func noiseSample(
+    nonisolated private static func renderSquareEvent(
         event: AudioManifest.Event,
-        localTime: Double,
+        leftChannel: UnsafeMutablePointer<Float>,
+        rightChannel: UnsafeMutablePointer<Float>,
+        startFrame: Int,
+        endFrame: Int,
         sampleRate: Double,
-        seed: UInt64
-    ) -> Double {
-        let clockHz = max(1, min(event.frequencyHz ?? 4_096, sampleRate * 0.45))
-        let stepPosition = localTime * clockHz
-        let stepIndex = Int(stepPosition.rounded(.down))
-        return heldNoiseValue(
-            stepIndex: stepIndex,
-            seed: seed,
-            shortMode: event.noiseShortMode ?? false
-        )
-    }
-
-    nonisolated private static func heldNoiseValue(stepIndex: Int, seed: UInt64, shortMode: Bool) -> Double {
-        let effectiveIndex = shortMode ? (stepIndex & 0x7f) : stepIndex
-        var hash = seed &+ (UInt64(truncatingIfNeeded: effectiveIndex) &* 1_103_515_245)
-        hash ^= hash >> 15
-        hash &*= 0xD168_AAAD
-        let bipolar = (Double(hash & 0xffff) / 32_767.5) - 1
-
-        guard shortMode else { return bipolar }
-        let metallicPulse = ((effectiveIndex >> 1) & 1) == 0 ? 0.35 : -0.35
-        return max(-1, min(1, (bipolar * 0.65) + metallicPulse))
-    }
-
-    nonisolated private static func waveTableSample(_ waveSamples: [Double]?, localTime: Double, frequency: Double) -> Double {
-        guard let waveSamples, waveSamples.isEmpty == false else {
-            return sin(2 * .pi * localTime * frequency)
+        declickFrames: Int
+    ) {
+        var phase = 0.0
+        for frame in startFrame..<endFrame {
+            let localTime = Double(frame - startFrame) / sampleRate
+            let frequency = min(
+                modulatedFrequency(for: event, localTime: localTime),
+                sampleRate * MixDefaults.maxRenderableFrequencyRatio
+            )
+            let phaseIncrement = max(0, min(frequency / sampleRate, MixDefaults.maxRenderableFrequencyRatio))
+            let dutyCycle = effectiveDutyCycle(for: event, localTime: localTime)
+            let wrappedDutyPhase = positiveFractionalPart(phase - dutyCycle)
+            var sampleValue = phase < dutyCycle ? 1.0 : -1.0
+            sampleValue += polyBLEP(phase: phase, phaseIncrement: phaseIncrement)
+            sampleValue -= polyBLEP(phase: wrappedDutyPhase, phaseIncrement: phaseIncrement)
+            mixSample(
+                sampleValue,
+                for: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                frame: frame,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                localTime: localTime,
+                declickFrames: declickFrames
+            )
+            phase = positiveFractionalPart(phase + phaseIncrement)
         }
-        let phase = (localTime * frequency).truncatingRemainder(dividingBy: 1)
-        let position = phase * Double(waveSamples.count)
+    }
+
+    nonisolated private static func renderWaveEvent(
+        event: AudioManifest.Event,
+        leftChannel: UnsafeMutablePointer<Float>,
+        rightChannel: UnsafeMutablePointer<Float>,
+        startFrame: Int,
+        endFrame: Int,
+        sampleRate: Double,
+        declickFrames: Int
+    ) {
+        var phase = 0.0
+        for frame in startFrame..<endFrame {
+            let localTime = Double(frame - startFrame) / sampleRate
+            let frequency = min(
+                modulatedFrequency(for: event, localTime: localTime),
+                sampleRate * MixDefaults.maxRenderableFrequencyRatio
+            )
+            let phaseIncrement = max(0, min(frequency / sampleRate, MixDefaults.maxRenderableFrequencyRatio))
+            let sampleValue = waveTableSample(event.waveSamples, phase: phase)
+            mixSample(
+                sampleValue,
+                for: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                frame: frame,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                localTime: localTime,
+                declickFrames: declickFrames
+            )
+            phase = positiveFractionalPart(phase + phaseIncrement)
+        }
+    }
+
+    nonisolated private static func renderNoiseEvent(
+        event: AudioManifest.Event,
+        leftChannel: UnsafeMutablePointer<Float>,
+        rightChannel: UnsafeMutablePointer<Float>,
+        startFrame: Int,
+        endFrame: Int,
+        sampleRate: Double,
+        declickFrames: Int
+    ) {
+        let clockHz = max(1, min(event.frequencyHz ?? 4_096, sampleRate * MixDefaults.maxRenderableFrequencyRatio))
+        let stepDuration = 1 / clockHz
+        var nextStepTime = stepDuration
+        var lfsr = 0x7fff
+        var sampleValue = gbNoiseOutputLevel(lfsr: lfsr)
+
+        for frame in startFrame..<endFrame {
+            let localTime = Double(frame - startFrame) / sampleRate
+            while localTime >= nextStepTime {
+                lfsr = advancedNoiseLFSR(lfsr: lfsr, shortMode: event.noiseShortMode ?? false)
+                sampleValue = gbNoiseOutputLevel(lfsr: lfsr)
+                nextStepTime += stepDuration
+            }
+            mixSample(
+                sampleValue,
+                for: event,
+                leftChannel: leftChannel,
+                rightChannel: rightChannel,
+                frame: frame,
+                startFrame: startFrame,
+                endFrame: endFrame,
+                localTime: localTime,
+                declickFrames: declickFrames
+            )
+        }
+    }
+
+    nonisolated private static func mixSample(
+        _ sampleValue: Double,
+        for event: AudioManifest.Event,
+        leftChannel: UnsafeMutablePointer<Float>,
+        rightChannel: UnsafeMutablePointer<Float>,
+        frame: Int,
+        startFrame: Int,
+        endFrame: Int,
+        localTime: Double,
+        declickFrames: Int
+    ) {
+        let amplitude = envelopeAdjustedAmplitude(for: event, localTime: localTime)
+        let startDistance = frame - startFrame
+        let endDistance = (endFrame - 1) - frame
+        let edgeFrames = min(startDistance, endDistance)
+        let declickEnvelope: Float
+        if edgeFrames < declickFrames {
+            declickEnvelope = Float(edgeFrames + 1) / Float(declickFrames + 1)
+        } else {
+            declickEnvelope = 1
+        }
+
+        let sample = Float(sampleValue * amplitude) * MixDefaults.renderedSampleGain * declickEnvelope
+        if event.stereoLeftEnabled {
+            leftChannel[frame] += sample
+        }
+        if event.stereoRightEnabled {
+            rightChannel[frame] += sample
+        }
+    }
+
+    nonisolated private static func polyBLEP(phase: Double, phaseIncrement: Double) -> Double {
+        guard phaseIncrement > 0 else { return 0 }
+        if phase < phaseIncrement {
+            let t = phase / phaseIncrement
+            return t + t - t * t - 1
+        }
+        if phase > 1 - phaseIncrement {
+            let t = (phase - 1) / phaseIncrement
+            return t * t + t + t + 1
+        }
+        return 0
+    }
+
+    nonisolated private static func positiveFractionalPart(_ value: Double) -> Double {
+        let fractional = value.truncatingRemainder(dividingBy: 1)
+        return fractional >= 0 ? fractional : fractional + 1
+    }
+
+    nonisolated private static func advancedNoiseLFSR(lfsr: Int, shortMode: Bool) -> Int {
+        let feedbackBit = (lfsr ^ (lfsr >> 1)) & 0x1
+        var next = (lfsr >> 1) | (feedbackBit << 14)
+        if shortMode {
+            next = (next & ~(1 << 6)) | (feedbackBit << 6)
+        }
+        return next & 0x7fff
+    }
+
+    nonisolated private static func gbNoiseOutputLevel(lfsr: Int) -> Double {
+        (lfsr & 0x1) == 0 ? 1 : -1
+    }
+
+    nonisolated private static func conditionRenderedSamples(_ samples: inout [Float]) {
+        guard samples.isEmpty == false else { return }
+        var previousInput = 0.0
+        var previousOutput = 0.0
+        for index in samples.indices {
+            let input = Double(samples[index])
+            let output = input - previousInput + (MixDefaults.dcBlockPole * previousOutput)
+            previousInput = input
+            previousOutput = output
+            samples[index] = Float(output)
+        }
+    }
+
+    nonisolated private static func waveTableSample(_ waveSamples: [Double]?, phase: Double) -> Double {
+        guard let waveSamples, waveSamples.isEmpty == false else {
+            return sin(2 * .pi * phase)
+        }
+        let position = positiveFractionalPart(phase) * Double(waveSamples.count)
         let sampleIndex = Int(position.rounded(.down)) % waveSamples.count
-        return waveSamples[sampleIndex]
+        let nextIndex = (sampleIndex + 1) % waveSamples.count
+        let fraction = position - Double(sampleIndex)
+        let currentSample = waveSamples[sampleIndex]
+        let nextSample = waveSamples[nextIndex]
+        return currentSample + ((nextSample - currentSample) * fraction)
     }
 
     nonisolated private static func frequencyHz(forRegister hardwareRegister: Int, waveform: AudioManifest.Waveform) -> Double {
