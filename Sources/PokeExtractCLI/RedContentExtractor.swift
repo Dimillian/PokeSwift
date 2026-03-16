@@ -6,6 +6,7 @@ public enum RedContentExtractor {
     private static let sendOutPoofAssetPath = "Assets/battle/effects/send_out_poof.png"
     private static let legacyFieldAnimationDirectory = "Assets/field/animations"
     private static let tilesetAnimationDirectory = "Assets/field/tileset_animations"
+    private static let itemAssetDirectory = "Assets/items"
     private static let battleAnimationAssetMap: [(source: String, destination: String)] = [
         ("gfx/battle/move_anim_0.png", "Assets/battle/animations/move_anim_0.png"),
         ("gfx/battle/move_anim_1.png", "Assets/battle/animations/move_anim_1.png"),
@@ -88,6 +89,7 @@ public enum RedContentExtractor {
         try FileManager.default.createDirectory(at: variantRoot, withIntermediateDirectories: true, attributes: nil)
         try removeItemIfExists(at: variantRoot.appendingPathComponent(legacyFieldAnimationDirectory))
         try removeItemIfExists(at: variantRoot.appendingPathComponent(tilesetAnimationDirectory))
+        try removeItemIfExists(at: variantRoot.appendingPathComponent(itemAssetDirectory))
 
         let source = try SourceTree(repoRoot: configuration.repoRoot)
         let charmap = try parseCharmap(at: source.charmapURL)
@@ -129,6 +131,11 @@ public enum RedContentExtractor {
         for animationAsset in tilesetAnimationAssetMap {
             let sourceURL = configuration.repoRoot.appendingPathComponent(animationAsset.source)
             let destinationURL = variantRoot.appendingPathComponent(animationAsset.destination)
+            try copyAsset(from: sourceURL, to: destinationURL)
+        }
+        for itemAsset in pokespriteItemAssetMap(from: gameplayManifest.items) {
+            let sourceURL = configuration.repoRoot.appendingPathComponent(itemAsset.source)
+            let destinationURL = variantRoot.appendingPathComponent(itemAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
         try copyAsset(
@@ -231,6 +238,12 @@ public enum RedContentExtractor {
                 throw ExtractorError.missingOutput(url.path)
             }
         }
+        for itemAsset in pokespriteItemAssetMap(from: gameplayManifest.items) {
+            let url = variantRoot.appendingPathComponent(itemAsset.destination)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                throw ExtractorError.missingOutput(url.path)
+            }
+        }
 
         let sendOutPoofURL = variantRoot.appendingPathComponent(sendOutPoofAssetPath)
         guard FileManager.default.fileExists(atPath: sendOutPoofURL.path) else {
@@ -244,7 +257,7 @@ public enum RedContentExtractor {
 
     private static func makeGameManifest(source: SourceTree) -> GameManifest {
         GameManifest(
-            contentVersion: "m5-red-coverage-v1",
+            contentVersion: "m6_5_red_bag_grid_v1",
             variant: .red,
             sourceCommit: source.gitCommit,
             extractorVersion: extractorVersion,

@@ -214,10 +214,10 @@ public enum GameplaySidebarPropsBuilder {
         }
     }
 
-    public static func makeInventory(items: [InventorySidebarItemProps] = []) -> InventorySidebarProps {
+    public static func makeInventory(sections: [InventorySidebarSectionProps] = []) -> InventorySidebarProps {
         InventorySidebarProps(
             title: "Bag",
-            items: items,
+            sections: sections,
             emptyStateTitle: "No items yet",
             emptyStateDetail: "No items collected in the current save."
         )

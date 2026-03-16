@@ -1,11 +1,26 @@
 import SwiftUI
 import PokeRender
 
-struct InventorySidebarContent: View {
+private enum InventorySidebarLayout {
+    static let columns = Array(
+        repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 6, alignment: .top),
+        count: 4
+    )
+    static let tileMinHeight: CGFloat = 76
+    static let iconTileSize: CGFloat = 24
+    static let hoverCardIconSize: CGFloat = 62
+    static let hoverCardWidth: CGFloat = 248
+}
+
+public struct InventorySidebarContent: View {
     let props: InventorySidebarProps
 
-    var body: some View {
-        if props.items.isEmpty {
+    public init(props: InventorySidebarProps) {
+        self.props = props
+    }
+
+    public var body: some View {
+        if itemCount == 0 {
             VStack(alignment: .leading, spacing: 6) {
                 GameBoyPixelText(
                     props.emptyStateTitle.uppercased(),
@@ -22,24 +37,298 @@ struct InventorySidebarContent: View {
             .padding(.vertical, 6)
         } else {
             ScrollView {
-                LazyVStack(spacing: 8) {
-                    ForEach(props.items) { item in
-                        GameplaySidebarInsetSurface {
-                            HStack(spacing: 12) {
-                                Text(item.name.uppercased())
-                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                    .foregroundStyle(FieldRetroPalette.ink)
-                                Spacer(minLength: 8)
-                                Text(item.quantityText)
-                                    .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(FieldRetroPalette.ink.opacity(0.7))
-                            }
-                        }
+                LazyVStack(alignment: .leading, spacing: 10) {
+                    ForEach(props.sections) { section in
+                        InventorySidebarSection(section: section)
                     }
                 }
             }
             .frame(maxHeight: GameplayFieldMetrics.inventoryExpandedMaxHeight)
             .scrollIndicators(.hidden)
+            .gameplayHoverCardHost()
+        }
+    }
+
+    private var itemCount: Int {
+        props.sections.reduce(0) { $0 + $1.items.count }
+    }
+}
+
+private struct InventorySidebarSection: View {
+    let section: InventorySidebarSectionProps
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 8) {
+                GameBoyPixelText(
+                    section.title.uppercased(),
+                    scale: 1.0,
+                    color: FieldRetroPalette.ink,
+                    fallbackFont: .system(size: 10, weight: .bold, design: .monospaced)
+                )
+
+                Capsule(style: .continuous)
+                    .fill(FieldRetroPalette.ink.opacity(0.16))
+                    .frame(height: 1.5)
+            }
+
+            LazyVGrid(columns: InventorySidebarLayout.columns, spacing: 6) {
+                ForEach(section.items) { item in
+                    InventorySidebarTile(item: item)
+                }
+            }
+        }
+    }
+}
+
+private struct InventorySidebarTile: View {
+    let item: InventorySidebarItemProps
+
+    @State private var isHovered = false
+
+    private var isActiveTile: Bool {
+        isHovered || item.isFocused
+    }
+
+    var body: some View {
+        HoverCardPresenter(
+            isPresented: showsHoverCard,
+            cardSide: .leading,
+            cardWidth: InventorySidebarLayout.hoverCardWidth,
+            spacing: GameplayFieldMetrics.hoverCardSpacing
+        ) {
+            VStack(spacing: 4) {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    Text(item.quantityText.uppercased())
+                        .font(.system(size: 6, weight: .bold, design: .monospaced))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.72))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2.5)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(FieldRetroPalette.slotFill.opacity(isActiveTile ? 0.94 : 0.78))
+                        )
+                        .overlay {
+                            Capsule(style: .continuous)
+                                .stroke(
+                                    FieldRetroPalette.ink.opacity(isActiveTile ? 0.14 : 0.08),
+                                    lineWidth: 0.75
+                                )
+                        }
+                }
+                .padding(.top, 1)
+                .padding(.trailing, 1)
+                .frame(height: 12)
+
+                InventorySidebarIconTile(
+                    iconURL: item.iconURL,
+                    label: item.name,
+                    size: InventorySidebarLayout.iconTileSize,
+                    showsBackground: false
+                )
+                .frame(maxWidth: .infinity)
+
+                Text(item.name.uppercased())
+                    .font(.system(size: 6.5, weight: .bold, design: .monospaced))
+                    .foregroundStyle(FieldRetroPalette.ink)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.55)
+                    .frame(maxWidth: .infinity, minHeight: 18, alignment: .top)
+            }
+            .padding(.horizontal, 5)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, minHeight: InventorySidebarLayout.tileMinHeight, alignment: .top)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                FieldRetroPalette.slotFill.opacity(isActiveTile ? 0.92 : 0.78),
+                                FieldRetroPalette.cardFill.opacity(isActiveTile ? 0.64 : 0.46),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(
+                        isActiveTile ? FieldRetroPalette.ink.opacity(0.26) : FieldRetroPalette.outline.opacity(0.12),
+                        lineWidth: isActiveTile ? 1.5 : 1
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                            .stroke(.white.opacity(isActiveTile ? 0.22 : 0.08), lineWidth: 0.75)
+                            .padding(3)
+                    }
+            }
+            .overlay(alignment: .bottom) {
+                Capsule(style: .continuous)
+                    .fill(FieldRetroPalette.ink.opacity(isActiveTile ? 0.34 : 0))
+                    .frame(width: 18, height: 2.5)
+                    .padding(.bottom, 4)
+            }
+            .glassEffect(
+                .regular.tint(isActiveTile ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint.opacity(0.5)),
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
+            .shadow(
+                color: isActiveTile ? FieldRetroPalette.shellBackdropShadow.opacity(0.18) : .clear,
+                radius: 6,
+                y: 2
+            )
+            .contentShape(.rect)
+            .onHover(perform: updateHoverState)
+        } hoverCard: {
+            InventorySidebarHoverCard(item: item)
+        }
+        .zIndex(showsHoverCard ? 1 : 0)
+    }
+
+    private var showsHoverCard: Bool {
+        isActiveTile
+    }
+
+    private func updateHoverState(_ hovering: Bool) {
+        withAnimation(.easeOut(duration: 0.14)) {
+            isHovered = hovering
+        }
+    }
+}
+
+private struct InventorySidebarIconTile: View {
+    let iconURL: URL?
+    let label: String
+    let size: CGFloat
+    let showsBackground: Bool
+
+    var body: some View {
+        Group {
+            if showsBackground {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(FieldRetroPalette.portraitFill)
+
+                    iconContent
+                        .padding(size * 0.12)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(FieldRetroPalette.outline.opacity(0.1), lineWidth: 1)
+                }
+                .glassEffect(
+                    .regular.tint(FieldRetroPalette.accentGlassTint),
+                    in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                )
+            } else {
+                iconContent
+            }
+        }
+        .frame(width: size, height: size)
+    }
+
+    @ViewBuilder
+    private var iconContent: some View {
+        if let iconURL {
+            PixelAssetView(url: iconURL, label: label)
+        } else {
+            Text(String(label.prefix(2)).uppercased())
+                .font(.system(size: size * 0.34, weight: .black, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink)
+        }
+    }
+}
+
+private struct InventorySidebarHoverCard: View {
+    let item: InventorySidebarItemProps
+
+    private let insetPadding = EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10)
+
+    var body: some View {
+        GameplayHoverCardSurface(padding: 16) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 10) {
+                    InventorySidebarIconTile(
+                        iconURL: item.iconURL,
+                        label: item.name,
+                        size: InventorySidebarLayout.hoverCardIconSize,
+                        showsBackground: true
+                    )
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(item.name.uppercased())
+                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .foregroundStyle(FieldRetroPalette.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        PartyPokemonCompactChipSurface(
+                            backgroundColor: FieldRetroPalette.slotFill.opacity(0.82),
+                            tint: FieldRetroPalette.interactiveGlassTint
+                        ) {
+                            Text(item.quantityText.uppercased())
+                                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                .foregroundStyle(FieldRetroPalette.ink.opacity(0.82))
+                        }
+                    }
+                }
+
+                GameplaySidebarInsetSurface(
+                    padding: insetPadding,
+                    tint: FieldRetroPalette.interactiveGlassTint
+                ) {
+                    Text(item.descriptionText)
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(FieldRetroPalette.ink.opacity(0.72))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if let tmhm = item.tmhm {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("MOVE")
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.56))
+
+                        GameplaySidebarInsetSurface(
+                            padding: insetPadding,
+                            tint: FieldRetroPalette.interactiveGlassTint
+                        ) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(tmhm.moveName.uppercased())
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(FieldRetroPalette.ink)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.72)
+
+                                GlassEffectContainer(spacing: 6) {
+                                    HStack(spacing: 4) {
+                                        InventorySidebarMetadataChip(text: tmhm.typeLabel.uppercased())
+                                        InventorySidebarMetadataChip(text: tmhm.maxPPText.uppercased())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct InventorySidebarMetadataChip: View {
+    let text: String
+
+    var body: some View {
+        GameplaySidebarChipSurface(
+            backgroundColor: FieldRetroPalette.slotFill.opacity(0.86),
+            tint: FieldRetroPalette.interactiveGlassTint
+        ) {
+            Text(text)
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(FieldRetroPalette.ink.opacity(0.76))
+                .lineLimit(1)
         }
     }
 }

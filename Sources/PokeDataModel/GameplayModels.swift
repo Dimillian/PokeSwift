@@ -1412,6 +1412,13 @@ public struct BlackoutCheckpointManifest: Codable, Equatable, Sendable {
 }
 
 public struct ItemManifest: Codable, Equatable, Sendable {
+    public enum BagSection: String, Codable, Equatable, Sendable, CaseIterable {
+        case items
+        case balls
+        case keyItems
+        case tmhm
+    }
+
     public enum BattleUseKind: String, Codable, Equatable, Sendable {
         case none
         case ball
@@ -1421,6 +1428,10 @@ public struct ItemManifest: Codable, Equatable, Sendable {
     public let displayName: String
     public let price: Int
     public let isKeyItem: Bool
+    public let bagSection: BagSection
+    public let shortDescription: String?
+    public let iconAssetPath: String?
+    public let tmhmMoveID: String?
     public let battleUse: BattleUseKind
 
     public init(
@@ -1428,12 +1439,20 @@ public struct ItemManifest: Codable, Equatable, Sendable {
         displayName: String,
         price: Int = 0,
         isKeyItem: Bool = false,
+        bagSection: BagSection = .items,
+        shortDescription: String? = nil,
+        iconAssetPath: String? = nil,
+        tmhmMoveID: String? = nil,
         battleUse: BattleUseKind = .none
     ) {
         self.id = id
         self.displayName = displayName
         self.price = price
         self.isKeyItem = isKeyItem
+        self.bagSection = bagSection
+        self.shortDescription = shortDescription
+        self.iconAssetPath = iconAssetPath
+        self.tmhmMoveID = tmhmMoveID
         self.battleUse = battleUse
     }
 }

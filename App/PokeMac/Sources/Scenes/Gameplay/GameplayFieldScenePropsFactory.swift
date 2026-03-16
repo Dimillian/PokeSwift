@@ -23,14 +23,9 @@ enum GameplayScenePropsFactory {
         case .fieldLike:
             let fieldState = runtime.currentFieldSceneState()
             let evolutionState = runtime.currentEvolutionSceneState()
-            let sidebarInventory = GameplaySidebarPropsBuilder.makeInventory(
-                items: fieldState.inventory?.items.map {
-                    InventorySidebarItemProps(
-                        id: $0.itemID,
-                        name: $0.displayName,
-                        quantityText: "x\($0.quantity)"
-                    )
-                } ?? []
+            let sidebarInventory = makeInventorySidebar(
+                from: fieldState.inventory?.items ?? [],
+                manifestIndex: manifestIndex
             )
 
             let pokedexSidebar = GameplaySidebarPropsBuilder.makePokedex(
@@ -171,8 +166,13 @@ enum GameplayScenePropsFactory {
                         battleAnimationTilesetURLs: battleAnimationTilesetURLs,
                         playerSpriteURL: playerSpriteURL,
                         enemySpriteURL: enemySpriteURL,
-                        bagItems: battle.bagItems,
-                        focusedBagItemIndex: battle.focusedBagItemIndex,
+                        bag: makeInventorySidebar(
+                            from: battle.bagItems,
+                            manifestIndex: manifestIndex,
+                            focusedItemID: battle.bagItems.indices.contains(battle.focusedBagItemIndex)
+                                ? battle.bagItems[battle.focusedBagItemIndex].itemID
+                                : nil
+                        ),
                         presentation: battle.presentation,
                         nicknameConfirmation: nicknameConfirmation
                     )
@@ -325,11 +325,51 @@ enum GameplayScenePropsFactory {
             ]
         )
     }
+
+    private static func makeInventorySidebar(
+        from items: [InventoryItemTelemetry],
+        manifestIndex: GameplaySidebarManifestIndex,
+        focusedItemID: String? = nil
+    ) -> InventorySidebarProps {
+        var itemsBySection: [ItemManifest.BagSection: [InventorySidebarItemProps]] = [:]
+
+        for item in items {
+            guard let catalogItem = manifestIndex.itemDetailsByID[item.itemID] else {
+                continue
+            }
+
+            itemsBySection[catalogItem.bagSection, default: []].append(
+                InventorySidebarItemProps(
+                    id: item.itemID,
+                    name: catalogItem.displayName,
+                    quantityText: "x\(item.quantity)",
+                    iconURL: catalogItem.iconURL,
+                    descriptionText: catalogItem.descriptionText,
+                    tmhm: catalogItem.tmhm,
+                    isFocused: item.itemID == focusedItemID
+                )
+            )
+        }
+
+        let sections = ItemManifest.BagSection.allCases.compactMap { section -> InventorySidebarSectionProps? in
+            guard let sectionItems = itemsBySection[section], sectionItems.isEmpty == false else {
+                return nil
+            }
+            return InventorySidebarSectionProps(
+                id: section.rawValue,
+                title: section.sidebarTitle,
+                items: sectionItems
+            )
+        }
+
+        return GameplaySidebarPropsBuilder.makeInventory(sections: sections)
+    }
 }
 
 @MainActor
 struct GameplaySidebarManifestIndex {
     let speciesDetailsByID: [String: PartySidebarSpeciesDetails]
+    let itemDetailsByID: [String: InventoryCatalogItemData]
     let moveDetailsByID: [String: PartySidebarMoveDetails]
     let pokedexSpeciesList: [GameplaySidebarPropsBuilder.PokedexSpeciesData]
 
@@ -369,6 +409,31 @@ struct GameplaySidebarManifestIndex {
             }
         )
         self.moveDetailsByID = moveDetailsByID
+
+        itemDetailsByID = Dictionary(
+            uniqueKeysWithValues: runtime.content.gameplayManifest.items.map { item in
+                let tmhm = item.tmhmMoveID
+                    .flatMap { moveID in moveDetailsByID[moveID].map { (moveID, $0) } }
+                    .map { _, moveDetails in
+                        InventorySidebarTMHMProps(
+                            moveName: moveDetails.displayName,
+                            typeLabel: moveDetails.typeLabel ?? "UNKNOWN",
+                            maxPPText: "PP \(moveDetails.maxPP ?? 0)"
+                        )
+                    }
+
+                return (
+                    item.id,
+                    InventoryCatalogItemData(
+                        displayName: item.displayName,
+                        bagSection: item.bagSection,
+                        iconURL: item.iconAssetPath.map { runtime.content.rootURL.appendingPathComponent($0) },
+                        descriptionText: item.shortDescription ?? "A useful item for battle, healing, or travel.",
+                        tmhm: tmhm
+                    )
+                )
+            }
+        )
 
         let preEvolutionBySpeciesID = runtime.content.gameplayManifest.species.reduce(
             into: [String: PokedexSidebarEvolutionProps]()
@@ -475,5 +540,28 @@ struct GameplaySidebarManifestIndex {
             .split(separator: "_")
             .map { $0.capitalized }
             .joined(separator: " ")
+    }
+}
+
+struct InventoryCatalogItemData {
+    let displayName: String
+    let bagSection: ItemManifest.BagSection
+    let iconURL: URL?
+    let descriptionText: String
+    let tmhm: InventorySidebarTMHMProps?
+}
+
+private extension ItemManifest.BagSection {
+    var sidebarTitle: String {
+        switch self {
+        case .items:
+            return "Items"
+        case .balls:
+            return "Balls"
+        case .keyItems:
+            return "Key Items"
+        case .tmhm:
+            return "TM/HM"
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
-  "contentVersion" : "m5-red-coverage-v1",
+  "contentVersion" : "m6_5_red_bag_grid_v1",
   "extractorVersion" : "0.1.0",
-  "sourceCommit" : "9d43b1eedde0",
+  "sourceCommit" : "fd7d025a35f6",
   "sourceFiles" : [
     {
       "path" : "constants/charmap.asm",

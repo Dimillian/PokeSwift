@@ -67,6 +67,14 @@ Instead:
 
 This keeps the disassembly authoritative while letting the macOS app stay native and testable.
 
+## Supplemental Item Sprites
+
+The bag UI also uses a checked-in subset of inventory item sprites sourced from [msikma/pokesprite](https://github.com/msikma/pokesprite).
+
+- Vendored source sprites live under `ThirdParty/PokeSprite/`.
+- The extractor copies only the referenced subset into generated runtime content under `Content/Red/Assets/items/`.
+- The upstream PokéSprite repository includes the sprite database and inventory icon set used for these supplemental bag assets.
+
 ## Original Disassembly And ROM Builds
 
 This repo still builds the original ROM targets:

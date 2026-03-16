@@ -10,7 +10,7 @@ enum GameplayFieldMetrics {
     static let interColumnSpacing: CGFloat = 20
     static let sidebarSectionSpacing: CGFloat = 12
     static let hoverCardSpacing: CGFloat = 22
-    static let inventoryExpandedMaxHeight: CGFloat = 210
+    static let inventoryExpandedMaxHeight: CGFloat = 350
     static let optionsExpandedMaxHeight: CGFloat = 320
     static let glassMergeSpacing: CGFloat = 16
     static let compactPartyThreshold = 3

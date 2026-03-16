@@ -57,11 +57,10 @@ struct BattleStageView: View {
     @ViewBuilder
     private var overlayContent: some View {
         if props.phase == "bagSelection" &&
-            props.bagItems.isEmpty == false &&
+            props.bag.sections.isEmpty == false &&
             props.presentation.uiVisibility == .visible {
             BattleBagOverlayPanel(
-                items: props.bagItems,
-                focusedIndex: props.focusedBagItemIndex
+                bag: props.bag
             )
             .frame(width: GameplayBattleStageLayout.bagOverlayWidth)
         }
@@ -69,8 +68,7 @@ struct BattleStageView: View {
 }
 
 private struct BattleBagOverlayPanel: View {
-    let items: [InventoryItemTelemetry]
-    let focusedIndex: Int
+    let bag: InventorySidebarProps
 
     var body: some View {
         GameplayHoverCardSurface {
@@ -78,18 +76,7 @@ private struct BattleBagOverlayPanel: View {
                 Text("BAG")
                     .font(.system(size: 16, weight: .bold, design: .monospaced))
                     .foregroundStyle(GameplayFieldStyleTokens.ink)
-                ForEach(Array(items.enumerated()), id: \.element.itemID) { index, item in
-                    HStack(spacing: 10) {
-                        Text(index == focusedIndex ? "▶" : " ")
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                        Text(item.displayName.uppercased())
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
-                        Spacer(minLength: 8)
-                        Text("x\(item.quantity)")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    }
-                    .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(index == focusedIndex ? 1 : 0.78))
-                }
+                InventorySidebarContent(props: bag)
             }
         }
     }

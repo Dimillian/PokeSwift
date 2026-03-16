@@ -298,6 +298,34 @@ extension PokeUITests {
     XCTAssertEqual(profile.statusItems, ["FIELD", "X4 Y4", "DOWN"])
     XCTAssertTrue(party.pokemon.isEmpty)
     XCTAssertEqual(inventory.emptyStateTitle, "No items yet")
+    XCTAssertTrue(inventory.sections.isEmpty)
+  }
+  func testInventoryBuilderPreservesSectionedBagMetadata() {
+    let inventory = GameplaySidebarPropsBuilder.makeInventory(
+      sections: [
+        .init(
+          id: "tmhm",
+          title: "TM/HM",
+          items: [
+            .init(
+              id: "TM_BUBBLEBEAM",
+              name: "TM11",
+              quantityText: "x1",
+              iconURL: URL(fileURLWithPath: "/tmp/tm-water.png"),
+              descriptionText: "A technical machine that teaches BUBBLEBEAM.",
+              tmhm: .init(moveName: "BUBBLEBEAM", typeLabel: "WATER", maxPPText: "PP 20"),
+              isFocused: true
+            )
+          ]
+        )
+      ]
+    )
+
+    XCTAssertEqual(inventory.sections.map(\.title), ["TM/HM"])
+    XCTAssertEqual(inventory.sections.first?.items.first?.descriptionText, "A technical machine that teaches BUBBLEBEAM.")
+    XCTAssertEqual(inventory.sections.first?.items.first?.tmhm?.moveName, "BUBBLEBEAM")
+    XCTAssertEqual(inventory.sections.first?.items.first?.tmhm?.typeLabel, "WATER")
+    XCTAssertTrue(inventory.sections.first?.items.first?.isFocused == true)
   }
   func testPokedexSidebarBuilderIncludesStructuredDetailFields() {
     let props = GameplaySidebarPropsBuilder.makePokedex(

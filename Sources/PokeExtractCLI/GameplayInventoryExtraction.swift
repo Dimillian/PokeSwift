@@ -5,14 +5,32 @@ func buildItems(repoRoot: URL) throws -> [ItemManifest] {
     let namesByID = try parseItemNames(repoRoot: repoRoot)
     let keyItemIDs = try parseKeyItemIDs(repoRoot: repoRoot)
     let pricesByID = try parseItemPrices(repoRoot: repoRoot)
+    let movesByID = Dictionary(uniqueKeysWithValues: try buildMoves(repoRoot: repoRoot).map { ($0.id, $0) })
+    let tmhmMoveIDByItemID = try parseTMHMMoveIDs(repoRoot: repoRoot)
 
     return try parseDefinedItemIDs(repoRoot: repoRoot).map { itemID in
-        ItemManifest(
+        let battleUse = battleUseKind(for: itemID)
+        let tmhmMoveID = tmhmMoveIDByItemID[itemID]
+        let move = tmhmMoveID.flatMap { movesByID[$0] }
+        let supplementalMetadata = buildSupplementalItemMetadata(
+            itemID: itemID,
+            displayName: namesByID[itemID] ?? itemID,
+            isKeyItem: keyItemIDs.contains(itemID),
+            battleUse: battleUse,
+            tmhmMoveID: tmhmMoveID,
+            tmhmMoveDisplayName: move?.displayName,
+            tmhmMoveType: move?.type
+        )
+        return ItemManifest(
             id: itemID,
             displayName: namesByID[itemID] ?? itemID,
             price: pricesByID[itemID] ?? 0,
             isKeyItem: keyItemIDs.contains(itemID),
-            battleUse: battleUseKind(for: itemID)
+            bagSection: supplementalMetadata.bagSection,
+            shortDescription: supplementalMetadata.shortDescription,
+            iconAssetPath: supplementalMetadata.iconAssetPath,
+            tmhmMoveID: supplementalMetadata.tmhmMoveID,
+            battleUse: battleUse
         )
     }
 }
@@ -237,6 +255,27 @@ private func parseTMPrices(repoRoot: URL) throws -> [String: Int] {
         }
 
     return Dictionary(uniqueKeysWithValues: zip(tmIDs, tmPrices))
+}
+
+private func parseTMHMMoveIDs(repoRoot: URL) throws -> [String: String] {
+    let constants = try String(contentsOf: repoRoot.appendingPathComponent("constants/item_constants.asm"))
+    var result: [String: String] = [:]
+
+    for rawLine in constants.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine.split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false).first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        if let match = line.firstMatch(of: /add_hm\s+([A-Z0-9_]+)/) {
+            result["HM_\(match.output.1)"] = String(match.output.1)
+            continue
+        }
+
+        if let match = line.firstMatch(of: /add_tm\s+([A-Z0-9_]+)/) {
+            result["TM_\(match.output.1)"] = String(match.output.1)
+        }
+    }
+
+    return result
 }
 
 private func battleUseKind(for itemID: String) -> ItemManifest.BattleUseKind {

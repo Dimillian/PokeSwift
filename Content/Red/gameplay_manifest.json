@@ -11407,746 +11407,1073 @@
   ],
   "items" : [
     {
+      "bagSection" : "balls",
       "battleUse" : "ball",
       "displayName" : "MASTER BALL",
+      "iconAssetPath" : "Assets/items/ball/master.png",
       "id" : "MASTER_BALL",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "The best Ball. It catches a wild Pokemon without fail."
     },
     {
+      "bagSection" : "balls",
       "battleUse" : "ball",
       "displayName" : "ULTRA BALL",
+      "iconAssetPath" : "Assets/items/ball/ultra.png",
       "id" : "ULTRA_BALL",
       "isKeyItem" : false,
-      "price" : 1200
+      "price" : 1200,
+      "shortDescription" : "A high-performance Ball with a very good catch rate."
     },
     {
+      "bagSection" : "balls",
       "battleUse" : "ball",
       "displayName" : "GREAT BALL",
+      "iconAssetPath" : "Assets/items/ball/great.png",
       "id" : "GREAT_BALL",
       "isKeyItem" : false,
-      "price" : 600
+      "price" : 600,
+      "shortDescription" : "A good Ball with a better catch rate than a Poke Ball."
     },
     {
+      "bagSection" : "balls",
       "battleUse" : "ball",
       "displayName" : "POKé BALL",
+      "iconAssetPath" : "Assets/items/ball/poke.png",
       "id" : "POKE_BALL",
       "isKeyItem" : false,
-      "price" : 200
+      "price" : 200,
+      "shortDescription" : "A standard Ball used to catch wild Pokemon."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "TOWN MAP",
+      "iconAssetPath" : "Assets/items/key-item/town-map.png",
       "id" : "TOWN_MAP",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A convenient map of the Kanto region."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "BICYCLE",
+      "iconAssetPath" : "Assets/items/key-item/bicycle.png",
       "id" : "BICYCLE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A folding bike that lets you move much faster than walking."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "?????",
+      "iconAssetPath" : "Assets/items/key-item/aqua-suit.png",
       "id" : "SURFBOARD",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An unused surfboard entry left behind in Red's item table."
     },
     {
+      "bagSection" : "balls",
       "battleUse" : "ball",
       "displayName" : "SAFARI BALL",
+      "iconAssetPath" : "Assets/items/ball/safari.png",
       "id" : "SAFARI_BALL",
       "isKeyItem" : true,
-      "price" : 1000
+      "price" : 1000,
+      "shortDescription" : "A special Ball supplied for use in the Safari Zone."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "POKéDEX",
+      "iconAssetPath" : "Assets/field/sprites/pokedex.png",
       "id" : "POKEDEX",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A hi-tech encyclopedia for recording Pokemon data."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MOON STONE",
+      "iconAssetPath" : "Assets/items/evo-item/moon-stone.png",
       "id" : "MOON_STONE",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A peculiar stone that can trigger certain evolutions."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "ANTIDOTE",
+      "iconAssetPath" : "Assets/items/medicine/antidote.png",
       "id" : "ANTIDOTE",
       "isKeyItem" : false,
-      "price" : 100
+      "price" : 100,
+      "shortDescription" : "A spray medicine that cures poisoning."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "BURN HEAL",
+      "iconAssetPath" : "Assets/items/medicine/burn-heal.png",
       "id" : "BURN_HEAL",
       "isKeyItem" : false,
-      "price" : 250
+      "price" : 250,
+      "shortDescription" : "A spray medicine that heals a burn."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "ICE HEAL",
+      "iconAssetPath" : "Assets/items/medicine/ice-heal.png",
       "id" : "ICE_HEAL",
       "isKeyItem" : false,
-      "price" : 250
+      "price" : 250,
+      "shortDescription" : "A spray medicine that thaws a frozen Pokemon."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "AWAKENING",
+      "iconAssetPath" : "Assets/items/medicine/awakening.png",
       "id" : "AWAKENING",
       "isKeyItem" : false,
-      "price" : 200
+      "price" : 200,
+      "shortDescription" : "A medicine that wakes a sleeping Pokemon."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "PARLYZ HEAL",
+      "iconAssetPath" : "Assets/items/medicine/paralyze-heal.png",
       "id" : "PARLYZ_HEAL",
       "isKeyItem" : false,
-      "price" : 200
+      "price" : 200,
+      "shortDescription" : "A medicine that cures paralysis."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "FULL RESTORE",
+      "iconAssetPath" : "Assets/items/medicine/full-restore.png",
       "id" : "FULL_RESTORE",
       "isKeyItem" : false,
-      "price" : 3000
+      "price" : 3000,
+      "shortDescription" : "Fully restores HP and cures all major status problems."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MAX POTION",
+      "iconAssetPath" : "Assets/items/medicine/max-potion.png",
       "id" : "MAX_POTION",
       "isKeyItem" : false,
-      "price" : 2500
+      "price" : 2500,
+      "shortDescription" : "Fully restores a Pokemon's HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "HYPER POTION",
+      "iconAssetPath" : "Assets/items/medicine/hyper-potion.png",
       "id" : "HYPER_POTION",
       "isKeyItem" : false,
-      "price" : 1500
+      "price" : 1500,
+      "shortDescription" : "Restores a large amount of HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "SUPER POTION",
+      "iconAssetPath" : "Assets/items/medicine/super-potion.png",
       "id" : "SUPER_POTION",
       "isKeyItem" : false,
-      "price" : 700
+      "price" : 700,
+      "shortDescription" : "Restores a healthy amount of HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "POTION",
+      "iconAssetPath" : "Assets/items/medicine/potion.png",
       "id" : "POTION",
       "isKeyItem" : false,
-      "price" : 300
+      "price" : 300,
+      "shortDescription" : "Restores a little HP."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "BOULDERBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "BOULDERBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Brock in Pewter Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "CASCADEBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "CASCADEBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Misty in Cerulean Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "THUNDERBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "THUNDERBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Lt. Surge in Vermilion Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "RAINBOWBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "RAINBOWBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Erika in Celadon Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "SOULBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "SOULBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Koga in Fuchsia Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "MARSHBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "MARSHBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Sabrina in Saffron Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "VOLCANOBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "VOLCANOBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Blaine in Cinnabar Gym."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "EARTHBADGE",
+      "iconAssetPath" : "Assets/items/key-item/surge-badge.png",
       "id" : "EARTHBADGE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Proof of victory over Giovanni in Viridian Gym."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "ESCAPE ROPE",
+      "iconAssetPath" : "Assets/items/other-item/escape-rope.png",
       "id" : "ESCAPE_ROPE",
       "isKeyItem" : false,
-      "price" : 550
+      "price" : 550,
+      "shortDescription" : "A sturdy rope that helps you quickly escape a cave or dungeon."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "REPEL",
+      "iconAssetPath" : "Assets/items/other-item/repel.png",
       "id" : "REPEL",
       "isKeyItem" : false,
-      "price" : 350
+      "price" : 350,
+      "shortDescription" : "Keeps weak wild Pokemon away for a while."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "OLD AMBER",
+      "iconAssetPath" : "Assets/items/fossil/old-amber.png",
       "id" : "OLD_AMBER",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A piece of ancient amber that may contain extinct Pokemon DNA."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "FIRE STONE",
+      "iconAssetPath" : "Assets/items/evo-item/fire-stone.png",
       "id" : "FIRE_STONE",
       "isKeyItem" : false,
-      "price" : 2100
+      "price" : 2100,
+      "shortDescription" : "A stone that can trigger certain Fire-type evolutions."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "THUNDERSTONE",
+      "iconAssetPath" : "Assets/items/evo-item/thunder-stone.png",
       "id" : "THUNDER_STONE",
       "isKeyItem" : false,
-      "price" : 2100
+      "price" : 2100,
+      "shortDescription" : "A stone that can trigger certain Electric-type evolutions."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "WATER STONE",
+      "iconAssetPath" : "Assets/items/evo-item/water-stone.png",
       "id" : "WATER_STONE",
       "isKeyItem" : false,
-      "price" : 2100
+      "price" : 2100,
+      "shortDescription" : "A stone that can trigger certain Water-type evolutions."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "HP UP",
+      "iconAssetPath" : "Assets/items/medicine/hp-up.png",
       "id" : "HP_UP",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises a Pokemon's maximum HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "PROTEIN",
+      "iconAssetPath" : "Assets/items/medicine/protein.png",
       "id" : "PROTEIN",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises a Pokemon's Attack stat."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "IRON",
+      "iconAssetPath" : "Assets/items/medicine/iron.png",
       "id" : "IRON",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises a Pokemon's Defense stat."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "CARBOS",
+      "iconAssetPath" : "Assets/items/medicine/carbos.png",
       "id" : "CARBOS",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises a Pokemon's Speed stat."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "CALCIUM",
+      "iconAssetPath" : "Assets/items/medicine/calcium.png",
       "id" : "CALCIUM",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises a Pokemon's Special stat."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "RARE CANDY",
+      "iconAssetPath" : "Assets/items/medicine/rare-candy.png",
       "id" : "RARE_CANDY",
       "isKeyItem" : false,
-      "price" : 4800
+      "price" : 4800,
+      "shortDescription" : "Raises a Pokemon's level by one."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "DOME FOSSIL",
+      "iconAssetPath" : "Assets/items/fossil/dome.png",
       "id" : "DOME_FOSSIL",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A fossil that can be revived into an ancient Pokemon."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "HELIX FOSSIL",
+      "iconAssetPath" : "Assets/items/fossil/helix.png",
       "id" : "HELIX_FOSSIL",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A fossil that can be revived into an ancient Pokemon."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "SECRET KEY",
+      "iconAssetPath" : "Assets/items/key-item/storage-key.png",
       "id" : "SECRET_KEY",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Opens the locked door in the Pokemon Mansion."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "?????",
+      "iconAssetPath" : "Assets/items/key-item/data-card.png",
       "id" : "ITEM_2C",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An unused item entry left in Red's item table."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "BIKE VOUCHER",
+      "iconAssetPath" : "Assets/items/key-item/bike-voucher.png",
       "id" : "BIKE_VOUCHER",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Exchange this voucher for a Bicycle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "X ACCURACY",
+      "iconAssetPath" : "Assets/items/battle-item/x-accuracy.png",
       "id" : "X_ACCURACY",
       "isKeyItem" : false,
-      "price" : 950
+      "price" : 950,
+      "shortDescription" : "Sharply boosts accuracy for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "LEAF STONE",
+      "iconAssetPath" : "Assets/items/evo-item/leaf-stone.png",
       "id" : "LEAF_STONE",
       "isKeyItem" : false,
-      "price" : 2100
+      "price" : 2100,
+      "shortDescription" : "A stone that can trigger certain Grass-type evolutions."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "CARD KEY",
+      "iconAssetPath" : "Assets/items/key-item/card-key.png",
       "id" : "CARD_KEY",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Unlocks electronic doors inside Silph Co."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "NUGGET",
+      "iconAssetPath" : "Assets/items/valuable-item/nugget.png",
       "id" : "NUGGET",
       "isKeyItem" : false,
-      "price" : 10000
+      "price" : 10000,
+      "shortDescription" : "A nugget of pure gold that sells for a high price."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "PP UP",
+      "iconAssetPath" : "Assets/items/medicine/pp-up.png",
       "id" : "ITEM_32",
       "isKeyItem" : false,
-      "price" : 9800
+      "price" : 9800,
+      "shortDescription" : "Raises the PP of one move."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "POKé DOLL",
+      "iconAssetPath" : "Assets/items/other-item/poke-doll.png",
       "id" : "POKE_DOLL",
       "isKeyItem" : false,
-      "price" : 1000
+      "price" : 1000,
+      "shortDescription" : "A cute doll that can distract wild Pokemon and help you flee."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "FULL HEAL",
+      "iconAssetPath" : "Assets/items/medicine/full-heal.png",
       "id" : "FULL_HEAL",
       "isKeyItem" : false,
-      "price" : 600
+      "price" : 600,
+      "shortDescription" : "Cures any major status problem."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "REVIVE",
+      "iconAssetPath" : "Assets/items/medicine/revive.png",
       "id" : "REVIVE",
       "isKeyItem" : false,
-      "price" : 1500
+      "price" : 1500,
+      "shortDescription" : "Revives a fainted Pokemon with some HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MAX REVIVE",
+      "iconAssetPath" : "Assets/items/medicine/max-revive.png",
       "id" : "MAX_REVIVE",
       "isKeyItem" : false,
-      "price" : 4000
+      "price" : 4000,
+      "shortDescription" : "Fully revives a fainted Pokemon."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "GUARD SPEC.",
+      "iconAssetPath" : "Assets/items/battle-item/guard-spec.png",
       "id" : "GUARD_SPEC",
       "isKeyItem" : false,
-      "price" : 700
+      "price" : 700,
+      "shortDescription" : "Raises protection against stat drops for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "SUPER REPEL",
+      "iconAssetPath" : "Assets/items/other-item/super-repel.png",
       "id" : "SUPER_REPEL",
       "isKeyItem" : false,
-      "price" : 500
+      "price" : 500,
+      "shortDescription" : "Keeps weak wild Pokemon away longer than a Repel."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MAX REPEL",
+      "iconAssetPath" : "Assets/items/other-item/max-repel.png",
       "id" : "MAX_REPEL",
       "isKeyItem" : false,
-      "price" : 700
+      "price" : 700,
+      "shortDescription" : "Keeps weak wild Pokemon away for a very long time."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "DIRE HIT",
+      "iconAssetPath" : "Assets/items/battle-item/dire-hit.png",
       "id" : "DIRE_HIT",
       "isKeyItem" : false,
-      "price" : 650
+      "price" : 650,
+      "shortDescription" : "Raises the critical-hit rate for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "COIN",
+      "iconAssetPath" : "Assets/items/other-item/bottle-cap.png",
       "id" : "COIN",
       "isKeyItem" : false,
-      "price" : 10
+      "price" : 10,
+      "shortDescription" : "A single Game Corner coin."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "FRESH WATER",
+      "iconAssetPath" : "Assets/items/medicine/fresh-water.png",
       "id" : "FRESH_WATER",
       "isKeyItem" : false,
-      "price" : 200
+      "price" : 200,
+      "shortDescription" : "A drink that restores a little HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "SODA POP",
+      "iconAssetPath" : "Assets/items/medicine/soda-pop.png",
       "id" : "SODA_POP",
       "isKeyItem" : false,
-      "price" : 300
+      "price" : 300,
+      "shortDescription" : "A fizzy drink that restores some HP."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "LEMONADE",
+      "iconAssetPath" : "Assets/items/medicine/lemonade.png",
       "id" : "LEMONADE",
       "isKeyItem" : false,
-      "price" : 350
+      "price" : 350,
+      "shortDescription" : "A sweet drink that restores more HP."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "S.S.TICKET",
+      "iconAssetPath" : "Assets/items/key-item/ss-ticket.png",
       "id" : "S_S_TICKET",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A boarding pass for the S.S. Anne."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "GOLD TEETH",
+      "iconAssetPath" : "Assets/items/key-item/gold-teeth.png",
       "id" : "GOLD_TEETH",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "The Warden's lost teeth from the Safari Zone."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "X ATTACK",
+      "iconAssetPath" : "Assets/items/battle-item/x-attack.png",
       "id" : "X_ATTACK",
       "isKeyItem" : false,
-      "price" : 500
+      "price" : 500,
+      "shortDescription" : "Boosts Attack for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "X DEFEND",
+      "iconAssetPath" : "Assets/items/battle-item/x-defense.png",
       "id" : "X_DEFEND",
       "isKeyItem" : false,
-      "price" : 550
+      "price" : 550,
+      "shortDescription" : "Boosts Defense for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "X SPEED",
+      "iconAssetPath" : "Assets/items/battle-item/x-speed.png",
       "id" : "X_SPEED",
       "isKeyItem" : false,
-      "price" : 350
+      "price" : 350,
+      "shortDescription" : "Boosts Speed for one battle."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "X SPECIAL",
+      "iconAssetPath" : "Assets/items/battle-item/x-sp-atk.png",
       "id" : "X_SPECIAL",
       "isKeyItem" : false,
-      "price" : 350
+      "price" : 350,
+      "shortDescription" : "Boosts Special for one battle."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "COIN CASE",
+      "iconAssetPath" : "Assets/items/key-item/coin-case.png",
       "id" : "COIN_CASE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Holds the Game Corner coins you collect."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "OAK's PARCEL",
+      "iconAssetPath" : "Assets/items/key-item/parcel.png",
       "id" : "OAKS_PARCEL",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A parcel that needs to be delivered to Professor Oak."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "ITEMFINDER",
+      "iconAssetPath" : "Assets/items/key-item/dowsing-machine.png",
       "id" : "ITEMFINDER",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Searches for hidden items nearby."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "SILPH SCOPE",
+      "iconAssetPath" : "Assets/items/key-item/silph-scope.png",
       "id" : "SILPH_SCOPE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A scope that reveals the true form of ghosts."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "POKé FLUTE",
+      "iconAssetPath" : "Assets/items/key-item/poke-flute.png",
       "id" : "POKE_FLUTE",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A flute with a sound that wakes sleeping Pokemon."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "LIFT KEY",
+      "iconAssetPath" : "Assets/items/key-item/lift-key.png",
       "id" : "LIFT_KEY",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Starts the elevator in Team Rocket's hideout."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "EXP.ALL",
+      "iconAssetPath" : "Assets/items/key-item/exp-share.png",
       "id" : "EXP_ALL",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Shares battle experience with the whole party."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "OLD ROD",
+      "iconAssetPath" : "Assets/items/key-item/old-rod.png",
       "id" : "OLD_ROD",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A simple fishing rod for catching basic Pokemon."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "GOOD ROD",
+      "iconAssetPath" : "Assets/items/key-item/good-rod.png",
       "id" : "GOOD_ROD",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "A better fishing rod for stronger bites."
     },
     {
+      "bagSection" : "keyItems",
       "battleUse" : "none",
       "displayName" : "SUPER ROD",
+      "iconAssetPath" : "Assets/items/key-item/super-rod.png",
       "id" : "SUPER_ROD",
       "isKeyItem" : true,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "The best fishing rod for the biggest catches."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "PP UP",
+      "iconAssetPath" : "Assets/items/medicine/pp-up.png",
       "id" : "PP_UP",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Raises the PP of one move."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "ETHER",
+      "iconAssetPath" : "Assets/items/medicine/ether.png",
       "id" : "ETHER",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Restores PP to one move."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MAX ETHER",
+      "iconAssetPath" : "Assets/items/medicine/max-ether.png",
       "id" : "MAX_ETHER",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Fully restores PP to one move."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "ELIXER",
+      "iconAssetPath" : "Assets/items/medicine/elixir.png",
       "id" : "ELIXER",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Restores PP to all learned moves."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "MAX ELIXER",
+      "iconAssetPath" : "Assets/items/medicine/max-elixir.png",
       "id" : "MAX_ELIXER",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "Fully restores PP to all learned moves."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "B2F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_B2F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked B2F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "B1F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_B1F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked B1F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "1F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_1F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 1F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "2F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_2F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 2F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "3F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_3F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 3F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "4F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_4F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 4F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "5F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_5F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 5F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "6F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_6F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 6F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "7F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_7F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 7F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "8F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_8F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 8F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "9F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_9F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 9F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "10F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_10F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 10F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "11F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_11F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked 11F."
     },
     {
+      "bagSection" : "items",
       "battleUse" : "none",
       "displayName" : "B4F",
+      "iconAssetPath" : "Assets/items/key-item/elevator-key.png",
       "id" : "FLOOR_B4F",
       "isKeyItem" : false,
-      "price" : 0
+      "price" : 0,
+      "shortDescription" : "An elevator floor card marked B4F."
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM34",
+      "iconAssetPath" : "Assets/items/tm/normal.png",
       "id" : "TM_BIDE",
       "isKeyItem" : false,
-      "price" : 2000
+      "price" : 2000,
+      "shortDescription" : "A technical machine that teaches BIDE.",
+      "tmhmMoveID" : "BIDE"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM11",
+      "iconAssetPath" : "Assets/items/tm/water.png",
       "id" : "TM_BUBBLEBEAM",
       "isKeyItem" : false,
-      "price" : 2000
+      "price" : 2000,
+      "shortDescription" : "A technical machine that teaches BUBBLEBEAM.",
+      "tmhmMoveID" : "BUBBLEBEAM"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM28",
+      "iconAssetPath" : "Assets/items/tm/ground.png",
       "id" : "TM_DIG",
       "isKeyItem" : false,
-      "price" : 2000
+      "price" : 2000,
+      "shortDescription" : "A technical machine that teaches DIG.",
+      "tmhmMoveID" : "DIG"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM42",
+      "iconAssetPath" : "Assets/items/tm/normal.png",
       "id" : "TM_DREAM_EATER",
       "isKeyItem" : false,
-      "price" : 2000
+      "price" : 2000,
+      "shortDescription" : "A technical machine that teaches DREAM EATER.",
+      "tmhmMoveID" : "DREAM_EATER"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM01",
+      "iconAssetPath" : "Assets/items/tm/normal.png",
       "id" : "TM_MEGA_PUNCH",
       "isKeyItem" : false,
-      "price" : 3000
+      "price" : 3000,
+      "shortDescription" : "A technical machine that teaches MEGA PUNCH.",
+      "tmhmMoveID" : "MEGA_PUNCH"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM19",
+      "iconAssetPath" : "Assets/items/tm/fighting.png",
       "id" : "TM_SEISMIC_TOSS",
       "isKeyItem" : false,
-      "price" : 3000
+      "price" : 3000,
+      "shortDescription" : "A technical machine that teaches SEISMIC TOSS.",
+      "tmhmMoveID" : "SEISMIC_TOSS"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM45",
+      "iconAssetPath" : "Assets/items/tm/electric.png",
       "id" : "TM_THUNDER_WAVE",
       "isKeyItem" : false,
-      "price" : 2000
+      "price" : 2000,
+      "shortDescription" : "A technical machine that teaches THUNDER WAVE.",
+      "tmhmMoveID" : "THUNDER_WAVE"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM12",
+      "iconAssetPath" : "Assets/items/tm/water.png",
       "id" : "TM_WATER_GUN",
       "isKeyItem" : false,
-      "price" : 1000
+      "price" : 1000,
+      "shortDescription" : "A technical machine that teaches WATER GUN.",
+      "tmhmMoveID" : "WATER_GUN"
     },
     {
+      "bagSection" : "tmhm",
       "battleUse" : "none",
       "displayName" : "TM04",
+      "iconAssetPath" : "Assets/items/tm/normal.png",
       "id" : "TM_WHIRLWIND",
       "isKeyItem" : false,
-      "price" : 1000
+      "price" : 1000,
+      "shortDescription" : "A technical machine that teaches WHIRLWIND.",
+      "tmhmMoveID" : "WHIRLWIND"
     }
   ],
   "mapScripts" : [

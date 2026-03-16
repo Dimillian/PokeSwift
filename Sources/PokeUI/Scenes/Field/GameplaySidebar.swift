@@ -117,7 +117,7 @@ private struct FieldModeSidebarContent: View {
 
             AccordionSidebarCard(
                 title: props.inventory.title,
-                summary: props.inventory.items.isEmpty ? "Empty" : "\(props.inventory.items.count)",
+                summary: inventorySummary(for: props.inventory),
                 isExpanded: expansionState.expandedSection == .bag
             ) {
                 onActivateSection(.bag)
@@ -154,6 +154,11 @@ private struct FieldModeSidebarContent: View {
 
             Spacer(minLength: 0)
         }
+    }
+
+    private func inventorySummary(for inventory: InventorySidebarProps) -> String {
+        let itemCount = inventory.sections.reduce(0) { $0 + $1.items.count }
+        return itemCount == 0 ? "Empty" : "\(itemCount)"
     }
 }
 
