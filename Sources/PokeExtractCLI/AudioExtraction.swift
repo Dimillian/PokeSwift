@@ -1757,7 +1757,7 @@ private func noiseClockParameters(for polynomialCounter: Int) -> (Double, Bool) 
     let divisorCode = polynomialCounter & 0b111
     let shortMode = (polynomialCounter & 0b1000) != 0
     let shift = (polynomialCounter >> 4) & 0b1111
-    let divisor: Double = divisorCode == 0 ? 8 : Double(divisorCode * 16)
-    let clockHz = 524_288 / divisor / pow(2, Double(shift + 1))
+    let divisorRatio: Double = divisorCode == 0 ? 0.5 : Double(divisorCode)
+    let clockHz = 524_288 / divisorRatio / pow(2, Double(shift + 1))
     return (clockHz, shortMode)
 }

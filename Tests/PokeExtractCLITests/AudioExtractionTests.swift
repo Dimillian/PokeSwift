@@ -127,6 +127,21 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertGreaterThan(firstEvent.duration, 0)
     }
 
+    func testAudioExtractorUsesGBNoiseClockFormulaForDoorTransitionSFX() throws {
+        let manifest = Self.repoManifest
+
+        let goInside = try XCTUnwrap(manifest.soundEffects.first { $0.id == "SFX_GO_INSIDE" })
+        let channelEight = try XCTUnwrap(goInside.channels.first { $0.channelNumber == 8 })
+        let opening = Array(channelEight.prelude.prefix(2))
+        let firstFrequency = try XCTUnwrap(opening[0].frequencyHz)
+        let secondFrequency = try XCTUnwrap(opening[1].frequencyHz)
+
+        XCTAssertEqual(opening.count, 2)
+        XCTAssertEqual(opening[0].waveform, .noise)
+        XCTAssertEqual(firstFrequency, 4_096, accuracy: 0.000_001)
+        XCTAssertEqual(secondFrequency, 5_461.333_333_333_333, accuracy: 0.000_001)
+    }
+
     func testAudioExtractorCarriesPitchSlideTargetsIntoPkmnHealedLead() throws {
         let manifest = Self.repoManifest
 
