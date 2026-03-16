@@ -225,6 +225,10 @@ public struct AudioManifest: Codable, Equatable, Sendable {
         public let vibratoDelaySeconds: Double
         public let vibratoDepthSemitones: Double
         public let vibratoRateHz: Double
+        public let vibratoDelayFrames: Int
+        public let vibratoExtentUp: Int
+        public let vibratoExtentDown: Int
+        public let vibratoRateFrames: Int
         public let pitchSlideTargetHz: Double?
         public let pitchSlideTargetRegister: Int?
         public let pitchSlideFrameCount: Int?
@@ -244,6 +248,10 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             vibratoDelaySeconds: Double = 0,
             vibratoDepthSemitones: Double = 0,
             vibratoRateHz: Double = 0,
+            vibratoDelayFrames: Int = 0,
+            vibratoExtentUp: Int = 0,
+            vibratoExtentDown: Int = 0,
+            vibratoRateFrames: Int = 0,
             pitchSlideTargetHz: Double? = nil,
             pitchSlideTargetRegister: Int? = nil,
             pitchSlideFrameCount: Int? = nil,
@@ -262,6 +270,10 @@ public struct AudioManifest: Codable, Equatable, Sendable {
             self.vibratoDelaySeconds = vibratoDelaySeconds
             self.vibratoDepthSemitones = vibratoDepthSemitones
             self.vibratoRateHz = vibratoRateHz
+            self.vibratoDelayFrames = vibratoDelayFrames
+            self.vibratoExtentUp = vibratoExtentUp
+            self.vibratoExtentDown = vibratoExtentDown
+            self.vibratoRateFrames = vibratoRateFrames
             self.pitchSlideTargetHz = pitchSlideTargetHz
             self.pitchSlideTargetRegister = pitchSlideTargetRegister
             self.pitchSlideFrameCount = pitchSlideFrameCount

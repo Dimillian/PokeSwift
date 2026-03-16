@@ -516,6 +516,10 @@ final class PokeAudioService: RuntimeAudioPlaying {
             vibratoDelaySeconds: event.vibratoDelaySeconds,
             vibratoDepthSemitones: event.vibratoDepthSemitones,
             vibratoRateHz: event.vibratoRateHz,
+            vibratoDelayFrames: event.vibratoDelayFrames,
+            vibratoExtentUp: event.vibratoExtentUp,
+            vibratoExtentDown: event.vibratoExtentDown,
+            vibratoRateFrames: event.vibratoRateFrames,
             pitchSlideTargetHz: adjustedTargetHz,
             pitchSlideTargetRegister: adjustedTargetRegister,
             pitchSlideFrameCount: event.pitchSlideFrameCount,
@@ -656,44 +660,82 @@ final class PokeAudioService: RuntimeAudioPlaying {
     }
 
     nonisolated private static func modulatedFrequency(for event: AudioManifest.Event, localTime: Double) -> Double {
-        let baseFrequency = pitchSlideAdjustedFrequency(
-            baseFrequency: event.frequencyHz ?? 440,
+        let pitchAdjustedRegister = pitchSlideAdjustedRegister(event: event, localTime: localTime)
+        let baseFrequency = pitchAdjustedRegister.map {
+            frequencyHz(forRegister: $0, waveform: event.waveform)
+        } ?? event.frequencyHz ?? 440
+        return vibratoAdjustedFrequency(
+            baseFrequency: baseFrequency,
+            frequencyRegister: pitchAdjustedRegister ?? event.frequencyRegister,
             event: event,
             localTime: localTime
         )
-        return vibratoAdjustedFrequency(baseFrequency: baseFrequency, event: event, localTime: localTime)
     }
 
-    nonisolated private static func pitchSlideAdjustedFrequency(
-        baseFrequency: Double,
+    nonisolated private static func pitchSlideAdjustedRegister(
         event: AudioManifest.Event,
         localTime: Double
-    ) -> Double {
+    ) -> Int? {
         guard let startRegister = event.frequencyRegister,
               let targetRegister = event.pitchSlideTargetRegister,
               let pitchSlideFrameCount = event.pitchSlideFrameCount,
               pitchSlideFrameCount > 0 else {
-            return baseFrequency
+            return nil
         }
         let elapsedFrames = max(0, Int((localTime * 60).rounded(.down)))
         let appliedFrames = min(pitchSlideFrameCount, elapsedFrames)
         let registerDelta = targetRegister - startRegister
-        let currentRegister: Int
         if appliedFrames >= pitchSlideFrameCount {
-            currentRegister = targetRegister
-        } else {
-            currentRegister = startRegister + Int(
-                (Double(registerDelta) * Double(appliedFrames)) / Double(pitchSlideFrameCount)
-            )
+            return targetRegister
         }
-        return frequencyHz(forRegister: currentRegister, waveform: event.waveform)
+        return startRegister + Int(
+            (Double(registerDelta) * Double(appliedFrames)) / Double(pitchSlideFrameCount)
+        )
     }
 
-    nonisolated private static func vibratoAdjustedFrequency(baseFrequency: Double, event: AudioManifest.Event, localTime: Double) -> Double {
+    nonisolated private static func vibratoAdjustedFrequency(
+        baseFrequency: Double,
+        frequencyRegister: Int?,
+        event: AudioManifest.Event,
+        localTime: Double
+    ) -> Double {
+        if let adjustedRegister = gbVibratoAdjustedRegister(
+            baseRegister: frequencyRegister,
+            event: event,
+            localTime: localTime
+        ) {
+            return frequencyHz(forRegister: adjustedRegister, waveform: event.waveform)
+        }
         guard event.vibratoDepthSemitones > 0, event.vibratoRateHz > 0 else { return baseFrequency }
         guard localTime >= event.vibratoDelaySeconds else { return baseFrequency }
         let semitoneOffset = sin(2 * .pi * localTime * event.vibratoRateHz) * event.vibratoDepthSemitones
         return baseFrequency * pow(2, semitoneOffset / 12)
+    }
+
+    // Match the GB engine more closely by toggling low-byte register offsets instead
+    // of applying a smooth sine-wave LFO to the note frequency.
+    nonisolated private static func gbVibratoAdjustedRegister(
+        baseRegister: Int?,
+        event: AudioManifest.Event,
+        localTime: Double
+    ) -> Int? {
+        guard let baseRegister else { return nil }
+        guard event.vibratoExtentUp > 0 || event.vibratoExtentDown > 0 else { return nil }
+
+        let elapsedFrames = max(0, Int((localTime * 60).rounded(.down)))
+        guard elapsedFrames >= event.vibratoDelayFrames else { return baseRegister }
+
+        let stepFrames = max(1, event.vibratoRateFrames + 1)
+        let phase = (elapsedFrames - event.vibratoDelayFrames) / stepFrames
+        let lowByte = baseRegister & 0xff
+        let adjustedLowByte: Int
+        if phase.isMultiple(of: 2) {
+            adjustedLowByte = min(0xff, lowByte + event.vibratoExtentUp)
+        } else {
+            adjustedLowByte = max(0, lowByte - event.vibratoExtentDown)
+        }
+
+        return (baseRegister & 0x0700) | adjustedLowByte
     }
 
     nonisolated private static func envelopeAdjustedAmplitude(for event: AudioManifest.Event, localTime: Double) -> Double {

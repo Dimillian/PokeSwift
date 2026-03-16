@@ -6,46 +6,20 @@ final class AudioExtractionTests: XCTestCase {
         try! makeFreshManifest()
     }()
 
-    func testAudioExtractorBuildsEarlyM4ManifestFromRepoSources() throws {
+    func testAudioExtractorBuildsCurrentSliceManifestFromRepoSources() throws {
         let manifest = Self.repoManifest
 
         XCTAssertEqual(manifest.variant, .red)
         XCTAssertEqual(manifest.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(
-            manifest.mapRoutes,
-            [
-                .init(mapID: "MT_MOON_1F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_B1F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_B2F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
-                .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "PEWTER_CITY", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "PEWTER_GYM", musicID: "MUSIC_GYM"),
-                .init(mapID: "PEWTER_MART", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "PEWTER_NIDORAN_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "PEWTER_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "PEWTER_SPEECH_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
-                .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
-                .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
-                .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "ROUTE_4", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
-                .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_FOREST_SOUTH_GATE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "VIRIDIAN_SCHOOL_HOUSE", musicID: "MUSIC_CITIES1"),
-            ]
-        )
+        XCTAssertEqual(manifest.mapRoutes.count, 41)
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "CERULEAN_CITY", musicID: "MUSIC_CITIES2")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "BIKE_SHOP", musicID: "MUSIC_CITIES2")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "BILLS_HOUSE", musicID: "MUSIC_CITIES2")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "CERULEAN_GYM", musicID: "MUSIC_GYM")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "ROUTE_24", musicID: "MUSIC_ROUTES2")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "ROUTE_25", musicID: "MUSIC_ROUTES2")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1")))
+        XCTAssertTrue(manifest.mapRoutes.contains(.init(mapID: "MT_MOON_1F", musicID: "MUSIC_DUNGEON3")))
 
         let cueByID = Dictionary(uniqueKeysWithValues: manifest.cues.map { ($0.id, $0) })
         XCTAssertEqual(cueByID["title_default"]?.trackID, "MUSIC_TITLE_SCREEN")
@@ -71,8 +45,10 @@ final class AudioExtractionTests: XCTestCase {
             "MUSIC_PALLET_TOWN",
             "MUSIC_OAKS_LAB",
             "MUSIC_ROUTES1",
+            "MUSIC_ROUTES2",
             "MUSIC_ROUTES3",
             "MUSIC_CITIES1",
+            "MUSIC_CITIES2",
             "MUSIC_DUNGEON2",
             "MUSIC_DUNGEON3",
             "MUSIC_GYM",
@@ -173,6 +149,25 @@ final class AudioExtractionTests: XCTestCase {
         XCTAssertEqual(thirdSlideTarget, 661.979_797_979_798, accuracy: 0.000_001)
     }
 
+    func testAudioExtractorCarriesRawGBVibratoIntoCeruleanLead() throws {
+        let manifest = Self.repoManifest
+
+        let ceruleanTrack = try XCTUnwrap(manifest.tracks.first { $0.id == "MUSIC_CITIES2" })
+        let channelOne = try XCTUnwrap(
+            ceruleanTrack.entries.first { $0.id == "default" }?.channels.first { $0.channelNumber == 1 }
+        )
+        let firstVibratoEvent = try XCTUnwrap(
+            channelOne.loop.first {
+                $0.vibratoExtentUp > 0 || $0.vibratoExtentDown > 0
+            }
+        )
+
+        XCTAssertEqual(firstVibratoEvent.vibratoDelayFrames, 8)
+        XCTAssertEqual(firstVibratoEvent.vibratoExtentUp, 2)
+        XCTAssertEqual(firstVibratoEvent.vibratoExtentDown, 1)
+        XCTAssertEqual(firstVibratoEvent.vibratoRateFrames, 2)
+    }
+
     func testAudioExtractorUsesASMFrequencyTableForPerfectPitchSquareChannel() throws {
         let manifest = Self.repoManifest
 
@@ -236,9 +231,9 @@ final class AudioExtractionTests: XCTestCase {
 
         let decoded = try JSONDecoder().decode(AudioManifest.self, from: first)
         XCTAssertEqual(decoded.titleTrackID, "MUSIC_TITLE_SCREEN")
-        XCTAssertEqual(decoded.mapRoutes.count, 30)
+        XCTAssertEqual(decoded.mapRoutes.count, 41)
         XCTAssertEqual(decoded.cues.count, 13)
-        XCTAssertEqual(decoded.tracks.count, 20)
+        XCTAssertEqual(decoded.tracks.count, 22)
         XCTAssertNotNil(decoded.tracks.first { $0.id == "MUSIC_MEET_RIVAL" }?.entries.first { $0.id == "alternateStart" })
     }
 

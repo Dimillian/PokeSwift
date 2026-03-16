@@ -368,6 +368,8 @@ private enum MusicInstruction {
     case pitchSweep(Int, Int)
     case vibrato(Int, Int, Int)
     case pitchSlide(Int, Int, String)
+    case stereoPanning(Int, Int)
+    case executeMusic
     case togglePerfectPitch
     case noteType(Int, Int, Int)
     case drumSpeed(Int)
@@ -395,9 +397,10 @@ private struct ChannelState {
     var dutyCycle: Double = 0.5
     var waveSamples: [Double]?
     var perfectPitchEnabled = false
-    var vibratoDelaySeconds: Double = 0
-    var vibratoDepthSemitones: Double = 0
-    var vibratoRateHz: Double = 0
+    var vibratoDelayFrames: Int = 0
+    var vibratoExtentUp: Int = 0
+    var vibratoExtentDown: Int = 0
+    var vibratoRateFrames: Int = 0
     var pendingPitchSlide: PendingPitchSlide?
     var channel1PitchSweep: Channel1PitchSweepState?
     var waveform: AudioManifest.Waveform
@@ -416,6 +419,10 @@ private struct TimedEvent {
     let vibratoDelaySeconds: Double
     let vibratoDepthSemitones: Double
     let vibratoRateHz: Double
+    let vibratoDelayFrames: Int
+    let vibratoExtentUp: Int
+    let vibratoExtentDown: Int
+    let vibratoRateFrames: Int
     let pitchSlideTargetHz: Double?
     let pitchSlideTargetRegister: Int?
     let pitchSlideFrameCount: Int?
@@ -531,6 +538,14 @@ private func parseMusicInstruction(_ line: String) -> MusicInstruction? {
        let length = Int(match.output.1),
        let octave = Int(match.output.2) {
         return .pitchSlide(length, octave, String(match.output.3))
+    }
+    if let match = line.firstMatch(of: /stereo_panning\s+%([01]{4}),\s*%([01]{4})/),
+       let left = Int(String(match.output.1), radix: 2),
+       let right = Int(String(match.output.2), radix: 2) {
+        return .stereoPanning(left, right)
+    }
+    if line == "execute_music" {
+        return .executeMusic
     }
     if line == "toggle_perfect_pitch" {
         return .togglePerfectPitch
@@ -706,9 +721,11 @@ private func renderChannelEntry(
                     signedShiftMagnitude: shift
                 )
             case let .vibrato(length, depth, rate):
-                state.vibratoDelaySeconds = Double(max(0, length)) / 60
-                state.vibratoDepthSemitones = Double(abs(depth)) / 64
-                state.vibratoRateHz = rate <= 0 ? 0 : 60 / Double(rate * 2)
+                let shape = gbVibratoShape(extentNibble: depth)
+                state.vibratoDelayFrames = max(0, length)
+                state.vibratoExtentUp = shape.up
+                state.vibratoExtentDown = shape.down
+                state.vibratoRateFrames = max(0, rate)
             case let .pitchSlide(length, octave, noteName):
                 let targetRegister = frequencyRegister(
                     for: noteName,
@@ -721,6 +738,8 @@ private func renderChannelEntry(
                     targetRegister: targetRegister,
                     lengthModifier: max(0, length - 1)
                 )
+            case .stereoPanning, .executeMusic:
+                continue
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
             case let .noteType(length, volume, parameter):
@@ -766,9 +785,13 @@ private func renderChannelEntry(
                         envelopeStepDuration: state.envelopeStepDuration,
                         envelopeDirection: state.envelopeDirection,
                         waveSamples: state.waveSamples,
-                        vibratoDelaySeconds: state.vibratoDelaySeconds,
-                        vibratoDepthSemitones: state.vibratoDepthSemitones,
-                        vibratoRateHz: state.vibratoRateHz,
+                        vibratoDelaySeconds: Double(state.vibratoDelayFrames) / 60,
+                        vibratoDepthSemitones: Double(state.vibratoExtentUp + state.vibratoExtentDown) / 64,
+                        vibratoRateHz: approximateVibratoRateHz(rateFrames: state.vibratoRateFrames),
+                        vibratoDelayFrames: state.vibratoDelayFrames,
+                        vibratoExtentUp: state.vibratoExtentUp,
+                        vibratoExtentDown: state.vibratoExtentDown,
+                        vibratoRateFrames: state.vibratoRateFrames,
                         pitchSlideTargetHz: pitchSlide?.targetHz,
                         pitchSlideTargetRegister: pitchSlide?.targetRegister,
                         pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) },
@@ -803,6 +826,10 @@ private func renderChannelEntry(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
+                        vibratoDelayFrames: 0,
+                        vibratoExtentUp: 0,
+                        vibratoExtentDown: 0,
+                        vibratoRateFrames: 0,
                         pitchSlideTargetHz: pitchSlide?.targetHz ?? channel1SweepTarget?.targetHz,
                         pitchSlideTargetRegister: pitchSlide?.targetRegister ?? channel1SweepTarget?.targetRegister,
                         pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) } ?? channel1SweepTarget?.frameCount,
@@ -828,6 +855,10 @@ private func renderChannelEntry(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
+                        vibratoDelayFrames: 0,
+                        vibratoExtentUp: 0,
+                        vibratoExtentDown: 0,
+                        vibratoRateFrames: 0,
                         pitchSlideTargetHz: nil,
                         pitchSlideTargetRegister: nil,
                         pitchSlideFrameCount: nil,
@@ -954,9 +985,11 @@ private func renderSubroutine(
                     signedShiftMagnitude: shift
                 )
             case let .vibrato(length, depth, rate):
-                state.vibratoDelaySeconds = Double(max(0, length)) / 60
-                state.vibratoDepthSemitones = Double(abs(depth)) / 64
-                state.vibratoRateHz = rate <= 0 ? 0 : 60 / Double(rate * 2)
+                let shape = gbVibratoShape(extentNibble: depth)
+                state.vibratoDelayFrames = max(0, length)
+                state.vibratoExtentUp = shape.up
+                state.vibratoExtentDown = shape.down
+                state.vibratoRateFrames = max(0, rate)
             case let .pitchSlide(length, octave, noteName):
                 let targetRegister = frequencyRegister(
                     for: noteName,
@@ -969,6 +1002,8 @@ private func renderSubroutine(
                     targetRegister: targetRegister,
                     lengthModifier: max(0, length - 1)
                 )
+            case .stereoPanning, .executeMusic:
+                continue
             case .togglePerfectPitch:
                 state.perfectPitchEnabled.toggle()
             case let .noteType(length, volume, parameter):
@@ -1014,9 +1049,13 @@ private func renderSubroutine(
                         envelopeStepDuration: state.envelopeStepDuration,
                         envelopeDirection: state.envelopeDirection,
                         waveSamples: state.waveSamples,
-                        vibratoDelaySeconds: state.vibratoDelaySeconds,
-                        vibratoDepthSemitones: state.vibratoDepthSemitones,
-                        vibratoRateHz: state.vibratoRateHz,
+                        vibratoDelaySeconds: Double(state.vibratoDelayFrames) / 60,
+                        vibratoDepthSemitones: Double(state.vibratoExtentUp + state.vibratoExtentDown) / 64,
+                        vibratoRateHz: approximateVibratoRateHz(rateFrames: state.vibratoRateFrames),
+                        vibratoDelayFrames: state.vibratoDelayFrames,
+                        vibratoExtentUp: state.vibratoExtentUp,
+                        vibratoExtentDown: state.vibratoExtentDown,
+                        vibratoRateFrames: state.vibratoRateFrames,
                         pitchSlideTargetHz: pitchSlide?.targetHz,
                         pitchSlideTargetRegister: pitchSlide?.targetRegister,
                         pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) },
@@ -1051,6 +1090,10 @@ private func renderSubroutine(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
+                        vibratoDelayFrames: 0,
+                        vibratoExtentUp: 0,
+                        vibratoExtentDown: 0,
+                        vibratoRateFrames: 0,
                         pitchSlideTargetHz: pitchSlide?.targetHz ?? channel1SweepTarget?.targetHz,
                         pitchSlideTargetRegister: pitchSlide?.targetRegister ?? channel1SweepTarget?.targetRegister,
                         pitchSlideFrameCount: pitchSlide.map { max(1, noteFrameCount(for: duration) - $0.lengthModifier) } ?? channel1SweepTarget?.frameCount,
@@ -1076,6 +1119,10 @@ private func renderSubroutine(
                         vibratoDelaySeconds: 0,
                         vibratoDepthSemitones: 0,
                         vibratoRateHz: 0,
+                        vibratoDelayFrames: 0,
+                        vibratoExtentUp: 0,
+                        vibratoExtentDown: 0,
+                        vibratoRateFrames: 0,
                         pitchSlideTargetHz: nil,
                         pitchSlideTargetRegister: nil,
                         pitchSlideFrameCount: nil,
@@ -1193,6 +1240,10 @@ private func silentTimedEvent(duration: Double, waveform: AudioManifest.Waveform
         vibratoDelaySeconds: 0,
         vibratoDepthSemitones: 0,
         vibratoRateHz: 0,
+        vibratoDelayFrames: 0,
+        vibratoExtentUp: 0,
+        vibratoExtentDown: 0,
+        vibratoRateFrames: 0,
         pitchSlideTargetHz: nil,
         pitchSlideTargetRegister: nil,
         pitchSlideFrameCount: nil,
@@ -1224,6 +1275,10 @@ private func audioEvent(from event: TimedEvent) -> AudioManifest.Event {
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
+        vibratoDelayFrames: event.vibratoDelayFrames,
+        vibratoExtentUp: event.vibratoExtentUp,
+        vibratoExtentDown: event.vibratoExtentDown,
+        vibratoRateFrames: event.vibratoRateFrames,
         pitchSlideTargetHz: event.pitchSlideTargetHz,
         pitchSlideTargetRegister: event.pitchSlideTargetRegister,
         pitchSlideFrameCount: event.pitchSlideFrameCount,
@@ -1246,6 +1301,10 @@ private func shiftTimedEvent(_ event: TimedEvent, by offset: Double) -> TimedEve
         vibratoDelaySeconds: event.vibratoDelaySeconds,
         vibratoDepthSemitones: event.vibratoDepthSemitones,
         vibratoRateHz: event.vibratoRateHz,
+        vibratoDelayFrames: event.vibratoDelayFrames,
+        vibratoExtentUp: event.vibratoExtentUp,
+        vibratoExtentDown: event.vibratoExtentDown,
+        vibratoRateFrames: event.vibratoRateFrames,
         pitchSlideTargetHz: event.pitchSlideTargetHz,
         pitchSlideTargetRegister: event.pitchSlideTargetRegister,
         pitchSlideFrameCount: event.pitchSlideFrameCount,
@@ -1272,6 +1331,10 @@ private func renderNoiseInstrument(
             vibratoDelaySeconds: 0,
             vibratoDepthSemitones: 0,
             vibratoRateHz: 0,
+            vibratoDelayFrames: 0,
+            vibratoExtentUp: 0,
+            vibratoExtentDown: 0,
+            vibratoRateFrames: 0,
             pitchSlideTargetHz: nil,
             pitchSlideTargetRegister: nil,
             pitchSlideFrameCount: nil,
@@ -1297,6 +1360,18 @@ private func waveChannelVolume(for value: Int) -> Double {
     case 2: return 0.5
     default: return 0.25
     }
+}
+
+private func gbVibratoShape(extentNibble: Int) -> (up: Int, down: Int) {
+    let extent = max(0, abs(extentNibble)) & 0xf
+    let down = extent / 2
+    let up = down + (extent % 2)
+    return (up, down)
+}
+
+private func approximateVibratoRateHz(rateFrames: Int) -> Double {
+    let stepFrames = max(1, rateFrames + 1)
+    return 60 / Double(stepFrames * 2)
 }
 
 private func envelopeDirection(for fade: Int) -> Int {
