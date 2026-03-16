@@ -741,6 +741,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
     public let trainerClass: String?
     public let trainerNumber: Int?
     public let visible: Bool?
+    public let continueOnFailure: Bool?
 
     public init(
         action: String,
@@ -761,7 +762,8 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         battleID: String? = nil,
         trainerClass: String? = nil,
         trainerNumber: Int? = nil,
-        visible: Bool? = nil
+        visible: Bool? = nil,
+        continueOnFailure: Bool? = nil
     ) {
         self.action = action
         self.stringValue = stringValue
@@ -782,6 +784,7 @@ public struct ScriptStep: Codable, Equatable, Sendable {
         self.trainerClass = trainerClass
         self.trainerNumber = trainerNumber
         self.visible = visible
+        self.continueOnFailure = continueOnFailure
     }
 }
 

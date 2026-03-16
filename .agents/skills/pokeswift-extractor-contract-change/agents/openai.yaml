@@ -1,0 +1,4 @@
+interface:
+  display_name: "PokeSwift Extractor Contract Change"
+  short_description: "Guard extractor and content contract changes"
+  default_prompt: "Use $pokeswift-extractor-contract-change to implement a PokeSwift extractor or shared-content contract change safely."

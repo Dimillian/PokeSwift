@@ -11,6 +11,7 @@ public struct BattlePanel: View {
     let kind: BattleKind
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let enemyPartyCount: Int
     let isEnemySpeciesOwned: Bool
     let trainerSpriteURL: URL?
     let playerTrainerFrontSpriteURL: URL?
@@ -28,6 +29,7 @@ public struct BattlePanel: View {
         kind: BattleKind,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
+        enemyPartyCount: Int = 1,
         isEnemySpeciesOwned: Bool,
         trainerSpriteURL: URL?,
         playerTrainerFrontSpriteURL: URL?,
@@ -44,6 +46,7 @@ public struct BattlePanel: View {
         self.kind = kind
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
+        self.enemyPartyCount = enemyPartyCount
         self.isEnemySpeciesOwned = isEnemySpeciesOwned
         self.trainerSpriteURL = trainerSpriteURL
         self.playerTrainerFrontSpriteURL = playerTrainerFrontSpriteURL
@@ -69,6 +72,7 @@ public struct BattlePanel: View {
                 kind: kind,
                 playerPokemon: playerPokemon,
                 enemyPokemon: enemyPokemon,
+                enemyPartyCount: enemyPartyCount,
                 isEnemySpeciesOwned: isEnemySpeciesOwned,
                 trainerSpriteURL: trainerSpriteURL,
                 playerTrainerFrontSpriteURL: playerTrainerFrontSpriteURL,

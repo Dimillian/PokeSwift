@@ -51,6 +51,7 @@ public final class GameRuntime {
     var dialogueState: DialogueState?
     var fieldPromptState: RuntimeFieldPromptState?
     var scriptItemPromptState: RuntimeScriptItemPromptState?
+    var scriptChoicePromptState: RuntimeScriptChoicePromptState?
     var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
@@ -296,6 +297,7 @@ public final class GameRuntime {
             dialogueState == nil &&
             fieldPromptState == nil &&
             scriptItemPromptState == nil &&
+            scriptChoicePromptState == nil &&
             fieldHealingState == nil &&
             fieldTransitionState == nil &&
             scriptedMovementTask == nil &&

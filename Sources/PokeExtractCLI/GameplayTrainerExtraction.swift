@@ -13,6 +13,8 @@ func buildTrainerBattles(
         .value(for: "OPP_BROCK", missingMessage: "missing trainer metadata for OPP_BROCK")
     let superNerdClassMetadata = try trainerClassMetadataByID
         .value(for: "OPP_SUPER_NERD", missingMessage: "missing trainer metadata for OPP_SUPER_NERD")
+    let rocketClassMetadata = try trainerClassMetadataByID
+        .value(for: "OPP_ROCKET", missingMessage: "missing trainer metadata for OPP_ROCKET")
 
     var battlesByID: [String: TrainerBattleManifest] = [:]
 
@@ -84,6 +86,19 @@ func buildTrainerBattles(
         )
     }
 
+    for trainerNumber in 7...9 {
+        battlesByID["cerulean_city_rival_\(trainerNumber)"] = try makeRivalBattle(
+            id: "cerulean_city_rival_\(trainerNumber)",
+            trainerNumber: trainerNumber,
+            playerWinDialogueID: "cerulean_city_rival_defeated",
+            playerLoseDialogueID: "cerulean_city_rival_victory",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            completionFlagID: "EVENT_BEAT_CERULEAN_RIVAL",
+            postBattleScriptID: "cerulean_city_rival_after_battle"
+        )
+    }
+
     guard brockClassMetadata.parties.indices.contains(0) else {
         throw ExtractorError.invalidArguments("missing Brock trainer party 1")
     }
@@ -125,6 +140,31 @@ func buildTrainerBattles(
         completionFlagID: "EVENT_BEAT_MT_MOON_EXIT_SUPER_NERD",
         postBattleScriptID: nil
     )
+
+    for (battleID, trainerNumber, playerWinDialogueID, completionFlagID, postBattleScriptID) in [
+        ("opp_rocket_5", 5, "cerulean_city_rocket_i_give_up", "EVENT_BEAT_CERULEAN_ROCKET_THIEF", "cerulean_city_rocket_reward"),
+        ("opp_rocket_6", 6, "route24_cooltrainer_m1_defeated", "EVENT_BEAT_ROUTE24_ROCKET", "route24_after_rocket_battle"),
+    ] {
+        guard rocketClassMetadata.parties.indices.contains(trainerNumber - 1) else {
+            throw ExtractorError.invalidArguments("missing Rocket trainer party \(trainerNumber)")
+        }
+        battlesByID[battleID] = TrainerBattleManifest(
+            id: battleID,
+            trainerClass: "OPP_ROCKET",
+            trainerNumber: trainerNumber,
+            displayName: rocketClassMetadata.displayName,
+            party: rocketClassMetadata.parties[trainerNumber - 1],
+            trainerSpritePath: rocketClassMetadata.trainerSpritePath,
+            baseRewardMoney: rocketClassMetadata.baseRewardMoney,
+            encounterAudioCueID: trainerEncounterCueByClass["OPP_ROCKET"],
+            playerWinDialogueID: playerWinDialogueID,
+            playerLoseDialogueID: nil,
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            completionFlagID: completionFlagID,
+            postBattleScriptID: postBattleScriptID
+        )
+    }
 
     for reference in try referencedSliceTrainerBattles(
         repoRoot: repoRoot,

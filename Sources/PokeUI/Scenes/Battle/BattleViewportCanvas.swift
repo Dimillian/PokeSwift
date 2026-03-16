@@ -8,6 +8,7 @@ struct BattleViewportCanvas: View {
     let kind: BattleKind
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let enemyPartyCount: Int
     let isEnemySpeciesOwned: Bool
     let trainerSpriteURL: URL?
     let playerTrainerFrontSpriteURL: URL?
@@ -113,6 +114,7 @@ struct BattleViewportCanvas: View {
                         stage: presentation.stage,
                         activeSide: presentation.activeSide,
                         attackAnimation: presentation.attackAnimation,
+                        hidePlayerPokemon: presentation.hidePlayerPokemon,
                         side: .enemy
                     ) ? spriteAnimation : nil,
                     value: presentation.revision
@@ -155,6 +157,7 @@ struct BattleViewportCanvas: View {
                         stage: presentation.stage,
                         activeSide: presentation.activeSide,
                         attackAnimation: presentation.attackAnimation,
+                        hidePlayerPokemon: presentation.hidePlayerPokemon,
                         side: .player
                     ) ? spriteAnimation : nil,
                     value: presentation.revision
@@ -213,6 +216,24 @@ struct BattleViewportCanvas: View {
             playerCardWidth: layout.playerCardSize.width,
             enemyShowsCaughtIndicator: shouldShowEnemyCaughtIndicator
         )
+
+        BattleTrainerPartyIndicator(
+            filledCount: enemyPartyCount,
+            totalCount: 6,
+            stage: presentation.stage,
+            animationRevision: presentation.revision
+        )
+        .frame(
+            width: layout.enemyCardSize.width * 0.84,
+            height: layout.enemyCardSize.height * 0.76
+        )
+        .position(
+            x: layout.enemyCardCenter.x + (layout.enemyCardSize.width * 0.015),
+            y: layout.enemyCardCenter.y
+        )
+        .opacity(trainerPartyIndicatorOpacity)
+        .offset(x: trainerPartyIndicatorOffset.width, y: trainerPartyIndicatorOffset.height)
+        .animation(hudAnimation, value: presentation.revision)
 
         BattleStatusCard(
             pokemon: enemyPokemon,
@@ -404,32 +425,25 @@ struct BattleViewportCanvas: View {
         return 1
     }
 
+    private var trainerPartyIndicatorOpacity: Double {
+        guard presentation.uiVisibility == .visible else { return 0 }
+        return Self.trainerPartyIndicatorOpacity(
+            battleKind: kind,
+            stage: presentation.stage,
+            activeSide: presentation.activeSide,
+            sendOutPokemonOpacity: currentSendOutState.pokemonOpacity
+        )
+    }
+
     private var playerHudOpacity: Double {
         guard presentation.uiVisibility == .visible else { return 0 }
-
-        if isTrainerBattle {
-            switch presentation.stage {
-            case .introReveal:
-                return 0
-            case .enemySendOut where presentation.activeSide == .enemy:
-                return 0
-            case .enemySendOut where presentation.activeSide == .player:
-                return currentSendOutState.pokemonOpacity
-            default:
-                return 1
-            }
-        }
-
-        if isWildBattle {
-            switch presentation.stage {
-            case .enemySendOut where presentation.activeSide == .player:
-                return currentSendOutState.pokemonOpacity
-            default:
-                return 1
-            }
-        }
-
-        return 1
+        return Self.playerHudOpacity(
+            battleKind: kind,
+            stage: presentation.stage,
+            activeSide: presentation.activeSide,
+            hidePlayerPokemon: presentation.hidePlayerPokemon,
+            sendOutPokemonOpacity: currentSendOutState.pokemonOpacity
+        )
     }
 
     private var enemyHudOffset: CGSize {
@@ -438,6 +452,22 @@ struct BattleViewportCanvas: View {
             width: currentAttackAnimationState.enemyHUDOffset.width,
             height: hiddenOffset + currentAttackAnimationState.enemyHUDOffset.height
         )
+    }
+
+    private var trainerPartyIndicatorOffset: CGSize {
+        if presentation.stage == .enemySendOut, presentation.activeSide == .enemy {
+            let progress = max(0, min(1, currentSendOutState.pokemonOpacity))
+            return CGSize(
+                width: progress * 18,
+                height: progress * -8
+            )
+        }
+
+        if trainerPartyIndicatorOpacity == 0 {
+            return CGSize(width: -14, height: -10)
+        }
+
+        return .zero
     }
 
     private var playerHudOffset: CGFloat {
@@ -510,35 +540,14 @@ struct BattleViewportCanvas: View {
     }
 
     private var playerPokemonOpacity: Double {
-        let visibility: Double
-        if isTrainerBattle {
-            switch presentation.stage {
-            case .introReveal:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .enemy && presentation.hidePlayerPokemon:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .player:
-                visibility = currentSendOutState.pokemonOpacity
-            case _ where playerPokemon.currentHP == 0:
-                visibility = 0
-            default:
-                visibility = 1
-            }
-        } else if isWildBattle {
-            switch presentation.stage {
-            case .introFlash1, .introFlash2, .introFlash3, .introSpiral, .introCrossing, .introReveal:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .player:
-                visibility = currentSendOutState.pokemonOpacity
-            case _ where playerPokemon.currentHP == 0:
-                visibility = 0
-            default:
-                visibility = 1
-            }
-        } else {
-            visibility = playerPokemon.currentHP == 0 ? 0 : 1
-        }
-        return visibility * currentAttackAnimationState.playerOpacity * currentApplyingHitEffectState.playerOpacity
+        Self.playerPokemonOpacity(
+            battleKind: kind,
+            stage: presentation.stage,
+            activeSide: presentation.activeSide,
+            hidePlayerPokemon: presentation.hidePlayerPokemon,
+            playerCurrentHP: playerPokemon.currentHP,
+            sendOutPokemonOpacity: currentSendOutState.pokemonOpacity
+        ) * currentAttackAnimationState.playerOpacity * currentApplyingHitEffectState.playerOpacity
     }
 
     private var enemyPokemonRotation: Angle {
@@ -702,6 +711,7 @@ struct BattleViewportCanvas: View {
         stage: BattlePresentationStage,
         activeSide: BattlePresentationSide?,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry?,
+        hidePlayerPokemon: Bool,
         side: BattlePresentationSide
     ) -> Bool {
         // Send-out reveal beats are driven by local sendOutVisualState. Letting
@@ -710,7 +720,97 @@ struct BattleViewportCanvas: View {
         if stage == .enemySendOut && activeSide == side {
             return false
         }
+        if hidePlayerPokemon && side == .player {
+            return false
+        }
         return !(attackAnimation != nil && activeSide == side)
+    }
+
+    static func playerHudOpacity(
+        battleKind: BattleKind,
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        hidePlayerPokemon: Bool,
+        sendOutPokemonOpacity: Double
+    ) -> Double {
+        if hidePlayerPokemon {
+            return 0
+        }
+
+        switch battleKind {
+        case .trainer:
+            switch stage {
+            case .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .enemy:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return 1
+            }
+        case .wild:
+            switch stage {
+            case .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return 1
+            }
+        }
+    }
+
+    static func trainerPartyIndicatorOpacity(
+        battleKind: BattleKind,
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        sendOutPokemonOpacity: Double
+    ) -> Double {
+        guard battleKind == .trainer else { return 0 }
+
+        switch stage {
+        case .introReveal:
+            return 1
+        case .enemySendOut where activeSide == .enemy:
+            return max(0, 1 - sendOutPokemonOpacity)
+        default:
+            return 0
+        }
+    }
+
+    static func playerPokemonOpacity(
+        battleKind: BattleKind,
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        hidePlayerPokemon: Bool,
+        playerCurrentHP: Int,
+        sendOutPokemonOpacity: Double
+    ) -> Double {
+        if hidePlayerPokemon {
+            return 0
+        }
+
+        switch battleKind {
+        case .trainer:
+            switch stage {
+            case .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return playerCurrentHP == 0 ? 0 : 1
+            }
+        case .wild:
+            switch stage {
+            case .introFlash1, .introFlash2, .introFlash3, .introSpiral, .introCrossing, .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return playerCurrentHP == 0 ? 0 : 1
+            }
+        }
     }
 
     static func resolvedSendOutState(
@@ -1029,8 +1129,9 @@ struct BattleSpriteSheetFrameView: View {
         var rgbaBytes = [UInt8](repeating: 0, count: width * height * 4)
 
         for index in 0..<(width * height) {
-            let alpha: UInt8 = maskBytes[index] == 255 ? 0 : 255
-            let value = grayscaleBytes[index]
+            let isMasked = maskBytes[index] == 255
+            let alpha: UInt8 = isMasked ? 0 : 255
+            let value: UInt8 = isMasked ? 0 : grayscaleBytes[index]
             let rgbaIndex = index * 4
             rgbaBytes[rgbaIndex] = value
             rgbaBytes[rgbaIndex + 1] = value
@@ -1050,7 +1151,7 @@ struct BattleSpriteSheetFrameView: View {
             bitsPerPixel: 32,
             bytesPerRow: rgbaBytesPerRow,
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
             provider: provider,
             decode: nil,
             shouldInterpolate: false,

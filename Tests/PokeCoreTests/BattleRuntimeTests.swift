@@ -328,7 +328,8 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.displayName, "Wing")
-        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "PIDGEY")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "SQUIRTLE")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.dropFirst().first?.speciesID, "PIDGEY")
     }
 
     func testBattleSwitchRejectsActiveAndFaintedPokemon() throws {
@@ -412,14 +413,14 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.scene, .battle)
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
-        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 1)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 0)
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.currentHP, 0)
 
         runtime.handle(button: .cancel)
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Bring out which #MON?")
 
-        let replacementHP = runtime.gameplayState?.playerParty[1].currentHP
+        let replacementHP = runtime.gameplayState?.playerParty[0].currentHP
         runtime.handle(button: .confirm)
         advanceBattleTextUntilMoveSelection(runtime)
 
@@ -450,6 +451,125 @@ extension PokeCoreTests {
         let snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertFalse(snapshot.canSwitch)
         XCTAssertTrue(snapshot.canRun)
+    }
+
+    func testBattleSwitchEnemyFollowUpUsesStandardAttackPresentation() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "LEAD", displayName: "Lead", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 80, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SWAP", displayName: "Swap", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 60, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "ENEMY", displayName: "Enemy", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 40, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2", frequencyModifier: 0, tempoModifier: 128)
+                        ),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "TACKLE",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "TACKLE",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 20
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "LEAD"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "LEAD", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "SWAP", level: 5, nickname: "Swap"),
+        ]
+
+        runtime.startWildBattle(speciesID: "ENEMY", level: 5)
+        drainBattleText(runtime)
+
+        let switchIndex = runtime.gameplayState.map { runtime.switchActionIndex(for: $0.battle!) } ?? 0
+        for _ in 0..<switchIndex {
+            runtime.handle(button: .down)
+        }
+
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        let swappedHP = runtime.currentSnapshot().battle?.playerPokemon.currentHP
+
+        waitUntil(
+            runtime.battlePresentationTask == nil &&
+                runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Go! Swap!" &&
+                {
+                    guard case .continueSwitchTurn? = runtime.gameplayState?.battle?.pendingAction else {
+                        return false
+                    }
+                    return true
+                }(),
+            message: "player send-out did not finish before the enemy follow-up turn",
+            maxTicks: 240
+        )
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Enemy used TACKLE!" &&
+                runtime.battlePresentationTask == nil &&
+                (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
+            message: "enemy switch follow-up did not pause on the used-move prompt",
+            maxTicks: 240
+        )
+        XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.currentHP, swappedHP)
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.attackAnimation?.moveID == "TACKLE" &&
+                runtime.currentSnapshot().battle?.presentation.attackAnimation?.attackerSide == .enemy,
+            message: "enemy switch follow-up did not start the standard attack animation",
+            maxTicks: 240
+        )
     }
 
     func testTrainerBattleCursorDoesNotExposeRunAction() throws {
@@ -1134,6 +1254,97 @@ extension PokeCoreTests {
         XCTAssertEqual(hitEffectBeat.soundEffectRequest?.soundEffectID, "SFX_DAMAGE")
         XCTAssertEqual(hitEffectBeat.soundEffectRequest?.frequencyModifier, 0x20)
         XCTAssertEqual(hitEffectBeat.soundEffectRequest?.tempoModifier, 0x30)
+    }
+
+    func testMissedMoveSkipsAttackAnimationBeats() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_DAMAGE", frequencyModifier: 0, tempoModifier: 128)
+                        ),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "TACKLE",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "TACKLE",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 20
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")
+        let defender = runtime.makePokemon(speciesID: "PIDGEY", level: 3, nickname: "Pidgey")
+
+        let beats = runtime.makeBeats(
+            for: ResolvedBattleAction(
+                side: .player,
+                moveID: "TACKLE",
+                attackerSpeciesID: "SQUIRTLE",
+                didExecuteMove: true,
+                updatedAttacker: attacker,
+                updatedDefender: defender,
+                messages: ["Squirtle used TACKLE!", "But it missed!"],
+                dealtDamage: 0,
+                typeMultiplier: 10,
+                defenderHPBefore: defender.currentHP,
+                defenderHPAfter: defender.currentHP,
+                pendingAction: nil,
+                payDayMoneyGain: 0
+            )
+        )
+
+        XCTAssertEqual(beats.count, 2)
+        XCTAssertEqual(beats.first?.stage, .resultText)
+        XCTAssertEqual(beats.first?.message, "Squirtle used TACKLE!")
+        XCTAssertEqual(beats.dropFirst().first?.stage, .resultText)
+        XCTAssertEqual(beats.dropFirst().first?.message, "But it missed!")
+        XCTAssertFalse(beats.contains { $0.stage == .attackWindup })
+        XCTAssertFalse(beats.contains { $0.attackAnimation != nil })
+        XCTAssertFalse(beats.contains { $0.applyingHitEffect != nil })
     }
 
     func testAnimationOffFallbackSuppressesExactlyDuplicateImpactSound() throws {

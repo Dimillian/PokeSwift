@@ -1177,6 +1177,211 @@ extension PokeCoreTests {
         XCTAssertTrue(runtime.currentFieldObjects.contains(where: { $0.id == "mt_moon_b2f_super_nerd" }))
     }
 
+    func testRepoGeneratedCeruleanRivalTriggerStartsBattleAndHidesRivalAfterWin() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_CITY"
+        runtime.gameplayState?.playerPosition = .init(x: 20, y: 6)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 26, nickname: "Wartortle")]
+
+        runtime.evaluateMapScriptsIfNeeded()
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "cerulean_city_rival_8")
+        XCTAssertEqual(battle.postBattleScriptID, "cerulean_city_rival_after_battle")
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_BEAT_CERULEAN_RIVAL") ?? false)
+        }
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_BEAT_CERULEAN_RIVAL"))
+        XCTAssertFalse(runtime.gameplayState?.objectStates["cerulean_city_rival"]?.visible ?? true)
+        XCTAssertFalse(runtime.currentFieldObjects.contains(where: { $0.id == "cerulean_city_rival" }))
+    }
+
+    func testRepoGeneratedCeruleanRocketRewardRetriesTMUntilBagHasRoom() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "CERULEAN_CITY"
+        runtime.gameplayState?.playerPosition = .init(x: 29, y: 8)
+        runtime.gameplayState?.facing = .right
+        runtime.gameplayState?.inventory = fullBagInventory(for: runtime, excluding: ["TM_DIG"])
+
+        runtime.beginScript(id: "cerulean_city_rocket_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("TM_DIG"), 0)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_1"]?.visible, false)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_2"]?.visible, true)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_rocket"]?.visible, true)
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "cerulean_city_rocket_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && runtime.itemQuantity("TM_DIG") == 1
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("TM_DIG"), 1)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_1"]?.visible, true)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_2"]?.visible, false)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_rocket"]?.visible, false)
+    }
+
+    func testRepoGeneratedRoute24RewardStopsOnBagFullAndResumesBattleAfterRetry() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_24"
+        runtime.gameplayState?.playerPosition = .init(x: 10, y: 15)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "WARTORTLE", level: 28, nickname: "Wartortle")]
+        runtime.gameplayState?.inventory = fullBagInventory(for: runtime, excluding: ["NUGGET"])
+
+        runtime.beginScript(id: "route24_nugget_bridge_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("NUGGET"), 0)
+        XCTAssertFalse(runtime.hasFlag("EVENT_GOT_NUGGET"))
+        XCTAssertNil(runtime.gameplayState?.battle)
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "route24_nugget_bridge_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .battle
+        }
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        XCTAssertEqual(battle.battleID, "opp_rocket_6")
+
+        runtime.finishBattle(battle: battle, won: true)
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_NUGGET") ?? false)
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("NUGGET"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_NUGGET"))
+    }
+
+    func testRepoGeneratedBillSequenceAndSSTicketUnlockPersistAcrossSave() throws {
+        let saveStore = InMemorySaveStore()
+        let content = try loadRepoContent()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "BILLS_HOUSE"
+        runtime.gameplayState?.playerPosition = .init(x: 4, y: 5)
+        runtime.gameplayState?.facing = .up
+
+        runtime.beginScript(id: "bills_house_bill_pokemon_interaction")
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bills_house_bill_im_not_a_pokemon")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+
+        runtime.handle(button: .right)
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.focusedIndex, 1)
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "bills_house_bill_no_you_gotta_help")
+
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_MET_BILL") ?? false)
+        }
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_BILL_SAID_USE_CELL_SEPARATOR"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_USED_CELL_SEPARATOR_ON_BILL"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_MET_BILL"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_MET_BILL_2"))
+        XCTAssertEqual(runtime.gameplayState?.objectStates["bills_house_bill_pokemon"]?.visible, false)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["bills_house_bill_1"]?.visible, true)
+
+        runtime.gameplayState?.inventory = fullBagInventory(for: runtime, excluding: ["S_S_TICKET"])
+        runtime.beginScript(id: "bills_house_bill_ss_ticket")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("S_S_TICKET"), 0)
+        XCTAssertFalse(runtime.hasFlag("EVENT_GOT_SS_TICKET"))
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_1"]?.visible, false)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_2"]?.visible, true)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["route24_nugget_bridge_guy"]?.visible, true)
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "bills_house_bill_ss_ticket")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_SS_TICKET") ?? false)
+        }
+
+        XCTAssertEqual(runtime.itemQuantity("S_S_TICKET"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_SS_TICKET"))
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_1"]?.visible, true)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["cerulean_city_guard_2"]?.visible, false)
+        XCTAssertEqual(runtime.gameplayState?.objectStates["route24_nugget_bridge_guy"]?.visible, false)
+
+        let envelope = try runtime.makeSaveEnvelope()
+        saveStore.envelope = envelope
+
+        let resumed = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+        XCTAssertTrue(resumed.continueFromTitleMenu())
+        XCTAssertTrue(resumed.hasFlag("EVENT_MET_BILL"))
+        XCTAssertTrue(resumed.hasFlag("EVENT_GOT_SS_TICKET"))
+        XCTAssertEqual(resumed.itemQuantity("S_S_TICKET"), 1)
+        XCTAssertEqual(resumed.gameplayState?.objectStates["bills_house_bill_pokemon"]?.visible, false)
+        XCTAssertEqual(resumed.gameplayState?.objectStates["bills_house_bill_1"]?.visible, true)
+        XCTAssertEqual(resumed.gameplayState?.objectStates["cerulean_city_guard_1"]?.visible, true)
+        XCTAssertEqual(resumed.gameplayState?.objectStates["cerulean_city_guard_2"]?.visible, false)
+        XCTAssertEqual(resumed.gameplayState?.objectStates["route24_nugget_bridge_guy"]?.visible, false)
+    }
+
     func testLossCanContinueIntoConfiguredPostBattleScript() {
         let runtime = GameRuntime(
             content: fixtureContent(
@@ -1209,5 +1414,18 @@ extension PokeCoreTests {
         }
 
         XCTAssertTrue(runtime.gameplayState?.activeFlags.contains("EVENT_LOSS_FOLLOWUP") ?? false)
+    }
+
+    private func fullBagInventory(for runtime: GameRuntime, excluding excludedItemIDs: Set<String>) -> [RuntimeInventoryItemState] {
+        Array(
+            runtime.content.gameplayManifest.items
+                .map(\.id)
+                .filter { excludedItemIDs.contains($0) == false }
+                .prefix(GameRuntime.bagItemCapacity)
+                .enumerated()
+                .map { index, itemID in
+                    RuntimeInventoryItemState(itemID: itemID, quantity: index == 0 ? 2 : 1)
+                }
+        )
     }
 }

@@ -115,6 +115,7 @@ extension PokeUITests {
         stage: .enemySendOut,
         activeSide: .enemy,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .enemy
       )
     )
@@ -123,6 +124,7 @@ extension PokeUITests {
         stage: .enemySendOut,
         activeSide: .player,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .player
       )
     )
@@ -131,8 +133,128 @@ extension PokeUITests {
         stage: .attackImpact,
         activeSide: .enemy,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .enemy
       )
+    )
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .resultText,
+        activeSide: .player,
+        attackAnimation: nil,
+        hidePlayerPokemon: true,
+        side: .player
+      )
+    )
+  }
+
+  func testWildBattlePlayerHUDStaysHiddenUntilSendOutReveal() {
+    XCTAssertEqual(
+      BattleViewportCanvas.playerHudOpacity(
+        battleKind: .wild,
+        stage: .introReveal,
+        activeSide: nil,
+        hidePlayerPokemon: false,
+        sendOutPokemonOpacity: 0
+      ),
+      0
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.playerHudOpacity(
+        battleKind: .wild,
+        stage: .enemySendOut,
+        activeSide: .player,
+        hidePlayerPokemon: false,
+        sendOutPokemonOpacity: 0.42
+      ),
+      0.42,
+      accuracy: 0.0001
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.playerHudOpacity(
+        battleKind: .wild,
+        stage: .commandReady,
+        activeSide: nil,
+        hidePlayerPokemon: false,
+        sendOutPokemonOpacity: 0
+      ),
+      1
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.playerHudOpacity(
+        battleKind: .wild,
+        stage: .resultText,
+        activeSide: .player,
+        hidePlayerPokemon: true,
+        sendOutPokemonOpacity: 1
+      ),
+      0
+    )
+  }
+
+  func testTrainerBattlePartyIndicatorTracksIntroAndEnemySendOut() {
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .introReveal,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      1
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        sendOutPokemonOpacity: 0.35
+      ),
+      0.65,
+      accuracy: 0.0001
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .commandReady,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      0
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .wild,
+        stage: .introReveal,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      0
+    )
+  }
+
+  func testBattlePlayerSpriteHidesWhenPresentationRequestsIt() {
+    XCTAssertEqual(
+      BattleViewportCanvas.playerPokemonOpacity(
+        battleKind: .wild,
+        stage: .resultText,
+        activeSide: .player,
+        hidePlayerPokemon: true,
+        playerCurrentHP: 10,
+        sendOutPokemonOpacity: 1
+      ),
+      0
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.playerPokemonOpacity(
+        battleKind: .wild,
+        stage: .enemySendOut,
+        activeSide: .player,
+        hidePlayerPokemon: false,
+        playerCurrentHP: 10,
+        sendOutPokemonOpacity: 0.5
+      ),
+      0.5,
+      accuracy: 0.0001
     )
   }
 
@@ -206,6 +328,7 @@ extension PokeUITests {
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
+        hidePlayerPokemon: false,
         side: .player
       )
     )
@@ -214,6 +337,7 @@ extension PokeUITests {
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
+        hidePlayerPokemon: false,
         side: .enemy
       )
     )

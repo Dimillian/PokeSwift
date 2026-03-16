@@ -32,6 +32,8 @@ extension PokeRenderTests {
     let compositedImage = try renderRGBAImage(maskedImage, background: background)
     let corner = rgbValue(in: compositedImage, x: 0, y: 0)
 
+    XCTAssertEqual(alphaValue(in: maskedImage, x: 0, y: 0), 0)
+    XCTAssertEqual(rgbValue(in: maskedImage, x: 0, y: 0), .init(red: 0, green: 0, blue: 0))
     XCTAssertGreaterThan(Int(corner.red), 200)
     XCTAssertLessThan(Int(corner.green), 64)
     XCTAssertLessThan(Int(corner.blue), 16)

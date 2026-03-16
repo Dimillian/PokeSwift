@@ -143,6 +143,19 @@ extension GameRuntime {
                 )
             )
             return true
+        case "promptYesNo":
+            guard let dialogueID = step.dialogueID else { return false }
+            let promptID = "\(gameplayState?.activeScriptID ?? dialogueID)_choice_prompt"
+            showDialogue(
+                id: dialogueID,
+                completion: .openScriptChoicePrompt(
+                    .init(
+                        promptID: promptID,
+                        failureDialogueID: step.failureDialogueID
+                    )
+                )
+            )
+            return true
         case "healParty":
             healParty()
             return false
@@ -222,8 +235,23 @@ extension GameRuntime {
                     self.gameplayState = gameplayState
                     let dialogueID = added ? step.successDialogueID : step.failureDialogueID
                     if let dialogueID {
-                        showDialogue(id: dialogueID, completion: .continueScript)
+                        let completion: DialogueState.CompletionAction
+                        if added || step.continueOnFailure ?? true {
+                            completion = .continueScript
+                        } else {
+                            finishScript()
+                            completion = .returnToField
+                        }
+                        let itemDisplayName = content.item(id: itemID)?.displayName ?? itemID
+                        showDialogue(
+                            id: dialogueID,
+                            replacements: ["wStringBuffer": itemDisplayName],
+                            completion: completion
+                        )
                         return true
+                    }
+                    if added == false, step.continueOnFailure == false {
+                        finishScript()
                     }
                     return false
                 }

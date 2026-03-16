@@ -237,6 +237,103 @@ func buildMapScripts() -> [MapScriptManifest] {
             ]
         ),
         MapScriptManifest(
+            mapID: "CERULEAN_CITY",
+            triggers: [
+                .init(
+                    id: "rival_bridge_left_after_charmander",
+                    scriptID: "cerulean_city_rival_vs_squirtle",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 20),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
+                    ]
+                ),
+                .init(
+                    id: "rival_bridge_left_after_squirtle",
+                    scriptID: "cerulean_city_rival_vs_bulbasaur",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 20),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
+                    ]
+                ),
+                .init(
+                    id: "rival_bridge_left_after_bulbasaur",
+                    scriptID: "cerulean_city_rival_vs_charmander",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 20),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
+                    ]
+                ),
+                .init(
+                    id: "rival_bridge_right_after_charmander",
+                    scriptID: "cerulean_city_rival_vs_squirtle",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 21),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
+                    ]
+                ),
+                .init(
+                    id: "rival_bridge_right_after_squirtle",
+                    scriptID: "cerulean_city_rival_vs_bulbasaur",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 21),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
+                    ]
+                ),
+                .init(
+                    id: "rival_bridge_right_after_bulbasaur",
+                    scriptID: "cerulean_city_rival_vs_charmander",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                        .init(kind: "playerXEquals", intValue: 21),
+                        .init(kind: "playerYEquals", intValue: 6),
+                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
+                    ]
+                ),
+                .init(
+                    id: "rocket_yard_entry_upper",
+                    scriptID: "cerulean_city_rocket_battle_upper",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_ROCKET_THIEF"),
+                        .init(kind: "playerXEquals", intValue: 30),
+                        .init(kind: "playerYEquals", intValue: 7),
+                    ]
+                ),
+                .init(
+                    id: "rocket_yard_entry_lower",
+                    scriptID: "cerulean_city_rocket_battle_lower",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_ROCKET_THIEF"),
+                        .init(kind: "playerXEquals", intValue: 30),
+                        .init(kind: "playerYEquals", intValue: 9),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
+            mapID: "ROUTE_24",
+            triggers: [
+                .init(
+                    id: "nugget_bridge_reward",
+                    scriptID: "route24_nugget_bridge_reward",
+                    conditions: [
+                        .init(kind: "flagUnset", flagID: "EVENT_GOT_NUGGET"),
+                        .init(kind: "playerXEquals", intValue: 10),
+                        .init(kind: "playerYEquals", intValue: 15),
+                    ]
+                ),
+            ]
+        ),
+        MapScriptManifest(
             mapID: "MT_MOON_B2F",
             triggers: [
                 .init(
@@ -767,6 +864,183 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
                 .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
                 .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
                 .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+
+    for (scriptID, battleID) in [
+        ("cerulean_city_rival_vs_squirtle", "cerulean_city_rival_7"),
+        ("cerulean_city_rival_vs_bulbasaur", "cerulean_city_rival_8"),
+        ("cerulean_city_rival_vs_charmander", "cerulean_city_rival_9"),
+    ] {
+        scripts.append(
+            ScriptManifest(
+                id: scriptID,
+                steps: [
+                    .init(action: "playMusicCue", stringValue: "rival_intro"),
+                    .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: true),
+                    .init(
+                        action: "performMovement",
+                        movement: .init(
+                            kind: .pathToPlayerAdjacent,
+                            actors: [.init(actorID: "cerulean_city_rival", path: [])],
+                            targetPlayerOffset: .init(x: 0, y: -1)
+                        )
+                    ),
+                    .init(action: "faceObject", stringValue: "down", objectID: "cerulean_city_rival"),
+                    .init(action: "facePlayer", stringValue: "up"),
+                    .init(action: "showDialogue", dialogueID: "cerulean_city_rival_pre_battle"),
+                    .init(action: "startBattle", battleID: battleID),
+                ]
+            )
+        )
+    }
+
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_city_rival_after_battle",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rival_i_went_to_bills"),
+                .init(action: "playMusicCue", stringValue: "rival_exit"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .fixedPath,
+                        variants: [
+                            .init(
+                                id: "player_on_left",
+                                conditions: [.init(kind: "playerXEquals", intValue: 20)],
+                                actors: [.init(actorID: "cerulean_city_rival", path: [.left, .down, .down, .down, .down, .down, .down])]
+                            ),
+                            .init(
+                                id: "player_on_right",
+                                conditions: [.init(kind: "playerXEquals", intValue: 21)],
+                                actors: [.init(actorID: "cerulean_city_rival", path: [.right, .down, .down, .down, .down, .down, .down])]
+                            ),
+                        ]
+                    )
+                ),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: false),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    )
+
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_city_rocket_battle_upper",
+            steps: [
+                .init(action: "faceObject", stringValue: "up", objectID: "cerulean_city_rocket"),
+                .init(action: "facePlayer", stringValue: "down"),
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rocket_text"),
+                .init(action: "startBattle", battleID: "opp_rocket_5"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_city_rocket_battle_lower",
+            steps: [
+                .init(action: "faceObject", stringValue: "down", objectID: "cerulean_city_rocket"),
+                .init(action: "facePlayer", stringValue: "up"),
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rocket_text"),
+                .init(action: "startBattle", battleID: "opp_rocket_5"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "cerulean_city_rocket_reward",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rocket_ill_return_the_tm"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "TM_DIG",
+                    intValue: 1,
+                    successDialogueID: "cerulean_city_rocket_received_tm28",
+                    failureDialogueID: "cerulean_city_rocket_tm28_no_room",
+                    continueOnFailure: false
+                ),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_guard_1", visible: true),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_guard_2", visible: false),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_rocket", visible: false),
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rocket_i_better_get_moving"),
+            ]
+        )
+    )
+
+    scripts.append(
+        ScriptManifest(
+            id: "route24_nugget_bridge_reward",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route24_cooltrainer_m1_contest_prize"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "NUGGET",
+                    intValue: 1,
+                    successDialogueID: "route24_cooltrainer_m1_received_nugget",
+                    failureDialogueID: "route24_cooltrainer_m1_no_room",
+                    successFlagID: "EVENT_GOT_NUGGET",
+                    continueOnFailure: false
+                ),
+                .init(action: "showDialogue", dialogueID: "route24_cooltrainer_m1_join_team_rocket"),
+                .init(action: "startBattle", battleID: "opp_rocket_6"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "route24_after_rocket_battle",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route24_cooltrainer_m1_you_could_become_a_top_leader"),
+            ]
+        )
+    )
+
+    scripts.append(
+        ScriptManifest(
+            id: "bills_house_bill_pokemon_interaction",
+            steps: [
+                .init(action: "promptYesNo", dialogueID: "bills_house_bill_im_not_a_pokemon", failureDialogueID: "bills_house_bill_no_you_gotta_help"),
+                .init(action: "showDialogue", dialogueID: "bills_house_bill_use_separation_system"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .pathToObjectOffset,
+                        actors: [.init(actorID: "bills_house_bill_pokemon", path: [])],
+                        targetObjectID: "bills_house_bill_1",
+                        targetObjectOffset: .init(x: 2, y: -2)
+                    )
+                ),
+                .init(action: "setFlag", flagID: "EVENT_BILL_SAID_USE_CELL_SEPARATOR"),
+                .init(action: "setFlag", flagID: "EVENT_USED_CELL_SEPARATOR_ON_BILL"),
+                .init(action: "setObjectVisibility", objectID: "bills_house_bill_pokemon", visible: false),
+                .init(action: "setObjectPosition", point: .init(x: 5, y: 6), objectID: "bills_house_bill_1"),
+                .init(action: "setObjectVisibility", objectID: "bills_house_bill_1", visible: true),
+                .init(action: "moveObject", path: [.down, .right, .right, .right, .down], objectID: "bills_house_bill_1"),
+                .init(action: "setFlag", flagID: "EVENT_MET_BILL_2"),
+                .init(action: "setFlag", flagID: "EVENT_MET_BILL"),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "bills_house_bill_ss_ticket",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "bills_house_bill_thank_you"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "S_S_TICKET",
+                    intValue: 1,
+                    successDialogueID: "bills_house_ss_ticket_received",
+                    failureDialogueID: "bills_house_ss_ticket_no_room",
+                    successFlagID: "EVENT_GOT_SS_TICKET",
+                    continueOnFailure: false
+                ),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_guard_1", visible: true),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_guard_2", visible: false),
+                .init(action: "setObjectVisibility", objectID: "route24_nugget_bridge_guy", visible: false),
+                .init(action: "showDialogue", dialogueID: "bills_house_bill_why_dont_you_go_instead_of_me"),
             ]
         )
     )

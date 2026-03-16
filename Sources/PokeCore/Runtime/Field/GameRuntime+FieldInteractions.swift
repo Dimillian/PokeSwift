@@ -11,6 +11,7 @@ extension GameRuntime {
 
         fieldPromptState = nil
         scriptItemPromptState = nil
+        scriptChoicePromptState = nil
         fieldHealingState = nil
 
         switch interaction.kind {
@@ -51,6 +52,7 @@ extension GameRuntime {
         guard var promptState = fieldPromptState else {
             fieldPromptState = nil
             scriptItemPromptState = nil
+            scriptChoicePromptState = nil
             return
         }
 
@@ -65,6 +67,21 @@ extension GameRuntime {
             case .confirm, .start:
                 playUIConfirmSound()
                 resolveScriptItemPromptSelection(accepted: promptState.focusedIndex == 0, promptState: scriptItemPromptState)
+            }
+            return
+        }
+
+        if let scriptChoicePromptState {
+            switch button {
+            case .left, .right, .up, .down:
+                promptState.focusedIndex = promptState.focusedIndex == 0 ? 1 : 0
+                fieldPromptState = promptState
+            case .cancel:
+                playUIConfirmSound()
+                resolveScriptChoicePromptSelection(accepted: false, promptState: scriptChoicePromptState)
+            case .confirm, .start:
+                playUIConfirmSound()
+                resolveScriptChoicePromptSelection(accepted: promptState.focusedIndex == 0, promptState: scriptChoicePromptState)
             }
             return
         }
@@ -93,6 +110,7 @@ extension GameRuntime {
     ) {
         fieldPromptState = nil
         scriptItemPromptState = nil
+        scriptChoicePromptState = nil
         dialogueState = nil
         isDialogueAudioBlockingInput = false
         scene = .field
@@ -133,6 +151,32 @@ extension GameRuntime {
             replacements: ["wStringBuffer": itemDisplayName],
             completion: .continueScript
         )
+    }
+
+    private func resolveScriptChoicePromptSelection(
+        accepted: Bool,
+        promptState: RuntimeScriptChoicePromptState
+    ) {
+        fieldPromptState = nil
+        scriptItemPromptState = nil
+        scriptChoicePromptState = nil
+        dialogueState = nil
+        isDialogueAudioBlockingInput = false
+
+        if accepted {
+            scene = .scriptedSequence
+            runActiveScript()
+            return
+        }
+
+        scene = .field
+        substate = "field"
+        if let failureDialogueID = promptState.failureDialogueID {
+            showDialogue(id: failureDialogueID, completion: .continueScript)
+        } else {
+            scene = .scriptedSequence
+            runActiveScript()
+        }
     }
 
     private func resolveFieldPromptSelection(

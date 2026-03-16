@@ -217,6 +217,38 @@ let gameplayCoverageMaps: [GameplayCoverageMapDefinition] = [
         isOutdoor: true
     ),
     .init(
+        mapID: "CERULEAN_CITY",
+        displayName: "Cerulean City",
+        objectFile: "data/maps/objects/CeruleanCity.asm",
+        blockFile: "maps/CeruleanCity.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "ROUTE_24",
+        displayName: "Route 24",
+        objectFile: "data/maps/objects/Route24.asm",
+        blockFile: "maps/Route24.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "ROUTE_25",
+        displayName: "Route 25",
+        objectFile: "data/maps/objects/Route25.asm",
+        blockFile: "maps/Route25.blk",
+        parentMapID: nil,
+        isOutdoor: true
+    ),
+    .init(
+        mapID: "BILLS_HOUSE",
+        displayName: "Bill's House",
+        objectFile: "data/maps/objects/BillsHouse.asm",
+        blockFile: "maps/BillsHouse.blk",
+        parentMapID: "ROUTE_25",
+        isOutdoor: false
+    ),
+    .init(
         mapID: "MT_MOON_POKECENTER",
         displayName: "Mt. Moon Pokecenter",
         objectFile: "data/maps/objects/MtMoonPokecenter.asm",

@@ -29,6 +29,10 @@ extension GameRuntime {
             handleFieldPrompt(button: button)
             return
         }
+        if case .openScriptChoicePrompt = dialogueState.completionAction, isFinalPage {
+            handleFieldPrompt(button: button)
+            return
+        }
         let currentPageHasBlockingEvents = dialogue.pages[dialogueState.pageIndex].events.contains(where: \.waitForCompletion)
         guard currentPageHasBlockingEvents == false || isDialogueAudioBlockingInput == false else {
             return
@@ -125,6 +129,18 @@ extension GameRuntime {
             scene = .dialogue
             substate = "dialogue_\(dialogue.id)_prompt"
             scriptItemPromptState = promptState
+            scriptChoicePromptState = nil
+            fieldPromptState = .init(
+                interactionID: promptState.promptID,
+                kind: .yesNo,
+                completionAction: .continueScript,
+                focusedIndex: 0
+            )
+        case let .openScriptChoicePrompt(promptState):
+            scene = .dialogue
+            substate = "dialogue_\(dialogue.id)_prompt"
+            scriptItemPromptState = nil
+            scriptChoicePromptState = promptState
             fieldPromptState = .init(
                 interactionID: promptState.promptID,
                 kind: .yesNo,
@@ -194,8 +210,19 @@ extension GameRuntime {
                 focusedIndex: 0
             )
             scriptItemPromptState = nil
+            scriptChoicePromptState = nil
         } else if case let .openScriptItemPrompt(promptState) = completion {
             scriptItemPromptState = promptState
+            scriptChoicePromptState = nil
+            fieldPromptState = .init(
+                interactionID: promptState.promptID,
+                kind: .yesNo,
+                completionAction: .continueScript,
+                focusedIndex: 0
+            )
+        } else if case let .openScriptChoicePrompt(promptState) = completion {
+            scriptItemPromptState = nil
+            scriptChoicePromptState = promptState
             fieldPromptState = .init(
                 interactionID: promptState.promptID,
                 kind: .yesNo,
@@ -205,6 +232,7 @@ extension GameRuntime {
         } else {
             fieldPromptState = nil
             scriptItemPromptState = nil
+            scriptChoicePromptState = nil
         }
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
@@ -228,6 +256,8 @@ extension GameRuntime {
         completion: DialogueState.CompletionAction
     ) {
         fieldPromptState = nil
+        scriptItemPromptState = nil
+        scriptChoicePromptState = nil
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
         }

@@ -128,7 +128,8 @@ extension GameRuntime {
         if simulatedPlayer.currentHP == 0 {
             batches.append(
                 playerDefeatResolutionBatch(
-                    faintedPlayer: simulatedPlayer
+                    faintedPlayer: simulatedPlayer,
+                    activePartyIndex: battle.playerActiveIndex
                 )
             )
             return true
@@ -183,7 +184,12 @@ extension GameRuntime {
         )
 
         if simulatedPlayer.currentHP == 0 {
-            batches.append(playerDefeatResolutionBatch(faintedPlayer: simulatedPlayer))
+            batches.append(
+                playerDefeatResolutionBatch(
+                    faintedPlayer: simulatedPlayer,
+                    activePartyIndex: battle.playerActiveIndex
+                )
+            )
             return true
         }
 
@@ -225,10 +231,12 @@ extension GameRuntime {
     }
 
     func playerDefeatResolutionBatch(
-        faintedPlayer: RuntimePokemonState
+        faintedPlayer: RuntimePokemonState,
+        activePartyIndex: Int
     ) -> [RuntimeBattlePresentationBeat] {
         let pendingAction: RuntimeBattlePendingAction = hasSwitchableBattleReplacement(
-            afterFainting: faintedPlayer
+            afterFainting: faintedPlayer,
+            activePartyIndex: activePartyIndex
         ) ? .continueForcedSwitch : .finish(won: false)
 
         return [
@@ -243,13 +251,21 @@ extension GameRuntime {
         ]
     }
 
-    func hasSwitchableBattleReplacement(afterFainting faintedPlayer: RuntimePokemonState) -> Bool {
+    func hasSwitchableBattleReplacement(
+        afterFainting faintedPlayer: RuntimePokemonState,
+        activePartyIndex: Int
+    ) -> Bool {
         guard var gameplayState, gameplayState.playerParty.isEmpty == false else {
             return false
         }
 
-        gameplayState.playerParty[0] = faintedPlayer
-        return firstSwitchablePartyIndex(gameplayState: gameplayState) != nil
+        if gameplayState.playerParty.indices.contains(activePartyIndex) {
+            gameplayState.playerParty[activePartyIndex] = faintedPlayer
+        }
+        return firstSwitchablePartyIndex(
+            gameplayState: gameplayState,
+            excluding: activePartyIndex
+        ) != nil
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
@@ -805,8 +821,9 @@ extension GameRuntime {
         }
 
         let move = content.move(id: action.moveID)
+        let moveMissed = action.messages.contains("But it missed!")
         let skipAnimation = optionsBattleAnimation == .off
-        let sourceMoveAnimation = skipAnimation ? nil : content.battleAnimation(moveID: action.moveID)
+        let sourceMoveAnimation = skipAnimation || moveMissed ? nil : content.battleAnimation(moveID: action.moveID)
         let attackAnimationPlayback = sourceMoveAnimation.map {
             makeAttackAnimationPlayback(for: action, moveAnimation: $0)
         }
@@ -829,8 +846,13 @@ extension GameRuntime {
             makeApplyingHitEffect(for: action, move: $0)
         }
         let fallbackMovePlaybackDelay = battlePresentationDelay(base: 30.0 / 60.0)
-        let movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
-        let windupSoundEffectRequest = attackAnimationPlayback == nil ? moveAudioRequest : nil
+        let movePlaybackDelay: TimeInterval
+        if moveMissed {
+            movePlaybackDelay = 0
+        } else {
+            movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
+        }
+        let windupSoundEffectRequest = moveMissed ? nil : (attackAnimationPlayback == nil ? moveAudioRequest : nil)
         let movePhaseSoundEffectRequests = stagedAttackSoundEffectRequests.map(\.request) + (windupSoundEffectRequest.map { [$0] } ?? [])
         let impactSoundEffectRequest = action.dealtDamage > 0
             ? applyingHitSoundEffectRequest(typeMultiplier: action.typeMultiplier)
@@ -852,7 +874,7 @@ extension GameRuntime {
             ),
         ]
 
-        if skipAnimation == false || windupSoundEffectRequest != nil {
+        if moveMissed == false && (skipAnimation == false || windupSoundEffectRequest != nil) {
             beats.append(
                 .init(
                     delay: skipAnimation ? 0 : battlePresentationDelay(base: 3.0 / 60.0),
@@ -1091,7 +1113,10 @@ extension GameRuntime {
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:
             guard let gameplayState,
-                  let firstSwitchableIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) else {
+                  let firstSwitchableIndex = firstSwitchablePartyIndex(
+                      gameplayState: gameplayState,
+                      excluding: battle.playerActiveIndex
+                  ) else {
                 battle.phase = .battleComplete
                 finishBattle(battle: battle, won: false)
                 return

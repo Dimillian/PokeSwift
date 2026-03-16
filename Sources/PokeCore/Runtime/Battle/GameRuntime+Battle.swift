@@ -558,7 +558,8 @@ extension GameRuntime {
         }
 
         var party = gameplayState.playerParty
-        party[0] = battle.playerPokemon
+        let activeIndex = party.indices.contains(battle.playerActiveIndex) ? battle.playerActiveIndex : 0
+        party[activeIndex] = battle.playerPokemon
         return party
     }
 

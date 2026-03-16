@@ -498,6 +498,7 @@ struct RuntimeBattleState {
     let canRun: Bool
     let trainerClass: String?
     let sourceTrainerObjectID: String?
+    var playerActiveIndex: Int
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
@@ -534,6 +535,7 @@ struct RuntimeBattleState {
         canRun: Bool,
         trainerClass: String?,
         sourceTrainerObjectID: String?,
+        playerActiveIndex: Int = 0,
         playerPokemon: RuntimePokemonState,
         enemyParty: [RuntimePokemonState],
         enemyActiveIndex: Int,
@@ -569,6 +571,7 @@ struct RuntimeBattleState {
         self.canRun = canRun
         self.trainerClass = trainerClass
         self.sourceTrainerObjectID = sourceTrainerObjectID
+        self.playerActiveIndex = playerActiveIndex
         self.playerPokemon = playerPokemon
         self.enemyParty = enemyParty
         self.enemyActiveIndex = enemyActiveIndex
@@ -618,6 +621,7 @@ struct DialogueState {
         case startFieldHealing(interactionID: String, completionAction: CompletionAction)
         case beginScriptedMovement(path: [FacingDirection])
         case openScriptItemPrompt(RuntimeScriptItemPromptState)
+        case openScriptChoicePrompt(RuntimeScriptChoicePromptState)
     }
 
     let dialogueID: String
@@ -640,6 +644,11 @@ struct RuntimeScriptItemPromptState {
     let targetObjectID: String?
     let successFlagID: String?
     let successDialogueID: String
+    let failureDialogueID: String?
+}
+
+struct RuntimeScriptChoicePromptState {
+    let promptID: String
     let failureDialogueID: String?
 }
 

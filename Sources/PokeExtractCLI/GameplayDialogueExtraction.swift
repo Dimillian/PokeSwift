@@ -10,6 +10,10 @@ func buildDialogues(
     let textContentsByMapID = try buildTextContentsByMapID(repoRoot: repoRoot)
     let route22Text = textContentsByMapID["ROUTE_22"]
     let route22GateText = textContentsByMapID["ROUTE_22_GATE"]
+    let ceruleanCityText = textContentsByMapID["CERULEAN_CITY"]
+    let route24Text = textContentsByMapID["ROUTE_24"]
+    let route25Text = textContentsByMapID["ROUTE_25"]
+    let billsHouseText = textContentsByMapID["BILLS_HOUSE"]
     let pewterGymText = textContentsByMapID["PEWTER_GYM"]
     let pallet = try String(contentsOf: repoRoot.appendingPathComponent("text/PalletTown.asm"))
     let oaksLab = try String(contentsOf: repoRoot.appendingPathComponent("text/OaksLab.asm"))
@@ -294,6 +298,199 @@ func buildDialogues(
         ) {
             dialogues.append(goRightAhead)
         }
+    }
+
+    if let route24Text {
+        dialogues.append(
+            try extractCombinedDialogue(
+                id: "route24_cooltrainer_m1_contest_prize",
+                segments: [
+                    (label: "_Route24CooltrainerM1YouBeatOurContestText", contents: route24Text),
+                    (label: "_Route24CooltrainerM1YouJustEarnedAPrizeText", contents: route24Text),
+                ]
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "route24_cooltrainer_m1_received_nugget",
+                label: "_Route24CooltrainerM1ReceivedNuggetText",
+                from: route24Text,
+                placeholderMap: ["wStringBuffer": "wStringBuffer"]
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "route24_cooltrainer_m1_no_room",
+                label: "_Route24CooltrainerM1NoRoomText",
+                from: route24Text
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "route24_cooltrainer_m1_join_team_rocket",
+                label: "_Route24CooltrainerM1JoinTeamRocketText",
+                from: route24Text
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "route24_cooltrainer_m1_defeated",
+                label: "_Route24CooltrainerM1DefeatedText",
+                from: route24Text
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "route24_cooltrainer_m1_you_could_become_a_top_leader",
+                label: "_Route24CooltrainerM1YouCouldBecomeATopLeaderText",
+                from: route24Text
+            )
+        )
+    }
+
+    if let route25Text {
+        dialogues.append(
+            try extractDialogue(
+                id: "route25_bill_sign",
+                label: "_Route25BillSignText",
+                from: route25Text
+            )
+        )
+    }
+
+    if let billsHouseText {
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_im_not_a_pokemon",
+                label: "_BillsHouseBillImNotAPokemonText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_use_separation_system",
+                label: "_BillsHouseBillUseSeparationSystemText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_no_you_gotta_help",
+                label: "_BillsHouseBillNoYouGottaHelpText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_thank_you",
+                label: "_BillsHouseBillThankYouText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_ss_ticket_received",
+                label: "_SSTicketReceivedText",
+                from: billsHouseText,
+                placeholderMap: ["wStringBuffer": "wStringBuffer"],
+                extraEvents: scriptDialogueEvents["_SSTicketReceivedText"] ?? []
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_ss_ticket_no_room",
+                label: "_SSTicketNoRoomText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_why_dont_you_go_instead_of_me",
+                label: "_BillsHouseBillWhyDontYouGoInsteadOfMeText",
+                from: billsHouseText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "bills_house_bill_check_out_my_rare_pokemon",
+                label: "_BillsHouseBillCheckOutMyRarePokemonText",
+                from: billsHouseText
+            )
+        )
+    }
+
+    if let ceruleanCityText {
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rival_pre_battle",
+                label: "_CeruleanCityRivalPreBattleText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rival_defeated",
+                label: "_CeruleanCityRivalDefeatedText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rival_victory",
+                label: "_CeruleanCityRivalVictoryText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rival_i_went_to_bills",
+                label: "_CeruleanCityRivalIWentToBillsText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_text",
+                label: "_CeruleanCityRocketText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_i_give_up",
+                label: "_CeruleanCityRocketIGiveUpText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_ill_return_the_tm",
+                label: "_CeruleanCityRocketIllReturnTheTMText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_received_tm28",
+                label: "_CeruleanCityRocketReceivedTM28Text",
+                from: ceruleanCityText,
+                extraEvents: scriptDialogueEvents["_CeruleanCityRocketReceivedTM28Text"] ?? []
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_tm28_no_room",
+                label: "_CeruleanCityRocketTM28NoRoomText",
+                from: ceruleanCityText
+            )
+        )
+        dialogues.append(
+            try extractDialogue(
+                id: "cerulean_city_rocket_i_better_get_moving",
+                label: "_CeruleanCityRocketIBetterGetMovingText",
+                from: ceruleanCityText
+            )
+        )
     }
 
     if let pewterGymText {

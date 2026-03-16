@@ -24,6 +24,7 @@ public enum RedContentExtractor {
         ("gfx/tilesets/gym.png", "Assets/field/tilesets/gym.png"),
         ("gfx/tilesets/gate.png", "Assets/field/tilesets/gate.png"),
         ("gfx/tilesets/house.png", "Assets/field/tilesets/house.png"),
+        ("gfx/tilesets/interior.png", "Assets/field/tilesets/interior.png"),
         ("gfx/tilesets/pokecenter.png", "Assets/field/tilesets/pokecenter.png"),
         ("gfx/sprites/red.png", "Assets/field/sprites/red.png"),
         ("gfx/sprites/oak.png", "Assets/field/sprites/oak.png"),
@@ -67,6 +68,7 @@ public enum RedContentExtractor {
         ("gfx/blocksets/gym.bst", "Assets/field/blocksets/gym.bst"),
         ("gfx/blocksets/gate.bst", "Assets/field/blocksets/gate.bst"),
         ("gfx/blocksets/house.bst", "Assets/field/blocksets/house.bst"),
+        ("gfx/blocksets/interior.bst", "Assets/field/blocksets/interior.bst"),
         ("gfx/blocksets/pokecenter.bst", "Assets/field/blocksets/pokecenter.bst"),
     ]
 
@@ -155,6 +157,7 @@ public enum RedContentExtractor {
             "Assets/field/tilesets/gym.png",
             "Assets/field/tilesets/gate.png",
             "Assets/field/tilesets/house.png",
+            "Assets/field/tilesets/interior.png",
             "Assets/field/tilesets/pokecenter.png",
             "Assets/field/sprites/red.png",
             "Assets/field/sprites/oak.png",
@@ -198,6 +201,7 @@ public enum RedContentExtractor {
             "Assets/field/blocksets/gym.bst",
             "Assets/field/blocksets/gate.bst",
             "Assets/field/blocksets/house.bst",
+            "Assets/field/blocksets/interior.bst",
             "Assets/field/blocksets/pokecenter.bst",
             "Assets/battle/animations/move_anim_0.png",
             "Assets/battle/animations/move_anim_1.png",

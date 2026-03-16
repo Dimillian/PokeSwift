@@ -212,6 +212,7 @@ extension GameRuntime {
         dialogueState = nil
         fieldPromptState = nil
         scriptItemPromptState = nil
+        scriptChoicePromptState = nil
         fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil

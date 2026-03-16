@@ -66,7 +66,10 @@ extension GameRuntime {
     ) {
         enterBattlePromptState(.partySelection, battle: &battle)
         battle.partySelectionMode = mode
-        battle.focusedPartyIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) ?? 0
+        battle.focusedPartyIndex = firstSwitchablePartyIndex(
+            gameplayState: gameplayState,
+            excluding: battle.playerActiveIndex
+        ) ?? 0
     }
 
     func shouldPlayBattleAdvanceConfirmSound(for battle: RuntimeBattleState) -> Bool {
@@ -397,17 +400,25 @@ extension GameRuntime {
     }
 
     func canUseBattleSwitch(for battle: RuntimeBattleState, gameplayState: GameplayState) -> Bool {
-        let _ = battle
-        return battleSwitchablePartyIndices(gameplayState: gameplayState).isEmpty == false
+        battleSwitchablePartyIndices(
+            gameplayState: gameplayState,
+            excluding: battle.playerActiveIndex
+        ).isEmpty == false
     }
 
-    func firstSwitchablePartyIndex(gameplayState: GameplayState) -> Int? {
-        battleSwitchablePartyIndices(gameplayState: gameplayState).first
+    func firstSwitchablePartyIndex(
+        gameplayState: GameplayState,
+        excluding activeIndex: Int = 0
+    ) -> Int? {
+        battleSwitchablePartyIndices(gameplayState: gameplayState, excluding: activeIndex).first
     }
 
-    func battleSwitchablePartyIndices(gameplayState: GameplayState) -> [Int] {
+    func battleSwitchablePartyIndices(
+        gameplayState: GameplayState,
+        excluding activeIndex: Int = 0
+    ) -> [Int] {
         gameplayState.playerParty.indices.filter { index in
-            index != 0 && gameplayState.playerParty[index].currentHP > 0
+            index != activeIndex && gameplayState.playerParty[index].currentHP > 0
         }
     }
 

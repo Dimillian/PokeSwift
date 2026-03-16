@@ -293,6 +293,38 @@ func objectIDFor(
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_COOLTRAINER_M"): return "pewter_gym_cooltrainer_m"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_gym_guide"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_RIVAL"): return "cerulean_city_rival"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_ROCKET"): return "cerulean_city_rocket"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_COOLTRAINER_M"): return "cerulean_city_cooltrainer_m"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SUPER_NERD1"): return "cerulean_city_super_nerd_1"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SUPER_NERD2"): return "cerulean_city_super_nerd_2"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_GUARD1"): return "cerulean_city_guard_1"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_COOLTRAINER_F1"): return "cerulean_city_cooltrainer_f_1"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SLOWBRO"): return "cerulean_city_slowbro"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_COOLTRAINER_F2"): return "cerulean_city_cooltrainer_f_2"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SUPER_NERD3"): return "cerulean_city_super_nerd_3"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_GUARD2"): return "cerulean_city_guard_2"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M1"): return "route24_nugget_bridge_guy"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M2"): return "route24_cooltrainer_m_2"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M3"): return "route24_cooltrainer_m_3"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_F1"): return "route24_cooltrainer_f_1"
+    case ("ROUTE_24", "TEXT_ROUTE24_YOUNGSTER1"): return "route24_youngster_1"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_F2"): return "route24_cooltrainer_f_2"
+    case ("ROUTE_24", "TEXT_ROUTE24_YOUNGSTER2"): return "route24_youngster_2"
+    case ("ROUTE_24", "TEXT_ROUTE24_TM_THUNDER_WAVE"): return "route_24_tm_thunder_wave"
+    case ("ROUTE_25", "TEXT_ROUTE25_YOUNGSTER1"): return "route25_youngster_1"
+    case ("ROUTE_25", "TEXT_ROUTE25_YOUNGSTER2"): return "route25_youngster_2"
+    case ("ROUTE_25", "TEXT_ROUTE25_COOLTRAINER_M"): return "route25_cooltrainer_m"
+    case ("ROUTE_25", "TEXT_ROUTE25_COOLTRAINER_F1"): return "route25_cooltrainer_f_1"
+    case ("ROUTE_25", "TEXT_ROUTE25_YOUNGSTER3"): return "route25_youngster_3"
+    case ("ROUTE_25", "TEXT_ROUTE25_COOLTRAINER_F2"): return "route25_cooltrainer_f_2"
+    case ("ROUTE_25", "TEXT_ROUTE25_HIKER1"): return "route25_hiker_1"
+    case ("ROUTE_25", "TEXT_ROUTE25_HIKER2"): return "route25_hiker_2"
+    case ("ROUTE_25", "TEXT_ROUTE25_HIKER3"): return "route25_hiker_3"
+    case ("ROUTE_25", "TEXT_ROUTE25_TM_SEISMIC_TOSS"): return "route_25_tm_seismic_toss"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_POKEMON"): return "bills_house_bill_pokemon"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_SS_TICKET"): return "bills_house_bill_1"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_CHECK_OUT_MY_RARE_POKEMON"): return "bills_house_bill_2"
     case ("MT_MOON_1F", "TEXT_MTMOON1F_POTION1"): return "mt_moon_1f_potion_1"
     case ("MT_MOON_1F", "TEXT_MTMOON1F_POTION2"): return "mt_moon_1f_potion_2"
     case ("MT_MOON_B2F", "TEXT_MTMOONB2F_SUPER_NERD"): return "mt_moon_b2f_super_nerd"
@@ -370,6 +402,8 @@ private func interactionScriptID(for objectID: String, mapID: String, sprite: St
     switch objectID {
     case "viridian_pokecenter_nurse":
         return "viridian_pokecenter_nurse_heal"
+    case "bills_house_bill_pokemon":
+        return "bills_house_bill_pokemon_interaction"
     case "mt_moon_b2f_super_nerd":
         return "mt_moon_b2f_super_nerd_battle"
     case "mt_moon_b2f_dome_fossil":
@@ -450,6 +484,31 @@ private func interactionTriggers(
                 dialogueID: "mt_moon_b2f_super_nerd_each_take_one"
             ),
         ]
+    case "cerulean_city_rocket":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_BEAT_CERULEAN_ROCKET_THIEF")],
+                scriptID: "cerulean_city_rocket_reward"
+            ),
+        ]
+    case "route24_nugget_bridge_guy":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_NUGGET")],
+                dialogueID: "route24_cooltrainer_m1_you_could_become_a_top_leader"
+            ),
+            .init(scriptID: "route24_nugget_bridge_reward"),
+        ]
+    case "bills_house_bill_1":
+        return [
+            .init(
+                conditions: [.init(kind: "flagSet", flagID: "EVENT_GOT_SS_TICKET")],
+                dialogueID: "bills_house_bill_why_dont_you_go_instead_of_me"
+            ),
+            .init(scriptID: "bills_house_bill_ss_ticket"),
+        ]
+    case "bills_house_bill_2":
+        return [.init(dialogueID: "bills_house_bill_check_out_my_rare_pokemon")]
     case "route_1_youngster_1":
         return [
             .init(
@@ -634,6 +693,9 @@ private func displayNameForObject(
     case "oaks_lab_oak_1", "oaks_lab_oak_2": return "Oak"
     case "oaks_lab_pokedex_1", "oaks_lab_pokedex_2": return "Pokedex"
     case "route_22_rival_1", "route_22_rival_2": return "Blue"
+    case "cerulean_city_rival": return "Blue"
+    case "cerulean_city_rocket", "route24_nugget_bridge_guy": return "Rocket"
+    case "bills_house_bill_pokemon", "bills_house_bill_1", "bills_house_bill_2": return "Bill"
     case "pewter_city_cooltrainer_f", "pewter_city_cooltrainer_m": return "Cooltrainer"
     case "pewter_city_super_nerd_1", "pewter_city_super_nerd_2": return "Super Nerd"
     case "pewter_city_youngster": return "Youngster"
@@ -658,7 +720,14 @@ func trainerBattleIDFor(trainerClass: String?, trainerNumber: Int?) -> String? {
 
 private func usesScriptedTrainerBattle(objectID: String) -> Bool {
     switch objectID {
-    case "route_22_rival_1", "route_22_rival_2", "pewter_gym_brock", "mt_moon_b2f_super_nerd":
+    case
+        "route_22_rival_1",
+        "route_22_rival_2",
+        "pewter_gym_brock",
+        "mt_moon_b2f_super_nerd",
+        "cerulean_city_rival",
+        "cerulean_city_rocket",
+        "route24_nugget_bridge_guy":
         return true
     default:
         return false
@@ -742,6 +811,21 @@ func dialogueID(for mapID: String, textID: String, mapScriptMetadata: MapScriptM
     case ("PEWTER_CITY", "TEXT_PEWTERCITY_MUSEUM_SIGN"): return "pewter_city_museum_sign"
     case ("PEWTER_CITY", "TEXT_PEWTERCITY_GYM_SIGN"): return "pewter_city_gym_sign"
     case ("PEWTER_CITY", "TEXT_PEWTERCITY_SIGN"): return "pewter_city_sign"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_RIVAL"): return "cerulean_city_rival_pre_battle"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_ROCKET"): return "cerulean_city_rocket_text"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_GUARD1"),
+         ("CERULEAN_CITY", "TEXT_CERULEANCITY_GUARD2"): return "cerulean_city_guard"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_SIGN"): return "cerulean_city_sign"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_TRAINER_TIPS"): return "cerulean_city_trainer_tips"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_MART_SIGN"): return "cerulean_city_mart_sign"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_POKECENTER_SIGN"): return "cerulean_city_pokecenter_sign"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_BIKESHOP_SIGN"): return "cerulean_city_bike_shop_sign"
+    case ("CERULEAN_CITY", "TEXT_CERULEANCITY_GYM_SIGN"): return "cerulean_city_gym_sign"
+    case ("ROUTE_24", "TEXT_ROUTE24_COOLTRAINER_M1"): return "route24_cooltrainer_m1_you_could_become_a_top_leader"
+    case ("ROUTE_25", "TEXT_ROUTE25_BILL_SIGN"): return "route25_bill_sign"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_POKEMON"): return "bills_house_bill_im_not_a_pokemon"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_SS_TICKET"): return "bills_house_bill_thank_you"
+    case ("BILLS_HOUSE", "TEXT_BILLSHOUSE_BILL_CHECK_OUT_MY_RARE_POKEMON"): return "bills_house_bill_check_out_my_rare_pokemon"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_BROCK"): return "pewter_gym_brock_pre_battle"
     case ("PEWTER_GYM", "TEXT_PEWTERGYM_GYM_GUIDE"): return "pewter_gym_guide_pre_advice"
     case ("VIRIDIAN_POKECENTER", "TEXT_VIRIDIANPOKECENTER_GENTLEMAN"): return "viridian_pokecenter_gentleman"

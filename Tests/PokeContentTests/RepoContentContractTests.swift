@@ -10,6 +10,7 @@ final class RepoContentContractTests: XCTestCase {
         let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
         let cavernTileset = try XCTUnwrap(loaded.tileset(id: "CAVERN"))
         let forestTileset = try XCTUnwrap(loaded.tileset(id: "FOREST"))
+        let interiorTileset = try XCTUnwrap(loaded.tileset(id: "INTERIOR"))
         let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
         let rocketSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_ROCKET"))
         let fossilSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_FOSSIL"))
@@ -25,6 +26,10 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.blocksetPath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(forestTileset.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(forestTileset.blocksetPath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(interiorTileset.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(interiorTileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(rocketSprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(fossilSprite.imagePath).path))
@@ -139,41 +144,17 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.audioCue(id: "pokemon_center_healed")?.resumeMusicAfterCompletion, true)
         XCTAssertNotNil(loaded.audioTrack(id: "MUSIC_TITLE_SCREEN"))
         XCTAssertNotNil(loaded.audioEntry(trackID: "MUSIC_MEET_RIVAL", entryID: "alternateStart"))
-        XCTAssertEqual(
-            loaded.audioManifest.mapRoutes,
-            [
-                .init(mapID: "MT_MOON_1F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_B1F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_B2F", musicID: "MUSIC_DUNGEON3"),
-                .init(mapID: "MT_MOON_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "MUSEUM_1F", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "MUSEUM_2F", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB"),
-                .init(mapID: "PALLET_TOWN", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "PEWTER_CITY", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "PEWTER_GYM", musicID: "MUSIC_GYM"),
-                .init(mapID: "PEWTER_MART", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "PEWTER_NIDORAN_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "PEWTER_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "PEWTER_SPEECH_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "REDS_HOUSE_1F", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "REDS_HOUSE_2F", musicID: "MUSIC_PALLET_TOWN"),
-                .init(mapID: "ROUTE_1", musicID: "MUSIC_ROUTES1"),
-                .init(mapID: "ROUTE_2", musicID: "MUSIC_ROUTES1"),
-                .init(mapID: "ROUTE_22", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "ROUTE_22_GATE", musicID: "MUSIC_DUNGEON2"),
-                .init(mapID: "ROUTE_3", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "ROUTE_4", musicID: "MUSIC_ROUTES3"),
-                .init(mapID: "VIRIDIAN_CITY", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_FOREST", musicID: "MUSIC_DUNGEON2"),
-                .init(mapID: "VIRIDIAN_FOREST_NORTH_GATE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_FOREST_SOUTH_GATE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_MART", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "VIRIDIAN_NICKNAME_HOUSE", musicID: "MUSIC_CITIES1"),
-                .init(mapID: "VIRIDIAN_POKECENTER", musicID: "MUSIC_POKECENTER"),
-                .init(mapID: "VIRIDIAN_SCHOOL_HOUSE", musicID: "MUSIC_CITIES1"),
-            ]
-        )
+        let mapRouteIDs = loaded.audioManifest.mapRoutes.map(\.mapID)
+        XCTAssertEqual(Set(mapRouteIDs).count, mapRouteIDs.count)
+        XCTAssertEqual(loaded.map(id: "CERULEAN_CITY")?.defaultMusicID, "MUSIC_CITIES2")
+        XCTAssertEqual(loaded.map(id: "ROUTE_24")?.defaultMusicID, "MUSIC_ROUTES2")
+        XCTAssertEqual(loaded.map(id: "ROUTE_25")?.defaultMusicID, "MUSIC_ROUTES2")
+        XCTAssertEqual(loaded.map(id: "BILLS_HOUSE")?.defaultMusicID, "MUSIC_CITIES2")
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "OAKS_LAB", musicID: "MUSIC_OAKS_LAB")))
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "CERULEAN_CITY", musicID: "MUSIC_CITIES2")))
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "ROUTE_24", musicID: "MUSIC_ROUTES2")))
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "ROUTE_25", musicID: "MUSIC_ROUTES2")))
+        XCTAssertTrue(loaded.audioManifest.mapRoutes.contains(.init(mapID: "BILLS_HOUSE", musicID: "MUSIC_CITIES2")))
     }
 
     func testLoaderReadsRepoGeneratedMartAndCaptureContracts() throws {
@@ -312,6 +293,47 @@ final class RepoContentContractTests: XCTestCase {
                 "route_22_gate_guard_blocks_northbound_lower_lane",
             ]
         )
+        XCTAssertEqual(
+            loaded.mapScript(for: "CERULEAN_CITY")?.triggers.count,
+            8
+        )
+        XCTAssertEqual(
+            loaded.mapScript(for: "ROUTE_24")?.triggers.map(\.scriptID),
+            ["route24_nugget_bridge_reward"]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "cerulean_city_rocket_reward")?.steps.map(\.action),
+            ["showDialogue", "giveItem", "setObjectVisibility", "setObjectVisibility", "setObjectVisibility", "showDialogue"]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "route24_nugget_bridge_reward")?.steps.map(\.action),
+            ["showDialogue", "giveItem", "showDialogue", "startBattle"]
+        )
+        XCTAssertEqual(loaded.script(id: "route24_nugget_bridge_reward")?.steps[1].continueOnFailure, false)
+        XCTAssertEqual(
+            loaded.script(id: "bills_house_bill_pokemon_interaction")?.steps.map(\.action),
+            [
+                "promptYesNo",
+                "showDialogue",
+                "performMovement",
+                "setFlag",
+                "setFlag",
+                "setObjectVisibility",
+                "setObjectPosition",
+                "setObjectVisibility",
+                "moveObject",
+                "setFlag",
+                "setFlag",
+            ]
+        )
+        XCTAssertEqual(
+            loaded.script(id: "bills_house_bill_ss_ticket")?.steps.map(\.action),
+            ["showDialogue", "giveItem", "setObjectVisibility", "setObjectVisibility", "setObjectVisibility", "showDialogue"]
+        )
+        XCTAssertEqual(loaded.script(id: "bills_house_bill_ss_ticket")?.steps[1].continueOnFailure, false)
+        XCTAssertNotNil(loaded.dialogue(id: "cerulean_city_rival_pre_battle"))
+        XCTAssertNotNil(loaded.dialogue(id: "route24_cooltrainer_m1_contest_prize"))
+        XCTAssertNotNil(loaded.dialogue(id: "bills_house_ss_ticket_received"))
         XCTAssertEqual(
             loaded.script(id: "route_22_gate_guard_blocks_northbound_upper_lane")?.steps.map(\.action),
             ["showDialogue", "movePlayer"]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PokeSwift Tuist Refactor Guard"
+  short_description: "Guard PokeSwift refactors against Tuist drift"
+  default_prompt: "Use $pokeswift-tuist-refactor-guard to plan or execute a PokeSwift refactor without breaking the Tuist workspace or target graph."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PokeSwift Parity Fix"
+  short_description: "Fix PokeSwift Red parity regressions"
+  default_prompt: "Use $pokeswift-parity-fix to investigate and fix a PokeSwift gameplay parity bug against pokered."

@@ -8,7 +8,7 @@ extension GameRuntime {
 
         let selectedIndex = battle.focusedPartyIndex
         let selectionMode = battle.partySelectionMode
-        guard selectedIndex != 0 else {
+        guard selectedIndex != battle.playerActiveIndex else {
             playCollisionSoundIfNeeded()
             battle.message = "\(battle.playerPokemon.nickname) is already out!"
             return
@@ -21,9 +21,12 @@ extension GameRuntime {
         }
 
         let recalledPokemon = battle.playerPokemon
-        gameplayState.playerParty[0] = clearBattleStatStages(recalledPokemon)
-        gameplayState.playerParty.swapAt(0, selectedIndex)
-        battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[0])
+        let recalledIndex = battle.playerActiveIndex
+        if gameplayState.playerParty.indices.contains(recalledIndex) {
+            gameplayState.playerParty[recalledIndex] = clearBattleStatStages(recalledPokemon)
+        }
+        battle.playerActiveIndex = selectedIndex
+        battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[selectedIndex])
         battle.phase = .resolvingTurn
         switch selectionMode {
         case .forcedReplacement:
@@ -76,12 +79,23 @@ extension GameRuntime {
                 enemyPokemon: battle.enemyParty[nextEnemyIndex]
             )
         case .optionalSwitch:
+            battle.message = "Come back, \(recalledPokemon.nickname)!"
+            updateBattlePresentation(
+                battle: &battle,
+                stage: .resultText,
+                uiVisibility: .visible,
+                activeSide: .player,
+                hidePlayerPokemon: true,
+                meterAnimation: nil,
+                transitionStyle: .none
+            )
             replacementBeats = [
                 .init(
                     delay: battlePresentationDelay(base: 0),
                     stage: .resultText,
                     uiVisibility: .visible,
                     activeSide: .player,
+                    hidePlayerPokemon: true,
                     message: "Come back, \(recalledPokemon.nickname)!",
                     phase: .turnText
                 ),
@@ -109,22 +123,71 @@ extension GameRuntime {
         var enemyPokemon = battle.enemyPokemon
         var playerPokemon = battle.playerPokemon
         let enemyMoveIndex = selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
-        let enemyMove = applyMove(attacker: &enemyPokemon, defender: &playerPokemon, moveIndex: enemyMoveIndex)
-        battle.aiLayer2Encouragement += 1
-        battle.enemyPokemon = enemyPokemon
-        battle.playerPokemon = playerPokemon
-
-        if let pendingAction = enemyMove.pendingAction {
-            presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: pendingAction)
-        } else if playerPokemon.currentHP == 0 {
-            let hasReplacement = gameplayState.map { firstSwitchablePartyIndex(gameplayState: $0) != nil } ?? false
-            presentBattleMessages(
-                enemyMove.messages,
-                battle: &battle,
-                pendingAction: hasReplacement ? .continueForcedSwitch : .finish(won: false)
-            )
-        } else {
-            presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: .moveSelection)
+        let enemyAction = resolveBattleAction(
+            side: .enemy,
+            attacker: enemyPokemon,
+            defender: playerPokemon,
+            moveIndex: enemyMoveIndex,
+            defenderCanActLaterInTurn: false
+        )
+        var actionBeats = makeBeats(for: enemyAction)
+        if let pendingAction = enemyAction.pendingAction,
+           actionBeats.isEmpty == false {
+            actionBeats[actionBeats.count - 1].pendingAction = pendingAction
         }
+
+        var batches: [[RuntimeBattlePresentationBeat]] = []
+        if actionBeats.isEmpty == false {
+            batches.append(actionBeats)
+        }
+
+        applyResolvedBattleAction(
+            enemyAction,
+            side: .enemy,
+            simulatedPlayer: &playerPokemon,
+            simulatedEnemy: &enemyPokemon
+        )
+        battle.aiLayer2Encouragement += 1
+
+        if enemyAction.pendingAction == nil {
+            if appendPostActionResolutionIfNeeded(
+                battle: battle,
+                simulatedPlayer: &playerPokemon,
+                simulatedEnemy: enemyPokemon,
+                batches: &batches
+            ) == false,
+               appendResidualResolutionIfNeeded(
+                   actingSide: .enemy,
+                   battle: battle,
+                   simulatedPlayer: &playerPokemon,
+                   simulatedEnemy: &enemyPokemon,
+                   batches: &batches
+               ) == false {
+                batches.append([
+                    commandReadyBeat(
+                        delay: battlePresentationDelay(base: 0.24),
+                        playerPokemon: playerPokemon,
+                        enemyPokemon: enemyPokemon
+                    ),
+                ])
+            }
+        }
+
+        if batches.isEmpty {
+            batches.append([
+                commandReadyBeat(
+                    delay: battlePresentationDelay(base: 0),
+                    playerPokemon: playerPokemon,
+                    enemyPokemon: enemyPokemon
+                ),
+            ])
+        }
+
+        battle.phase = .resolvingTurn
+        battle.pendingAction = nil
+        battle.queuedMessages = []
+        battle.pendingPresentationBatches = Array(batches.dropFirst())
+        battle.message = ""
+        scheduleBattlePresentation(batches.first ?? [], battleID: battle.battleID)
     }
 }
