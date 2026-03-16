@@ -113,6 +113,7 @@ struct BattleViewportCanvas: View {
                         stage: presentation.stage,
                         activeSide: presentation.activeSide,
                         attackAnimation: presentation.attackAnimation,
+                        hidePlayerPokemon: presentation.hidePlayerPokemon,
                         side: .enemy
                     ) ? spriteAnimation : nil,
                     value: presentation.revision
@@ -155,6 +156,7 @@ struct BattleViewportCanvas: View {
                         stage: presentation.stage,
                         activeSide: presentation.activeSide,
                         attackAnimation: presentation.attackAnimation,
+                        hidePlayerPokemon: presentation.hidePlayerPokemon,
                         side: .player
                     ) ? spriteAnimation : nil,
                     value: presentation.revision
@@ -492,35 +494,14 @@ struct BattleViewportCanvas: View {
     }
 
     private var playerPokemonOpacity: Double {
-        let visibility: Double
-        if isTrainerBattle {
-            switch presentation.stage {
-            case .introReveal:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .enemy && presentation.hidePlayerPokemon:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .player:
-                visibility = currentSendOutState.pokemonOpacity
-            case _ where playerPokemon.currentHP == 0:
-                visibility = 0
-            default:
-                visibility = 1
-            }
-        } else if isWildBattle {
-            switch presentation.stage {
-            case .introFlash1, .introFlash2, .introFlash3, .introSpiral, .introCrossing, .introReveal:
-                visibility = 0
-            case .enemySendOut where presentation.activeSide == .player:
-                visibility = currentSendOutState.pokemonOpacity
-            case _ where playerPokemon.currentHP == 0:
-                visibility = 0
-            default:
-                visibility = 1
-            }
-        } else {
-            visibility = playerPokemon.currentHP == 0 ? 0 : 1
-        }
-        return visibility * currentAttackAnimationState.playerOpacity * currentApplyingHitEffectState.playerOpacity
+        Self.playerPokemonOpacity(
+            battleKind: kind,
+            stage: presentation.stage,
+            activeSide: presentation.activeSide,
+            hidePlayerPokemon: presentation.hidePlayerPokemon,
+            playerCurrentHP: playerPokemon.currentHP,
+            sendOutPokemonOpacity: currentSendOutState.pokemonOpacity
+        ) * currentAttackAnimationState.playerOpacity * currentApplyingHitEffectState.playerOpacity
     }
 
     private var enemyPokemonRotation: Angle {
@@ -684,12 +665,16 @@ struct BattleViewportCanvas: View {
         stage: BattlePresentationStage,
         activeSide: BattlePresentationSide?,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry?,
+        hidePlayerPokemon: Bool,
         side: BattlePresentationSide
     ) -> Bool {
         // Send-out reveal beats are driven by local sendOutVisualState. Letting
         // the stage revision animate the whole sprite causes SwiftUI to tween
         // more than just scale/opacity, which reads as the Pokemon drifting.
         if stage == .enemySendOut && activeSide == side {
+            return false
+        }
+        if hidePlayerPokemon && side == .player {
             return false
         }
         return !(attackAnimation != nil && activeSide == side)
@@ -721,6 +706,40 @@ struct BattleViewportCanvas: View {
                 return sendOutPokemonOpacity
             default:
                 return 1
+            }
+        }
+    }
+
+    static func playerPokemonOpacity(
+        battleKind: BattleKind,
+        stage: BattlePresentationStage,
+        activeSide: BattlePresentationSide?,
+        hidePlayerPokemon: Bool,
+        playerCurrentHP: Int,
+        sendOutPokemonOpacity: Double
+    ) -> Double {
+        if hidePlayerPokemon {
+            return 0
+        }
+
+        switch battleKind {
+        case .trainer:
+            switch stage {
+            case .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return playerCurrentHP == 0 ? 0 : 1
+            }
+        case .wild:
+            switch stage {
+            case .introFlash1, .introFlash2, .introFlash3, .introSpiral, .introCrossing, .introReveal:
+                return 0
+            case .enemySendOut where activeSide == .player:
+                return sendOutPokemonOpacity
+            default:
+                return playerCurrentHP == 0 ? 0 : 1
             }
         }
     }

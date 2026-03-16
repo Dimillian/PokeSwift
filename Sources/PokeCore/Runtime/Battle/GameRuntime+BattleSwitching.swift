@@ -79,12 +79,23 @@ extension GameRuntime {
                 enemyPokemon: battle.enemyParty[nextEnemyIndex]
             )
         case .optionalSwitch:
+            battle.message = "Come back, \(recalledPokemon.nickname)!"
+            updateBattlePresentation(
+                battle: &battle,
+                stage: .resultText,
+                uiVisibility: .visible,
+                activeSide: .player,
+                hidePlayerPokemon: true,
+                meterAnimation: nil,
+                transitionStyle: .none
+            )
             replacementBeats = [
                 .init(
                     delay: battlePresentationDelay(base: 0),
                     stage: .resultText,
                     uiVisibility: .visible,
                     activeSide: .player,
+                    hidePlayerPokemon: true,
                     message: "Come back, \(recalledPokemon.nickname)!",
                     phase: .turnText
                 ),

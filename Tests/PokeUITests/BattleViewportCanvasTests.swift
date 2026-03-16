@@ -115,6 +115,7 @@ extension PokeUITests {
         stage: .enemySendOut,
         activeSide: .enemy,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .enemy
       )
     )
@@ -123,6 +124,7 @@ extension PokeUITests {
         stage: .enemySendOut,
         activeSide: .player,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .player
       )
     )
@@ -131,7 +133,17 @@ extension PokeUITests {
         stage: .attackImpact,
         activeSide: .enemy,
         attackAnimation: nil,
+        hidePlayerPokemon: false,
         side: .enemy
+      )
+    )
+    XCTAssertFalse(
+      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+        stage: .resultText,
+        activeSide: .player,
+        attackAnimation: nil,
+        hidePlayerPokemon: true,
+        side: .player
       )
     )
   }
@@ -164,6 +176,32 @@ extension PokeUITests {
         sendOutPokemonOpacity: 0
       ),
       1
+    )
+  }
+
+  func testBattlePlayerSpriteHidesWhenPresentationRequestsIt() {
+    XCTAssertEqual(
+      BattleViewportCanvas.playerPokemonOpacity(
+        battleKind: .wild,
+        stage: .resultText,
+        activeSide: .player,
+        hidePlayerPokemon: true,
+        playerCurrentHP: 10,
+        sendOutPokemonOpacity: 1
+      ),
+      0
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.playerPokemonOpacity(
+        battleKind: .wild,
+        stage: .enemySendOut,
+        activeSide: .player,
+        hidePlayerPokemon: false,
+        playerCurrentHP: 10,
+        sendOutPokemonOpacity: 0.5
+      ),
+      0.5,
+      accuracy: 0.0001
     )
   }
 
@@ -237,6 +275,7 @@ extension PokeUITests {
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
+        hidePlayerPokemon: false,
         side: .player
       )
     )
@@ -245,6 +284,7 @@ extension PokeUITests {
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
+        hidePlayerPokemon: false,
         side: .enemy
       )
     )
