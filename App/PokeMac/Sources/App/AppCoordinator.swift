@@ -2,6 +2,7 @@ import AppKit
 import Observation
 import PokeContent
 import PokeCore
+import PokeDataModel
 import PokeTelemetry
 import PokeUI
 
@@ -47,6 +48,33 @@ final class AppCoordinator {
 
                 let server = try await telemetry.makeServer(
                     port: AppPaths.telemetryPort,
+                    mapProvider: { [weak self] in
+                        await MainActor.run {
+                            guard let runtime = self?.runtime,
+                                  let map = runtime.currentMapManifest,
+                                  let tileset = runtime.content.tileset(id: map.tileset) else {
+                                return nil
+                            }
+                            let passable = Set(tileset.collision.passableTileIDs)
+                            let walkable = map.stepCollisionTileIDs.map { passable.contains($0) }
+                            return MapStateTelemetry(
+                                mapID: map.id,
+                                displayName: map.displayName,
+                                stepWidth: map.stepWidth,
+                                stepHeight: map.stepHeight,
+                                walkable: walkable,
+                                warps: map.warps.map {
+                                    MapWarpTelemetry(id: $0.id, origin: $0.origin, targetMapID: $0.targetMapID, targetPosition: $0.targetPosition, targetFacing: $0.targetFacing)
+                                },
+                                connections: map.connections.map {
+                                    MapConnectionTelemetry(direction: $0.direction, targetMapID: $0.targetMapID)
+                                },
+                                signs: map.backgroundEvents.map {
+                                    MapSignTelemetry(position: $0.position, dialogueID: $0.dialogueID)
+                                }
+                            )
+                        }
+                    },
                     inputHandler: { [weak self] button in
                         await MainActor.run {
                             guard let runtime = self?.runtime else { return false }

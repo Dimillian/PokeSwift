@@ -1076,6 +1076,73 @@ public struct RuntimeSessionEvent: Codable, Equatable, Sendable {
     }
 }
 
+public struct MapStateTelemetry: Codable, Equatable, Sendable {
+    public let mapID: String
+    public let displayName: String
+    public let stepWidth: Int
+    public let stepHeight: Int
+    public let walkable: [Bool]
+    public let warps: [MapWarpTelemetry]
+    public let connections: [MapConnectionTelemetry]
+    public let signs: [MapSignTelemetry]
+
+    public init(
+        mapID: String,
+        displayName: String,
+        stepWidth: Int,
+        stepHeight: Int,
+        walkable: [Bool],
+        warps: [MapWarpTelemetry],
+        connections: [MapConnectionTelemetry],
+        signs: [MapSignTelemetry]
+    ) {
+        self.mapID = mapID
+        self.displayName = displayName
+        self.stepWidth = stepWidth
+        self.stepHeight = stepHeight
+        self.walkable = walkable
+        self.warps = warps
+        self.connections = connections
+        self.signs = signs
+    }
+}
+
+public struct MapWarpTelemetry: Codable, Equatable, Sendable {
+    public let id: String
+    public let origin: TilePoint
+    public let targetMapID: String
+    public let targetPosition: TilePoint
+    public let targetFacing: FacingDirection
+
+    public init(id: String, origin: TilePoint, targetMapID: String, targetPosition: TilePoint, targetFacing: FacingDirection) {
+        self.id = id
+        self.origin = origin
+        self.targetMapID = targetMapID
+        self.targetPosition = targetPosition
+        self.targetFacing = targetFacing
+    }
+}
+
+public struct MapConnectionTelemetry: Codable, Equatable, Sendable {
+    public let direction: MapConnectionDirection
+    public let targetMapID: String
+
+    public init(direction: MapConnectionDirection, targetMapID: String) {
+        self.direction = direction
+        self.targetMapID = targetMapID
+    }
+}
+
+public struct MapSignTelemetry: Codable, Equatable, Sendable {
+    public let position: TilePoint
+    public let dialogueID: String
+
+    public init(position: TilePoint, dialogueID: String) {
+        self.position = position
+        self.dialogueID = dialogueID
+    }
+}
+
 public protocol TelemetryPublisher: Sendable {
     func publish(snapshot: RuntimeTelemetrySnapshot) async
     func publish(event: RuntimeSessionEvent) async

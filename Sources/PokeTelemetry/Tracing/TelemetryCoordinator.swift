@@ -31,6 +31,7 @@ public actor TelemetryCoordinator: TelemetryPublisher {
 
     public func makeServer(
         port: UInt16,
+        mapProvider: @escaping @Sendable () async -> MapStateTelemetry?,
         inputHandler: @escaping @Sendable (RuntimeButton) async -> Bool,
         saveHandler: @escaping @Sendable () async -> Bool,
         loadHandler: @escaping @Sendable () async -> Bool,
@@ -41,6 +42,7 @@ public actor TelemetryCoordinator: TelemetryPublisher {
             snapshotProvider: { [coordinator = self] in
                 await coordinator.latestSnapshot()
             },
+            mapProvider: mapProvider,
             inputHandler: inputHandler,
             saveHandler: saveHandler,
             loadHandler: loadHandler,
