@@ -453,6 +453,122 @@ extension PokeCoreTests {
         XCTAssertTrue(snapshot.canRun)
     }
 
+    func testBattleSwitchEnemyFollowUpUsesStandardAttackPresentation() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "LEAD", displayName: "Lead", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 80, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "SWAP", displayName: "Swap", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 60, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "ENEMY", displayName: "Enemy", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 40, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_GET_ITEM_2", frequencyModifier: 0, tempoModifier: 128)
+                        ),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "TACKLE",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "TACKLE",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 20
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.chosenStarterSpeciesID = "LEAD"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "LEAD", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "SWAP", level: 5, nickname: "Swap"),
+        ]
+
+        runtime.startWildBattle(speciesID: "ENEMY", level: 5)
+        drainBattleText(runtime)
+
+        let switchIndex = runtime.gameplayState.map { runtime.switchActionIndex(for: $0.battle!) } ?? 0
+        for _ in 0..<switchIndex {
+            runtime.handle(button: .down)
+        }
+
+        runtime.handle(button: .confirm)
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.battlePresentationTask == nil &&
+                runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Go! Swap!" &&
+                {
+                    guard case .continueSwitchTurn? = runtime.gameplayState?.battle?.pendingAction else {
+                        return false
+                    }
+                    return true
+                }(),
+            message: "player send-out did not finish before the enemy follow-up turn",
+            maxTicks: 240
+        )
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.battleMessage == "Enemy used TACKLE!" &&
+                runtime.battlePresentationTask == nil &&
+                (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
+            message: "enemy switch follow-up did not pause on the used-move prompt",
+            maxTicks: 240
+        )
+
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.attackAnimation?.moveID == "TACKLE" &&
+                runtime.currentSnapshot().battle?.presentation.attackAnimation?.attackerSide == .enemy,
+            message: "enemy switch follow-up did not start the standard attack animation",
+            maxTicks: 240
+        )
+    }
+
     func testTrainerBattleCursorDoesNotExposeRunAction() throws {
         let runtime = try makeRepoRuntime()
 

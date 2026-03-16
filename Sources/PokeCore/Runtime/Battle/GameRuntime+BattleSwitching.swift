@@ -112,27 +112,74 @@ extension GameRuntime {
         var enemyPokemon = battle.enemyPokemon
         var playerPokemon = battle.playerPokemon
         let enemyMoveIndex = selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
-        let enemyMove = applyMove(attacker: &enemyPokemon, defender: &playerPokemon, moveIndex: enemyMoveIndex)
+        let enemyAction = resolveBattleAction(
+            side: .enemy,
+            attacker: enemyPokemon,
+            defender: playerPokemon,
+            moveIndex: enemyMoveIndex,
+            defenderCanActLaterInTurn: false
+        )
+        var actionBeats = makeBeats(for: enemyAction)
+        if let pendingAction = enemyAction.pendingAction,
+           actionBeats.isEmpty == false {
+            actionBeats[actionBeats.count - 1].pendingAction = pendingAction
+        }
+
+        var batches: [[RuntimeBattlePresentationBeat]] = []
+        if actionBeats.isEmpty == false {
+            batches.append(actionBeats)
+        }
+
+        applyResolvedBattleAction(
+            enemyAction,
+            side: .enemy,
+            simulatedPlayer: &playerPokemon,
+            simulatedEnemy: &enemyPokemon
+        )
         battle.aiLayer2Encouragement += 1
+
+        if enemyAction.pendingAction == nil {
+            if appendPostActionResolutionIfNeeded(
+                battle: battle,
+                simulatedPlayer: &playerPokemon,
+                simulatedEnemy: enemyPokemon,
+                batches: &batches
+            ) == false,
+               appendResidualResolutionIfNeeded(
+                   actingSide: .enemy,
+                   battle: battle,
+                   simulatedPlayer: &playerPokemon,
+                   simulatedEnemy: &enemyPokemon,
+                   batches: &batches
+               ) == false {
+                batches.append([
+                    commandReadyBeat(
+                        delay: battlePresentationDelay(base: 0.24),
+                        playerPokemon: playerPokemon,
+                        enemyPokemon: enemyPokemon
+                    ),
+                ])
+            }
+        }
+
+        if batches.isEmpty {
+            batches.append([
+                commandReadyBeat(
+                    delay: battlePresentationDelay(base: 0),
+                    playerPokemon: playerPokemon,
+                    enemyPokemon: enemyPokemon
+                ),
+            ])
+        }
+
         battle.enemyPokemon = enemyPokemon
         battle.playerPokemon = playerPokemon
 
-        if let pendingAction = enemyMove.pendingAction {
-            presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: pendingAction)
-        } else if playerPokemon.currentHP == 0 {
-            let hasReplacement = gameplayState.map {
-                firstSwitchablePartyIndex(
-                    gameplayState: $0,
-                    excluding: battle.playerActiveIndex
-                ) != nil
-            } ?? false
-            presentBattleMessages(
-                enemyMove.messages,
-                battle: &battle,
-                pendingAction: hasReplacement ? .continueForcedSwitch : .finish(won: false)
-            )
-        } else {
-            presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: .moveSelection)
-        }
+        battle.phase = .resolvingTurn
+        battle.pendingAction = nil
+        battle.queuedMessages = []
+        battle.pendingPresentationBatches = Array(batches.dropFirst())
+        battle.message = ""
+        scheduleBattlePresentation(batches.first ?? [], battleID: battle.battleID)
     }
 }
