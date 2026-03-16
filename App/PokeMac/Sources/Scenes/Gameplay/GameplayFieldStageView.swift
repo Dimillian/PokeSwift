@@ -15,6 +15,9 @@ private enum GameplayFieldStageLayout {
 }
 
 struct FieldStageView: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let props: GameplayFieldViewportProps
     let fieldDisplayStyle: FieldDisplayStyle
 
@@ -61,7 +64,7 @@ struct FieldStageView: View {
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
                     .multilineTextAlignment(.center)
             }
-            .foregroundStyle(PokeThemePalette.secondaryText)
+            .foregroundStyle(palette.secondaryText.color)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
@@ -104,5 +107,13 @@ struct FieldStageView: View {
             )
             .frame(width: GameplayFieldStageLayout.starterChoiceOverlayWidth)
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }

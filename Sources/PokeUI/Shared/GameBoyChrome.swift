@@ -23,9 +23,11 @@ public struct GameBoyScreen<Content: View>: View {
 }
 
 public struct GameBoyPanel<Content: View>: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     private let content: Content
     private let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-    private let palette = PokeThemePalette.lightPalette
 
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -45,11 +47,21 @@ public struct GameBoyPanel<Content: View>: View {
             )
             .shadow(color: palette.dialogueShadow.color, radius: 20, y: 10)
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 public struct PlainWhitePanel<Content: View>: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     private let content: Content
-    private let palette = PokeThemePalette.lightPalette
 
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -60,18 +72,36 @@ public struct PlainWhitePanel<Content: View>: View {
             .padding(18)
             .background(palette.plainPanelFill.color)
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 private struct GameBoyScreenBackground: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let style: GameBoyScreenStyle
-    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         switch style {
         case .classic:
             palette.classicBackground.color
         case .fieldShell:
-            PokeThemePalette.appBackgroundMiddle
+            palette.appBackgroundMiddle.color
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }

@@ -8,6 +8,9 @@ public struct DialogueBoxView: View {
     var onFullyRevealed: (() -> Void)?
 
     @Environment(\.pokeTextSpeed) private var textSpeed
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     @State private var revealedCharacters = 0
 
     private var totalCharacters: Int {
@@ -37,7 +40,7 @@ public struct DialogueBoxView: View {
                     GameBoyPixelText(
                         title.uppercased(),
                         scale: 1,
-                        color: PokeThemePalette.tertiaryText,
+                        color: palette.tertiaryText.color,
                         fallbackFont: .system(size: 11, weight: .bold, design: .monospaced)
                     )
                     .padding(.bottom, 2)
@@ -47,7 +50,7 @@ public struct DialogueBoxView: View {
                     GameBoyPixelText(
                         revealedPortion(of: line, lineIndex: index),
                         scale: 2,
-                        color: PokeThemePalette.primaryText,
+                        color: palette.primaryText.color,
                         fallbackFont: .system(size: 20, weight: .medium, design: .monospaced)
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -93,9 +96,20 @@ public struct DialogueBoxView: View {
         if available >= line.count { return line }
         return String(line.prefix(available))
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 private struct GameBoyDialogueFrame<Content: View>: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     private let content: Content
     private let showPromptIndicator: Bool
 
@@ -113,42 +127,53 @@ private struct GameBoyDialogueFrame<Content: View>: View {
             .background {
                 ZStack {
                     Rectangle()
-                        .fill(PokeThemePalette.dialogueBorder)
+                        .fill(palette.dialogueBorder.color)
 
                     Rectangle()
-                        .fill(PokeThemePalette.dialoguePaper)
+                        .fill(palette.dialoguePaper.color)
                         .padding(4)
 
                     Rectangle()
-                        .fill(PokeThemePalette.dialogueInsetBorder)
+                        .fill(palette.dialogueInsetBorder.color)
                         .padding(8)
 
                     Rectangle()
-                        .fill(PokeThemePalette.dialogueFill)
+                        .fill(palette.dialogueFill.color)
                         .padding(12)
                 }
             }
         .overlay(alignment: .bottomTrailing) {
             HStack(spacing: 4) {
                 Rectangle()
-                    .fill(PokeThemePalette.dialogueDotSoft)
+                    .fill(palette.dialogueDotSoft.color)
                     .frame(width: 6, height: 6)
                 Rectangle()
-                    .fill(PokeThemePalette.dialogueDotMid)
+                    .fill(palette.dialogueDotMid.color)
                     .frame(width: 6, height: 6)
                 Rectangle()
-                    .fill(PokeThemePalette.dialogueDotStrong)
+                    .fill(palette.dialogueDotStrong.color)
                     .frame(width: 6, height: 6)
             }
             .padding(.trailing, 18)
             .padding(.bottom, 16)
             .opacity(showPromptIndicator ? 1 : 0)
         }
-        .shadow(color: PokeThemePalette.dialogueShadow, radius: 18, y: 8)
+        .shadow(color: palette.dialogueShadow.color, radius: 18, y: 8)
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }
 
 public struct StarterChoicePanel: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let options: [SpeciesManifest]
     let focusedIndex: Int
 
@@ -162,7 +187,7 @@ public struct StarterChoicePanel: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Choose Your Starter")
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(PokeThemePalette.primaryText)
+                    .foregroundStyle(palette.primaryText.color)
 
                 ForEach(Array(options.enumerated()), id: \.element.id) { index, species in
                     HStack(spacing: 12) {
@@ -180,10 +205,18 @@ public struct StarterChoicePanel: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
-                    .background(index == focusedIndex ? PokeThemePalette.menuFocusFill : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(index == focusedIndex ? palette.menuFocusFill.color : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
-            .foregroundStyle(PokeThemePalette.primaryText)
+            .foregroundStyle(palette.primaryText.color)
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }

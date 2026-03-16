@@ -7,10 +7,13 @@ public enum GameplayFooterPlacement {
 }
 
 public struct GameplayShell<Stage: View>: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
     private let sidebarMode: GameplaySidebarMode
     private let onSidebarAction: ((String) -> Void)?
     private let onPartyRowSelected: ((Int) -> Void)?
     @Binding private var fieldDisplayStyle: FieldDisplayStyle
+    @Binding private var sidebarExpansionState: GameplaySidebarExpansionState
     private let stage: Stage
 
     public init(
@@ -18,12 +21,14 @@ public struct GameplayShell<Stage: View>: View {
         onSidebarAction: ((String) -> Void)? = nil,
         onPartyRowSelected: ((Int) -> Void)? = nil,
         fieldDisplayStyle: Binding<FieldDisplayStyle>,
+        sidebarExpansionState: Binding<GameplaySidebarExpansionState>,
         @ViewBuilder stage: () -> Stage
     ) {
         self.sidebarMode = sidebarMode
         self.onSidebarAction = onSidebarAction
         self.onPartyRowSelected = onPartyRowSelected
         _fieldDisplayStyle = fieldDisplayStyle
+        _sidebarExpansionState = sidebarExpansionState
         self.stage = stage()
     }
 
@@ -36,12 +41,18 @@ public struct GameplayShell<Stage: View>: View {
                 mode: sidebarMode,
                 onSidebarAction: onSidebarAction,
                 onPartyRowSelected: onPartyRowSelected,
-                fieldDisplayStyle: $fieldDisplayStyle
+                fieldDisplayStyle: $fieldDisplayStyle,
+                expansionState: $sidebarExpansionState
             )
             .frame(width: GameplayFieldMetrics.sidebarWidth)
         }
         .padding(GameplayFieldMetrics.outerPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .id(themeRefreshKey)
+    }
+
+    private var themeRefreshKey: String {
+        "\(appearanceMode.rawValue)-\(gameBoyShellStyle.rawValue)"
     }
 }
 

@@ -6,6 +6,9 @@ import PokeUI
 
 struct OakIntroScene: View {
     @Bindable var runtime: GameRuntime
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
 
     private var state: OakIntroState? {
         runtime.oakIntroState
@@ -59,7 +62,6 @@ struct OakIntroScene: View {
                     .opacity(isPresetSelection ? 1 : 0)
             }
         }
-        .preferredColorScheme(.dark)
         .opacity(state?.phase == .fadeOut ? 0 : 1)
         .animation(.easeOut(duration: 0.6), value: state?.phase == .fadeOut)
     }
@@ -143,7 +145,7 @@ struct OakIntroScene: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text(prompt)
                     .font(.system(size: 14, weight: .bold, design: .monospaced))
-                    .foregroundStyle(PokeThemePalette.lightPalette.primaryText.color)
+                    .foregroundStyle(palette.primaryText.color)
 
                 nameSlots(characters: characters)
             }
@@ -159,11 +161,11 @@ struct OakIntroScene: View {
                     : ""
                 Text(char)
                     .font(.system(size: 16, weight: .bold, design: .monospaced))
-                    .foregroundStyle(PokeThemePalette.lightPalette.primaryText.color)
+                    .foregroundStyle(palette.primaryText.color)
                     .frame(width: 18, height: 22)
                     .overlay(alignment: .bottom) {
                         Rectangle()
-                            .fill(PokeThemePalette.lightPalette.primaryText.color.opacity(
+                            .fill(palette.primaryText.color.opacity(
                                 index == characters.count ? 1 : 0.24
                             ))
                             .frame(height: 2)
@@ -199,7 +201,7 @@ struct OakIntroScene: View {
                 GameBoyPixelText(
                     "NAME",
                     scale: 2,
-                    color: PokeThemePalette.primaryText,
+                    color: palette.primaryText.color,
                     fallbackFont: .system(size: 20, weight: .bold, design: .monospaced)
                 )
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -228,7 +230,7 @@ struct OakIntroScene: View {
                         GameBoyPixelText(
                             index == state.namePresetFocusedIndex ? "▶" : " ",
                             scale: 2,
-                            color: PokeThemePalette.primaryText,
+                            color: palette.primaryText.color,
                             fallbackFont: .system(size: 18, weight: .bold, design: .monospaced)
                         )
                         .frame(width: 20, alignment: .leading)
@@ -236,7 +238,7 @@ struct OakIntroScene: View {
                         GameBoyPixelText(
                             name,
                             scale: 2,
-                            color: PokeThemePalette.primaryText,
+                            color: palette.primaryText.color,
                             fallbackFont: .system(size: 18, weight: .bold, design: .monospaced)
                         )
                     }
@@ -244,7 +246,7 @@ struct OakIntroScene: View {
                     .padding(.vertical, 4)
                     .background(
                         index == state.namePresetFocusedIndex
-                            ? PokeThemePalette.menuFocusFill
+                            ? palette.menuFocusFill.color
                             : Color.clear,
                         in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                     )
@@ -279,5 +281,13 @@ struct OakIntroScene: View {
                 EmptyView()
             }
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }

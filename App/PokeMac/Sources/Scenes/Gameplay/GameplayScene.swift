@@ -6,11 +6,17 @@ struct GameplayScene: View {
     @Environment(AppPreferences.self) private var preferences
     let props: GameplaySceneProps
     @State private var fieldDisplayStyle: FieldDisplayStyle
+    @State private var sidebarExpansionState: GameplaySidebarExpansionState
     @State private var isLoadConfirmationPresented = false
 
     init(props: GameplaySceneProps) {
         self.props = props
         _fieldDisplayStyle = State(initialValue: props.initialFieldDisplayStyle)
+        _sidebarExpansionState = State(
+            initialValue: GameplaySidebarExpansionState(
+                expandedSection: props.sidebarMode.defaultExpandedSection
+            )
+        )
     }
 
     var body: some View {
@@ -19,7 +25,8 @@ struct GameplayScene: View {
                 sidebarMode: props.sidebarMode,
                 onSidebarAction: handleSidebarAction(_:),
                 onPartyRowSelected: props.onPartyRowSelected,
-                fieldDisplayStyle: $fieldDisplayStyle
+                fieldDisplayStyle: $fieldDisplayStyle,
+                sidebarExpansionState: $sidebarExpansionState
             ) {
                 stage
             }

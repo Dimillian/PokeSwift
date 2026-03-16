@@ -98,7 +98,10 @@ extension PokeUITests {
     )
     let view = GameplayShell(
       sidebarMode: sidebarMode,
-      fieldDisplayStyle: .constant(.defaultGameplayStyle)
+      fieldDisplayStyle: .constant(.defaultGameplayStyle),
+      sidebarExpansionState: .constant(
+        GameplaySidebarExpansionState(expandedSection: sidebarMode.defaultExpandedSection)
+      )
     ) {
       FieldMapStage {
         Color.black
@@ -167,7 +170,10 @@ extension PokeUITests {
     )
     let view = GameplayShell(
       sidebarMode: sidebarMode,
-      fieldDisplayStyle: .constant(.defaultGameplayStyle)
+      fieldDisplayStyle: .constant(.defaultGameplayStyle),
+      sidebarExpansionState: .constant(
+        GameplaySidebarExpansionState(expandedSection: sidebarMode.defaultExpandedSection)
+      )
     ) {
       BattleViewportStage {
         Color.black
@@ -1856,6 +1862,54 @@ extension PokeUITests {
     XCTAssertNotEqual(light.field.ink, dark.field.ink)
     XCTAssertGreaterThan(light.screenGlow.alpha, 0)
     XCTAssertGreaterThan(dark.screenGlow.alpha, 0)
+  }
+  func testShellAwareThemePaletteLeavesClassicOnBaseAppearancePalette() {
+    let lightClassic = PokeThemePalette.resolve(
+      for: .light,
+      shellStyle: .classic,
+      colorScheme: .light
+    )
+    let darkClassic = PokeThemePalette.resolve(
+      for: .retroDark,
+      shellStyle: .classic,
+      colorScheme: .dark
+    )
+
+    XCTAssertEqual(lightClassic, PokeThemePalette.resolve(for: .light))
+    XCTAssertEqual(darkClassic, PokeThemePalette.resolve(for: .retroDark))
+  }
+  func testShellAwareThemePaletteTintsChromeForNonClassicShells() {
+    let classicLight = PokeThemePalette.resolve(
+      for: .light,
+      shellStyle: .classic,
+      colorScheme: .light
+    )
+    let classicDark = PokeThemePalette.resolve(
+      for: .retroDark,
+      shellStyle: .classic,
+      colorScheme: .dark
+    )
+
+    for shellStyle in [GameBoyShellStyle.kiwi, .dandelion, .teal, .grape] {
+      let lightPalette = PokeThemePalette.resolve(
+        for: .light,
+        shellStyle: shellStyle,
+        colorScheme: .light
+      )
+      let darkPalette = PokeThemePalette.resolve(
+        for: .retroDark,
+        shellStyle: shellStyle,
+        colorScheme: .dark
+      )
+
+      XCTAssertNotEqual(lightPalette.panelBackground, classicLight.panelBackground)
+      XCTAssertNotEqual(lightPalette.menuFocusFill, classicLight.menuFocusFill)
+      XCTAssertNotEqual(lightPalette.field.hoverCardGlassTint, classicLight.field.hoverCardGlassTint)
+      XCTAssertNotEqual(darkPalette.panelBackground, classicDark.panelBackground)
+      XCTAssertNotEqual(darkPalette.appBackgroundMiddle, classicDark.appBackgroundMiddle)
+      XCTAssertNotEqual(lightPalette.menuFocusFill, darkPalette.menuFocusFill)
+      XCTAssertNotEqual(lightPalette.dialoguePaper, darkPalette.dialoguePaper)
+    }
   }
   func testGameplayScreenGlowPaletteTracksDisplayStyle() {
     let tinted = PokeThemePalette.gameplayScreenGlowPalette(

@@ -204,6 +204,26 @@ public struct ThemeRGBA: Equatable, Sendable {
             )
         )
     }
+
+    func mixed(with other: ThemeRGBA, amount: Double, mixAlpha: Bool = false) -> ThemeRGBA {
+        let clampedAmount = amount.clampedToUnitInterval
+        return ThemeRGBA(
+            red: red + ((other.red - red) * clampedAmount),
+            green: green + ((other.green - green) * clampedAmount),
+            blue: blue + ((other.blue - blue) * clampedAmount),
+            alpha: mixAlpha
+                ? alpha + ((other.alpha - alpha) * clampedAmount)
+                : alpha
+        )
+    }
+
+    func withAlpha(_ alpha: Double) -> ThemeRGBA {
+        ThemeRGBA(red: red, green: green, blue: blue, alpha: alpha.clampedToUnitInterval)
+    }
+
+    func multiplyingAlpha(by factor: Double) -> ThemeRGBA {
+        withAlpha(alpha * factor)
+    }
 }
 
 public struct GameBoyShellPalette: Equatable, Sendable {
@@ -309,6 +329,85 @@ public enum PokeThemePalette {
         case .system:
             return .light
         }
+    }
+
+    public static func resolve(
+        for appearanceMode: AppAppearanceMode,
+        shellStyle: GameBoyShellStyle,
+        colorScheme: ColorScheme
+    ) -> PokeThemeResolvedPalette {
+        let resolvedAppearance = appearanceMode.resolved(for: colorScheme)
+        let basePalette = resolve(for: resolvedAppearance)
+        guard shellStyle != .classic else { return basePalette }
+
+        let seed = shellUISeed(shellStyle: shellStyle, appearanceMode: resolvedAppearance)
+
+        return PokeThemeResolvedPalette(
+            primaryText: basePalette.primaryText.mixed(with: seed.text, amount: seed.textMix),
+            secondaryText: basePalette.secondaryText.mixed(with: seed.text, amount: seed.textMix * 0.92),
+            tertiaryText: basePalette.tertiaryText.mixed(with: seed.text, amount: seed.textMix * 0.78),
+            disabledText: basePalette.disabledText.mixed(with: seed.text, amount: seed.textMix * 0.56),
+            classicBackground: basePalette.classicBackground.mixed(with: seed.background, amount: seed.backgroundMix),
+            panelBackground: basePalette.panelBackground.mixed(with: seed.surface, amount: seed.surfaceMix),
+            panelGlassTint: basePalette.panelGlassTint.mixed(with: seed.glass, amount: seed.glassMix),
+            panelOutline: basePalette.panelOutline.mixed(with: seed.shadow, amount: seed.outlineMix),
+            plainPanelFill: basePalette.plainPanelFill.mixed(with: seed.paper, amount: seed.paperMix),
+            placeholderFill: basePalette.placeholderFill.mixed(with: seed.accent, amount: seed.focusMix * 0.55),
+            menuFocusFill: basePalette.menuFocusFill.mixed(with: seed.focus, amount: seed.focusMix),
+            menuIdleFill: basePalette.menuIdleFill.mixed(with: seed.surface, amount: seed.surfaceMix * 0.6),
+            menuFocusGlass: basePalette.menuFocusGlass.mixed(with: seed.glass, amount: seed.glassMix),
+            menuIdleGlass: basePalette.menuIdleGlass.mixed(with: seed.glass, amount: seed.glassMix * 0.72),
+            menuFocusStroke: basePalette.menuFocusStroke.mixed(with: seed.accent, amount: seed.focusMix * 0.82),
+            menuIdleStroke: basePalette.menuIdleStroke.mixed(with: seed.shadow, amount: seed.outlineMix),
+            appBackgroundTop: basePalette.appBackgroundTop.mixed(with: seed.background, amount: seed.backgroundMix),
+            appBackgroundMiddle: basePalette.appBackgroundMiddle.mixed(with: seed.surface, amount: seed.backgroundMix),
+            appBackgroundBottom: basePalette.appBackgroundBottom.mixed(with: seed.shadow, amount: seed.backgroundMix * 0.94),
+            appHighlightGlow: basePalette.appHighlightGlow.mixed(with: seed.glass, amount: seed.glassMix * 0.5),
+            appAccentGlow: basePalette.appAccentGlow.mixed(with: seed.accent, amount: seed.focusMix * 0.72),
+            appDepthShadow: basePalette.appDepthShadow.mixed(with: seed.shadow, amount: seed.outlineMix, mixAlpha: true),
+            gameBoyWordmark: basePalette.gameBoyWordmark,
+            dialogueBorder: basePalette.dialogueBorder.mixed(with: seed.shadow, amount: seed.outlineMix * 0.78),
+            dialoguePaper: basePalette.dialoguePaper.mixed(with: seed.paper, amount: seed.paperMix),
+            dialogueInsetBorder: basePalette.dialogueInsetBorder.mixed(with: seed.shadow, amount: seed.outlineMix * 0.72),
+            dialogueFill: basePalette.dialogueFill.mixed(with: seed.paper, amount: seed.paperMix * 0.82),
+            dialogueDotSoft: basePalette.dialogueDotSoft.mixed(with: seed.accent, amount: seed.focusMix * 0.4),
+            dialogueDotMid: basePalette.dialogueDotMid.mixed(with: seed.accent, amount: seed.focusMix * 0.5),
+            dialogueDotStrong: basePalette.dialogueDotStrong.mixed(with: seed.accent, amount: seed.focusMix * 0.64),
+            dialogueShadow: basePalette.dialogueShadow.mixed(with: seed.shadow, amount: seed.outlineMix, mixAlpha: true),
+            screenWellFill: basePalette.screenWellFill,
+            screenWellHighlight: basePalette.screenWellHighlight,
+            screenWellDepth: basePalette.screenWellDepth,
+            screenLabel: basePalette.screenLabel,
+            batteryIndicator: basePalette.batteryIndicator,
+            screenRim: basePalette.screenRim,
+            screenGlow: basePalette.screenGlow,
+            screenGlowInner: basePalette.screenGlowInner,
+            accentBarMagenta: basePalette.accentBarMagenta,
+            accentBarBlue: basePalette.accentBarBlue,
+            battleEnemyTint: basePalette.battleEnemyTint,
+            battleEnemyBackground: basePalette.battleEnemyBackground,
+            battlePlayerTint: basePalette.battlePlayerTint,
+            battlePlayerBackground: basePalette.battlePlayerBackground,
+            field: PokeThemeFieldValues(
+                ink: basePalette.field.ink.mixed(with: seed.text, amount: seed.textMix * 0.7),
+                outline: basePalette.field.outline.mixed(with: seed.shadow, amount: seed.outlineMix * 0.8),
+                cardFill: basePalette.field.cardFill.mixed(with: seed.surface, amount: seed.surfaceMix),
+                slotFill: basePalette.field.slotFill.mixed(with: seed.surface, amount: seed.surfaceMix * 0.92),
+                leadSlotFill: basePalette.field.leadSlotFill.mixed(with: seed.focus, amount: seed.focusMix * 0.62),
+                track: basePalette.field.track.mixed(with: seed.shadow, amount: seed.outlineMix * 0.84),
+                portraitFill: basePalette.field.portraitFill.mixed(with: seed.surface, amount: seed.surfaceMix * 0.84),
+                stageOuter: basePalette.field.stageOuter,
+                stageMiddle: basePalette.field.stageMiddle,
+                stageInner: basePalette.field.stageInner,
+                glassTint: basePalette.field.glassTint.mixed(with: seed.glass, amount: seed.glassMix),
+                accentGlassTint: basePalette.field.accentGlassTint.mixed(with: seed.accent, amount: seed.focusMix * 0.72),
+                interactiveGlassTint: basePalette.field.interactiveGlassTint.mixed(with: seed.glass, amount: seed.glassMix),
+                hoverCardGlassTint: basePalette.field.hoverCardGlassTint.mixed(with: seed.glass, amount: seed.glassMix * 1.06),
+                hoverCardBackgroundTint: basePalette.field.hoverCardBackgroundTint.mixed(with: seed.surface, amount: seed.surfaceMix),
+                shellBackdrop: basePalette.field.shellBackdrop.mixed(with: seed.background, amount: seed.backgroundMix * 0.72),
+                shellBackdropShadow: basePalette.field.shellBackdropShadow.mixed(with: seed.shadow, amount: seed.outlineMix)
+            )
+        )
     }
 
     public static func gameplayHDRProfile(
@@ -447,6 +546,77 @@ public enum PokeThemePalette {
         ).shell
     }
 
+    private struct ShellUISeed {
+        let surface: ThemeRGBA
+        let glass: ThemeRGBA
+        let focus: ThemeRGBA
+        let accent: ThemeRGBA
+        let text: ThemeRGBA
+        let shadow: ThemeRGBA
+        let background: ThemeRGBA
+        let paper: ThemeRGBA
+        let surfaceMix: Double
+        let glassMix: Double
+        let focusMix: Double
+        let textMix: Double
+        let outlineMix: Double
+        let backgroundMix: Double
+        let paperMix: Double
+    }
+
+    private static func shellUISeed(
+        shellStyle: GameBoyShellStyle,
+        appearanceMode: AppAppearanceMode
+    ) -> ShellUISeed {
+        let chrome = gameBoyShellChromePalette(
+            shellStyle: shellStyle,
+            appearanceMode: appearanceMode,
+            colorScheme: appearanceMode == .retroDark ? .dark : .light
+        )
+        let isDark = appearanceMode == .retroDark
+        let shellBackdrop = chrome.shell.backdrop
+        let shellShadow = chrome.shell.shadow
+        let shellAccent = chrome.wordmark
+        let neutral = isDark ? ThemeRGBA(red: 0.06, green: 0.07, blue: 0.07) : ThemeRGBA(red: 1, green: 1, blue: 1)
+
+        let surface = isDark
+            ? shellBackdrop.mixed(with: shellShadow, amount: 0.58)
+            : shellBackdrop.mixed(with: neutral, amount: 0.34)
+        let glass = isDark
+            ? shellBackdrop.mixed(with: shellAccent, amount: 0.22)
+            : shellBackdrop.mixed(with: neutral, amount: 0.22)
+        let focus = isDark
+            ? shellAccent.mixed(with: shellBackdrop, amount: 0.44)
+            : shellBackdrop.mixed(with: shellAccent, amount: 0.38)
+        let text = isDark
+            ? shellAccent.mixed(with: neutral, amount: 0.18)
+            : shellAccent
+        let background = isDark
+            ? shellShadow.mixed(with: shellBackdrop, amount: 0.18)
+            : shellBackdrop.mixed(with: neutral, amount: 0.52)
+        let paper = isDark
+            ? surface.mixed(with: neutral, amount: 0.16)
+            : neutral.mixed(with: shellBackdrop, amount: 0.18)
+
+        return ShellUISeed(
+            surface: surface,
+            glass: glass,
+            focus: focus,
+            accent: shellAccent,
+            text: text,
+            shadow: shellShadow,
+            background: background,
+            paper: paper,
+            surfaceMix: isDark ? 0.34 : 0.28,
+            glassMix: isDark ? 0.5 : 0.42,
+            focusMix: isDark ? 0.48 : 0.34,
+            textMix: isDark ? 0.11 : 0.16,
+            outlineMix: isDark ? 0.3 : 0.16,
+            backgroundMix: isDark ? 0.38 : 0.26,
+            paperMix: isDark ? 0.24 : 0.16
+        )
+    }
+
     public static let primaryText = dynamic(\.primaryText)
     public static let secondaryText = dynamic(\.secondaryText)
     public static let tertiaryText = dynamic(\.tertiaryText)
@@ -517,19 +687,41 @@ public enum PokeThemePalette {
 
     private static func dynamicField(_ keyPath: KeyPath<PokeThemeFieldValues, ThemeRGBA>) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
-            resolve(for: appearanceMode(for: appearance)).field[keyPath: keyPath].nsColor
+            let appearanceMode = appearanceMode(for: appearance)
+            let colorScheme: ColorScheme = appearanceMode == .retroDark ? .dark : .light
+            return resolve(
+                for: appearanceMode,
+                shellStyle: persistedShellStyle(),
+                colorScheme: colorScheme
+            )
+            .field[keyPath: keyPath]
+            .nsColor
         })
     }
 
     private static func dynamicNSColor(_ keyPath: KeyPath<PokeThemeResolvedPalette, ThemeRGBA>) -> NSColor {
         NSColor(name: nil) { appearance in
-            resolve(for: appearanceMode(for: appearance))[keyPath: keyPath].nsColor
+            let appearanceMode = appearanceMode(for: appearance)
+            let colorScheme: ColorScheme = appearanceMode == .retroDark ? .dark : .light
+            return resolve(
+                for: appearanceMode,
+                shellStyle: persistedShellStyle(),
+                colorScheme: colorScheme
+            )[keyPath: keyPath].nsColor
         }
     }
 
     private static func appearanceMode(for appearance: NSAppearance) -> AppAppearanceMode {
         let bestMatch = appearance.bestMatch(from: [.darkAqua, .aqua]) ?? .aqua
         return bestMatch == .darkAqua ? .retroDark : .light
+    }
+
+    private static func persistedShellStyle() -> GameBoyShellStyle {
+        guard let rawValue = UserDefaults.standard.string(forKey: "pokemac.gameBoyShellStyle"),
+              let shellStyle = GameBoyShellStyle(rawValue: rawValue) else {
+            return .classic
+        }
+        return shellStyle
     }
 }
 
@@ -723,4 +915,10 @@ private extension PokeThemeResolvedPalette {
             shellBackdropShadow: .init(red: 0, green: 0, blue: 0, alpha: 0.5)
         )
     )
+}
+
+private extension Double {
+    var clampedToUnitInterval: Double {
+        min(max(self, 0), 1)
+    }
 }

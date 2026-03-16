@@ -6,24 +6,20 @@ struct GameplaySidebar: View {
     let onSidebarAction: ((String) -> Void)?
     let onPartyRowSelected: ((Int) -> Void)?
     @Binding var fieldDisplayStyle: FieldDisplayStyle
-
-    @State private var expansionState: GameplaySidebarExpansionState
+    @Binding var expansionState: GameplaySidebarExpansionState
 
     init(
         mode: GameplaySidebarMode,
         onSidebarAction: ((String) -> Void)? = nil,
         onPartyRowSelected: ((Int) -> Void)? = nil,
-        fieldDisplayStyle: Binding<FieldDisplayStyle>
+        fieldDisplayStyle: Binding<FieldDisplayStyle>,
+        expansionState: Binding<GameplaySidebarExpansionState>
     ) {
         self.mode = mode
         self.onSidebarAction = onSidebarAction
         self.onPartyRowSelected = onPartyRowSelected
         _fieldDisplayStyle = fieldDisplayStyle
-        _expansionState = State(
-            initialValue: GameplaySidebarExpansionState(
-                expandedSection: mode.defaultExpandedSection
-            )
-        )
+        _expansionState = expansionState
     }
 
     var body: some View {

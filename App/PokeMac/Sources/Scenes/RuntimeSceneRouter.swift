@@ -28,41 +28,43 @@ struct RuntimeSceneRouter: View {
     private var sceneContent: some View {
         switch runtime.scene {
         case .launch:
-            LaunchScene()
-                .preferredColorScheme(.light)
-                .pokeAppearanceMode(.light)
+            legacyPregameChrome {
+                LaunchScene()
+            }
         case .splash:
-            SplashView(rootURL: runtime.content.rootURL)
-                .preferredColorScheme(.light)
-                .pokeAppearanceMode(.light)
+            legacyPregameChrome {
+                SplashView(rootURL: runtime.content.rootURL)
+            }
         case .titleAttract:
-            TitleAttractView(rootURL: runtime.content.rootURL)
-                .preferredColorScheme(.light)
-                .pokeAppearanceMode(.light)
+            legacyPregameChrome {
+                TitleAttractView(rootURL: runtime.content.rootURL)
+            }
         case .titleMenu:
-            TitleMenuScene(
-                props: .init(
-                    rootURL: runtime.content.rootURL,
-                    entries: runtime.menuEntries,
-                    saveMetadata: runtime.currentSaveMetadata,
-                    focusedIndex: runtime.focusedIndex
+            legacyPregameChrome {
+                TitleMenuScene(
+                    props: .init(
+                        rootURL: runtime.content.rootURL,
+                        entries: runtime.menuEntries,
+                        saveMetadata: runtime.currentSaveMetadata,
+                        focusedIndex: runtime.focusedIndex
+                    )
                 )
-            )
-            .preferredColorScheme(.light)
-            .pokeAppearanceMode(.light)
+            }
         case .titleOptions:
-            TitleOptionsScene(
-                props: .init(
-                    focusedRow: runtime.optionsFocusedRow,
-                    textSpeed: runtime.optionsTextSpeed,
-                    battleAnimation: runtime.optionsBattleAnimation,
-                    battleStyle: runtime.optionsBattleStyle
+            legacyPregameChrome {
+                TitleOptionsScene(
+                    props: .init(
+                        focusedRow: runtime.optionsFocusedRow,
+                        textSpeed: runtime.optionsTextSpeed,
+                        battleAnimation: runtime.optionsBattleAnimation,
+                        battleStyle: runtime.optionsBattleStyle
+                    )
                 )
-            )
-            .preferredColorScheme(.light)
-            .pokeAppearanceMode(.light)
+            }
         case .oakIntro:
-            OakIntroScene(runtime: runtime)
+            legacyPregameChrome {
+                OakIntroScene(runtime: runtime)
+            }
         case .field, .dialogue, .scriptedSequence, .starterChoice, .battle, .evolution, .naming:
             if let gameplaySceneProps = GameplayScenePropsFactory.make(
                 runtime: runtime,
@@ -74,14 +76,14 @@ struct RuntimeSceneRouter: View {
             }
         case .placeholder:
             PlaceholderScene(props: .init(title: runtime.placeholderTitle))
-                .preferredColorScheme(.light)
-                .pokeAppearanceMode(.light)
         }
     }
 }
 
 private struct LaunchScene: View {
-    private let palette = PokeThemePalette.lightPalette
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         GameBoyScreen {
@@ -89,5 +91,24 @@ private struct LaunchScene: View {
                 .font(.system(size: 48, weight: .black, design: .rounded))
                 .foregroundStyle(palette.primaryText.color)
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
+}
+
+private extension RuntimeSceneRouter {
+    func legacyPregameChrome<Content: View>(
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        content()
+            .preferredColorScheme(.light)
+            .pokeAppearanceMode(.light)
+            .pokeGameBoyShellStyle(.classic)
     }
 }

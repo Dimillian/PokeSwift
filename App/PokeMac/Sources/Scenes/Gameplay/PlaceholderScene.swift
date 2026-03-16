@@ -2,8 +2,10 @@ import SwiftUI
 import PokeUI
 
 struct PlaceholderScene: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let props: PlaceholderSceneProps
-    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         GameBoyScreen {
@@ -22,5 +24,13 @@ struct PlaceholderScene: View {
             }
             .frame(width: 580)
         }
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
     }
 }

@@ -52,8 +52,10 @@ struct TitleAttractView: View {
 }
 
 struct TitleAttractContent: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let rootURL: URL
-    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         VStack(spacing: 18) {
@@ -84,6 +86,14 @@ struct TitleAttractContent: View {
     private func assetURL(_ path: String) -> URL {
         rootURL.appendingPathComponent(path)
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 struct TitleMenuScene: View {
@@ -110,8 +120,10 @@ struct TitleMenuScene: View {
 }
 
 private struct TitleSaveSummaryCard: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let metadata: GameSaveMetadata
-    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         PlainWhitePanel {
@@ -151,14 +163,24 @@ private struct TitleSaveSummaryCard: View {
         let minutes = (max(0, seconds) % 3600) / 60
         return String(format: "%03d:%02d", hours, minutes)
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 struct TitleOptionsScene: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let props: TitleOptionsSceneProps
 
     @State private var cursorVisible = true
 
-    private let palette = PokeThemePalette.lightPalette
     private let panelShape = RoundedRectangle(cornerRadius: 14, style: .continuous)
 
     var body: some View {
@@ -218,17 +240,25 @@ struct TitleOptionsScene: View {
             cursorVisible = true
         }
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 private struct OptionsSection: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let options: [String]
     let selectedIndex: Int
     let isFocused: Bool
     let cursorVisible: Bool
-
-    private let palette = PokeThemePalette.lightPalette
-    private let ink: Color = .black
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -257,6 +287,18 @@ private struct OptionsSection: View {
             return cursorVisible ? 1 : 0
         }
         return 1
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
+
+    private var ink: Color {
+        palette.primaryText.color
     }
 }
 

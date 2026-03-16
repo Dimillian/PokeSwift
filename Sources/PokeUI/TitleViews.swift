@@ -2,9 +2,11 @@ import SwiftUI
 import PokeDataModel
 
 public struct TitleMenuPanel: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     private let entries: [TitleMenuEntryState]
     private let focusedIndex: Int
-    private let palette = PokeThemePalette.lightPalette
 
     public init(entries: [TitleMenuEntryState], focusedIndex: Int) {
         self.entries = entries
@@ -27,14 +29,24 @@ public struct TitleMenuPanel: View {
             }
         }
     }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
+        )
+    }
 }
 
 private struct TitleMenuRow: View {
+    @Environment(\.pokeAppearanceMode) private var appearanceMode
+    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
+    @Environment(\.colorScheme) private var colorScheme
     let entry: TitleMenuEntryState
     let isFocused: Bool
 
     private let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
-    private let palette = PokeThemePalette.lightPalette
 
     var body: some View {
         HStack(spacing: 10) {
@@ -82,6 +94,14 @@ private struct TitleMenuRow: View {
                 ? .regular.tint(palette.menuFocusGlass.color)
                 : .regular.tint(palette.menuIdleGlass.color),
             in: shape
+        )
+    }
+
+    private var palette: PokeThemeResolvedPalette {
+        PokeThemePalette.resolve(
+            for: appearanceMode,
+            shellStyle: gameBoyShellStyle,
+            colorScheme: colorScheme
         )
     }
 }
