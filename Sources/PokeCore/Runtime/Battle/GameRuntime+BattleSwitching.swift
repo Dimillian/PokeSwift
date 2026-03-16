@@ -8,7 +8,7 @@ extension GameRuntime {
 
         let selectedIndex = battle.focusedPartyIndex
         let selectionMode = battle.partySelectionMode
-        guard selectedIndex != 0 else {
+        guard selectedIndex != battle.playerActiveIndex else {
             playCollisionSoundIfNeeded()
             battle.message = "\(battle.playerPokemon.nickname) is already out!"
             return
@@ -21,9 +21,12 @@ extension GameRuntime {
         }
 
         let recalledPokemon = battle.playerPokemon
-        gameplayState.playerParty[0] = clearBattleStatStages(recalledPokemon)
-        gameplayState.playerParty.swapAt(0, selectedIndex)
-        battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[0])
+        let recalledIndex = battle.playerActiveIndex
+        if gameplayState.playerParty.indices.contains(recalledIndex) {
+            gameplayState.playerParty[recalledIndex] = clearBattleStatStages(recalledPokemon)
+        }
+        battle.playerActiveIndex = selectedIndex
+        battle.playerPokemon = clearBattleStatStages(gameplayState.playerParty[selectedIndex])
         battle.phase = .resolvingTurn
         switch selectionMode {
         case .forcedReplacement:
@@ -117,7 +120,12 @@ extension GameRuntime {
         if let pendingAction = enemyMove.pendingAction {
             presentBattleMessages(enemyMove.messages, battle: &battle, pendingAction: pendingAction)
         } else if playerPokemon.currentHP == 0 {
-            let hasReplacement = gameplayState.map { firstSwitchablePartyIndex(gameplayState: $0) != nil } ?? false
+            let hasReplacement = gameplayState.map {
+                firstSwitchablePartyIndex(
+                    gameplayState: $0,
+                    excluding: battle.playerActiveIndex
+                ) != nil
+            } ?? false
             presentBattleMessages(
                 enemyMove.messages,
                 battle: &battle,

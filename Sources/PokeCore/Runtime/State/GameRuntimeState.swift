@@ -498,6 +498,7 @@ struct RuntimeBattleState {
     let canRun: Bool
     let trainerClass: String?
     let sourceTrainerObjectID: String?
+    var playerActiveIndex: Int
     var playerPokemon: RuntimePokemonState
     var enemyParty: [RuntimePokemonState]
     var enemyActiveIndex: Int
@@ -534,6 +535,7 @@ struct RuntimeBattleState {
         canRun: Bool,
         trainerClass: String?,
         sourceTrainerObjectID: String?,
+        playerActiveIndex: Int = 0,
         playerPokemon: RuntimePokemonState,
         enemyParty: [RuntimePokemonState],
         enemyActiveIndex: Int,
@@ -569,6 +571,7 @@ struct RuntimeBattleState {
         self.canRun = canRun
         self.trainerClass = trainerClass
         self.sourceTrainerObjectID = sourceTrainerObjectID
+        self.playerActiveIndex = playerActiveIndex
         self.playerPokemon = playerPokemon
         self.enemyParty = enemyParty
         self.enemyActiveIndex = enemyActiveIndex

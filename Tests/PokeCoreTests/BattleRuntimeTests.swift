@@ -328,7 +328,8 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.displayName, "Wing")
-        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "PIDGEY")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "SQUIRTLE")
+        XCTAssertEqual(runtime.gameplayState?.playerParty.dropFirst().first?.speciesID, "PIDGEY")
     }
 
     func testBattleSwitchRejectsActiveAndFaintedPokemon() throws {
@@ -412,14 +413,14 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.scene, .battle)
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
-        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 1)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 0)
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.currentHP, 0)
 
         runtime.handle(button: .cancel)
         XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Bring out which #MON?")
 
-        let replacementHP = runtime.gameplayState?.playerParty[1].currentHP
+        let replacementHP = runtime.gameplayState?.playerParty[0].currentHP
         runtime.handle(button: .confirm)
         advanceBattleTextUntilMoveSelection(runtime)
 

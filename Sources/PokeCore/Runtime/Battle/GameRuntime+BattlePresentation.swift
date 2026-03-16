@@ -128,7 +128,8 @@ extension GameRuntime {
         if simulatedPlayer.currentHP == 0 {
             batches.append(
                 playerDefeatResolutionBatch(
-                    faintedPlayer: simulatedPlayer
+                    faintedPlayer: simulatedPlayer,
+                    activePartyIndex: battle.playerActiveIndex
                 )
             )
             return true
@@ -183,7 +184,12 @@ extension GameRuntime {
         )
 
         if simulatedPlayer.currentHP == 0 {
-            batches.append(playerDefeatResolutionBatch(faintedPlayer: simulatedPlayer))
+            batches.append(
+                playerDefeatResolutionBatch(
+                    faintedPlayer: simulatedPlayer,
+                    activePartyIndex: battle.playerActiveIndex
+                )
+            )
             return true
         }
 
@@ -225,10 +231,12 @@ extension GameRuntime {
     }
 
     func playerDefeatResolutionBatch(
-        faintedPlayer: RuntimePokemonState
+        faintedPlayer: RuntimePokemonState,
+        activePartyIndex: Int
     ) -> [RuntimeBattlePresentationBeat] {
         let pendingAction: RuntimeBattlePendingAction = hasSwitchableBattleReplacement(
-            afterFainting: faintedPlayer
+            afterFainting: faintedPlayer,
+            activePartyIndex: activePartyIndex
         ) ? .continueForcedSwitch : .finish(won: false)
 
         return [
@@ -243,13 +251,21 @@ extension GameRuntime {
         ]
     }
 
-    func hasSwitchableBattleReplacement(afterFainting faintedPlayer: RuntimePokemonState) -> Bool {
+    func hasSwitchableBattleReplacement(
+        afterFainting faintedPlayer: RuntimePokemonState,
+        activePartyIndex: Int
+    ) -> Bool {
         guard var gameplayState, gameplayState.playerParty.isEmpty == false else {
             return false
         }
 
-        gameplayState.playerParty[0] = faintedPlayer
-        return firstSwitchablePartyIndex(gameplayState: gameplayState) != nil
+        if gameplayState.playerParty.indices.contains(activePartyIndex) {
+            gameplayState.playerParty[activePartyIndex] = faintedPlayer
+        }
+        return firstSwitchablePartyIndex(
+            gameplayState: gameplayState,
+            excluding: activePartyIndex
+        ) != nil
     }
 
     func battlePresentationDelay(base: TimeInterval) -> TimeInterval {
@@ -1091,7 +1107,10 @@ extension GameRuntime {
             continueSwitchTurnAfterPlayerSwap(battle: &battle)
         case .continueForcedSwitch:
             guard let gameplayState,
-                  let firstSwitchableIndex = firstSwitchablePartyIndex(gameplayState: gameplayState) else {
+                  let firstSwitchableIndex = firstSwitchablePartyIndex(
+                      gameplayState: gameplayState,
+                      excluding: battle.playerActiveIndex
+                  ) else {
                 battle.phase = .battleComplete
                 finishBattle(battle: battle, won: false)
                 return
