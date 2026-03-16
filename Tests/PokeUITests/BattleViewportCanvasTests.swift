@@ -192,6 +192,46 @@ extension PokeUITests {
     )
   }
 
+  func testTrainerBattlePartyIndicatorTracksIntroAndEnemySendOut() {
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .introReveal,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      1
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .enemySendOut,
+        activeSide: .enemy,
+        sendOutPokemonOpacity: 0.35
+      ),
+      0.65,
+      accuracy: 0.0001
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .trainer,
+        stage: .commandReady,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      0
+    )
+    XCTAssertEqual(
+      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+        battleKind: .wild,
+        stage: .introReveal,
+        activeSide: nil,
+        sendOutPokemonOpacity: 0
+      ),
+      0
+    )
+  }
+
   func testBattlePlayerSpriteHidesWhenPresentationRequestsIt() {
     XCTAssertEqual(
       BattleViewportCanvas.playerPokemonOpacity(

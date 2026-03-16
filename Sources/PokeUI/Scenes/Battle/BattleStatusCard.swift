@@ -229,6 +229,108 @@ struct BattlePokeballToken: View {
     }
 }
 
+struct BattleTrainerPartyIndicator: View {
+    let filledCount: Int
+    let totalCount: Int
+    let stage: BattlePresentationStage
+    let animationRevision: Int
+
+    @State private var revealedSlotCount = 6
+
+    var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let horizontalPadding = max(2, size.width * 0.01)
+            let verticalPadding = max(2, size.height * 0.03)
+            let slotSpacing = max(4, size.width * 0.025)
+            let clampedTotalCount = max(1, totalCount)
+            let clampedFilledCount = min(max(0, filledCount), clampedTotalCount)
+            let availableWidth = max(
+                0,
+                size.width - (horizontalPadding * 2) - (CGFloat(clampedTotalCount - 1) * slotSpacing)
+            )
+            let slotDiameter = min(availableWidth / CGFloat(clampedTotalCount), size.height * 0.42)
+            let ballRowWidth = (CGFloat(clampedTotalCount) * slotDiameter) +
+                (CGFloat(clampedTotalCount - 1) * slotSpacing)
+            let underlineSpacing = max(4, size.height * 0.12)
+
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: slotSpacing) {
+                    ForEach(0..<clampedTotalCount, id: \.self) { index in
+                        BattlePartyBallToken(isFilled: index < clampedFilledCount)
+                            .frame(width: slotDiameter, height: slotDiameter)
+                            .opacity(index < revealedSlotCount ? 1 : 0)
+                            .offset(
+                                x: index < revealedSlotCount
+                                    ? 0
+                                    : -((slotDiameter + slotSpacing) * CGFloat(index + 1) * 0.55)
+                            )
+                    }
+                }
+                .frame(width: ballRowWidth, alignment: .leading)
+
+                Capsule()
+                    .fill(Color.white.opacity(0.82))
+                    .frame(width: ballRowWidth, height: max(1.5, size.height * 0.055))
+                    .padding(.top, underlineSpacing)
+            }
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .task(id: entranceAnimationKey) {
+                await syncSlotEntranceAnimation()
+            }
+        }
+    }
+
+    private var entranceAnimationKey: String {
+        "\(stage.rawValue)-\(animationRevision)"
+    }
+
+    @MainActor
+    private func syncSlotEntranceAnimation() async {
+        if stage == .introReveal {
+            revealedSlotCount = 0
+
+            for slotIndex in 0..<max(1, totalCount) {
+                guard Task.isCancelled == false else { return }
+
+                withAnimation(.easeOut(duration: 0.26)) {
+                    revealedSlotCount = slotIndex + 1
+                }
+
+                try? await Task.sleep(for: .milliseconds(95))
+            }
+            return
+        }
+
+        revealedSlotCount = max(1, totalCount)
+    }
+}
+
+private struct BattlePartyBallToken: View {
+    let isFilled: Bool
+
+    var body: some View {
+        GeometryReader { proxy in
+            let strokeWidth = max(1, proxy.size.width * 0.12)
+
+            if isFilled {
+                BattlePokeballToken()
+                    .padding(proxy.size.width * 0.04)
+            } else {
+                Circle()
+                    .fill(Color.white.opacity(0.08))
+                    .overlay {
+                        Circle()
+                            .stroke(Color.white.opacity(0.82), lineWidth: strokeWidth)
+                    }
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+}
+
 private extension BattlePokeballToken {
     static let topColor = Color(red: 0.86, green: 0.14, blue: 0.18)
     static let bottomColor = Color(red: 0.97, green: 0.97, blue: 0.95)
