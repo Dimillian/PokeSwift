@@ -4,10 +4,18 @@ import PokeDataModel
 public enum RedContentExtractor {
     public static let extractorVersion = "0.1.0"
     private static let sendOutPoofAssetPath = "Assets/battle/effects/send_out_poof.png"
+    private static let legacyFieldAnimationDirectory = "Assets/field/animations"
+    private static let tilesetAnimationDirectory = "Assets/field/tileset_animations"
     private static let battleAnimationAssetMap: [(source: String, destination: String)] = [
         ("gfx/battle/move_anim_0.png", "Assets/battle/animations/move_anim_0.png"),
         ("gfx/battle/move_anim_1.png", "Assets/battle/animations/move_anim_1.png"),
     ]
+    private static let tilesetAnimationAssetMap: [(source: String, destination: String)] = (1...3).map { frameIndex in
+        (
+            source: "gfx/tilesets/flower/flower\(frameIndex).png",
+            destination: "Assets/field/tileset_animations/flower/flower\(frameIndex).png"
+        )
+    }
     private static let fieldAssetMap: [(source: String, destination: String)] = [
         ("gfx/tilesets/reds_house.png", "Assets/field/tilesets/reds_house.png"),
         ("gfx/tilesets/overworld.png", "Assets/field/tilesets/overworld.png"),
@@ -77,6 +85,8 @@ public enum RedContentExtractor {
     public static func extract(configuration: Configuration) throws {
         let variantRoot = configuration.outputRoot.appendingPathComponent("Red", isDirectory: true)
         try FileManager.default.createDirectory(at: variantRoot, withIntermediateDirectories: true, attributes: nil)
+        try removeItemIfExists(at: variantRoot.appendingPathComponent(legacyFieldAnimationDirectory))
+        try removeItemIfExists(at: variantRoot.appendingPathComponent(tilesetAnimationDirectory))
 
         let source = try SourceTree(repoRoot: configuration.repoRoot)
         let charmap = try parseCharmap(at: source.charmapURL)
@@ -113,6 +123,11 @@ public enum RedContentExtractor {
         for battleAnimationAsset in battleAnimationAssetMap {
             let sourceURL = configuration.repoRoot.appendingPathComponent(battleAnimationAsset.source)
             let destinationURL = variantRoot.appendingPathComponent(battleAnimationAsset.destination)
+            try copyAsset(from: sourceURL, to: destinationURL)
+        }
+        for animationAsset in tilesetAnimationAssetMap {
+            let sourceURL = configuration.repoRoot.appendingPathComponent(animationAsset.source)
+            let destinationURL = variantRoot.appendingPathComponent(animationAsset.destination)
             try copyAsset(from: sourceURL, to: destinationURL)
         }
         try copyAsset(
@@ -191,7 +206,7 @@ public enum RedContentExtractor {
             "Assets/battle/animations/move_anim_0.png",
             "Assets/battle/animations/move_anim_1.png",
             sendOutPoofAssetPath,
-        ]
+        ] + tilesetAnimationAssetMap.map { $0.destination }
 
         for relativePath in required {
             let url = variantRoot.appendingPathComponent(relativePath)
@@ -318,6 +333,11 @@ public enum RedContentExtractor {
         }
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         try data.write(to: url, options: .atomic)
+    }
+
+    private static func removeItemIfExists(at url: URL) throws {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        try FileManager.default.removeItem(at: url)
     }
 
     private static func battleAssetMap(from gameplayManifest: GameplayManifest) -> [(source: String, destination: String)] {

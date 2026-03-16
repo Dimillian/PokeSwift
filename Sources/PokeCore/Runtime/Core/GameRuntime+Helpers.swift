@@ -70,6 +70,9 @@ extension GameRuntime {
         let requiredPaths =
             content.titleManifest.assets.map(\.relativePath) +
             content.gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
+            content.gameplayManifest.tilesets.flatMap { tileset in
+                tileset.animation.animatedTiles.flatMap(\.frameImagePaths)
+            } +
             content.gameplayManifest.overworldSprites.map(\.imagePath)
 
         return requiredPaths.compactMap { relativePath in

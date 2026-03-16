@@ -45,16 +45,22 @@ public final class FileSystemContentLoader: ContentLoader {
         let gameplayManifest: GameplayManifest = try decode("gameplay_manifest.json", at: variantRoot)
         let battleAnimationManifest: BattleAnimationManifest = try decode("battle_animation_manifest.json", at: variantRoot)
 
+        let tilesetAssetPaths = gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] }
+        let animatedTileAssetPaths = gameplayManifest.tilesets.flatMap { tileset in
+            tileset.animation.animatedTiles.flatMap(\.frameImagePaths)
+        }
+        let speciesBattleAssetPaths = gameplayManifest.species.flatMap { species -> [String] in
+            guard let battleSprite = species.battleSprite else { return [] }
+            return [battleSprite.frontImagePath, battleSprite.backImagePath]
+        }
         let requiredAssetPaths =
             titleManifest.assets.map(\.relativePath) +
             ["Assets/battle/effects/send_out_poof.png"] +
             battleAnimationManifest.tilesets.map(\.imagePath) +
-            gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
+            tilesetAssetPaths +
+            animatedTileAssetPaths +
             gameplayManifest.overworldSprites.map(\.imagePath) +
-            gameplayManifest.species.flatMap { species -> [String] in
-                guard let battleSprite = species.battleSprite else { return [] }
-                return [battleSprite.frontImagePath, battleSprite.backImagePath]
-            }
+            speciesBattleAssetPaths
 
         for relativePath in requiredAssetPaths {
             let assetURL = variantRoot.appendingPathComponent(relativePath)
@@ -72,6 +78,15 @@ public final class FileSystemContentLoader: ContentLoader {
             let blocksetURL = variantRoot.appendingPathComponent(tileset.blocksetPath)
             guard FileManager.default.fileExists(atPath: blocksetURL.path) else {
                 throw ContentLoadError.invalidAsset(tileset.blocksetPath)
+            }
+
+            for animatedTile in tileset.animation.animatedTiles {
+                for frameImagePath in animatedTile.frameImagePaths {
+                    let frameURL = variantRoot.appendingPathComponent(frameImagePath)
+                    guard FileManager.default.fileExists(atPath: frameURL.path) else {
+                        throw ContentLoadError.invalidAsset(frameImagePath)
+                    }
+                }
             }
         }
 

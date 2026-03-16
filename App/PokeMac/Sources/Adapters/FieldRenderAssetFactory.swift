@@ -12,7 +12,18 @@ func makeFieldRenderAssets(runtime: GameRuntime) -> FieldRenderAssets? {
         blocksetURL: runtime.content.rootURL.appendingPathComponent(tilesetManifest.blocksetPath),
         sourceTileSize: tilesetManifest.sourceTileSize,
         blockTileWidth: tilesetManifest.blockTileWidth,
-        blockTileHeight: tilesetManifest.blockTileHeight
+        blockTileHeight: tilesetManifest.blockTileHeight,
+        animation: .init(
+            kind: tilesetManifest.animation.kind,
+            animatedTiles: tilesetManifest.animation.animatedTiles.map { animatedTile in
+                .init(
+                    tileID: animatedTile.tileID,
+                    frameImageURLs: animatedTile.frameImagePaths.map {
+                        runtime.content.rootURL.appendingPathComponent($0)
+                    }
+                )
+            }
+        )
     )
 
     let spritePairs: [(String, FieldSpriteDefinition)] = runtime.currentFieldSpriteIDs.compactMap { spriteID in

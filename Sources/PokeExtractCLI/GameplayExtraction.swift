@@ -22,7 +22,11 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
     let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
     let playerStart = try buildPlayerStart(repoRoot: context.repoRoot)
     let itemNamesByID = try parseItemNames(repoRoot: context.repoRoot)
-    let dialogues = try buildDialogues(repoRoot: context.repoRoot, mapScriptMetadataByMapID: context.mapScriptMetadataByMapID, itemNamesByID: itemNamesByID)
+    let dialogues = try buildDialogues(
+        repoRoot: context.repoRoot,
+        mapScriptMetadataByMapID: context.mapScriptMetadataByMapID,
+        itemNamesByID: itemNamesByID
+    )
     let fieldInteractions = try buildFieldInteractions(maps: maps, repoRoot: context.repoRoot)
     let mapScripts = buildMapScripts()
     let scripts = try buildScripts(repoRoot: context.repoRoot, maps: maps)
@@ -37,7 +41,10 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
         mapScriptMetadataByMapID: context.mapScriptMetadataByMapID
     )
     let trainerAIMoveChoiceModifications = try buildTrainerAIMoveChoiceModifications(repoRoot: context.repoRoot)
-    let trainerBattles = try buildTrainerBattles(repoRoot: context.repoRoot, mapScriptMetadataByMapID: context.mapScriptMetadataByMapID)
+    let trainerBattles = try buildTrainerBattles(
+        repoRoot: context.repoRoot,
+        mapScriptMetadataByMapID: context.mapScriptMetadataByMapID
+    )
     let eventFlags = try parseEventFlags(
         repoRoot: context.repoRoot,
         maps: maps,

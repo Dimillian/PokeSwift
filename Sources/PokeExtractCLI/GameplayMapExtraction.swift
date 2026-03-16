@@ -485,36 +485,63 @@ private func parseSignedHexOrDecimal(_ token: String) -> Int? {
     return Int(trimmed)
 }
 
+private struct ParsedTilesetHeaderData {
+    let grassTilesByLabel: [String: Int?]
+    let animationKindsByLabel: [String: TilesetAnimationKind]
+}
+
 private func parseTilesetCollisionData(repoRoot: URL) throws -> ParsedTilesetCollisionData {
-    ParsedTilesetCollisionData(
+    let headerData = try parseTilesetHeaderData(repoRoot: repoRoot)
+    return ParsedTilesetCollisionData(
         passableTilesByKey: try parseCollisionSets(repoRoot: repoRoot),
         warpTilesByLabel: try parseTilesetTileTable(repoRoot: repoRoot, path: "data/tilesets/warp_tile_ids.asm"),
         doorTilesByLabel: try parseTilesetTileTable(repoRoot: repoRoot, path: "data/tilesets/door_tile_ids.asm"),
-        grassTilesByLabel: try parseGrassTiles(repoRoot: repoRoot),
+        grassTilesByLabel: headerData.grassTilesByLabel,
+        animationKindsByLabel: headerData.animationKindsByLabel,
         tilePairCollisionsByTileset: try parseTilePairCollisions(repoRoot: repoRoot),
         ledges: try parseLedgeRules(repoRoot: repoRoot)
     )
 }
 
-private func parseGrassTiles(repoRoot: URL) throws -> [String: Int?] {
+private func parseTilesetHeaderData(repoRoot: URL) throws -> ParsedTilesetHeaderData {
     let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/tilesets/tileset_headers.asm"))
     let regex = try NSRegularExpression(
-        pattern: #"tileset\s+([A-Za-z0-9_]+),\s+[^,]+,\s+[^,]+,\s+[^,]+,\s+(-?\$?[0-9A-Fa-f]+)"#
+        pattern: #"tileset\s+([A-Za-z0-9_]+),\s+[^,]+,\s+[^,]+,\s+[^,]+,\s+(-?\$?[0-9A-Fa-f]+),\s+(TILEANIM_[A-Z_]+)"#
     )
     let nsRange = NSRange(contents.startIndex..<contents.endIndex, in: contents)
-    var result: [String: Int?] = [:]
+    var grassTilesByLabel: [String: Int?] = [:]
+    var animationKindsByLabel: [String: TilesetAnimationKind] = [:]
 
     for match in regex.matches(in: contents, range: nsRange) {
         guard
             let labelRange = Range(match.range(at: 1), in: contents),
-            let grassRange = Range(match.range(at: 2), in: contents)
+            let grassRange = Range(match.range(at: 2), in: contents),
+            let animationRange = Range(match.range(at: 3), in: contents)
         else {
             continue
         }
-        result[String(contents[labelRange])] = parseSignedHexOrDecimal(String(contents[grassRange]))
+        let label = String(contents[labelRange])
+        grassTilesByLabel[label] = parseSignedHexOrDecimal(String(contents[grassRange]))
+        animationKindsByLabel[label] = try parseTilesetAnimationKind(rawValue: String(contents[animationRange]))
     }
 
-    return result
+    return ParsedTilesetHeaderData(
+        grassTilesByLabel: grassTilesByLabel,
+        animationKindsByLabel: animationKindsByLabel
+    )
+}
+
+private func parseTilesetAnimationKind(rawValue: String) throws -> TilesetAnimationKind {
+    switch rawValue {
+    case "TILEANIM_NONE":
+        return .none
+    case "TILEANIM_WATER":
+        return .water
+    case "TILEANIM_WATER_FLOWER":
+        return .waterFlower
+    default:
+        throw ExtractorError.invalidArguments("unsupported tileset animation kind \(rawValue)")
+    }
 }
 
 func makeMapManifestDraft(
@@ -781,7 +808,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "REDS_HOUSE_1", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "REDS_HOUSE_1", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "REDS_HOUSE_1", parsed: collisionData)
         ),
         .init(
             id: "REDS_HOUSE_2",
@@ -790,7 +818,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "REDS_HOUSE_2", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "REDS_HOUSE_2", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "REDS_HOUSE_2", parsed: collisionData)
         ),
         .init(
             id: "OVERWORLD",
@@ -799,7 +828,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "OVERWORLD", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "OVERWORLD", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "OVERWORLD", parsed: collisionData)
         ),
         .init(
             id: "CAVERN",
@@ -808,7 +838,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "CAVERN", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "CAVERN", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "CAVERN", parsed: collisionData)
         ),
         .init(
             id: "DOJO",
@@ -817,7 +848,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "DOJO", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "DOJO", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "DOJO", parsed: collisionData)
         ),
         .init(
             id: "GYM",
@@ -826,7 +858,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "GYM", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "GYM", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "GYM", parsed: collisionData)
         ),
         .init(
             id: "FOREST",
@@ -835,7 +868,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "FOREST", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "FOREST", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "FOREST", parsed: collisionData)
         ),
         .init(
             id: "FOREST_GATE",
@@ -844,7 +878,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "FOREST_GATE", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "FOREST_GATE", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "FOREST_GATE", parsed: collisionData)
         ),
         .init(
             id: "GATE",
@@ -853,7 +888,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "GATE", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "GATE", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "GATE", parsed: collisionData)
         ),
         .init(
             id: "MUSEUM",
@@ -862,7 +898,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "MUSEUM", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "MUSEUM", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "MUSEUM", parsed: collisionData)
         ),
         .init(
             id: "HOUSE",
@@ -871,7 +908,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "HOUSE", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "HOUSE", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "HOUSE", parsed: collisionData)
         ),
         .init(
             id: "INTERIOR",
@@ -889,7 +927,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "MART", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "MART", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "MART", parsed: collisionData)
         ),
         .init(
             id: "POKECENTER",
@@ -898,7 +937,8 @@ func buildTilesets(repoRoot: URL) throws -> [TilesetManifest] {
             sourceTileSize: 8,
             blockTileWidth: 4,
             blockTileHeight: 4,
-            collision: tilesetCollisionManifest(for: "POKECENTER", parsed: collisionData)
+            collision: tilesetCollisionManifest(for: "POKECENTER", parsed: collisionData),
+            animation: tilesetAnimationManifest(for: "POKECENTER", parsed: collisionData)
         ),
     ]
 }
@@ -913,6 +953,33 @@ private func tilesetCollisionManifest(for tileset: String, parsed: ParsedTileset
         tilePairCollisions: parsed.tilePairCollisionsByTileset[tileset] ?? [],
         ledges: parsed.ledges
     )
+}
+
+private func tilesetAnimationManifest(for tileset: String, parsed: ParsedTilesetCollisionData) -> TilesetAnimationManifest {
+    let label = tilesetLabel(for: tileset)
+    switch parsed.animationKindsByLabel[label] ?? .none {
+    case .none:
+        return .none
+    case .water:
+        return TilesetAnimationManifest(
+            kind: .water,
+            animatedTiles: [.init(tileID: 0x14)]
+        )
+    case .waterFlower:
+        return TilesetAnimationManifest(
+            kind: .waterFlower,
+            animatedTiles: [
+                .init(tileID: 0x14),
+                .init(tileID: 0x03, frameImagePaths: flowerAnimationFramePaths())
+            ]
+        )
+    }
+}
+
+private func flowerAnimationFramePaths() -> [String] {
+    return (1...3).map { frameIndex in
+        "Assets/field/tileset_animations/flower/flower\(frameIndex).png"
+    }
 }
 
 private func parseTilesetTileTable(repoRoot: URL, path: String) throws -> [String: [Int]] {

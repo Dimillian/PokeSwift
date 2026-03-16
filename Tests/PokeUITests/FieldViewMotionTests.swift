@@ -108,6 +108,59 @@ extension PokeUITests {
     XCTAssertFalse(FieldMapView.playerUsesWalkingFrame(phase: 2))
     XCTAssertTrue(FieldMapView.playerUsesWalkingFrame(phase: 3))
   }
+  func testWaterTileAnimationVisualStateAdvancesEveryTwentyFrames() {
+    let animation = FieldTilesetAnimationDefinition(
+      kind: .water,
+      animatedTiles: [.init(tileID: 0x14)]
+    )
+
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 0),
+      .init(waterFrameIndex: 0, flowerFrameIndex: nil)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 19),
+      .init(waterFrameIndex: 0, flowerFrameIndex: nil)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 20),
+      .init(waterFrameIndex: 1, flowerFrameIndex: nil)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 160),
+      .init(waterFrameIndex: 0, flowerFrameIndex: nil)
+    )
+  }
+  func testWaterFlowerTileAnimationVisualStateMatchesSourceCadence() {
+    let animation = FieldTilesetAnimationDefinition(
+      kind: .waterFlower,
+      animatedTiles: [
+        .init(tileID: 0x14),
+        .init(tileID: 0x03, frameImageURLs: []),
+      ]
+    )
+
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 0),
+      .init(waterFrameIndex: 0, flowerFrameIndex: nil)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 20),
+      .init(waterFrameIndex: 1, flowerFrameIndex: nil)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 21),
+      .init(waterFrameIndex: 1, flowerFrameIndex: 0)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 42),
+      .init(waterFrameIndex: 2, flowerFrameIndex: 1)
+    )
+    XCTAssertEqual(
+      FieldSceneRenderer.tileAnimationVisualState(animation: animation, visibleFieldFrameCount: 63),
+      .init(waterFrameIndex: 3, flowerFrameIndex: 2)
+    )
+  }
   func testChainedWalkPhaseOffsetStartsHeldStrideOnVisibleWalkFrame() {
     let stepDuration = 16.0 / 60.0
     let now = Date()

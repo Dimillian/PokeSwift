@@ -9,6 +9,7 @@ final class RepoContentContractTests: XCTestCase {
 
         let tileset = try XCTUnwrap(loaded.tileset(id: "OVERWORLD"))
         let cavernTileset = try XCTUnwrap(loaded.tileset(id: "CAVERN"))
+        let forestTileset = try XCTUnwrap(loaded.tileset(id: "FOREST"))
         let interiorTileset = try XCTUnwrap(loaded.tileset(id: "INTERIOR"))
         let sprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_RED"))
         let rocketSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_ROCKET"))
@@ -17,11 +18,16 @@ final class RepoContentContractTests: XCTestCase {
         let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
         let moveAnim0URL = root.appendingPathComponent("Assets/battle/animations/move_anim_0.png")
         let moveAnim1URL = root.appendingPathComponent("Assets/battle/animations/move_anim_1.png")
+        let flowerAnimationPaths = try XCTUnwrap(
+            tileset.animation.animatedTiles.first { $0.tileID == 0x03 }?.frameImagePaths
+        )
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(tileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(cavernTileset.blocksetPath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(forestTileset.imagePath).path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(forestTileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(interiorTileset.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(interiorTileset.blocksetPath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
@@ -30,6 +36,9 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim0URL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim1URL.path))
+        XCTAssertEqual(tileset.animation.kind, .waterFlower)
+        XCTAssertEqual(tileset.animation.animatedTiles.map(\.tileID), [0x14, 0x03])
+        XCTAssertEqual(forestTileset.animation.kind, .water)
         let sendOutPoofSource = try XCTUnwrap(CGImageSourceCreateWithURL(sendOutPoofURL as CFURL, nil))
         let sendOutPoofImage = try XCTUnwrap(CGImageSourceCreateImageAtIndex(sendOutPoofSource, 0, nil))
         XCTAssertEqual(sendOutPoofImage.width, 128)
@@ -93,6 +102,14 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.battleAnimationFrameBlock(id: "FRAMEBLOCK_06")?.tiles.count, 12)
         XCTAssertEqual(loaded.battleAnimationBaseCoordinate(id: "BASECOORD_30"), .init(id: "BASECOORD_30", x: 0x28, y: 0x58))
         XCTAssertEqual(loaded.battleAnimationSpecialEffect(id: "SE_SHAKE_SCREEN")?.routine, "AnimationShakeScreen")
+        for relativePath in flowerAnimationPaths {
+            let url = root.appendingPathComponent(relativePath)
+            XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+            let source = try XCTUnwrap(CGImageSourceCreateWithURL(url as CFURL, nil))
+            let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+            XCTAssertEqual(image.width, tileset.sourceTileSize)
+            XCTAssertEqual(image.height, tileset.sourceTileSize)
+        }
         XCTAssertTrue(
             loaded.fieldRenderIssues(
                 map: oaksLab,

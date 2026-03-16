@@ -53,6 +53,23 @@ public extension LoadedContent {
             issues.append("failed to read tileset assets for \(tileset.id)")
         }
 
+        for animatedTile in tileset.animation.animatedTiles {
+            for frameImagePath in animatedTile.frameImagePaths {
+                let frameURL = rootURL.appendingPathComponent(frameImagePath)
+                guard FileManager.default.fileExists(atPath: frameURL.path) else {
+                    issues.append("missing tileset animation frame: \(frameImagePath)")
+                    continue
+                }
+                guard let size = imagePixelSize(at: frameURL) else {
+                    issues.append("invalid tileset animation frame: \(frameImagePath)")
+                    continue
+                }
+                if size.width != tileset.sourceTileSize || size.height != tileset.sourceTileSize {
+                    issues.append("unexpected tileset animation frame size: \(frameImagePath)")
+                }
+            }
+        }
+
         let uniqueSpriteIDs = Array(Set(spriteIDs)).sorted()
         for spriteID in uniqueSpriteIDs {
             guard let sprite = overworldSprite(id: spriteID) else {

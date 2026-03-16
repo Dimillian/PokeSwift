@@ -16,6 +16,7 @@ struct ParsedTilesetCollisionData {
     let warpTilesByLabel: [String: [Int]]
     let doorTilesByLabel: [String: [Int]]
     let grassTilesByLabel: [String: Int?]
+    let animationKindsByLabel: [String: TilesetAnimationKind]
     let tilePairCollisionsByTileset: [String: [TilePairCollisionManifest]]
     let ledges: [LedgeCollisionManifest]
 }

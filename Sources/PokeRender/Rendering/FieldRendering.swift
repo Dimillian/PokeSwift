@@ -92,6 +92,7 @@ public struct FieldTilesetDefinition: Equatable, Sendable {
     public let sourceTileSize: Int
     public let blockTileWidth: Int
     public let blockTileHeight: Int
+    public let animation: FieldTilesetAnimationDefinition
 
     public init(
         id: String,
@@ -99,7 +100,8 @@ public struct FieldTilesetDefinition: Equatable, Sendable {
         blocksetURL: URL,
         sourceTileSize: Int = 8,
         blockTileWidth: Int = 4,
-        blockTileHeight: Int = 4
+        blockTileHeight: Int = 4,
+        animation: FieldTilesetAnimationDefinition = .none
     ) {
         self.id = id
         self.imageURL = imageURL
@@ -107,6 +109,47 @@ public struct FieldTilesetDefinition: Equatable, Sendable {
         self.sourceTileSize = sourceTileSize
         self.blockTileWidth = blockTileWidth
         self.blockTileHeight = blockTileHeight
+        self.animation = animation
+    }
+}
+
+public struct FieldAnimatedTileDefinition: Equatable, Sendable {
+    public let tileID: Int
+    public let frameImageURLs: [URL]
+
+    public init(tileID: Int, frameImageURLs: [URL] = []) {
+        self.tileID = tileID
+        self.frameImageURLs = frameImageURLs
+    }
+}
+
+public struct FieldTilesetAnimationDefinition: Equatable, Sendable {
+    public let kind: TilesetAnimationKind
+    public let animatedTiles: [FieldAnimatedTileDefinition]
+
+    public init(kind: TilesetAnimationKind, animatedTiles: [FieldAnimatedTileDefinition] = []) {
+        self.kind = kind
+        self.animatedTiles = animatedTiles
+    }
+
+    public static let none = FieldTilesetAnimationDefinition(kind: .none)
+
+    public var isAnimated: Bool {
+        kind != .none && animatedTiles.isEmpty == false
+    }
+
+    public var waterTileID: Int? {
+        switch kind {
+        case .none:
+            return nil
+        case .water, .waterFlower:
+            return animatedTiles.first(where: { $0.frameImageURLs.isEmpty })?.tileID
+        }
+    }
+
+    public var flowerTile: FieldAnimatedTileDefinition? {
+        guard kind == .waterFlower else { return nil }
+        return animatedTiles.first(where: { $0.frameImageURLs.isEmpty == false })
     }
 }
 
@@ -126,6 +169,7 @@ public struct FieldRenderAssets: Equatable, Sendable {
 
 enum FieldRendererError: Error, Equatable {
     case invalidTilesetImage(URL)
+    case invalidTilesetAnimationImage(URL)
     case invalidSpriteImage(URL)
     case invalidBlocksetLength(Int)
     case invalidBlockIndex(Int)
@@ -133,6 +177,21 @@ enum FieldRendererError: Error, Equatable {
     case cropFailed
     case maskCreationFailed
     case bitmapContextCreationFailed
+}
+
+public struct FieldTileAnimationVisualState: Equatable, Hashable, Sendable {
+    public let waterFrameIndex: Int
+    public let flowerFrameIndex: Int?
+
+    public init(waterFrameIndex: Int, flowerFrameIndex: Int?) {
+        self.waterFrameIndex = waterFrameIndex
+        self.flowerFrameIndex = flowerFrameIndex
+    }
+}
+
+private enum WaterShiftDirection {
+    case left
+    case right
 }
 
 struct FieldBlockset: Equatable {
@@ -257,21 +316,41 @@ public struct FieldRenderedActor: Identifiable, @unchecked Sendable {
     }
 }
 
+public struct FieldRenderedAnimatedTilePlacement: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let tileID: Int
+    public let worldPosition: FieldPixelPoint
+    public let size: FieldPixelSize
+
+    public init(tileID: Int, worldPosition: FieldPixelPoint, size: FieldPixelSize) {
+        self.tileID = tileID
+        self.worldPosition = worldPosition
+        self.size = size
+        id = "\(tileID)-\(worldPosition.x)-\(worldPosition.y)"
+    }
+}
+
 public struct FieldRenderedScene: @unchecked Sendable {
     public let mapID: String
+    public let tileset: FieldTilesetDefinition
     public let metrics: FieldSceneMetrics
     public let backgroundImage: CGImage
+    public let animatedTilePlacements: [FieldRenderedAnimatedTilePlacement]
     public let actors: [FieldRenderedActor]
 
     public init(
         mapID: String,
+        tileset: FieldTilesetDefinition,
         metrics: FieldSceneMetrics,
         backgroundImage: CGImage,
+        animatedTilePlacements: [FieldRenderedAnimatedTilePlacement],
         actors: [FieldRenderedActor]
     ) {
         self.mapID = mapID
+        self.tileset = tileset
         self.metrics = metrics
         self.backgroundImage = backgroundImage
+        self.animatedTilePlacements = animatedTilePlacements
         self.actors = actors
     }
 }
@@ -472,6 +551,36 @@ private struct PreparedTileAtlas {
     }
 }
 
+private struct PreparedAnimatedTileFrames {
+    struct Frame {
+        let width: Int
+        let height: Int
+        let rgbaPixels: [UInt8]
+    }
+
+    let waterFrames: [Frame]
+    let flowerFrames: [Frame]
+
+    func frame(
+        for tileID: Int,
+        animation: FieldTilesetAnimationDefinition,
+        visualState: FieldTileAnimationVisualState
+    ) -> Frame? {
+        if tileID == animation.waterTileID {
+            guard waterFrames.indices.contains(visualState.waterFrameIndex) else { return nil }
+            return waterFrames[visualState.waterFrameIndex]
+        }
+
+        if tileID == animation.flowerTile?.tileID,
+           let flowerFrameIndex = visualState.flowerFrameIndex,
+           flowerFrames.indices.contains(flowerFrameIndex) {
+            return flowerFrames[flowerFrameIndex]
+        }
+
+        return nil
+    }
+}
+
 private final class FieldRendererCaches: @unchecked Sendable {
     private struct BlocksetCacheKey: Hashable {
         let path: String
@@ -492,15 +601,68 @@ private final class FieldRendererCaches: @unchecked Sendable {
         let height: Int
     }
 
+    fileprivate struct AnimatedTileFramesCacheKey: Hashable {
+        let tilesetImagePath: String
+        let tileSize: Int
+        let animationKind: TilesetAnimationKind
+        let waterTileID: Int?
+        let flowerTileID: Int?
+        let flowerImagePaths: [String]
+
+        init(tileset: FieldTilesetDefinition) {
+            tilesetImagePath = tileset.imageURL.standardizedFileURL.path
+            tileSize = tileset.sourceTileSize
+            animationKind = tileset.animation.kind
+            waterTileID = tileset.animation.waterTileID
+            flowerTileID = tileset.animation.flowerTile?.tileID
+            flowerImagePaths = tileset.animation.flowerTile?.frameImageURLs.map(\.standardizedFileURL.path) ?? []
+        }
+    }
+
+    fileprivate struct AnimatedOverlayCacheKey: Hashable {
+        struct PlacementSignature: Hashable {
+            let tileID: Int
+            let worldPosition: FieldPixelPoint
+            let size: FieldPixelSize
+
+            init(_ placement: FieldRenderedAnimatedTilePlacement) {
+                tileID = placement.tileID
+                worldPosition = placement.worldPosition
+                size = placement.size
+            }
+        }
+
+        let contentPixelSize: FieldPixelSize
+        let tilesetFramesKey: AnimatedTileFramesCacheKey
+        let visualState: FieldTileAnimationVisualState
+        let placements: [PlacementSignature]
+
+        init(
+            contentPixelSize: FieldPixelSize,
+            tileset: FieldTilesetDefinition,
+            visualState: FieldTileAnimationVisualState,
+            placements: [FieldRenderedAnimatedTilePlacement]
+        ) {
+            self.contentPixelSize = contentPixelSize
+            tilesetFramesKey = AnimatedTileFramesCacheKey(tileset: tileset)
+            self.visualState = visualState
+            self.placements = placements.map(PlacementSignature.init)
+        }
+    }
+
     static let shared = FieldRendererCaches()
 
     private let lock = NSLock()
     private let maxRenderedImages = 24
+    private let maxAnimatedOverlayImages = 32
     private var decodedImages: [String: CGImage] = [:]
     private var blocksets: [BlocksetCacheKey: FieldBlockset] = [:]
     private var preparedAtlases: [AtlasCacheKey: PreparedTileAtlas] = [:]
     private var preparedSprites: [SpriteFrameCacheKey: CGImage] = [:]
+    private var preparedAnimatedTiles: [AnimatedTileFramesCacheKey: PreparedAnimatedTileFrames] = [:]
     private var backgroundImages: [FieldBackgroundSignature: CGImage] = [:]
+    private var animatedOverlayImages: [AnimatedOverlayCacheKey: CGImage] = [:]
+    private var animatedOverlayOrder: [AnimatedOverlayCacheKey] = []
     private var renderedImages: [FieldRenderSignature: CGImage] = [:]
     private var renderedImageOrder: [FieldRenderSignature] = []
 
@@ -534,6 +696,25 @@ private final class FieldRendererCaches: @unchecked Sendable {
     func storeBackgroundImage(_ image: CGImage, for signature: FieldBackgroundSignature) {
         withLock {
             backgroundImages[signature] = image
+        }
+    }
+
+    func animatedOverlayImage(for key: AnimatedOverlayCacheKey) -> CGImage? {
+        withLock {
+            animatedOverlayImages[key]
+        }
+    }
+
+    func storeAnimatedOverlayImage(_ image: CGImage, for key: AnimatedOverlayCacheKey) {
+        withLock {
+            animatedOverlayImages[key] = image
+            animatedOverlayOrder.removeAll { $0 == key }
+            animatedOverlayOrder.append(key)
+
+            while animatedOverlayOrder.count > maxAnimatedOverlayImages {
+                let evictedKey = animatedOverlayOrder.removeFirst()
+                animatedOverlayImages.removeValue(forKey: evictedKey)
+            }
         }
     }
 
@@ -623,6 +804,34 @@ private final class FieldRendererCaches: @unchecked Sendable {
         return preparedImage
     }
 
+    func preparedAnimatedTileFrames(for tileset: FieldTilesetDefinition) throws -> PreparedAnimatedTileFrames? {
+        guard tileset.animation.isAnimated else { return nil }
+
+        let key = AnimatedTileFramesCacheKey(tileset: tileset)
+        if let cached = withLock({ preparedAnimatedTiles[key] }) {
+            return cached
+        }
+
+        let atlas = try preparedAtlas(for: tileset)
+        let waterFrames = try tileset.animation.waterTileID.map { waterTileID in
+            try FieldSceneRenderer.prepareWaterAnimationFrames(baseTile: atlas.tile(at: waterTileID))
+        } ?? []
+        let flowerFrames = try tileset.animation.flowerTile?.frameImageURLs.map { frameURL in
+            try FieldSceneRenderer.prepareAnimatedTileFrame(
+                image(at: frameURL, invalidError: .invalidTilesetAnimationImage(frameURL))
+            )
+        } ?? []
+        let preparedFrames = PreparedAnimatedTileFrames(
+            waterFrames: waterFrames,
+            flowerFrames: flowerFrames
+        )
+
+        withLock {
+            preparedAnimatedTiles[key] = preparedFrames
+        }
+        return preparedFrames
+    }
+
     private func withLock<T>(_ body: () throws -> T) rethrows -> T {
         lock.lock()
         defer { lock.unlock() }
@@ -670,6 +879,67 @@ public struct FieldSceneRenderer {
         )
     }
 
+    public static func tileAnimationVisualState(
+        animation: FieldTilesetAnimationDefinition,
+        visibleFieldFrameCount: Int
+    ) -> FieldTileAnimationVisualState {
+        let clampedFrameCount = max(0, visibleFieldFrameCount)
+
+        switch animation.kind {
+        case .none:
+            return .init(waterFrameIndex: 0, flowerFrameIndex: nil)
+        case .water:
+            return .init(
+                waterFrameIndex: (clampedFrameCount / 20) % 8,
+                flowerFrameIndex: nil
+            )
+        case .waterFlower:
+            let waterUpdateCount = (clampedFrameCount + 1) / 21
+            let flowerUpdateCount = clampedFrameCount / 21
+
+            return .init(
+                waterFrameIndex: waterUpdateCount % 8,
+                flowerFrameIndex: flowerUpdateCount == 0
+                    ? nil
+                    : flowerFrameIndex(forWaterCounter: flowerUpdateCount % 8)
+            )
+        }
+    }
+
+    public static func animatedOverlayImage(
+        for scene: FieldRenderedScene,
+        visualState: FieldTileAnimationVisualState
+    ) -> CGImage? {
+        guard scene.tileset.animation.isAnimated,
+              scene.animatedTilePlacements.isEmpty == false else {
+            return nil
+        }
+
+        let overlayKey = FieldRendererCaches.AnimatedOverlayCacheKey(
+            contentPixelSize: scene.metrics.contentPixelSize,
+            tileset: scene.tileset,
+            visualState: visualState,
+            placements: scene.animatedTilePlacements
+        )
+        if let cached = FieldRendererCaches.shared.animatedOverlayImage(for: overlayKey) {
+            return cached
+        }
+        guard let preparedFrames = try? FieldRendererCaches.shared.preparedAnimatedTileFrames(for: scene.tileset) else {
+            return nil
+        }
+        guard let image = try? renderAnimatedOverlayImage(
+            contentPixelSize: scene.metrics.contentPixelSize,
+            placements: scene.animatedTilePlacements,
+            tileset: scene.tileset,
+            preparedFrames: preparedFrames,
+            visualState: visualState
+        ) else {
+            return nil
+        }
+        FieldRendererCaches.shared.storeAnimatedOverlayImage(image, for: overlayKey)
+        return image
+    }
+
     public static func renderScene(
         map: MapManifest,
         playerPosition: TilePoint,
@@ -702,6 +972,12 @@ public struct FieldSceneRenderer {
             )
             FieldRendererCaches.shared.storeBackgroundImage(backgroundImage, for: backgroundSignature)
         }
+        let animatedTilePlacements = renderedAnimatedTilePlacements(
+            map: map,
+            blockset: blockset,
+            metrics: metrics,
+            tileset: assets.tileset
+        )
 
         let actors = try renderedActors(
             objects: objects,
@@ -714,8 +990,10 @@ public struct FieldSceneRenderer {
 
         return FieldRenderedScene(
             mapID: map.id,
+            tileset: assets.tileset,
             metrics: metrics,
             backgroundImage: backgroundImage,
+            animatedTilePlacements: animatedTilePlacements,
             actors: sortedActorsForPresentation(actors)
         )
     }
@@ -921,18 +1199,15 @@ public struct FieldSceneRenderer {
         canvasHeight: Int,
         into context: CGContext
     ) throws {
-        for blockY in 0..<map.blockHeight {
-            for blockX in 0..<map.blockWidth {
-                try drawBlock(
-                    blockID: map.blockID(atBlockX: blockX, blockY: blockY, includeConnections: false),
-                    mapX: blockX,
-                    mapY: blockY,
-                    atlas: atlas,
-                    blockset: blockset,
-                    canvasHeight: canvasHeight,
-                    into: context
-                )
-            }
+        try enumerateBackgroundTiles(
+            map: map,
+            blockset: blockset,
+            paddingBlocks: .init(width: 0, height: 0),
+            includeConnections: false
+        ) { tileIndex, x, topY in
+            let tileImage = try atlas.tile(at: tileIndex)
+            let y = contextY(forTopY: topY, drawHeight: tilePixelSize, canvasHeight: canvasHeight)
+            context.draw(tileImage, in: CGRect(x: x, y: y, width: tilePixelSize, height: tilePixelSize))
         }
     }
 
@@ -946,48 +1221,82 @@ public struct FieldSceneRenderer {
     ) throws {
         let paddingBlocksX = metrics.paddingPixels.width / blockPixelSize
         let paddingBlocksY = metrics.paddingPixels.height / blockPixelSize
-        let totalBlocksX = map.blockWidth + (paddingBlocksX * 2)
-        let totalBlocksY = map.blockHeight + (paddingBlocksY * 2)
-
-        for paddedBlockY in 0..<totalBlocksY {
-            for paddedBlockX in 0..<totalBlocksX {
-                let mapBlockX = paddedBlockX - paddingBlocksX
-                let mapBlockY = paddedBlockY - paddingBlocksY
-                try drawBlock(
-                    blockID: map.blockID(atBlockX: mapBlockX, blockY: mapBlockY),
-                    mapX: paddedBlockX,
-                    mapY: paddedBlockY,
-                    atlas: atlas,
-                    blockset: blockset,
-                    canvasHeight: canvasHeight,
-                    into: context
-                )
-            }
+        try enumerateBackgroundTiles(
+            map: map,
+            blockset: blockset,
+            paddingBlocks: .init(width: paddingBlocksX, height: paddingBlocksY)
+        ) { tileIndex, x, topY in
+            let tileImage = try atlas.tile(at: tileIndex)
+            let y = contextY(forTopY: topY, drawHeight: tilePixelSize, canvasHeight: canvasHeight)
+            context.draw(tileImage, in: CGRect(x: x, y: y, width: tilePixelSize, height: tilePixelSize))
         }
     }
 
-    private static func drawBlock(
-        blockID: Int,
-        mapX: Int,
-        mapY: Int,
-        atlas: PreparedTileAtlas,
+    private static func renderedAnimatedTilePlacements(
+        map: MapManifest,
         blockset: FieldBlockset,
-        canvasHeight: Int,
-        into context: CGContext
-    ) throws {
-        guard blockset.blocks.indices.contains(blockID) else {
-            throw FieldRendererError.invalidBlockIndex(blockID)
-        }
+        metrics: FieldSceneMetrics,
+        tileset: FieldTilesetDefinition
+    ) -> [FieldRenderedAnimatedTilePlacement] {
+        guard tileset.animation.isAnimated else { return [] }
 
-        let block = blockset.blocks[blockID]
-        for tileRow in 0..<blockset.blockTileHeight {
-            for tileColumn in 0..<blockset.blockTileWidth {
-                let tileIndex = Int(block[(tileRow * blockset.blockTileWidth) + tileColumn])
-                let tileImage = try atlas.tile(at: tileIndex)
-                let x = (mapX * blockPixelSize) + (tileColumn * tilePixelSize)
-                let topY = (mapY * blockPixelSize) + (tileRow * tilePixelSize)
-                let y = contextY(forTopY: topY, drawHeight: tilePixelSize, canvasHeight: canvasHeight)
-                context.draw(tileImage, in: CGRect(x: x, y: y, width: tilePixelSize, height: tilePixelSize))
+        let animatedTileIDs = Set(tileset.animation.animatedTiles.map(\.tileID))
+        guard animatedTileIDs.isEmpty == false else { return [] }
+
+        let paddingBlocks = FieldPixelSize(
+            width: metrics.paddingPixels.width / blockPixelSize,
+            height: metrics.paddingPixels.height / blockPixelSize
+        )
+        var placements: [FieldRenderedAnimatedTilePlacement] = []
+        try? enumerateBackgroundTiles(
+            map: map,
+            blockset: blockset,
+            paddingBlocks: paddingBlocks
+        ) { tileIndex, x, topY in
+            guard animatedTileIDs.contains(tileIndex) else { return }
+            placements.append(
+                .init(
+                    tileID: tileIndex,
+                    worldPosition: .init(x: x, y: topY),
+                    size: .init(width: tilePixelSize, height: tilePixelSize)
+                )
+            )
+        }
+        return placements
+    }
+
+    private static func enumerateBackgroundTiles(
+        map: MapManifest,
+        blockset: FieldBlockset,
+        paddingBlocks: FieldPixelSize,
+        includeConnections: Bool = true,
+        _ body: (Int, Int, Int) throws -> Void
+    ) throws {
+        let totalBlocksX = map.blockWidth + (paddingBlocks.width * 2)
+        let totalBlocksY = map.blockHeight + (paddingBlocks.height * 2)
+
+        for paddedBlockY in 0..<totalBlocksY {
+            for paddedBlockX in 0..<totalBlocksX {
+                let mapBlockX = paddedBlockX - paddingBlocks.width
+                let mapBlockY = paddedBlockY - paddingBlocks.height
+                let blockID = map.blockID(
+                    atBlockX: mapBlockX,
+                    blockY: mapBlockY,
+                    includeConnections: includeConnections
+                )
+                guard blockset.blocks.indices.contains(blockID) else {
+                    throw FieldRendererError.invalidBlockIndex(blockID)
+                }
+
+                let block = blockset.blocks[blockID]
+                for tileRow in 0..<blockset.blockTileHeight {
+                    for tileColumn in 0..<blockset.blockTileWidth {
+                        let tileIndex = Int(block[(tileRow * blockset.blockTileWidth) + tileColumn])
+                        let x = (paddedBlockX * blockPixelSize) + (tileColumn * tilePixelSize)
+                        let topY = (paddedBlockY * blockPixelSize) + (tileRow * tilePixelSize)
+                        try body(tileIndex, x, topY)
+                    }
+                }
             }
         }
     }
@@ -1127,11 +1436,190 @@ public struct FieldSceneRenderer {
         return bytes
     }
 
+    private static func renderAnimatedOverlayImage(
+        contentPixelSize: FieldPixelSize,
+        placements: [FieldRenderedAnimatedTilePlacement],
+        tileset: FieldTilesetDefinition,
+        preparedFrames: PreparedAnimatedTileFrames,
+        visualState: FieldTileAnimationVisualState
+    ) throws -> CGImage {
+        let bytesPerRow = contentPixelSize.width * 4
+        var pixels = [UInt8](repeating: 0, count: contentPixelSize.height * bytesPerRow)
+
+        for placement in placements {
+            guard let frame = preparedFrames.frame(
+                for: placement.tileID,
+                animation: tileset.animation,
+                visualState: visualState
+            ) else {
+                continue
+            }
+            guard frame.width == placement.size.width,
+                  frame.height == placement.size.height else {
+                throw FieldRendererError.bitmapContextCreationFailed
+            }
+
+            for row in 0..<frame.height {
+                let destinationY = placement.worldPosition.y + row
+                guard (0..<contentPixelSize.height).contains(destinationY) else { continue }
+
+                let sourceRowStart = row * frame.width * 4
+                let destinationRowStart = (destinationY * bytesPerRow) + (placement.worldPosition.x * 4)
+                guard destinationRowStart >= 0,
+                      destinationRowStart + (frame.width * 4) <= pixels.count else {
+                    continue
+                }
+
+                pixels.replaceSubrange(
+                    destinationRowStart..<(destinationRowStart + (frame.width * 4)),
+                    with: frame.rgbaPixels[sourceRowStart..<(sourceRowStart + (frame.width * 4))]
+                )
+            }
+        }
+
+        return try rgbaImage(from: pixels, width: contentPixelSize.width, height: contentPixelSize.height)
+    }
+
+    fileprivate static func prepareWaterAnimationFrames(baseTile: CGImage) throws -> [PreparedAnimatedTileFrames.Frame] {
+        let width = baseTile.width
+        let height = baseTile.height
+        var frames: [[UInt8]] = [try grayscalePixels(for: baseTile)]
+        guard frames[0].count == width * height else {
+            throw FieldRendererError.bitmapContextCreationFailed
+        }
+
+        for frameIndex in 1..<8 {
+            let previous = frames[frameIndex - 1]
+            let direction: WaterShiftDirection = (frameIndex & 0x4) == 0 ? .right : .left
+            frames.append(shiftWaterTilePixels(previous, width: width, height: height, direction: direction))
+        }
+
+        return frames.map { framePixels in
+            PreparedAnimatedTileFrames.Frame(
+                width: width,
+                height: height,
+                rgbaPixels: rgbaPixels(fromGrayscalePixels: framePixels)
+            )
+        }
+    }
+
+    private static func shiftWaterTilePixels(
+        _ pixels: [UInt8],
+        width: Int,
+        height: Int,
+        direction: WaterShiftDirection
+    ) -> [UInt8] {
+        var shifted = pixels
+        for row in 0..<height {
+            let rowStart = row * width
+            switch direction {
+            case .left:
+                let first = pixels[rowStart]
+                for column in 0..<(width - 1) {
+                    shifted[rowStart + column] = pixels[rowStart + column + 1]
+                }
+                shifted[rowStart + width - 1] = first
+            case .right:
+                let last = pixels[rowStart + width - 1]
+                for column in stride(from: width - 1, to: 0, by: -1) {
+                    shifted[rowStart + column] = pixels[rowStart + column - 1]
+                }
+                shifted[rowStart] = last
+            }
+        }
+        return shifted
+    }
+
+    fileprivate static func prepareAnimatedTileFrame(_ image: CGImage) throws -> PreparedAnimatedTileFrames.Frame {
+        .init(
+            width: image.width,
+            height: image.height,
+            rgbaPixels: try rgbaPixels(for: image)
+        )
+    }
+
+    private static func rgbaPixels(fromGrayscalePixels pixels: [UInt8]) -> [UInt8] {
+        var rgbaPixels = [UInt8]()
+        rgbaPixels.reserveCapacity(pixels.count * 4)
+        for pixel in pixels {
+            rgbaPixels.append(pixel)
+            rgbaPixels.append(pixel)
+            rgbaPixels.append(pixel)
+            rgbaPixels.append(255)
+        }
+        return rgbaPixels
+    }
+
+    private static func rgbaPixels(for image: CGImage) throws -> [UInt8] {
+        let bytesPerRow = image.width * 4
+        var bytes = [UInt8](repeating: 0, count: image.height * bytesPerRow)
+        guard let context = CGContext(
+            data: &bytes,
+            width: image.width,
+            height: image.height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            throw FieldRendererError.bitmapContextCreationFailed
+        }
+        context.interpolationQuality = .none
+        context.setShouldAntialias(false)
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        return bytes
+    }
+
+    private static func rgbaImage(from pixels: [UInt8], width: Int, height: Int) throws -> CGImage {
+        let imageData = Data(pixels) as CFData
+        guard let provider = CGDataProvider(data: imageData),
+              let image = CGImage(
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bitsPerPixel: 32,
+                bytesPerRow: width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                provider: provider,
+                decode: nil,
+                shouldInterpolate: false,
+                intent: .defaultIntent
+              ) else {
+            throw FieldRendererError.bitmapContextCreationFailed
+        }
+
+        return image
+    }
+
+    private static func flowerFrameIndex(forWaterCounter waterCounter: Int) -> Int {
+        let modFlower = waterCounter & 0x3
+        if modFlower < 2 {
+            return 0
+        }
+        if modFlower == 2 {
+            return 1
+        }
+        return 2
+    }
+
     private static func contextY(forTopY topY: Int, drawHeight: Int, canvasHeight: Int) -> Int {
         canvasHeight - topY - drawHeight
     }
 
     private static func spriteBitmapContext(width: Int, height: Int) -> CGContext? {
+        CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        )
+    }
+
+    private static func transparentBitmapContext(width: Int, height: Int) -> CGContext? {
         CGContext(
             data: nil,
             width: width,

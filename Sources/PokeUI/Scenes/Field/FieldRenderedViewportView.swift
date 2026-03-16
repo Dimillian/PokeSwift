@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import PokeDataModel
 import PokeRender
@@ -23,10 +24,25 @@ struct FixedViewportRenderedField: View {
     var body: some View {
         let cornerRadius = max(6, displayScale * 2.5)
         let hasActiveStepAnimation = playerStepAnimation != nil || objectStepAnimations.isEmpty == false
+        let hasAnimatedTiles = scene.tileset.animation.isAnimated && scene.animatedTilePlacements.isEmpty == false
         let walkAnimationInterval = max(1.0 / 120.0, playerStepDuration / 8.0)
+        let timelineInterval = hasAnimatedTiles ? min(walkAnimationInterval, 1.0 / 60.0) : walkAnimationInterval
 
-        TimelineView(.animation(minimumInterval: walkAnimationInterval, paused: hasActiveStepAnimation == false)) { timeline in
+        TimelineView(
+            .animation(
+                minimumInterval: timelineInterval,
+                paused: hasActiveStepAnimation == false && hasAnimatedTiles == false
+            )
+        ) { timeline in
             let playerWalkPhase = playerWalkAnimationPhase(at: timeline.date)
+            let tileAnimationState = FieldSceneRenderer.tileAnimationVisualState(
+                animation: scene.tileset.animation,
+                visibleFieldFrameCount: max(0, Int(floor(ProcessInfo.processInfo.systemUptime * 60)))
+            )
+            let animatedOverlayImage = FieldSceneRenderer.animatedOverlayImage(
+                for: scene,
+                visualState: tileAnimationState
+            )
 
             ZStack(alignment: .topLeading) {
                 lcdBackground
@@ -42,6 +58,20 @@ struct FixedViewportRenderedField: View {
                         x: -cameraOrigin.x * displayScale,
                         y: -cameraOrigin.y * displayScale
                     )
+
+                if let animatedOverlayImage {
+                    Image(decorative: animatedOverlayImage, scale: 1)
+                        .interpolation(.none)
+                        .resizable()
+                        .frame(
+                            width: CGFloat(scene.metrics.contentPixelSize.width) * displayScale,
+                            height: CGFloat(scene.metrics.contentPixelSize.height) * displayScale
+                        )
+                        .offset(
+                            x: -cameraOrigin.x * displayScale,
+                            y: -cameraOrigin.y * displayScale
+                        )
+                }
 
                 ForEach(scene.actors) { actor in
                     let renderedWorldPosition = actor.role == .player

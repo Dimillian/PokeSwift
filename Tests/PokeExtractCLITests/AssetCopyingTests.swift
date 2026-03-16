@@ -26,6 +26,9 @@ final class AssetCopyingTests: XCTestCase {
             "Assets/field/blocksets/reds_house.bst",
             "Assets/field/blocksets/overworld.bst",
             "Assets/field/blocksets/gym.bst",
+            "Assets/field/tileset_animations/flower/flower1.png",
+            "Assets/field/tileset_animations/flower/flower2.png",
+            "Assets/field/tileset_animations/flower/flower3.png",
             "Assets/battle/pokemon/front/charmander.png",
             "Assets/battle/pokemon/front/squirtle.png",
             "Assets/battle/pokemon/front/bulbasaur.png",
@@ -51,5 +54,37 @@ final class AssetCopyingTests: XCTestCase {
                 "Missing extracted field asset at \(relativePath)"
             )
         }
+    }
+
+    func testExtractorRemovesLegacySharedFieldAnimationAssetsOnRegeneration() throws {
+        let outputRoot = try PokeExtractCLITestSupport.temporaryDirectory()
+        let variantRoot = outputRoot.appendingPathComponent("Red", isDirectory: true)
+        let legacyFlowerURL = variantRoot.appendingPathComponent("Assets/field/animations/flower1.png")
+        let duplicatedFlowerURL = variantRoot.appendingPathComponent("Assets/field/tileset_animations/overworld/flower/flower1.png")
+
+        try FileManager.default.createDirectory(
+            at: legacyFlowerURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
+        try Data([0x00]).write(to: legacyFlowerURL)
+        try FileManager.default.createDirectory(
+            at: duplicatedFlowerURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
+        try Data([0x00]).write(to: duplicatedFlowerURL)
+
+        try RedContentExtractor.extract(
+            configuration: .init(repoRoot: PokeExtractCLITestSupport.repoRoot(), outputRoot: outputRoot)
+        )
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyFlowerURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: duplicatedFlowerURL.path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: variantRoot.appendingPathComponent("Assets/field/tileset_animations/flower/flower1.png").path
+            )
+        )
     }
 }

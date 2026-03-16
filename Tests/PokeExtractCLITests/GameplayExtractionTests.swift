@@ -53,6 +53,34 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.imagePath, "Assets/field/tilesets/gym.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "MUSEUM" }?.blocksetPath, "Assets/field/blocksets/gate.bst")
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "OVERWORLD" }?.animation.kind, .waterFlower)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "DOJO" }?.animation.kind, .waterFlower)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.animation.kind, .waterFlower)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "FOREST" }?.animation.kind, .water)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "REDS_HOUSE_1" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "REDS_HOUSE_2" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "GATE" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "MART" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(manifest.tilesets.first { $0.id == "POKECENTER" }?.animation.kind, TilesetAnimationKind.none)
+        XCTAssertEqual(
+            manifest.tilesets.first { $0.id == "OVERWORLD" }?.animation.animatedTiles,
+            [
+                .init(tileID: 0x14),
+                .init(
+                    tileID: 0x03,
+                    frameImagePaths: [
+                        "Assets/field/tileset_animations/flower/flower1.png",
+                        "Assets/field/tileset_animations/flower/flower2.png",
+                        "Assets/field/tileset_animations/flower/flower3.png",
+                    ]
+                ),
+            ]
+        )
+        XCTAssertEqual(
+            manifest.tilesets.first { $0.id == "FOREST" }?.animation.animatedTiles,
+            [.init(tileID: 0x14)]
+        )
         let overworldSpriteIDs = manifest.overworldSprites.map(\.id)
         XCTAssertEqual(Set(overworldSpriteIDs).count, overworldSpriteIDs.count)
         let referencedSpriteIDs = Set(manifest.maps.flatMap(\.objects).map(\.sprite))
@@ -1186,6 +1214,16 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertFalse(decoded.items.contains { $0.id.contains("\\") })
         XCTAssertEqual(decoded.tilesets.first?.imagePath, "Assets/field/tilesets/reds_house.png")
         XCTAssertEqual(decoded.tilesets.first?.blocksetPath, "Assets/field/blocksets/reds_house.bst")
+        XCTAssertEqual(decoded.tilesets.first { $0.id == "OVERWORLD" }?.animation.kind, .waterFlower)
+        XCTAssertEqual(decoded.tilesets.first { $0.id == "FOREST" }?.animation.kind, .water)
+        XCTAssertEqual(
+            decoded.tilesets.first { $0.id == "OVERWORLD" }?.animation.animatedTiles.last?.frameImagePaths,
+            [
+                "Assets/field/tileset_animations/flower/flower1.png",
+                "Assets/field/tileset_animations/flower/flower2.png",
+                "Assets/field/tileset_animations/flower/flower3.png",
+            ]
+        )
         XCTAssertEqual(decoded.overworldSprites.first?.facingFrames.down, .init(x: 0, y: 0, width: 16, height: 16))
         XCTAssertEqual(decoded.overworldSprites.first?.walkingFrames?.down, .init(x: 0, y: 48, width: 16, height: 16))
         XCTAssertEqual(
