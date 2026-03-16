@@ -1060,8 +1060,9 @@ struct BattleSpriteSheetFrameView: View {
         var rgbaBytes = [UInt8](repeating: 0, count: width * height * 4)
 
         for index in 0..<(width * height) {
-            let alpha: UInt8 = maskBytes[index] == 255 ? 0 : 255
-            let value = grayscaleBytes[index]
+            let isMasked = maskBytes[index] == 255
+            let alpha: UInt8 = isMasked ? 0 : 255
+            let value: UInt8 = isMasked ? 0 : grayscaleBytes[index]
             let rgbaIndex = index * 4
             rgbaBytes[rgbaIndex] = value
             rgbaBytes[rgbaIndex + 1] = value
@@ -1081,7 +1082,7 @@ struct BattleSpriteSheetFrameView: View {
             bitsPerPixel: 32,
             bytesPerRow: rgbaBytesPerRow,
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
             provider: provider,
             decode: nil,
             shouldInterpolate: false,

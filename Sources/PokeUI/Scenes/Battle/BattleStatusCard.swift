@@ -218,7 +218,9 @@ struct BattlePokeballToken: View {
                 Circle()
                     .fill(Self.centerFill)
                     .frame(width: centerDiameter, height: centerDiameter)
-
+            }
+            .clipShape(Circle())
+            .overlay {
                 Circle()
                     .stroke(Self.outlineColor, lineWidth: max(1, proxy.size.width * 0.12))
             }
