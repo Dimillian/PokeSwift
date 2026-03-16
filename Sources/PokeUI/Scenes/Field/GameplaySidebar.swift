@@ -5,6 +5,7 @@ struct GameplaySidebar: View {
     let mode: GameplaySidebarMode
     let onSidebarAction: ((String) -> Void)?
     let onPartyRowSelected: ((Int) -> Void)?
+    let onInventoryItemSelected: ((String) -> Void)?
     @Binding var fieldDisplayStyle: FieldDisplayStyle
     @Binding var expansionState: GameplaySidebarExpansionState
 
@@ -12,12 +13,14 @@ struct GameplaySidebar: View {
         mode: GameplaySidebarMode,
         onSidebarAction: ((String) -> Void)? = nil,
         onPartyRowSelected: ((Int) -> Void)? = nil,
+        onInventoryItemSelected: ((String) -> Void)? = nil,
         fieldDisplayStyle: Binding<FieldDisplayStyle>,
         expansionState: Binding<GameplaySidebarExpansionState>
     ) {
         self.mode = mode
         self.onSidebarAction = onSidebarAction
         self.onPartyRowSelected = onPartyRowSelected
+        self.onInventoryItemSelected = onInventoryItemSelected
         _fieldDisplayStyle = fieldDisplayStyle
         _expansionState = expansionState
     }
@@ -43,6 +46,7 @@ struct GameplaySidebar: View {
                 expansionState: expansionState,
                 onSidebarAction: onSidebarAction,
                 onPartyRowSelected: onPartyRowSelected,
+                onInventoryItemSelected: onInventoryItemSelected,
                 fieldDisplayStyle: $fieldDisplayStyle
             ) { section in
                 expansionState.activate(section)
@@ -76,6 +80,7 @@ private struct FieldModeSidebarContent: View {
     let expansionState: GameplaySidebarExpansionState
     let onSidebarAction: ((String) -> Void)?
     let onPartyRowSelected: ((Int) -> Void)?
+    let onInventoryItemSelected: ((String) -> Void)?
     @Binding var fieldDisplayStyle: FieldDisplayStyle
     let onActivateSection: (GameplaySidebarExpandedSection) -> Void
 
@@ -118,7 +123,10 @@ private struct FieldModeSidebarContent: View {
             ) {
                 onActivateSection(.bag)
             } content: {
-                InventorySidebarContent(props: props.inventory)
+                InventorySidebarContent(
+                    props: props.inventory,
+                    onItemSelected: onInventoryItemSelected
+                )
             }
 
             AccordionSidebarCard(

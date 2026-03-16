@@ -60,7 +60,8 @@ struct BattleStageView: View {
             props.bag.sections.isEmpty == false &&
             props.presentation.uiVisibility == .visible {
             BattleBagOverlayPanel(
-                bag: props.bag
+                bag: props.bag,
+                onItemSelected: props.onBagItemSelected
             )
             .frame(width: GameplayBattleStageLayout.bagOverlayWidth)
         }
@@ -69,6 +70,7 @@ struct BattleStageView: View {
 
 private struct BattleBagOverlayPanel: View {
     let bag: InventorySidebarProps
+    let onItemSelected: ((String) -> Void)?
 
     var body: some View {
         GameplayHoverCardSurface {
@@ -76,7 +78,7 @@ private struct BattleBagOverlayPanel: View {
                 Text("BAG")
                     .font(.system(size: 16, weight: .bold, design: .monospaced))
                     .foregroundStyle(GameplayFieldStyleTokens.ink)
-                InventorySidebarContent(props: bag)
+                InventorySidebarContent(props: bag, onItemSelected: onItemSelected)
             }
         }
     }

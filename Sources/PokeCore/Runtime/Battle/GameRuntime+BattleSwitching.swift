@@ -2,12 +2,80 @@ extension GameRuntime {
     func resolveBattlePartySelection(battle: inout RuntimeBattleState, gameplayState: inout GameplayState) {
         guard battle.phase == .partySelection,
               gameplayState.playerParty.indices.contains(battle.focusedPartyIndex) else {
-            returnToBattleMoveSelection(battle: &battle)
+            if case .itemUse = battle.partySelectionMode {
+                enterBattleBagSelection(battle: &battle)
+            } else {
+                returnToBattleMoveSelection(battle: &battle)
+            }
             return
         }
 
         let selectedIndex = battle.focusedPartyIndex
         let selectionMode = battle.partySelectionMode
+
+        if case let .itemUse(itemID) = selectionMode {
+            guard let resolvedUse = applyMedicine(itemID: itemID, to: gameplayState.playerParty[selectedIndex]) else {
+                playCollisionSoundIfNeeded()
+                battle.message = medicineNoEffectMessage
+                return
+            }
+            guard removeItem(itemID, quantity: 1, from: &gameplayState) else {
+                enterBattleBagSelection(battle: &battle)
+                battle.message = "No items left."
+                return
+            }
+
+            gameplayState.playerParty[selectedIndex] = resolvedUse.updatedPokemon
+            if selectedIndex == battle.playerActiveIndex {
+                battle.playerPokemon = resolvedUse.updatedPokemon
+            }
+
+            traceEvent(
+                .inventoryChanged,
+                "Removed 1x \(itemID).",
+                mapID: gameplayState.mapID,
+                battleID: battle.battleID,
+                details: [
+                    "itemID": itemID,
+                    "quantity": "1",
+                    "operation": "remove",
+                    "reason": "itemUse",
+                ]
+            )
+
+            battle.phase = .resolvingTurn
+            battle.pendingAction = nil
+            battle.queuedMessages = []
+            battle.pendingPresentationBatches = []
+            battle.lastCaptureResult = nil
+            battle.partySelectionMode = .optionalSwitch
+
+            var enemyPokemon = battle.enemyPokemon
+            var playerPokemon = battle.playerPokemon
+            let enemyMoveIndex = selectEnemyMoveIndex(
+                battle: battle,
+                enemyPokemon: enemyPokemon,
+                playerPokemon: playerPokemon
+            )
+            let enemyMove = applyMove(
+                attacker: &enemyPokemon,
+                defender: &playerPokemon,
+                moveIndex: enemyMoveIndex
+            )
+            battle.aiLayer2Encouragement += 1
+            battle.enemyPokemon = enemyPokemon
+            battle.playerPokemon = playerPokemon
+
+            var messages = [resolvedUse.message]
+            messages.append(contentsOf: enemyMove.messages)
+            if playerPokemon.currentHP == 0 {
+                presentBattleMessages(messages, battle: &battle, pendingAction: .finish(won: false))
+            } else {
+                presentBattleMessages(messages, battle: &battle, pendingAction: .moveSelection)
+            }
+            return
+        }
+
         guard selectedIndex != battle.playerActiveIndex else {
             playCollisionSoundIfNeeded()
             battle.message = "\(battle.playerPokemon.nickname) is already out!"
@@ -34,6 +102,8 @@ extension GameRuntime {
         case .optionalSwitch:
             battle.pendingAction = .continueSwitchTurn
         case .trainerShift:
+            battle.pendingAction = nil
+        case .itemUse:
             battle.pendingAction = nil
         }
         battle.queuedMessages = []
@@ -114,6 +184,8 @@ extension GameRuntime {
                     )
                 ),
             ]
+        case .itemUse:
+            replacementBeats = []
         }
 
         scheduleBattlePresentation(replacementBeats, battleID: battle.battleID)

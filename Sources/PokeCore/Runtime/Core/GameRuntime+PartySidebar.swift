@@ -10,7 +10,7 @@ extension GameRuntime {
             scriptedMovementTask == nil &&
             trainerEngagementTask == nil &&
             gameplayState.playerParty.indices.contains(index) &&
-            gameplayState.playerParty.count > 1
+            (fieldItemUseState != nil || gameplayState.playerParty.count > 1)
     }
 
     func canHandleBattlePartySidebarSelection(
@@ -45,6 +45,11 @@ extension GameRuntime {
         }
 
         playUIConfirmSound()
+
+        if fieldItemUseState != nil {
+            resolveFieldMedicineSelection(index)
+            return
+        }
 
         if let reorderState = fieldPartyReorderState {
             if reorderState.selectedIndex == index {

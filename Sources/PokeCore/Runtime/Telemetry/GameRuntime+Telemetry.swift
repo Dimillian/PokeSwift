@@ -120,7 +120,7 @@ extension GameRuntime {
             focusedBagItemIndex: battle.focusedBagItemIndex,
             focusedPartyIndex: battle.focusedPartyIndex,
             canRun: battle.canRun,
-            canUseBag: battle.kind == .wild && currentBattleBagItems.isEmpty == false,
+            canUseBag: currentBattleBagItems.isEmpty == false,
             canSwitch: canUseBattleSwitch(for: battle, gameplayState: gameplayState),
             phase: battle.phase.rawValue,
             textLines: battle.message.isEmpty ? [] : [battle.message],

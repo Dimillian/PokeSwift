@@ -1572,6 +1572,107 @@ extension PokeUITests {
     XCTAssertEqual(compactBattleParty.pokemon[2].selectionAnnotation, "FAINTED")
     XCTAssertEqual(compactBattleParty.pokemon[2].currentHP, 0)
   }
+  func testPartySidebarBuilderMapsMedicineTargetingState() {
+    let party = PartyTelemetry(
+      pokemon: [
+        .init(
+          speciesID: "BULBASAUR",
+          displayName: "Bulbasaur",
+          level: 5,
+          currentHP: 19,
+          maxHP: 19,
+          attack: 11,
+          defense: 10,
+          speed: 9,
+          special: 12,
+          moves: ["TACKLE"],
+          experience: .init(total: 150, levelStart: 135, nextLevel: 179),
+          growthOutlook: .init(hp: .neutral, attack: .neutral, defense: .neutral, speed: .neutral, special: .neutral)
+        ),
+        .init(
+          speciesID: "PIDGEY",
+          displayName: "Pidgey",
+          level: 3,
+          currentHP: 8,
+          maxHP: 12,
+          attack: 8,
+          defense: 8,
+          speed: 10,
+          special: 7,
+          moves: ["TACKLE"],
+          experience: .init(total: 27, levelStart: 27, nextLevel: 64),
+          growthOutlook: .init(hp: .neutral, attack: .neutral, defense: .neutral, speed: .neutral, special: .neutral)
+        ),
+      ]
+    )
+
+    let sidebarParty = GameplaySidebarPropsBuilder.makeParty(
+      from: party,
+      mode: .itemUseTarget,
+      focusedIndex: 1,
+      selectableIndices: [1],
+      annotationByIndex: [0: "FULL HP", 1: "ACTIVE"],
+      promptText: "Use POTION on which #MON?"
+    )
+
+    XCTAssertEqual(sidebarParty.mode, .itemUseTarget)
+    XCTAssertEqual(sidebarParty.promptText, "Use POTION on which #MON?")
+    XCTAssertEqual(sidebarParty.pokemon[0].selectionAnnotation, "FULL HP")
+    XCTAssertFalse(sidebarParty.pokemon[0].isSelectable)
+    XCTAssertEqual(sidebarParty.pokemon[1].selectionAnnotation, "ACTIVE")
+    XCTAssertTrue(sidebarParty.pokemon[1].isSelectable)
+    XCTAssertTrue(sidebarParty.pokemon[1].isFocused)
+  }
+  func testBattleSidebarRoutesMedicineTargetingAttentionToParty() {
+    let props = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: "partySelection",
+      promptText: "Use POTION on which #MON?",
+      playerPokemon: .init(
+        speciesID: "BULBASAUR",
+        displayName: "Bulbasaur",
+        level: 5,
+        currentHP: 19,
+        maxHP: 19,
+        attack: 11,
+        defense: 10,
+        speed: 9,
+        special: 12,
+        moves: ["TACKLE"]
+      ),
+      enemyPokemon: .init(
+        speciesID: "PIDGEY",
+        displayName: "Pidgey",
+        level: 3,
+        currentHP: 12,
+        maxHP: 12,
+        attack: 8,
+        defense: 8,
+        speed: 10,
+        special: 7,
+        moves: ["TACKLE"]
+      ),
+      moveSlots: [
+        .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true)
+      ],
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(
+        pokemon: [],
+        mode: .itemUseTarget,
+        promptText: "Use POTION on which #MON?"
+      ),
+      presentation: .init(
+        stage: .commandReady,
+        revision: 1,
+        uiVisibility: .visible
+      )
+    )
+
+    XCTAssertFalse(props.shouldForceCombatSectionOpen)
+    XCTAssertEqual(props.attentionSection, GameplaySidebarExpandedSection.party)
+  }
   func testCompactPartySectionContentStaysHeightBounded() {
     let party = PartySidebarProps(
       pokemon: [

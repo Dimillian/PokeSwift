@@ -110,7 +110,7 @@ extension BattleSidebarProps {
             return false
         }
 
-        if party.mode == .battleSwitch {
+        if party.mode == .battleSwitch || party.mode == .itemUseTarget {
             return false
         }
 
@@ -128,7 +128,7 @@ extension BattleSidebarProps {
             return nil
         }
 
-        if party.mode == .battleSwitch {
+        if party.mode == .battleSwitch || party.mode == .itemUseTarget {
             return .party
         }
 

@@ -224,6 +224,7 @@ extension GameRuntime {
         fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil
+        fieldItemUseState = nil
         deferredActions.removeAll()
         currentAudioState = nil
         fieldTransitionState = nil

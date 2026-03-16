@@ -8,6 +8,8 @@ enum BattleSelectionAction {
 }
 
 extension GameRuntime {
+    static let battleBagGridColumnCount = 4
+
     func battlePrompt(for phase: RuntimeBattlePhase) -> String {
         switch phase {
         case .partySelection:
@@ -72,6 +74,23 @@ extension GameRuntime {
         ) ?? 0
     }
 
+    func enterBattleItemUseSelection(
+        battle: inout RuntimeBattleState,
+        gameplayState: GameplayState,
+        itemID: String
+    ) {
+        enterBattlePromptState(
+            .partySelection,
+            battle: &battle,
+            message: medicinePartyPromptText(itemID: itemID)
+        )
+        battle.partySelectionMode = .itemUse(itemID: itemID)
+        battle.focusedPartyIndex = firstMedicineTargetIndex(
+            itemID: itemID,
+            party: gameplayState.playerParty
+        ) ?? battle.playerActiveIndex
+    }
+
     func shouldPlayBattleAdvanceConfirmSound(for battle: RuntimeBattleState) -> Bool {
         guard battle.queuedMessages.isEmpty,
               case .captured = battle.pendingAction else {
@@ -89,6 +108,42 @@ extension GameRuntime {
         return item.battleUse != .ball
     }
 
+    func moveBattleBagFocusHorizontally(_ direction: Int, battle: inout RuntimeBattleState) {
+        let count = currentBattleBagItems.count
+        guard count > 0 else {
+            battle.focusedBagItemIndex = 0
+            return
+        }
+
+        let currentIndex = min(max(0, battle.focusedBagItemIndex), count - 1)
+        let column = currentIndex % Self.battleBagGridColumnCount
+        let rowStart = currentIndex - column
+        let rowEnd = min(rowStart + Self.battleBagGridColumnCount - 1, count - 1)
+
+        if direction < 0 {
+            guard currentIndex > rowStart else { return }
+            battle.focusedBagItemIndex = currentIndex - 1
+        } else if direction > 0 {
+            guard currentIndex < rowEnd else { return }
+            battle.focusedBagItemIndex = currentIndex + 1
+        }
+    }
+
+    func moveBattleBagFocusVertically(_ direction: Int, battle: inout RuntimeBattleState) {
+        let count = currentBattleBagItems.count
+        guard count > 0 else {
+            battle.focusedBagItemIndex = 0
+            return
+        }
+
+        let currentIndex = min(max(0, battle.focusedBagItemIndex), count - 1)
+        let targetIndex = currentIndex + (direction * Self.battleBagGridColumnCount)
+        guard (0..<count).contains(targetIndex) else {
+            return
+        }
+        battle.focusedBagItemIndex = targetIndex
+    }
+
     func handleBattle(button: RuntimeButton) {
         if nicknameConfirmation != nil {
             handleNicknameConfirmation(button: button)
@@ -102,7 +157,7 @@ extension GameRuntime {
             case .moveSelection:
                 battle.focusedMoveIndex = max(0, battle.focusedMoveIndex - 1)
             case .bagSelection:
-                battle.focusedBagItemIndex = max(0, battle.focusedBagItemIndex - 1)
+                moveBattleBagFocusVertically(-1, battle: &battle)
             case .partySelection:
                 battle.focusedPartyIndex = max(0, battle.focusedPartyIndex - 1)
             case .trainerAboutToUseDecision:
@@ -120,7 +175,7 @@ extension GameRuntime {
                     battle.focusedMoveIndex + 1
                 )
             case .bagSelection:
-                battle.focusedBagItemIndex = min(max(0, currentBattleBagItems.count - 1), battle.focusedBagItemIndex + 1)
+                moveBattleBagFocusVertically(1, battle: &battle)
             case .partySelection:
                 battle.focusedPartyIndex = min(max(0, gameplayState.playerParty.count - 1), battle.focusedPartyIndex + 1)
             case .trainerAboutToUseDecision:
@@ -137,11 +192,11 @@ extension GameRuntime {
             }
         case .left:
             if battle.phase == .bagSelection {
-                battle.focusedBagItemIndex = max(0, battle.focusedBagItemIndex - 1)
+                moveBattleBagFocusHorizontally(-1, battle: &battle)
             }
         case .right:
             if battle.phase == .bagSelection {
-                battle.focusedBagItemIndex = min(max(0, currentBattleBagItems.count - 1), battle.focusedBagItemIndex + 1)
+                moveBattleBagFocusHorizontally(1, battle: &battle)
             }
         case .cancel:
             switch battle.phase {
@@ -153,9 +208,16 @@ extension GameRuntime {
                 playUIConfirmSound()
                 returnToBattleMoveSelection(battle: &battle)
             case .partySelection:
-                guard battle.partySelectionMode == .optionalSwitch else { break }
-                playUIConfirmSound()
-                returnToBattleMoveSelection(battle: &battle)
+                switch battle.partySelectionMode {
+                case .optionalSwitch:
+                    playUIConfirmSound()
+                    returnToBattleMoveSelection(battle: &battle)
+                case .itemUse:
+                    playUIConfirmSound()
+                    enterBattleBagSelection(battle: &battle)
+                case .forcedReplacement, .trainerShift:
+                    break
+                }
             case .trainerAboutToUseDecision:
                 playUIConfirmSound()
                 battle.focusedMoveIndex = 1
@@ -216,6 +278,7 @@ extension GameRuntime {
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
+        fieldItemUseState = nil
         scene = .battle
         substate = "battle"
     }
@@ -298,15 +361,40 @@ extension GameRuntime {
         }
 
         let itemState = bagItems[battle.focusedBagItemIndex]
-        guard let item = content.item(id: itemState.itemID), item.battleUse == .ball else {
+        guard let item = content.item(id: itemState.itemID) else {
             returnToBattleMoveSelection(battle: &battle)
             battle.message = "That item can't be used here."
             return
         }
-        guard removeItem(item.id, quantity: 1, from: &gameplayState) else {
+
+        switch item.battleUse {
+        case .none:
             returnToBattleMoveSelection(battle: &battle)
-            battle.message = "No items left."
+            battle.message = "That item can't be used here."
             return
+        case .medicine:
+            guard gameplayState.playerParty.isEmpty == false else {
+                returnToBattleMoveSelection(battle: &battle)
+                battle.message = medicineEmptyPartyMessage
+                return
+            }
+            guard hasUsableMedicineTarget(itemID: item.id, party: gameplayState.playerParty) else {
+                returnToBattleMoveSelection(battle: &battle)
+                battle.message = medicineNoEffectMessage
+                return
+            }
+            enterBattleItemUseSelection(
+                battle: &battle,
+                gameplayState: gameplayState,
+                itemID: item.id
+            )
+            return
+        case .ball:
+            guard removeItem(item.id, quantity: 1, from: &gameplayState) else {
+                returnToBattleMoveSelection(battle: &battle)
+                battle.message = "No items left."
+                return
+            }
         }
 
         battle.phase = .resolvingTurn
@@ -396,7 +484,7 @@ extension GameRuntime {
     }
 
     func canUseBattleBag(for battle: RuntimeBattleState) -> Bool {
-        battle.kind == .wild && currentBattleBagItems.isEmpty == false
+        currentBattleBagItems.isEmpty == false
     }
 
     func canUseBattleSwitch(for battle: RuntimeBattleState, gameplayState: GameplayState) -> Bool {

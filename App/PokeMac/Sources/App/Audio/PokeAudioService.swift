@@ -9,7 +9,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         static let masterVolume: Float = 0.6
         static let musicVolume: Float = 0.4
         static let soundEffectVolume: Float = 1.0
-        static let renderedSampleGain: Float = 0.16
+        static let musicRenderedSampleGain: Float = 0.16
+        static let soundEffectRenderedSampleGain: Float = 0.24
         static let maxRenderableFrequencyRatio = 0.45
         static let dcBlockPole: Double = 0.995
     }
@@ -29,6 +30,12 @@ final class PokeAudioService: RuntimeAudioPlaying {
         let channels: [Int: RenderedChannelBuffers]
         let playbackMode: AudioManifest.PlaybackMode
         let maxDuration: Double
+    }
+
+    private struct RenderOptions {
+        let sampleGain: Float
+        let smoothNoise: Bool
+        let noiseGainMultiplier: Float
     }
 
     private struct PendingMusicPlayback {
@@ -231,7 +238,12 @@ final class PokeAudioService: RuntimeAudioPlaying {
         musicRenderCache[cacheKey] = Self.renderedAudioAsset(
             playbackMode: entry.playbackMode,
             channels: entry.channels,
-            sampleRate: format.sampleRate
+            sampleRate: format.sampleRate,
+            options: .init(
+                sampleGain: MixDefaults.musicRenderedSampleGain,
+                smoothNoise: true,
+                noiseGainMultiplier: 0.68
+            )
         )
     }
 
@@ -252,7 +264,12 @@ final class PokeAudioService: RuntimeAudioPlaying {
             let rendered = Self.renderedAudioAsset(
                 playbackMode: entry.playbackMode,
                 channels: entry.channels,
-                sampleRate: sampleRate
+                sampleRate: sampleRate,
+                options: .init(
+                    sampleGain: MixDefaults.musicRenderedSampleGain,
+                    smoothNoise: true,
+                    noiseGainMultiplier: 0.68
+                )
             )
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -291,6 +308,11 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 playbackMode: .oneShot,
                 channels: channels,
                 sampleRate: sampleRate,
+                options: .init(
+                    sampleGain: MixDefaults.soundEffectRenderedSampleGain,
+                    smoothNoise: true,
+                    noiseGainMultiplier: 1.0
+                ),
                 soundEffectRequest: request
             )
             DispatchQueue.main.async { [weak self] in
@@ -429,6 +451,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
         playbackMode: AudioManifest.PlaybackMode,
         channels: [AudioManifest.ChannelProgram],
         sampleRate: Double,
+        options: RenderOptions,
         soundEffectRequest: SoundEffectPlaybackRequest? = nil
     ) -> RenderedAudioAsset {
         var renderedChannels: [Int: RenderedChannelBuffers] = [:]
@@ -449,11 +472,13 @@ final class PokeAudioService: RuntimeAudioPlaying {
             )
             let preludeSamples = renderSegment(
                 events: preludeEvents,
-                sampleRate: sampleRate
+                sampleRate: sampleRate,
+                options: options
             )
             let loopSamples = renderSegment(
                 events: loopEvents,
-                sampleRate: sampleRate
+                sampleRate: sampleRate,
+                options: options
             )
             let preludeDuration = renderedDuration(for: preludeEvents)
             let loopDuration = renderedDuration(for: loopEvents)
@@ -596,7 +621,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
 
     nonisolated private static func renderSegment(
         events: [AudioManifest.Event],
-        sampleRate: Double
+        sampleRate: Double,
+        options: RenderOptions
     ) -> RenderedSamples? {
         let totalDuration = renderedDuration(for: events)
         guard totalDuration > 0 else { return nil }
@@ -614,14 +640,17 @@ final class PokeAudioService: RuntimeAudioPlaying {
                         leftChannel: leftBaseAddress,
                         rightChannel: rightBaseAddress,
                         frameCount: frameCount,
-                        sampleRate: sampleRate
+                        sampleRate: sampleRate,
+                        options: options
                     )
                 }
             }
         }
 
-        conditionRenderedSamples(&leftSamples)
-        conditionRenderedSamples(&rightSamples)
+        if shouldApplyDCBlock(to: events) {
+            conditionRenderedSamples(&leftSamples)
+            conditionRenderedSamples(&rightSamples)
+        }
         return RenderedSamples(left: leftSamples, right: rightSamples)
     }
 
@@ -634,7 +663,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         leftChannel: UnsafeMutablePointer<Float>,
         rightChannel: UnsafeMutablePointer<Float>,
         frameCount: Int,
-        sampleRate: Double
+        sampleRate: Double,
+        options: RenderOptions
     ) {
         guard event.duration > 0 else { return }
         let startFrame = max(0, Int(event.startTime * sampleRate))
@@ -652,7 +682,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 sampleRate: sampleRate,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: options.sampleGain
             )
         case .wave:
             renderWaveEvent(
@@ -662,7 +693,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 sampleRate: sampleRate,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: options.sampleGain
             )
         case .noise:
             renderNoiseEvent(
@@ -672,7 +704,10 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 sampleRate: sampleRate,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: options.sampleGain,
+                smoothNoise: options.smoothNoise,
+                noiseGainMultiplier: options.noiseGainMultiplier
             )
         }
     }
@@ -798,7 +833,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         startFrame: Int,
         endFrame: Int,
         sampleRate: Double,
-        declickFrames: Int
+        declickFrames: Int,
+        sampleGain: Float
     ) {
         var phase = 0.0
         for frame in startFrame..<endFrame {
@@ -822,7 +858,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 localTime: localTime,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: sampleGain
             )
             phase = positiveFractionalPart(phase + phaseIncrement)
         }
@@ -835,7 +872,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         startFrame: Int,
         endFrame: Int,
         sampleRate: Double,
-        declickFrames: Int
+        declickFrames: Int,
+        sampleGain: Float
     ) {
         var phase = 0.0
         for frame in startFrame..<endFrame {
@@ -855,7 +893,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 localTime: localTime,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: sampleGain
             )
             phase = positiveFractionalPart(phase + phaseIncrement)
         }
@@ -868,13 +907,18 @@ final class PokeAudioService: RuntimeAudioPlaying {
         startFrame: Int,
         endFrame: Int,
         sampleRate: Double,
-        declickFrames: Int
+        declickFrames: Int,
+        sampleGain: Float,
+        smoothNoise: Bool,
+        noiseGainMultiplier: Float
     ) {
         let clockHz = max(1, min(event.frequencyHz ?? 4_096, sampleRate * MixDefaults.maxRenderableFrequencyRatio))
         let stepDuration = 1 / clockHz
         var nextStepTime = stepDuration
         var lfsr = 0x7fff
         var sampleValue = gbNoiseOutputLevel(lfsr: lfsr)
+        var filteredSampleValue = sampleValue
+        let lowPassAlpha = noiseLowPassAlpha(sampleRate: sampleRate, clockHz: clockHz)
 
         for frame in startFrame..<endFrame {
             let localTime = Double(frame - startFrame) / sampleRate
@@ -883,8 +927,13 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 sampleValue = gbNoiseOutputLevel(lfsr: lfsr)
                 nextStepTime += stepDuration
             }
+            if smoothNoise {
+                filteredSampleValue += (sampleValue - filteredSampleValue) * lowPassAlpha
+            } else {
+                filteredSampleValue = sampleValue
+            }
             mixSample(
-                sampleValue,
+                filteredSampleValue,
                 for: event,
                 leftChannel: leftChannel,
                 rightChannel: rightChannel,
@@ -892,7 +941,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
                 startFrame: startFrame,
                 endFrame: endFrame,
                 localTime: localTime,
-                declickFrames: declickFrames
+                declickFrames: declickFrames,
+                sampleGain: sampleGain * noiseGainMultiplier
             )
         }
     }
@@ -906,7 +956,8 @@ final class PokeAudioService: RuntimeAudioPlaying {
         startFrame: Int,
         endFrame: Int,
         localTime: Double,
-        declickFrames: Int
+        declickFrames: Int,
+        sampleGain: Float
     ) {
         let amplitude = envelopeAdjustedAmplitude(for: event, localTime: localTime)
         let startDistance = frame - startFrame
@@ -919,7 +970,7 @@ final class PokeAudioService: RuntimeAudioPlaying {
             declickEnvelope = 1
         }
 
-        let sample = Float(sampleValue * amplitude) * MixDefaults.renderedSampleGain * declickEnvelope
+        let sample = Float(sampleValue * amplitude) * sampleGain * declickEnvelope
         if event.stereoLeftEnabled {
             leftChannel[frame] += sample
         }
@@ -959,6 +1010,14 @@ final class PokeAudioService: RuntimeAudioPlaying {
         (lfsr & 0x1) == 0 ? 1 : -1
     }
 
+    nonisolated private static func noiseLowPassAlpha(sampleRate: Double, clockHz: Double) -> Double {
+        let targetCutoffHz = max(280, min(1_400, clockHz * 1.5))
+        let clampedCutoff = min(targetCutoffHz, sampleRate * 0.45)
+        let dt = 1 / sampleRate
+        let rc = 1 / (2 * Double.pi * clampedCutoff)
+        return dt / (rc + dt)
+    }
+
     nonisolated private static func conditionRenderedSamples(_ samples: inout [Float]) {
         guard samples.isEmpty == false else { return }
         var previousInput = 0.0
@@ -970,6 +1029,10 @@ final class PokeAudioService: RuntimeAudioPlaying {
             previousOutput = output
             samples[index] = Float(output)
         }
+    }
+
+    nonisolated private static func shouldApplyDCBlock(to events: [AudioManifest.Event]) -> Bool {
+        events.contains { $0.waveform == .square }
     }
 
     nonisolated private static func waveTableSample(_ waveSamples: [Double]?, phase: Double) -> Double {

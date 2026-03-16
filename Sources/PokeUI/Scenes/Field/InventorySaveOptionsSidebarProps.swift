@@ -20,6 +20,7 @@ public struct InventorySidebarItemProps: Identifiable, Equatable, Sendable {
     public let iconURL: URL?
     public let descriptionText: String
     public let tmhm: InventorySidebarTMHMProps?
+    public let isEnabled: Bool
     public let isFocused: Bool
 
     public init(
@@ -29,6 +30,7 @@ public struct InventorySidebarItemProps: Identifiable, Equatable, Sendable {
         iconURL: URL? = nil,
         descriptionText: String = "",
         tmhm: InventorySidebarTMHMProps? = nil,
+        isEnabled: Bool = true,
         isFocused: Bool = false
     ) {
         self.id = id
@@ -37,6 +39,7 @@ public struct InventorySidebarItemProps: Identifiable, Equatable, Sendable {
         self.iconURL = iconURL
         self.descriptionText = descriptionText
         self.tmhm = tmhm
+        self.isEnabled = isEnabled
         self.isFocused = isFocused
     }
 }

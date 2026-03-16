@@ -9,6 +9,7 @@ struct GameplaySceneProps {
     let sidebarMode: GameplaySidebarMode
     let onSidebarAction: ((String) -> Void)?
     let onPartyRowSelected: ((Int) -> Void)?
+    let onInventoryItemSelected: ((String) -> Void)?
     let initialFieldDisplayStyle: FieldDisplayStyle
 }
 
@@ -58,6 +59,7 @@ struct BattleViewportProps {
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
     let bag: InventorySidebarProps
+    let onBagItemSelected: ((String) -> Void)?
     let presentation: BattlePresentationTelemetry
     let nicknameConfirmation: NicknameConfirmationViewProps?
 }

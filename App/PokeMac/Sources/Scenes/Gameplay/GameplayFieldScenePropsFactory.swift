@@ -23,9 +23,16 @@ enum GameplayScenePropsFactory {
         case .fieldLike:
             let fieldState = runtime.currentFieldSceneState()
             let evolutionState = runtime.currentEvolutionSceneState()
+            let enabledFieldInventoryItemIDs = Set(
+                (fieldState.inventory?.items ?? []).compactMap { item in
+                    runtime.content.item(id: item.itemID)?.medicine == nil ? nil : item.itemID
+                }
+            )
             let sidebarInventory = makeInventorySidebar(
                 from: fieldState.inventory?.items ?? [],
-                manifestIndex: manifestIndex
+                manifestIndex: manifestIndex,
+                focusedItemID: runtime.fieldItemUseItemID,
+                enabledItemIDs: enabledFieldInventoryItemIDs
             )
 
             let pokedexSidebar = GameplaySidebarPropsBuilder.makePokedex(
@@ -53,7 +60,9 @@ enum GameplayScenePropsFactory {
                         battleStyle: runtime.optionsBattleStyle
                     ),
                     preferredExpandedSection: runtime.scene == .evolution ? .party : (
-                        runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex
+                        runtime.fieldItemUseItemID != nil
+                            ? .party
+                            : (runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex)
                     )
                 )
             )
@@ -74,6 +83,9 @@ enum GameplayScenePropsFactory {
                     },
                     onPartyRowSelected: { index in
                         runtime.handlePartySidebarSelection(index)
+                    },
+                    onInventoryItemSelected: { itemID in
+                        runtime.handleInventorySidebarSelection(itemID)
                     },
                     initialFieldDisplayStyle: .defaultGameplayStyle
                 )
@@ -116,6 +128,9 @@ enum GameplayScenePropsFactory {
                 },
                 onPartyRowSelected: { index in
                     runtime.handlePartySidebarSelection(index)
+                },
+                onInventoryItemSelected: { itemID in
+                    runtime.handleInventorySidebarSelection(itemID)
                 },
                 initialFieldDisplayStyle: .defaultGameplayStyle
             )
@@ -173,6 +188,9 @@ enum GameplayScenePropsFactory {
                                 ? battle.bagItems[battle.focusedBagItemIndex].itemID
                                 : nil
                         ),
+                        onBagItemSelected: { itemID in
+                            runtime.handleInventorySidebarSelection(itemID)
+                        },
                         presentation: battle.presentation,
                         nicknameConfirmation: nicknameConfirmation
                     )
@@ -193,7 +211,12 @@ enum GameplayScenePropsFactory {
                         canSwitch: battle.canSwitch,
                         bagItemCount: battle.bagItems.count,
                         moveDetailsByID: manifestIndex.moveDetailsByID,
-                        party: makeBattlePartySidebar(party: battleState.party, manifestIndex: manifestIndex, battle: battle),
+                        party: makeBattlePartySidebar(
+                            runtime: runtime,
+                            party: battleState.party,
+                            manifestIndex: manifestIndex,
+                            battle: battle
+                        ),
                         capture: battle.capture,
                         presentation: battle.presentation
                     )
@@ -202,6 +225,7 @@ enum GameplayScenePropsFactory {
                 onPartyRowSelected: { index in
                     runtime.handlePartySidebarSelection(index)
                 },
+                onInventoryItemSelected: nil,
                 initialFieldDisplayStyle: .defaultGameplayStyle
             )
         }
@@ -329,7 +353,8 @@ enum GameplayScenePropsFactory {
     private static func makeInventorySidebar(
         from items: [InventoryItemTelemetry],
         manifestIndex: GameplaySidebarManifestIndex,
-        focusedItemID: String? = nil
+        focusedItemID: String? = nil,
+        enabledItemIDs: Set<String>? = nil
     ) -> InventorySidebarProps {
         var itemsBySection: [ItemManifest.BagSection: [InventorySidebarItemProps]] = [:]
 
@@ -346,6 +371,7 @@ enum GameplayScenePropsFactory {
                     iconURL: catalogItem.iconURL,
                     descriptionText: catalogItem.descriptionText,
                     tmhm: catalogItem.tmhm,
+                    isEnabled: enabledItemIDs?.contains(item.itemID) ?? true,
                     isFocused: item.itemID == focusedItemID
                 )
             )

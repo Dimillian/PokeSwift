@@ -12339,101 +12339,144 @@
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "ANTIDOTE",
       "iconAssetPath" : "Assets/items/medicine/antidote.png",
       "id" : "ANTIDOTE",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "poison"
+      },
       "price" : 100,
       "shortDescription" : "A spray medicine that cures poisoning."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "BURN HEAL",
       "iconAssetPath" : "Assets/items/medicine/burn-heal.png",
       "id" : "BURN_HEAL",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "burn"
+      },
       "price" : 250,
       "shortDescription" : "A spray medicine that heals a burn."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "ICE HEAL",
       "iconAssetPath" : "Assets/items/medicine/ice-heal.png",
       "id" : "ICE_HEAL",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "freeze"
+      },
       "price" : 250,
       "shortDescription" : "A spray medicine that thaws a frozen Pokemon."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "AWAKENING",
       "iconAssetPath" : "Assets/items/medicine/awakening.png",
       "id" : "AWAKENING",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "sleep"
+      },
       "price" : 200,
       "shortDescription" : "A medicine that wakes a sleeping Pokemon."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "PARLYZ HEAL",
       "iconAssetPath" : "Assets/items/medicine/paralyze-heal.png",
       "id" : "PARLYZ_HEAL",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "paralysis"
+      },
       "price" : 200,
       "shortDescription" : "A medicine that cures paralysis."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "FULL RESTORE",
       "iconAssetPath" : "Assets/items/medicine/full-restore.png",
       "id" : "FULL_RESTORE",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "healToFull",
+        "statusMode" : "all"
+      },
       "price" : 3000,
       "shortDescription" : "Fully restores HP and cures all major status problems."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "MAX POTION",
       "iconAssetPath" : "Assets/items/medicine/max-potion.png",
       "id" : "MAX_POTION",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "healToFull",
+        "statusMode" : "none"
+      },
       "price" : 2500,
       "shortDescription" : "Fully restores a Pokemon's HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "HYPER POTION",
       "iconAssetPath" : "Assets/items/medicine/hyper-potion.png",
       "id" : "HYPER_POTION",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 200,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 1500,
       "shortDescription" : "Restores a large amount of HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "SUPER POTION",
       "iconAssetPath" : "Assets/items/medicine/super-potion.png",
       "id" : "SUPER_POTION",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 50,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 700,
       "shortDescription" : "Restores a healthy amount of HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "POTION",
       "iconAssetPath" : "Assets/items/medicine/potion.png",
       "id" : "POTION",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 20,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 300,
       "shortDescription" : "Restores a little HP."
     },
@@ -12749,31 +12792,43 @@
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "FULL HEAL",
       "iconAssetPath" : "Assets/items/medicine/full-heal.png",
       "id" : "FULL_HEAL",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "none",
+        "statusMode" : "all"
+      },
       "price" : 600,
       "shortDescription" : "Cures any major status problem."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "REVIVE",
       "iconAssetPath" : "Assets/items/medicine/revive.png",
       "id" : "REVIVE",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "reviveHalfMax",
+        "statusMode" : "none"
+      },
       "price" : 1500,
       "shortDescription" : "Revives a fainted Pokemon with some HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "MAX REVIVE",
       "iconAssetPath" : "Assets/items/medicine/max-revive.png",
       "id" : "MAX_REVIVE",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpMode" : "reviveFull",
+        "statusMode" : "none"
+      },
       "price" : 4000,
       "shortDescription" : "Fully revives a fainted Pokemon."
     },
@@ -12829,31 +12884,46 @@
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "FRESH WATER",
       "iconAssetPath" : "Assets/items/medicine/fresh-water.png",
       "id" : "FRESH_WATER",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 50,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 200,
       "shortDescription" : "A drink that restores a little HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "SODA POP",
       "iconAssetPath" : "Assets/items/medicine/soda-pop.png",
       "id" : "SODA_POP",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 60,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 300,
       "shortDescription" : "A fizzy drink that restores some HP."
     },
     {
       "bagSection" : "items",
-      "battleUse" : "none",
+      "battleUse" : "medicine",
       "displayName" : "LEMONADE",
       "iconAssetPath" : "Assets/items/medicine/lemonade.png",
       "id" : "LEMONADE",
       "isKeyItem" : false,
+      "medicine" : {
+        "hpAmount" : 80,
+        "hpMode" : "fixed",
+        "statusMode" : "none"
+      },
       "price" : 350,
       "shortDescription" : "A sweet drink that restores more HP."
     },
