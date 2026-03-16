@@ -85,7 +85,7 @@ This repo still builds the original ROM targets:
 - dmgapae0.e69.patch `sha1: 0fb5f743696adfe1dbb2e062111f08f9bc5a293a`
 - dmgapee0.e68.patch `sha1: ed4be94dc29c64271942c87f2157bca9ca1019c7`
 
-For the original assembly toolchain and ROM build setup, see [**INSTALL.md**](INSTALL.md).
+For the original assembly toolchain and ROM build setup, see [**docs/INSTALL.md**](docs/INSTALL.md).
 
 ## Planning And Progress
 
