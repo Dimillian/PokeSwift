@@ -1256,6 +1256,97 @@ extension PokeCoreTests {
         XCTAssertEqual(hitEffectBeat.soundEffectRequest?.tempoModifier, 0x30)
     }
 
+    func testMissedMoveSkipsAttackAnimationBeats() throws {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "SQUIRTLE", displayName: "Squirtle", baseHP: 44, baseAttack: 48, baseDefense: 65, baseSpeed: 43, baseSpecial: 50, startingMoves: ["TACKLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(
+                            id: "TACKLE",
+                            displayName: "TACKLE",
+                            power: 35,
+                            accuracy: 100,
+                            maxPP: 35,
+                            effect: "NO_ADDITIONAL_EFFECT",
+                            type: "NORMAL",
+                            battleAudio: .init(kind: .soundEffect, soundEffectID: "SFX_DAMAGE", frequencyModifier: 0, tempoModifier: 128)
+                        ),
+                    ]
+                ),
+                battleAnimationManifest: .init(
+                    variant: .red,
+                    moveAnimations: [
+                        .init(
+                            moveID: "TACKLE",
+                            commands: [
+                                .init(
+                                    kind: .subanimation,
+                                    soundMoveID: "TACKLE",
+                                    subanimationID: "SUBANIM_TEST",
+                                    specialEffectID: nil,
+                                    tilesetID: "MOVE_ANIM_TILESET_0",
+                                    delayFrames: 20
+                                ),
+                            ]
+                        ),
+                    ],
+                    subanimations: [
+                        .init(
+                            id: "SUBANIM_TEST",
+                            transform: .normal,
+                            steps: [
+                                .init(frameBlockID: "FRAMEBLOCK_TEST", baseCoordinateID: "BASECOORD_TEST", frameBlockMode: .mode00),
+                            ]
+                        ),
+                    ],
+                    frameBlocks: [
+                        .init(id: "FRAMEBLOCK_TEST", tiles: [.init(x: 0, y: 0, tileID: 0)]),
+                    ],
+                    baseCoordinates: [
+                        .init(id: "BASECOORD_TEST", x: 80, y: 56),
+                    ],
+                    specialEffects: [],
+                    tilesets: []
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let attacker = runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")
+        let defender = runtime.makePokemon(speciesID: "PIDGEY", level: 3, nickname: "Pidgey")
+
+        let beats = runtime.makeBeats(
+            for: ResolvedBattleAction(
+                side: .player,
+                moveID: "TACKLE",
+                attackerSpeciesID: "SQUIRTLE",
+                didExecuteMove: true,
+                updatedAttacker: attacker,
+                updatedDefender: defender,
+                messages: ["Squirtle used TACKLE!", "But it missed!"],
+                dealtDamage: 0,
+                typeMultiplier: 10,
+                defenderHPBefore: defender.currentHP,
+                defenderHPAfter: defender.currentHP,
+                pendingAction: nil,
+                payDayMoneyGain: 0
+            )
+        )
+
+        XCTAssertEqual(beats.count, 2)
+        XCTAssertEqual(beats.first?.stage, .resultText)
+        XCTAssertEqual(beats.first?.message, "Squirtle used TACKLE!")
+        XCTAssertEqual(beats.dropFirst().first?.stage, .resultText)
+        XCTAssertEqual(beats.dropFirst().first?.message, "But it missed!")
+        XCTAssertFalse(beats.contains { $0.stage == .attackWindup })
+        XCTAssertFalse(beats.contains { $0.attackAnimation != nil })
+        XCTAssertFalse(beats.contains { $0.applyingHitEffect != nil })
+    }
+
     func testAnimationOffFallbackSuppressesExactlyDuplicateImpactSound() throws {
         let runtime = GameRuntime(
             content: fixtureContent(

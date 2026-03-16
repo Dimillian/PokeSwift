@@ -821,8 +821,9 @@ extension GameRuntime {
         }
 
         let move = content.move(id: action.moveID)
+        let moveMissed = action.messages.contains("But it missed!")
         let skipAnimation = optionsBattleAnimation == .off
-        let sourceMoveAnimation = skipAnimation ? nil : content.battleAnimation(moveID: action.moveID)
+        let sourceMoveAnimation = skipAnimation || moveMissed ? nil : content.battleAnimation(moveID: action.moveID)
         let attackAnimationPlayback = sourceMoveAnimation.map {
             makeAttackAnimationPlayback(for: action, moveAnimation: $0)
         }
@@ -845,8 +846,13 @@ extension GameRuntime {
             makeApplyingHitEffect(for: action, move: $0)
         }
         let fallbackMovePlaybackDelay = battlePresentationDelay(base: 30.0 / 60.0)
-        let movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
-        let windupSoundEffectRequest = attackAnimationPlayback == nil ? moveAudioRequest : nil
+        let movePlaybackDelay: TimeInterval
+        if moveMissed {
+            movePlaybackDelay = 0
+        } else {
+            movePlaybackDelay = attackAnimationPlayback?.totalDuration ?? fallbackMovePlaybackDelay
+        }
+        let windupSoundEffectRequest = moveMissed ? nil : (attackAnimationPlayback == nil ? moveAudioRequest : nil)
         let movePhaseSoundEffectRequests = stagedAttackSoundEffectRequests.map(\.request) + (windupSoundEffectRequest.map { [$0] } ?? [])
         let impactSoundEffectRequest = action.dealtDamage > 0
             ? applyingHitSoundEffectRequest(typeMultiplier: action.typeMultiplier)
@@ -868,7 +874,7 @@ extension GameRuntime {
             ),
         ]
 
-        if skipAnimation == false || windupSoundEffectRequest != nil {
+        if moveMissed == false && (skipAnimation == false || windupSoundEffectRequest != nil) {
             beats.append(
                 .init(
                     delay: skipAnimation ? 0 : battlePresentationDelay(base: 3.0 / 60.0),
