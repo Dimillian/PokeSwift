@@ -146,8 +146,9 @@ public struct FieldMapView: View {
             return
         }
 
+        let expectedSignature = sceneRenderSignature
         let scene = await renderFieldScene(assets: renderAssets)
-        guard Task.isCancelled == false else { return }
+        guard Task.isCancelled == false, sceneRenderSignature == expectedSignature else { return }
         renderedScene = scene
     }
 
@@ -206,11 +207,20 @@ public struct FieldMapView: View {
         })
         let nextObjectStepAnimations = makeObjectStepAnimations(to: nextIdentity)
         let shouldAnimateObjects = nextObjectStepAnimations.isEmpty == false
+        let isMapTransition = presentedMap?.id != map.id
         let resolvedPlayerStepAnimation = resolvedPlayerStepAnimation(
             nextIdentity: nextIdentity,
             nextStepAnimation: nextStepAnimation,
             shouldAnimateObjects: shouldAnimateObjects
         )
+        let shouldAnimatePresentation = shouldAnimate || shouldAnimateObjects
+        let shouldAnimateForPresentation = shouldAnimatePresentation && isMapTransition == false
+
+        if isMapTransition {
+            renderedScene = nil
+            playerStepAnimation = nil
+            objectStepAnimations = [:]
+        }
 
         let applyState = {
             presentedPlayerWorldPosition = CGPoint(
@@ -226,7 +236,7 @@ public struct FieldMapView: View {
             presentedMap = map
         }
 
-        if shouldAnimate || shouldAnimateObjects {
+        if shouldAnimateForPresentation {
             playerStepAnimation = resolvedPlayerStepAnimation
             objectStepAnimations = nextObjectStepAnimations
             if let connectedStepOrigin {
@@ -245,6 +255,17 @@ public struct FieldMapView: View {
                 }
             }
             withAnimation(.linear(duration: playerStepDuration)) {
+                applyState()
+            }
+            return
+        }
+
+        if isMapTransition {
+            playerStepAnimation = nil
+            objectStepAnimations = [:]
+            var transaction = Transaction()
+            transaction.animation = nil
+            withTransaction(transaction) {
                 applyState()
             }
         } else {

@@ -16,7 +16,6 @@ extension GameRuntime {
               let destination = resolveWarpDestination(for: warp, from: map, gameplayState: gameplayState) else {
             return false
         }
-        clearHeldFieldDirections()
         let transitionKind = fieldTransitionKind(
             sourceMap: map,
             sourcePosition: warp.origin,
@@ -89,6 +88,7 @@ extension GameRuntime {
 
         fieldTransitionState = nil
         substate = "field"
+        beginFieldMovementCooldown()
         publishSnapshot()
         traceEvent(
             .warpCompleted,
