@@ -30,6 +30,8 @@ struct BattleStageView: View {
                 battleAnimationTilesetURLs: props.battleAnimationTilesetURLs,
                 playerSpriteURL: props.playerSpriteURL,
                 enemySpriteURL: props.enemySpriteURL,
+                playerBattlePalette: props.playerBattlePalette,
+                enemyBattlePalette: props.enemyBattlePalette,
                 displayStyle: fieldDisplayStyle,
                 presentation: props.presentation
             )

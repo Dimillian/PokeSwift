@@ -12236,6 +12236,933 @@
       "successDialogueID" : "bike_shop_come_again"
     }
   ],
+  "fieldPalettes" : [
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 11,
+          "green" : 28,
+          "red" : 21
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_ROUTE"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 27,
+          "green" : 28,
+          "red" : 25
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_PALLET"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 3,
+          "green" : 26,
+          "red" : 17
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_VIRIDIAN"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 16,
+          "green" : 25,
+          "red" : 23
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_PEWTER"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 30,
+          "green" : 20,
+          "red" : 17
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_CERULEAN"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 27,
+          "green" : 20,
+          "red" : 27
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_LAVENDER"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 0,
+          "green" : 18,
+          "red" : 30
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_VERMILION"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 22,
+          "green" : 30,
+          "red" : 16
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_CELADON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 22,
+          "green" : 15,
+          "red" : 31
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_FUCHSIA"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 6,
+          "green" : 10,
+          "red" : 26
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_CINNABAR"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 24,
+          "green" : 14,
+          "red" : 22
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_INDIGO"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 3,
+          "green" : 27,
+          "red" : 27
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_SAFFRON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 31,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 10,
+          "green" : 23,
+          "red" : 17
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_TOWNMAP"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 17,
+          "green" : 30,
+          "red" : 30
+        },
+        {
+          "blue" : 10,
+          "green" : 23,
+          "red" : 17
+        },
+        {
+          "blue" : 4,
+          "green" : 0,
+          "red" : 21
+        }
+      ],
+      "id" : "PAL_LOGO1"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 17,
+          "green" : 30,
+          "red" : 30
+        },
+        {
+          "blue" : 24,
+          "green" : 18,
+          "red" : 18
+        },
+        {
+          "blue" : 16,
+          "green" : 7,
+          "red" : 7
+        }
+      ],
+      "id" : "PAL_LOGO2"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 30,
+          "green" : 20,
+          "red" : 24
+        },
+        {
+          "blue" : 30,
+          "green" : 20,
+          "red" : 11
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_0F"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 17,
+          "green" : 22,
+          "red" : 30
+        },
+        {
+          "blue" : 19,
+          "green" : 14,
+          "red" : 16
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_MEWMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 27,
+          "green" : 20,
+          "red" : 18
+        },
+        {
+          "blue" : 23,
+          "green" : 15,
+          "red" : 11
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_BLUEMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 10,
+          "green" : 20,
+          "red" : 31
+        },
+        {
+          "blue" : 6,
+          "green" : 10,
+          "red" : 26
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_REDMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 29,
+          "green" : 25,
+          "red" : 21
+        },
+        {
+          "blue" : 25,
+          "green" : 19,
+          "red" : 14
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_CYANMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 24,
+          "green" : 22,
+          "red" : 27
+        },
+        {
+          "blue" : 23,
+          "green" : 15,
+          "red" : 21
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_PURPLEMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 15,
+          "green" : 20,
+          "red" : 28
+        },
+        {
+          "blue" : 9,
+          "green" : 14,
+          "red" : 21
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_BROWNMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 16,
+          "green" : 26,
+          "red" : 20
+        },
+        {
+          "blue" : 11,
+          "green" : 20,
+          "red" : 9
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_GREENMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 24,
+          "green" : 22,
+          "red" : 30
+        },
+        {
+          "blue" : 21,
+          "green" : 15,
+          "red" : 28
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_PINKMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 14,
+          "green" : 28,
+          "red" : 31
+        },
+        {
+          "blue" : 0,
+          "green" : 20,
+          "red" : 26
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_YELLOWMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 22,
+          "green" : 21,
+          "red" : 26
+        },
+        {
+          "blue" : 18,
+          "green" : 15,
+          "red" : 15
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_GRAYMON"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 22,
+          "green" : 21,
+          "red" : 26
+        },
+        {
+          "blue" : 6,
+          "green" : 20,
+          "red" : 27
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_SLOTS1"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 17,
+          "green" : 31,
+          "red" : 31
+        },
+        {
+          "blue" : 21,
+          "green" : 17,
+          "red" : 25
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_SLOTS2"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 16,
+          "green" : 31,
+          "red" : 22
+        },
+        {
+          "blue" : 21,
+          "green" : 17,
+          "red" : 25
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_SLOTS3"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 29,
+          "green" : 19,
+          "red" : 16
+        },
+        {
+          "blue" : 21,
+          "green" : 17,
+          "red" : 25
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_SLOTS4"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 7,
+          "green" : 7,
+          "red" : 7
+        },
+        {
+          "blue" : 3,
+          "green" : 3,
+          "red" : 2
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_BLACK"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 15,
+          "green" : 26,
+          "red" : 30
+        },
+        {
+          "blue" : 11,
+          "green" : 20,
+          "red" : 9
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_GREENBAR"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 15,
+          "green" : 26,
+          "red" : 30
+        },
+        {
+          "blue" : 0,
+          "green" : 20,
+          "red" : 26
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_YELLOWBAR"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 15,
+          "green" : 26,
+          "red" : 30
+        },
+        {
+          "blue" : 6,
+          "green" : 10,
+          "red" : 26
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_REDBAR"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 17,
+          "green" : 22,
+          "red" : 30
+        },
+        {
+          "blue" : 23,
+          "green" : 15,
+          "red" : 11
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_BADGE"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 9,
+          "green" : 14,
+          "red" : 21
+        },
+        {
+          "blue" : 22,
+          "green" : 24,
+          "red" : 18
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_CAVE"
+    },
+    {
+      "colors" : [
+        {
+          "blue" : 31,
+          "green" : 29,
+          "red" : 31
+        },
+        {
+          "blue" : 14,
+          "green" : 28,
+          "red" : 31
+        },
+        {
+          "blue" : 10,
+          "green" : 20,
+          "red" : 24
+        },
+        {
+          "blue" : 2,
+          "green" : 2,
+          "red" : 3
+        }
+      ],
+      "id" : "PAL_GAMEFREAK"
+    }
+  ],
   "items" : [
     {
       "bagSection" : "balls",
@@ -14081,6 +15008,7 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 2F",
+      "fieldPaletteID" : "PAL_PALLET",
       "id" : "REDS_HOUSE_2F",
       "objects" : [
 
@@ -14209,6 +15137,7 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 1F",
+      "fieldPaletteID" : "PAL_PALLET",
       "id" : "REDS_HOUSE_1F",
       "objects" : [
         {
@@ -15144,6 +16073,7 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Pallet Town",
+      "fieldPaletteID" : "PAL_PALLET",
       "id" : "PALLET_TOWN",
       "objects" : [
         {
@@ -16303,6 +17233,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES1",
       "displayName" : "Route 1",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_1",
       "objects" : [
         {
@@ -18266,6 +19197,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian City",
+      "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_CITY",
       "objects" : [
         {
@@ -21273,6 +22205,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 22",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_22",
       "objects" : [
         {
@@ -22119,6 +23052,7 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON2",
       "displayName" : "Route 22 Gate",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_22_GATE",
       "objects" : [
         {
@@ -23429,6 +24363,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES1",
       "displayName" : "Route 2",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_2",
       "objects" : [
         {
@@ -25052,6 +25987,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian School House",
+      "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_SCHOOL_HOUSE",
       "objects" : [
         {
@@ -25237,6 +26173,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Nickname House",
+      "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_NICKNAME_HOUSE",
       "objects" : [
         {
@@ -25484,6 +26421,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Viridian Pokecenter",
+      "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_POKECENTER",
       "objects" : [
         {
@@ -25768,6 +26706,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Viridian Mart",
+      "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_MART",
       "objects" : [
         {
@@ -26012,6 +26951,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Forest South Gate",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST_SOUTH_GATE",
       "objects" : [
         {
@@ -26682,6 +27622,7 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON2",
       "displayName" : "Viridian Forest",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST",
       "objects" : [
         {
@@ -28673,6 +29614,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Forest North Gate",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST_NORTH_GATE",
       "objects" : [
         {
@@ -28918,6 +29860,7 @@
       ],
       "defaultMusicID" : "MUSIC_OAKS_LAB",
       "displayName" : "Oak's Lab",
+      "fieldPaletteID" : "PAL_PALLET",
       "id" : "OAKS_LAB",
       "objects" : [
         {
@@ -30619,6 +31562,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter City",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_CITY",
       "objects" : [
         {
@@ -32342,6 +33286,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Pewter Pokecenter",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_POKECENTER",
       "objects" : [
         {
@@ -32626,6 +33571,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Pewter Mart",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_MART",
       "objects" : [
         {
@@ -32841,6 +33787,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter Nidoran House",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_NIDORAN_HOUSE",
       "objects" : [
         {
@@ -33051,6 +33998,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter Speech House",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_SPEECH_HOUSE",
       "objects" : [
         {
@@ -33260,6 +34208,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Museum 1F",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "MUSEUM_1F",
       "objects" : [
         {
@@ -33739,6 +34688,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Museum 2F",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "MUSEUM_2F",
       "objects" : [
         {
@@ -34051,6 +35001,7 @@
       ],
       "defaultMusicID" : "MUSIC_GYM",
       "displayName" : "Pewter Gym",
+      "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_GYM",
       "objects" : [
         {
@@ -35477,6 +36428,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 3",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_3",
       "objects" : [
         {
@@ -38164,6 +39116,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 4",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_4",
       "objects" : [
         {
@@ -41414,6 +42367,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean City",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_CITY",
       "objects" : [
         {
@@ -43340,6 +44294,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Cerulean Pokecenter",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_POKECENTER",
       "objects" : [
         {
@@ -43624,6 +44579,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Cerulean Mart",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_MART",
       "objects" : [
         {
@@ -43839,6 +44795,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Bike Shop",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "BIKE_SHOP",
       "objects" : [
         {
@@ -44090,6 +45047,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean Trade House",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_TRADE_HOUSE",
       "objects" : [
         {
@@ -44275,6 +45233,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Cerulean Badge House",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_BADGE_HOUSE",
       "objects" : [
         {
@@ -44457,6 +45416,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean Trashed House",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_TRASHED_HOUSE",
       "objects" : [
         {
@@ -44690,6 +45650,7 @@
       ],
       "defaultMusicID" : "MUSIC_GYM",
       "displayName" : "Cerulean Gym",
+      "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_GYM",
       "objects" : [
         {
@@ -45871,6 +46832,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES2",
       "displayName" : "Route 24",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_24",
       "objects" : [
         {
@@ -47339,6 +48301,7 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES2",
       "displayName" : "Route 25",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_25",
       "objects" : [
         {
@@ -48789,6 +49752,7 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Bill's House",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "BILLS_HOUSE",
       "objects" : [
         {
@@ -49031,6 +49995,7 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Mt. Moon Pokecenter",
+      "fieldPaletteID" : "PAL_ROUTE",
       "id" : "MT_MOON_POKECENTER",
       "objects" : [
         {
@@ -49716,6 +50681,7 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon 1F",
+      "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_1F",
       "objects" : [
         {
@@ -51832,6 +52798,7 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon B1F",
+      "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_B1F",
       "objects" : [
 
@@ -53122,6 +54089,7 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon B2F",
+      "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_B2F",
       "objects" : [
         {
@@ -62500,6 +63468,7 @@
       "baseHP" : 45,
       "baseSpecial" : 65,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/bulbasaur.png",
         "frontImagePath" : "Assets/battle/pokemon/front/bulbasaur.png"
@@ -62570,6 +63539,7 @@
       "baseHP" : 60,
       "baseSpecial" : 80,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/ivysaur.png",
         "frontImagePath" : "Assets/battle/pokemon/front/ivysaur.png"
@@ -62641,6 +63611,7 @@
       "baseHP" : 80,
       "baseSpecial" : 100,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/venusaur.png",
         "frontImagePath" : "Assets/battle/pokemon/front/venusaur.png"
@@ -62707,6 +63678,7 @@
       "baseHP" : 39,
       "baseSpecial" : 50,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/charmander.png",
         "frontImagePath" : "Assets/battle/pokemon/front/charmander.png"
@@ -62772,6 +63744,7 @@
       "baseHP" : 58,
       "baseSpecial" : 65,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/charmeleon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/charmeleon.png"
@@ -62838,6 +63811,7 @@
       "baseHP" : 78,
       "baseSpecial" : 85,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/charizard.png",
         "frontImagePath" : "Assets/battle/pokemon/front/charizard.png"
@@ -62900,6 +63874,7 @@
       "baseHP" : 44,
       "baseSpecial" : 50,
       "baseSpeed" : 43,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/squirtle.png",
         "frontImagePath" : "Assets/battle/pokemon/front/squirtle.png"
@@ -62965,6 +63940,7 @@
       "baseHP" : 59,
       "baseSpecial" : 65,
       "baseSpeed" : 58,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/wartortle.png",
         "frontImagePath" : "Assets/battle/pokemon/front/wartortle.png"
@@ -63031,6 +64007,7 @@
       "baseHP" : 79,
       "baseSpecial" : 85,
       "baseSpeed" : 78,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/blastoise.png",
         "frontImagePath" : "Assets/battle/pokemon/front/blastoise.png"
@@ -63092,6 +64069,7 @@
       "baseHP" : 45,
       "baseSpecial" : 20,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/caterpie.png",
         "frontImagePath" : "Assets/battle/pokemon/front/caterpie.png"
@@ -63134,6 +64112,7 @@
       "baseHP" : 50,
       "baseSpecial" : 25,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/metapod.png",
         "frontImagePath" : "Assets/battle/pokemon/front/metapod.png"
@@ -63175,6 +64154,7 @@
       "baseHP" : 60,
       "baseSpecial" : 80,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/butterfree.png",
         "frontImagePath" : "Assets/battle/pokemon/front/butterfree.png"
@@ -63238,6 +64218,7 @@
       "baseHP" : 40,
       "baseSpecial" : 20,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/weedle.png",
         "frontImagePath" : "Assets/battle/pokemon/front/weedle.png"
@@ -63281,6 +64262,7 @@
       "baseHP" : 45,
       "baseSpecial" : 25,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kakuna.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kakuna.png"
@@ -63323,6 +64305,7 @@
       "baseHP" : 65,
       "baseSpecial" : 45,
       "baseSpeed" : 75,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/beedrill.png",
         "frontImagePath" : "Assets/battle/pokemon/front/beedrill.png"
@@ -63382,6 +64365,7 @@
       "baseHP" : 40,
       "baseSpecial" : 35,
       "baseSpeed" : 56,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/pidgey.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pidgey.png"
@@ -63447,6 +64431,7 @@
       "baseHP" : 63,
       "baseSpecial" : 50,
       "baseSpeed" : 71,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/pidgeotto.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pidgeotto.png"
@@ -63513,6 +64498,7 @@
       "baseHP" : 83,
       "baseSpecial" : 70,
       "baseSpeed" : 91,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/pidgeot.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pidgeot.png"
@@ -63574,6 +64560,7 @@
       "baseHP" : 30,
       "baseSpecial" : 25,
       "baseSpeed" : 72,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/rattata.png",
         "frontImagePath" : "Assets/battle/pokemon/front/rattata.png"
@@ -63631,6 +64618,7 @@
       "baseHP" : 55,
       "baseSpecial" : 50,
       "baseSpeed" : 97,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/raticate.png",
         "frontImagePath" : "Assets/battle/pokemon/front/raticate.png"
@@ -63683,6 +64671,7 @@
       "baseHP" : 40,
       "baseSpecial" : 31,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/spearow.png",
         "frontImagePath" : "Assets/battle/pokemon/front/spearow.png"
@@ -63745,6 +64734,7 @@
       "baseHP" : 65,
       "baseSpecial" : 61,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/fearow.png",
         "frontImagePath" : "Assets/battle/pokemon/front/fearow.png"
@@ -63802,6 +64792,7 @@
       "baseHP" : 35,
       "baseSpecial" : 40,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/ekans.png",
         "frontImagePath" : "Assets/battle/pokemon/front/ekans.png"
@@ -63863,6 +64854,7 @@
       "baseHP" : 60,
       "baseSpecial" : 65,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/arbok.png",
         "frontImagePath" : "Assets/battle/pokemon/front/arbok.png"
@@ -63919,6 +64911,7 @@
       "baseHP" : 35,
       "baseSpecial" : 50,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/pikachu.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pikachu.png"
@@ -63981,6 +64974,7 @@
       "baseHP" : 60,
       "baseSpecial" : 90,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/raichu.png",
         "frontImagePath" : "Assets/battle/pokemon/front/raichu.png"
@@ -64018,6 +65012,7 @@
       "baseHP" : 50,
       "baseSpecial" : 30,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/sandshrew.png",
         "frontImagePath" : "Assets/battle/pokemon/front/sandshrew.png"
@@ -64078,6 +65073,7 @@
       "baseHP" : 75,
       "baseSpecial" : 55,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/sandslash.png",
         "frontImagePath" : "Assets/battle/pokemon/front/sandslash.png"
@@ -64133,6 +65129,7 @@
       "baseHP" : 55,
       "baseSpecial" : 40,
       "baseSpeed" : 41,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidoranf.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidoranf.png"
@@ -64198,6 +65195,7 @@
       "baseHP" : 70,
       "baseSpecial" : 55,
       "baseSpeed" : 56,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidorina.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidorina.png"
@@ -64265,6 +65263,7 @@
       "baseHP" : 90,
       "baseSpecial" : 75,
       "baseSpeed" : 76,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidoqueen.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidoqueen.png"
@@ -64315,6 +65314,7 @@
       "baseHP" : 46,
       "baseSpecial" : 40,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidoranm.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidoranm.png"
@@ -64380,6 +65380,7 @@
       "baseHP" : 61,
       "baseSpecial" : 55,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidorino.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidorino.png"
@@ -64447,6 +65448,7 @@
       "baseHP" : 81,
       "baseSpecial" : 75,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/nidoking.png",
         "frontImagePath" : "Assets/battle/pokemon/front/nidoking.png"
@@ -64497,6 +65499,7 @@
       "baseHP" : 70,
       "baseSpecial" : 60,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/clefairy.png",
         "frontImagePath" : "Assets/battle/pokemon/front/clefairy.png"
@@ -64563,6 +65566,7 @@
       "baseHP" : 95,
       "baseSpecial" : 85,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/clefable.png",
         "frontImagePath" : "Assets/battle/pokemon/front/clefable.png"
@@ -64601,6 +65605,7 @@
       "baseHP" : 38,
       "baseSpecial" : 65,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/vulpix.png",
         "frontImagePath" : "Assets/battle/pokemon/front/vulpix.png"
@@ -64663,6 +65668,7 @@
       "baseHP" : 73,
       "baseSpecial" : 100,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/ninetales.png",
         "frontImagePath" : "Assets/battle/pokemon/front/ninetales.png"
@@ -64701,6 +65707,7 @@
       "baseHP" : 115,
       "baseSpecial" : 25,
       "baseSpeed" : 20,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/jigglypuff.png",
         "frontImagePath" : "Assets/battle/pokemon/front/jigglypuff.png"
@@ -64770,6 +65777,7 @@
       "baseHP" : 140,
       "baseSpecial" : 50,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/wigglytuff.png",
         "frontImagePath" : "Assets/battle/pokemon/front/wigglytuff.png"
@@ -64808,6 +65816,7 @@
       "baseHP" : 40,
       "baseSpecial" : 40,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/zubat.png",
         "frontImagePath" : "Assets/battle/pokemon/front/zubat.png"
@@ -64869,6 +65878,7 @@
       "baseHP" : 75,
       "baseSpecial" : 75,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/golbat.png",
         "frontImagePath" : "Assets/battle/pokemon/front/golbat.png"
@@ -64926,6 +65936,7 @@
       "baseHP" : 45,
       "baseSpecial" : 75,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/oddish.png",
         "frontImagePath" : "Assets/battle/pokemon/front/oddish.png"
@@ -64991,6 +66002,7 @@
       "baseHP" : 60,
       "baseSpecial" : 85,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/gloom.png",
         "frontImagePath" : "Assets/battle/pokemon/front/gloom.png"
@@ -65059,6 +66071,7 @@
       "baseHP" : 75,
       "baseSpecial" : 100,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/vileplume.png",
         "frontImagePath" : "Assets/battle/pokemon/front/vileplume.png"
@@ -65109,6 +66122,7 @@
       "baseHP" : 35,
       "baseSpecial" : 55,
       "baseSpeed" : 25,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/paras.png",
         "frontImagePath" : "Assets/battle/pokemon/front/paras.png"
@@ -65170,6 +66184,7 @@
       "baseHP" : 60,
       "baseSpecial" : 80,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/parasect.png",
         "frontImagePath" : "Assets/battle/pokemon/front/parasect.png"
@@ -65227,6 +66242,7 @@
       "baseHP" : 60,
       "baseSpecial" : 40,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/venonat.png",
         "frontImagePath" : "Assets/battle/pokemon/front/venonat.png"
@@ -65293,6 +66309,7 @@
       "baseHP" : 70,
       "baseSpecial" : 90,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/venomoth.png",
         "frontImagePath" : "Assets/battle/pokemon/front/venomoth.png"
@@ -65355,6 +66372,7 @@
       "baseHP" : 10,
       "baseSpecial" : 45,
       "baseSpeed" : 95,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/diglett.png",
         "frontImagePath" : "Assets/battle/pokemon/front/diglett.png"
@@ -65415,6 +66433,7 @@
       "baseHP" : 35,
       "baseSpecial" : 70,
       "baseSpeed" : 120,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dugtrio.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dugtrio.png"
@@ -65471,6 +66490,7 @@
       "baseHP" : 40,
       "baseSpecial" : 40,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/meowth.png",
         "frontImagePath" : "Assets/battle/pokemon/front/meowth.png"
@@ -65532,6 +66552,7 @@
       "baseHP" : 65,
       "baseSpecial" : 65,
       "baseSpeed" : 115,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/persian.png",
         "frontImagePath" : "Assets/battle/pokemon/front/persian.png"
@@ -65589,6 +66610,7 @@
       "baseHP" : 50,
       "baseSpecial" : 50,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/psyduck.png",
         "frontImagePath" : "Assets/battle/pokemon/front/psyduck.png"
@@ -65649,6 +66671,7 @@
       "baseHP" : 80,
       "baseSpecial" : 80,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/golduck.png",
         "frontImagePath" : "Assets/battle/pokemon/front/golduck.png"
@@ -65705,6 +66728,7 @@
       "baseHP" : 40,
       "baseSpecial" : 35,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/mankey.png",
         "frontImagePath" : "Assets/battle/pokemon/front/mankey.png"
@@ -65766,6 +66790,7 @@
       "baseHP" : 65,
       "baseSpecial" : 60,
       "baseSpeed" : 95,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/primeape.png",
         "frontImagePath" : "Assets/battle/pokemon/front/primeape.png"
@@ -65823,6 +66848,7 @@
       "baseHP" : 55,
       "baseSpecial" : 50,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/growlithe.png",
         "frontImagePath" : "Assets/battle/pokemon/front/growlithe.png"
@@ -65885,6 +66911,7 @@
       "baseHP" : 90,
       "baseSpecial" : 80,
       "baseSpeed" : 95,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/arcanine.png",
         "frontImagePath" : "Assets/battle/pokemon/front/arcanine.png"
@@ -65923,6 +66950,7 @@
       "baseHP" : 40,
       "baseSpecial" : 40,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/poliwag.png",
         "frontImagePath" : "Assets/battle/pokemon/front/poliwag.png"
@@ -65987,6 +67015,7 @@
       "baseHP" : 65,
       "baseSpecial" : 50,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/poliwhirl.png",
         "frontImagePath" : "Assets/battle/pokemon/front/poliwhirl.png"
@@ -66054,6 +67083,7 @@
       "baseHP" : 90,
       "baseSpecial" : 70,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/poliwrath.png",
         "frontImagePath" : "Assets/battle/pokemon/front/poliwrath.png"
@@ -66100,6 +67130,7 @@
       "baseHP" : 25,
       "baseSpecial" : 105,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/abra.png",
         "frontImagePath" : "Assets/battle/pokemon/front/abra.png"
@@ -66141,6 +67172,7 @@
       "baseHP" : 40,
       "baseSpecial" : 120,
       "baseSpeed" : 105,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kadabra.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kadabra.png"
@@ -66207,6 +67239,7 @@
       "baseHP" : 55,
       "baseSpecial" : 135,
       "baseSpeed" : 120,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/alakazam.png",
         "frontImagePath" : "Assets/battle/pokemon/front/alakazam.png"
@@ -66267,6 +67300,7 @@
       "baseHP" : 70,
       "baseSpecial" : 35,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/machop.png",
         "frontImagePath" : "Assets/battle/pokemon/front/machop.png"
@@ -66327,6 +67361,7 @@
       "baseHP" : 80,
       "baseSpecial" : 50,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/machoke.png",
         "frontImagePath" : "Assets/battle/pokemon/front/machoke.png"
@@ -66389,6 +67424,7 @@
       "baseHP" : 90,
       "baseSpecial" : 65,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/machamp.png",
         "frontImagePath" : "Assets/battle/pokemon/front/machamp.png"
@@ -66445,6 +67481,7 @@
       "baseHP" : 50,
       "baseSpecial" : 70,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/bellsprout.png",
         "frontImagePath" : "Assets/battle/pokemon/front/bellsprout.png"
@@ -66515,6 +67552,7 @@
       "baseHP" : 65,
       "baseSpecial" : 85,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/weepinbell.png",
         "frontImagePath" : "Assets/battle/pokemon/front/weepinbell.png"
@@ -66587,6 +67625,7 @@
       "baseHP" : 80,
       "baseSpecial" : 100,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/victreebel.png",
         "frontImagePath" : "Assets/battle/pokemon/front/victreebel.png"
@@ -66637,6 +67676,7 @@
       "baseHP" : 40,
       "baseSpecial" : 100,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/tentacool.png",
         "frontImagePath" : "Assets/battle/pokemon/front/tentacool.png"
@@ -66710,6 +67750,7 @@
       "baseHP" : 80,
       "baseSpecial" : 120,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/tentacruel.png",
         "frontImagePath" : "Assets/battle/pokemon/front/tentacruel.png"
@@ -66779,6 +67820,7 @@
       "baseHP" : 40,
       "baseSpecial" : 30,
       "baseSpeed" : 20,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/geodude.png",
         "frontImagePath" : "Assets/battle/pokemon/front/geodude.png"
@@ -66844,6 +67886,7 @@
       "baseHP" : 55,
       "baseSpecial" : 45,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/graveler.png",
         "frontImagePath" : "Assets/battle/pokemon/front/graveler.png"
@@ -66910,6 +67953,7 @@
       "baseHP" : 80,
       "baseSpecial" : 55,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/golem.png",
         "frontImagePath" : "Assets/battle/pokemon/front/golem.png"
@@ -66970,6 +68014,7 @@
       "baseHP" : 50,
       "baseSpecial" : 65,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/ponyta.png",
         "frontImagePath" : "Assets/battle/pokemon/front/ponyta.png"
@@ -67034,6 +68079,7 @@
       "baseHP" : 65,
       "baseSpecial" : 80,
       "baseSpeed" : 105,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/rapidash.png",
         "frontImagePath" : "Assets/battle/pokemon/front/rapidash.png"
@@ -67095,6 +68141,7 @@
       "baseHP" : 90,
       "baseSpecial" : 40,
       "baseSpeed" : 15,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/slowpoke.png",
         "frontImagePath" : "Assets/battle/pokemon/front/slowpoke.png"
@@ -67160,6 +68207,7 @@
       "baseHP" : 95,
       "baseSpecial" : 80,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/slowbro.png",
         "frontImagePath" : "Assets/battle/pokemon/front/slowbro.png"
@@ -67225,6 +68273,7 @@
       "baseHP" : 25,
       "baseSpecial" : 95,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/magnemite.png",
         "frontImagePath" : "Assets/battle/pokemon/front/magnemite.png"
@@ -67289,6 +68338,7 @@
       "baseHP" : 50,
       "baseSpecial" : 120,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/magneton.png",
         "frontImagePath" : "Assets/battle/pokemon/front/magneton.png"
@@ -67349,6 +68399,7 @@
       "baseHP" : 52,
       "baseSpecial" : 58,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/farfetchd.png",
         "frontImagePath" : "Assets/battle/pokemon/front/farfetchd.png"
@@ -67405,6 +68456,7 @@
       "baseHP" : 35,
       "baseSpecial" : 35,
       "baseSpeed" : 75,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/doduo.png",
         "frontImagePath" : "Assets/battle/pokemon/front/doduo.png"
@@ -67470,6 +68522,7 @@
       "baseHP" : 60,
       "baseSpecial" : 60,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dodrio.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dodrio.png"
@@ -67531,6 +68584,7 @@
       "baseHP" : 65,
       "baseSpecial" : 70,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/seel.png",
         "frontImagePath" : "Assets/battle/pokemon/front/seel.png"
@@ -67591,6 +68645,7 @@
       "baseHP" : 90,
       "baseSpecial" : 95,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dewgong.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dewgong.png"
@@ -67648,6 +68703,7 @@
       "baseHP" : 80,
       "baseSpecial" : 40,
       "baseSpeed" : 25,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/grimer.png",
         "frontImagePath" : "Assets/battle/pokemon/front/grimer.png"
@@ -67713,6 +68769,7 @@
       "baseHP" : 105,
       "baseSpecial" : 65,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/muk.png",
         "frontImagePath" : "Assets/battle/pokemon/front/muk.png"
@@ -67773,6 +68830,7 @@
       "baseHP" : 30,
       "baseSpecial" : 45,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/shellder.png",
         "frontImagePath" : "Assets/battle/pokemon/front/shellder.png"
@@ -67835,6 +68893,7 @@
       "baseHP" : 50,
       "baseSpecial" : 85,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/cloyster.png",
         "frontImagePath" : "Assets/battle/pokemon/front/cloyster.png"
@@ -67877,6 +68936,7 @@
       "baseHP" : 30,
       "baseSpecial" : 100,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/gastly.png",
         "frontImagePath" : "Assets/battle/pokemon/front/gastly.png"
@@ -67928,6 +68988,7 @@
       "baseHP" : 45,
       "baseSpecial" : 115,
       "baseSpeed" : 95,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/haunter.png",
         "frontImagePath" : "Assets/battle/pokemon/front/haunter.png"
@@ -67979,6 +69040,7 @@
       "baseHP" : 60,
       "baseSpecial" : 130,
       "baseSpeed" : 110,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/gengar.png",
         "frontImagePath" : "Assets/battle/pokemon/front/gengar.png"
@@ -68024,6 +69086,7 @@
       "baseHP" : 35,
       "baseSpecial" : 30,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/onix.png",
         "frontImagePath" : "Assets/battle/pokemon/front/onix.png"
@@ -68080,6 +69143,7 @@
       "baseHP" : 60,
       "baseSpecial" : 90,
       "baseSpeed" : 42,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/drowzee.png",
         "frontImagePath" : "Assets/battle/pokemon/front/drowzee.png"
@@ -68145,6 +69209,7 @@
       "baseHP" : 85,
       "baseSpecial" : 115,
       "baseSpeed" : 67,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/hypno.png",
         "frontImagePath" : "Assets/battle/pokemon/front/hypno.png"
@@ -68206,6 +69271,7 @@
       "baseHP" : 30,
       "baseSpecial" : 25,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/krabby.png",
         "frontImagePath" : "Assets/battle/pokemon/front/krabby.png"
@@ -68267,6 +69333,7 @@
       "baseHP" : 55,
       "baseSpecial" : 50,
       "baseSpeed" : 75,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kingler.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kingler.png"
@@ -68323,6 +69390,7 @@
       "baseHP" : 40,
       "baseSpecial" : 55,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/voltorb.png",
         "frontImagePath" : "Assets/battle/pokemon/front/voltorb.png"
@@ -68384,6 +69452,7 @@
       "baseHP" : 60,
       "baseSpecial" : 80,
       "baseSpeed" : 140,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/electrode.png",
         "frontImagePath" : "Assets/battle/pokemon/front/electrode.png"
@@ -68440,6 +69509,7 @@
       "baseHP" : 60,
       "baseSpecial" : 60,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/exeggcute.png",
         "frontImagePath" : "Assets/battle/pokemon/front/exeggcute.png"
@@ -68507,6 +69577,7 @@
       "baseHP" : 95,
       "baseSpecial" : 125,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/exeggutor.png",
         "frontImagePath" : "Assets/battle/pokemon/front/exeggutor.png"
@@ -68547,6 +69618,7 @@
       "baseHP" : 50,
       "baseSpecial" : 40,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/cubone.png",
         "frontImagePath" : "Assets/battle/pokemon/front/cubone.png"
@@ -68608,6 +69680,7 @@
       "baseHP" : 60,
       "baseSpecial" : 50,
       "baseSpeed" : 45,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/marowak.png",
         "frontImagePath" : "Assets/battle/pokemon/front/marowak.png"
@@ -68665,6 +69738,7 @@
       "baseHP" : 50,
       "baseSpecial" : 35,
       "baseSpeed" : 87,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/hitmonlee.png",
         "frontImagePath" : "Assets/battle/pokemon/front/hitmonlee.png"
@@ -68720,6 +69794,7 @@
       "baseHP" : 50,
       "baseSpecial" : 35,
       "baseSpeed" : 76,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/hitmonchan.png",
         "frontImagePath" : "Assets/battle/pokemon/front/hitmonchan.png"
@@ -68775,6 +69850,7 @@
       "baseHP" : 90,
       "baseSpecial" : 60,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/lickitung.png",
         "frontImagePath" : "Assets/battle/pokemon/front/lickitung.png"
@@ -68830,6 +69906,7 @@
       "baseHP" : 40,
       "baseSpecial" : 60,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/koffing.png",
         "frontImagePath" : "Assets/battle/pokemon/front/koffing.png"
@@ -68891,6 +69968,7 @@
       "baseHP" : 65,
       "baseSpecial" : 85,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_PURPLEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/weezing.png",
         "frontImagePath" : "Assets/battle/pokemon/front/weezing.png"
@@ -68947,6 +70025,7 @@
       "baseHP" : 80,
       "baseSpecial" : 30,
       "baseSpeed" : 25,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/rhyhorn.png",
         "frontImagePath" : "Assets/battle/pokemon/front/rhyhorn.png"
@@ -69012,6 +70091,7 @@
       "baseHP" : 105,
       "baseSpecial" : 45,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/rhydon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/rhydon.png"
@@ -69074,6 +70154,7 @@
       "baseHP" : 250,
       "baseSpecial" : 105,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/chansey.png",
         "frontImagePath" : "Assets/battle/pokemon/front/chansey.png"
@@ -69133,6 +70214,7 @@
       "baseHP" : 65,
       "baseSpecial" : 100,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/tangela.png",
         "frontImagePath" : "Assets/battle/pokemon/front/tangela.png"
@@ -69192,6 +70274,7 @@
       "baseHP" : 105,
       "baseSpecial" : 40,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kangaskhan.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kangaskhan.png"
@@ -69247,6 +70330,7 @@
       "baseHP" : 30,
       "baseSpecial" : 70,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/horsea.png",
         "frontImagePath" : "Assets/battle/pokemon/front/horsea.png"
@@ -69307,6 +70391,7 @@
       "baseHP" : 55,
       "baseSpecial" : 95,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/seadra.png",
         "frontImagePath" : "Assets/battle/pokemon/front/seadra.png"
@@ -69362,6 +70447,7 @@
       "baseHP" : 45,
       "baseSpecial" : 50,
       "baseSpeed" : 63,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/goldeen.png",
         "frontImagePath" : "Assets/battle/pokemon/front/goldeen.png"
@@ -69427,6 +70513,7 @@
       "baseHP" : 80,
       "baseSpecial" : 80,
       "baseSpeed" : 68,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/seaking.png",
         "frontImagePath" : "Assets/battle/pokemon/front/seaking.png"
@@ -69487,6 +70574,7 @@
       "baseHP" : 30,
       "baseSpecial" : 70,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/staryu.png",
         "frontImagePath" : "Assets/battle/pokemon/front/staryu.png"
@@ -69556,6 +70644,7 @@
       "baseHP" : 60,
       "baseSpecial" : 100,
       "baseSpeed" : 115,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/starmie.png",
         "frontImagePath" : "Assets/battle/pokemon/front/starmie.png"
@@ -69594,6 +70683,7 @@
       "baseHP" : 40,
       "baseSpecial" : 100,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/mr.mime.png",
         "frontImagePath" : "Assets/battle/pokemon/front/mr.mime.png"
@@ -69649,6 +70739,7 @@
       "baseHP" : 70,
       "baseSpecial" : 55,
       "baseSpeed" : 105,
+      "battlePaletteID" : "PAL_GREENMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/scyther.png",
         "frontImagePath" : "Assets/battle/pokemon/front/scyther.png"
@@ -69708,6 +70799,7 @@
       "baseHP" : 65,
       "baseSpecial" : 95,
       "baseSpeed" : 95,
+      "battlePaletteID" : "PAL_MEWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/jynx.png",
         "frontImagePath" : "Assets/battle/pokemon/front/jynx.png"
@@ -69768,6 +70860,7 @@
       "baseHP" : 65,
       "baseSpecial" : 85,
       "baseSpeed" : 105,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/electabuzz.png",
         "frontImagePath" : "Assets/battle/pokemon/front/electabuzz.png"
@@ -69823,6 +70916,7 @@
       "baseHP" : 65,
       "baseSpecial" : 85,
       "baseSpeed" : 93,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/magmar.png",
         "frontImagePath" : "Assets/battle/pokemon/front/magmar.png"
@@ -69881,6 +70975,7 @@
       "baseHP" : 65,
       "baseSpecial" : 55,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/pinsir.png",
         "frontImagePath" : "Assets/battle/pokemon/front/pinsir.png"
@@ -69939,6 +71034,7 @@
       "baseHP" : 75,
       "baseSpecial" : 70,
       "baseSpeed" : 110,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/tauros.png",
         "frontImagePath" : "Assets/battle/pokemon/front/tauros.png"
@@ -69993,6 +71089,7 @@
       "baseHP" : 20,
       "baseSpecial" : 20,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/magikarp.png",
         "frontImagePath" : "Assets/battle/pokemon/front/magikarp.png"
@@ -70037,6 +71134,7 @@
       "baseHP" : 95,
       "baseSpecial" : 100,
       "baseSpeed" : 81,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/gyarados.png",
         "frontImagePath" : "Assets/battle/pokemon/front/gyarados.png"
@@ -70095,6 +71193,7 @@
       "baseHP" : 130,
       "baseSpecial" : 95,
       "baseSpeed" : 60,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/lapras.png",
         "frontImagePath" : "Assets/battle/pokemon/front/lapras.png"
@@ -70155,6 +71254,7 @@
       "baseHP" : 48,
       "baseSpecial" : 48,
       "baseSpeed" : 48,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/ditto.png",
         "frontImagePath" : "Assets/battle/pokemon/front/ditto.png"
@@ -70190,6 +71290,7 @@
       "baseHP" : 55,
       "baseSpecial" : 65,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/eevee.png",
         "frontImagePath" : "Assets/battle/pokemon/front/eevee.png"
@@ -70264,6 +71365,7 @@
       "baseHP" : 130,
       "baseSpecial" : 110,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_CYANMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/vaporeon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/vaporeon.png"
@@ -70333,6 +71435,7 @@
       "baseHP" : 65,
       "baseSpecial" : 110,
       "baseSpeed" : 130,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/jolteon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/jolteon.png"
@@ -70402,6 +71505,7 @@
       "baseHP" : 65,
       "baseSpecial" : 110,
       "baseSpeed" : 65,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/flareon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/flareon.png"
@@ -70471,6 +71575,7 @@
       "baseHP" : 65,
       "baseSpecial" : 75,
       "baseSpeed" : 40,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/porygon.png",
         "frontImagePath" : "Assets/battle/pokemon/front/porygon.png"
@@ -70523,6 +71628,7 @@
       "baseHP" : 35,
       "baseSpecial" : 90,
       "baseSpeed" : 35,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/omanyte.png",
         "frontImagePath" : "Assets/battle/pokemon/front/omanyte.png"
@@ -70581,6 +71687,7 @@
       "baseHP" : 70,
       "baseSpecial" : 115,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/omastar.png",
         "frontImagePath" : "Assets/battle/pokemon/front/omastar.png"
@@ -70634,6 +71741,7 @@
       "baseHP" : 30,
       "baseSpecial" : 45,
       "baseSpeed" : 55,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kabuto.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kabuto.png"
@@ -70692,6 +71800,7 @@
       "baseHP" : 60,
       "baseSpecial" : 70,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/kabutops.png",
         "frontImagePath" : "Assets/battle/pokemon/front/kabutops.png"
@@ -70745,6 +71854,7 @@
       "baseHP" : 80,
       "baseSpecial" : 60,
       "baseSpeed" : 130,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/aerodactyl.png",
         "frontImagePath" : "Assets/battle/pokemon/front/aerodactyl.png"
@@ -70797,6 +71907,7 @@
       "baseHP" : 160,
       "baseSpecial" : 65,
       "baseSpeed" : 30,
+      "battlePaletteID" : "PAL_PINKMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/snorlax.png",
         "frontImagePath" : "Assets/battle/pokemon/front/snorlax.png"
@@ -70849,6 +71960,7 @@
       "baseHP" : 90,
       "baseSpecial" : 125,
       "baseSpeed" : 85,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/articuno.png",
         "frontImagePath" : "Assets/battle/pokemon/front/articuno.png"
@@ -70897,6 +72009,7 @@
       "baseHP" : 90,
       "baseSpecial" : 125,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_YELLOWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/zapdos.png",
         "frontImagePath" : "Assets/battle/pokemon/front/zapdos.png"
@@ -70945,6 +72058,7 @@
       "baseHP" : 90,
       "baseSpecial" : 125,
       "baseSpeed" : 90,
+      "battlePaletteID" : "PAL_REDMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/moltres.png",
         "frontImagePath" : "Assets/battle/pokemon/front/moltres.png"
@@ -70993,6 +72107,7 @@
       "baseHP" : 41,
       "baseSpecial" : 50,
       "baseSpeed" : 50,
+      "battlePaletteID" : "PAL_GRAYMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dratini.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dratini.png"
@@ -71054,6 +72169,7 @@
       "baseHP" : 61,
       "baseSpecial" : 70,
       "baseSpeed" : 70,
+      "battlePaletteID" : "PAL_BLUEMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dragonair.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dragonair.png"
@@ -71116,6 +72232,7 @@
       "baseHP" : 91,
       "baseSpecial" : 100,
       "baseSpeed" : 80,
+      "battlePaletteID" : "PAL_BROWNMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/dragonite.png",
         "frontImagePath" : "Assets/battle/pokemon/front/dragonite.png"
@@ -71174,6 +72291,7 @@
       "baseHP" : 106,
       "baseSpecial" : 154,
       "baseSpeed" : 130,
+      "battlePaletteID" : "PAL_MEWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/mewtwo.png",
         "frontImagePath" : "Assets/battle/pokemon/front/mewtwo.png"
@@ -71231,6 +72349,7 @@
       "baseHP" : 100,
       "baseSpecial" : 100,
       "baseSpeed" : 100,
+      "battlePaletteID" : "PAL_MEWMON",
       "battleSprite" : {
         "backImagePath" : "Assets/battle/pokemon/back/mew.png",
         "frontImagePath" : "Assets/battle/pokemon/front/mew.png"

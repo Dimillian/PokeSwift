@@ -9,6 +9,14 @@ public extension LoadedContent {
         guard let tileset = tileset(id: map.tileset) else {
             return ["missing tileset manifest: \(map.tileset)"]
         }
+        if let fieldPaletteID = map.fieldPaletteID {
+            guard let palette = fieldPalette(id: fieldPaletteID) else {
+                return ["missing field palette manifest: \(fieldPaletteID)"]
+            }
+            if palette.colors.count != 4 {
+                return ["unexpected field palette color count: \(fieldPaletteID)"]
+            }
+        }
 
         let tilesetURL = rootURL.appendingPathComponent(tileset.imagePath)
         let blocksetURL = rootURL.appendingPathComponent(tileset.blocksetPath)

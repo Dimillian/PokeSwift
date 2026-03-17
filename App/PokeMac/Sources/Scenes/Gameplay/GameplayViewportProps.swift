@@ -21,6 +21,7 @@ enum GameplayViewportProps {
 
 struct GameplayFieldViewportProps {
     let map: MapManifest?
+    let fieldPalette: FieldPaletteManifest?
     let playerPosition: TilePoint?
     let playerFacing: FacingDirection
     let playerStepDuration: TimeInterval
@@ -60,6 +61,8 @@ struct BattleViewportProps {
     let battleAnimationTilesetURLs: [String: URL]
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
+    let playerBattlePalette: FieldPaletteManifest?
+    let enemyBattlePalette: FieldPaletteManifest?
     let bag: InventorySidebarProps
     let onBagItemSelected: ((String) -> Void)?
     let presentation: BattlePresentationTelemetry

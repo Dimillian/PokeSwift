@@ -8,6 +8,7 @@ struct FixedViewportPlaceholderField: View {
     @Environment(\.colorScheme) private var colorScheme
 
     let map: MapManifest
+    let fieldPalette: FieldPaletteManifest?
     let playerPosition: TilePoint
     let playerFacing: FacingDirection
     let objects: [FieldRenderableObjectState]
@@ -93,6 +94,7 @@ struct FixedViewportPlaceholderField: View {
         .gameplayScreenEffect(
             displayStyle: displayStyle,
             displayScale: displayScale,
+            fieldPalette: fieldPalette,
             hdrBoost: fieldShaderHDRBoost
         )
         .frame(width: viewportWidth, height: viewportHeight, alignment: .topLeading)

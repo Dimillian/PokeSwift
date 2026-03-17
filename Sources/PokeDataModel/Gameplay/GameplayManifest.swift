@@ -2,6 +2,7 @@ import Foundation
 
 public struct GameplayManifest: Codable, Equatable, Sendable {
     public let maps: [MapManifest]
+    public let fieldPalettes: [FieldPaletteManifest]
     public let tilesets: [TilesetManifest]
     public let overworldSprites: [OverworldSpriteManifest]
     public let dialogues: [DialogueManifest]
@@ -22,6 +23,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
 
     public init(
         maps: [MapManifest],
+        fieldPalettes: [FieldPaletteManifest] = [],
         tilesets: [TilesetManifest],
         overworldSprites: [OverworldSpriteManifest],
         dialogues: [DialogueManifest],
@@ -54,6 +56,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
         playerStart: PlayerStartManifest
     ) {
         self.maps = maps
+        self.fieldPalettes = fieldPalettes
         self.tilesets = tilesets
         self.overworldSprites = overworldSprites
         self.dialogues = dialogues
@@ -75,6 +78,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case maps
+        case fieldPalettes
         case tilesets
         case overworldSprites
         case dialogues
@@ -97,6 +101,7 @@ public struct GameplayManifest: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         maps = try container.decode([MapManifest].self, forKey: .maps)
+        fieldPalettes = try container.decodeIfPresent([FieldPaletteManifest].self, forKey: .fieldPalettes) ?? []
         tilesets = try container.decode([TilesetManifest].self, forKey: .tilesets)
         overworldSprites = try container.decode([OverworldSpriteManifest].self, forKey: .overworldSprites)
         dialogues = try container.decode([DialogueManifest].self, forKey: .dialogues)

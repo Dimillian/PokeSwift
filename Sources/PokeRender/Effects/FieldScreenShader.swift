@@ -22,12 +22,20 @@ private enum BattleTransitionScreenShader {
     )
 }
 
+private enum CompatibilityPaletteShader {
+    static let function = ShaderFunction(
+        library: .bundle(PokeRenderResources.bundle),
+        name: "compatibilityPaletteEffect"
+    )
+}
+
 struct GameplayScreenEffectConfiguration: Equatable {
     let viewportWidth: Float
     let viewportHeight: Float
     let pixelScale: Float
     let preset: Float
     let hdrBoost: Float
+    let fieldPaletteComponents: [Float]
     let introStyle: Float
     let introProgress: Float
     let introAmount: Float
@@ -36,16 +44,21 @@ struct GameplayScreenEffectConfiguration: Equatable {
         displayStyle: FieldDisplayStyle,
         displayScale: CGFloat,
         hdrBoost: Float,
+        fieldPalette: FieldPaletteManifest? = nil,
         presentation: BattlePresentationTelemetry? = nil,
         introProgress: CGFloat = 1,
         introAmount: CGFloat = 0
     ) {
         let resolvedScale = Float(max(1, displayScale))
+        let resolvedDisplayStyle = displayStyle == .gbcCompatibility && fieldPalette == nil && presentation == nil
+            ? .defaultGameplayStyle
+            : displayStyle
         viewportWidth = Float(CGFloat(FieldSceneRenderer.viewportPixelSize.width) * displayScale)
         viewportHeight = Float(CGFloat(FieldSceneRenderer.viewportPixelSize.height) * displayScale)
         pixelScale = resolvedScale
-        preset = displayStyle.shaderPresetValue
+        preset = resolvedDisplayStyle.shaderPresetValue
         self.hdrBoost = hdrBoost
+        fieldPaletteComponents = Self.fieldPaletteComponents(for: fieldPalette)
         introStyle = presentation.map(Self.introStyleValue(for:)) ?? 0
         self.introProgress = Float(introProgress)
         self.introAmount = Float(introAmount)
@@ -72,7 +85,7 @@ struct GameplayScreenEffectConfiguration: Equatable {
             .float(pixelScale),
             .float(preset),
             .float(hdrBoost),
-        ]
+        ] + fieldPaletteComponents.map(Shader.Argument.float)
     }
 
     var battleArguments: [Shader.Argument] {
@@ -87,12 +100,38 @@ struct GameplayScreenEffectConfiguration: Equatable {
             .float(hdrBoost),
         ]
     }
+
+    static func fieldPaletteComponents(for fieldPalette: FieldPaletteManifest?) -> [Float] {
+        let colors = fieldPalette?.colors ?? defaultFieldPalette.colors
+        let clampedColors = colors.prefix(4)
+        guard clampedColors.count == 4 else {
+            return Array(repeating: 0, count: 12)
+        }
+        return clampedColors.flatMap { color in
+            [
+                Float(max(0, min(31, color.red))) / 31.0,
+                Float(max(0, min(31, color.green))) / 31.0,
+                Float(max(0, min(31, color.blue))) / 31.0,
+            ]
+        }
+    }
+
+    private static let defaultFieldPalette = FieldPaletteManifest(
+        id: "DEFAULT_FIELD_PALETTE",
+        colors: [
+            .init(red: 31, green: 31, blue: 31),
+            .init(red: 21, green: 21, blue: 21),
+            .init(red: 10, green: 10, blue: 10),
+            .init(red: 0, green: 0, blue: 0),
+        ]
+    )
 }
 
 extension View {
     public func gameplayScreenEffect(
         displayStyle: FieldDisplayStyle,
         displayScale: CGFloat,
+        fieldPalette: FieldPaletteManifest? = nil,
         battlePresentation: BattlePresentationTelemetry? = nil,
         hdrBoost: Float = 0
     ) -> some View {
@@ -100,6 +139,7 @@ extension View {
             GameplayScreenEffectModifier(
                 displayStyle: displayStyle,
                 displayScale: displayScale,
+                fieldPalette: fieldPalette,
                 battlePresentation: battlePresentation,
                 hdrBoost: hdrBoost
             )
@@ -109,11 +149,13 @@ extension View {
     public func fieldScreenEffect(
         displayStyle: FieldDisplayStyle,
         displayScale: CGFloat,
+        fieldPalette: FieldPaletteManifest? = nil,
         hdrBoost: Float = 0
     ) -> some View {
         gameplayScreenEffect(
             displayStyle: displayStyle,
             displayScale: displayScale,
+            fieldPalette: fieldPalette,
             hdrBoost: hdrBoost
         )
     }
@@ -146,21 +188,28 @@ extension View {
     }
 
     public func battleTransitionEffect(
+        displayStyle: FieldDisplayStyle = .defaultGameplayStyle,
         displayScale: CGFloat,
         presentation: BattlePresentationTelemetry
     ) -> some View {
         modifier(
             BattleTransitionEffectModifier(
+                displayStyle: displayStyle,
                 displayScale: displayScale,
                 presentation: presentation
             )
         )
+    }
+
+    public func compatibilityPaletteEffect(_ palette: FieldPaletteManifest?) -> some View {
+        modifier(CompatibilityPaletteEffectModifier(palette: palette))
     }
 }
 
 private struct GameplayScreenEffectModifier: ViewModifier {
     let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
+    let fieldPalette: FieldPaletteManifest?
     let battlePresentation: BattlePresentationTelemetry?
     let hdrBoost: Float
 
@@ -183,6 +232,7 @@ private struct GameplayScreenEffectModifier: ViewModifier {
                 FieldScreenEffectModifier(
                     displayStyle: displayStyle,
                     displayScale: displayScale,
+                    fieldPalette: fieldPalette,
                     hdrBoost: hdrBoost
                 )
             )
@@ -190,16 +240,41 @@ private struct GameplayScreenEffectModifier: ViewModifier {
     }
 }
 
+private struct CompatibilityPaletteEffectModifier: ViewModifier {
+    let palette: FieldPaletteManifest?
+
+    func body(content: Content) -> some View {
+        guard let palette else {
+            return AnyView(content)
+        }
+
+        return AnyView(
+            content
+                .colorEffect(
+                    Shader(
+                        function: CompatibilityPaletteShader.function,
+                        arguments: GameplayScreenEffectConfiguration
+                            .fieldPaletteComponents(for: palette)
+                            .map(Shader.Argument.float)
+                    )
+                )
+                .drawingGroup()
+        )
+    }
+}
+
 private struct FieldScreenEffectModifier: ViewModifier {
     let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
+    let fieldPalette: FieldPaletteManifest?
     let hdrBoost: Float
 
     func body(content: Content) -> some View {
         let configuration = GameplayScreenEffectConfiguration(
             displayStyle: displayStyle,
             displayScale: displayScale,
-            hdrBoost: hdrBoost
+            hdrBoost: hdrBoost,
+            fieldPalette: fieldPalette
         )
 
         return content
@@ -300,6 +375,7 @@ private struct BattleScreenEffectModifier: ViewModifier {
 }
 
 private struct BattleTransitionEffectModifier: ViewModifier {
+    let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
     let presentation: BattlePresentationTelemetry
     @State private var displayedIntroProgress: CGFloat = 1
@@ -308,7 +384,7 @@ private struct BattleTransitionEffectModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let configuration = GameplayScreenEffectConfiguration(
-            displayStyle: .defaultGameplayStyle,
+            displayStyle: displayStyle,
             displayScale: displayScale,
             hdrBoost: 0,
             presentation: presentation,
@@ -323,6 +399,7 @@ private struct BattleTransitionEffectModifier: ViewModifier {
                     arguments: [
                         .float(configuration.viewportWidth),
                         .float(configuration.viewportHeight),
+                        .float(configuration.preset),
                         .float(configuration.introStyle),
                         .float(configuration.introProgress),
                         .float(configuration.introAmount),
@@ -398,6 +475,8 @@ private extension FieldDisplayStyle {
             return 1
         case .dmgTinted:
             return 2
+        case .gbcCompatibility:
+            return 3
         }
     }
 }

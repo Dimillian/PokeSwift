@@ -4,6 +4,7 @@ import PokeDataModel
 func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
     let speciesDefinitions = try parseCanonicalSpeciesDefinitions(repoRoot: repoRoot)
     let progressionBySpeciesID = try parseSpeciesProgression(repoRoot: repoRoot)
+    let battlePaletteIDBySpeciesID = try parseBattlePaletteIDs(repoRoot: repoRoot)
     let dexNumbersByID = try parsePokedexNumbers(repoRoot: repoRoot)
     let dexEntriesByKey = try parsePokedexEntries(repoRoot: repoRoot)
     let dexTextByKey = try parsePokedexText(repoRoot: repoRoot)
@@ -28,6 +29,7 @@ func buildSpecies(repoRoot: URL) throws -> [SpeciesManifest] {
             id: definition.id,
             displayName: definition.displayName,
             cryData: definition.cryData,
+            battlePaletteID: battlePaletteIDBySpeciesID[definition.id],
             evolutions: progressionBySpeciesID[definition.id]?.evolutions ?? [],
             levelUpLearnset: progressionBySpeciesID[definition.id]?.levelUpLearnset ?? [],
             pokedexData: pokedexData
@@ -450,6 +452,7 @@ private func parseSpecies(
     id: String,
     displayName: String,
     cryData: (soundEffectID: String?, pitch: Int?, length: Int?),
+    battlePaletteID: String?,
     evolutions: [EvolutionManifest],
     levelUpLearnset: [LevelUpMoveManifest],
     pokedexData: PokedexData? = nil
@@ -499,6 +502,7 @@ private func parseSpecies(
         primaryType: primaryType,
         secondaryType: primaryType == rawSecondaryType ? nil : rawSecondaryType,
         battleSprite: battleSprite,
+        battlePaletteID: battlePaletteID,
         catchRate: catchRate,
         baseExp: baseExp,
         growthRate: growthRate,

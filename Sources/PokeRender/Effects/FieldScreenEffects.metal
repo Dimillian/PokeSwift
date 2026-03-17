@@ -38,13 +38,39 @@ float3 tintedPalette(float luminance) {
     return mix(lowBand, highBand, smoothstep(0.22, 0.78, t));
 }
 
-float3 paletteForPreset(float luminance, float preset) {
+float3 gbcCompatibilityPalette(
+    float luminance,
+    float3 color0,
+    float3 color1,
+    float3 color2,
+    float3 color3
+) {
+    if (luminance < 0.25) {
+        return color3;
+    } else if (luminance < 0.5) {
+        return color2;
+    } else if (luminance < 0.75) {
+        return color1;
+    }
+    return color0;
+}
+
+float3 paletteForPreset(
+    float luminance,
+    float preset,
+    float3 gbcColor0,
+    float3 gbcColor1,
+    float3 gbcColor2,
+    float3 gbcColor3
+) {
     if (preset < 0.5) {
         return rawPalette(luminance);
     } else if (preset < 1.5) {
         return authenticPalette(luminance);
+    } else if (preset < 2.5) {
+        return tintedPalette(luminance);
     }
-    return tintedPalette(luminance);
+    return gbcCompatibilityPalette(luminance, gbcColor0, gbcColor1, gbcColor2, gbcColor3);
 }
 
 float cellInteriorMask(float2 cellFraction) {
@@ -85,13 +111,20 @@ float3 applyLCDCell(float3 baseColor, float2 cellFraction, float preset) {
         shadowStrength = 0.065;
         highlightColor = float3(0.78, 0.88, 0.68);
         shadowColor = float3(0.05, 0.11, 0.04);
-    } else {
+    } else if (preset < 2.5) {
         bodyStrength = 0.87;
         gapStrength = 0.78;
         highlightStrength = 0.05;
         shadowStrength = 0.08;
         highlightColor = float3(0.78, 0.88, 0.68);
         shadowColor = float3(0.05, 0.11, 0.04);
+    } else {
+        bodyStrength = 0.9;
+        gapStrength = 0.76;
+        highlightStrength = 0.03;
+        shadowStrength = 0.06;
+        highlightColor = float3(0.92);
+        shadowColor = float3(0.08);
     }
 
     float3 shaded = baseColor;
@@ -118,6 +151,13 @@ float3 applyTintedReflection(float3 baseColor, float2 uv) {
     float3 glassTint = float3(0.96, 1.0, 0.9);
     float reflection = primaryBand + topSheen;
     return (baseColor * edgeShade * panelVariation) + (glassTint * reflection);
+}
+
+float3 battleIntroGlowColor(float preset) {
+    if (preset >= 2.5) {
+        return float3(0.76, 0.82, 0.92);
+    }
+    return float3(0.18, 0.21, 0.14);
 }
 
 float2 safeNormalize(float2 value) {
@@ -161,7 +201,19 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     float viewportHeight,
     float pixelScale,
     float preset,
-    float hdrBoost
+    float hdrBoost,
+    float palette0Red,
+    float palette0Green,
+    float palette0Blue,
+    float palette1Red,
+    float palette1Green,
+    float palette1Blue,
+    float palette2Red,
+    float palette2Green,
+    float palette2Blue,
+    float palette3Red,
+    float palette3Green,
+    float palette3Blue
 ) {
     if (currentColor.a <= 0.0h) {
         return currentColor;
@@ -171,12 +223,19 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     float safeScale = max(pixelScale, 1.0);
     float3 sourceColor = float3(currentColor.rgb);
     float luminance = clamp(dot(sourceColor, float3(0.299, 0.587, 0.114)), 0.0, 1.0);
-    float3 shaded = paletteForPreset(luminance, preset);
+    float3 shaded = paletteForPreset(
+        luminance,
+        preset,
+        float3(palette0Red, palette0Green, palette0Blue),
+        float3(palette1Red, palette1Green, palette1Blue),
+        float3(palette2Red, palette2Green, palette2Blue),
+        float3(palette3Red, palette3Green, palette3Blue)
+    );
 
     float2 cellFraction = fract(position / safeScale) - 0.5;
     shaded = applyLCDCell(shaded, cellFraction, preset);
 
-    if (preset >= 1.5) {
+    if (preset >= 1.5 && preset < 2.5) {
         shaded = applyTintedReflection(shaded, clamp(position / safeViewport, 0.0, 1.0));
     }
 
@@ -223,11 +282,20 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     float2 cellFraction = fract(position / safeScale) - 0.5;
     float3 sourceColor = float3(sampledColor.rgb);
     float luminance = clamp(dot(sourceColor, float3(0.299, 0.587, 0.114)), 0.0, 1.0);
-    float3 shaded = paletteForPreset(luminance, preset);
+    float3 shaded = preset >= 2.5
+        ? sourceColor
+        : paletteForPreset(
+            luminance,
+            preset,
+            float3(1.0),
+            float3(0.66),
+            float3(0.33),
+            float3(0.0)
+        );
 
     shaded = applyLCDCell(shaded, cellFraction, preset);
 
-    if (preset >= 1.5) {
+    if (preset >= 1.5 && preset < 2.5) {
         shaded = applyTintedReflection(shaded, uv);
     }
 
@@ -235,7 +303,7 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
 
     if (effectAmount > 0.001) {
         float edgeGlow = (1.0 - introMask) * (0.12 + (0.1 * (1.0 - transitionPhase)));
-        shaded += float3(0.18, 0.21, 0.14) * edgeGlow * effectAmount;
+        shaded += battleIntroGlowColor(preset) * edgeGlow * effectAmount;
     }
 
     if (hdrBoost > 0.001) {
@@ -246,11 +314,44 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
     return half4(half3(max(shaded, 0.0)), sampledColor.a);
 }
 
+[[ stitchable ]] half4 compatibilityPaletteEffect(
+    float2 position,
+    half4 currentColor,
+    float palette0Red,
+    float palette0Green,
+    float palette0Blue,
+    float palette1Red,
+    float palette1Green,
+    float palette1Blue,
+    float palette2Red,
+    float palette2Green,
+    float palette2Blue,
+    float palette3Red,
+    float palette3Green,
+    float palette3Blue
+) {
+    if (currentColor.a <= 0.0h) {
+        return currentColor;
+    }
+
+    float3 sourceColor = float3(currentColor.rgb);
+    float luminance = clamp(dot(sourceColor, float3(0.299, 0.587, 0.114)), 0.0, 1.0);
+    float3 shaded = gbcCompatibilityPalette(
+        luminance,
+        float3(palette0Red, palette0Green, palette0Blue),
+        float3(palette1Red, palette1Green, palette1Blue),
+        float3(palette2Red, palette2Green, palette2Blue),
+        float3(palette3Red, palette3Green, palette3Blue)
+    );
+    return half4(half3(max(shaded, 0.0)), currentColor.a);
+}
+
 [[ stitchable ]] half4 battleTransitionEffect(
     float2 position,
     SwiftUI::Layer layer,
     float viewportWidth,
     float viewportHeight,
+    float preset,
     float introStyle,
     float introProgress,
     float introAmount
@@ -279,7 +380,7 @@ float spiralIntroMask(float2 uv, float progress, float amount, float2 aspectScal
 
     if (effectAmount > 0.001) {
         float edgeGlow = (1.0 - introMask) * (0.08 + (0.08 * (1.0 - transitionPhase)));
-        shaded += float3(0.16, 0.18, 0.14) * edgeGlow * effectAmount;
+        shaded += battleIntroGlowColor(preset) * edgeGlow * effectAmount;
     }
 
     return half4(half3(max(shaded, 0.0)), sampledColor.a);

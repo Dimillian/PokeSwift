@@ -60,6 +60,18 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(manifest.tilesets.first { $0.id == "HOUSE" }?.blocksetPath, "Assets/field/blocksets/house.bst")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.imagePath, "Assets/field/tilesets/gym.png")
         XCTAssertEqual(manifest.tilesets.first { $0.id == "MUSEUM" }?.blocksetPath, "Assets/field/blocksets/gate.bst")
+        XCTAssertEqual(manifest.fieldPalettes.first { $0.id == "PAL_ROUTE" }?.colors, [
+            .init(red: 31, green: 29, blue: 31),
+            .init(red: 21, green: 28, blue: 11),
+            .init(red: 20, green: 26, blue: 31),
+            .init(red: 3, green: 2, blue: 2),
+        ])
+        XCTAssertEqual(manifest.fieldPalettes.first { $0.id == "PAL_CAVE" }?.colors, [
+            .init(red: 31, green: 29, blue: 31),
+            .init(red: 21, green: 14, blue: 9),
+            .init(red: 18, green: 24, blue: 22),
+            .init(red: 3, green: 2, blue: 2),
+        ])
         XCTAssertEqual(manifest.tilesets.first { $0.id == "OVERWORLD" }?.animation.kind, .waterFlower)
         XCTAssertEqual(manifest.tilesets.first { $0.id == "DOJO" }?.animation.kind, .waterFlower)
         XCTAssertEqual(manifest.tilesets.first { $0.id == "GYM" }?.animation.kind, .waterFlower)
@@ -101,6 +113,7 @@ final class GameplayExtractionTests: XCTestCase {
         )
 
         let palletTown = try XCTUnwrap(manifest.maps.first { $0.id == "PALLET_TOWN" })
+        XCTAssertEqual(palletTown.fieldPaletteID, "PAL_PALLET")
         XCTAssertEqual(palletTown.borderBlockID, 0x0B)
         XCTAssertEqual(palletTown.stepCollisionTileIDs.count, palletTown.stepWidth * palletTown.stepHeight)
         XCTAssertEqual(palletTown.connections.map(\.direction), [.north, .south])
@@ -146,6 +159,7 @@ final class GameplayExtractionTests: XCTestCase {
         )
 
         let oaksLab = try XCTUnwrap(manifest.maps.first { $0.id == "OAKS_LAB" })
+        XCTAssertEqual(oaksLab.fieldPaletteID, "PAL_PALLET")
         XCTAssertEqual(oaksLab.borderBlockID, 0x03)
         XCTAssertEqual(oaksLab.warps.map(\.targetPosition), [.init(x: 12, y: 11), .init(x: 12, y: 11)])
         XCTAssertEqual(oaksLab.objects.count, 11)
@@ -158,6 +172,11 @@ final class GameplayExtractionTests: XCTestCase {
             oaksLab.objects.filter { $0.id.hasPrefix("oaks_lab_scientist") }.map(\.id),
             ["oaks_lab_scientist_1", "oaks_lab_scientist_2"]
         )
+        XCTAssertEqual(manifest.maps.first { $0.id == "VIRIDIAN_POKECENTER" }?.fieldPaletteID, "PAL_VIRIDIAN")
+        XCTAssertEqual(manifest.maps.first { $0.id == "CERULEAN_GYM" }?.fieldPaletteID, "PAL_CERULEAN")
+        XCTAssertEqual(manifest.maps.first { $0.id == "MUSEUM_2F" }?.fieldPaletteID, "PAL_PEWTER")
+        XCTAssertEqual(manifest.maps.first { $0.id == "BILLS_HOUSE" }?.fieldPaletteID, "PAL_ROUTE")
+        XCTAssertEqual(manifest.maps.first { $0.id == "MT_MOON_1F" }?.fieldPaletteID, "PAL_CAVE")
         let extractedFlagIDs = manifest.eventFlags.flags.map(\.id)
         XCTAssertEqual(Set(extractedFlagIDs).count, extractedFlagIDs.count)
         XCTAssertTrue(
@@ -486,6 +505,7 @@ final class GameplayExtractionTests: XCTestCase {
         let squirtle = try XCTUnwrap(manifest.species.first { $0.id == "SQUIRTLE" })
         XCTAssertEqual(squirtle.primaryType, "WATER")
         XCTAssertNil(squirtle.secondaryType)
+        XCTAssertEqual(squirtle.battlePaletteID, "PAL_CYANMON")
         XCTAssertEqual(squirtle.baseExp, 66)
         XCTAssertEqual(squirtle.growthRate, .mediumSlow)
         XCTAssertEqual(
@@ -504,6 +524,7 @@ final class GameplayExtractionTests: XCTestCase {
         let bulbasaur = try XCTUnwrap(manifest.species.first { $0.id == "BULBASAUR" })
         XCTAssertEqual(bulbasaur.primaryType, "GRASS")
         XCTAssertEqual(bulbasaur.secondaryType, "POISON")
+        XCTAssertEqual(bulbasaur.battlePaletteID, "PAL_GREENMON")
         XCTAssertEqual(bulbasaur.baseExp, 64)
         XCTAssertEqual(bulbasaur.growthRate, .mediumSlow)
         XCTAssertEqual(
@@ -513,6 +534,7 @@ final class GameplayExtractionTests: XCTestCase {
         let pidgey = try XCTUnwrap(manifest.species.first { $0.id == "PIDGEY" })
         XCTAssertEqual(pidgey.primaryType, "NORMAL")
         XCTAssertEqual(pidgey.secondaryType, "FLYING")
+        XCTAssertEqual(pidgey.battlePaletteID, "PAL_BROWNMON")
         XCTAssertEqual(pidgey.baseExp, 55)
         XCTAssertEqual(
             pidgey.battleSprite,

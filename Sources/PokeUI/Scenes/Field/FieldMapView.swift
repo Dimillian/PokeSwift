@@ -5,6 +5,7 @@ import PokeRender
 
 public struct FieldMapView: View {
     let map: MapManifest
+    let fieldPalette: FieldPaletteManifest?
     let playerPosition: TilePoint
     let playerFacing: FacingDirection
     let playerStepDuration: TimeInterval
@@ -26,6 +27,7 @@ public struct FieldMapView: View {
 
     public init(
         map: MapManifest,
+        fieldPalette: FieldPaletteManifest? = nil,
         playerPosition: TilePoint,
         playerFacing: FacingDirection,
         playerStepDuration: TimeInterval = 16.0 / 60.0,
@@ -37,6 +39,7 @@ public struct FieldMapView: View {
         displayStyle: FieldDisplayStyle = .defaultGameplayStyle
     ) {
         self.map = map
+        self.fieldPalette = fieldPalette
         self.playerPosition = playerPosition
         self.playerFacing = playerFacing
         self.playerStepDuration = playerStepDuration
@@ -58,6 +61,7 @@ public struct FieldMapView: View {
                 if let renderedScene {
                     FixedViewportRenderedField(
                         scene: renderedScene,
+                        fieldPalette: fieldPalette,
                         playerFacing: playerFacing,
                         playerStepAnimation: playerStepAnimation,
                         playerStepDuration: playerStepDuration,
@@ -73,6 +77,7 @@ public struct FieldMapView: View {
                 } else {
                     FixedViewportPlaceholderField(
                         map: map,
+                        fieldPalette: fieldPalette,
                         playerPosition: playerPosition,
                         playerFacing: playerFacing,
                         objects: objects,

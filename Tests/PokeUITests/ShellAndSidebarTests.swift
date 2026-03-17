@@ -2237,6 +2237,11 @@ extension PokeUITests {
       appearanceMode: .retroDark,
       colorScheme: .dark
     )
+    let gbc = PokeThemePalette.gameplayScreenGlowPalette(
+      displayStyle: .gbcCompatibility,
+      appearanceMode: .retroDark,
+      colorScheme: .dark
+    )
     let dark = PokeThemePalette.resolve(for: .retroDark)
 
     XCTAssertEqual(tinted.outer, dark.screenGlow)
@@ -2247,6 +2252,8 @@ extension PokeUITests {
     XCTAssertEqual(raw.inner.green, raw.inner.blue)
     XCTAssertNotEqual(raw.outer, tinted.outer)
     XCTAssertNotEqual(authentic.outer, tinted.outer)
+    XCTAssertNotEqual(gbc.outer, tinted.outer)
+    XCTAssertNotEqual(gbc.outer, raw.outer)
   }
   func testGameplayScreenGlowPaletteUsesRestoredTintedValues() {
     let tinted = PokeThemePalette.gameplayScreenGlowPalette(

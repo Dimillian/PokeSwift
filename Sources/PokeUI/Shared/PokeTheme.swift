@@ -481,6 +481,11 @@ public enum PokeThemePalette {
                 ThemeRGBA(red: 0.78, green: 0.78, blue: 0.78, alpha: resolvedPalette.screenGlow.alpha),
                 ThemeRGBA(red: 0.96, green: 0.96, blue: 0.96, alpha: resolvedPalette.screenGlowInner.alpha)
             )
+        case .gbcCompatibility:
+            return (
+                ThemeRGBA(red: 0.36, green: 0.58, blue: 0.84, alpha: resolvedPalette.screenGlow.alpha),
+                ThemeRGBA(red: 0.78, green: 0.88, blue: 0.98, alpha: resolvedPalette.screenGlowInner.alpha)
+            )
         }
     }
 

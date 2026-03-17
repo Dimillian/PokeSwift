@@ -132,6 +132,16 @@ public final class GameRuntime {
         return content.tileset(id: map.tileset)
     }
 
+    public var currentBattlePlayerPalette: FieldPaletteManifest? {
+        guard let pokemon = gameplayState?.battle?.playerPokemon else { return nil }
+        return battlePalette(for: pokemon)
+    }
+
+    public var currentBattleEnemyPalette: FieldPaletteManifest? {
+        guard let pokemon = gameplayState?.battle?.enemyPokemon else { return nil }
+        return battlePalette(for: pokemon)
+    }
+
     public var currentFieldSpriteIDs: [String] {
         Array(Set(currentFieldObjects.map(\.sprite) + [playerSpriteID])).sorted()
     }
@@ -142,6 +152,17 @@ public final class GameRuntime {
 
     public var playerPosition: TilePoint? {
         gameplayState?.playerPosition
+    }
+
+    private func battlePalette(for pokemon: RuntimePokemonState) -> FieldPaletteManifest? {
+        let paletteID: String?
+        if pokemon.battleEffects.transformedState != nil {
+            paletteID = "PAL_GRAYMON"
+        } else {
+            paletteID = content.species(id: pokemon.speciesID)?.battlePaletteID
+        }
+        guard let paletteID else { return nil }
+        return content.palette(id: paletteID)
     }
 
     public var playerFacing: FacingDirection {

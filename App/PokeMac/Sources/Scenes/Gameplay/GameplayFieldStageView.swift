@@ -46,6 +46,7 @@ struct FieldStageView: View {
            let playerPosition = props.playerPosition {
             FieldMapView(
                 map: map,
+                fieldPalette: props.fieldPalette,
                 playerPosition: playerPosition,
                 playerFacing: props.playerFacing,
                 playerStepDuration: props.playerStepDuration,

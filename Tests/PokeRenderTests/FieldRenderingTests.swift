@@ -9,6 +9,26 @@ import XCTest
 
 @MainActor
 extension PokeRenderTests {
+  func testFieldDisplayStylePreferenceValuesRoundTrip() {
+    XCTAssertEqual(
+      FieldDisplayStyle(preferenceValue: FieldDisplayStyle.rawGrayscale.preferenceValue),
+      .rawGrayscale
+    )
+    XCTAssertEqual(
+      FieldDisplayStyle(preferenceValue: FieldDisplayStyle.dmgAuthentic.preferenceValue),
+      .dmgAuthentic
+    )
+    XCTAssertEqual(
+      FieldDisplayStyle(preferenceValue: FieldDisplayStyle.dmgTinted.preferenceValue),
+      .dmgTinted
+    )
+    XCTAssertEqual(
+      FieldDisplayStyle(preferenceValue: FieldDisplayStyle.gbcCompatibility.preferenceValue),
+      .gbcCompatibility
+    )
+    XCTAssertNil(FieldDisplayStyle(preferenceValue: "unknownStyle"))
+  }
+
   func testRendererCanCompositeRealFieldAssets() throws {
     let root = repoRoot()
     let assets = FieldRenderAssets(

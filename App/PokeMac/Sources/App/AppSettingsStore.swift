@@ -1,5 +1,6 @@
 import Foundation
 import PokeDataModel
+import PokeRender
 import PokeUI
 
 @MainActor
@@ -12,6 +13,7 @@ final class AppSettingsStore {
         static let textSpeed = "pokemac.textSpeed"
         static let battleAnimation = "pokemac.battleAnimation"
         static let battleStyle = "pokemac.battleStyle"
+        static let fieldDisplayStyle = "pokemac.fieldDisplayStyle"
     }
 
     private let defaults: UserDefaults
@@ -106,6 +108,19 @@ final class AppSettingsStore {
         }
         set {
             defaults.set(newValue.rawValue, forKey: Keys.battleStyle)
+        }
+    }
+
+    var fieldDisplayStyle: FieldDisplayStyle {
+        get {
+            guard let rawValue = defaults.string(forKey: Keys.fieldDisplayStyle),
+                  let value = FieldDisplayStyle(preferenceValue: rawValue) else {
+                return .defaultGameplayStyle
+            }
+            return value
+        }
+        set {
+            defaults.set(newValue.preferenceValue, forKey: Keys.fieldDisplayStyle)
         }
     }
 }

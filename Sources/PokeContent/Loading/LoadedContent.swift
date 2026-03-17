@@ -43,6 +43,14 @@ public struct LoadedContent: Sendable {
         gameplayManifest.maps.first { $0.id == id }
     }
 
+    public func palette(id: String) -> FieldPaletteManifest? {
+        gameplayManifest.fieldPalettes.first { $0.id == id }
+    }
+
+    public func fieldPalette(id: String) -> FieldPaletteManifest? {
+        palette(id: id)
+    }
+
     public func tileset(id: String) -> TilesetManifest? {
         gameplayManifest.tilesets.first { $0.id == id }
     }

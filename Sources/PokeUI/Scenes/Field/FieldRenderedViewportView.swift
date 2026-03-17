@@ -9,6 +9,7 @@ struct FixedViewportRenderedField: View {
     @Environment(\.colorScheme) private var colorScheme
 
     let scene: FieldRenderedScene
+    let fieldPalette: FieldPaletteManifest?
     let playerFacing: FacingDirection
     let playerStepAnimation: PlayerStepAnimationState?
     let playerStepDuration: TimeInterval
@@ -116,6 +117,7 @@ struct FixedViewportRenderedField: View {
             .gameplayScreenEffect(
                 displayStyle: displayStyle,
                 displayScale: displayScale,
+                fieldPalette: fieldPalette,
                 hdrBoost: fieldShaderHDRBoost
             )
             .frame(

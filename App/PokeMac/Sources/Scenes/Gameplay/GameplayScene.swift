@@ -44,6 +44,16 @@ struct GameplayScene: View {
         } message: {
             Text("This replaces the current in-memory progress with the last saved game.")
         }
+        .onAppear {
+            fieldDisplayStyle = preferences.fieldDisplayStyle
+        }
+        .onChange(of: fieldDisplayStyle) { _, newValue in
+            preferences.setFieldDisplayStyle(newValue)
+        }
+        .onChange(of: preferences.fieldDisplayStyle) { _, newValue in
+            guard fieldDisplayStyle != newValue else { return }
+            fieldDisplayStyle = newValue
+        }
     }
 }
 

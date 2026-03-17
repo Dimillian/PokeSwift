@@ -638,12 +638,18 @@ func makeMapManifestDraft(
 
 func resolveMapWarps(
     _ drafts: [MapManifestDraft],
-    tilesets: [TilesetManifest]
+    tilesets: [TilesetManifest],
+    fieldPaletteRules: ParsedFieldPaletteRules
 ) throws -> [MapManifest] {
     let draftsByID = Dictionary(uniqueKeysWithValues: drafts.map { ($0.id, $0) })
     let tilesetsByID = Dictionary(uniqueKeysWithValues: tilesets.map { ($0.id, $0) })
 
     return try drafts.map { draft in
+        let fieldPaletteID = try resolveFieldPaletteID(
+            for: draft,
+            draftsByID: draftsByID,
+            rules: fieldPaletteRules
+        )
         let warps = try draft.rawWarps.enumerated().map { index, rawWarp in
             let usesPreviousMapTarget = warpUsesPreviousMapTarget(from: draft, rawWarp: rawWarp)
             let targetMapID = resolveTargetMapID(from: draft, rawWarp: rawWarp, rawTargetMapID: rawWarp.rawTargetMapID)
@@ -676,6 +682,7 @@ func resolveMapWarps(
             id: draft.id,
             displayName: draft.displayName,
             defaultMusicID: draft.defaultMusicID,
+            fieldPaletteID: fieldPaletteID,
             borderBlockID: draft.borderBlockID,
             blockWidth: draft.blockWidth,
             blockHeight: draft.blockHeight,

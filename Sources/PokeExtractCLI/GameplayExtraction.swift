@@ -19,7 +19,11 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
             martStockLabels: context.martStockLabels
         )
     }
-    let maps = try resolveMapWarps(mapDrafts, tilesets: tilesets)
+    let maps = try resolveMapWarps(
+        mapDrafts,
+        tilesets: tilesets,
+        fieldPaletteRules: context.fieldPaletteRules
+    )
     let playerStart = try buildPlayerStart(repoRoot: context.repoRoot)
     let itemNamesByID = try parseItemNames(repoRoot: context.repoRoot)
     let dialogues = try buildDialogues(
@@ -59,6 +63,7 @@ func extractGameplayManifest(source: SourceTree) throws -> GameplayManifest {
 
     return GameplayManifest(
         maps: maps,
+        fieldPalettes: context.fieldPalettes,
         tilesets: tilesets,
         overworldSprites: buildOverworldSprites(),
         dialogues: dialogues,
@@ -86,6 +91,8 @@ private func makeGameplayExtractionContext(source: SourceTree) throws -> Gamepla
     let mapScriptMetadataByMapID = try parseSelectedMapScriptMetadata(repoRoot: source.repoRoot)
     let objectVisibilityByMapID = try parseToggleableObjectDefaultVisibility(repoRoot: source.repoRoot)
     let martStockLabels = try Set(parseMartStocks(repoRoot: source.repoRoot).keys)
+    let fieldPalettes = try buildFieldPalettes(repoRoot: source.repoRoot)
+    let fieldPaletteRules = try parseFieldPaletteRules(repoRoot: source.repoRoot)
 
     return GameplayExtractionContext(
         repoRoot: source.repoRoot,
@@ -94,6 +101,8 @@ private func makeGameplayExtractionContext(source: SourceTree) throws -> Gamepla
         mapMusicByMapID: mapMusicByMapID,
         mapScriptMetadataByMapID: mapScriptMetadataByMapID,
         objectVisibilityByMapID: objectVisibilityByMapID,
-        martStockLabels: martStockLabels
+        martStockLabels: martStockLabels,
+        fieldPalettes: fieldPalettes,
+        fieldPaletteRules: fieldPaletteRules
     )
 }

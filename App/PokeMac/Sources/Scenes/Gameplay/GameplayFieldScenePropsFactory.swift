@@ -16,6 +16,7 @@ enum GameplayScenePropsFactory {
     ) -> GameplaySceneProps? {
         let manifestIndex = cachedManifestIndex(for: runtime)
         let saveSidebar = makeSaveSidebar(runtime: runtime)
+        let initialFieldDisplayStyle = AppSettingsStore().fieldDisplayStyle
 
         let nicknameConfirmation = makeNicknameConfirmationProps(runtime: runtime)
 
@@ -87,7 +88,7 @@ enum GameplayScenePropsFactory {
                     onInventoryItemSelected: { itemID in
                         runtime.handleInventorySidebarSelection(itemID)
                     },
-                    initialFieldDisplayStyle: .defaultGameplayStyle
+                    initialFieldDisplayStyle: initialFieldDisplayStyle
                 )
             }
 
@@ -95,6 +96,11 @@ enum GameplayScenePropsFactory {
                 viewport: .field(
                     GameplayFieldViewportProps(
                         map: runtime.currentMapManifest,
+                        fieldPalette: runtime.currentMapManifest.flatMap { map in
+                            map.fieldPaletteID.flatMap { paletteID in
+                                runtime.content.fieldPalette(id: paletteID)
+                            }
+                        },
                         playerPosition: runtime.playerPosition,
                         playerFacing: runtime.playerFacing,
                         playerStepDuration: runtime.fieldAnimationStepDuration,
@@ -132,7 +138,7 @@ enum GameplayScenePropsFactory {
                 onInventoryItemSelected: { itemID in
                     runtime.handleInventorySidebarSelection(itemID)
                 },
-                initialFieldDisplayStyle: .defaultGameplayStyle
+                initialFieldDisplayStyle: initialFieldDisplayStyle
             )
         case .battle:
             let battleState = runtime.currentBattleSceneState()
@@ -207,6 +213,8 @@ enum GameplayScenePropsFactory {
                         battleAnimationTilesetURLs: battleAnimationTilesetURLs,
                         playerSpriteURL: playerSpriteURL,
                         enemySpriteURL: enemySpriteURL,
+                        playerBattlePalette: runtime.currentBattlePlayerPalette,
+                        enemyBattlePalette: runtime.currentBattleEnemyPalette,
                         bag: makeInventorySidebar(
                             from: battle.bagItems,
                             manifestIndex: manifestIndex,
@@ -227,7 +235,7 @@ enum GameplayScenePropsFactory {
                     runtime.handlePartySidebarSelection(index)
                 },
                 onInventoryItemSelected: nil,
-                initialFieldDisplayStyle: .defaultGameplayStyle
+                initialFieldDisplayStyle: initialFieldDisplayStyle
             )
         }
     }

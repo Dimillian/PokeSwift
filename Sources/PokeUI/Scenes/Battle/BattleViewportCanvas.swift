@@ -18,6 +18,8 @@ struct BattleViewportCanvas: View {
     let battleAnimationTilesetURLs: [String: URL]
     let playerSpriteURL: URL?
     let enemySpriteURL: URL?
+    let playerBattlePalette: FieldPaletteManifest?
+    let enemyBattlePalette: FieldPaletteManifest?
     let displayStyle: FieldDisplayStyle
     let hdrBoost: Float
     let presentation: BattlePresentationTelemetry
@@ -40,6 +42,7 @@ struct BattleViewportCanvas: View {
                 hudLayer(layout: layout)
             }
             .battleTransitionEffect(
+                displayStyle: displayStyle,
                 displayScale: displayScale,
                 presentation: presentation
             )
@@ -98,6 +101,9 @@ struct BattleViewportCanvas: View {
                     renderMode: .battlePokemonFront
                 )
                 .frame(width: layout.enemySpriteSize.width, height: layout.enemySpriteSize.height)
+                .compatibilityPaletteEffect(
+                    displayStyle == .gbcCompatibility ? enemyBattlePalette : nil
+                )
                 .scaleEffect(
                     enemySpriteScale,
                     anchor: Self.pokemonScaleAnchor(
@@ -141,6 +147,9 @@ struct BattleViewportCanvas: View {
                     renderMode: .battlePokemonBack
                 )
                 .frame(width: layout.playerSpriteSize.width, height: layout.playerSpriteSize.height)
+                .compatibilityPaletteEffect(
+                    displayStyle == .gbcCompatibility ? playerBattlePalette : nil
+                )
                 .scaleEffect(
                     playerSpriteScale,
                     anchor: Self.pokemonScaleAnchor(
@@ -949,7 +958,16 @@ struct BattleViewportCanvas: View {
 
     private var battleBackground: some View {
         Rectangle()
-            .fill(Color(red: 0.49, green: 0.56, blue: 0.17))
+            .fill(battleBackgroundColor)
+    }
+
+    private var battleBackgroundColor: Color {
+        switch displayStyle {
+        case .gbcCompatibility:
+            return Color(red: 0.85, green: 0.87, blue: 0.9)
+        default:
+            return Color(red: 0.49, green: 0.56, blue: 0.17)
+        }
     }
 
     private var spriteAnimation: Animation? {

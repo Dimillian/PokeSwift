@@ -553,6 +553,7 @@ struct FieldDisplayStyleOptionsRow: View {
 
                 GlassEffectContainer(spacing: 6) {
                     HStack(spacing: 5) {
+                        styleButton(for: .gbcCompatibility)
                         styleButton(for: .dmgTinted)
                         styleButton(for: .dmgAuthentic)
                         styleButton(for: .rawGrayscale)
@@ -596,6 +597,8 @@ struct FieldDisplayStyleOptionsRow: View {
 
     private func styleTitle(for style: FieldDisplayStyle) -> String {
         switch style {
+        case .gbcCompatibility:
+            return "GBC"
         case .dmgTinted:
             return "TINTED"
         case .dmgAuthentic:

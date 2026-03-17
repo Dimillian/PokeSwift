@@ -1,6 +1,7 @@
 import Observation
 import PokeCore
 import PokeDataModel
+import PokeRender
 import PokeUI
 
 @MainActor
@@ -13,6 +14,7 @@ final class AppPreferences {
     var textSpeed: TextSpeed
     var battleAnimation: BattleAnimation
     var battleStyle: BattleStyle
+    var fieldDisplayStyle: FieldDisplayStyle
 
     private let settingsStore: AppSettingsStore
     private weak var runtime: GameRuntime?
@@ -26,6 +28,7 @@ final class AppPreferences {
         textSpeed = settingsStore.textSpeed
         battleAnimation = settingsStore.battleAnimation
         battleStyle = settingsStore.battleStyle
+        fieldDisplayStyle = settingsStore.fieldDisplayStyle
     }
 
     func attachRuntime(_ runtime: GameRuntime?) {
@@ -79,6 +82,15 @@ final class AppPreferences {
         battleStyle = value
         settingsStore.battleStyle = value
         runtime?.optionsBattleStyle = value
+    }
+
+    func setFieldDisplayStyle(_ value: FieldDisplayStyle) {
+        guard fieldDisplayStyle != value else {
+            return
+        }
+
+        fieldDisplayStyle = value
+        settingsStore.fieldDisplayStyle = value
     }
 
     func cycleTextSpeed() {

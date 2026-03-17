@@ -51,6 +51,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let primaryType: String
     public let secondaryType: String?
     public let battleSprite: BattleSpriteManifest?
+    public let battlePaletteID: String?
     public let id: String
     public let displayName: String
     public let catchRate: Int
@@ -80,6 +81,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         primaryType: String = "NORMAL",
         secondaryType: String? = nil,
         battleSprite: BattleSpriteManifest? = nil,
+        battlePaletteID: String? = nil,
         catchRate: Int = 0,
         baseExp: Int = 0,
         growthRate: PokemonGrowthRate = .mediumFast,
@@ -106,6 +108,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.primaryType = primaryType
         self.secondaryType = secondaryType
         self.battleSprite = battleSprite
+        self.battlePaletteID = battlePaletteID
         self.catchRate = catchRate
         self.baseExp = baseExp
         self.growthRate = growthRate
@@ -132,6 +135,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case primaryType
         case secondaryType
         case battleSprite
+        case battlePaletteID
         case id
         case displayName
         case catchRate
@@ -163,6 +167,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         primaryType = try container.decodeIfPresent(String.self, forKey: .primaryType) ?? "NORMAL"
         secondaryType = try container.decodeIfPresent(String.self, forKey: .secondaryType)
         battleSprite = try container.decodeIfPresent(BattleSpriteManifest.self, forKey: .battleSprite)
+        battlePaletteID = try container.decodeIfPresent(String.self, forKey: .battlePaletteID)
         catchRate = try container.decodeIfPresent(Int.self, forKey: .catchRate) ?? 0
         baseExp = try container.decodeIfPresent(Int.self, forKey: .baseExp) ?? 0
         growthRate = try container.decodeIfPresent(PokemonGrowthRate.self, forKey: .growthRate) ?? .mediumFast

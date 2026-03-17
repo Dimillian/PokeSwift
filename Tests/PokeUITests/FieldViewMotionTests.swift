@@ -11,9 +11,11 @@ import XCTest
 extension PokeUITests {
   func testFieldDisplayStyleLabelsRemainStableForSidebarSwitcher() {
     XCTAssertEqual(FieldDisplayStyle.defaultGameplayStyle, .dmgTinted)
+    XCTAssertEqual(FieldDisplayStyle.gbcCompatibility.sidebarSummaryLabel, "GBC")
     XCTAssertEqual(FieldDisplayStyle.dmgAuthentic.sidebarSummaryLabel, "DMG")
     XCTAssertEqual(FieldDisplayStyle.dmgTinted.sidebarSummaryLabel, "TINTED")
     XCTAssertEqual(FieldDisplayStyle.rawGrayscale.sidebarSummaryLabel, "RAW")
+    XCTAssertEqual(FieldDisplayStyle.gbcCompatibility.sidebarOptionTitle, "GBC Compat")
     XCTAssertEqual(FieldDisplayStyle.dmgAuthentic.sidebarOptionTitle, "Authentic DMG")
     XCTAssertEqual(FieldDisplayStyle.dmgTinted.sidebarOptionTitle, "Tinted")
     XCTAssertEqual(FieldDisplayStyle.rawGrayscale.sidebarOptionTitle, "Raw Gray")

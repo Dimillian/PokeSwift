@@ -9,6 +9,15 @@ struct GameplayExtractionContext {
     let mapScriptMetadataByMapID: [String: MapScriptMetadata]
     let objectVisibilityByMapID: [String: [String: Bool]]
     let martStockLabels: Set<String>
+    let fieldPalettes: [FieldPaletteManifest]
+    let fieldPaletteRules: ParsedFieldPaletteRules
+}
+
+struct ParsedFieldPaletteRules {
+    let paletteIDsInOrder: [String]
+    let mapIndexByID: [String: Int]
+    let numCityMaps: Int
+    let indoorGroupIDByMapID: [String: String]
 }
 
 struct ParsedTilesetCollisionData {

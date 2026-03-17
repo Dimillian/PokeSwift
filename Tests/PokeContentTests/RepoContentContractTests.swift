@@ -15,6 +15,7 @@ final class RepoContentContractTests: XCTestCase {
         let rocketSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_ROCKET"))
         let fossilSprite = try XCTUnwrap(loaded.overworldSprite(id: "SPRITE_FOSSIL"))
         let oaksLab = try XCTUnwrap(loaded.map(id: "OAKS_LAB"))
+        let palletPalette = try XCTUnwrap(loaded.fieldPalette(id: "PAL_PALLET"))
         let sendOutPoofURL = root.appendingPathComponent("Assets/battle/effects/send_out_poof.png")
         let moveAnim0URL = root.appendingPathComponent("Assets/battle/animations/move_anim_0.png")
         let moveAnim1URL = root.appendingPathComponent("Assets/battle/animations/move_anim_1.png")
@@ -33,6 +34,17 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(sprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(rocketSprite.imagePath).path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(fossilSprite.imagePath).path))
+        XCTAssertEqual(palletPalette.colors, [
+            .init(red: 31, green: 29, blue: 31),
+            .init(red: 25, green: 28, blue: 27),
+            .init(red: 20, green: 26, blue: 31),
+            .init(red: 3, green: 2, blue: 2),
+        ])
+        XCTAssertEqual(oaksLab.fieldPaletteID, "PAL_PALLET")
+        XCTAssertEqual(loaded.map(id: "VIRIDIAN_POKECENTER")?.fieldPaletteID, "PAL_VIRIDIAN")
+        XCTAssertEqual(loaded.map(id: "MUSEUM_2F")?.fieldPaletteID, "PAL_PEWTER")
+        XCTAssertEqual(loaded.map(id: "BILLS_HOUSE")?.fieldPaletteID, "PAL_ROUTE")
+        XCTAssertEqual(loaded.map(id: "MT_MOON_1F")?.fieldPaletteID, "PAL_CAVE")
         XCTAssertTrue(FileManager.default.fileExists(atPath: sendOutPoofURL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim0URL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: moveAnim1URL.path))
@@ -184,6 +196,9 @@ final class RepoContentContractTests: XCTestCase {
         let mtMoonB2FEncounters = try XCTUnwrap(loaded.wildEncounterTable(mapID: "MT_MOON_B2F"))
 
         XCTAssertEqual(viridianMart.mapID, "VIRIDIAN_MART")
+        XCTAssertEqual(pidgey.battlePaletteID, "PAL_BROWNMON")
+        XCTAssertEqual(squirtle.battlePaletteID, "PAL_CYANMON")
+        XCTAssertEqual(loaded.palette(id: "PAL_CYANMON")?.colors.count, 4)
         XCTAssertEqual(viridianMart.clerkObjectID, "viridian_mart_clerk")
         XCTAssertEqual(viridianMart.stockItemIDs, ["POKE_BALL", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL"])
         XCTAssertEqual(loaded.mart(mapID: "VIRIDIAN_MART", clerkObjectID: "viridian_mart_clerk")?.id, viridianMart.id)

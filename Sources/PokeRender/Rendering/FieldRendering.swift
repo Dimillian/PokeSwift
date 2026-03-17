@@ -8,6 +8,7 @@ public enum FieldDisplayStyle: Equatable, Hashable, Sendable {
     case rawGrayscale
     case dmgAuthentic
     case dmgTinted
+    case gbcCompatibility
 
     public static let defaultGameplayStyle: FieldDisplayStyle = .dmgTinted
 
@@ -19,6 +20,8 @@ public enum FieldDisplayStyle: Equatable, Hashable, Sendable {
             return "DMG"
         case .dmgTinted:
             return "TINTED"
+        case .gbcCompatibility:
+            return "GBC"
         }
     }
 
@@ -30,6 +33,36 @@ public enum FieldDisplayStyle: Equatable, Hashable, Sendable {
             return "Authentic DMG"
         case .dmgTinted:
             return "Tinted"
+        case .gbcCompatibility:
+            return "GBC Compat"
+        }
+    }
+
+    public var preferenceValue: String {
+        switch self {
+        case .rawGrayscale:
+            return "rawGrayscale"
+        case .dmgAuthentic:
+            return "dmgAuthentic"
+        case .dmgTinted:
+            return "dmgTinted"
+        case .gbcCompatibility:
+            return "gbcCompatibility"
+        }
+    }
+
+    public init?(preferenceValue: String) {
+        switch preferenceValue {
+        case "rawGrayscale":
+            self = .rawGrayscale
+        case "dmgAuthentic":
+            self = .dmgAuthentic
+        case "dmgTinted":
+            self = .dmgTinted
+        case "gbcCompatibility":
+            self = .gbcCompatibility
+        default:
+            return nil
         }
     }
 }
