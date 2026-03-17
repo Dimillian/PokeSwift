@@ -3,7 +3,7 @@ import PokeDataModel
 public struct BattleSidebarProps: Equatable, Sendable {
     public let trainerName: String
     public let kind: BattleKind
-    public let phase: String
+    public let phase: BattlePhaseTelemetry
     public let promptText: String
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
@@ -22,7 +22,7 @@ public struct BattleSidebarProps: Equatable, Sendable {
     public init(
         trainerName: String,
         kind: BattleKind,
-        phase: String,
+        phase: BattlePhaseTelemetry,
         promptText: String,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
@@ -115,11 +115,11 @@ extension BattleSidebarProps {
         }
 
         return (
-            phase == "moveSelection" ||
-            phase == "bagSelection" ||
-            phase == "trainerAboutToUseDecision" ||
-            phase == "learnMoveDecision" ||
-            phase == "learnMoveSelection"
+            phase == .moveSelection ||
+            phase == .bagSelection ||
+            phase == .trainerAboutToUseDecision ||
+            phase == .learnMoveDecision ||
+            phase == .learnMoveSelection
         )
     }
 
@@ -175,11 +175,11 @@ extension BattleSidebarProps {
             return false
         }
 
-        if learnMovePrompt != nil || phase == "trainerAboutToUseDecision" {
+        if learnMovePrompt != nil || phase == .trainerAboutToUseDecision {
             return true
         }
 
-        guard phase == "moveSelection" else {
+        guard phase == .moveSelection else {
             return false
         }
 
@@ -226,7 +226,7 @@ extension BattleSidebarProps {
             }
         }
 
-        if phase == "trainerAboutToUseDecision" {
+        if phase == .trainerAboutToUseDecision {
             return [
                 BattleSidebarActionRowProps(
                     id: "trainer-about-to-use-yes",

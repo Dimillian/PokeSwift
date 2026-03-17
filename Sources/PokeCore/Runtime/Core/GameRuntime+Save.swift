@@ -27,13 +27,13 @@ enum GameSaveRuntimeError: LocalizedError {
 extension GameRuntime {
     public func saveCurrentGame() -> Bool {
         guard canSaveGame else {
-            recordSaveResult(operation: "save", succeeded: false, message: "Saving is only available while exploring the field.")
+            recordSaveResult(operation: .save, succeeded: false, message: "Saving is only available while exploring the field.")
             publishSnapshot()
             return false
         }
 
         guard let saveStore else {
-            recordSaveResult(operation: "save", succeeded: false, message: GameSaveRuntimeError.storeUnavailable.localizedDescription)
+            recordSaveResult(operation: .save, succeeded: false, message: GameSaveRuntimeError.storeUnavailable.localizedDescription)
             publishSnapshot()
             return false
         }
@@ -43,12 +43,12 @@ extension GameRuntime {
             try saveStore.save(envelope)
             saveMetadata = envelope.metadata
             saveErrorMessage = nil
-            recordSaveResult(operation: "save", succeeded: true, message: "Saved at \(envelope.metadata.locationName).")
+            recordSaveResult(operation: .save, succeeded: true, message: "Saved at \(envelope.metadata.locationName).")
             publishSnapshot()
             return true
         } catch {
             saveErrorMessage = error.localizedDescription
-            recordSaveResult(operation: "save", succeeded: false, message: error.localizedDescription)
+            recordSaveResult(operation: .save, succeeded: false, message: error.localizedDescription)
             publishSnapshot()
             return false
         }
@@ -56,15 +56,15 @@ extension GameRuntime {
 
     @discardableResult
     public func loadSavedGameFromSidebar() -> Bool {
-        loadSavedGame(operation: "load", requireSettledFieldState: true)
+        loadSavedGame(operation: .load, requireSettledFieldState: true)
     }
 
     @discardableResult
     func continueFromTitleMenu() -> Bool {
-        loadSavedGame(operation: "continue", requireSettledFieldState: false)
+        loadSavedGame(operation: .continue, requireSettledFieldState: false)
     }
 
-    func loadSavedGame(operation: String, requireSettledFieldState: Bool) -> Bool {
+    func loadSavedGame(operation: RuntimeSaveOperation, requireSettledFieldState: Bool) -> Bool {
         if requireSettledFieldState && canLoadGame == false {
             recordSaveResult(operation: operation, succeeded: false, message: "Loading is only available from settled field gameplay.")
             publishSnapshot()
@@ -84,7 +84,7 @@ extension GameRuntime {
             try applySaveEnvelope(envelope)
             saveMetadata = envelope.metadata
             saveErrorMessage = nil
-            let successMessage = operation == "continue"
+            let successMessage = operation == .continue
                 ? "Continue loaded from \(envelope.metadata.locationName)."
                 : "Loaded save from \(envelope.metadata.locationName)."
             recordSaveResult(operation: operation, succeeded: true, message: successMessage)
@@ -307,7 +307,7 @@ extension GameRuntime {
         )
     }
 
-    func recordSaveResult(operation: String, succeeded: Bool, message: String?) {
+    func recordSaveResult(operation: RuntimeSaveOperation, succeeded: Bool, message: String?) {
         lastSaveResult = RuntimeSaveResult(
             operation: operation,
             succeeded: succeeded,
@@ -316,10 +316,10 @@ extension GameRuntime {
         )
         traceEvent(
             .saveResult,
-            message ?? "\(operation.capitalized) \(succeeded ? "succeeded" : "failed").",
+            message ?? "\(operation.rawValue.capitalized) \(succeeded ? "succeeded" : "failed").",
             mapID: gameplayState?.mapID,
             details: [
-                "operation": operation,
+                "operation": operation.rawValue,
                 "succeeded": succeeded ? "true" : "false",
             ]
         )

@@ -454,7 +454,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         _ = try await waitForSnapshot(runtime) {
-            $0.fieldHealing?.phase == "healedJingle"
+            $0.fieldHealing?.phase == .healedJingle
         }
         audioPlayer.completePendingPlayback()
         _ = try await waitForSnapshot(runtime) {

@@ -1,21 +1,23 @@
+import PokeDataModel
+
 enum GameplayBattlePrompts {
     static let moveSelection = "Pick the next move."
     static let partySelection = "Bring out which #MON?"
     private static let dialogueWrapLimit = 18
 
-    static func defaultPrompt(for phase: String) -> String {
-        phase == "partySelection" ? partySelection : moveSelection
+    static func defaultPrompt(for phase: BattlePhaseTelemetry) -> String {
+        phase == .partySelection ? partySelection : moveSelection
     }
 
     static func promptText(
         textLines: [String],
         battleMessage: String,
-        phase: String
+        phase: BattlePhaseTelemetry
     ) -> String {
         textLines.last ?? (battleMessage.isEmpty ? defaultPrompt(for: phase) : battleMessage)
     }
 
-    static func textLines(_ textLines: [String], phase: String) -> [String] {
+    static func textLines(_ textLines: [String], phase: BattlePhaseTelemetry) -> [String] {
         let sourceLines = textLines.isEmpty ? [defaultPrompt(for: phase)] : textLines
         return sourceLines.flatMap { message in
             message

@@ -136,8 +136,8 @@ public final class GameRuntime {
         Array(Set(currentFieldObjects.map(\.sprite) + [playerSpriteID])).sorted()
     }
 
-    public var currentFieldRenderMode: String {
-        currentFieldRenderIssues.isEmpty ? "realAssets" : "placeholder"
+    public var currentFieldRenderMode: FieldRenderMode {
+        currentFieldRenderIssues.isEmpty ? .realAssets : .placeholder
     }
 
     public var playerPosition: TilePoint? {

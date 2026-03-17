@@ -16,7 +16,7 @@ struct ShopOverlayPanel: View {
                     .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(0.72))
 
                 switch shop.phase {
-                case "mainMenu":
+                case .mainMenu:
                     ForEach(Array(shop.menuOptions.enumerated()), id: \.offset) { index, option in
                         menuRow(
                             title: option,
@@ -25,17 +25,17 @@ struct ShopOverlayPanel: View {
                             isSelectable: true
                         )
                     }
-                case "buyList":
+                case .buyList:
                     itemRows(shop.buyItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: false)
-                case "sellList":
+                case .sellList:
                     itemRows(shop.sellItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: true)
-                case "quantity":
-                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == "sell")
+                case .quantity:
+                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == .sell)
                     Text("QTY \(shop.selectedQuantity)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(0.68))
-                case "confirmation":
-                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == "sell")
+                case .confirmation:
+                    itemRows(activeItems, focusedIndex: shop.focusedItemIndex, showsOwnedQuantity: shop.selectedTransactionKind == .sell)
                     Text("QTY \(shop.selectedQuantity)")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(GameplayFieldStyleTokens.ink.opacity(0.68))
@@ -50,7 +50,7 @@ struct ShopOverlayPanel: View {
 
     private var activeItems: [ShopRowTelemetry] {
         switch shop.selectedTransactionKind {
-        case "sell":
+        case .sell:
             return shop.sellItems
         default:
             return shop.buyItems
@@ -70,7 +70,7 @@ struct ShopOverlayPanel: View {
     }
 
     private func itemDetail(for item: ShopRowTelemetry, showsOwnedQuantity: Bool) -> String {
-        if shop.selectedTransactionKind == "sell" || shop.phase == "sellList" {
+        if shop.selectedTransactionKind == .sell || shop.phase == .sellList {
             return showsOwnedQuantity ? "x\(item.ownedQuantity) ¥\(item.transactionPrice)" : "¥\(item.transactionPrice)"
         }
         return showsOwnedQuantity ? "x\(item.ownedQuantity) ¥\(item.unitPrice)" : "¥\(item.unitPrice)"

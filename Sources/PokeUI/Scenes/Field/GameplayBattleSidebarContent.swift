@@ -13,22 +13,22 @@ struct BattleSummaryContent: View {
             return "Intro"
         }
         switch props.phase {
-        case "introText":
+        case .introText:
             return "Intro"
-        case "moveSelection":
+        case .moveSelection:
             return "Move Select"
-        case "partySelection":
+        case .partySelection:
             return "Party"
-        case "trainerAboutToUseDecision":
+        case .trainerAboutToUseDecision:
             return "Shift"
-        case "resolvingTurn":
+        case .resolvingTurn:
             return "Resolving"
-        case "turnText":
+        case .turnText:
             return "Turn Text"
-        case "battleComplete":
+        case .battleComplete:
             return "Result"
         default:
-            return props.phase.uppercased()
+            return props.phase.rawValue.uppercased()
         }
     }
 

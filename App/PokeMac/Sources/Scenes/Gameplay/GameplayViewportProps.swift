@@ -44,7 +44,7 @@ struct GameplayFieldViewportProps {
 struct BattleViewportProps {
     let trainerName: String
     let kind: BattleKind
-    let phase: String
+    let phase: BattlePhaseTelemetry
     let textLines: [String]
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry

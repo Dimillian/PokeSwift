@@ -326,7 +326,7 @@ enum GameplayScenePropsFactory {
         let metadata = runtime.currentSaveMetadata
         let summary = metadata == nil ? "No Save" : "1 File"
         let saveDetail: String
-        if let result = runtime.currentLastSaveResult, result.operation == "save" {
+        if let result = runtime.currentLastSaveResult, result.operation == .save {
             saveDetail = result.succeeded ? "Saved" : "Failed"
         } else {
             saveDetail = runtime.canSaveGame ? "Ready" : "Busy"

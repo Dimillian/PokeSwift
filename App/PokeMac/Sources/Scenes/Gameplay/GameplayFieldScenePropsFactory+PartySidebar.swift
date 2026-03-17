@@ -126,7 +126,7 @@ extension GameplayScenePropsFactory {
         battle: BattleTelemetry
     ) -> BattlePartySidebarConfiguration {
         let partyPokemon = party?.pokemon ?? []
-        let isSelecting = battle.phase == "partySelection"
+        let isSelecting = battle.phase == .partySelection
         let activeIndex = runtime.currentBattlePlayerActiveIndex ?? 0
 
         if isSelecting, let itemID = runtime.currentBattlePartySelectionItemID {

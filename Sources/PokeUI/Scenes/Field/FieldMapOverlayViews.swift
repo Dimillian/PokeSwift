@@ -48,6 +48,6 @@ struct FieldViewportTransitionOverlay: View {
     }
 
     private var targetOpacity: Double {
-        transition?.phase == "fadingOut" ? 1 : 0
+        transition?.phase == .fadingOut ? 1 : 0
     }
 }

@@ -319,23 +319,23 @@ func advanceBattleTextUntilMoveSelection(_ runtime: GameRuntime, maxTicks: Int =
             XCTFail("battle ended before returning to move selection")
             return
         }
-        if battle.phase == "moveSelection" {
+        if battle.phase == .moveSelection {
             return
         }
-        if battle.phase == "trainerAboutToUseDecision" {
+        if battle.phase == .trainerAboutToUseDecision {
             runtime.handle(button: .down)
         }
         runtime.handle(button: .confirm)
         RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
     }
 
-    XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection", "battle text did not resolve to move selection")
+    XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .moveSelection, "battle text did not resolve to move selection")
 }
 
 @MainActor
 func advanceBattleUntilPhase(
     _ runtime: GameRuntime,
-    phase targetPhase: String,
+    phase targetPhase: BattlePhaseTelemetry,
     maxTicks: Int = 240
 ) {
     let pollInterval = 0.01
@@ -349,7 +349,7 @@ func advanceBattleUntilPhase(
         if battle.phase == targetPhase {
             return
         }
-        if battle.phase == "trainerAboutToUseDecision", targetPhase != "trainerAboutToUseDecision" {
+        if battle.phase == .trainerAboutToUseDecision, targetPhase != .trainerAboutToUseDecision {
             runtime.handle(button: .down)
         }
         runtime.handle(button: .confirm)
@@ -376,7 +376,7 @@ func resolveBattleUntilComplete(
     while runtime.scene == .battle, Date() < deadline {
         if let battle = runtime.currentSnapshot().battle {
             observe?(battle)
-            if battle.phase == "trainerAboutToUseDecision" {
+            if battle.phase == .trainerAboutToUseDecision {
                 runtime.handle(button: .down)
             }
             runtime.handle(button: .confirm)
@@ -467,7 +467,7 @@ func driveBattleUntil(
         if predicate(battle) {
             return history
         }
-        if battle.phase == "trainerAboutToUseDecision" {
+        if battle.phase == .trainerAboutToUseDecision {
             runtime.handle(button: .down)
         }
         runtime.handle(button: .confirm)

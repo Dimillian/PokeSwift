@@ -15,7 +15,7 @@ extension PokeCoreTests {
         let snapshot = runtime.currentSnapshot()
         XCTAssertEqual(snapshot.scene, .field)
         XCTAssertEqual(snapshot.field?.mapID, "REDS_HOUSE_2F")
-        XCTAssertEqual(snapshot.field?.renderMode, "realAssets")
+        XCTAssertEqual(snapshot.field?.renderMode, .realAssets)
         XCTAssertEqual(snapshot.assetLoadingFailures, [])
     }
     func testRepoGeneratedPalletNorthConnectionCrossesIntoRoute1() throws {
@@ -447,7 +447,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         _ = try await waitForSnapshot(runtime) {
-            $0.fieldHealing?.phase == "healedJingle"
+            $0.fieldHealing?.phase == .healedJingle
         }
 
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.currentHP, runtime.gameplayState?.playerParty.first?.maxHP)
@@ -498,7 +498,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         _ = try await waitForSnapshot(runtime) {
-            $0.fieldHealing?.phase == "priming" || $0.fieldHealing?.phase == "machineActive"
+            $0.fieldHealing?.phase == .priming || $0.fieldHealing?.phase == .machineActive
         }
 
         XCTAssertEqual(
@@ -564,7 +564,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         _ = try await waitForSnapshot(runtime) {
-            $0.fieldHealing?.phase == "priming" || $0.fieldHealing?.phase == "machineActive"
+            $0.fieldHealing?.phase == .priming || $0.fieldHealing?.phase == .machineActive
         }
 
         XCTAssertEqual(
@@ -822,7 +822,7 @@ extension PokeCoreTests {
 
         let shop = try XCTUnwrap(runtime.currentSnapshot().shop)
         XCTAssertEqual(shop.martID, "viridian_mart")
-        XCTAssertEqual(shop.phase, "mainMenu")
+        XCTAssertEqual(shop.phase, .mainMenu)
         XCTAssertEqual(shop.menuOptions, ["BUY", "SELL", "QUIT"])
         XCTAssertEqual(shop.buyItems.map(\.itemID), ["POKE_BALL", "ANTIDOTE", "PARLYZ_HEAL", "BURN_HEAL"])
         XCTAssertEqual(shop.buyItems.first?.unitPrice, 200)
@@ -849,7 +849,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "result")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, .result)
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 1)
         XCTAssertEqual(runtime.playerMoney, 2800)
         XCTAssertEqual(runtime.currentSnapshot().inventory?.items.first { $0.itemID == "POKE_BALL" }?.quantity, 1)
@@ -874,7 +874,7 @@ extension PokeCoreTests {
 
         runtime.setDirectionalButton(.right, isPressed: true)
 
-        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "mainMenu")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, .mainMenu)
         XCTAssertEqual(runtime.currentSnapshot().shop?.focusedMainMenuIndex, 1)
         XCTAssertEqual(runtime.substate, "shop_viridian_mart")
     }
@@ -923,7 +923,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "result")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, .result)
         XCTAssertEqual(runtime.itemQuantity("ANTIDOTE"), 1)
         XCTAssertEqual(runtime.playerMoney, 3050)
     }
@@ -943,7 +943,7 @@ extension PokeCoreTests {
 
         let shop = try XCTUnwrap(runtime.currentSnapshot().shop)
         XCTAssertEqual(shop.martID, "cerulean_mart")
-        XCTAssertEqual(shop.phase, "mainMenu")
+        XCTAssertEqual(shop.phase, .mainMenu)
         XCTAssertEqual(shop.menuOptions, ["BUY", "SELL", "QUIT"])
         XCTAssertEqual(
             shop.buyItems.map(\.itemID),
@@ -1106,11 +1106,11 @@ extension PokeCoreTests {
 
         XCTAssertEqual(runtime.itemQuantity("HM_CUT"), 1)
         XCTAssertEqual(runtime.playerMoney, 3000)
-        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "result")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, .result)
         XCTAssertEqual(runtime.currentSnapshot().shop?.promptText, "I can't put a price on that.")
 
         runtime.handle(button: .confirm)
-        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, "mainMenu")
+        XCTAssertEqual(runtime.currentSnapshot().shop?.phase, .mainMenu)
     }
 
     func testFieldPartyReorderSwapsSelectedPokemon() {

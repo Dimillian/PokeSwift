@@ -548,7 +548,7 @@ extension PokeCoreTests {
         XCTAssertFalse(runtime.continueFromTitleMenu())
 
         XCTAssertNotEqual(runtime.scene, .field)
-        XCTAssertEqual(runtime.currentLastSaveResult?.operation, "continue")
+        XCTAssertEqual(runtime.currentLastSaveResult?.operation, .continue)
         XCTAssertEqual(runtime.currentLastSaveResult?.succeeded, false)
         XCTAssertEqual(runtime.currentSaveErrorMessage, "Save schema 2 is not supported.")
     }

@@ -49,9 +49,9 @@ struct PokemonCenterHealingOverlay: View {
 
     private var monitorFill: Color {
         switch healing.phase {
-        case "healedJingle":
+        case .healedJingle:
             return GameplayFieldStyleTokens.ink.opacity(0.78)
-        case "machineActive":
+        case .machineActive:
             return healing.pulseStep.isMultiple(of: 2) ? PokeThemePalette.fieldLeadSlotFill.opacity(0.92) : PokeThemePalette.fieldCardFill
         default:
             return PokeThemePalette.fieldCardFill
@@ -59,7 +59,7 @@ struct PokemonCenterHealingOverlay: View {
     }
 
     private func signalFill(for index: Int) -> Color {
-        if healing.phase == "healedJingle" {
+        if healing.phase == .healedJingle {
             return (index + healing.pulseStep).isMultiple(of: 2)
                 ? GameplayFieldStyleTokens.ink.opacity(0.88)
                 : PokeThemePalette.fieldLeadSlotFill.opacity(0.8)
@@ -73,11 +73,11 @@ struct PokemonCenterHealingOverlay: View {
 
     private var statusText: String {
         switch healing.phase {
-        case "priming":
+        case .priming:
             return "PREPARING"
-        case "machineActive":
+        case .machineActive:
             return "ADDING PARTY BALLS"
-        case "healedJingle":
+        case .healedJingle:
             return "POKeMON HEALED"
         default:
             return "HEALING"
@@ -86,7 +86,7 @@ struct PokemonCenterHealingOverlay: View {
 
     private var progressText: String {
         switch healing.phase {
-        case "machineActive", "healedJingle":
+        case .machineActive, .healedJingle:
             return "\(healing.activeBallCount)/\(healing.totalBallCount) LOADED"
         default:
             return "STANDBY"
@@ -107,7 +107,7 @@ struct PokemonCenterBallWell: View {
                 .padding(5)
 
             Circle()
-                .stroke(PokeThemePalette.fieldLeadSlotFill.opacity(healing.phase == "healedJingle" ? 0.7 : 0.36), lineWidth: 1)
+                .stroke(PokeThemePalette.fieldLeadSlotFill.opacity(healing.phase == .healedJingle ? 0.7 : 0.36), lineWidth: 1)
                 .padding(12)
 
             ForEach(0..<max(healing.totalBallCount, 1), id: \.self) { index in
@@ -116,8 +116,8 @@ struct PokemonCenterBallWell: View {
 
                 PokemonCenterBallToken(
                     isVisible: isVisible,
-                    isFlashing: healing.phase == "healedJingle" && (index + healing.pulseStep).isMultiple(of: 2),
-                    isNewest: healing.phase == "machineActive" && index == max(0, healing.activeBallCount - 1)
+                    isFlashing: healing.phase == .healedJingle && (index + healing.pulseStep).isMultiple(of: 2),
+                    isNewest: healing.phase == .machineActive && index == max(0, healing.activeBallCount - 1)
                 )
                 .position(point)
             }
@@ -129,7 +129,7 @@ struct PokemonCenterBallWell: View {
 
     private var visibleBallCount: Int {
         switch healing.phase {
-        case "priming":
+        case .priming:
             return 0
         default:
             return min(healing.activeBallCount, healing.totalBallCount)

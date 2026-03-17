@@ -119,7 +119,7 @@ extension PokeUITests {
       BattleSidebarProps(
         trainerName: "BLUE",
         kind: .trainer,
-        phase: "moveSelection",
+        phase: .moveSelection,
         promptText: "Pick the next move.",
         playerPokemon: .init(
           speciesID: "BULBASAUR",
@@ -528,7 +528,7 @@ extension PokeUITests {
     let moveSelection = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -564,7 +564,7 @@ extension PokeUITests {
     let resolve = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "turnText",
+      phase: .turnText,
       promptText: "Charmander used Scratch!",
       playerPokemon: moveSelection.playerPokemon,
       enemyPokemon: moveSelection.enemyPokemon,
@@ -574,9 +574,9 @@ extension PokeUITests {
       party: moveSelection.party
     )
 
-    XCTAssertEqual(moveSelection.phase, "moveSelection")
+    XCTAssertEqual(moveSelection.phase, .moveSelection)
     XCTAssertEqual(moveSelection.promptText, "Pick the next move.")
-    XCTAssertEqual(resolve.phase, "turnText")
+    XCTAssertEqual(resolve.phase, .turnText)
     XCTAssertEqual(resolve.promptText, "Charmander used Scratch!")
     XCTAssertEqual(resolve.moveSlots.first?.displayName, "Tackle")
   }
@@ -615,7 +615,7 @@ extension PokeUITests {
     let confirmPrompt = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "learnMoveDecision",
+      phase: .learnMoveDecision,
       promptText: "Teach EMBER to Charmander?",
       playerPokemon: playerPokemon,
       enemyPokemon: enemyPokemon,
@@ -628,7 +628,7 @@ extension PokeUITests {
     let replacePrompt = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "learnMoveSelection",
+      phase: .learnMoveSelection,
       promptText: "Choose a move to forget for EMBER.",
       playerPokemon: playerPokemon,
       enemyPokemon: enemyPokemon,
@@ -652,7 +652,7 @@ extension PokeUITests {
       BattleSidebarProps(
         trainerName: "BLUE",
         kind: .trainer,
-        phase: "moveSelection",
+        phase: .moveSelection,
         promptText: "Pick the next move.",
         playerPokemon: .init(
           speciesID: "BULBASAUR",
@@ -699,7 +699,7 @@ extension PokeUITests {
       BattleSidebarProps(
         trainerName: "PIDGEY",
         kind: .wild,
-        phase: "moveSelection",
+        phase: .moveSelection,
         promptText: "Pick the next move.",
         playerPokemon: .init(
           speciesID: "BULBASAUR",
@@ -747,7 +747,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -799,7 +799,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "PIKACHU",
@@ -859,7 +859,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "introText",
+      phase: .introText,
       promptText: "BLUE challenges you!",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -909,7 +909,7 @@ extension PokeUITests {
       BattleSidebarProps(
         trainerName: "BLUE",
         kind: kind,
-        phase: "turnText",
+        phase: .turnText,
         promptText: "Battle intro text.",
         playerPokemon: .init(
           speciesID: "BULBASAUR",
@@ -1003,7 +1003,7 @@ extension PokeUITests {
   }
   func testBattleSidebarActionRowsOnlyAppearWhenBattleInputIsReady() {
     func makeProps(
-      phase: String,
+      phase: BattlePhaseTelemetry,
       presentation: BattlePresentationTelemetry,
       learnMovePrompt: BattleLearnMovePromptTelemetry? = nil
     ) -> BattleSidebarProps {
@@ -1049,7 +1049,7 @@ extension PokeUITests {
     }
 
     let introProps = makeProps(
-      phase: "introText",
+      phase: .introText,
       presentation: .init(
         stage: .introReveal,
         revision: 1,
@@ -1057,7 +1057,7 @@ extension PokeUITests {
       )
     )
     let sendOutProps = makeProps(
-      phase: "moveSelection",
+      phase: .moveSelection,
       presentation: .init(
         stage: .enemySendOut,
         revision: 2,
@@ -1066,7 +1066,7 @@ extension PokeUITests {
       )
     )
     let turnTextProps = makeProps(
-      phase: "turnText",
+      phase: .turnText,
       presentation: .init(
         stage: .resultText,
         revision: 3,
@@ -1075,7 +1075,7 @@ extension PokeUITests {
       )
     )
     let bagSelectionProps = makeProps(
-      phase: "bagSelection",
+      phase: .bagSelection,
       presentation: .init(
         stage: .commandReady,
         revision: 4,
@@ -1083,7 +1083,7 @@ extension PokeUITests {
       )
     )
     let commandReadyProps = makeProps(
-      phase: "moveSelection",
+      phase: .moveSelection,
       presentation: .init(
         stage: .commandReady,
         revision: 5,
@@ -1091,7 +1091,7 @@ extension PokeUITests {
       )
     )
     let learnPromptProps = makeProps(
-      phase: "learnMoveDecision",
+      phase: .learnMoveDecision,
       presentation: .init(
         stage: .resultText,
         revision: 6,
@@ -1107,7 +1107,7 @@ extension PokeUITests {
     let trainerDecisionProps = BattleSidebarProps(
       trainerName: "BUG CATCHER",
       kind: .trainer,
-      phase: "trainerAboutToUseDecision",
+      phase: .trainerAboutToUseDecision,
       promptText: "Will RED change #MON?",
       playerPokemon: commandReadyProps.playerPokemon,
       enemyPokemon: commandReadyProps.enemyPokemon,
@@ -1134,7 +1134,7 @@ extension PokeUITests {
     let wildProps = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -1177,7 +1177,7 @@ extension PokeUITests {
     let trainerProps = BattleSidebarProps(
       trainerName: "BLUE",
       kind: .trainer,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: wildProps.playerPokemon,
       enemyPokemon: wildProps.enemyPokemon,
@@ -1200,7 +1200,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -1252,7 +1252,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: .init(
         speciesID: "BULBASAUR",
@@ -1350,7 +1350,7 @@ extension PokeUITests {
     let moveSelection = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "moveSelection",
+      phase: .moveSelection,
       promptText: "Pick the next move.",
       playerPokemon: basePlayerPokemon,
       enemyPokemon: baseEnemyPokemon,
@@ -1362,7 +1362,7 @@ extension PokeUITests {
     let trainerDecision = BattleSidebarProps(
       trainerName: "BUG CATCHER",
       kind: .trainer,
-      phase: "trainerAboutToUseDecision",
+      phase: .trainerAboutToUseDecision,
       promptText: "Will RED change #MON?",
       playerPokemon: basePlayerPokemon,
       enemyPokemon: baseEnemyPokemon,
@@ -1374,7 +1374,7 @@ extension PokeUITests {
     let partySelection = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "partySelection",
+      phase: .partySelection,
       promptText: "Bring out which #MON?",
       playerPokemon: basePlayerPokemon,
       enemyPokemon: baseEnemyPokemon,
@@ -1412,7 +1412,7 @@ extension PokeUITests {
     let turnText = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "turnText",
+      phase: .turnText,
       promptText: "Bulbasaur used Tackle!",
       playerPokemon: basePlayerPokemon,
       enemyPokemon: baseEnemyPokemon,
@@ -1432,7 +1432,7 @@ extension PokeUITests {
       BattleSidebarProps(
         trainerName: "PIDGEY",
         kind: .wild,
-        phase: "partySelection",
+        phase: .partySelection,
         promptText: "Bring out which #MON?",
         playerPokemon: .init(
           speciesID: "BULBASAUR",
@@ -1627,7 +1627,7 @@ extension PokeUITests {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",
       kind: .wild,
-      phase: "partySelection",
+      phase: .partySelection,
       promptText: "Use POTION on which #MON?",
       playerPokemon: .init(
         speciesID: "BULBASAUR",

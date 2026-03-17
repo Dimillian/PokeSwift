@@ -114,7 +114,10 @@ extension GameRuntime {
 
     func makeFieldTransitionTelemetry() -> FieldTransitionTelemetry? {
         fieldTransitionState.map {
-            .init(kind: $0.kind.rawValue, phase: $0.phase.rawValue)
+            .init(
+                kind: FieldTransitionKind(rawValue: $0.kind.rawValue) ?? .warp,
+                phase: FieldTransitionPhase(rawValue: $0.phase.rawValue) ?? .fadingOut
+            )
         }
     }
 

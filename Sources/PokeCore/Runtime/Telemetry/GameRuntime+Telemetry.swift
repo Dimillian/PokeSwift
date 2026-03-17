@@ -77,7 +77,7 @@ extension GameRuntime {
         guard let fieldPromptState else { return nil }
         return FieldPromptTelemetry(
             interactionID: fieldPromptState.interactionID,
-            kind: fieldPromptState.kind.rawValue,
+            kind: fieldPromptState.kind,
             options: fieldPromptOptions(for: fieldPromptState.kind),
             focusedIndex: fieldPromptState.focusedIndex
         )
@@ -87,7 +87,7 @@ extension GameRuntime {
         guard let fieldHealingState else { return nil }
         return FieldHealingTelemetry(
             interactionID: fieldHealingState.interactionID,
-            phase: fieldHealingState.phase.rawValue,
+            phase: FieldHealingPhase(rawValue: fieldHealingState.phase.rawValue) ?? .priming,
             activeBallCount: fieldHealingState.activeBallCount,
             totalBallCount: fieldHealingState.totalBallCount,
             pulseStep: fieldHealingState.pulseStep,
@@ -122,7 +122,7 @@ extension GameRuntime {
             canRun: battle.canRun,
             canUseBag: currentBattleBagItems.isEmpty == false,
             canSwitch: canUseBattleSwitch(for: battle, gameplayState: gameplayState),
-            phase: battle.phase.rawValue,
+            phase: BattlePhaseTelemetry(rawValue: battle.phase.rawValue) ?? .moveSelection,
             textLines: battle.message.isEmpty ? [] : [battle.message],
             learnMovePrompt: makeBattleLearnMovePromptTelemetry(from: battle),
             moveSlots: battleDisplayedMoveSet(for: battle).compactMap { makeBattleMoveSlotTelemetry(from: $0) },
@@ -203,13 +203,15 @@ extension GameRuntime {
         return ShopTelemetry(
             martID: mart.id,
             title: currentMapManifest?.displayName ?? "Poke Mart",
-            phase: shopState.phase.rawValue,
+            phase: ShopPhaseTelemetry(rawValue: shopState.phase.rawValue) ?? .mainMenu,
             promptText: shopState.message,
             focusedMainMenuIndex: shopState.focusedMainMenuIndex,
             focusedItemIndex: shopState.focusedItemIndex,
             focusedConfirmationIndex: shopState.focusedConfirmationIndex,
             selectedQuantity: shopState.selectedQuantity,
-            selectedTransactionKind: shopState.transaction?.kind.rawValue,
+            selectedTransactionKind: shopState.transaction.flatMap {
+                ShopTransactionKindTelemetry(rawValue: $0.kind.rawValue)
+            },
             menuOptions: ["BUY", "SELL", "QUIT"],
             buyItems: buyItems,
             sellItems: sellItems

@@ -56,7 +56,7 @@ struct BattleStageView: View {
 
     @ViewBuilder
     private var overlayContent: some View {
-        if props.phase == "bagSelection" &&
+        if props.phase == .bagSelection &&
             props.bag.sections.isEmpty == false &&
             props.presentation.uiVisibility == .visible {
             BattleBagOverlayPanel(

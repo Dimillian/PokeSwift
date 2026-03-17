@@ -51,7 +51,7 @@ extension PokeCoreTests {
         runtime.handle(button: .down)
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "bagSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .bagSelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.bagItems.map(\.itemID), ["POKE_BALL"])
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 0)
 
@@ -114,11 +114,11 @@ extension PokeCoreTests {
         }
 
         runtime.handle(button: .confirm)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "bagSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .bagSelection)
 
         runtime.setBattleRandomOverrides([0, 0, 0, 0])
         runtime.handle(button: .confirm)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 0)
 
         runtime.handle(button: .confirm)
@@ -174,7 +174,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .moveSelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "It won't have any effect.")
         XCTAssertEqual(runtime.itemQuantity("POTION"), 1)
     }
@@ -226,7 +226,7 @@ extension PokeCoreTests {
         }
         runtime.handle(button: .confirm)
 
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "bagSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .bagSelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.bagItems.map(\.itemID), ["ITEM_A", "ITEM_B", "ITEM_C", "ITEM_D", "ITEM_E"])
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedBagItemIndex, 0)
 
@@ -436,7 +436,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         XCTAssertEqual(runtime.itemQuantity("POKE_BALL"), 1)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "turnText")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .turnText)
         XCTAssertEqual(
             runtime.currentSnapshot().battle?.battleMessage,
             runtime.paginatedBattleMessage("The #MON BOX is full! Can't use that item!").first
@@ -514,13 +514,13 @@ extension PokeCoreTests {
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, switchIndex)
 
         runtime.handle(button: .confirm)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 1)
 
         runtime.handle(button: .confirm)
         advanceBattleTextUntilMoveSelection(runtime)
 
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .moveSelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.displayName, "Wing")
         XCTAssertEqual(runtime.gameplayState?.playerParty.first?.speciesID, "SQUIRTLE")
         XCTAssertEqual(runtime.gameplayState?.playerParty.dropFirst().first?.speciesID, "PIDGEY")
@@ -552,15 +552,15 @@ extension PokeCoreTests {
         }
 
         runtime.handle(button: .confirm)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 1)
 
         runtime.handlePartySidebarSelection(0)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Lead is already out!")
 
         runtime.handlePartySidebarSelection(2)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "There's no will to battle!")
     }
 
@@ -603,22 +603,22 @@ extension PokeCoreTests {
 
         runtime.handle(button: .confirm)
         runtime.handle(button: .confirm)
-        advanceBattleUntilPhase(runtime, phase: "partySelection")
+        advanceBattleUntilPhase(runtime, phase: .partySelection)
 
         XCTAssertEqual(runtime.scene, .battle)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.focusedPartyIndex, 0)
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.currentHP, 0)
 
         runtime.handle(button: .cancel)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "partySelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .partySelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.battleMessage, "Bring out which #MON?")
 
         let replacementHP = runtime.gameplayState?.playerParty[0].currentHP
         runtime.handle(button: .confirm)
         advanceBattleTextUntilMoveSelection(runtime)
 
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "moveSelection")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .moveSelection)
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.displayName, "Lead")
         XCTAssertEqual(runtime.currentSnapshot().battle?.playerPokemon.currentHP, replacementHP)
     }
@@ -732,7 +732,7 @@ extension PokeCoreTests {
 
         waitUntil(
             runtime.battlePresentationTask == nil &&
-                runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.phase == .turnText &&
                 runtime.currentSnapshot().battle?.battleMessage == "Go! Swap!" &&
                 {
                     guard case .continueSwitchTurn? = runtime.gameplayState?.battle?.pendingAction else {
@@ -747,7 +747,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "turnText" &&
+            runtime.currentSnapshot().battle?.phase == .turnText &&
                 runtime.currentSnapshot().battle?.battleMessage == "Enemy used TACKLE!" &&
                 runtime.battlePresentationTask == nil &&
                 (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
@@ -930,15 +930,15 @@ extension PokeCoreTests {
         runtime.startBattle(id: "opp_rival1_2")
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPartyCount, 2)
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyActiveIndex, 0)
-        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, "introText")
+        XCTAssertEqual(runtime.currentSnapshot().battle?.phase, .introText)
 
         drainBattleText(runtime)
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattleUntilPhase(runtime, phase: "trainerAboutToUseDecision")
+        advanceBattleUntilPhase(runtime, phase: .trainerAboutToUseDecision)
         runtime.handle(button: .down)
         runtime.handle(button: .confirm)
-        advanceBattleUntilPhase(runtime, phase: "moveSelection")
+        advanceBattleUntilPhase(runtime, phase: .moveSelection)
 
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyActiveIndex, 1)
         XCTAssertEqual(runtime.currentSnapshot().battle?.enemyPartyCount, 2)
@@ -1117,7 +1117,7 @@ extension PokeCoreTests {
 
         runtime.handle(button: .confirm)
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "moveSelection",
+            runtime.currentSnapshot().battle?.phase == .moveSelection,
             message: "battle did not return to move selection after choosing no",
             maxTicks: 240
         )
@@ -1861,7 +1861,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "turnText" &&
+                runtime.currentSnapshot().battle?.phase == .turnText &&
                 runtime.currentSnapshot().battle?.battleMessage == "Fastmon used TACKLE!" &&
                 runtime.battlePresentationTask == nil &&
                 (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
@@ -1878,7 +1878,7 @@ extension PokeCoreTests {
         )
 
         waitUntil(
-            runtime.currentSnapshot().battle?.phase == "turnText" &&
+            runtime.currentSnapshot().battle?.phase == .turnText &&
                 runtime.currentSnapshot().battle?.battleMessage == "Slowmon used TACKLE!" &&
                 runtime.battlePresentationTask == nil,
             message: "enemy turn did not pause on the used-move prompt",
@@ -4502,7 +4502,7 @@ extension PokeCoreTests {
 
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
-        advanceBattleUntilPhase(runtime, phase: "learnMoveDecision")
+        advanceBattleUntilPhase(runtime, phase: .learnMoveDecision)
 
         var snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
         XCTAssertEqual(snapshot.learnMovePrompt?.stage, .confirm)
@@ -4512,14 +4512,14 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.phase, "learnMoveSelection")
+        XCTAssertEqual(snapshot.phase, .learnMoveSelection)
         XCTAssertEqual(snapshot.learnMovePrompt?.stage, .replace)
 
         runtime.handle(button: .down)
         runtime.handle(button: .confirm)
 
         snapshot = try XCTUnwrap(runtime.currentSnapshot().battle)
-        XCTAssertEqual(snapshot.phase, "learnMoveSelection")
+        XCTAssertEqual(snapshot.phase, .learnMoveSelection)
         XCTAssertEqual(snapshot.battleMessage, "CUT can't be forgotten.")
 
         runtime.handle(button: .down)

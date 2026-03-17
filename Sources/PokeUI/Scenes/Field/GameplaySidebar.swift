@@ -209,17 +209,17 @@ private struct BattleModeSidebarContent: View {
             return "Intro"
         }
         switch props.phase {
-        case "moveSelection":
+        case .moveSelection:
             return "Moves"
-        case "partySelection":
+        case .partySelection:
             return "Party"
-        case "trainerAboutToUseDecision":
+        case .trainerAboutToUseDecision:
             return "Shift"
-        case "resolvingTurn":
+        case .resolvingTurn:
             return "Resolving"
-        case "turnText":
+        case .turnText:
             return "Text"
-        case "battleComplete":
+        case .battleComplete:
             return "Result"
         default:
             return "Battle"
@@ -231,7 +231,7 @@ private struct BattleModeSidebarContent: View {
         return [
             props.presentation.stage.rawValue,
             props.presentation.activeSide?.rawValue ?? "none",
-            props.phase,
+            props.phase.rawValue,
             props.learnMovePrompt?.stage.rawValue ?? "none",
             props.showsEnemyCombatantStatus.description,
             props.showsPlayerCombatantStatus.description,
