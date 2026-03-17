@@ -113,8 +113,7 @@ extension GameRuntime {
                 continueCaptureAftermath(advanceCaptureAftermath(aftermath))
                 return
             }
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             beginNicknameConfirmationAfterCapture(advanceCaptureAftermath(aftermath))
         case .showDestination:
             showCaptureDestinationDialogue(aftermath)
@@ -253,11 +252,8 @@ extension GameRuntime {
             gameplayState.battle = nil
             self.gameplayState = gameplayState
         }
-        scene = .field
-        substate = "field"
         captureAftermathPokedexSelectionID = nil
-        requestDefaultMapMusic()
-        publishSnapshot()
+        enterSettledFieldState(restoreMapMusic: true, publishSnapshot: true)
     }
 
     private func applyNicknameToLastPartyMember(_ nickname: String) {

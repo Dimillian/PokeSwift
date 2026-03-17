@@ -56,12 +56,10 @@ extension GameRuntime {
             return
         }
 
-        self.dialogueState = nil
-        isDialogueAudioBlockingInput = false
+        clearTransientInteractionState()
         switch dialogueState.completionAction {
         case .returnToField:
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
         case .continueScript:
             scene = .scriptedSequence
             runActiveScript()
@@ -76,27 +74,23 @@ extension GameRuntime {
             substate = "starter_choice"
             starterChoiceFocusedIndex = max(0, starterChoiceOptions.firstIndex(where: { $0.id == preselectedSpeciesID }) ?? 0)
         case .beginPostChoiceSequence:
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             finalizeStarterChoiceSequence()
         case .beginPostChoiceNaming:
             guard let speciesID = gameplayState?.pendingStarterSpeciesID else {
-                scene = .field
-                substate = "field"
+                enterSettledFieldState()
                 finalizeStarterChoiceSequence()
                 return
             }
             let defaultName = content.species(id: speciesID)?.displayName ?? speciesID.capitalized
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             beginNicknameConfirmation(
                 speciesID: speciesID,
                 defaultName: defaultName,
                 completion: .returnToFieldAfterStarter
             )
         case let .finishTrainerBattle(won, preventsBlackoutOnLoss, postBattleScriptID, runsPostBattleScriptOnLoss, sourceTrainerObjectID):
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             completeTrainerBattleDialogue(
                 won: won,
                 preventsBlackoutOnLoss: preventsBlackoutOnLoss,
@@ -105,16 +99,13 @@ extension GameRuntime {
                 sourceTrainerObjectID: sourceTrainerObjectID
             )
         case let .startBattle(battleID, sourceTrainerObjectID):
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             startBattle(id: battleID, sourceTrainerObjectID: sourceTrainerObjectID)
         case let .showDialogue(dialogueID, completionAction):
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             showDialogue(id: dialogueID, completion: completionAction)
         case let .continueCaptureAftermath(aftermath):
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             continueCaptureAftermath(aftermath)
         case let .fieldPrompt(interactionID, completionAction):
             scene = .dialogue
@@ -150,8 +141,7 @@ extension GameRuntime {
         case let .startFieldHealing(interactionID, completionAction):
             startFieldHealing(interactionID: interactionID, completionAction: completionAction)
         case let .beginScriptedMovement(path):
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             beginScriptedPlayerMovement(path)
         }
     }
@@ -197,8 +187,7 @@ extension GameRuntime {
                     dialogueID: id,
                     details: details
                 )
-                scene = .field
-                substate = "field"
+                enterSettledFieldState()
             }
             return
         }
@@ -255,9 +244,7 @@ extension GameRuntime {
         pages: [DialoguePage],
         completion: DialogueState.CompletionAction
     ) {
-        fieldPromptState = nil
-        scriptItemPromptState = nil
-        scriptChoicePromptState = nil
+        clearTransientInteractionState()
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
         }
@@ -301,12 +288,9 @@ extension GameRuntime {
                     gameplayState.objectStates[objectID]?.visible = false
                     self.gameplayState = gameplayState
                 }
-                scene = .field
-                substate = "field"
+                enterSettledFieldState()
             case .restoreMapMusic:
-                requestDefaultMapMusic()
-                scene = .field
-                substate = "field"
+                enterSettledFieldState(restoreMapMusic: true)
             }
         }
     }

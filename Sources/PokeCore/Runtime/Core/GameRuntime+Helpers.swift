@@ -67,17 +67,6 @@ extension GameRuntime {
     }
 
     static func missingAssets(in content: LoadedContent) -> [String] {
-        let requiredPaths =
-            content.titleManifest.assets.map(\.relativePath) +
-            content.gameplayManifest.tilesets.flatMap { [$0.imagePath, $0.blocksetPath] } +
-            content.gameplayManifest.tilesets.flatMap { tileset in
-                tileset.animation.animatedTiles.flatMap(\.frameImagePaths)
-            } +
-            content.gameplayManifest.overworldSprites.map(\.imagePath)
-
-        return requiredPaths.compactMap { relativePath in
-            let url = content.rootURL.appendingPathComponent(relativePath)
-            return FileManager.default.fileExists(atPath: url.path) ? nil : relativePath
-        }
+        content.missingRequiredAssetPaths()
     }
 }

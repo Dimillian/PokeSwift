@@ -69,9 +69,7 @@ extension GameRuntime {
         if gameplayState?.activeScriptID != nil {
             finishScript()
         }
-        scene = .field
-        substate = "field"
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 
     func finishWildBattleEscape() {
@@ -83,8 +81,6 @@ extension GameRuntime {
         }
         gameplayState.battle = nil
         self.gameplayState = gameplayState
-        scene = .field
-        substate = "field"
         if let battle {
             traceEvent(
                 .battleEnded,
@@ -98,7 +94,7 @@ extension GameRuntime {
                 ]
             )
         }
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 
     func finishWildBattle(battle: RuntimeBattleState, won: Bool) {
@@ -186,8 +182,6 @@ extension GameRuntime {
             performBlackout(sourceTrainerObjectID: nil)
             return
         }
-        scene = .field
-        substate = "field"
         traceEvent(
             .battleEnded,
             "Finished wild battle \(battle.battleID).",
@@ -199,7 +193,7 @@ extension GameRuntime {
                 "opponent": battle.trainerName,
             ]
         )
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 
     func beginBlackoutSequence(battle: inout RuntimeBattleState) {
@@ -241,8 +235,6 @@ extension GameRuntime {
         gameplayState.battle = nil
         self.gameplayState = gameplayState
         captureAftermathPokedexSelectionID = nil
-        scene = .field
-        substate = "field"
         traceEvent(
             .battleEnded,
             "Captured \(battle.enemyPokemon.speciesID) in \(battle.battleID).",
@@ -254,7 +246,7 @@ extension GameRuntime {
                 "speciesID": battle.enemyPokemon.speciesID,
             ]
         )
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
         continueCaptureAftermath(aftermath)
     }
 
@@ -505,8 +497,7 @@ extension GameRuntime {
         gameplayState.activeScriptStep = nil
         self.gameplayState = gameplayState
         healParty()
-        dialogueState = nil
-        fieldPromptState = nil
+        clearTransientInteractionState()
         fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil
@@ -527,9 +518,7 @@ extension GameRuntime {
                 "checkpointMapID": checkpoint?.mapID ?? gameplayState.mapID,
             ]
         )
-        scene = .field
-        substate = "field"
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 
     func rivalStarter(for playerStarter: String) -> String {

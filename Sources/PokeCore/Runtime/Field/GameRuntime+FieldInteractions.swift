@@ -4,14 +4,11 @@ import PokeDataModel
 extension GameRuntime {
     func startFieldInteraction(id: String, completionAction: DialogueState.CompletionAction) {
         guard let interaction = content.fieldInteraction(id: id) else {
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             return
         }
 
-        fieldPromptState = nil
-        scriptItemPromptState = nil
-        scriptChoicePromptState = nil
+        clearTransientInteractionState()
         fieldHealingState = nil
 
         switch interaction.kind {
@@ -39,8 +36,7 @@ extension GameRuntime {
             )
         case .paidAdmission:
             guard let paidAdmission = interaction.paidAdmission else {
-                scene = .field
-                substate = "field"
+                enterSettledFieldState()
                 return
             }
 
@@ -119,13 +115,8 @@ extension GameRuntime {
         accepted: Bool,
         promptState: RuntimeScriptItemPromptState
     ) {
-        fieldPromptState = nil
-        scriptItemPromptState = nil
-        scriptChoicePromptState = nil
-        dialogueState = nil
-        isDialogueAudioBlockingInput = false
-        scene = .field
-        substate = "field"
+        clearTransientInteractionState()
+        enterSettledFieldState()
 
         guard accepted else {
             finishScript()
@@ -168,11 +159,7 @@ extension GameRuntime {
         accepted: Bool,
         promptState: RuntimeScriptChoicePromptState
     ) {
-        fieldPromptState = nil
-        scriptItemPromptState = nil
-        scriptChoicePromptState = nil
-        dialogueState = nil
-        isDialogueAudioBlockingInput = false
+        clearTransientInteractionState()
 
         if accepted {
             scene = .scriptedSequence
@@ -180,8 +167,7 @@ extension GameRuntime {
             return
         }
 
-        scene = .field
-        substate = "field"
+        enterSettledFieldState()
         if let failureDialogueID = promptState.failureDialogueID {
             showDialogue(id: failureDialogueID, completion: .continueScript)
         } else {
@@ -195,11 +181,8 @@ extension GameRuntime {
         promptState: RuntimeFieldPromptState,
         interaction: FieldInteractionManifest
     ) {
-        fieldPromptState = nil
-        dialogueState = nil
-        isDialogueAudioBlockingInput = false
-        scene = .field
-        substate = "field"
+        clearTransientInteractionState()
+        enterSettledFieldState()
 
         switch interaction.kind {
         case .pokemonCenterHealing:
@@ -256,8 +239,7 @@ extension GameRuntime {
     func startFieldHealing(interactionID: String, completionAction: DialogueState.CompletionAction) {
         guard let interaction = content.fieldInteraction(id: interactionID),
               let healing = interaction.healingSequence else {
-            scene = .field
-            substate = "field"
+            enterSettledFieldState()
             return
         }
 
@@ -353,8 +335,7 @@ extension GameRuntime {
             setObjectFacing(nurseObjectID, to: originalFacing)
         }
         fieldHealingState = nil
-        scene = .field
-        substate = "field"
+        enterSettledFieldState()
         showDialogue(
             id: interaction.successDialogueID,
             completion: .showDialogue(

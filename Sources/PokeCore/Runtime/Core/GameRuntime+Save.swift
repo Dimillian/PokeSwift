@@ -217,10 +217,7 @@ extension GameRuntime {
         )
         reseedRuntimeRNG()
         clearHeldFieldDirections()
-        dialogueState = nil
-        fieldPromptState = nil
-        scriptItemPromptState = nil
-        scriptChoicePromptState = nil
+        clearTransientInteractionState()
         fieldHealingState = nil
         shopState = nil
         fieldPartyReorderState = nil
@@ -231,10 +228,8 @@ extension GameRuntime {
         fieldAlertState = nil
         starterChoiceFocusedIndex = 0
         placeholderTitle = nil
-        scene = .field
-        substate = "field"
         restartGameplayClock()
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 
     func makeSaveObjectState(from objectState: RuntimeObjectState) -> GameSaveObjectState {

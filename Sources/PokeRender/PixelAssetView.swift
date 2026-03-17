@@ -53,7 +53,7 @@ public struct PixelAssetView: View {
         .task(id: taskID) {
             let image = await PixelAssetImageRepository.shared.image(
                 for: url,
-                whiteIsTransparent: whiteIsTransparent,
+                maskStrategy: whiteIsTransparent ? .floodFillBorderWhite : .none,
                 renderMode: renderMode
             )
             guard Task.isCancelled == false else { return }
@@ -69,7 +69,7 @@ public struct PixelAssetView: View {
     private var syncProcessedImage: CGImage? {
         PixelAssetImageRepository.loadImage(
             for: url,
-            whiteIsTransparent: whiteIsTransparent,
+            maskStrategy: whiteIsTransparent ? .floodFillBorderWhite : .none,
             renderMode: renderMode
         )
     }

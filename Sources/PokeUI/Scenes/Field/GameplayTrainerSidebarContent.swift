@@ -1,7 +1,6 @@
-import CoreGraphics
-import ImageIO
 import SwiftUI
 import PokeDataModel
+import PokeRender
 
 struct TrainerProfileContent: View {
     let props: TrainerProfileProps
@@ -202,76 +201,12 @@ public struct PixelSpriteFrameView: View {
     }
 
     public var body: some View {
-        Group {
-            if let image = croppedFrameImage {
-                Image(decorative: image, scale: 1)
-                    .resizable()
-                    .interpolation(.none)
-                    .antialiased(false)
-                    .aspectRatio(contentMode: .fit)
-                    .scaleEffect(x: frame.flippedHorizontally ? -1 : 1, y: 1)
-            } else {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(FieldRetroPalette.outline.opacity(0.12))
-                    .overlay {
-                        Text("??")
-                            .font(.system(size: 15, weight: .black, design: .monospaced))
-                            .foregroundStyle(FieldRetroPalette.ink.opacity(0.6))
-                    }
-            }
-        }
-        .accessibilityLabel(label)
-    }
-
-    private var croppedFrameImage: CGImage? {
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
-              let croppedImage = image.cropping(to: CGRect(x: frame.x, y: frame.y, width: frame.width, height: frame.height).integral),
-              let maskedImage = applyTransparencyMask(to: croppedImage) else {
-            return nil
-        }
-        return maskedImage
-    }
-
-    private func applyTransparencyMask(to image: CGImage) -> CGImage? {
-        let width = image.width
-        let height = image.height
-        let bytesPerRow = width
-        var grayscaleBytes = [UInt8](repeating: 0, count: width * height)
-
-        guard let grayscaleContext = CGContext(
-            data: &grayscaleBytes,
-            width: width,
-            height: height,
-            bitsPerComponent: 8,
-            bytesPerRow: bytesPerRow,
-            space: CGColorSpaceCreateDeviceGray(),
-            bitmapInfo: CGImageAlphaInfo.none.rawValue
-        ) else {
-            return nil
-        }
-
-        grayscaleContext.interpolationQuality = .none
-        grayscaleContext.setShouldAntialias(false)
-        grayscaleContext.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
-
-        let maskBytes = grayscaleBytes.map { $0 == 255 ? UInt8(255) : UInt8(0) }
-        let maskData = Data(maskBytes) as CFData
-
-        guard let provider = CGDataProvider(data: maskData),
-              let mask = CGImage(
-                maskWidth: width,
-                height: height,
-                bitsPerComponent: 8,
-                bitsPerPixel: 8,
-                bytesPerRow: width,
-                provider: provider,
-                decode: nil,
-                shouldInterpolate: false
-              ) else {
-            return nil
-        }
-
-        return image.masking(mask)
+        PixelAssetFrameView(
+            url: url,
+            cropRect: CGRect(x: frame.x, y: frame.y, width: frame.width, height: frame.height),
+            label: label,
+            maskStrategy: .allWhitePixels,
+            flipHorizontal: frame.flippedHorizontally
+        )
     }
 }

@@ -41,4 +41,29 @@ extension PokeRenderTests {
     XCTAssertEqual(
       rgbValue(in: compositedImage, x: 2, y: 2), .init(red: 255, green: 255, blue: 255))
   }
+
+  func testSimpleWhiteMaskClearsInteriorWhitePixelsToo() throws {
+    let image = try makeRGBAImage(
+      width: 3,
+      height: 3,
+      pixels: [
+        0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255,
+        0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
+      ]
+    )
+
+    guard
+      let maskedImage = PixelAssetMasking.applyWhiteTransparencyMask(
+        to: image,
+        strategy: .allWhitePixels
+      )
+    else {
+      return XCTFail("Expected simple white masking to succeed")
+    }
+
+    XCTAssertEqual(alphaValue(in: maskedImage, x: 1, y: 1), 0)
+    XCTAssertEqual(alphaValue(in: maskedImage, x: 1, y: 0), 0)
+    XCTAssertEqual(alphaValue(in: maskedImage, x: 0, y: 0), 255)
+  }
 }

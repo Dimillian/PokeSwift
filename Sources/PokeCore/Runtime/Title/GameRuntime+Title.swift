@@ -113,8 +113,7 @@ extension GameRuntime {
         gameplayState = makeInitialGameplayState()
         playthroughID = UUID().uuidString
         reseedRuntimeRNG()
-        dialogueState = nil
-        fieldPromptState = nil
+        clearTransientInteractionState()
         fieldHealingState = nil
         placeholderTitle = nil
         starterChoiceFocusedIndex = 0

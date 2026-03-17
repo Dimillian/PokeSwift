@@ -100,74 +100,7 @@ func buildMapScripts() -> [MapScriptManifest] {
         ),
         MapScriptManifest(
             mapID: "ROUTE_22",
-            triggers: [
-                .init(
-                    id: "first_rival_upper_after_charmander",
-                    scriptID: "route_22_rival_1_challenge_4_upper",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 4),
-                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
-                    ]
-                ),
-                .init(
-                    id: "first_rival_upper_after_squirtle",
-                    scriptID: "route_22_rival_1_challenge_5_upper",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 4),
-                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
-                    ]
-                ),
-                .init(
-                    id: "first_rival_upper_after_bulbasaur",
-                    scriptID: "route_22_rival_1_challenge_6_upper",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 4),
-                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
-                    ]
-                ),
-                .init(
-                    id: "first_rival_lower_after_charmander",
-                    scriptID: "route_22_rival_1_challenge_4_lower",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 5),
-                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
-                    ]
-                ),
-                .init(
-                    id: "first_rival_lower_after_squirtle",
-                    scriptID: "route_22_rival_1_challenge_5_lower",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 5),
-                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
-                    ]
-                ),
-                .init(
-                    id: "first_rival_lower_after_bulbasaur",
-                    scriptID: "route_22_rival_1_challenge_6_lower",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                        .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                        .init(kind: "playerXEquals", intValue: 29),
-                        .init(kind: "playerYEquals", intValue: 5),
-                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
-                    ]
-                ),
-            ]
+            triggers: route22RivalMapTriggers()
         ),
         MapScriptManifest(
             mapID: "ROUTE_22_GATE",
@@ -204,101 +137,11 @@ func buildMapScripts() -> [MapScriptManifest] {
                         .init(kind: "playerYEquals", intValue: 6),
                     ]
                 ),
-                .init(
-                    id: "rival_challenge_after_charmander",
-                    scriptID: "oaks_lab_rival_challenge_vs_squirtle",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_GOT_STARTER"),
-                        .init(kind: "flagUnset", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
-                    ]
-                ),
-                .init(
-                    id: "rival_challenge_after_squirtle",
-                    scriptID: "oaks_lab_rival_challenge_vs_bulbasaur",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_GOT_STARTER"),
-                        .init(kind: "flagUnset", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
-                    ]
-                ),
-                .init(
-                    id: "rival_challenge_after_bulbasaur",
-                    scriptID: "oaks_lab_rival_challenge_vs_charmander",
-                    conditions: [
-                        .init(kind: "flagSet", flagID: "EVENT_GOT_STARTER"),
-                        .init(kind: "flagUnset", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
-                    ]
-                ),
-            ]
+            ] + oakLabRivalChallengeTriggers()
         ),
         MapScriptManifest(
             mapID: "CERULEAN_CITY",
-            triggers: [
-                .init(
-                    id: "rival_bridge_left_after_charmander",
-                    scriptID: "cerulean_city_rival_vs_squirtle",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 20),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
-                    ]
-                ),
-                .init(
-                    id: "rival_bridge_left_after_squirtle",
-                    scriptID: "cerulean_city_rival_vs_bulbasaur",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 20),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
-                    ]
-                ),
-                .init(
-                    id: "rival_bridge_left_after_bulbasaur",
-                    scriptID: "cerulean_city_rival_vs_charmander",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 20),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
-                    ]
-                ),
-                .init(
-                    id: "rival_bridge_right_after_charmander",
-                    scriptID: "cerulean_city_rival_vs_squirtle",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 21),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "CHARMANDER"),
-                    ]
-                ),
-                .init(
-                    id: "rival_bridge_right_after_squirtle",
-                    scriptID: "cerulean_city_rival_vs_bulbasaur",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 21),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "SQUIRTLE"),
-                    ]
-                ),
-                .init(
-                    id: "rival_bridge_right_after_bulbasaur",
-                    scriptID: "cerulean_city_rival_vs_charmander",
-                    conditions: [
-                        .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
-                        .init(kind: "playerXEquals", intValue: 21),
-                        .init(kind: "playerYEquals", intValue: 6),
-                        .init(kind: "chosenStarterEquals", stringValue: "BULBASAUR"),
-                    ]
-                ),
+            triggers: ceruleanRivalMapTriggers() + [
                 .init(
                     id: "rocket_yard_entry_upper",
                     scriptID: "cerulean_city_rocket_battle_upper",
@@ -368,6 +211,65 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
     let rivalExitPath = try parseMovementLabel(".RivalExitMovement", from: oaksLabScripts)
     let route22Rival1ExitPathLower = try parseMovementLabel("Route22Rival1ExitMovementData1", from: route22Scripts)
     let route22Rival1ExitPathUpper = try parseMovementLabel("Route22Rival1ExitMovementData2", from: route22Scripts)
+    let oakLabRivalPickupSpecs: [OakLabRivalPickupScriptSpec] = [
+        .init(
+            playerStarterID: "CHARMANDER",
+            rivalSpeciesID: "SQUIRTLE",
+            hiddenBallObjectID: "oaks_lab_poke_ball_squirtle",
+            variants: [
+                .init(
+                    id: "player_below_table",
+                    conditions: [.init(kind: "playerYEquals", intValue: 4)],
+                    path: rivalMiddleBall1,
+                    point: nil
+                ),
+                .init(
+                    id: "default",
+                    conditions: [],
+                    path: rivalMiddleBall2,
+                    point: nil
+                ),
+            ]
+        ),
+        .init(
+            playerStarterID: "SQUIRTLE",
+            rivalSpeciesID: "BULBASAUR",
+            hiddenBallObjectID: "oaks_lab_poke_ball_bulbasaur",
+            variants: [
+                .init(
+                    id: "player_below_table",
+                    conditions: [.init(kind: "playerYEquals", intValue: 4)],
+                    path: rivalRightBall1,
+                    point: nil
+                ),
+                .init(
+                    id: "default",
+                    conditions: [],
+                    path: rivalRightBall2,
+                    point: nil
+                ),
+            ]
+        ),
+        .init(
+            playerStarterID: "BULBASAUR",
+            rivalSpeciesID: "CHARMANDER",
+            hiddenBallObjectID: "oaks_lab_poke_ball_charmander",
+            variants: [
+                .init(
+                    id: "player_right_of_table",
+                    conditions: [.init(kind: "playerXEquals", intValue: 9)],
+                    path: rivalLeftBall2,
+                    point: .init(x: 9, y: 8)
+                ),
+                .init(
+                    id: "default",
+                    conditions: [],
+                    path: rivalLeftBall1,
+                    point: nil
+                ),
+            ]
+        ),
+    ]
 
     var scripts: [ScriptManifest] = [
         ScriptManifest(
@@ -604,139 +506,10 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
                 .init(action: "facePlayer", stringValue: "up"),
             ]
         ),
-        ScriptManifest(
-            id: "oaks_lab_rival_picks_after_charmander",
-            steps: [
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .rivalStarterPickup,
-                        variants: [
-                            .init(
-                                id: "player_below_table",
-                                conditions: [.init(kind: "playerYEquals", intValue: 4)],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalMiddleBall1)]
-                            ),
-                            .init(
-                                id: "default",
-                                conditions: [],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalMiddleBall2)]
-                            ),
-                        ]
-                    )
-                ),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_this_one"),
-                .init(action: "setObjectVisibility", objectID: "oaks_lab_poke_ball_squirtle", visible: false),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_received_mon_squirtle"),
-            ]
-        ),
-        ScriptManifest(
-            id: "oaks_lab_rival_picks_after_squirtle",
-            steps: [
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .rivalStarterPickup,
-                        variants: [
-                            .init(
-                                id: "player_below_table",
-                                conditions: [.init(kind: "playerYEquals", intValue: 4)],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalRightBall1)]
-                            ),
-                            .init(
-                                id: "default",
-                                conditions: [],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalRightBall2)]
-                            ),
-                        ]
-                    )
-                ),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_this_one"),
-                .init(action: "setObjectVisibility", objectID: "oaks_lab_poke_ball_bulbasaur", visible: false),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_received_mon_bulbasaur"),
-            ]
-        ),
-        ScriptManifest(
-            id: "oaks_lab_rival_picks_after_bulbasaur",
-            steps: [
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .rivalStarterPickup,
-                        variants: [
-                            .init(
-                                id: "player_right_of_table",
-                                conditions: [.init(kind: "playerXEquals", intValue: 9)],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalLeftBall2)],
-                                point: .init(x: 9, y: 8)
-                            ),
-                            .init(
-                                id: "default",
-                                conditions: [],
-                                actors: [.init(actorID: "oaks_lab_rival", path: rivalLeftBall1)]
-                            ),
-                        ]
-                    )
-                ),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_this_one"),
-                .init(action: "setObjectVisibility", objectID: "oaks_lab_poke_ball_charmander", visible: false),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_received_mon_charmander"),
-            ]
-        ),
-        ScriptManifest(
-            id: "oaks_lab_rival_challenge_vs_squirtle",
-            steps: [
-                .init(action: "faceObject", stringValue: "down", objectID: "oaks_lab_rival"),
-                .init(action: "facePlayer", stringValue: "up"),
-                .init(action: "playMusicCue", stringValue: "rival_intro"),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .pathToPlayerAdjacent,
-                        actors: [.init(actorID: "oaks_lab_rival", path: [])],
-                        targetPlayerOffset: .init(x: 0, y: -1)
-                    )
-                ),
-                .init(action: "startBattle", battleID: "opp_rival1_1"),
-            ]
-        ),
-        ScriptManifest(
-            id: "oaks_lab_rival_challenge_vs_bulbasaur",
-            steps: [
-                .init(action: "faceObject", stringValue: "down", objectID: "oaks_lab_rival"),
-                .init(action: "facePlayer", stringValue: "up"),
-                .init(action: "playMusicCue", stringValue: "rival_intro"),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .pathToPlayerAdjacent,
-                        actors: [.init(actorID: "oaks_lab_rival", path: [])],
-                        targetPlayerOffset: .init(x: 0, y: -1)
-                    )
-                ),
-                .init(action: "startBattle", battleID: "opp_rival1_2"),
-            ]
-        ),
-        ScriptManifest(
-            id: "oaks_lab_rival_challenge_vs_charmander",
-            steps: [
-                .init(action: "faceObject", stringValue: "down", objectID: "oaks_lab_rival"),
-                .init(action: "facePlayer", stringValue: "up"),
-                .init(action: "playMusicCue", stringValue: "rival_intro"),
-                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .pathToPlayerAdjacent,
-                        actors: [.init(actorID: "oaks_lab_rival", path: [])],
-                        targetPlayerOffset: .init(x: 0, y: -1)
-                    )
-                ),
-                .init(action: "startBattle", battleID: "opp_rival1_3"),
-            ]
-        ),
+    ]
+    scripts.append(contentsOf: buildOakLabRivalPickupScripts(specs: oakLabRivalPickupSpecs))
+    scripts.append(contentsOf: buildOakLabRivalChallengeScripts())
+    scripts.append(
         ScriptManifest(
             id: "oaks_lab_rival_exit_after_battle",
             steps: [
@@ -754,8 +527,8 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
                 .init(action: "setObjectVisibility", objectID: "oaks_lab_rival", visible: false),
                 .init(action: "restoreMapMusic"),
             ]
-        ),
-    ]
+        )
+    )
 
     scripts.append(
         ScriptManifest(
@@ -825,138 +598,15 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
         )
     )
 
-    let route22ChallengeVariants: [(scriptID: String, battleID: String, offset: TilePoint, rivalFacing: String, playerFacing: String)] = [
-        ("route_22_rival_1_challenge_4_upper", "route_22_rival_1_4_upper", .init(x: 0, y: 1), "right", "left"),
-        ("route_22_rival_1_challenge_5_upper", "route_22_rival_1_5_upper", .init(x: 0, y: 1), "right", "left"),
-        ("route_22_rival_1_challenge_6_upper", "route_22_rival_1_6_upper", .init(x: 0, y: 1), "right", "left"),
-        ("route_22_rival_1_challenge_4_lower", "route_22_rival_1_4_lower", .init(x: -1, y: 0), "up", "down"),
-        ("route_22_rival_1_challenge_5_lower", "route_22_rival_1_5_lower", .init(x: -1, y: 0), "up", "down"),
-        ("route_22_rival_1_challenge_6_lower", "route_22_rival_1_6_lower", .init(x: -1, y: 0), "up", "down"),
-    ]
-
-    for variant in route22ChallengeVariants {
-        scripts.append(
-            ScriptManifest(
-                id: variant.scriptID,
-                steps: [
-                    .init(action: "playMusicCue", stringValue: "rival_intro"),
-                    .init(
-                        action: "performMovement",
-                        movement: .init(
-                            kind: .pathToPlayerAdjacent,
-                            actors: [.init(actorID: "route_22_rival_1", path: [])],
-                            targetPlayerOffset: variant.offset
-                        )
-                    ),
-                    .init(action: "faceObject", stringValue: variant.rivalFacing, objectID: "route_22_rival_1"),
-                    .init(action: "facePlayer", stringValue: variant.playerFacing),
-                    .init(action: "showDialogue", dialogueID: "route_22_rival_before_battle_1"),
-                    .init(action: "startBattle", battleID: variant.battleID),
-                ]
-            )
-        )
-    }
-
+    scripts.append(contentsOf: buildRoute22RivalChallengeScripts())
     scripts.append(
-        ScriptManifest(
-            id: "route_22_rival_1_exit_upper",
-            steps: [
-                .init(action: "showDialogue", dialogueID: "route_22_rival_after_battle_1"),
-                .init(action: "playMusicCue", stringValue: "rival_exit"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .fixedPath,
-                        actors: [.init(actorID: "route_22_rival_1", path: route22Rival1ExitPathUpper)]
-                    )
-                ),
-                .init(action: "setFlag", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"),
-                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
-                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                .init(action: "restoreMapMusic"),
-            ]
+        contentsOf: buildRoute22RivalExitScripts(
+            upperExitPath: route22Rival1ExitPathUpper,
+            lowerExitPath: route22Rival1ExitPathLower
         )
     )
-    scripts.append(
-        ScriptManifest(
-            id: "route_22_rival_1_exit_lower",
-            steps: [
-                .init(action: "showDialogue", dialogueID: "route_22_rival_after_battle_1"),
-                .init(action: "playMusicCue", stringValue: "rival_exit"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .fixedPath,
-                        actors: [.init(actorID: "route_22_rival_1", path: route22Rival1ExitPathLower)]
-                    )
-                ),
-                .init(action: "setFlag", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"),
-                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
-                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
-                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
-                .init(action: "restoreMapMusic"),
-            ]
-        )
-    )
-
-    for (scriptID, battleID) in [
-        ("cerulean_city_rival_vs_squirtle", "cerulean_city_rival_7"),
-        ("cerulean_city_rival_vs_bulbasaur", "cerulean_city_rival_8"),
-        ("cerulean_city_rival_vs_charmander", "cerulean_city_rival_9"),
-    ] {
-        scripts.append(
-            ScriptManifest(
-                id: scriptID,
-                steps: [
-                    .init(action: "playMusicCue", stringValue: "rival_intro"),
-                    .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: true),
-                    .init(
-                        action: "performMovement",
-                        movement: .init(
-                            kind: .pathToPlayerAdjacent,
-                            actors: [.init(actorID: "cerulean_city_rival", path: [])],
-                            targetPlayerOffset: .init(x: 0, y: -1)
-                        )
-                    ),
-                    .init(action: "faceObject", stringValue: "down", objectID: "cerulean_city_rival"),
-                    .init(action: "facePlayer", stringValue: "up"),
-                    .init(action: "showDialogue", dialogueID: "cerulean_city_rival_pre_battle"),
-                    .init(action: "startBattle", battleID: battleID),
-                ]
-            )
-        )
-    }
-
-    scripts.append(
-        ScriptManifest(
-            id: "cerulean_city_rival_after_battle",
-            steps: [
-                .init(action: "showDialogue", dialogueID: "cerulean_city_rival_i_went_to_bills"),
-                .init(action: "playMusicCue", stringValue: "rival_exit"),
-                .init(
-                    action: "performMovement",
-                    movement: .init(
-                        kind: .fixedPath,
-                        variants: [
-                            .init(
-                                id: "player_on_left",
-                                conditions: [.init(kind: "playerXEquals", intValue: 20)],
-                                actors: [.init(actorID: "cerulean_city_rival", path: [.left, .down, .down, .down, .down, .down, .down])]
-                            ),
-                            .init(
-                                id: "player_on_right",
-                                conditions: [.init(kind: "playerXEquals", intValue: 21)],
-                                actors: [.init(actorID: "cerulean_city_rival", path: [.right, .down, .down, .down, .down, .down, .down])]
-                            ),
-                        ]
-                    )
-                ),
-                .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: false),
-                .init(action: "restoreMapMusic"),
-            ]
-        )
-    )
+    scripts.append(contentsOf: buildCeruleanRivalBattleScripts())
+    scripts.append(buildCeruleanRivalAfterBattleScript())
 
     scripts.append(
         ScriptManifest(
@@ -1168,6 +818,310 @@ func pokemonCenterHealScriptID(for mapID: String) -> String {
 }
 
 // MARK: - Private helpers
+
+private struct RivalStarterTripletSpec {
+    let playerStarterID: String
+    let rivalSpeciesID: String
+    let oakLabTrainerNumber: Int
+    let route22TrainerNumber: Int
+    let ceruleanTrainerNumber: Int
+}
+
+private let rivalStarterTripletSpecs: [RivalStarterTripletSpec] = [
+    .init(
+        playerStarterID: "CHARMANDER",
+        rivalSpeciesID: "SQUIRTLE",
+        oakLabTrainerNumber: 1,
+        route22TrainerNumber: 4,
+        ceruleanTrainerNumber: 7
+    ),
+    .init(
+        playerStarterID: "SQUIRTLE",
+        rivalSpeciesID: "BULBASAUR",
+        oakLabTrainerNumber: 2,
+        route22TrainerNumber: 5,
+        ceruleanTrainerNumber: 8
+    ),
+    .init(
+        playerStarterID: "BULBASAUR",
+        rivalSpeciesID: "CHARMANDER",
+        oakLabTrainerNumber: 3,
+        route22TrainerNumber: 6,
+        ceruleanTrainerNumber: 9
+    ),
+]
+
+private struct Route22LaneSpec {
+    let idSuffix: String
+    let playerY: Int
+    let targetOffset: TilePoint
+    let rivalFacing: String
+    let playerFacing: String
+    let exitScriptID: String
+}
+
+private let route22LaneSpecs: [Route22LaneSpec] = [
+    .init(
+        idSuffix: "upper",
+        playerY: 4,
+        targetOffset: .init(x: 0, y: 1),
+        rivalFacing: "right",
+        playerFacing: "left",
+        exitScriptID: "route_22_rival_1_exit_upper"
+    ),
+    .init(
+        idSuffix: "lower",
+        playerY: 5,
+        targetOffset: .init(x: -1, y: 0),
+        rivalFacing: "up",
+        playerFacing: "down",
+        exitScriptID: "route_22_rival_1_exit_lower"
+    ),
+]
+
+private struct CeruleanBridgeLaneSpec {
+    let idSuffix: String
+    let playerX: Int
+    let exitPath: [FacingDirection]
+}
+
+private let ceruleanBridgeLaneSpecs: [CeruleanBridgeLaneSpec] = [
+    .init(idSuffix: "left", playerX: 20, exitPath: [.left, .down, .down, .down, .down, .down, .down]),
+    .init(idSuffix: "right", playerX: 21, exitPath: [.right, .down, .down, .down, .down, .down, .down]),
+]
+
+private struct OakLabRivalPickupVariantSpec {
+    let id: String
+    let conditions: [ScriptConditionManifest]
+    let path: [FacingDirection]
+    let point: TilePoint?
+}
+
+private struct OakLabRivalPickupScriptSpec {
+    let playerStarterID: String
+    let rivalSpeciesID: String
+    let hiddenBallObjectID: String
+    let variants: [OakLabRivalPickupVariantSpec]
+}
+
+private func route22RivalMapTriggers() -> [MapScriptTriggerManifest] {
+    route22LaneSpecs.flatMap { lane in
+        rivalStarterTripletSpecs.map { starter in
+            MapScriptTriggerManifest(
+                id: "first_rival_\(lane.idSuffix)_after_\(starter.playerStarterID.lowercased())",
+                scriptID: "route_22_rival_1_challenge_\(starter.route22TrainerNumber)_\(lane.idSuffix)",
+                conditions: [
+                    .init(kind: "flagSet", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                    .init(kind: "flagSet", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                    .init(kind: "playerXEquals", intValue: 29),
+                    .init(kind: "playerYEquals", intValue: lane.playerY),
+                    .init(kind: "chosenStarterEquals", stringValue: starter.playerStarterID),
+                ]
+            )
+        }
+    }
+}
+
+private func oakLabRivalChallengeTriggers() -> [MapScriptTriggerManifest] {
+    rivalStarterTripletSpecs.map { starter in
+        MapScriptTriggerManifest(
+            id: "rival_challenge_after_\(starter.playerStarterID.lowercased())",
+            scriptID: "oaks_lab_rival_challenge_vs_\(starter.rivalSpeciesID.lowercased())",
+            conditions: [
+                .init(kind: "flagSet", flagID: "EVENT_GOT_STARTER"),
+                .init(kind: "flagUnset", flagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB"),
+                .init(kind: "playerYEquals", intValue: 6),
+                .init(kind: "chosenStarterEquals", stringValue: starter.playerStarterID),
+            ]
+        )
+    }
+}
+
+private func ceruleanRivalMapTriggers() -> [MapScriptTriggerManifest] {
+    ceruleanBridgeLaneSpecs.flatMap { lane in
+        rivalStarterTripletSpecs.map { starter in
+            MapScriptTriggerManifest(
+                id: "rival_bridge_\(lane.idSuffix)_after_\(starter.playerStarterID.lowercased())",
+                scriptID: "cerulean_city_rival_vs_\(starter.rivalSpeciesID.lowercased())",
+                conditions: [
+                    .init(kind: "flagUnset", flagID: "EVENT_BEAT_CERULEAN_RIVAL"),
+                    .init(kind: "playerXEquals", intValue: lane.playerX),
+                    .init(kind: "playerYEquals", intValue: 6),
+                    .init(kind: "chosenStarterEquals", stringValue: starter.playerStarterID),
+                ]
+            )
+        }
+    }
+}
+
+private func buildOakLabRivalPickupScripts(specs: [OakLabRivalPickupScriptSpec]) -> [ScriptManifest] {
+    specs.map { spec in
+        ScriptManifest(
+            id: "oaks_lab_rival_picks_after_\(spec.playerStarterID.lowercased())",
+            steps: [
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .rivalStarterPickup,
+                        variants: spec.variants.map { variant in
+                            .init(
+                                id: variant.id,
+                                conditions: variant.conditions,
+                                actors: [.init(actorID: "oaks_lab_rival", path: variant.path)],
+                                point: variant.point
+                            )
+                        }
+                    )
+                ),
+                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_this_one"),
+                .init(
+                    action: "setObjectVisibility",
+                    objectID: spec.hiddenBallObjectID,
+                    visible: false
+                ),
+                .init(
+                    action: "showDialogue",
+                    dialogueID: "oaks_lab_rival_received_mon_\(spec.rivalSpeciesID.lowercased())"
+                ),
+            ]
+        )
+    }
+}
+
+private func buildOakLabRivalChallengeScripts() -> [ScriptManifest] {
+    rivalStarterTripletSpecs.map { starter in
+        ScriptManifest(
+            id: "oaks_lab_rival_challenge_vs_\(starter.rivalSpeciesID.lowercased())",
+            steps: [
+                .init(action: "faceObject", stringValue: "down", objectID: "oaks_lab_rival"),
+                .init(action: "facePlayer", stringValue: "up"),
+                .init(action: "playMusicCue", stringValue: "rival_intro"),
+                .init(action: "showDialogue", dialogueID: "oaks_lab_rival_ill_take_you_on"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .pathToPlayerAdjacent,
+                        actors: [.init(actorID: "oaks_lab_rival", path: [])],
+                        targetPlayerOffset: .init(x: 0, y: -1)
+                    )
+                ),
+                .init(action: "startBattle", battleID: "opp_rival1_\(starter.oakLabTrainerNumber)"),
+            ]
+        )
+    }
+}
+
+private func buildRoute22RivalChallengeScripts() -> [ScriptManifest] {
+    route22LaneSpecs.flatMap { lane in
+        rivalStarterTripletSpecs.map { starter in
+            ScriptManifest(
+                id: "route_22_rival_1_challenge_\(starter.route22TrainerNumber)_\(lane.idSuffix)",
+                steps: [
+                    .init(action: "playMusicCue", stringValue: "rival_intro"),
+                    .init(
+                        action: "performMovement",
+                        movement: .init(
+                            kind: .pathToPlayerAdjacent,
+                            actors: [.init(actorID: "route_22_rival_1", path: [])],
+                            targetPlayerOffset: lane.targetOffset
+                        )
+                    ),
+                    .init(action: "faceObject", stringValue: lane.rivalFacing, objectID: "route_22_rival_1"),
+                    .init(action: "facePlayer", stringValue: lane.playerFacing),
+                    .init(action: "showDialogue", dialogueID: "route_22_rival_before_battle_1"),
+                    .init(
+                        action: "startBattle",
+                        battleID: "route_22_rival_1_\(starter.route22TrainerNumber)_\(lane.idSuffix)"
+                    ),
+                ]
+            )
+        }
+    }
+}
+
+private func buildRoute22RivalExitScripts(
+    upperExitPath: [FacingDirection],
+    lowerExitPath: [FacingDirection]
+) -> [ScriptManifest] {
+    let exitPathByScriptID: [String: [FacingDirection]] = [
+        "route_22_rival_1_exit_upper": upperExitPath,
+        "route_22_rival_1_exit_lower": lowerExitPath,
+    ]
+
+    return route22LaneSpecs.map { lane in
+        ScriptManifest(
+            id: lane.exitScriptID,
+            steps: [
+                .init(action: "showDialogue", dialogueID: "route_22_rival_after_battle_1"),
+                .init(action: "playMusicCue", stringValue: "rival_exit"),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .fixedPath,
+                        actors: [.init(
+                            actorID: "route_22_rival_1",
+                            path: exitPathByScriptID[lane.exitScriptID] ?? []
+                        )]
+                    )
+                ),
+                .init(action: "setFlag", flagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE"),
+                .init(action: "setObjectVisibility", objectID: "route_22_rival_1", visible: false),
+                .init(action: "clearFlag", flagID: "EVENT_1ST_ROUTE22_RIVAL_BATTLE"),
+                .init(action: "clearFlag", flagID: "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"),
+                .init(action: "restoreMapMusic"),
+            ]
+        )
+    }
+}
+
+private func buildCeruleanRivalBattleScripts() -> [ScriptManifest] {
+    rivalStarterTripletSpecs.map { starter in
+        ScriptManifest(
+            id: "cerulean_city_rival_vs_\(starter.rivalSpeciesID.lowercased())",
+            steps: [
+                .init(action: "playMusicCue", stringValue: "rival_intro"),
+                .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: true),
+                .init(
+                    action: "performMovement",
+                    movement: .init(
+                        kind: .pathToPlayerAdjacent,
+                        actors: [.init(actorID: "cerulean_city_rival", path: [])],
+                        targetPlayerOffset: .init(x: 0, y: -1)
+                    )
+                ),
+                .init(action: "faceObject", stringValue: "down", objectID: "cerulean_city_rival"),
+                .init(action: "facePlayer", stringValue: "up"),
+                .init(action: "showDialogue", dialogueID: "cerulean_city_rival_pre_battle"),
+                .init(action: "startBattle", battleID: "cerulean_city_rival_\(starter.ceruleanTrainerNumber)"),
+            ]
+        )
+    }
+}
+
+private func buildCeruleanRivalAfterBattleScript() -> ScriptManifest {
+    ScriptManifest(
+        id: "cerulean_city_rival_after_battle",
+        steps: [
+            .init(action: "showDialogue", dialogueID: "cerulean_city_rival_i_went_to_bills"),
+            .init(action: "playMusicCue", stringValue: "rival_exit"),
+            .init(
+                action: "performMovement",
+                movement: .init(
+                    kind: .fixedPath,
+                    variants: ceruleanBridgeLaneSpecs.map { lane in
+                        .init(
+                            id: "player_on_\(lane.idSuffix)",
+                            conditions: [.init(kind: "playerXEquals", intValue: lane.playerX)],
+                            actors: [.init(actorID: "cerulean_city_rival", path: lane.exitPath)]
+                        )
+                    }
+                )
+            ),
+            .init(action: "setObjectVisibility", objectID: "cerulean_city_rival", visible: false),
+            .init(action: "restoreMapMusic"),
+        ]
+    )
+}
 
 private func buildPokemonCenterHealingScripts(maps: [MapManifest]) -> [ScriptManifest] {
     maps.compactMap { map in

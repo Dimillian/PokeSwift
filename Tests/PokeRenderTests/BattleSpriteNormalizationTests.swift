@@ -17,7 +17,7 @@ extension PokeRenderTests {
 
         guard let normalizedImage = PixelAssetImageProcessing.processImage(
             image,
-            whiteIsTransparent: false,
+            maskStrategy: .none,
             renderMode: .battlePokemonFront
         ) else {
             return XCTFail("Expected front sprite normalization to succeed")
@@ -38,7 +38,7 @@ extension PokeRenderTests {
 
         guard let normalizedImage = PixelAssetImageProcessing.processImage(
             image,
-            whiteIsTransparent: false,
+            maskStrategy: .none,
             renderMode: .battlePokemonBack
         ) else {
             return XCTFail("Expected back sprite normalization to succeed")

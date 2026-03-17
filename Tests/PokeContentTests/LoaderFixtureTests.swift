@@ -41,4 +41,14 @@ final class LoaderFixtureTests: XCTestCase {
         XCTAssertEqual(loaded.tileset(id: "REDS_HOUSE_2")?.collision.passableTileIDs, [0x01, 0x02])
         XCTAssertEqual(loaded.overworldSprite(id: "SPRITE_RED")?.frameHeight, 16)
     }
+
+    func testLoadedContentTracksManifestDerivedMissingAssets() throws {
+        let root = try PokeContentTestSupport.makeFixtureRoot()
+        let loaded = try FileSystemContentLoader(rootURL: root).loadContent(variant: .red)
+        let fileManager = FileManager.default
+        try fileManager.removeItem(at: root.appendingPathComponent("Assets/battle/effects/send_out_poof.png"))
+
+        XCTAssertTrue(loaded.requiredAssetPaths().contains("Assets/battle/effects/send_out_poof.png"))
+        XCTAssertEqual(loaded.missingRequiredAssetPaths(), ["Assets/battle/effects/send_out_poof.png"])
+    }
 }

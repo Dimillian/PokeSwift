@@ -1,6 +1,115 @@
 import Foundation
 import PokeDataModel
 
+private struct RivalBattleSpec {
+    let id: String
+    let trainerNumber: Int
+    let playerWinDialogueID: String
+    let playerLoseDialogueID: String?
+    let healsPartyAfterBattle: Bool
+    let preventsBlackoutOnLoss: Bool
+    let completionFlagID: String
+    let postBattleScriptID: String?
+    let runsPostBattleScriptOnLoss: Bool
+}
+
+private let oakLabRivalBattleSpecs: [RivalBattleSpec] = (1...3).map { trainerNumber in
+    RivalBattleSpec(
+        id: "opp_rival1_\(trainerNumber)",
+        trainerNumber: trainerNumber,
+        playerWinDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
+        playerLoseDialogueID: "oaks_lab_rival_am_i_great_or_what",
+        healsPartyAfterBattle: true,
+        preventsBlackoutOnLoss: true,
+        completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
+        postBattleScriptID: "oaks_lab_rival_exit_after_battle",
+        runsPostBattleScriptOnLoss: true
+    )
+}
+
+private let route22RivalBattleSpecs: [RivalBattleSpec] = [
+    RivalBattleSpec(
+        id: "route_22_rival_1_4_upper",
+        trainerNumber: 4,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_upper",
+        runsPostBattleScriptOnLoss: false
+    ),
+    RivalBattleSpec(
+        id: "route_22_rival_1_5_upper",
+        trainerNumber: 5,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_upper",
+        runsPostBattleScriptOnLoss: false
+    ),
+    RivalBattleSpec(
+        id: "route_22_rival_1_6_upper",
+        trainerNumber: 6,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_upper",
+        runsPostBattleScriptOnLoss: false
+    ),
+    RivalBattleSpec(
+        id: "route_22_rival_1_4_lower",
+        trainerNumber: 4,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_lower",
+        runsPostBattleScriptOnLoss: false
+    ),
+    RivalBattleSpec(
+        id: "route_22_rival_1_5_lower",
+        trainerNumber: 5,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_lower",
+        runsPostBattleScriptOnLoss: false
+    ),
+    RivalBattleSpec(
+        id: "route_22_rival_1_6_lower",
+        trainerNumber: 6,
+        playerWinDialogueID: "route_22_rival_1_defeated",
+        playerLoseDialogueID: "route_22_rival_1_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
+        postBattleScriptID: "route_22_rival_1_exit_lower",
+        runsPostBattleScriptOnLoss: false
+    ),
+]
+
+private let ceruleanRivalBattleSpecs: [RivalBattleSpec] = (7...9).map { trainerNumber in
+    RivalBattleSpec(
+        id: "cerulean_city_rival_\(trainerNumber)",
+        trainerNumber: trainerNumber,
+        playerWinDialogueID: "cerulean_city_rival_defeated",
+        playerLoseDialogueID: "cerulean_city_rival_victory",
+        healsPartyAfterBattle: false,
+        preventsBlackoutOnLoss: false,
+        completionFlagID: "EVENT_BEAT_CERULEAN_RIVAL",
+        postBattleScriptID: "cerulean_city_rival_after_battle",
+        runsPostBattleScriptOnLoss: false
+    )
+}
+
 func buildTrainerBattles(
     repoRoot: URL,
     mapScriptMetadataByMapID: [String: MapScriptMetadata]
@@ -54,50 +163,17 @@ func buildTrainerBattles(
         )
     }
 
-    for trainerNumber in 1...3 {
-        battlesByID["opp_rival1_\(trainerNumber)"] = try makeRivalBattle(
-            id: "opp_rival1_\(trainerNumber)",
-            trainerNumber: trainerNumber,
-            playerWinDialogueID: "oaks_lab_rival_i_picked_the_wrong_pokemon",
-            playerLoseDialogueID: "oaks_lab_rival_am_i_great_or_what",
-            healsPartyAfterBattle: true,
-            preventsBlackoutOnLoss: true,
-            completionFlagID: "EVENT_BATTLED_RIVAL_IN_OAKS_LAB",
-            postBattleScriptID: "oaks_lab_rival_exit_after_battle",
-            runsPostBattleScriptOnLoss: true
-        )
-    }
-
-    for (battleID, trainerNumber, postBattleScriptID) in [
-        ("route_22_rival_1_4_upper", 4, "route_22_rival_1_exit_upper"),
-        ("route_22_rival_1_5_upper", 5, "route_22_rival_1_exit_upper"),
-        ("route_22_rival_1_6_upper", 6, "route_22_rival_1_exit_upper"),
-        ("route_22_rival_1_4_lower", 4, "route_22_rival_1_exit_lower"),
-        ("route_22_rival_1_5_lower", 5, "route_22_rival_1_exit_lower"),
-        ("route_22_rival_1_6_lower", 6, "route_22_rival_1_exit_lower"),
-    ] {
-        battlesByID[battleID] = try makeRivalBattle(
-            id: battleID,
-            trainerNumber: trainerNumber,
-            playerWinDialogueID: "route_22_rival_1_defeated",
-            playerLoseDialogueID: "route_22_rival_1_victory",
-            healsPartyAfterBattle: false,
-            preventsBlackoutOnLoss: false,
-            completionFlagID: "EVENT_BEAT_ROUTE22_RIVAL_1ST_BATTLE",
-            postBattleScriptID: postBattleScriptID
-        )
-    }
-
-    for trainerNumber in 7...9 {
-        battlesByID["cerulean_city_rival_\(trainerNumber)"] = try makeRivalBattle(
-            id: "cerulean_city_rival_\(trainerNumber)",
-            trainerNumber: trainerNumber,
-            playerWinDialogueID: "cerulean_city_rival_defeated",
-            playerLoseDialogueID: "cerulean_city_rival_victory",
-            healsPartyAfterBattle: false,
-            preventsBlackoutOnLoss: false,
-            completionFlagID: "EVENT_BEAT_CERULEAN_RIVAL",
-            postBattleScriptID: "cerulean_city_rival_after_battle"
+    for spec in oakLabRivalBattleSpecs + route22RivalBattleSpecs + ceruleanRivalBattleSpecs {
+        battlesByID[spec.id] = try makeRivalBattle(
+            id: spec.id,
+            trainerNumber: spec.trainerNumber,
+            playerWinDialogueID: spec.playerWinDialogueID,
+            playerLoseDialogueID: spec.playerLoseDialogueID,
+            healsPartyAfterBattle: spec.healsPartyAfterBattle,
+            preventsBlackoutOnLoss: spec.preventsBlackoutOnLoss,
+            completionFlagID: spec.completionFlagID,
+            postBattleScriptID: spec.postBattleScriptID,
+            runsPostBattleScriptOnLoss: spec.runsPostBattleScriptOnLoss
         )
     }
 

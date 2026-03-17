@@ -8,8 +8,25 @@ public enum PixelAssetRenderMode: Hashable, Sendable {
     case battlePokemonBack
 }
 
+public enum PixelAssetMaskStrategy: Hashable, Sendable {
+    case none
+    case allWhitePixels
+    case floodFillBorderWhite
+}
+
 enum PixelAssetMasking {
     static func applyWhiteTransparencyMask(to image: CGImage) -> CGImage? {
+        applyWhiteTransparencyMask(to: image, strategy: .floodFillBorderWhite)
+    }
+
+    static func applyWhiteTransparencyMask(
+        to image: CGImage,
+        strategy: PixelAssetMaskStrategy
+    ) -> CGImage? {
+        guard strategy != .none else {
+            return image
+        }
+
         let width = image.width
         let height = image.height
         let grayscaleBytesPerRow = width
@@ -32,41 +49,51 @@ enum PixelAssetMasking {
         grayscaleContext.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
 
         let threshold: UInt8 = 250
-        var maskBytes = [UInt8](repeating: 0, count: width * height)
-        var visited = [Bool](repeating: false, count: width * height)
-        var queue: [Int] = []
-        queue.reserveCapacity((width * 2) + (height * 2))
+        let maskBytes: [UInt8]
+        switch strategy {
+        case .none:
+            return image
+        case .allWhitePixels:
+            maskBytes = grayscaleBytes.map { $0 >= threshold ? UInt8(255) : UInt8(0) }
+        case .floodFillBorderWhite:
+            var resolvedMaskBytes = [UInt8](repeating: 0, count: width * height)
+            var visited = [Bool](repeating: false, count: width * height)
+            var queue: [Int] = []
+            queue.reserveCapacity((width * 2) + (height * 2))
 
-        func enqueueIfNeeded(x: Int, y: Int) {
-            guard x >= 0, x < width, y >= 0, y < height else { return }
-            let index = (y * width) + x
-            guard visited[index] == false, grayscaleBytes[index] >= threshold else { return }
-            visited[index] = true
-            queue.append(index)
-        }
+            func enqueueIfNeeded(x: Int, y: Int) {
+                guard x >= 0, x < width, y >= 0, y < height else { return }
+                let index = (y * width) + x
+                guard visited[index] == false, grayscaleBytes[index] >= threshold else { return }
+                visited[index] = true
+                queue.append(index)
+            }
 
-        for x in 0..<width {
-            enqueueIfNeeded(x: x, y: 0)
-            enqueueIfNeeded(x: x, y: height - 1)
-        }
+            for x in 0..<width {
+                enqueueIfNeeded(x: x, y: 0)
+                enqueueIfNeeded(x: x, y: height - 1)
+            }
 
-        for y in 0..<height {
-            enqueueIfNeeded(x: 0, y: y)
-            enqueueIfNeeded(x: width - 1, y: y)
-        }
+            for y in 0..<height {
+                enqueueIfNeeded(x: 0, y: y)
+                enqueueIfNeeded(x: width - 1, y: y)
+            }
 
-        var queueIndex = 0
-        while queueIndex < queue.count {
-            let index = queue[queueIndex]
-            queueIndex += 1
-            maskBytes[index] = 255
+            var queueIndex = 0
+            while queueIndex < queue.count {
+                let index = queue[queueIndex]
+                queueIndex += 1
+                resolvedMaskBytes[index] = 255
 
-            let x = index % width
-            let y = index / width
-            enqueueIfNeeded(x: x - 1, y: y)
-            enqueueIfNeeded(x: x + 1, y: y)
-            enqueueIfNeeded(x: x, y: y - 1)
-            enqueueIfNeeded(x: x, y: y + 1)
+                let x = index % width
+                let y = index / width
+                enqueueIfNeeded(x: x - 1, y: y)
+                enqueueIfNeeded(x: x + 1, y: y)
+                enqueueIfNeeded(x: x, y: y - 1)
+                enqueueIfNeeded(x: x, y: y + 1)
+            }
+
+            maskBytes = resolvedMaskBytes
         }
 
         let rgbaBytesPerRow = width * 4
@@ -110,26 +137,40 @@ enum PixelAssetImageProcessing {
 
     static func processImage(
         _ image: CGImage,
-        whiteIsTransparent: Bool,
+        cropRect: CGRect? = nil,
+        maskStrategy: PixelAssetMaskStrategy,
         renderMode: PixelAssetRenderMode
     ) -> CGImage? {
-        let processedImage: CGImage
-        if whiteIsTransparent {
-            guard let maskedImage = PixelAssetMasking.applyWhiteTransparencyMask(to: image) else {
+        let croppedImage: CGImage
+        if let cropRect {
+            guard let resolvedImage = image.cropping(to: cropRect.integral) else {
                 return nil
             }
-            processedImage = maskedImage
+            croppedImage = resolvedImage
         } else {
-            processedImage = image
+            croppedImage = image
+        }
+
+        let maskedImage: CGImage
+        if maskStrategy == .none {
+            maskedImage = croppedImage
+        } else {
+            guard let resolvedImage = PixelAssetMasking.applyWhiteTransparencyMask(
+                to: croppedImage,
+                strategy: maskStrategy
+            ) else {
+                return nil
+            }
+            maskedImage = resolvedImage
         }
 
         switch renderMode {
         case .standard:
-            return processedImage
+            return maskedImage
         case .battlePokemonFront:
-            return centeredOnBattleCanvas(processedImage)
+            return centeredOnBattleCanvas(maskedImage)
         case .battlePokemonBack:
-            return normalizedBattleBackSprite(processedImage)
+            return normalizedBattleBackSprite(maskedImage)
         }
     }
 
@@ -210,15 +251,22 @@ actor PixelAssetImageRepository {
     enum CacheKey: Hashable {
         case asset(
             path: String,
-            whiteIsTransparent: Bool,
+            cropRect: CGRect?,
+            maskStrategy: PixelAssetMaskStrategy,
             renderMode: PixelAssetRenderMode
         )
 
-        init(url: URL, whiteIsTransparent: Bool, renderMode: PixelAssetRenderMode) {
+        init(
+            url: URL,
+            cropRect: CGRect?,
+            maskStrategy: PixelAssetMaskStrategy,
+            renderMode: PixelAssetRenderMode
+        ) {
             let path = url.standardizedFileURL.path
             self = .asset(
                 path: path,
-                whiteIsTransparent: whiteIsTransparent,
+                cropRect: cropRect?.integral,
+                maskStrategy: maskStrategy,
                 renderMode: renderMode
             )
         }
@@ -236,12 +284,14 @@ actor PixelAssetImageRepository {
 
     func image(
         for url: URL,
-        whiteIsTransparent: Bool,
+        cropRect: CGRect? = nil,
+        maskStrategy: PixelAssetMaskStrategy = .none,
         renderMode: PixelAssetRenderMode
     ) async -> CGImage? {
         let key = CacheKey(
             url: url,
-            whiteIsTransparent: whiteIsTransparent,
+            cropRect: cropRect,
+            maskStrategy: maskStrategy,
             renderMode: renderMode
         )
 
@@ -261,7 +311,8 @@ actor PixelAssetImageRepository {
         let task = Task.detached(priority: .userInitiated) {
             Self.loadImage(
                 for: url,
-                whiteIsTransparent: whiteIsTransparent,
+                cropRect: cropRect,
+                maskStrategy: maskStrategy,
                 renderMode: renderMode
             )
         }
@@ -275,7 +326,8 @@ actor PixelAssetImageRepository {
 
     nonisolated static func loadImage(
         for url: URL,
-        whiteIsTransparent: Bool,
+        cropRect: CGRect? = nil,
+        maskStrategy: PixelAssetMaskStrategy = .none,
         renderMode: PixelAssetRenderMode
     ) -> CGImage? {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
@@ -285,7 +337,8 @@ actor PixelAssetImageRepository {
 
         return PixelAssetImageProcessing.processImage(
             image,
-            whiteIsTransparent: whiteIsTransparent,
+            cropRect: cropRect,
+            maskStrategy: maskStrategy,
             renderMode: renderMode
         )
     }

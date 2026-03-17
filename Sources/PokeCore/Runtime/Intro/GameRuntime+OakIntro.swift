@@ -202,9 +202,7 @@ extension GameRuntime {
         gameplayState?.rivalName = rivalName
         oakIntroState = nil
 
-        scene = .field
-        substate = "field"
         restartGameplayClock()
-        requestDefaultMapMusic()
+        enterSettledFieldState(restoreMapMusic: true)
     }
 }
