@@ -161,6 +161,30 @@ enum GameplayScenePropsFactory {
                 battleMessage: battle.battleMessage,
                 phase: battle.phase
             )
+            let sidebarProps = BattleSidebarProps(
+                trainerName: battle.trainerName,
+                kind: battle.kind,
+                phase: battle.phase,
+                promptText: promptText,
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon,
+                learnMovePrompt: battle.learnMovePrompt,
+                moveSlots: battle.moveSlots,
+                focusedMoveIndex: battle.focusedMoveIndex,
+                canRun: battle.canRun,
+                canUseBag: battle.canUseBag,
+                canSwitch: battle.canSwitch,
+                bagItemCount: battle.bagItems.count,
+                moveDetailsByID: manifestIndex.moveDetailsByID,
+                party: makeBattlePartySidebar(
+                    runtime: runtime,
+                    party: battleState.party,
+                    manifestIndex: manifestIndex,
+                    battle: battle
+                ),
+                capture: battle.capture,
+                presentation: battle.presentation
+            )
 
             return GameplaySceneProps(
                 viewport: .battle(
@@ -168,6 +192,7 @@ enum GameplayScenePropsFactory {
                         trainerName: battle.trainerName,
                         kind: battle.kind,
                         phase: battle.phase,
+                        showsBagOverlay: sidebarProps.showsBagOverlay,
                         textLines: battle.textLines,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
@@ -195,32 +220,7 @@ enum GameplayScenePropsFactory {
                         nicknameConfirmation: nicknameConfirmation
                     )
                 ),
-                sidebarMode: .battle(
-                    BattleSidebarProps(
-                        trainerName: battle.trainerName,
-                        kind: battle.kind,
-                        phase: battle.phase,
-                        promptText: promptText,
-                        playerPokemon: battle.playerPokemon,
-                        enemyPokemon: battle.enemyPokemon,
-                        learnMovePrompt: battle.learnMovePrompt,
-                        moveSlots: battle.moveSlots,
-                        focusedMoveIndex: battle.focusedMoveIndex,
-                        canRun: battle.canRun,
-                        canUseBag: battle.canUseBag,
-                        canSwitch: battle.canSwitch,
-                        bagItemCount: battle.bagItems.count,
-                        moveDetailsByID: manifestIndex.moveDetailsByID,
-                        party: makeBattlePartySidebar(
-                            runtime: runtime,
-                            party: battleState.party,
-                            manifestIndex: manifestIndex,
-                            battle: battle
-                        ),
-                        capture: battle.capture,
-                        presentation: battle.presentation
-                    )
-                ),
+                sidebarMode: .battle(sidebarProps),
                 onSidebarAction: nil,
                 onPartyRowSelected: { index in
                     runtime.handlePartySidebarSelection(index)

@@ -189,6 +189,88 @@ final class TelemetryCompatibilityTests: XCTestCase {
         )
     }
 
+    func testBattleTelemetryPhaseCompatibilityPreservesStableStringsAndMissingFallback() throws {
+        let missingPhasePayload = Data(
+            """
+            {
+              "battleID": "wild_route_1_pidgey_3",
+              "trainerName": "PIDGEY",
+              "playerPokemon": {
+                "speciesID": "SQUIRTLE",
+                "displayName": "Squirtle",
+                "level": 5,
+                "currentHP": 20,
+                "maxHP": 20,
+                "attack": 10,
+                "defense": 11,
+                "speed": 9,
+                "special": 10,
+                "moves": ["TACKLE"]
+              },
+              "enemyPokemon": {
+                "speciesID": "PIDGEY",
+                "displayName": "Pidgey",
+                "level": 3,
+                "currentHP": 12,
+                "maxHP": 12,
+                "attack": 8,
+                "defense": 8,
+                "speed": 10,
+                "special": 7,
+                "moves": ["TACKLE"]
+              },
+              "focusedMoveIndex": 0,
+              "battleMessage": "Wild PIDGEY appeared!"
+            }
+            """.utf8
+        )
+
+        let decodedMissingPhase = try JSONDecoder().decode(BattleTelemetry.self, from: missingPhasePayload)
+        XCTAssertEqual(decodedMissingPhase.phase, .moveSelection)
+
+        let telemetry = BattleTelemetry(
+            battleID: "trainer_oak_lab",
+            kind: .trainer,
+            trainerName: "BLUE",
+            playerPokemon: PartyPokemonTelemetry(
+                speciesID: "SQUIRTLE",
+                displayName: "Squirtle",
+                level: 5,
+                currentHP: 20,
+                maxHP: 20,
+                attack: 10,
+                defense: 11,
+                speed: 9,
+                special: 10,
+                moves: ["TACKLE"]
+            ),
+            enemyPokemon: PartyPokemonTelemetry(
+                speciesID: "BULBASAUR",
+                displayName: "Bulbasaur",
+                level: 5,
+                currentHP: 21,
+                maxHP: 21,
+                attack: 10,
+                defense: 10,
+                speed: 9,
+                special: 11,
+                moves: ["TACKLE"]
+            ),
+            enemyPartyCount: 1,
+            enemyActiveIndex: 0,
+            focusedMoveIndex: 0,
+            phase: .learnMoveSelection,
+            battleMessage: "Which move should be forgotten?"
+        )
+
+        let encoded = try JSONEncoder().encode(telemetry)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(json["phase"] as? String, BattlePhaseTelemetry.learnMoveSelection.rawValue)
+
+        let decodedRoundTrip = try JSONDecoder().decode(BattleTelemetry.self, from: encoded)
+        XCTAssertEqual(decodedRoundTrip.phase, .learnMoveSelection)
+    }
+
     func testRuntimeTelemetrySnapshotRoundTripsSplitModels() throws {
         let snapshot = RuntimeTelemetrySnapshot(
             appVersion: "0.3.0",

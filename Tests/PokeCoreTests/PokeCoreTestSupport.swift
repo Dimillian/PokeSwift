@@ -422,6 +422,35 @@ func waitUntil(
 }
 
 @MainActor
+func advanceBattleByConfirmingUntil(
+    _ runtime: GameRuntime,
+    message: String,
+    maxTicks: Int = 240,
+    predicate: @escaping () -> Bool
+) {
+    if predicate() {
+        return
+    }
+
+    let pollInterval = 0.01
+    let deadline = Date().addingTimeInterval(Double(maxTicks) * pollInterval)
+
+    while Date() < deadline {
+        if predicate() {
+            return
+        }
+
+        if runtime.currentSnapshot().battle?.phase == .trainerAboutToUseDecision {
+            runtime.handle(button: .down)
+        }
+        runtime.handle(button: .confirm)
+        RunLoop.current.run(until: Date().addingTimeInterval(pollInterval))
+    }
+
+    XCTAssertTrue(predicate(), message)
+}
+
+@MainActor
 func captureBattleTimeline(
     _ runtime: GameRuntime,
     duration: TimeInterval = 0.45,

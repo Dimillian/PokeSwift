@@ -242,18 +242,7 @@ struct RuntimePokemonState {
     }
 }
 
-enum RuntimeBattlePhase: String {
-    case introText
-    case moveSelection
-    case bagSelection
-    case partySelection
-    case trainerAboutToUseDecision
-    case learnMoveDecision
-    case learnMoveSelection
-    case resolvingTurn
-    case turnText
-    case battleComplete
-}
+typealias RuntimeBattlePhase = BattlePhaseTelemetry
 
 enum RuntimeBattleCaptureResult: Equatable {
     case uncatchable

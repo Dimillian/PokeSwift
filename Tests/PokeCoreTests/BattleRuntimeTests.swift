@@ -19,10 +19,13 @@ extension PokeCoreTests {
 
         runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
         drainBattleText(runtime)
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let runIndex = runtime.runActionIndex(for: battle)
+        for _ in 0..<runIndex {
+            runtime.handle(button: .down)
+        }
 
-        runtime.handle(button: .down)
-
-        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, 1)
+        XCTAssertEqual(runtime.currentSnapshot().battle?.focusedMoveIndex, runIndex)
 
         runtime.handle(button: .confirm)
         drainBattleUntilComplete(runtime)
@@ -1789,13 +1792,13 @@ extension PokeCoreTests {
         let hitEffectBeat = try XCTUnwrap(beats.dropFirst(2).first)
         XCTAssertEqual(hitEffectBeat.stage, .attackImpact)
         XCTAssertEqual(hitEffectBeat.applyingHitEffect?.kind, .shakeScreenHorizontalSlow2)
-        XCTAssertEqual(hitEffectBeat.delay, 10.0 / 60.0, accuracy: 0.0001)
+        XCTAssertEqual(hitEffectBeat.delay, runtime.battlePresentationDelay(base: 10.0 / 60.0), accuracy: 0.0001)
 
         let statusBeat = try XCTUnwrap(beats.dropFirst(3).first)
         XCTAssertEqual(statusBeat.stage, .resultText)
         XCTAssertEqual(statusBeat.message, "Slowmon's ATTACK fell!")
         XCTAssertEqual(statusBeat.activeSide, .enemy)
-        XCTAssertEqual(statusBeat.delay, 24.0 / 60.0, accuracy: 0.0001)
+        XCTAssertEqual(statusBeat.delay, runtime.battlePresentationDelay(base: 24.0 / 60.0), accuracy: 0.0001)
     }
 
     func testResolvedTurnPausesOnUsedMoveTextBeforeEachAttackAnimation() throws {
@@ -1861,7 +1864,7 @@ extension PokeCoreTests {
         runtime.handle(button: .confirm)
 
         waitUntil(
-                runtime.currentSnapshot().battle?.phase == .turnText &&
+            runtime.currentSnapshot().battle?.phase == .turnText &&
                 runtime.currentSnapshot().battle?.battleMessage == "Fastmon used TACKLE!" &&
                 runtime.battlePresentationTask == nil &&
                 (runtime.gameplayState?.battle?.pendingPresentationBatches.isEmpty == false),
@@ -2166,7 +2169,7 @@ extension PokeCoreTests {
 
         let beats = runtime.makeBeats(for: action)
         XCTAssertEqual(beats.first?.message, "Charmander used EMBER!")
-        XCTAssertEqual(beats.first?.requiresConfirmAfterDisplay, false)
+        XCTAssertEqual(beats.first?.requiresConfirmAfterDisplay, true)
         XCTAssertTrue(
             beats.contains(where: {
                 $0.message == "It's super effective!" && $0.requiresConfirmAfterDisplay

@@ -102,115 +102,188 @@ public struct BattleSidebarActionRowProps: Identifiable, Equatable, Sendable {
     }
 }
 
+enum BattleSidebarActionPanelMode: Equatable, Sendable {
+    case hidden
+    case commands
+    case shiftDecision
+    case learnConfirm
+    case learnReplace
+}
+
+struct BattleSidebarViewState: Equatable, Sendable {
+    let summaryLabel: String
+    let attentionSection: GameplaySidebarExpandedSection?
+    let forceCombatSectionOpen: Bool
+    let showsInterface: Bool
+    let showsEnemyCombatantStatus: Bool
+    let showsPlayerCombatantStatus: Bool
+    let showsBagOverlay: Bool
+    let actionPanelMode: BattleSidebarActionPanelMode
+
+    fileprivate init(props: BattleSidebarProps) {
+        let showsInterface = props.presentation.uiVisibility == .visible
+        let partyOverridesCombatFocus = props.party.mode == .battleSwitch || props.party.mode == .itemUseTarget
+        let forceCombatSectionOpen =
+            showsInterface &&
+            partyOverridesCombatFocus == false &&
+            Self.combatFocusPhases.contains(props.phase)
+
+        self.summaryLabel = showsInterface ? Self.summaryLabel(for: props.phase) : "Intro"
+        self.showsInterface = showsInterface
+        self.attentionSection = showsInterface
+            ? (partyOverridesCombatFocus ? .party : (forceCombatSectionOpen ? .battleCombat : nil))
+            : nil
+        self.forceCombatSectionOpen = forceCombatSectionOpen
+        self.showsEnemyCombatantStatus =
+            showsInterface && !(props.kind == .trainer && props.presentation.stage == .introReveal)
+        self.showsPlayerCombatantStatus = {
+            guard showsInterface else { return false }
+            switch props.presentation.stage {
+            case .introReveal:
+                return false
+            case .enemySendOut where props.presentation.activeSide == .enemy:
+                return false
+            default:
+                return true
+            }
+        }()
+        self.showsBagOverlay = showsInterface && props.phase == .bagSelection && props.bagItemCount > 0
+        self.actionPanelMode = Self.actionPanelMode(for: props, showsInterface: showsInterface)
+    }
+
+    private static let combatFocusPhases: Set<BattlePhaseTelemetry> = [
+        .moveSelection,
+        .bagSelection,
+        .trainerAboutToUseDecision,
+        .learnMoveDecision,
+        .learnMoveSelection,
+    ]
+
+    private static func summaryLabel(for phase: BattlePhaseTelemetry) -> String {
+        switch phase {
+        case .introText:
+            return "Intro"
+        case .moveSelection:
+            return "Command"
+        case .bagSelection:
+            return "Bag"
+        case .partySelection:
+            return "Party"
+        case .trainerAboutToUseDecision:
+            return "Shift"
+        case .learnMoveDecision:
+            return "Learn"
+        case .learnMoveSelection:
+            return "Forget"
+        case .resolvingTurn:
+            return "Resolving"
+        case .turnText:
+            return "Text"
+        case .battleComplete:
+            return "Result"
+        }
+    }
+
+    private static func actionPanelMode(
+        for props: BattleSidebarProps,
+        showsInterface: Bool
+    ) -> BattleSidebarActionPanelMode {
+        guard showsInterface else {
+            return .hidden
+        }
+
+        if let learnMovePrompt = props.learnMovePrompt {
+            switch learnMovePrompt.stage {
+            case .confirm:
+                return .learnConfirm
+            case .replace:
+                return .learnReplace
+            }
+        }
+
+        switch props.phase {
+        case .trainerAboutToUseDecision:
+            return .shiftDecision
+        case .moveSelection where props.presentation.stage == .commandReady:
+            return .commands
+        default:
+            return .hidden
+        }
+    }
+}
+
 // MARK: - Computed Behavior
 
 extension BattleSidebarProps {
+    var viewState: BattleSidebarViewState {
+        BattleSidebarViewState(props: self)
+    }
+
+    public var summaryLabel: String {
+        viewState.summaryLabel
+    }
+
     public var shouldForceCombatSectionOpen: Bool {
-        guard showsInterface else {
-            return false
-        }
-
-        if party.mode == .battleSwitch || party.mode == .itemUseTarget {
-            return false
-        }
-
-        return (
-            phase == .moveSelection ||
-            phase == .bagSelection ||
-            phase == .trainerAboutToUseDecision ||
-            phase == .learnMoveDecision ||
-            phase == .learnMoveSelection
-        )
+        viewState.forceCombatSectionOpen
     }
 
     public var attentionSection: GameplaySidebarExpandedSection? {
-        guard showsInterface else {
-            return nil
-        }
-
-        if party.mode == .battleSwitch || party.mode == .itemUseTarget {
-            return .party
-        }
-
-        if shouldForceCombatSectionOpen {
-            return .battleCombat
-        }
-
-        return nil
+        viewState.attentionSection
     }
 
     public var showsInterface: Bool {
-        presentation.uiVisibility == .visible
+        viewState.showsInterface
     }
 
     public var showsEnemyCombatantStatus: Bool {
-        guard showsInterface else {
-            return false
-        }
-
-        if kind == .trainer, presentation.stage == .introReveal {
-            return false
-        }
-
-        return true
+        viewState.showsEnemyCombatantStatus
     }
 
     public var showsPlayerCombatantStatus: Bool {
-        guard showsInterface else {
-            return false
-        }
+        viewState.showsPlayerCombatantStatus
+    }
 
-        switch presentation.stage {
-        case .introReveal:
-            return false
-        case .enemySendOut where presentation.activeSide == .enemy:
-            return false
-        default:
-            return true
-        }
+    public var showsBagOverlay: Bool {
+        viewState.showsBagOverlay
     }
 
     public var showsActionRows: Bool {
-        guard showsInterface else {
-            return false
-        }
-
-        if learnMovePrompt != nil || phase == .trainerAboutToUseDecision {
-            return true
-        }
-
-        guard phase == .moveSelection else {
-            return false
-        }
-
-        return presentation.stage == .commandReady
+        viewState.actionPanelMode != .hidden
     }
 
     public var actionRows: [BattleSidebarActionRowProps] {
         guard showsActionRows else {
             return []
         }
-        if let learnMovePrompt {
+
+        switch viewState.actionPanelMode {
+        case .hidden:
+            return []
+        case .learnConfirm:
+            guard let learnMovePrompt else { return [] }
+            return [
+                BattleSidebarActionRowProps(
+                    id: "learn-move",
+                    title: "Learn \(learnMovePrompt.moveDisplayName)",
+                    detail: nil,
+                    isSelectable: true,
+                    isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 0,
+                    kind: .learn
+                ),
+                BattleSidebarActionRowProps(
+                    id: "skip-move",
+                    title: "Skip",
+                    detail: nil,
+                    isSelectable: true,
+                    isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 1,
+                    kind: .skip
+                ),
+            ]
+        case .learnReplace:
+            guard let learnMovePrompt else { return [] }
             switch learnMovePrompt.stage {
             case .confirm:
-                return [
-                    BattleSidebarActionRowProps(
-                        id: "learn-move",
-                        title: "Learn \(learnMovePrompt.moveDisplayName)",
-                        detail: nil,
-                        isSelectable: true,
-                        isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 0,
-                        kind: .learn
-                    ),
-                    BattleSidebarActionRowProps(
-                        id: "skip-move",
-                        title: "Skip",
-                        detail: nil,
-                        isSelectable: true,
-                        isFocused: shouldForceCombatSectionOpen && focusedMoveIndex == 1,
-                        kind: .skip
-                    ),
-                ]
+                return []
             case .replace:
                 return moveSlots.enumerated().map { index, slot in
                     BattleSidebarActionRowProps(
@@ -224,9 +297,7 @@ extension BattleSidebarProps {
                     )
                 }
             }
-        }
-
-        if phase == .trainerAboutToUseDecision {
+        case .shiftDecision:
             return [
                 BattleSidebarActionRowProps(
                     id: "trainer-about-to-use-yes",
@@ -245,6 +316,8 @@ extension BattleSidebarProps {
                     kind: .deny
                 ),
             ]
+        case .commands:
+            break
         }
 
         let moveRows = moveSlots.enumerated().map { index, slot in

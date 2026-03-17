@@ -385,6 +385,7 @@ extension PokeCoreTests {
         drainBattleText(runtime)
         runtime.battleRandomOverrides = [0, 255]
         runtime.handle(button: .confirm)
+        advanceBattlePresentationBatch(runtime)
 
         waitUntil(
             audioPlayer.soundEffectRequests.contains {
@@ -760,23 +761,27 @@ extension PokeCoreTests {
         drainBattleText(runtime)
         runtime.handle(button: .confirm)
 
-        waitUntil(
-            runtime.currentSnapshot().battle?.battleMessage.contains("fainted") == true,
+        advanceBattleByConfirmingUntil(
+            runtime,
             message: "wild battle did not reach the enemy faint text",
             maxTicks: 240
-        )
+        ) {
+            runtime.currentSnapshot().battle?.battleMessage.contains("fainted") == true
+        }
 
         let confirmCountBeforeRewardBatch = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
         runtime.handle(button: .confirm)
 
-        waitUntil(
+        advanceBattleByConfirmingUntil(
+            runtime,
+            message: "wild victory music did not start before the experience text",
+            maxTicks: 240
+        ) {
             runtime.currentSnapshot().battle?.battleMessage.contains("gained") == true &&
                 runtime.currentSnapshot().battle?.battleMessage.contains("EXP") == true &&
                 runtime.currentSnapshot().audio?.trackID == "MUSIC_DEFEATED_WILD_MON" &&
-                runtime.scene == .battle,
-            message: "wild victory music did not start before the experience text",
-            maxTicks: 240
-        )
+                runtime.scene == .battle
+        }
         XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_DEFEATED_WILD_MON", entryID: "default"))
         XCTAssertEqual(
             audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count,
@@ -786,12 +791,14 @@ extension PokeCoreTests {
         let confirmCountBeforeLevelUpBeat = audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_PRESS_AB" }.count
         runtime.handle(button: .confirm)
 
-        waitUntil(
-            runtime.currentSnapshot().battle?.battleMessage.contains("grew to") == true &&
-                runtime.currentSnapshot().battle?.battleMessage.contains("Lv6") == true,
+        advanceBattleByConfirmingUntil(
+            runtime,
             message: "battle reward did not reach the level-up message",
             maxTicks: 240
-        )
+        ) {
+            runtime.currentSnapshot().battle?.battleMessage.contains("grew to") == true &&
+                runtime.currentSnapshot().battle?.battleMessage.contains("Lv6") == true
+        }
         XCTAssertEqual(audioPlayer.soundEffectRequests.last?.soundEffectID, "SFX_LEVEL_UP")
         XCTAssertEqual(audioPlayer.soundEffectRequests.filter { $0.soundEffectID == "SFX_LEVEL_UP" }.count, 1)
         XCTAssertEqual(

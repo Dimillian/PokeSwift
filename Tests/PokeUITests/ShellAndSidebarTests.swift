@@ -1126,9 +1126,218 @@ extension PokeUITests {
     XCTAssertTrue(sendOutProps.actionRows.isEmpty)
     XCTAssertTrue(turnTextProps.actionRows.isEmpty)
     XCTAssertTrue(bagSelectionProps.actionRows.isEmpty)
-    XCTAssertEqual(commandReadyProps.actionRows.map(\.kind), [.move, .move, .run])
-    XCTAssertEqual(learnPromptProps.actionRows.map(\.kind), [.learn, .skip])
-    XCTAssertEqual(trainerDecisionProps.actionRows.map(\.kind), [.confirm, .deny])
+    XCTAssertEqual(
+      commandReadyProps.actionRows.map(\.kind),
+      [.move, .move, .run] as [BattleSidebarActionRowProps.Kind]
+    )
+    XCTAssertEqual(
+      learnPromptProps.actionRows.map(\.kind),
+      [.learn, .skip] as [BattleSidebarActionRowProps.Kind]
+    )
+    XCTAssertEqual(
+      trainerDecisionProps.actionRows.map(\.kind),
+      [.confirm, .deny] as [BattleSidebarActionRowProps.Kind]
+    )
+  }
+
+  func testBattleSidebarViewStateUsesCanonicalSummaryLabels() {
+    let props = BattleSidebarProps(
+      trainerName: "PIDGEY",
+      kind: .wild,
+      phase: .moveSelection,
+      promptText: "Pick the next move.",
+      playerPokemon: .init(
+        speciesID: "BULBASAUR",
+        displayName: "Bulbasaur",
+        level: 5,
+        currentHP: 19,
+        maxHP: 19,
+        attack: 11,
+        defense: 10,
+        speed: 9,
+        special: 12,
+        moves: ["TACKLE", "GROWL"]
+      ),
+      enemyPokemon: .init(
+        speciesID: "PIDGEY",
+        displayName: "Pidgey",
+        level: 3,
+        currentHP: 12,
+        maxHP: 12,
+        attack: 8,
+        defense: 8,
+        speed: 10,
+        special: 7,
+        moves: ["TACKLE"]
+      ),
+      moveSlots: [
+        .init(moveID: "TACKLE", displayName: "Tackle", currentPP: 35, maxPP: 35, isSelectable: true)
+      ],
+      focusedMoveIndex: 0,
+      canRun: true,
+      party: .init(pokemon: []),
+      presentation: .init(stage: .commandReady, revision: 1, uiVisibility: .visible)
+    )
+
+    XCTAssertEqual(props.viewState.summaryLabel, "Command")
+    XCTAssertEqual(BattleSidebarProps(
+      trainerName: props.trainerName,
+      kind: props.kind,
+      phase: .bagSelection,
+      promptText: props.promptText,
+      playerPokemon: props.playerPokemon,
+      enemyPokemon: props.enemyPokemon,
+      moveSlots: props.moveSlots,
+      focusedMoveIndex: props.focusedMoveIndex,
+      canRun: props.canRun,
+      party: props.party,
+      presentation: props.presentation
+    ).viewState.summaryLabel, "Bag")
+    XCTAssertEqual(BattleSidebarProps(
+      trainerName: props.trainerName,
+      kind: props.kind,
+      phase: .learnMoveSelection,
+      promptText: props.promptText,
+      playerPokemon: props.playerPokemon,
+      enemyPokemon: props.enemyPokemon,
+      learnMovePrompt: .init(
+        pokemonName: "Bulbasaur",
+        moveID: "VINE_WHIP",
+        moveDisplayName: "VINE WHIP",
+        stage: .replace
+      ),
+      moveSlots: props.moveSlots,
+      focusedMoveIndex: props.focusedMoveIndex,
+      canRun: props.canRun,
+      party: props.party,
+      presentation: props.presentation
+    ).viewState.summaryLabel, "Forget")
+  }
+  func testBattleSidebarBagOverlayTracksDerivedViewStatePolicy() {
+    func makeProps(
+      phase: BattlePhaseTelemetry,
+      bagItemCount: Int,
+      presentation: BattlePresentationTelemetry
+    ) -> BattleSidebarProps {
+      BattleSidebarProps(
+        trainerName: "PIDGEY",
+        kind: .wild,
+        phase: phase,
+        promptText: "Pick the next move.",
+        playerPokemon: .init(
+          speciesID: "BULBASAUR",
+          displayName: "Bulbasaur",
+          level: 5,
+          currentHP: 19,
+          maxHP: 19,
+          attack: 11,
+          defense: 10,
+          speed: 9,
+          special: 12,
+          moves: ["TACKLE", "GROWL"]
+        ),
+        enemyPokemon: .init(
+          speciesID: "PIDGEY",
+          displayName: "Pidgey",
+          level: 3,
+          currentHP: 12,
+          maxHP: 12,
+          attack: 8,
+          defense: 8,
+          speed: 10,
+          special: 7,
+          moves: ["TACKLE"]
+        ),
+        moveSlots: [],
+        focusedMoveIndex: 0,
+        canRun: true,
+        canUseBag: true,
+        bagItemCount: bagItemCount,
+        party: .init(pokemon: []),
+        presentation: presentation
+      )
+    }
+
+    let visibleBagSelection = makeProps(
+      phase: .bagSelection,
+      bagItemCount: 2,
+      presentation: .init(stage: .commandReady, revision: 1, uiVisibility: .visible)
+    )
+    let hiddenBagSelection = makeProps(
+      phase: .bagSelection,
+      bagItemCount: 2,
+      presentation: .init(stage: .commandReady, revision: 2, uiVisibility: .hidden)
+    )
+    let emptyBagSelection = makeProps(
+      phase: .bagSelection,
+      bagItemCount: 0,
+      presentation: .init(stage: .commandReady, revision: 3, uiVisibility: .visible)
+    )
+    let moveSelection = makeProps(
+      phase: .moveSelection,
+      bagItemCount: 3,
+      presentation: .init(stage: .commandReady, revision: 4, uiVisibility: .visible)
+    )
+
+    XCTAssertTrue(visibleBagSelection.viewState.showsBagOverlay)
+    XCTAssertTrue(visibleBagSelection.showsBagOverlay)
+    XCTAssertFalse(hiddenBagSelection.viewState.showsBagOverlay)
+    XCTAssertFalse(hiddenBagSelection.showsBagOverlay)
+    XCTAssertFalse(emptyBagSelection.viewState.showsBagOverlay)
+    XCTAssertFalse(emptyBagSelection.showsBagOverlay)
+    XCTAssertFalse(moveSelection.viewState.showsBagOverlay)
+    XCTAssertFalse(moveSelection.showsBagOverlay)
+  }
+
+  func testBattleSummaryViewsShareCanonicalSummaryLabel() {
+    let props = BattleSidebarProps(
+      trainerName: "BLUE",
+      kind: .trainer,
+      phase: .trainerAboutToUseDecision,
+      promptText: "Will RED change #MON?",
+      playerPokemon: .init(
+        speciesID: "SQUIRTLE",
+        displayName: "Squirtle",
+        level: 18,
+        currentHP: 44,
+        maxHP: 44,
+        attack: 25,
+        defense: 28,
+        speed: 22,
+        special: 24,
+        moves: ["TACKLE", "BUBBLE"]
+      ),
+      enemyPokemon: .init(
+        speciesID: "PIDGEOTTO",
+        displayName: "Pidgeotto",
+        level: 17,
+        currentHP: 38,
+        maxHP: 38,
+        attack: 24,
+        defense: 20,
+        speed: 25,
+        special: 18,
+        moves: ["GUST", "QUICK_ATTACK"]
+      ),
+      moveSlots: [],
+      focusedMoveIndex: 0,
+      canRun: false,
+      party: .init(pokemon: []),
+      presentation: .init(stage: .resultText, revision: 1, uiVisibility: .visible)
+    )
+
+    let summaryContent = BattleSummaryContent(props: props)
+    let sidebarContent = BattleModeSidebarContent(
+      props: props,
+      expansionState: GameplaySidebarExpansionState(expandedSection: .battleCombat),
+      onPartyRowSelected: nil,
+      onActivateSection: { _ in }
+    )
+
+    XCTAssertEqual(summaryContent.summaryChipText, "Shift")
+    XCTAssertEqual(summaryContent.summaryChipText, props.summaryLabel)
+    XCTAssertEqual(sidebarContent.combatSummaryText, props.summaryLabel)
+    XCTAssertEqual(summaryContent.summaryChipText, sidebarContent.combatSummaryText)
   }
   func testBattleSidebarActionRowsFocusRunOnlyForWildBattles() {
     let wildProps = BattleSidebarProps(

@@ -166,17 +166,21 @@ private struct FieldModeSidebarContent: View {
     }
 }
 
-private struct BattleModeSidebarContent: View {
+struct BattleModeSidebarContent: View {
     let props: BattleSidebarProps
     let expansionState: GameplaySidebarExpansionState
     let onPartyRowSelected: ((Int) -> Void)?
     let onActivateSection: (GameplaySidebarExpandedSection) -> Void
 
+    var combatSummaryText: String {
+        props.summaryLabel
+    }
+
     var body: some View {
         VStack(spacing: GameplayFieldMetrics.sidebarSectionSpacing) {
             AccordionSidebarCard(
                 title: "Combat",
-                summary: battleSummaryLabel,
+                summary: combatSummaryText,
                 isExpanded: expansionState.expandedSection == .battleCombat,
                 isHighlighted: props.attentionSection == .battleCombat
             ) {
@@ -201,28 +205,6 @@ private struct BattleModeSidebarContent: View {
             }
 
             Spacer(minLength: 0)
-        }
-    }
-
-    private var battleSummaryLabel: String {
-        guard props.showsInterface else {
-            return "Intro"
-        }
-        switch props.phase {
-        case .moveSelection:
-            return "Moves"
-        case .partySelection:
-            return "Party"
-        case .trainerAboutToUseDecision:
-            return "Shift"
-        case .resolvingTurn:
-            return "Resolving"
-        case .turnText:
-            return "Text"
-        case .battleComplete:
-            return "Result"
-        default:
-            return "Battle"
         }
     }
 

@@ -8,28 +8,8 @@ struct BattleSummaryContent: View {
         props.kind == .wild ? nil : "TRAINER BATTLE"
     }
 
-    private var phaseTitle: String {
-        if props.showsInterface == false {
-            return "Intro"
-        }
-        switch props.phase {
-        case .introText:
-            return "Intro"
-        case .moveSelection:
-            return "Move Select"
-        case .partySelection:
-            return "Party"
-        case .trainerAboutToUseDecision:
-            return "Shift"
-        case .resolvingTurn:
-            return "Resolving"
-        case .turnText:
-            return "Turn Text"
-        case .battleComplete:
-            return "Result"
-        default:
-            return props.phase.rawValue.uppercased()
-        }
+    var summaryChipText: String {
+        props.summaryLabel
     }
 
     var body: some View {
@@ -50,7 +30,7 @@ struct BattleSummaryContent: View {
                 Spacer(minLength: 8)
 
                 GameplaySidebarChipSurface(tint: FieldRetroPalette.accentGlassTint) {
-                    Text(phaseTitle.uppercased())
+                    Text(summaryChipText.uppercased())
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
                         .foregroundStyle(FieldRetroPalette.ink.opacity(0.82))
                 }

@@ -45,6 +45,7 @@ struct BattleViewportProps {
     let trainerName: String
     let kind: BattleKind
     let phase: BattlePhaseTelemetry
+    let showsBagOverlay: Bool
     let textLines: [String]
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
