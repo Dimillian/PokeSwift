@@ -65,6 +65,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
     public let startingMoves: [String]
     public let evolutions: [EvolutionManifest]
     public let levelUpLearnset: [LevelUpMoveManifest]
+    public let tmhmLearnset: [String]
     public let crySoundEffectID: String?
     public let cryPitch: Int?
     public let cryLength: Int?
@@ -93,6 +94,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         startingMoves: [String],
         evolutions: [EvolutionManifest] = [],
         levelUpLearnset: [LevelUpMoveManifest] = [],
+        tmhmLearnset: [String] = [],
         crySoundEffectID: String? = nil,
         cryPitch: Int? = nil,
         cryLength: Int? = nil,
@@ -120,6 +122,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         self.startingMoves = startingMoves
         self.evolutions = evolutions
         self.levelUpLearnset = levelUpLearnset
+        self.tmhmLearnset = tmhmLearnset
         self.crySoundEffectID = crySoundEffectID
         self.cryPitch = cryPitch
         self.cryLength = cryLength
@@ -149,6 +152,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         case startingMoves
         case evolutions
         case levelUpLearnset
+        case tmhmLearnset
         case crySoundEffectID
         case cryPitch
         case cryLength
@@ -179,6 +183,7 @@ public struct SpeciesManifest: Codable, Equatable, Sendable {
         startingMoves = try container.decode([String].self, forKey: .startingMoves)
         evolutions = try container.decodeIfPresent([EvolutionManifest].self, forKey: .evolutions) ?? []
         levelUpLearnset = try container.decodeIfPresent([LevelUpMoveManifest].self, forKey: .levelUpLearnset) ?? []
+        tmhmLearnset = try container.decodeIfPresent([String].self, forKey: .tmhmLearnset) ?? []
         crySoundEffectID = try container.decodeIfPresent(String.self, forKey: .crySoundEffectID)
         cryPitch = try container.decodeIfPresent(Int.self, forKey: .cryPitch)
         cryLength = try container.decodeIfPresent(Int.self, forKey: .cryLength)

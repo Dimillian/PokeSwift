@@ -1215,6 +1215,320 @@ extension PokeCoreTests {
         )
     }
 
+    func testFieldItemUseModalBlocksHeldMovementAndSaveability() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Lead"),
+        ]
+        runtime.gameplayState?.playerParty[0].currentHP = max(
+            1,
+            (runtime.gameplayState?.playerParty[0].maxHP ?? 20) - 5
+        )
+        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+
+        let originalPosition = runtime.playerPosition
+        runtime.handleInventorySidebarSelection("POTION")
+
+        XCTAssertEqual(runtime.currentFieldModalKind, .itemUse)
+        XCTAssertEqual(runtime.fieldItemUseItemID, "POTION")
+        XCTAssertTrue(runtime.isFieldInputLocked)
+        XCTAssertFalse(runtime.canSaveGame)
+        XCTAssertFalse(runtime.canContinueHeldFieldMovement)
+
+        runtime.setDirectionalButton(.right, isPressed: true)
+
+        XCTAssertEqual(runtime.playerPosition, originalPosition)
+        XCTAssertEqual(runtime.fieldItemUseItemID, "POTION")
+    }
+
+    func testPromptModalKindTakesPriorityOverPlainDialogueAndBlocksSidebarSelection() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .dialogue
+        runtime.substate = "dialogue_prompt"
+        runtime.dialogueState = DialogueState(
+            dialogueID: "field_prompt_dialogue",
+            pages: [.init(lines: ["Use the machine?"], waitsForPrompt: true)],
+            replacements: [:],
+            pageIndex: 0,
+            completionAction: .continueScript
+        )
+        runtime.fieldPromptState = RuntimeFieldPromptState(
+            interactionID: "field_prompt",
+            kind: .yesNo,
+            completionAction: .continueScript,
+            focusedIndex: 0
+        )
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Shell"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "TM_BIDE", quantity: 1)]
+
+        let gameplayState = try? XCTUnwrap(runtime.gameplayState)
+
+        XCTAssertEqual(runtime.currentFieldModalKind, .prompt)
+        XCTAssertEqual(runtime.currentFieldInteractionPolicy.modalKind, .prompt)
+        XCTAssertTrue(runtime.currentFieldInteractionPolicy.blocksPartySidebarSelection)
+        XCTAssertTrue(runtime.currentFieldInteractionPolicy.blocksInventorySidebarSelection)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines, ["Use the machine?"])
+        XCTAssertFalse(
+            runtime.canHandleFieldInventorySidebarSelection(
+                itemID: "TM_BIDE",
+                gameplayState: gameplayState ?? runtime.makeInitialGameplayState()
+            )
+        )
+        XCTAssertFalse(
+            runtime.canHandleFieldPartySidebarSelection(
+                index: 0,
+                gameplayState: gameplayState ?? runtime.makeInitialGameplayState()
+            )
+        )
+    }
+
+    func testFieldTMHMSelectionAppliesTMAndConsumesOnSuccessfulTeach() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Shell"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "TM_BIDE", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("TM_BIDE")
+
+        XCTAssertEqual(runtime.currentFieldItemUseMode, .tmhm)
+        XCTAssertEqual(runtime.fieldItemUseItemID, "TM_BIDE")
+
+        runtime.handlePartySidebarSelection(0)
+
+        XCTAssertNil(runtime.fieldItemUseItemID)
+        XCTAssertNil(runtime.currentFieldLearnMoveState)
+        XCTAssertEqual(runtime.itemQuantity("TM_BIDE"), 0)
+        XCTAssertTrue(runtime.gameplayState?.playerParty[0].moves.contains(where: { $0.id == "BIDE" }) == true)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines.joined(separator: " "), "Shell learned BIDE!")
+    }
+
+    func testFieldTMHMSelectionShowsNoEffectWhenNoPartyCanLearnMove() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Flare"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "HM_SURF", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("HM_SURF")
+
+        XCTAssertNil(runtime.fieldItemUseItemID)
+        XCTAssertNil(runtime.currentFieldLearnMoveState)
+        XCTAssertEqual(runtime.itemQuantity("HM_SURF"), 1)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines.joined(separator: " "), "It won't have any effect.")
+    }
+
+    func testFieldItemUseTargetingCanCancelWithEscape() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Shell"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "TM_BIDE", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("TM_BIDE")
+
+        XCTAssertEqual(runtime.currentFieldModalKind, .itemUse)
+        XCTAssertEqual(runtime.fieldItemUseItemID, "TM_BIDE")
+
+        runtime.handle(button: .cancel)
+
+        XCTAssertNil(runtime.fieldItemUseItemID)
+        XCTAssertNil(runtime.currentFieldModalKind)
+        XCTAssertEqual(runtime.itemQuantity("TM_BIDE"), 1)
+        XCTAssertEqual(runtime.scene, .field)
+    }
+
+    func testFieldTMHMLearnOverlayBlocksForgettingHMAndRetainsHMItem() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Flare"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "HM_STRENGTH", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("HM_STRENGTH")
+        runtime.handlePartySidebarSelection(0)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .confirm)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .replace)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines.joined(separator: " "), "Cut can't be forgotten.")
+        XCTAssertEqual(runtime.itemQuantity("HM_STRENGTH"), 1)
+
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.scene, .field)
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .replace)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.itemQuantity("HM_STRENGTH"), 1)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertTrue(runtime.currentDialoguePage?.lines.joined(separator: " ").contains("Flare forgot Scratch.") == true)
+        XCTAssertTrue(runtime.gameplayState?.playerParty[0].moves.map(\.id).contains("STRENGTH") == true)
+        XCTAssertFalse(runtime.gameplayState?.playerParty[0].moves.map(\.id).contains("SCRATCH") == true)
+
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertNil(runtime.currentFieldLearnMoveState)
+    }
+
+    func testFieldTMHMDecliningLearnPromptKeepsTMAndKnownMovesUnchanged() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Shell"),
+        ]
+        runtime.gameplayState?.playerParty[0].moves.append(.init(id: "WATER_GUN", currentPP: 25))
+        runtime.gameplayState?.inventory = [.init(itemID: "TM_BIDE", quantity: 1)]
+
+        let originalMoves = runtime.gameplayState?.playerParty[0].moves.map(\.id)
+
+        runtime.handleInventorySidebarSelection("TM_BIDE")
+        runtime.handlePartySidebarSelection(0)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .confirm)
+
+        runtime.handle(button: .cancel)
+
+        XCTAssertNil(runtime.currentFieldLearnMoveState)
+        XCTAssertEqual(runtime.itemQuantity("TM_BIDE"), 1)
+        XCTAssertEqual(runtime.gameplayState?.playerParty[0].moves.map(\.id), originalMoves)
+        XCTAssertEqual(runtime.scene, .dialogue)
+        XCTAssertEqual(runtime.currentDialoguePage?.lines.joined(separator: " "), "Shell did not learn BIDE.")
+    }
+
+    func testFieldTMHMLearnOverlayDirectionalBridgeNavigatesConfirmAndReplaceStages() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Flare"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "HM_STRENGTH", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("HM_STRENGTH")
+        runtime.handlePartySidebarSelection(0)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .confirm)
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.focusedIndex, 0)
+
+        runtime.setDirectionalButton(.down, isPressed: true)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .confirm)
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.focusedIndex, 1)
+
+        runtime.setDirectionalButton(.up, isPressed: true)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.focusedIndex, 0)
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .replace)
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.focusedIndex, 0)
+
+        runtime.setDirectionalButton(.down, isPressed: true)
+
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.stage, .replace)
+        XCTAssertEqual(runtime.currentFieldLearnMoveState?.focusedIndex, 1)
+    }
+
+    func testLearnMoveModalKindTakesPriorityOverItemUseTargeting() {
+        let runtime = makeTMHMFieldRuntime()
+
+        runtime.gameplayState?.playerParty = [
+            runtime.makePokemon(speciesID: "CHARMANDER", level: 5, nickname: "Flare"),
+        ]
+        runtime.gameplayState?.inventory = [.init(itemID: "HM_STRENGTH", quantity: 1)]
+
+        runtime.handleInventorySidebarSelection("HM_STRENGTH")
+        XCTAssertEqual(runtime.currentFieldModalKind, .itemUse)
+
+        runtime.handlePartySidebarSelection(0)
+
+        XCTAssertEqual(runtime.currentFieldModalKind, .learnMove)
+        XCTAssertEqual(runtime.currentFieldModalItemID, "HM_STRENGTH")
+        XCTAssertTrue(runtime.currentFieldInteractionPolicy.blocksInventorySidebarSelection)
+        XCTAssertTrue(runtime.currentFieldInteractionPolicy.blocksPartySidebarSelection)
+    }
+
+    private func makeTMHMFieldRuntime() -> GameRuntime {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(
+                            id: "SQUIRTLE",
+                            displayName: "Squirtle",
+                            primaryType: "WATER",
+                            baseHP: 44,
+                            baseAttack: 48,
+                            baseDefense: 65,
+                            baseSpeed: 43,
+                            baseSpecial: 50,
+                            startingMoves: ["TACKLE", "TAIL_WHIP", "BUBBLE"],
+                            tmhmLearnset: ["BIDE", "SURF"]
+                        ),
+                        .init(
+                            id: "CHARMANDER",
+                            displayName: "Charmander",
+                            primaryType: "FIRE",
+                            baseHP: 39,
+                            baseAttack: 52,
+                            baseDefense: 43,
+                            baseSpeed: 65,
+                            baseSpecial: 50,
+                            startingMoves: ["CUT", "SCRATCH", "GROWL", "EMBER"],
+                            tmhmLearnset: ["STRENGTH"]
+                        ),
+                    ],
+                    items: [
+                        .init(id: "TM_BIDE", displayName: "TM34", bagSection: .tmhm, tmhmMoveID: "BIDE"),
+                        .init(id: "HM_SURF", displayName: "HM03", bagSection: .tmhm, tmhmMoveID: "SURF"),
+                        .init(id: "HM_STRENGTH", displayName: "HM04", bagSection: .tmhm, tmhmMoveID: "STRENGTH"),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "Tackle", power: 40, accuracy: 100, maxPP: 35, effect: "damage", type: "NORMAL"),
+                        .init(id: "TAIL_WHIP", displayName: "Tail Whip", power: 0, accuracy: 100, maxPP: 30, effect: "defenseDown", type: "NORMAL"),
+                        .init(id: "BUBBLE", displayName: "Bubble", power: 20, accuracy: 100, maxPP: 30, effect: "damage", type: "WATER"),
+                        .init(id: "WATER_GUN", displayName: "Water Gun", power: 40, accuracy: 100, maxPP: 25, effect: "damage", type: "WATER"),
+                        .init(id: "CUT", displayName: "Cut", power: 50, accuracy: 95, maxPP: 30, effect: "damage", type: "NORMAL"),
+                        .init(id: "SCRATCH", displayName: "Scratch", power: 40, accuracy: 100, maxPP: 35, effect: "damage", type: "NORMAL"),
+                        .init(id: "GROWL", displayName: "Growl", power: 0, accuracy: 100, maxPP: 40, effect: "attackDown", type: "NORMAL"),
+                        .init(id: "EMBER", displayName: "Ember", power: 40, accuracy: 100, maxPP: 25, effect: "damage", type: "FIRE"),
+                        .init(id: "BIDE", displayName: "BIDE", power: 0, accuracy: 100, maxPP: 10, effect: "bide", type: "NORMAL"),
+                        .init(id: "SURF", displayName: "Surf", power: 95, accuracy: 100, maxPP: 15, effect: "damage", type: "WATER"),
+                        .init(id: "STRENGTH", displayName: "Strength", power: 80, accuracy: 100, maxPP: 15, effect: "damage", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        return runtime
+    }
+
     func testPurchaseItemRejectsNewSlotWhenBagIsFull() {
         let runtime = GameRuntime(
             content: fixtureContent(

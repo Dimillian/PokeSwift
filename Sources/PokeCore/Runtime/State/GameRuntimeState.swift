@@ -271,7 +271,7 @@ enum RuntimeBattlePartySelectionMode: Equatable {
     case itemUse(itemID: String)
 }
 
-struct RuntimeBattleLearnMoveState {
+struct RuntimeLearnMoveState {
     let moveID: String
     let remainingMoveIDs: [String]
 }
@@ -354,6 +354,103 @@ struct RuntimeFieldPartyReorderState {
 
 struct RuntimeFieldItemUseState {
     let itemID: String
+    let mode: FieldItemUseMode
+}
+
+struct RuntimeFieldLearnMoveState {
+    let itemID: String
+    let pokemonIndex: Int
+    var stage: FieldLearnMoveStage
+    var focusedIndex: Int
+    let learnMoveState: RuntimeLearnMoveState
+}
+
+public enum FieldModalKind: String, Equatable, Sendable {
+    case dialogue
+    case prompt
+    case healing
+    case shop
+    case itemUse
+    case learnMove
+    case nicknameConfirmation
+    case naming
+    case starterChoice
+}
+
+enum RuntimeFieldModalState {
+    case dialogue(DialogueState)
+    case prompt(dialogue: DialogueState, prompt: RuntimeFieldPromptState)
+    case healing(RuntimeFieldHealingState)
+    case shop(RuntimeShopState)
+    case itemUse(RuntimeFieldItemUseState)
+    case learnMove(RuntimeFieldLearnMoveState)
+    case nicknameConfirmation(RuntimeNicknameConfirmationState)
+    case naming(RuntimeNamingState)
+    case starterChoice(focusedIndex: Int)
+
+    var kind: FieldModalKind {
+        switch self {
+        case .dialogue:
+            return .dialogue
+        case .prompt:
+            return .prompt
+        case .healing:
+            return .healing
+        case .shop:
+            return .shop
+        case .itemUse:
+            return .itemUse
+        case .learnMove:
+            return .learnMove
+        case .nicknameConfirmation:
+            return .nicknameConfirmation
+        case .naming:
+            return .naming
+        case .starterChoice:
+            return .starterChoice
+        }
+    }
+
+    var interactionPolicy: RuntimeFieldInteractionPolicy {
+        switch self {
+        case .itemUse:
+            return .init(
+                modalKind: kind,
+                blocksHeldMovement: true,
+                blocksDirectFieldInput: true,
+                blocksPartySidebarSelection: false,
+                blocksInventorySidebarSelection: false,
+                blocksSaveLoad: true
+            )
+        case .dialogue, .prompt, .healing, .shop, .learnMove, .nicknameConfirmation, .naming, .starterChoice:
+            return .init(
+                modalKind: kind,
+                blocksHeldMovement: true,
+                blocksDirectFieldInput: true,
+                blocksPartySidebarSelection: true,
+                blocksInventorySidebarSelection: true,
+                blocksSaveLoad: true
+            )
+        }
+    }
+}
+
+struct RuntimeFieldInteractionPolicy {
+    let modalKind: FieldModalKind?
+    let blocksHeldMovement: Bool
+    let blocksDirectFieldInput: Bool
+    let blocksPartySidebarSelection: Bool
+    let blocksInventorySidebarSelection: Bool
+    let blocksSaveLoad: Bool
+
+    static let inactive = RuntimeFieldInteractionPolicy(
+        modalKind: nil,
+        blocksHeldMovement: false,
+        blocksDirectFieldInput: false,
+        blocksPartySidebarSelection: false,
+        blocksInventorySidebarSelection: false,
+        blocksSaveLoad: false
+    )
 }
 
 struct RuntimeBattlePresentationState {
@@ -404,7 +501,7 @@ struct RuntimeBattlePresentationBeat {
     let message: String?
     let phase: RuntimeBattlePhase?
     var pendingAction: RuntimeBattlePendingAction?
-    let learnMoveState: RuntimeBattleLearnMoveState?
+    let learnMoveState: RuntimeLearnMoveState?
     let rewardContinuation: RuntimeBattleRewardContinuation?
     let pendingEvolution: RuntimePendingEvolutionState?
     let playerPokemon: RuntimePokemonState?
@@ -431,7 +528,7 @@ struct RuntimeBattlePresentationBeat {
         message: String? = nil,
         phase: RuntimeBattlePhase? = nil,
         pendingAction: RuntimeBattlePendingAction? = nil,
-        learnMoveState: RuntimeBattleLearnMoveState? = nil,
+        learnMoveState: RuntimeLearnMoveState? = nil,
         rewardContinuation: RuntimeBattleRewardContinuation? = nil,
         pendingEvolution: RuntimePendingEvolutionState? = nil,
         playerPokemon: RuntimePokemonState? = nil,
@@ -504,7 +601,7 @@ struct RuntimeBattleState {
     var pendingAction: RuntimeBattlePendingAction?
     var lastCaptureResult: RuntimeBattleCaptureResult?
     var pendingPresentationBatches: [[RuntimeBattlePresentationBeat]]
-    var learnMoveState: RuntimeBattleLearnMoveState?
+    var learnMoveState: RuntimeLearnMoveState?
     var rewardContinuation: RuntimeBattleRewardContinuation?
     var pendingEvolution: RuntimePendingEvolutionState?
     var presentation: RuntimeBattlePresentationState
@@ -541,7 +638,7 @@ struct RuntimeBattleState {
         pendingAction: RuntimeBattlePendingAction?,
         lastCaptureResult: RuntimeBattleCaptureResult?,
         pendingPresentationBatches: [[RuntimeBattlePresentationBeat]],
-        learnMoveState: RuntimeBattleLearnMoveState?,
+        learnMoveState: RuntimeLearnMoveState?,
         rewardContinuation: RuntimeBattleRewardContinuation?,
         pendingEvolution: RuntimePendingEvolutionState? = nil,
         presentation: RuntimeBattlePresentationState

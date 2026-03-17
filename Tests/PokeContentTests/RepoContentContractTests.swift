@@ -231,6 +231,9 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent("Assets/items/ball/poke.png").path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent("Assets/items/tm/normal.png").path))
         XCTAssertEqual(pidgey.catchRate, 255)
+        XCTAssertTrue(squirtle.tmhmLearnset.contains("SURF"))
+        XCTAssertTrue(squirtle.tmhmLearnset.contains("STRENGTH"))
+        XCTAssertFalse(squirtle.tmhmLearnset.contains("FLY"))
         XCTAssertEqual(
             Array(squirtle.levelUpLearnset.prefix(2)),
             [.init(level: 8, moveID: "BUBBLE"), .init(level: 15, moveID: "WATER_GUN")]

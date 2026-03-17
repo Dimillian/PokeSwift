@@ -4,6 +4,44 @@ import PokeAudio
 import PokeContent
 import PokeDataModel
 
+public enum FieldItemUseMode: String, Equatable, Sendable {
+    case medicine
+    case tmhm
+}
+
+public enum FieldLearnMoveStage: String, Equatable, Sendable {
+    case confirm
+    case replace
+}
+
+public struct FieldLearnMoveSelectionState: Equatable, Sendable {
+    public let itemID: String
+    public let moveID: String
+    public let pokemonIndex: Int
+    public let pokemonName: String
+    public let stage: FieldLearnMoveStage
+    public let focusedIndex: Int
+    public let knownMoveIDs: [String]
+
+    public init(
+        itemID: String,
+        moveID: String,
+        pokemonIndex: Int,
+        pokemonName: String,
+        stage: FieldLearnMoveStage,
+        focusedIndex: Int,
+        knownMoveIDs: [String]
+    ) {
+        self.itemID = itemID
+        self.moveID = moveID
+        self.pokemonIndex = pokemonIndex
+        self.pokemonName = pokemonName
+        self.stage = stage
+        self.focusedIndex = focusedIndex
+        self.knownMoveIDs = knownMoveIDs
+    }
+}
+
 @MainActor
 @Observable
 public final class GameRuntime {
@@ -57,6 +95,7 @@ public final class GameRuntime {
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
     var fieldItemUseState: RuntimeFieldItemUseState?
+    var fieldLearnMoveState: RuntimeFieldLearnMoveState?
     public internal(set) var namingState: RuntimeNamingState?
     public internal(set) var nicknameConfirmation: RuntimeNicknameConfirmationState?
     var evolutionState: RuntimeEvolutionState?
@@ -175,6 +214,44 @@ public final class GameRuntime {
 
     public var fieldItemUseItemID: String? {
         fieldItemUseState?.itemID
+    }
+
+    public var currentFieldItemUseMode: FieldItemUseMode? {
+        fieldItemUseState?.mode
+    }
+
+    public var currentFieldModalKind: FieldModalKind? {
+        currentFieldModalState?.kind
+    }
+
+    public var currentFieldModalItemID: String? {
+        switch currentFieldModalState {
+        case let .itemUse(state):
+            return state.itemID
+        case let .learnMove(state):
+            return state.itemID
+        default:
+            return nil
+        }
+    }
+
+    public var currentFieldLearnMoveState: FieldLearnMoveSelectionState? {
+        guard let fieldLearnMoveState,
+              let gameplayState,
+              gameplayState.playerParty.indices.contains(fieldLearnMoveState.pokemonIndex) else {
+            return nil
+        }
+
+        let pokemon = gameplayState.playerParty[fieldLearnMoveState.pokemonIndex]
+        return FieldLearnMoveSelectionState(
+            itemID: fieldLearnMoveState.itemID,
+            moveID: fieldLearnMoveState.learnMoveState.moveID,
+            pokemonIndex: fieldLearnMoveState.pokemonIndex,
+            pokemonName: pokemon.nickname,
+            stage: fieldLearnMoveState.stage,
+            focusedIndex: fieldLearnMoveState.focusedIndex,
+            knownMoveIDs: pokemon.moves.map(\.id)
+        )
     }
 
     public var currentBattlePlayerActiveIndex: Int? {
@@ -309,14 +386,77 @@ public final class GameRuntime {
         fieldHealingState
     }
 
-    var isFieldInputLocked: Bool {
+    var currentFieldModalState: RuntimeFieldModalState? {
+        if let namingState {
+            return .naming(namingState)
+        }
+        if let nicknameConfirmation {
+            return .nicknameConfirmation(nicknameConfirmation)
+        }
+        if let fieldLearnMoveState {
+            return .learnMove(fieldLearnMoveState)
+        }
+        if let shopState {
+            return .shop(shopState)
+        }
+        if let fieldHealingState {
+            return .healing(fieldHealingState)
+        }
+        if let fieldItemUseState {
+            return .itemUse(fieldItemUseState)
+        }
+        if scene == .starterChoice {
+            return .starterChoice(focusedIndex: starterChoiceFocusedIndex)
+        }
+        if let fieldPromptState,
+           let dialogueState {
+            return .prompt(dialogue: dialogueState, prompt: fieldPromptState)
+        }
+        if let dialogueState {
+            return .dialogue(dialogueState)
+        }
+        return nil
+    }
+
+    var currentFieldInteractionPolicy: RuntimeFieldInteractionPolicy {
+        currentFieldModalState?.interactionPolicy ?? .inactive
+    }
+
+    var hasBlockingFieldDirectInputTaskState: Bool {
         fieldTransitionState != nil ||
             fieldMovementTask != nil ||
             scriptedMovementTask != nil ||
             trainerEngagementTask != nil ||
+            fieldInteractionTask != nil
+    }
+
+    var hasBlockingHeldFieldMovementTaskState: Bool {
+        fieldTransitionState != nil ||
+            scriptedMovementTask != nil ||
+            trainerEngagementTask != nil ||
             fieldInteractionTask != nil ||
-            fieldHealingState != nil ||
-            shopState != nil
+            gameplayState?.activeScriptID != nil ||
+            gameplayState?.battle != nil
+    }
+
+    var hasBlockingFieldSidebarTaskState: Bool {
+        fieldTransitionState != nil ||
+            scriptedMovementTask != nil ||
+            trainerEngagementTask != nil
+    }
+
+    var hasBlockingFieldSaveState: Bool {
+        fieldTransitionState != nil ||
+            scriptedMovementTask != nil ||
+            trainerEngagementTask != nil ||
+            gameplayState?.activeScriptID != nil ||
+            gameplayState?.activeScriptStep != nil ||
+            gameplayState?.battle != nil
+    }
+
+    var isFieldInputLocked: Bool {
+        hasBlockingFieldDirectInputTaskState ||
+            currentFieldInteractionPolicy.blocksDirectFieldInput
     }
 
     var currentFieldRenderIssues: [String] {
@@ -367,18 +507,10 @@ public final class GameRuntime {
     var isSaveableFieldGameplay: Bool {
         gameplayState != nil &&
             scene == .field &&
-            dialogueState == nil &&
-            fieldPromptState == nil &&
             scriptItemPromptState == nil &&
             scriptChoicePromptState == nil &&
-            fieldHealingState == nil &&
-            fieldItemUseState == nil &&
-            fieldTransitionState == nil &&
-            scriptedMovementTask == nil &&
-            trainerEngagementTask == nil &&
-            gameplayState?.activeScriptID == nil &&
-            gameplayState?.activeScriptStep == nil &&
-            gameplayState?.battle == nil
+            currentFieldInteractionPolicy.blocksSaveLoad == false &&
+            hasBlockingFieldSaveState == false
     }
 
     var isSettledFieldGameplay: Bool {

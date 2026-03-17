@@ -19,6 +19,27 @@ enum GameplayViewportProps {
     case evolution(EvolutionViewportProps)
 }
 
+enum GameplayFieldFooterContent {
+    case dialogue(
+        lines: [String],
+        instantReveal: Bool,
+        onFullyRevealed: (() -> Void)?
+    )
+    case nicknameConfirmation(NicknameConfirmationViewProps)
+}
+
+enum GameplayFieldOverlayContent {
+    case healing(FieldHealingTelemetry)
+    case learnMove(FieldLearnMoveOverlayProps)
+    case prompt(FieldPromptTelemetry)
+    case shop(ShopTelemetry)
+    case starterChoice(options: [SpeciesManifest], focusedIndex: Int)
+}
+
+enum GameplayFieldScreenModalContent {
+    case naming(NamingOverlayProps)
+}
+
 struct GameplayFieldViewportProps {
     let map: MapManifest?
     let fieldPalette: FieldPaletteManifest?
@@ -30,16 +51,9 @@ struct GameplayFieldViewportProps {
     let renderAssets: FieldRenderAssets?
     let fieldTransition: FieldTransitionTelemetry?
     let fieldAlert: FieldAlertTelemetry?
-    let dialogueLines: [String]?
-    let dialogueInstantReveal: Bool
-    let onDialogueRevealed: (() -> Void)?
-    let fieldPrompt: FieldPromptTelemetry?
-    let fieldHealing: FieldHealingTelemetry?
-    let shop: ShopTelemetry?
-    let starterChoiceOptions: [SpeciesManifest]
-    let starterChoiceFocusedIndex: Int
-    let namingProps: NamingOverlayProps?
-    let nicknameConfirmation: NicknameConfirmationViewProps?
+    let footerContent: GameplayFieldFooterContent?
+    let overlayContent: GameplayFieldOverlayContent?
+    let screenModalContent: GameplayFieldScreenModalContent?
 }
 
 struct BattleViewportProps {

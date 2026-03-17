@@ -68,23 +68,59 @@ extension GameplayScenePropsFactory {
         party: PartyTelemetry?
     ) -> FieldPartySidebarConfiguration {
         let partyPokemon = party?.pokemon ?? []
-        if let itemID = runtime.fieldItemUseItemID {
-            let selectableIndices = medicineSelectableIndices(
-                runtime: runtime,
-                itemID: itemID,
-                partyPokemon: partyPokemon
-            )
+        if let learnMoveState = runtime.currentFieldLearnMoveState {
             return FieldPartySidebarConfiguration(
-                mode: .itemUseTarget,
-                selectedIndex: nil,
-                selectableIndices: selectableIndices,
-                annotationByIndex: medicineAnnotations(
+                mode: .passive,
+                selectedIndex: learnMoveState.pokemonIndex,
+                selectableIndices: [],
+                annotationByIndex: [learnMoveState.pokemonIndex: "LEARNING"],
+                promptText: nil
+            )
+        }
+
+        if let itemID = runtime.fieldItemUseItemID {
+            let selectableIndices: Set<Int>
+            let annotationByIndex: [Int: String]
+            let promptText: String?
+
+            switch runtime.currentFieldItemUseMode {
+            case .medicine:
+                selectableIndices = medicineSelectableIndices(
+                    runtime: runtime,
+                    itemID: itemID,
+                    partyPokemon: partyPokemon
+                )
+                annotationByIndex = medicineAnnotations(
                     runtime: runtime,
                     itemID: itemID,
                     partyPokemon: partyPokemon,
                     activeIndex: nil
-                ),
-                promptText: medicinePromptText(runtime: runtime, itemID: itemID)
+                )
+                promptText = medicinePromptText(runtime: runtime, itemID: itemID)
+            case .tmhm:
+                selectableIndices = tmhmSelectableIndices(
+                    runtime: runtime,
+                    itemID: itemID,
+                    partyPokemon: partyPokemon
+                )
+                annotationByIndex = tmhmAnnotations(
+                    runtime: runtime,
+                    itemID: itemID,
+                    partyPokemon: partyPokemon
+                )
+                promptText = tmhmPromptText(runtime: runtime, itemID: itemID)
+            case nil:
+                selectableIndices = []
+                annotationByIndex = [:]
+                promptText = nil
+            }
+
+            return FieldPartySidebarConfiguration(
+                mode: .itemUseTarget,
+                selectedIndex: nil,
+                selectableIndices: selectableIndices,
+                annotationByIndex: annotationByIndex,
+                promptText: promptText
             )
         }
 
@@ -245,6 +281,75 @@ extension GameplayScenePropsFactory {
                 return annotation.map { (index, $0) }
             }
         )
+    }
+
+    private static func tmhmPromptText(
+        runtime: GameRuntime,
+        itemID: String
+    ) -> String {
+        guard let moveID = runtime.content.item(id: itemID)?.tmhmMoveID,
+              let move = runtime.content.move(id: moveID) else {
+            return "Teach to which #MON?"
+        }
+        return "Teach \(move.displayName) to which #MON?"
+    }
+
+    private static func tmhmSelectableIndices(
+        runtime: GameRuntime,
+        itemID: String,
+        partyPokemon: [PartyPokemonTelemetry]
+    ) -> Set<Int> {
+        guard let moveID = runtime.content.item(id: itemID)?.tmhmMoveID else {
+            return []
+        }
+
+        return Set(
+            partyPokemon.indices.filter { index in
+                tmhmCanLearn(runtime: runtime, moveID: moveID, pokemon: partyPokemon[index])
+            }
+        )
+    }
+
+    private static func tmhmAnnotations(
+        runtime: GameRuntime,
+        itemID: String,
+        partyPokemon: [PartyPokemonTelemetry]
+    ) -> [Int: String] {
+        guard let moveID = runtime.content.item(id: itemID)?.tmhmMoveID else {
+            return [:]
+        }
+
+        return Dictionary(
+            uniqueKeysWithValues: partyPokemon.indices.map { index in
+                (
+                    index,
+                    tmhmAnnotation(runtime: runtime, moveID: moveID, pokemon: partyPokemon[index])
+                )
+            }
+        )
+    }
+
+    private static func tmhmCanLearn(
+        runtime: GameRuntime,
+        moveID: String,
+        pokemon: PartyPokemonTelemetry
+    ) -> Bool {
+        runtime.content.species(id: pokemon.speciesID)?.tmhmLearnset.contains(moveID) == true &&
+            pokemon.moves.contains(moveID) == false
+    }
+
+    private static func tmhmAnnotation(
+        runtime: GameRuntime,
+        moveID: String,
+        pokemon: PartyPokemonTelemetry
+    ) -> String {
+        if pokemon.moves.contains(moveID) {
+            return "KNOWS IT"
+        }
+        if runtime.content.species(id: pokemon.speciesID)?.tmhmLearnset.contains(moveID) == true {
+            return "ABLE"
+        }
+        return "UNABLE"
     }
 
     private static func canApplyMedicine(

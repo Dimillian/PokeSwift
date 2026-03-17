@@ -2,13 +2,8 @@ import PokeDataModel
 
 struct BattleExperienceRewardResult {
     let messages: [String]
-    let pendingLearnMove: RuntimeBattleLearnMoveState?
+    let pendingLearnMove: RuntimeLearnMoveState?
     let pendingEvolution: RuntimePendingEvolutionState?
-}
-
-struct LevelUpMoveProcessingResult {
-    let messages: [String]
-    let pendingLearnMove: RuntimeBattleLearnMoveState?
 }
 
 extension GameRuntime {
@@ -274,34 +269,15 @@ extension GameRuntime {
     func applyPendingLevelUpMoves(
         to pokemon: inout RuntimePokemonState,
         moveIDs: [String]
-    ) -> LevelUpMoveProcessingResult {
-        var messages: [String] = []
-        var pendingMoveIDs = moveIDs
-        var knownMoves = levelUpMoveSet(for: pokemon)
-
-        while pendingMoveIDs.isEmpty == false {
-            let moveID = pendingMoveIDs.removeFirst()
-            guard knownMoves.contains(where: { $0.id == moveID }) == false,
-                  let move = content.move(id: moveID) else {
-                continue
+    ) -> MoveTeachingPreparationResult {
+        applyPendingMoveTeaching(
+            to: &pokemon,
+            moveIDs: moveIDs,
+            knownMoves: levelUpMoveSet(for: pokemon),
+            setKnownMoves: { updatedMoves, pokemon in
+                setLevelUpMoveSet(updatedMoves, for: &pokemon)
             }
-
-            if knownMoves.count < 4 {
-                knownMoves.append(RuntimeMoveState(id: move.id, currentPP: move.maxPP))
-                setLevelUpMoveSet(knownMoves, for: &pokemon)
-                messages.append("\(pokemon.nickname) learned \(move.displayName)!")
-                continue
-            }
-
-            messages.append("\(pokemon.nickname) is trying to learn \(move.displayName)!")
-            messages.append("But \(pokemon.nickname) can't learn more than 4 moves.")
-            return LevelUpMoveProcessingResult(
-                messages: messages,
-                pendingLearnMove: .init(moveID: move.id, remainingMoveIDs: pendingMoveIDs)
-            )
-        }
-
-        return LevelUpMoveProcessingResult(messages: messages, pendingLearnMove: nil)
+        )
     }
 
     func continueLevelUpResolution(battle: inout RuntimeBattleState) {
@@ -314,7 +290,10 @@ extension GameRuntime {
 
     func enterLearnMoveDecisionPrompt(battle: inout RuntimeBattleState) {
         guard let learnMoveState = battle.learnMoveState,
-              let move = content.move(id: learnMoveState.moveID) else {
+              let message = learnMoveDecisionPromptMessage(
+                moveID: learnMoveState.moveID,
+                pokemonName: battle.playerPokemon.nickname
+              ) else {
             battle.learnMoveState = nil
             resumeRewardContinuation(battle: &battle)
             return
@@ -323,7 +302,7 @@ extension GameRuntime {
         battle.focusedMoveIndex = 0
         battle.pendingAction = nil
         battle.queuedMessages = []
-        battle.message = "Teach \(move.displayName) to \(battle.playerPokemon.nickname)?"
+        battle.message = message
     }
 
     func resolveLearnMoveDecision(battle: inout RuntimeBattleState) {
@@ -338,7 +317,7 @@ extension GameRuntime {
             battle.focusedMoveIndex = 0
             battle.pendingAction = nil
             battle.queuedMessages = []
-            battle.message = "Choose a move to forget for \(move.displayName)."
+            battle.message = learnMoveReplacementPromptMessage(moveID: move.id) ?? battle.message
             return
         }
 
@@ -362,29 +341,30 @@ extension GameRuntime {
             return
         }
 
-        let forgottenMoveID = knownMoves[battle.focusedMoveIndex].id
-        guard hmMoveIDs.contains(forgottenMoveID) == false else {
-            let moveDisplayName = content.move(id: forgottenMoveID)?.displayName ?? forgottenMoveID
-            battle.message = "\(moveDisplayName) can't be forgotten."
+        guard let replacement = resolveLearnMoveReplacement(
+            learnMoveState: learnMoveState,
+            focusedMoveIndex: battle.focusedMoveIndex,
+            knownMoves: knownMoves
+        ) else {
             return
         }
 
-        let forgottenMoveName = content.move(id: forgottenMoveID)?.displayName ?? forgottenMoveID
-        knownMoves[battle.focusedMoveIndex] = RuntimeMoveState(
-            id: newMove.id,
-            currentPP: newMove.maxPP
-        )
-        setLevelUpMoveSet(knownMoves, for: &battle.playerPokemon)
-        battle.learnMoveState = nil
+        switch replacement {
+        case let .blocked(message):
+            battle.message = message
+        case let .replaced(updatedMoves, forgottenMoveName, learnedMoveName):
+            setLevelUpMoveSet(updatedMoves, for: &battle.playerPokemon)
+            battle.learnMoveState = nil
 
-        processPendingLevelUpMoves(
-            battle: &battle,
-            moveIDs: learnMoveState.remainingMoveIDs,
-            prefixMessages: [
-                "\(battle.playerPokemon.nickname) forgot \(forgottenMoveName).",
-                "\(battle.playerPokemon.nickname) learned \(newMove.displayName)!",
-            ]
-        )
+            processPendingLevelUpMoves(
+                battle: &battle,
+                moveIDs: learnMoveState.remainingMoveIDs,
+                prefixMessages: [
+                    "\(battle.playerPokemon.nickname) forgot \(forgottenMoveName).",
+                    "\(battle.playerPokemon.nickname) learned \(learnedMoveName)!",
+                ]
+            )
+        }
     }
 
     func processPendingLevelUpMoves(
@@ -496,11 +476,6 @@ extension GameRuntime {
     ) -> Int {
         max(0, battle.baseRewardMoney * defeatedEnemy.level)
     }
-
-    var hmMoveIDs: Set<String> {
-        ["CUT", "FLY", "SURF", "STRENGTH", "FLASH"]
-    }
-
     func awardStatExp(from defeatedPokemon: RuntimePokemonState, to statExp: PokemonStatExp) -> PokemonStatExp {
         guard let species = content.species(id: defeatedPokemon.speciesID) else {
             return statExp

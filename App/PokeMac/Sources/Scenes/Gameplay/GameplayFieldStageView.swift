@@ -7,6 +7,7 @@ private enum GameplayFieldStageLayout {
     static let healingOverlayWidth: CGFloat = 320
     static let healingOverlayTopInset: CGFloat = 108
     static let healingOverlayXOffset: CGFloat = -252
+    static let learnMoveOverlayWidth: CGFloat = 420
     static let promptOverlayWidth: CGFloat = 100
     static let promptOverlayTopInset: CGFloat = 306
     static let promptOverlayXOffset: CGFloat = -100
@@ -31,7 +32,7 @@ struct FieldStageView: View {
                 overlayContent
             }
 
-            if let namingProps = props.namingProps {
+            if case let .naming(namingProps) = props.screenModalContent {
                 Color.black
                     .ignoresSafeArea()
                 NamingOverlayPanel(props: namingProps)
@@ -72,41 +73,50 @@ struct FieldStageView: View {
 
     @ViewBuilder
     private var footerContent: some View {
-        if let confirmation = props.nicknameConfirmation {
+        switch props.footerContent {
+        case let .nicknameConfirmation(confirmation):
             NicknameConfirmationFooter(confirmation: confirmation)
-        } else if let dialogueLines = props.dialogueLines {
+        case let .dialogue(dialogueLines, instantReveal, onFullyRevealed):
             DialogueBoxView(
                 lines: dialogueLines,
-                instantReveal: props.dialogueInstantReveal,
-                onFullyRevealed: props.onDialogueRevealed
+                instantReveal: instantReveal,
+                onFullyRevealed: onFullyRevealed
             )
             .frame(maxWidth: GameplayFieldStageLayout.dialogueMaxWidth)
+        case nil:
+            EmptyView()
         }
     }
 
     @ViewBuilder
     private var overlayContent: some View {
-        if let fieldHealing = props.fieldHealing {
+        switch props.overlayContent {
+        case let .healing(fieldHealing):
             PokemonCenterHealingOverlay(healing: fieldHealing)
                 .frame(width: GameplayFieldStageLayout.healingOverlayWidth)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.top, GameplayFieldStageLayout.healingOverlayTopInset)
                 .offset(x: GameplayFieldStageLayout.healingOverlayXOffset)
-        } else if let fieldPrompt = props.fieldPrompt {
+        case let .learnMove(fieldLearnMove):
+            FieldLearnMoveOverlay(props: fieldLearnMove)
+                .frame(width: GameplayFieldStageLayout.learnMoveOverlayWidth)
+        case let .prompt(fieldPrompt):
             FieldPromptOverlay(prompt: fieldPrompt)
                 .frame(width: GameplayFieldStageLayout.promptOverlayWidth)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(.top, GameplayFieldStageLayout.promptOverlayTopInset)
                 .offset(x: GameplayFieldStageLayout.promptOverlayXOffset)
-        } else if let shop = props.shop {
+        case let .shop(shop):
             ShopOverlayPanel(shop: shop)
                 .frame(width: GameplayFieldStageLayout.shopOverlayWidth)
-        } else if props.starterChoiceOptions.isEmpty == false {
+        case let .starterChoice(options, focusedIndex):
             StarterChoicePanel(
-                options: props.starterChoiceOptions,
-                focusedIndex: props.starterChoiceFocusedIndex
+                options: options,
+                focusedIndex: focusedIndex
             )
             .frame(width: GameplayFieldStageLayout.starterChoiceOverlayWidth)
+        case nil:
+            EmptyView()
         }
     }
 

@@ -330,6 +330,7 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         scene = .battle
         substate = "battle"
         traceEvent(
@@ -427,6 +428,7 @@ extension GameRuntime {
         gameplayState.battle = battle
         self.gameplayState = gameplayState
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         scene = .battle
         substate = "battle"
         traceEvent(
@@ -502,6 +504,7 @@ extension GameRuntime {
         shopState = nil
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         deferredActions.removeAll()
         currentAudioState = nil
         fieldInteractionTask?.cancel()

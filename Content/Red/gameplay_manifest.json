@@ -63530,6 +63530,23 @@
         "TACKLE",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 150
     },
     {
@@ -63602,6 +63619,23 @@
         "GROWL",
         "LEECH_SEED"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 290
     },
     {
@@ -63669,6 +63703,24 @@
         "LEECH_SEED",
         "VINE_WHIP"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 2210
     },
     {
@@ -63734,6 +63786,32 @@
       "startingMoves" : [
         "SCRATCH",
         "GROWL"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "SWORDS_DANCE",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DRAGON_RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
       ],
       "weightTenths" : 190
     },
@@ -63802,6 +63880,32 @@
         "GROWL",
         "EMBER"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "SWORDS_DANCE",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DRAGON_RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
+      ],
       "weightTenths" : 420
     },
     {
@@ -63864,6 +63968,35 @@
         "GROWL",
         "EMBER",
         "LEER"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "SWORDS_DANCE",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DRAGON_RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
       ],
       "weightTenths" : 2000
     },
@@ -63930,6 +64063,32 @@
       "startingMoves" : [
         "TACKLE",
         "TAIL_WHIP"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 200
     },
@@ -63998,6 +64157,32 @@
         "TAIL_WHIP",
         "BUBBLE"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 500
     },
     {
@@ -64060,6 +64245,35 @@
         "BUBBLE",
         "WATER_GUN"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 1890
     },
     {
@@ -64103,6 +64317,9 @@
         "TACKLE",
         "STRING_SHOT"
       ],
+      "tmhmLearnset" : [
+
+      ],
       "weightTenths" : 60
     },
     {
@@ -64144,6 +64361,9 @@
       "speciesCategory" : "COCOON",
       "startingMoves" : [
         "HARDEN"
+      ],
+      "tmhmLearnset" : [
+
       ],
       "weightTenths" : 220
     },
@@ -64209,6 +64429,27 @@
       "startingMoves" : [
         "CONFUSION"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 710
     },
     {
@@ -64253,6 +64494,9 @@
         "POISON_STING",
         "STRING_SHOT"
       ],
+      "tmhmLearnset" : [
+
+      ],
       "weightTenths" : 70
     },
     {
@@ -64295,6 +64539,9 @@
       "speciesCategory" : "COCOON",
       "startingMoves" : [
         "HARDEN"
+      ],
+      "tmhmLearnset" : [
+
       ],
       "weightTenths" : 220
     },
@@ -64355,6 +64602,24 @@
       "speciesCategory" : "POISON BEE",
       "startingMoves" : [
         "FURY_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 650
     },
@@ -64421,6 +64686,23 @@
       "speciesCategory" : "TINY BIRD",
       "startingMoves" : [
         "GUST"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
       ],
       "weightTenths" : 40
     },
@@ -64489,6 +64771,23 @@
         "GUST",
         "SAND_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
+      ],
       "weightTenths" : 660
     },
     {
@@ -64551,6 +64850,24 @@
         "SAND_ATTACK",
         "QUICK_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
+      ],
       "weightTenths" : 870
     },
     {
@@ -64609,6 +64926,26 @@
         "TACKLE",
         "TAIL_WHIP"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 80
     },
     {
@@ -64661,6 +64998,28 @@
         "TACKLE",
         "TAIL_WHIP",
         "QUICK_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 410
     },
@@ -64725,6 +65084,22 @@
         "PECK",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
+      ],
       "weightTenths" : 40
     },
     {
@@ -64782,6 +65157,23 @@
         "PECK",
         "GROWL",
         "LEER"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
       ],
       "weightTenths" : 840
     },
@@ -64845,6 +65237,25 @@
         "WRAP",
         "LEER"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 150
     },
     {
@@ -64901,6 +65312,26 @@
         "WRAP",
         "LEER",
         "POISON_STING"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 1430
     },
@@ -64965,6 +65396,30 @@
         "THUNDERSHOCK",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "PAY_DAY",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 130
     },
     {
@@ -65002,6 +65457,31 @@
         "THUNDERSHOCK",
         "GROWL",
         "THUNDER_WAVE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 660
     },
@@ -65064,6 +65544,29 @@
       "startingMoves" : [
         "SCRATCH"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
+      ],
       "weightTenths" : 260
     },
     {
@@ -65119,6 +65622,30 @@
       "startingMoves" : [
         "SCRATCH",
         "SAND_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
       ],
       "weightTenths" : 650
     },
@@ -65185,6 +65712,23 @@
       "startingMoves" : [
         "GROWL",
         "TACKLE"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 150
     },
@@ -65254,6 +65798,27 @@
         "TACKLE",
         "SCRATCH"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 440
     },
     {
@@ -65304,6 +65869,40 @@
         "SCRATCH",
         "TAIL_WHIP",
         "BODY_SLAM"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1320
     },
@@ -65370,6 +65969,24 @@
       "startingMoves" : [
         "LEER",
         "TACKLE"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 200
     },
@@ -65439,6 +66056,27 @@
         "TACKLE",
         "HORN_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 430
     },
     {
@@ -65489,6 +66127,40 @@
         "HORN_ATTACK",
         "POISON_STING",
         "THRASH"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1370
     },
@@ -65557,6 +66229,41 @@
         "POUND",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
+      ],
       "weightTenths" : 170
     },
     {
@@ -65595,6 +66302,42 @@
         "DOUBLESLAP",
         "MINIMIZE",
         "METRONOME"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
       ],
       "weightTenths" : 880
     },
@@ -65659,6 +66402,23 @@
         "EMBER",
         "TAIL_WHIP"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 220
     },
     {
@@ -65697,6 +66457,24 @@
         "TAIL_WHIP",
         "QUICK_ATTACK",
         "ROAR"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 440
     },
@@ -65768,6 +66546,40 @@
       "startingMoves" : [
         "SING"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
+      ],
       "weightTenths" : 120
     },
     {
@@ -65806,6 +66618,41 @@
         "DISABLE",
         "DEFENSE_CURL",
         "DOUBLESLAP"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
       ],
       "weightTenths" : 260
     },
@@ -65869,6 +66716,21 @@
       "startingMoves" : [
         "LEECH_LIFE"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 170
     },
     {
@@ -65926,6 +66788,22 @@
         "LEECH_LIFE",
         "SCREECH",
         "BITE"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 1210
     },
@@ -65992,6 +66870,22 @@
       "speciesCategory" : "WEED",
       "startingMoves" : [
         "ABSORB"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 120
     },
@@ -66062,6 +66956,22 @@
         "POISONPOWDER",
         "STUN_SPORE"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 190
     },
     {
@@ -66112,6 +67022,24 @@
         "SLEEP_POWDER",
         "ACID",
         "PETAL_DANCE"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 410
     },
@@ -66175,6 +67103,25 @@
       "startingMoves" : [
         "SCRATCH"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 120
     },
     {
@@ -66232,6 +67179,26 @@
         "SCRATCH",
         "STUN_SPORE",
         "LEECH_LIFE"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 650
     },
@@ -66300,6 +67267,22 @@
         "TACKLE",
         "DISABLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 660
     },
     {
@@ -66363,6 +67346,27 @@
         "POISONPOWDER",
         "LEECH_LIFE"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 280
     },
     {
@@ -66424,6 +67428,22 @@
       "startingMoves" : [
         "SCRATCH"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 20
     },
     {
@@ -66480,6 +67500,23 @@
         "SCRATCH",
         "GROWL",
         "DIG"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 730
     },
@@ -66543,6 +67580,25 @@
         "SCRATCH",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "PAY_DAY",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 90
     },
     {
@@ -66600,6 +67656,26 @@
         "GROWL",
         "BITE",
         "SCREECH"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 710
     },
@@ -66662,6 +67738,33 @@
       "startingMoves" : [
         "SCRATCH"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 430
     },
     {
@@ -66718,6 +67821,34 @@
         "SCRATCH",
         "TAIL_WHIP",
         "DISABLE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1690
     },
@@ -66781,6 +67912,32 @@
         "SCRATCH",
         "LEER"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 620
     },
     {
@@ -66838,6 +67995,33 @@
         "LEER",
         "KARATE_CHOP",
         "FURY_SWIPES"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 710
     },
@@ -66902,6 +68086,24 @@
         "BITE",
         "ROAR"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "DRAGON_RAGE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 420
     },
     {
@@ -66940,6 +68142,26 @@
         "EMBER",
         "LEER",
         "TAKE_DOWN"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "DRAGON_RAGE",
+        "DIG",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 3420
     },
@@ -67005,6 +68227,26 @@
       "speciesCategory" : "TADPOLE",
       "startingMoves" : [
         "BUBBLE"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 270
     },
@@ -67074,6 +68316,35 @@
         "HYPNOSIS",
         "WATER_GUN"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 440
     },
     {
@@ -67121,6 +68392,36 @@
         "DOUBLESLAP",
         "BODY_SLAM"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 1190
     },
     {
@@ -67162,6 +68463,32 @@
       "speciesCategory" : "PSI",
       "startingMoves" : [
         "TELEPORT"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 430
     },
@@ -67230,6 +68557,33 @@
         "CONFUSION",
         "DISABLE"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 1250
     },
     {
@@ -67291,6 +68645,34 @@
         "CONFUSION",
         "DISABLE"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "DIG",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 1060
     },
     {
@@ -67351,6 +68733,31 @@
       "speciesCategory" : "SUPERPOWER",
       "startingMoves" : [
         "KARATE_CHOP"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 430
     },
@@ -67415,6 +68822,31 @@
         "LOW_KICK",
         "LEER"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 1550
     },
     {
@@ -67471,6 +68903,32 @@
         "KARATE_CHOP",
         "LOW_KICK",
         "LEER"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 2870
     },
@@ -67542,6 +69000,22 @@
       "startingMoves" : [
         "VINE_WHIP",
         "GROWTH"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 90
     },
@@ -67616,6 +69090,22 @@
         "GROWTH",
         "WRAP"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 140
     },
     {
@@ -67666,6 +69156,24 @@
         "STUN_SPORE",
         "ACID",
         "RAZOR_LEAF"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 340
     },
@@ -67741,6 +69249,27 @@
       "startingMoves" : [
         "ACID"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MEGA_DRAIN",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "SURF"
+      ],
       "weightTenths" : 1000
     },
     {
@@ -67811,6 +69340,28 @@
         "SUPERSONIC",
         "WRAP"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "SURF"
+      ],
       "weightTenths" : 1210
     },
     {
@@ -67876,6 +69427,31 @@
       "speciesCategory" : "ROCK",
       "startingMoves" : [
         "TACKLE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 440
     },
@@ -67944,6 +69520,31 @@
         "TACKLE",
         "DEFENSE_CURL"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 2320
     },
     {
@@ -68004,6 +69605,33 @@
       "startingMoves" : [
         "TACKLE",
         "DEFENSE_CURL"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 6620
     },
@@ -68070,6 +69698,23 @@
       "startingMoves" : [
         "EMBER"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 660
     },
     {
@@ -68131,6 +69776,24 @@
         "TAIL_WHIP",
         "STOMP",
         "GROWL"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 2090
     },
@@ -68198,6 +69861,38 @@
       "startingMoves" : [
         "CONFUSION"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "PAY_DAY",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH",
+        "FLASH"
+      ],
       "weightTenths" : 790
     },
     {
@@ -68264,6 +69959,44 @@
         "DISABLE",
         "HEADBUTT"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH",
+        "FLASH"
+      ],
       "weightTenths" : 1730
     },
     {
@@ -68329,6 +70062,24 @@
       "startingMoves" : [
         "TACKLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 130
     },
     {
@@ -68390,6 +70141,25 @@
         "SONICBOOM",
         "THUNDERSHOCK"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 1320
     },
     {
@@ -68446,6 +70216,26 @@
       "startingMoves" : [
         "PECK",
         "SAND_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "SWORDS_DANCE",
+        "WHIRLWIND",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "FLY"
       ],
       "weightTenths" : 330
     },
@@ -68513,6 +70303,24 @@
       "startingMoves" : [
         "PECK"
       ],
+      "tmhmLearnset" : [
+        "WHIRLWIND",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "SKY_ATTACK",
+        "REST",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLY"
+      ],
       "weightTenths" : 860
     },
     {
@@ -68575,6 +70383,25 @@
         "GROWL",
         "FURY_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "WHIRLWIND",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "SKY_ATTACK",
+        "REST",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLY"
+      ],
       "weightTenths" : 1880
     },
     {
@@ -68636,6 +70463,27 @@
       "startingMoves" : [
         "HEADBUTT"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "PAY_DAY",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 1980
     },
     {
@@ -68693,6 +70541,28 @@
         "HEADBUTT",
         "GROWL",
         "AURORA_BEAM"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 2650
     },
@@ -68760,6 +70630,22 @@
         "POUND",
         "DISABLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 660
     },
     {
@@ -68820,6 +70706,23 @@
         "POUND",
         "DISABLE",
         "POISON_GAS"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 660
     },
@@ -68884,6 +70787,28 @@
         "TACKLE",
         "WITHDRAW"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "SWIFT",
+        "REST",
+        "EXPLOSION",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 90
     },
     {
@@ -68926,6 +70851,29 @@
         "SUPERSONIC",
         "CLAMP",
         "AURORA_BEAM"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "SWIFT",
+        "REST",
+        "EXPLOSION",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 2920
     },
@@ -68979,6 +70927,23 @@
         "CONFUSE_RAY",
         "NIGHT_SHADE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "RAGE",
+        "MEGA_DRAIN",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "DREAM_EATER",
+        "REST",
+        "PSYWAVE",
+        "EXPLOSION",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 2
     },
     {
@@ -69031,6 +70996,23 @@
         "CONFUSE_RAY",
         "NIGHT_SHADE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "RAGE",
+        "MEGA_DRAIN",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "DREAM_EATER",
+        "REST",
+        "PSYWAVE",
+        "EXPLOSION",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 2
     },
     {
@@ -69076,6 +71058,35 @@
         "LICK",
         "CONFUSE_RAY",
         "NIGHT_SHADE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MEGA_DRAIN",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "SKULL_BASH",
+        "DREAM_EATER",
+        "REST",
+        "PSYWAVE",
+        "EXPLOSION",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 890
     },
@@ -69133,6 +71144,26 @@
       "startingMoves" : [
         "TACKLE",
         "SCREECH"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "SKULL_BASH",
+        "REST",
+        "EXPLOSION",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 4630
     },
@@ -69200,6 +71231,33 @@
         "POUND",
         "HYPNOSIS"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "DREAM_EATER",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 710
     },
     {
@@ -69261,6 +71319,34 @@
         "HYPNOSIS",
         "DISABLE",
         "CONFUSION"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "DREAM_EATER",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 1670
     },
@@ -69324,6 +71410,26 @@
         "BUBBLE",
         "LEER"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 140
     },
     {
@@ -69380,6 +71486,27 @@
         "BUBBLE",
         "LEER",
         "VICEGRIP"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1320
     },
@@ -69443,6 +71570,25 @@
         "TACKLE",
         "SCREECH"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "SWIFT",
+        "REST",
+        "THUNDER_WAVE",
+        "EXPLOSION",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 230
     },
     {
@@ -69499,6 +71645,27 @@
         "TACKLE",
         "SCREECH",
         "SONICBOOM"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "EXPLOSION",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 1470
     },
@@ -69568,6 +71735,24 @@
         "BARRAGE",
         "HYPNOSIS"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "EGG_BOMB",
+        "REST",
+        "PSYWAVE",
+        "EXPLOSION",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 60
     },
     {
@@ -69608,6 +71793,28 @@
       "startingMoves" : [
         "BARRAGE",
         "HYPNOSIS"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SELFDESTRUCT",
+        "EGG_BOMB",
+        "REST",
+        "PSYWAVE",
+        "EXPLOSION",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 2650
     },
@@ -69671,6 +71878,33 @@
         "BONE_CLUB",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 140
     },
     {
@@ -69729,6 +71963,34 @@
         "LEER",
         "FOCUS_ENERGY"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 990
     },
     {
@@ -69784,6 +72046,27 @@
       "startingMoves" : [
         "DOUBLE_KICK",
         "MEDITATE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "STRENGTH"
       ],
       "weightTenths" : 1100
     },
@@ -69841,6 +72124,27 @@
         "COMET_PUNCH",
         "AGILITY"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 1110
     },
     {
@@ -69896,6 +72200,38 @@
       "startingMoves" : [
         "WRAP",
         "SUPERSONIC"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "SWORDS_DANCE",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1440
     },
@@ -69959,6 +72295,20 @@
         "TACKLE",
         "SMOG"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 20
     },
     {
@@ -70015,6 +72365,21 @@
         "TACKLE",
         "SMOG",
         "SLUDGE"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "REST",
+        "EXPLOSION",
+        "SUBSTITUTE"
       ],
       "weightTenths" : 210
     },
@@ -70082,6 +72447,28 @@
       "startingMoves" : [
         "HORN_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 2540
     },
     {
@@ -70145,6 +72532,40 @@
         "TAIL_WHIP",
         "FURY_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 2650
     },
     {
@@ -70204,6 +72625,44 @@
       "startingMoves" : [
         "POUND",
         "DOUBLESLAP"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "EGG_BOMB",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "SOFTBOILED",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
       ],
       "weightTenths" : 760
     },
@@ -70265,6 +72724,24 @@
         "CONSTRICT",
         "BIND"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
+      ],
       "weightTenths" : 770
     },
     {
@@ -70320,6 +72797,37 @@
       "startingMoves" : [
         "COMET_PUNCH",
         "RAGE"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 1760
     },
@@ -70382,6 +72890,24 @@
       "startingMoves" : [
         "BUBBLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 180
     },
     {
@@ -70437,6 +72963,25 @@
       "startingMoves" : [
         "BUBBLE",
         "SMOKESCREEN"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 550
     },
@@ -70504,6 +73049,25 @@
         "PECK",
         "TAIL_WHIP"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 330
     },
     {
@@ -70564,6 +73128,26 @@
         "PECK",
         "TAIL_WHIP",
         "SUPERSONIC"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 860
     },
@@ -70635,6 +73219,33 @@
       "startingMoves" : [
         "TACKLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF",
+        "FLASH"
+      ],
       "weightTenths" : 760
     },
     {
@@ -70673,6 +73284,34 @@
         "TACKLE",
         "WATER_GUN",
         "HARDEN"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "SURF",
+        "FLASH"
       ],
       "weightTenths" : 1760
     },
@@ -70729,6 +73368,35 @@
       "startingMoves" : [
         "CONFUSION",
         "BARRIER"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 1200
     },
@@ -70789,6 +73457,22 @@
       "speciesCategory" : "MANTIS",
       "startingMoves" : [
         "QUICK_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "CUT"
       ],
       "weightTenths" : 1230
     },
@@ -70851,6 +73535,34 @@
         "POUND",
         "LOVELY_KISS"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 900
     },
     {
@@ -70906,6 +73618,36 @@
       "startingMoves" : [
         "QUICK_ATTACK",
         "LEER"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
       ],
       "weightTenths" : 660
     },
@@ -70966,6 +73708,31 @@
       "startingMoves" : [
         "EMBER"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "METRONOME",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 980
     },
     {
@@ -71025,6 +73792,24 @@
       "startingMoves" : [
         "VICEGRIP"
       ],
+      "tmhmLearnset" : [
+        "SWORDS_DANCE",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "CUT",
+        "STRENGTH"
+      ],
       "weightTenths" : 1210
     },
     {
@@ -71080,6 +73865,29 @@
       "startingMoves" : [
         "TACKLE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "STRENGTH"
+      ],
       "weightTenths" : 1950
     },
     {
@@ -71124,6 +73932,9 @@
       "speciesCategory" : "FISH",
       "startingMoves" : [
         "SPLASH"
+      ],
+      "tmhmLearnset" : [
+
       ],
       "weightTenths" : 220
     },
@@ -71183,6 +73994,31 @@
         "DRAGON_RAGE",
         "LEER",
         "HYDRO_PUMP"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
       ],
       "weightTenths" : 5180
     },
@@ -71245,6 +74081,34 @@
         "WATER_GUN",
         "GROWL"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "SOLARBEAM",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 4850
     },
     {
@@ -71280,6 +74144,9 @@
       "speciesCategory" : "TRANSFORM",
       "startingMoves" : [
         "TRANSFORM"
+      ],
+      "tmhmLearnset" : [
+
       ],
       "weightTenths" : 90
     },
@@ -71356,6 +74223,21 @@
         "TACKLE",
         "SAND_ATTACK"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 140
     },
     {
@@ -71425,6 +74307,27 @@
         "SAND_ATTACK",
         "QUICK_ATTACK",
         "WATER_GUN"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 640
     },
@@ -71496,6 +74399,26 @@
         "QUICK_ATTACK",
         "THUNDERSHOCK"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLASH"
+      ],
       "weightTenths" : 540
     },
     {
@@ -71566,6 +74489,23 @@
         "QUICK_ATTACK",
         "EMBER"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE"
+      ],
       "weightTenths" : 550
     },
     {
@@ -71618,6 +74558,31 @@
         "TACKLE",
         "SHARPEN",
         "CONVERSION"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "FLASH"
       ],
       "weightTenths" : 800
     },
@@ -71678,6 +74643,24 @@
         "WATER_GUN",
         "WITHDRAW"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 170
     },
     {
@@ -71731,6 +74714,29 @@
         "WATER_GUN",
         "WITHDRAW",
         "HORN_ATTACK"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 770
     },
@@ -71791,6 +74797,24 @@
         "SCRATCH",
         "HARDEN"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 250
     },
     {
@@ -71845,6 +74869,31 @@
         "HARDEN",
         "ABSORB"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "SWORDS_DANCE",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "SUBMISSION",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SKULL_BASH",
+        "REST",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 890
     },
     {
@@ -71897,6 +74946,26 @@
       "startingMoves" : [
         "WING_ATTACK",
         "AGILITY"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "DRAGON_RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
       ],
       "weightTenths" : 1300
     },
@@ -71951,6 +75020,44 @@
         "AMNESIA",
         "REST"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "PSYCHIC_M",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "PSYWAVE",
+        "ROCK_SLIDE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 10140
     },
     {
@@ -71999,6 +75106,28 @@
       "startingMoves" : [
         "PECK",
         "ICE_BEAM"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
       ],
       "weightTenths" : 1220
     },
@@ -72049,6 +75178,28 @@
         "THUNDERSHOCK",
         "DRILL_PECK"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "FLY",
+        "FLASH"
+      ],
       "weightTenths" : 1160
     },
     {
@@ -72097,6 +75248,25 @@
       "startingMoves" : [
         "PECK",
         "FIRE_SPIN"
+      ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "WHIRLWIND",
+        "TOXIC",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "HYPER_BEAM",
+        "RAGE",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKY_ATTACK",
+        "REST",
+        "SUBSTITUTE",
+        "FLY"
       ],
       "weightTenths" : 1320
     },
@@ -72159,6 +75329,31 @@
       "startingMoves" : [
         "WRAP",
         "LEER"
+      ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "SURF"
       ],
       "weightTenths" : 70
     },
@@ -72223,6 +75418,32 @@
         "LEER",
         "THUNDER_WAVE"
       ],
+      "tmhmLearnset" : [
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "RAGE",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "SURF"
+      ],
       "weightTenths" : 360
     },
     {
@@ -72282,6 +75503,35 @@
         "THUNDER_WAVE",
         "AGILITY"
       ],
+      "tmhmLearnset" : [
+        "RAZOR_WIND",
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "RAGE",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "SUBSTITUTE",
+        "SURF",
+        "STRENGTH"
+      ],
       "weightTenths" : 4630
     },
     {
@@ -72340,6 +75590,44 @@
         "SWIFT",
         "PSYCHIC_M"
       ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "MEGA_KICK",
+        "TOXIC",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "SOLARBEAM",
+        "THUNDERBOLT",
+        "THUNDER",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "FIRE_BLAST",
+        "SKULL_BASH",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "STRENGTH",
+        "FLASH"
+      ],
       "weightTenths" : 2690
     },
     {
@@ -72390,6 +75678,64 @@
       "speciesCategory" : "NEW SPECIE",
       "startingMoves" : [
         "POUND"
+      ],
+      "tmhmLearnset" : [
+        "MEGA_PUNCH",
+        "RAZOR_WIND",
+        "SWORDS_DANCE",
+        "WHIRLWIND",
+        "MEGA_KICK",
+        "TOXIC",
+        "HORN_DRILL",
+        "BODY_SLAM",
+        "TAKE_DOWN",
+        "DOUBLE_EDGE",
+        "BUBBLEBEAM",
+        "WATER_GUN",
+        "ICE_BEAM",
+        "BLIZZARD",
+        "HYPER_BEAM",
+        "PAY_DAY",
+        "SUBMISSION",
+        "COUNTER",
+        "SEISMIC_TOSS",
+        "RAGE",
+        "MEGA_DRAIN",
+        "SOLARBEAM",
+        "DRAGON_RAGE",
+        "THUNDERBOLT",
+        "THUNDER",
+        "EARTHQUAKE",
+        "FISSURE",
+        "DIG",
+        "PSYCHIC_M",
+        "TELEPORT",
+        "MIMIC",
+        "DOUBLE_TEAM",
+        "REFLECT",
+        "BIDE",
+        "METRONOME",
+        "SELFDESTRUCT",
+        "EGG_BOMB",
+        "FIRE_BLAST",
+        "SWIFT",
+        "SKULL_BASH",
+        "SOFTBOILED",
+        "DREAM_EATER",
+        "SKY_ATTACK",
+        "REST",
+        "THUNDER_WAVE",
+        "PSYWAVE",
+        "EXPLOSION",
+        "ROCK_SLIDE",
+        "TRI_ATTACK",
+        "SUBSTITUTE",
+        "CUT",
+        "FLY",
+        "SURF",
+        "STRENGTH",
+        "FLASH",
+        "UNUSED"
       ],
       "weightTenths" : 90
     }

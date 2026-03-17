@@ -2,6 +2,14 @@ import Foundation
 import PokeDataModel
 
 extension GameRuntime {
+    func cancelFieldItemUseTargeting() {
+        guard fieldItemUseState != nil else { return }
+        clearHeldFieldDirections()
+        fieldItemUseState = nil
+        fieldPartyReorderState = nil
+        publishSnapshot()
+    }
+
     public func handleInventorySidebarSelection(_ itemID: String) {
         switch scene {
         case .field:
@@ -17,47 +25,59 @@ extension GameRuntime {
         itemID: String,
         gameplayState: GameplayState
     ) -> Bool {
-        dialogueState == nil &&
-            fieldPromptState == nil &&
-            fieldHealingState == nil &&
-            shopState == nil &&
-            fieldTransitionState == nil &&
-            scriptedMovementTask == nil &&
-            trainerEngagementTask == nil &&
+        currentFieldInteractionPolicy.blocksInventorySidebarSelection == false &&
+            hasBlockingFieldSidebarTaskState == false &&
             gameplayState.inventory.contains(where: { $0.itemID == itemID })
     }
 
     func handleFieldInventorySidebarSelection(_ itemID: String) {
         guard let gameplayState,
-              canHandleFieldInventorySidebarSelection(itemID: itemID, gameplayState: gameplayState),
-              medicineItem(for: itemID) != nil else {
+              canHandleFieldInventorySidebarSelection(itemID: itemID, gameplayState: gameplayState) else {
+            return
+        }
+
+        let itemUseMode: FieldItemUseMode
+        if medicineItem(for: itemID) != nil {
+            itemUseMode = .medicine
+        } else if tmhmItem(for: itemID) != nil {
+            itemUseMode = .tmhm
+        } else {
             return
         }
 
         playUIConfirmSound()
+        clearHeldFieldDirections()
         fieldPartyReorderState = nil
 
         if gameplayState.playerParty.isEmpty {
             fieldItemUseState = nil
-            showFieldMedicineDialogue(
-                id: "field_medicine_empty_party",
+            showFieldItemUseDialogue(
+                id: "field_item_use_empty_party",
                 message: medicineEmptyPartyMessage
             )
             publishSnapshot()
             return
         }
 
-        if hasUsableMedicineTarget(itemID: itemID, party: gameplayState.playerParty) == false {
+        let hasUsableTarget: Bool
+        switch itemUseMode {
+        case .medicine:
+            hasUsableTarget = hasUsableMedicineTarget(itemID: itemID, party: gameplayState.playerParty)
+        case .tmhm:
+            hasUsableTarget = hasUsableTMHMTarget(itemID: itemID, party: gameplayState.playerParty)
+        }
+
+        if hasUsableTarget == false {
             fieldItemUseState = nil
-            showFieldMedicineDialogue(
-                id: "field_medicine_no_effect",
+            showFieldItemUseDialogue(
+                id: "field_item_use_no_effect",
                 message: medicineNoEffectMessage
             )
             publishSnapshot()
             return
         }
 
-        fieldItemUseState = .init(itemID: itemID)
+        fieldItemUseState = .init(itemID: itemID, mode: itemUseMode)
         self.gameplayState = gameplayState
         publishSnapshot()
     }
@@ -85,6 +105,7 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         substate = "battle"
         publishSnapshot()
     }
@@ -100,7 +121,7 @@ extension GameRuntime {
               removeItem(itemID, quantity: 1, from: &gameplayState) else {
             fieldItemUseState = nil
             self.gameplayState = gameplayState
-            showFieldMedicineDialogue(
+            showFieldItemUseDialogue(
                 id: "field_medicine_no_effect",
                 message: medicineNoEffectMessage
             )
@@ -112,14 +133,14 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         fieldItemUseState = nil
         traceItemUseRemoval(itemID: itemID, gameplayState: gameplayState)
-        showFieldMedicineDialogue(
+        showFieldItemUseDialogue(
             id: "field_medicine_\(itemID.lowercased())",
             message: result.message
         )
         publishSnapshot()
     }
 
-    private func showFieldMedicineDialogue(id: String, message: String) {
+    func showFieldItemUseDialogue(id: String, message: String) {
         showInlineDialogue(
             id: id,
             pages: inlineDialoguePages(for: message),
@@ -127,7 +148,7 @@ extension GameRuntime {
         )
     }
 
-    private func inlineDialoguePages(for message: String) -> [DialoguePage] {
+    func inlineDialoguePages(for message: String) -> [DialoguePage] {
         let wrappedLines = message
             .components(separatedBy: "\n")
             .flatMap { wrapBattleDialogueLine($0, limit: 18) }
@@ -154,7 +175,7 @@ extension GameRuntime {
         return pages
     }
 
-    private func traceItemUseRemoval(itemID: String, gameplayState: GameplayState) {
+    func traceItemUseRemoval(itemID: String, gameplayState: GameplayState) {
         traceEvent(
             .inventoryChanged,
             "Removed 1x \(itemID).",

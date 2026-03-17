@@ -1832,6 +1832,141 @@ extension PokeUITests {
     XCTAssertTrue(sidebarParty.pokemon[1].isSelectable)
     XCTAssertTrue(sidebarParty.pokemon[1].isFocused)
   }
+  func testPartySidebarBuilderMapsTMHMTargetingAnnotations() {
+    let party = PartyTelemetry(
+      pokemon: [
+        .init(
+          speciesID: "SQUIRTLE",
+          displayName: "Shell",
+          level: 5,
+          currentHP: 19,
+          maxHP: 19,
+          attack: 11,
+          defense: 10,
+          speed: 9,
+          special: 12,
+          moves: ["TACKLE"]
+        ),
+        .init(
+          speciesID: "CHARMANDER",
+          displayName: "Flare",
+          level: 5,
+          currentHP: 18,
+          maxHP: 18,
+          attack: 10,
+          defense: 9,
+          speed: 11,
+          special: 10,
+          moves: ["STRENGTH"]
+        ),
+        .init(
+          speciesID: "PIDGEY",
+          displayName: "Wing",
+          level: 3,
+          currentHP: 12,
+          maxHP: 12,
+          attack: 8,
+          defense: 8,
+          speed: 10,
+          special: 7,
+          moves: ["GUST"]
+        ),
+      ]
+    )
+
+    let sidebarParty = GameplaySidebarPropsBuilder.makeParty(
+      from: party,
+      mode: .itemUseTarget,
+      focusedIndex: 0,
+      selectableIndices: [0],
+      annotationByIndex: [0: "ABLE", 1: "KNOWS IT", 2: "UNABLE"],
+      promptText: "Teach SURF to which #MON?"
+    )
+
+    XCTAssertEqual(sidebarParty.mode, .itemUseTarget)
+    XCTAssertEqual(sidebarParty.promptText, "Teach SURF to which #MON?")
+    XCTAssertEqual(sidebarParty.pokemon[0].selectionAnnotation, "ABLE")
+    XCTAssertTrue(sidebarParty.pokemon[0].isSelectable)
+    XCTAssertTrue(sidebarParty.pokemon[0].isFocused)
+    XCTAssertEqual(sidebarParty.pokemon[1].selectionAnnotation, "KNOWS IT")
+    XCTAssertFalse(sidebarParty.pokemon[1].isSelectable)
+    XCTAssertEqual(sidebarParty.pokemon[2].selectionAnnotation, "UNABLE")
+    XCTAssertFalse(sidebarParty.pokemon[2].isSelectable)
+  }
+  func testFieldLearnMoveOverlaySupportsReplaceRows() {
+    let overlay = FieldLearnMoveOverlay(
+      props: FieldLearnMoveOverlayProps(
+        title: "Forget A Move",
+        promptText: "Choose a move to forget for Strength.",
+        rows: [
+          .init(
+            id: "forget-cut",
+            title: "Cut",
+            isSelectable: false,
+            isFocused: true,
+            move: PartySidebarMoveProps(
+              id: "cut-row",
+              moveID: "CUT",
+              displayName: "Cut",
+              typeLabel: "NORMAL",
+              currentPP: 30,
+              maxPP: 30,
+              power: 50,
+              accuracy: 95
+            )
+          ),
+          .init(
+            id: "forget-scratch",
+            title: "Scratch",
+            isSelectable: true,
+            isFocused: false,
+            move: PartySidebarMoveProps(
+              id: "scratch-row",
+              moveID: "SCRATCH",
+              displayName: "Scratch",
+              typeLabel: "NORMAL",
+              currentPP: 35,
+              maxPP: 35,
+              power: 40,
+              accuracy: 100
+            )
+          ),
+        ]
+      )
+    )
+
+    let measuredHeight = measureFittingHeight(of: overlay, width: 360)
+
+    XCTAssertGreaterThan(measuredHeight, 120)
+  }
+
+  func testFieldLearnMoveOverlaySupportsConfirmRows() {
+    let overlay = FieldLearnMoveOverlay(
+      props: FieldLearnMoveOverlayProps(
+        title: "Teach Strength",
+        promptText: "Teach Strength to Flare?",
+        rows: [
+          .init(
+            id: "learn-move",
+            title: "Learn Strength",
+            isSelectable: true,
+            isFocused: true
+          ),
+          .init(
+            id: "skip-move",
+            title: "Skip",
+            isSelectable: true,
+            isFocused: false
+          ),
+        ]
+      )
+    )
+
+    let measuredHeight = measureFittingHeight(of: overlay, width: 360)
+
+    XCTAssertGreaterThan(measuredHeight, 80)
+  }
+
   func testBattleSidebarRoutesMedicineTargetingAttentionToParty() {
     let props = BattleSidebarProps(
       trainerName: "PIDGEY",

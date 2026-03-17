@@ -279,6 +279,7 @@ extension GameRuntime {
         self.gameplayState = gameplayState
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         scene = .battle
         substate = "battle"
     }

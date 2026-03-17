@@ -9,6 +9,7 @@ extension GameRuntime {
         clearHeldFieldDirections()
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         shopState = RuntimeShopState(
             martID: martID,
             phase: .mainMenu,

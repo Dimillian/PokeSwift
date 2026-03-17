@@ -482,6 +482,7 @@ private func parseSpecies(
         String(moveMatch.output.3),
         String(moveMatch.output.4),
     ]
+    let tmhmLearnset = parseTMHMLearnset(from: contents)
     let primaryType = String(typeMatch.output.1)
     let rawSecondaryType = String(typeMatch.output.2)
     let catchRate = Int(catchRateMatch.output.1) ?? 0
@@ -514,6 +515,7 @@ private func parseSpecies(
         startingMoves: moveValues.filter { $0 != "NO_MOVE" },
         evolutions: evolutions,
         levelUpLearnset: levelUpLearnset,
+        tmhmLearnset: tmhmLearnset,
         crySoundEffectID: cryData.soundEffectID,
         cryPitch: cryData.pitch,
         cryLength: cryData.length,
@@ -524,6 +526,54 @@ private func parseSpecies(
         weightTenths: pokedexData?.weightTenths,
         pokedexEntryText: pokedexData?.entryText
     )
+}
+
+private func parseTMHMLearnset(from contents: String) -> [String] {
+    let lines = contents
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        .map(String.init)
+
+    var learnset: [String] = []
+    var isCollecting = false
+
+    for rawLine in lines {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+
+        guard line.isEmpty == false else {
+            if isCollecting {
+                break
+            }
+            continue
+        }
+
+        let fragment: String
+        if isCollecting == false {
+            guard line.hasPrefix("tmhm ") else {
+                continue
+            }
+            isCollecting = true
+            fragment = String(line.dropFirst("tmhm ".count))
+        } else {
+            fragment = line
+        }
+
+        let cleanedFragment = fragment.replacingOccurrences(of: "\\", with: "")
+        learnset.append(
+            contentsOf: cleanedFragment
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .filter { $0.isEmpty == false }
+        )
+
+        if line.hasSuffix("\\") == false {
+            break
+        }
+    }
+
+    return learnset
 }
 
 private func battleSpriteManifest(speciesID: String, frontSymbol: String, backSymbol: String) throws -> BattleSpriteManifest {

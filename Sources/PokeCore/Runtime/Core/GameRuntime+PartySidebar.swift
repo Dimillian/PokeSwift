@@ -2,13 +2,8 @@ import Foundation
 
 extension GameRuntime {
     func canHandleFieldPartySidebarSelection(index: Int, gameplayState: GameplayState) -> Bool {
-        dialogueState == nil &&
-            fieldPromptState == nil &&
-            fieldHealingState == nil &&
-            shopState == nil &&
-            fieldTransitionState == nil &&
-            scriptedMovementTask == nil &&
-            trainerEngagementTask == nil &&
+        currentFieldInteractionPolicy.blocksPartySidebarSelection == false &&
+            hasBlockingFieldSidebarTaskState == false &&
             gameplayState.playerParty.indices.contains(index) &&
             (fieldItemUseState != nil || gameplayState.playerParty.count > 1)
     }
@@ -46,8 +41,13 @@ extension GameRuntime {
 
         playUIConfirmSound()
 
-        if fieldItemUseState != nil {
-            resolveFieldMedicineSelection(index)
+        if let fieldItemUseState {
+            switch fieldItemUseState.mode {
+            case .medicine:
+                resolveFieldMedicineSelection(index)
+            case .tmhm:
+                resolveFieldTMHMSelection(index)
+            }
             return
         }
 

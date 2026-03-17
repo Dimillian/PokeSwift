@@ -2,13 +2,25 @@ import PokeDataModel
 
 extension GameRuntime {
     func handleField(button: RuntimeButton) {
-        if nicknameConfirmation != nil {
-            handleNicknameConfirmation(button: button)
-            return
-        }
-        if shopState != nil {
-            handleShop(button: button)
-            return
+        if let modalState = currentFieldModalState {
+            switch modalState {
+            case .nicknameConfirmation:
+                handleNicknameConfirmation(button: button)
+                return
+            case .itemUse:
+                guard button == .cancel else { return }
+                playUIConfirmSound()
+                cancelFieldItemUseTargeting()
+                return
+            case .learnMove:
+                handleFieldLearnMove(button: button)
+                return
+            case .shop:
+                handleShop(button: button)
+                return
+            case .dialogue, .prompt, .healing, .naming, .starterChoice:
+                break
+            }
         }
         guard isFieldInputLocked == false else { return }
         clearFieldPartyReorderState()
@@ -35,17 +47,8 @@ extension GameRuntime {
 
     var canContinueHeldFieldMovement: Bool {
         scene == .field &&
-            dialogueState == nil &&
-            fieldPromptState == nil &&
-            nicknameConfirmation == nil &&
-            shopState == nil &&
-            fieldHealingState == nil &&
-            fieldTransitionState == nil &&
-            scriptedMovementTask == nil &&
-            trainerEngagementTask == nil &&
-            fieldInteractionTask == nil &&
-            gameplayState?.activeScriptID == nil &&
-            gameplayState?.battle == nil
+            currentFieldInteractionPolicy.blocksHeldMovement == false &&
+            hasBlockingHeldFieldMovementTaskState == false
     }
 
     func pressHeldFieldDirection(_ direction: FacingDirection) {

@@ -24,15 +24,20 @@ enum GameplayScenePropsFactory {
         case .fieldLike:
             let fieldState = runtime.currentFieldSceneState()
             let evolutionState = runtime.currentEvolutionSceneState()
-            let enabledFieldInventoryItemIDs = Set(
+            let fieldModalKind = runtime.currentFieldModalKind
+            let activeFieldItemID = runtime.currentFieldModalItemID
+            let enabledFieldInventoryItemIDs: Set<String> = Set(
                 (fieldState.inventory?.items ?? []).compactMap { item in
-                    runtime.content.item(id: item.itemID)?.medicine == nil ? nil : item.itemID
+                    guard let manifest = runtime.content.item(id: item.itemID) else {
+                        return nil
+                    }
+                    return (manifest.medicine != nil || manifest.tmhmMoveID != nil) ? item.itemID : nil
                 }
             )
             let sidebarInventory = makeInventorySidebar(
                 from: fieldState.inventory?.items ?? [],
                 manifestIndex: manifestIndex,
-                focusedItemID: runtime.fieldItemUseItemID,
+                focusedItemID: activeFieldItemID,
                 enabledItemIDs: enabledFieldInventoryItemIDs
             )
 
@@ -61,7 +66,7 @@ enum GameplayScenePropsFactory {
                         battleStyle: runtime.optionsBattleStyle
                     ),
                     preferredExpandedSection: runtime.scene == .evolution ? .party : (
-                        runtime.fieldItemUseItemID != nil
+                        activeFieldItemID != nil
                             ? .party
                             : (runtime.captureAftermathPokedexSelectionID == nil ? nil : .pokedex)
                     )
@@ -109,16 +114,21 @@ enum GameplayScenePropsFactory {
                         renderAssets: makeFieldRenderAssets(runtime: runtime),
                         fieldTransition: fieldState.transition,
                         fieldAlert: fieldState.fieldAlert,
-                        dialogueLines: runtime.currentDialoguePage?.lines,
-                        dialogueInstantReveal: runtime.dialogueTextFullyRevealed,
-                        onDialogueRevealed: { [weak runtime] in runtime?.dialogueTextFullyRevealed = true },
-                        fieldPrompt: fieldState.fieldPrompt,
-                        fieldHealing: fieldState.fieldHealing,
-                        shop: fieldState.shop,
-                        starterChoiceOptions: runtime.scene == .starterChoice ? runtime.starterChoiceOptions : [],
-                        starterChoiceFocusedIndex: runtime.starterChoiceFocusedIndex,
-                        namingProps: makeNamingProps(runtime: runtime),
-                        nicknameConfirmation: nicknameConfirmation
+                        footerContent: makeFieldFooterContent(
+                            runtime: runtime,
+                            modalKind: fieldModalKind,
+                            nicknameConfirmation: nicknameConfirmation
+                        ),
+                        overlayContent: makeFieldOverlayContent(
+                            runtime: runtime,
+                            modalKind: fieldModalKind,
+                            fieldState: fieldState,
+                            manifestIndex: manifestIndex
+                        ),
+                        screenModalContent: makeFieldScreenModalContent(
+                            runtime: runtime,
+                            modalKind: fieldModalKind
+                        )
                     )
                 ),
                 sidebarMode: sidebarMode,
@@ -305,6 +315,133 @@ enum GameplayScenePropsFactory {
         return NicknameConfirmationViewProps(
             speciesDisplayName: confirmation.defaultName,
             focusedIndex: confirmation.focusedIndex
+        )
+    }
+
+    private static func makeFieldFooterContent(
+        runtime: GameRuntime,
+        modalKind: FieldModalKind?,
+        nicknameConfirmation: NicknameConfirmationViewProps?
+    ) -> GameplayFieldFooterContent? {
+        switch modalKind {
+        case .nicknameConfirmation:
+            return nicknameConfirmation.map(GameplayFieldFooterContent.nicknameConfirmation)
+        case .dialogue, .prompt:
+            guard let dialogueLines = runtime.currentDialoguePage?.lines else {
+                return nil
+            }
+            return .dialogue(
+                lines: dialogueLines,
+                instantReveal: runtime.dialogueTextFullyRevealed,
+                onFullyRevealed: { [weak runtime] in runtime?.dialogueTextFullyRevealed = true }
+            )
+        default:
+            return nil
+        }
+    }
+
+    private static func makeFieldOverlayContent(
+        runtime: GameRuntime,
+        modalKind: FieldModalKind?,
+        fieldState: GameplayFieldSceneState,
+        manifestIndex: GameplaySidebarManifestIndex
+    ) -> GameplayFieldOverlayContent? {
+        switch modalKind {
+        case .healing:
+            return fieldState.fieldHealing.map(GameplayFieldOverlayContent.healing)
+        case .learnMove:
+            return makeFieldLearnMoveOverlay(
+                runtime: runtime,
+                manifestIndex: manifestIndex
+            )
+            .map(GameplayFieldOverlayContent.learnMove)
+        case .prompt:
+            return fieldState.fieldPrompt.map(GameplayFieldOverlayContent.prompt)
+        case .shop:
+            return fieldState.shop.map(GameplayFieldOverlayContent.shop)
+        case .starterChoice:
+            return .starterChoice(
+                options: runtime.starterChoiceOptions,
+                focusedIndex: runtime.starterChoiceFocusedIndex
+            )
+        default:
+            return nil
+        }
+    }
+
+    private static func makeFieldScreenModalContent(
+        runtime: GameRuntime,
+        modalKind: FieldModalKind?
+    ) -> GameplayFieldScreenModalContent? {
+        guard modalKind == .naming,
+              let namingProps = makeNamingProps(runtime: runtime) else {
+            return nil
+        }
+        return .naming(namingProps)
+    }
+
+    private static func makeFieldLearnMoveOverlay(
+        runtime: GameRuntime,
+        manifestIndex: GameplaySidebarManifestIndex
+    ) -> FieldLearnMoveOverlayProps? {
+        guard let state = runtime.currentFieldLearnMoveState,
+              let move = runtime.content.move(id: state.moveID),
+              let party = runtime.currentFieldSceneState().party,
+              party.pokemon.indices.contains(state.pokemonIndex) else {
+            return nil
+        }
+
+        let pokemon = party.pokemon[state.pokemonIndex]
+        // Reuse the runtime HM protection source of truth so focused fixtures
+        // still mark canonical HM moves as unforgettable even when some HM items
+        // are omitted from the extracted item slice.
+        let hmMoveIDs = runtime.hmMoveIDs
+
+        let rows: [FieldLearnMoveOverlayRowProps]
+        switch state.stage {
+        case .confirm:
+            rows = [
+                .init(
+                    id: "learn-move",
+                    title: "Learn \(move.displayName)",
+                    isSelectable: true,
+                    isFocused: state.focusedIndex == 0
+                ),
+                .init(
+                    id: "skip-move",
+                    title: "Skip",
+                    isSelectable: true,
+                    isFocused: state.focusedIndex == 1
+                ),
+            ]
+        case .replace:
+            rows = pokemon.moveStates.enumerated().map { index, knownMove in
+                let moveDetails = manifestIndex.moveDetailsByID[knownMove.id]
+                return FieldLearnMoveOverlayRowProps(
+                    id: "forget-\(index)",
+                    title: moveDetails?.displayName ?? knownMove.id,
+                    isSelectable: hmMoveIDs.contains(knownMove.id) == false,
+                    isFocused: state.focusedIndex == index,
+                    move: PartySidebarMoveProps(
+                        id: "field-learn-move-\(index)",
+                        moveID: knownMove.id,
+                        displayName: moveDetails?.displayName ?? knownMove.id,
+                        typeLabel: moveDetails?.typeLabel,
+                        currentPP: knownMove.currentPP,
+                        maxPP: moveDetails?.maxPP,
+                        power: moveDetails?.power,
+                        accuracy: moveDetails?.accuracy
+                    )
+                )
+            }
+        }
+
+        return FieldLearnMoveOverlayProps(
+            title: state.stage == .confirm ? "Teach \(move.displayName)" : "Forget A Move",
+            promptText: state.stage == .confirm
+                ? "Teach \(move.displayName) to \(pokemon.displayName)?"
+                : "Choose a move to forget for \(move.displayName).",
+            rows: rows
         )
     }
 

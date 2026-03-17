@@ -222,6 +222,7 @@ extension GameRuntime {
         shopState = nil
         fieldPartyReorderState = nil
         fieldItemUseState = nil
+        fieldLearnMoveState = nil
         deferredActions.removeAll()
         currentAudioState = nil
         fieldTransitionState = nil
