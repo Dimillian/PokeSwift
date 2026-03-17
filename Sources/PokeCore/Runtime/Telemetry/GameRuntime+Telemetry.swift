@@ -114,6 +114,7 @@ extension GameRuntime {
             trainerSpritePath: battle.trainerSpritePath,
             playerPokemon: makePartyPokemonTelemetry(from: battle.playerPokemon),
             enemyPokemon: makePartyPokemonTelemetry(from: battle.enemyPokemon),
+            enemyParty: battle.enemyParty.map { makePartyPokemonTelemetry(from: $0) },
             enemyPartyCount: battle.enemyParty.count,
             enemyActiveIndex: battle.enemyActiveIndex,
             focusedMoveIndex: battle.focusedMoveIndex,

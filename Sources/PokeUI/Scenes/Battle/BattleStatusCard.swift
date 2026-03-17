@@ -229,8 +229,25 @@ struct BattlePokeballToken: View {
     }
 }
 
+enum BattlePartyBallState: Equatable {
+    case occupied
+    case statused
+    case fainted
+    case empty
+
+    init(pokemon: PartyPokemonTelemetry) {
+        if pokemon.currentHP <= 0 {
+            self = .fainted
+        } else if pokemon.majorStatus != .none {
+            self = .statused
+        } else {
+            self = .occupied
+        }
+    }
+}
+
 struct BattleTrainerPartyIndicator: View {
-    let filledCount: Int
+    let slotStates: [BattlePartyBallState]
     let totalCount: Int
     let stage: BattlePresentationStage
     let animationRevision: Int
@@ -243,8 +260,8 @@ struct BattleTrainerPartyIndicator: View {
             let horizontalPadding = max(2, size.width * 0.01)
             let verticalPadding = max(2, size.height * 0.03)
             let slotSpacing = max(4, size.width * 0.025)
-            let clampedTotalCount = max(1, totalCount)
-            let clampedFilledCount = min(max(0, filledCount), clampedTotalCount)
+            let resolvedSlotStates = Self.normalizedSlotStates(slotStates, totalCount: totalCount)
+            let clampedTotalCount = resolvedSlotStates.count
             let availableWidth = max(
                 0,
                 size.width - (horizontalPadding * 2) - (CGFloat(clampedTotalCount - 1) * slotSpacing)
@@ -256,8 +273,8 @@ struct BattleTrainerPartyIndicator: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: slotSpacing) {
-                    ForEach(0..<clampedTotalCount, id: \.self) { index in
-                        BattlePartyBallToken(isFilled: index < clampedFilledCount)
+                    ForEach(Array(resolvedSlotStates.enumerated()), id: \.offset) { index, state in
+                        BattlePartyBallToken(state: state)
                             .frame(width: slotDiameter, height: slotDiameter)
                             .opacity(index < revealedSlotCount ? 1 : 0)
                             .offset(
@@ -287,12 +304,46 @@ struct BattleTrainerPartyIndicator: View {
         "\(stage.rawValue)-\(animationRevision)"
     }
 
+    static func slotStates(
+        enemyParty: [PartyPokemonTelemetry],
+        enemyPartyCount: Int,
+        totalCount: Int
+    ) -> [BattlePartyBallState] {
+        let clampedTotalCount = max(1, totalCount)
+        let reportedOccupiedCount = min(clampedTotalCount, max(enemyPartyCount, enemyParty.count))
+        var states = enemyParty
+            .prefix(clampedTotalCount)
+            .map(BattlePartyBallState.init(pokemon:))
+
+        if states.count < reportedOccupiedCount {
+            states.append(contentsOf: Array(repeating: .occupied, count: reportedOccupiedCount - states.count))
+        }
+        if states.count < clampedTotalCount {
+            states.append(contentsOf: Array(repeating: .empty, count: clampedTotalCount - states.count))
+        }
+
+        return states
+    }
+
+    static func normalizedSlotStates(
+        _ slotStates: [BattlePartyBallState],
+        totalCount: Int
+    ) -> [BattlePartyBallState] {
+        let clampedTotalCount = max(1, totalCount)
+        var normalized = Array(slotStates.prefix(clampedTotalCount))
+        if normalized.count < clampedTotalCount {
+            normalized.append(contentsOf: Array(repeating: .empty, count: clampedTotalCount - normalized.count))
+        }
+        return normalized
+    }
+
     @MainActor
     private func syncSlotEntranceAnimation() async {
+        let resolvedSlotCount = Self.normalizedSlotStates(slotStates, totalCount: totalCount).count
         if stage == .introReveal {
             revealedSlotCount = 0
 
-            for slotIndex in 0..<max(1, totalCount) {
+            for slotIndex in 0..<resolvedSlotCount {
                 guard Task.isCancelled == false else { return }
 
                 withAnimation(.easeOut(duration: 0.26)) {
@@ -304,21 +355,34 @@ struct BattleTrainerPartyIndicator: View {
             return
         }
 
-        revealedSlotCount = max(1, totalCount)
+        revealedSlotCount = resolvedSlotCount
     }
 }
 
 private struct BattlePartyBallToken: View {
-    let isFilled: Bool
+    let state: BattlePartyBallState
 
     var body: some View {
         GeometryReader { proxy in
             let strokeWidth = max(1, proxy.size.width * 0.12)
+            let tokenPadding = proxy.size.width * 0.04
 
-            if isFilled {
+            switch state {
+            case .occupied:
                 BattlePokeballToken()
-                    .padding(proxy.size.width * 0.04)
-            } else {
+                    .padding(tokenPadding)
+            case .statused:
+                BattlePokeballToken()
+                    .padding(tokenPadding)
+                    .saturation(0)
+                    .brightness(-0.24)
+            case .fainted:
+                BattlePokeballToken()
+                    .padding(tokenPadding)
+                    .saturation(0)
+                    .brightness(-0.78)
+                    .contrast(1.15)
+            case .empty:
                 Circle()
                     .fill(Color.white.opacity(0.08))
                     .overlay {

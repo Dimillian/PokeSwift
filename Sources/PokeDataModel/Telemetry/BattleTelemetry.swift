@@ -32,6 +32,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
     public let trainerSpritePath: String?
     public let playerPokemon: PartyPokemonTelemetry
     public let enemyPokemon: PartyPokemonTelemetry
+    public let enemyParty: [PartyPokemonTelemetry]
     public let enemyPartyCount: Int
     public let enemyActiveIndex: Int
     public let focusedMoveIndex: Int
@@ -56,6 +57,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         trainerSpritePath: String? = nil,
         playerPokemon: PartyPokemonTelemetry,
         enemyPokemon: PartyPokemonTelemetry,
+        enemyParty: [PartyPokemonTelemetry] = [],
         enemyPartyCount: Int,
         enemyActiveIndex: Int,
         focusedMoveIndex: Int,
@@ -83,6 +85,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         self.trainerSpritePath = trainerSpritePath
         self.playerPokemon = playerPokemon
         self.enemyPokemon = enemyPokemon
+        self.enemyParty = enemyParty
         self.enemyPartyCount = enemyPartyCount
         self.enemyActiveIndex = enemyActiveIndex
         self.focusedMoveIndex = focusedMoveIndex
@@ -108,6 +111,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         case trainerSpritePath
         case playerPokemon
         case enemyPokemon
+        case enemyParty
         case enemyPartyCount
         case enemyActiveIndex
         case focusedMoveIndex
@@ -134,6 +138,7 @@ public struct BattleTelemetry: Codable, Equatable, Sendable {
         trainerSpritePath = try container.decodeIfPresent(String.self, forKey: .trainerSpritePath)
         playerPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .playerPokemon)
         enemyPokemon = try container.decode(PartyPokemonTelemetry.self, forKey: .enemyPokemon)
+        enemyParty = try container.decodeArray([PartyPokemonTelemetry].self, forKey: .enemyParty, default: [])
         enemyPartyCount = try container.decode(Int.self, forKey: .enemyPartyCount, default: 1)
         enemyActiveIndex = try container.decode(Int.self, forKey: .enemyActiveIndex, default: 0)
         focusedMoveIndex = try container.decode(Int.self, forKey: .focusedMoveIndex)

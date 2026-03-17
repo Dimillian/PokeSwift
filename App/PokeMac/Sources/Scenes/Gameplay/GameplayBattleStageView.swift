@@ -19,6 +19,7 @@ struct BattleStageView: View {
                 kind: props.kind,
                 playerPokemon: props.playerPokemon,
                 enemyPokemon: props.enemyPokemon,
+                enemyParty: props.enemyParty,
                 enemyPartyCount: props.enemyPartyCount,
                 isEnemySpeciesOwned: props.isEnemySpeciesOwned,
                 trainerSpriteURL: props.trainerSpriteURL,

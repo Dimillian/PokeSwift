@@ -196,6 +196,7 @@ enum GameplayScenePropsFactory {
                         textLines: battle.textLines,
                         playerPokemon: battle.playerPokemon,
                         enemyPokemon: battle.enemyPokemon,
+                        enemyParty: battle.enemyParty,
                         enemyPartyCount: battle.enemyPartyCount,
                         isEnemySpeciesOwned: isEnemySpeciesOwned,
                         trainerSpriteURL: trainerSpriteURL,

@@ -232,6 +232,70 @@ extension PokeUITests {
     )
   }
 
+  func testTrainerPartyIndicatorSlotStatesMarkFaintedStatusedAndEmptySlots() {
+    let slotStates = BattleTrainerPartyIndicator.slotStates(
+      enemyParty: [
+        .init(
+          speciesID: "PIDGEY",
+          displayName: "Pidgey",
+          level: 9,
+          currentHP: 20,
+          maxHP: 20,
+          attack: 12,
+          defense: 10,
+          speed: 14,
+          special: 9,
+          moves: ["TACKLE"]
+        ),
+        .init(
+          speciesID: "RATTATA",
+          displayName: "Rattata",
+          level: 8,
+          currentHP: 0,
+          maxHP: 18,
+          attack: 13,
+          defense: 9,
+          speed: 15,
+          special: 8,
+          moves: ["TACKLE"]
+        ),
+        .init(
+          speciesID: "EKANS",
+          displayName: "Ekans",
+          level: 10,
+          currentHP: 23,
+          maxHP: 23,
+          attack: 14,
+          defense: 11,
+          speed: 12,
+          special: 10,
+          majorStatus: .sleep,
+          moves: ["WRAP"]
+        ),
+      ],
+      enemyPartyCount: 3,
+      totalCount: 6
+    )
+
+    XCTAssertEqual(
+      slotStates,
+      [.occupied, .fainted, .statused, .empty, .empty, .empty]
+    )
+  }
+
+  func testTrainerPartyIndicatorSlotStatesFallbackToReportedPartyCount() {
+    let slotStates = BattleTrainerPartyIndicator.slotStates(
+      enemyParty: [],
+      enemyPartyCount: 2,
+      totalCount: 6
+    )
+
+    XCTAssertEqual(
+      slotStates,
+      [.occupied, .occupied, .empty, .empty, .empty, .empty]
+    )
+  }
+
   func testBattlePlayerSpriteHidesWhenPresentationRequestsIt() {
     XCTAssertEqual(
       BattleViewportCanvas.playerPokemonOpacity(

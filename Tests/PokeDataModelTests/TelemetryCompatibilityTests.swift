@@ -134,6 +134,7 @@ final class TelemetryCompatibilityTests: XCTestCase {
         let decoded = try JSONDecoder().decode(BattleTelemetry.self, from: payload)
 
         XCTAssertEqual(decoded.kind, .trainer)
+        XCTAssertEqual(decoded.enemyParty, [])
         XCTAssertEqual(decoded.enemyPartyCount, 1)
         XCTAssertEqual(decoded.enemyActiveIndex, 0)
         XCTAssertEqual(decoded.focusedBagItemIndex, 0)
@@ -269,6 +270,65 @@ final class TelemetryCompatibilityTests: XCTestCase {
 
         let decodedRoundTrip = try JSONDecoder().decode(BattleTelemetry.self, from: encoded)
         XCTAssertEqual(decodedRoundTrip.phase, .learnMoveSelection)
+    }
+
+    func testBattleTelemetryRoundTripsEnemyPartyTelemetry() throws {
+        let enemyParty = [
+            PartyPokemonTelemetry(
+                speciesID: "PIDGEY",
+                displayName: "Pidgey",
+                level: 12,
+                currentHP: 18,
+                maxHP: 24,
+                attack: 14,
+                defense: 12,
+                speed: 17,
+                special: 11,
+                moves: ["TACKLE"]
+            ),
+            PartyPokemonTelemetry(
+                speciesID: "RATTATA",
+                displayName: "Rattata",
+                level: 11,
+                currentHP: 0,
+                maxHP: 22,
+                attack: 15,
+                defense: 9,
+                speed: 19,
+                special: 10,
+                majorStatus: .poison,
+                moves: ["TACKLE"]
+            ),
+        ]
+        let telemetry = BattleTelemetry(
+            battleID: "trainer_route_3_lass_1",
+            kind: .trainer,
+            trainerName: "LASS",
+            playerPokemon: PartyPokemonTelemetry(
+                speciesID: "SQUIRTLE",
+                displayName: "Squirtle",
+                level: 14,
+                currentHP: 35,
+                maxHP: 35,
+                attack: 18,
+                defense: 20,
+                speed: 16,
+                special: 17,
+                moves: ["TACKLE"]
+            ),
+            enemyPokemon: enemyParty[0],
+            enemyParty: enemyParty,
+            enemyPartyCount: enemyParty.count,
+            enemyActiveIndex: 0,
+            focusedMoveIndex: 0,
+            battleMessage: "LASS wants to fight!"
+        )
+
+        let encoded = try JSONEncoder().encode(telemetry)
+        let decoded = try JSONDecoder().decode(BattleTelemetry.self, from: encoded)
+
+        XCTAssertEqual(decoded.enemyParty, enemyParty)
+        XCTAssertEqual(decoded.enemyPartyCount, enemyParty.count)
     }
 
     func testRuntimeTelemetrySnapshotRoundTripsSplitModels() throws {

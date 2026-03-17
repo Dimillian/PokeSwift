@@ -7,6 +7,7 @@ struct BattleViewportCanvas: View {
     let kind: BattleKind
     let playerPokemon: PartyPokemonTelemetry
     let enemyPokemon: PartyPokemonTelemetry
+    let enemyParty: [PartyPokemonTelemetry]
     let enemyPartyCount: Int
     let isEnemySpeciesOwned: Bool
     let trainerSpriteURL: URL?
@@ -217,7 +218,11 @@ struct BattleViewportCanvas: View {
         )
 
         BattleTrainerPartyIndicator(
-            filledCount: enemyPartyCount,
+            slotStates: BattleTrainerPartyIndicator.slotStates(
+                enemyParty: enemyParty,
+                enemyPartyCount: enemyPartyCount,
+                totalCount: 6
+            ),
             totalCount: 6,
             stage: presentation.stage,
             animationRevision: presentation.revision
