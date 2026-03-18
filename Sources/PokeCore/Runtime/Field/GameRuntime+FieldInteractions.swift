@@ -93,6 +93,21 @@ extension GameRuntime {
             return
         }
 
+        if let fieldObstaclePromptState {
+            switch button {
+            case .left, .right, .up, .down:
+                promptState.focusedIndex = promptState.focusedIndex == 0 ? 1 : 0
+                fieldPromptState = promptState
+            case .cancel:
+                playUIConfirmSound()
+                resolveFieldObstaclePromptSelection(accepted: false, promptState: fieldObstaclePromptState)
+            case .confirm, .start:
+                playUIConfirmSound()
+                resolveFieldObstaclePromptSelection(accepted: promptState.focusedIndex == 0, promptState: fieldObstaclePromptState)
+            }
+            return
+        }
+
         guard let interaction = content.fieldInteraction(id: promptState.interactionID) else {
             fieldPromptState = nil
             return
@@ -234,6 +249,40 @@ extension GameRuntime {
                 interaction: interaction
             )
         }
+    }
+
+    private func resolveFieldObstaclePromptSelection(
+        accepted: Bool,
+        promptState: RuntimeFieldObstaclePromptState
+    ) {
+        clearTransientInteractionState()
+        enterSettledFieldState()
+
+        guard accepted else {
+            return
+        }
+
+        guard let obstacle = fieldObstacle(id: promptState.obstacleID, on: promptState.mapID) else {
+            return
+        }
+
+        guard earnedBadgeIDs.contains(Self.normalizedBadgeID(obstacle.requiredBadgeID)) else {
+            showDialogue(id: "field_move_new_badge_required", completion: .returnToField)
+            return
+        }
+
+        guard let pokemon = firstPartyPokemonKnowing(moveID: obstacle.requiredMoveID)?.pokemon else {
+            showDialogue(id: "field_move_nothing_to_cut", completion: .returnToField)
+            return
+        }
+
+        markFieldObstacleCleared(obstacle, on: promptState.mapID)
+        _ = playSoundEffect(id: "SFX_CUT", reason: "fieldObstacle.cut")
+        showDialogue(
+            id: "field_move_used_cut",
+            replacements: ["wNameBuffer": pokemon.nickname],
+            completion: .returnToField
+        )
     }
 
     func startFieldHealing(interactionID: String, completionAction: DialogueState.CompletionAction) {

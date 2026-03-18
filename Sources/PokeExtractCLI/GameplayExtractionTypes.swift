@@ -83,6 +83,7 @@ struct MapManifestDraft {
     let blockIDs: [Int]
     let stepCollisionTileIDs: [Int]
     let rawWarps: [RawWarpEntry]
+    let fieldObstacles: [FieldObstacleManifest]
     let backgroundEvents: [BackgroundEventManifest]
     let objects: [MapObjectManifest]
     let connections: [MapConnectionManifest]

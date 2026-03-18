@@ -392,6 +392,23 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertEqual(loaded.map(id: "ROUTE_24")?.objects.first { $0.id == "route_24_tm_thunder_wave" }?.pickupItemID, "TM_THUNDER_WAVE")
         XCTAssertEqual(loaded.map(id: "ROUTE_25")?.warps.first?.targetMapID, "BILLS_HOUSE")
         XCTAssertEqual(loaded.map(id: "ROUTE_25")?.objects.first { $0.id == "route_25_tm_seismic_toss" }?.pickupItemID, "TM_SEISMIC_TOSS")
+        XCTAssertEqual(
+            loaded.map(id: "ROUTE_2")?.fieldObstacles.first { $0.id == "route_2_cut_tree_2_5" },
+            .init(
+                id: "route_2_cut_tree_2_5",
+                kind: .cutTree,
+                blockPosition: .init(x: 2, y: 5),
+                triggerStepOffset: .init(x: 1, y: 0),
+                requiredMoveID: "CUT",
+                requiredBadgeID: "CASCADEBADGE",
+                replacementBlockID: 0x6D,
+                replacementStepCollisionTileIDs: [0x50, 0x2C, 0x50, 0x2C]
+            )
+        )
+        XCTAssertEqual(loaded.map(id: "ROUTE_2")?.fieldObstacles.count, 6)
+        XCTAssertFalse(loaded.map(id: "ROUTE_2")?.fieldObstacles.contains { $0.replacementBlockID == 0x0A } ?? true)
+        XCTAssertEqual(loaded.map(id: "REDS_HOUSE_1F")?.fieldObstacles, [])
+        XCTAssertEqual(loaded.map(id: "VIRIDIAN_POKECENTER")?.fieldObstacles, [])
         XCTAssertNotNil(loaded.trainerBattle(id: "opp_lass_4"))
         XCTAssertNotNil(loaded.trainerBattle(id: "opp_jr_trainer_m_2"))
         XCTAssertNotNil(loaded.trainerBattle(id: "opp_youngster_5"))
@@ -414,6 +431,13 @@ final class RepoContentContractTests: XCTestCase {
         )
         XCTAssertEqual(loaded.script(id: "bike_shop_exchange_voucher")?.steps[1].continueOnFailure, false)
         XCTAssertEqual(
+            loaded.dialogue(id: "ss_anne_captains_room_rub_captains_back")?.pages.last?.events,
+            [
+                .init(kind: .music, trackID: "MUSIC_PKMN_HEALED"),
+                .init(kind: .restoreMapMusic, waitForCompletion: false),
+            ]
+        )
+        XCTAssertEqual(
             loaded.script(id: "bills_house_bill_pokemon_interaction")?.steps.map(\.action),
             [
                 "promptYesNo",
@@ -435,6 +459,18 @@ final class RepoContentContractTests: XCTestCase {
         )
         XCTAssertEqual(loaded.script(id: "bills_house_bill_ss_ticket")?.steps[1].continueOnFailure, false)
         XCTAssertEqual(
+            loaded.script(id: "ss_anne_captains_room_captain_reward")?.steps.map(\.action),
+            ["jumpIfFlagSet", "showDialogue", "setFlag", "showDialogue", "giveItem"]
+        )
+        XCTAssertEqual(loaded.script(id: "ss_anne_captains_room_captain_reward")?.steps.first?.flagID, "EVENT_GOT_HM01")
+        XCTAssertEqual(loaded.script(id: "ss_anne_captains_room_captain_reward")?.steps.first?.stringValue, "ss_anne_captains_room_captain_after_reward")
+        XCTAssertEqual(loaded.script(id: "ss_anne_captains_room_captain_reward")?.steps.last?.stringValue, "HM_CUT")
+        XCTAssertEqual(loaded.script(id: "ss_anne_captains_room_captain_reward")?.steps.last?.successFlagID, "EVENT_GOT_HM01")
+        XCTAssertEqual(
+            loaded.script(id: "ss_anne_captains_room_captain_after_reward")?.steps.map(\.action),
+            ["showDialogue"]
+        )
+        XCTAssertEqual(
             loaded.script(id: "cerulean_gym_misty_reward")?.steps.map(\.action),
             ["showDialogue", "setFlag", "giveItem", "awardBadge", "setFlag", "setFlag", "restoreMapMusic"]
         )
@@ -444,6 +480,10 @@ final class RepoContentContractTests: XCTestCase {
         XCTAssertNotNil(loaded.dialogue(id: "cerulean_gym_misty_tm11_explanation"))
         XCTAssertNotNil(loaded.dialogue(id: "route24_cooltrainer_m1_contest_prize"))
         XCTAssertNotNil(loaded.dialogue(id: "bills_house_ss_ticket_received"))
+        XCTAssertNotNil(loaded.dialogue(id: "field_move_new_badge_required"))
+        XCTAssertNotNil(loaded.dialogue(id: "field_move_nothing_to_cut"))
+        XCTAssertNotNil(loaded.dialogue(id: "field_move_used_cut"))
+        XCTAssertNotNil(loaded.dialogue(id: "ss_anne_captains_room_captain_received_hm01"))
         XCTAssertEqual(
             loaded.script(id: "route_22_gate_guard_blocks_northbound_upper_lane")?.steps.map(\.action),
             ["showDialogue", "movePlayer"]

@@ -286,6 +286,15 @@ extension GameRuntime {
             } else {
                 completion?()
             }
+        case .music:
+            if let trackID = event.trackID {
+                playOneShotMusic(trackID: trackID, entryID: "default", reason: "dialogueCommand", completion: completion)
+            } else {
+                completion?()
+            }
+        case .restoreMapMusic:
+            requestDefaultMapMusic()
+            completion?()
         }
 
         if event.waitForCompletion == false {

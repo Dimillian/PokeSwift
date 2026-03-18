@@ -39,7 +39,7 @@ extension GameRuntime {
     }
 
     func makeFieldTelemetry() -> FieldTelemetry? {
-        guard let gameplayState, let map = content.map(id: gameplayState.mapID) else { return nil }
+        guard let gameplayState, let map = currentMapManifest else { return nil }
         return FieldTelemetry(
             mapID: map.id,
             mapName: map.displayName,

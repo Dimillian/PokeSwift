@@ -848,6 +848,41 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(route2.objects.map(\.pickupItemID), ["MOON_STONE", "HP_UP"])
         XCTAssertEqual(route2.warps.first { $0.origin == .init(x: 3, y: 43) }?.targetMapID, "VIRIDIAN_FOREST_SOUTH_GATE")
         XCTAssertEqual(route2.warps.first { $0.origin == .init(x: 3, y: 11) }?.targetMapID, "VIRIDIAN_FOREST_NORTH_GATE")
+        XCTAssertEqual(route2.fieldObstacles.count, 6)
+        XCTAssertFalse(route2.fieldObstacles.contains { $0.replacementBlockID == 0x0A })
+        XCTAssertTrue(
+            route2.fieldObstacles.contains(
+                .init(
+                    id: "route_2_cut_tree_2_5",
+                    kind: .cutTree,
+                    blockPosition: .init(x: 2, y: 5),
+                    triggerStepOffset: .init(x: 1, y: 0),
+                    requiredMoveID: "CUT",
+                    requiredBadgeID: "CASCADEBADGE",
+                    replacementBlockID: 0x6D,
+                    replacementStepCollisionTileIDs: [0x50, 0x2C, 0x50, 0x2C]
+                )
+            )
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "REDS_HOUSE_1F" }?.fieldObstacles,
+            []
+        )
+        XCTAssertEqual(
+            manifest.maps.first { $0.id == "VIRIDIAN_POKECENTER" }?.fieldObstacles,
+            []
+        )
+
+        let captainRubBack = try XCTUnwrap(
+            manifest.dialogues.first { $0.id == "ss_anne_captains_room_rub_captains_back" }
+        )
+        XCTAssertEqual(
+            captainRubBack.pages.last?.events,
+            [
+                .init(kind: .music, trackID: "MUSIC_PKMN_HEALED"),
+                .init(kind: .restoreMapMusic, waitForCompletion: false),
+            ]
+        )
 
         let viridianCity = try XCTUnwrap(manifest.maps.first { $0.id == "VIRIDIAN_CITY" })
         XCTAssertEqual(viridianCity.defaultMusicID, "MUSIC_CITIES1")
@@ -1361,6 +1396,28 @@ final class GameplayExtractionTests: XCTestCase {
             manifest.dialogues.first { $0.id == "mt_moon_b2f_received_fossil" }?.pages.first?.events,
             [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
         )
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "field_move_new_badge_required" }?.pages.first?.lines, ["No! A new BADGE", "is required."])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "field_move_nothing_to_cut" }?.pages.first?.lines, ["There isn't", "anything to CUT!"])
+        XCTAssertEqual(manifest.dialogues.first { $0.id == "field_move_used_cut" }?.pages.first?.lines, ["{wNameBuffer} hacked", "away with CUT!"])
+        XCTAssertEqual(
+            manifest.dialogues.first { $0.id == "ss_anne_captains_room_captain_received_hm01" }?.pages.first?.events,
+            [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        )
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_reward" }?.steps.map(\.action),
+            ["jumpIfFlagSet", "showDialogue", "setFlag", "showDialogue", "giveItem"]
+        )
+        XCTAssertEqual(manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_reward" }?.steps.first?.flagID, "EVENT_GOT_HM01")
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_reward" }?.steps.first?.stringValue,
+            "ss_anne_captains_room_captain_after_reward"
+        )
+        XCTAssertEqual(manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_reward" }?.steps.last?.stringValue, "HM_CUT")
+        XCTAssertEqual(manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_reward" }?.steps.last?.successFlagID, "EVENT_GOT_HM01")
+        XCTAssertEqual(
+            manifest.scripts.first { $0.id == "ss_anne_captains_room_captain_after_reward" }?.steps.map(\.action),
+            ["showDialogue"]
+        )
         XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_super_nerd_ok_ill_share" }?.pages.first?.lines, ["OK!", "I'll share!"])
         XCTAssertEqual(manifest.dialogues.first { $0.id == "mt_moon_b2f_super_nerd_each_take_one" }?.pages.first?.lines, ["We'll each take", "one!", "No being greedy!"])
 
@@ -1411,7 +1468,7 @@ final class GameplayExtractionTests: XCTestCase {
         XCTAssertEqual(decoded.wildEncounterTables.count, 11)
         XCTAssertEqual(decoded.fieldInteractions.count, 6)
         XCTAssertEqual(decoded.trainerBattles.count, 57)
-        XCTAssertEqual(decoded.eventFlags.flags.count, 74)
+        XCTAssertEqual(decoded.eventFlags.flags.count, 76)
         XCTAssertGreaterThan(decoded.dialogues.count, 250)
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_gramps" })
         XCTAssertNotNil(decoded.dialogues.first { $0.id == "oaks_lab_rival_ill_take_you_on" })

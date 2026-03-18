@@ -113,6 +113,12 @@ extension GameRuntime {
             guard let dialogueID = step.dialogueID else { return false }
             showDialogue(id: dialogueID, completion: .continueScript)
             return true
+        case "jumpIfFlagSet":
+            guard let flagID = step.flagID, hasFlag(flagID), let scriptID = step.stringValue else {
+                return false
+            }
+            beginScript(id: scriptID)
+            return true
         case "startFieldInteraction":
             guard let fieldInteractionID = step.fieldInteractionID else { return false }
             startFieldInteraction(id: fieldInteractionID, completionAction: .continueScript)
@@ -285,6 +291,9 @@ extension GameRuntime {
                 }
             case "setMap":
                 if let mapID = step.stringValue, let point = step.point {
+                    if gameplayState.mapID != mapID {
+                        clearFieldObstacleOverrides()
+                    }
                     gameplayState.mapID = mapID
                     gameplayState.playerPosition = point
                     gameplayState.activeMapScriptTriggerID = nil

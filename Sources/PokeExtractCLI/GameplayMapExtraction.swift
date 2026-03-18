@@ -602,6 +602,14 @@ func makeMapManifestDraft(
         blockHeight: size.height,
         blockIDs: blockIDs
     )
+    let fieldObstacles = try parseFieldObstacles(
+        repoRoot: repoRoot,
+        mapID: mapID,
+        tileset: tilesetManifest,
+        blockWidth: size.width,
+        blockHeight: size.height,
+        blockIDs: blockIDs
+    )
     let connections = try buildMapConnections(
         for: mapHeader,
         repoRoot: repoRoot,
@@ -624,6 +632,7 @@ func makeMapManifestDraft(
         blockIDs: blockIDs,
         stepCollisionTileIDs: resolvedStepCollisionTileIDs,
         rawWarps: parseRawWarps(contents: contents),
+        fieldObstacles: fieldObstacles,
         backgroundEvents: parseBackgroundEvents(mapID: mapID, contents: contents, mapScriptMetadata: mapScriptMetadata),
         objects: parseObjects(
             mapID: mapID,
@@ -692,11 +701,71 @@ func resolveMapWarps(
             blockIDs: draft.blockIDs,
             stepCollisionTileIDs: draft.stepCollisionTileIDs,
             warps: warps,
+            fieldObstacles: draft.fieldObstacles,
             backgroundEvents: draft.backgroundEvents,
             objects: draft.objects,
             connections: draft.connections
         )
     }
+}
+
+private func parseFieldObstacles(
+    repoRoot: URL,
+    mapID: String,
+    tileset: TilesetManifest,
+    blockWidth: Int,
+    blockHeight: Int,
+    blockIDs: [Int]
+) throws -> [FieldObstacleManifest] {
+    guard tileset.id == "OVERWORLD" else {
+        return []
+    }
+
+    let cutTreeBlockSwaps = try parseCutTreeBlockSwaps(repoRoot: repoRoot)
+    guard cutTreeBlockSwaps.isEmpty == false else {
+        return []
+    }
+
+    let blocks = try loadTilesetBlocks(repoRoot: repoRoot, tileset: tileset)
+    let cutTreeObstacleSpecs = resolvedOverworldCutTreeObstacleSpecs(
+        blockSwaps: cutTreeBlockSwaps,
+        blocks: blocks
+    )
+    guard cutTreeObstacleSpecs.isEmpty == false else {
+        return []
+    }
+    var obstacles: [FieldObstacleManifest] = []
+    obstacles.reserveCapacity(blockIDs.count)
+
+    for (index, blockID) in blockIDs.enumerated() {
+        guard let obstacleSpec = cutTreeObstacleSpecs[blockID] else {
+            continue
+        }
+
+        let blockX = index % blockWidth
+        let blockY = index / blockWidth
+        guard blockY < blockHeight else {
+            continue
+        }
+
+        obstacles.append(
+            FieldObstacleManifest(
+                id: "\(mapID.lowercased())_cut_tree_\(blockX)_\(blockY)",
+                kind: .cutTree,
+                blockPosition: .init(x: blockX, y: blockY),
+                triggerStepOffset: obstacleSpec.triggerStepOffset,
+                requiredMoveID: "CUT",
+                requiredBadgeID: "CASCADEBADGE",
+                replacementBlockID: obstacleSpec.replacementBlockID,
+                replacementStepCollisionTileIDs: replacementCollisionTileIDs(
+                    for: obstacleSpec.replacementBlockID,
+                    blocks: blocks
+                )
+            )
+        )
+    }
+
+    return obstacles
 }
 
 private func loadBlockIDs(
@@ -713,6 +782,97 @@ private func loadBlockIDs(
         )
     }
     return blockIDs
+}
+
+private func loadTilesetBlocks(
+    repoRoot: URL,
+    tileset: TilesetManifest
+) throws -> [[Int]] {
+    let path = tileset.blocksetPath.replacingOccurrences(of: "Assets/field/", with: "gfx/")
+    let blocksetData = try Data(contentsOf: repoRoot.appendingPathComponent(path))
+    return stride(from: 0, to: blocksetData.count, by: 16).map { start in
+        Array(blocksetData[start..<(start + 16)]).map(Int.init)
+    }
+}
+
+private func parseCutTreeBlockSwaps(repoRoot: URL) throws -> [Int: Int] {
+    let contents = try String(contentsOf: repoRoot.appendingPathComponent("data/tilesets/cut_tree_blocks.asm"))
+    var swaps: [Int: Int] = [:]
+
+    for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
+        let line = rawLine
+            .split(separator: ";", maxSplits: 1, omittingEmptySubsequences: false)
+            .first?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        guard line.hasPrefix("db ") else {
+            continue
+        }
+
+        let values = line
+            .replacingOccurrences(of: "db", with: "")
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        guard values.count == 2,
+              let sourceBlockID = parseSignedHexOrDecimal(values[0]),
+              let replacementBlockID = parseSignedHexOrDecimal(values[1]) else {
+            continue
+        }
+
+        swaps[sourceBlockID] = replacementBlockID
+    }
+
+    return swaps
+}
+
+private func replacementCollisionTileIDs(for blockID: Int, blocks: [[Int]]) -> [Int] {
+    guard blocks.indices.contains(blockID) else {
+        return [0, 0, 0, 0]
+    }
+
+    let block = blocks[blockID]
+    let tileIndices = [4, 6, 12, 14]
+    return tileIndices.map { index in
+        block.indices.contains(index) ? block[index] : 0
+    }
+}
+
+private struct ParsedCutTreeObstacleSpec {
+    let replacementBlockID: Int
+    let triggerStepOffset: TilePoint
+}
+
+private func resolvedOverworldCutTreeObstacleSpecs(
+    blockSwaps: [Int: Int],
+    blocks: [[Int]]
+) -> [Int: ParsedCutTreeObstacleSpec] {
+    let overworldCutTreeTileID = 0x3D
+    let triggerOffsets = [
+        TilePoint(x: 0, y: 0),
+        TilePoint(x: 1, y: 0),
+        TilePoint(x: 0, y: 1),
+        TilePoint(x: 1, y: 1),
+    ]
+
+    var specs: [Int: ParsedCutTreeObstacleSpec] = [:]
+    specs.reserveCapacity(blockSwaps.count)
+
+    for (sourceBlockID, replacementBlockID) in blockSwaps {
+        let collisionTileIDs = replacementCollisionTileIDs(for: sourceBlockID, blocks: blocks)
+        let matchingOffsets = zip(triggerOffsets, collisionTileIDs).compactMap { offset, tileID in
+            tileID == overworldCutTreeTileID ? offset : nil
+        }
+
+        guard matchingOffsets.count == 1, let triggerStepOffset = matchingOffsets.first else {
+            continue
+        }
+
+        specs[sourceBlockID] = .init(
+            replacementBlockID: replacementBlockID,
+            triggerStepOffset: triggerStepOffset
+        )
+    }
+
+    return specs
 }
 
 private func buildMapConnections(
@@ -1120,10 +1280,7 @@ private func resolveStepCollisionTileIDs(
     blockHeight: Int,
     blockIDs: [Int]
 ) throws -> [Int] {
-    let blocksetData = try Data(contentsOf: repoRoot.appendingPathComponent(tileset.blocksetPath.replacingOccurrences(of: "Assets/field/", with: "gfx/")))
-    let blocks = stride(from: 0, to: blocksetData.count, by: 16).map { start in
-        Array(blocksetData[start..<(start + 16)]).map(Int.init)
-    }
+    let blocks = try loadTilesetBlocks(repoRoot: repoRoot, tileset: tileset)
 
     func blockIDAt(mapBlockX: Int, mapBlockY: Int) -> Int {
         guard mapBlockX >= 0, mapBlockY >= 0, mapBlockX < blockWidth, mapBlockY < blockHeight else {

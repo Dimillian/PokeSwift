@@ -38,23 +38,28 @@ public struct DialogueManifest: Codable, Equatable, Sendable {
 public enum DialogueEventKind: String, Codable, Equatable, Sendable {
     case soundEffect
     case cry
+    case music
+    case restoreMapMusic
 }
 
 public struct DialogueEvent: Codable, Equatable, Sendable {
     public let kind: DialogueEventKind
     public let soundEffectID: String?
     public let speciesID: String?
+    public let trackID: String?
     public let waitForCompletion: Bool
 
     public init(
         kind: DialogueEventKind,
         soundEffectID: String? = nil,
         speciesID: String? = nil,
+        trackID: String? = nil,
         waitForCompletion: Bool = true
     ) {
         self.kind = kind
         self.soundEffectID = soundEffectID
         self.speciesID = speciesID
+        self.trackID = trackID
         self.waitForCompletion = waitForCompletion
     }
 }

@@ -1937,6 +1937,286 @@ extension PokeCoreTests {
         XCTAssertEqual(resumed.itemQuantity("TM_BUBBLEBEAM"), 1)
     }
 
+    func testRepoGeneratedCaptainRewardScriptGrantsHM01AndPersistsAcrossSaveLoad() throws {
+        let saveStore = InMemorySaveStore()
+        let content = try loadRepoContent()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+
+        runtime.beginScript(id: "ss_anne_captains_room_captain_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_HM01") ?? false)
+        }
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_RUBBED_CAPTAINS_BACK"))
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_HM01"))
+        XCTAssertEqual(runtime.itemQuantity("HM_CUT"), 1)
+
+        let envelope = try runtime.makeSaveEnvelope()
+        saveStore.envelope = envelope
+
+        let resumed = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+        XCTAssertTrue(resumed.continueFromTitleMenu())
+        XCTAssertTrue(resumed.hasFlag("EVENT_RUBBED_CAPTAINS_BACK"))
+        XCTAssertTrue(resumed.hasFlag("EVENT_GOT_HM01"))
+        XCTAssertEqual(resumed.itemQuantity("HM_CUT"), 1)
+    }
+
+    func testRepoGeneratedCaptainRewardScriptPlaysHealJingleThenRestoresMapMusic() throws {
+        let audioPlayer = RecordingAudioPlayer()
+        let runtime = try makeRepoRuntime(audioPlayer: audioPlayer)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+
+        runtime.beginScript(id: "ss_anne_captains_room_captain_reward")
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "ss_anne_captains_room_rub_captains_back")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "ss_anne_captains_room_rub_captains_back")
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "ss_anne_captains_room_rub_captains_back")
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_PKMN_HEALED", entryID: "default"))
+
+        audioPlayer.completePendingPlayback()
+        XCTAssertEqual(audioPlayer.musicRequests.last, .init(trackID: "MUSIC_ROUTES1", entryID: "default"))
+
+        runtime.handle(button: .confirm)
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "ss_anne_captains_room_captain_i_feel_much_better")
+    }
+
+    func testRepoGeneratedCaptainRewardScriptRetriesHMUntilBagHasRoom() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.inventory = fullBagInventory(for: runtime, excluding: ["HM_CUT"])
+
+        runtime.beginScript(id: "ss_anne_captains_room_captain_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_RUBBED_CAPTAINS_BACK") ?? false)
+        }
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_RUBBED_CAPTAINS_BACK"))
+        XCTAssertFalse(runtime.hasFlag("EVENT_GOT_HM01"))
+        XCTAssertEqual(runtime.itemQuantity("HM_CUT"), 0)
+
+        runtime.gameplayState?.inventory.removeLast()
+        runtime.beginScript(id: "ss_anne_captains_room_captain_reward")
+        drainDialogueAndScripts(runtime) {
+            $0.scene == .field
+                && $0.dialogue == nil
+                && runtime.gameplayState?.activeScriptID == nil
+                && runtime.gameplayState?.activeScriptStep == nil
+                && ($0.eventFlags?.activeFlags.contains("EVENT_GOT_HM01") ?? false)
+        }
+
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_HM01"))
+        XCTAssertEqual(runtime.itemQuantity("HM_CUT"), 1)
+    }
+
+    func testRepoGeneratedCaptainRewardScriptDoesNotGrantDuplicateHM01AfterRewardFlag() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.activeFlags.insert("EVENT_GOT_HM01")
+        runtime.gameplayState?.inventory = [.init(itemID: "HM_CUT", quantity: 1)]
+
+        runtime.beginScript(id: "ss_anne_captains_room_captain_reward")
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "ss_anne_captains_room_captain_not_sick_anymore")
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(runtime.itemQuantity("HM_CUT"), 1)
+        XCTAssertTrue(runtime.hasFlag("EVENT_GOT_HM01"))
+    }
+
+    func testRepoGeneratedRoute2CutObstacleRequiresCascadeBadge() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+
+        let setup = try route2CutInteractionSetup(for: runtime)
+        runtime.gameplayState?.playerPosition = setup.position
+        runtime.gameplayState?.facing = setup.facing
+
+        XCTAssertFalse(runtime.canMove(from: setup.position, to: setup.target, in: setup.map, facing: setup.facing))
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "field_move_new_badge_required")
+        XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
+    }
+
+    func testRepoGeneratedRoute2CutObstacleRequiresPokemonKnowingCut() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+        runtime.gameplayState?.earnedBadgeIDs = ["cascade"]
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "PIDGEY", level: 16, nickname: "Pidgey")]
+
+        let setup = try route2CutInteractionSetup(for: runtime)
+        runtime.gameplayState?.playerPosition = setup.position
+        runtime.gameplayState?.facing = setup.facing
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "field_move_nothing_to_cut")
+        XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
+    }
+
+    func testRepoGeneratedRoute2CutObstacleUsesFirstEligiblePokemonAndOpensTraversal() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+        runtime.gameplayState?.earnedBadgeIDs = ["cascade"]
+
+        var lead = runtime.makePokemon(speciesID: "PIDGEY", level: 16, nickname: "Lead")
+        lead.moves = [.init(id: "GUST", currentPP: 35)]
+        var cutterA = runtime.makePokemon(speciesID: "ODDISH", level: 18, nickname: "Leafy")
+        cutterA.moves = [.init(id: "CUT", currentPP: 30)]
+        var cutterB = runtime.makePokemon(speciesID: "FARFETCHD", level: 20, nickname: "Twig")
+        cutterB.moves = [.init(id: "CUT", currentPP: 30)]
+        runtime.gameplayState?.playerParty = [lead, cutterA, cutterB]
+
+        let setup = try route2CutInteractionSetup(for: runtime)
+        runtime.gameplayState?.playerPosition = setup.position
+        runtime.gameplayState?.facing = setup.facing
+
+        XCTAssertFalse(runtime.canMove(from: setup.position, to: setup.target, in: setup.map, facing: setup.facing))
+
+        runtime.interactAhead()
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "field_obstacle_cut_prompt")
+        XCTAssertEqual(runtime.currentSnapshot().fieldPrompt?.options, ["YES", "NO"])
+
+        runtime.handle(button: .confirm)
+
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.dialogueID, "field_move_used_cut")
+        XCTAssertEqual(runtime.currentSnapshot().dialogue?.lines, ["Leafy hacked", "away with CUT!"])
+        XCTAssertEqual(
+            runtime.currentMapManifest?.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x],
+            setup.obstacle.replacementBlockID
+        )
+        XCTAssertTrue(
+            runtime.canMove(
+                from: setup.position,
+                to: setup.target,
+                in: try XCTUnwrap(runtime.currentMapManifest),
+                facing: setup.facing
+            )
+        )
+
+        advanceDialogueUntilComplete(runtime)
+        runtime.movePlayer(in: setup.facing)
+        XCTAssertEqual(runtime.gameplayState?.playerPosition, setup.target)
+    }
+
+    func testRepoGeneratedRoute2CutObstacleDoesNotTriggerFromNonCutQuadrant() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+        runtime.gameplayState?.earnedBadgeIDs = ["cascade"]
+
+        var cutter = runtime.makePokemon(speciesID: "ODDISH", level: 18, nickname: "Leafy")
+        cutter.moves = [.init(id: "CUT", currentPP: 30)]
+        runtime.gameplayState?.playerParty = [cutter]
+
+        let setup = try route2NonCutQuadrantInteractionSetup(for: runtime)
+        runtime.gameplayState?.playerPosition = setup.position
+        runtime.gameplayState?.facing = setup.facing
+
+        runtime.interactAhead()
+
+        XCTAssertNil(runtime.currentSnapshot().dialogue)
+        XCTAssertNil(runtime.currentSnapshot().fieldPrompt)
+        XCTAssertEqual(
+            runtime.currentMapManifest?.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x],
+            setup.map.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x]
+        )
+    }
+
+    func testRepoGeneratedRoute2CutObstacleResetAfterLoadAndIsNotSerialized() throws {
+        let saveStore = InMemorySaveStore()
+        let content = try loadRepoContent()
+        let runtime = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_2"
+        runtime.gameplayState?.earnedBadgeIDs = ["cascade"]
+
+        var cutter = runtime.makePokemon(speciesID: "ODDISH", level: 18, nickname: "Leafy")
+        cutter.moves = [.init(id: "CUT", currentPP: 30)]
+        runtime.gameplayState?.playerParty = [cutter]
+
+        let setup = try route2CutInteractionSetup(for: runtime)
+        runtime.gameplayState?.playerPosition = setup.position
+        runtime.gameplayState?.facing = setup.facing
+
+        runtime.interactAhead()
+        runtime.handle(button: .confirm)
+        advanceDialogueUntilComplete(runtime)
+
+        XCTAssertEqual(
+            runtime.currentMapManifest?.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x],
+            setup.obstacle.replacementBlockID
+        )
+
+        let envelope = try runtime.makeSaveEnvelope()
+        saveStore.envelope = envelope
+
+        let resumed = GameRuntime(content: content, telemetryPublisher: nil, saveStore: saveStore)
+        XCTAssertTrue(resumed.continueFromTitleMenu())
+
+        resumed.gameplayState?.playerPosition = setup.position
+        resumed.gameplayState?.facing = setup.facing
+
+        XCTAssertEqual(
+            resumed.currentMapManifest?.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x],
+            setup.map.blockIDs[(setup.obstacle.blockPosition.y * setup.map.blockWidth) + setup.obstacle.blockPosition.x]
+        )
+        XCTAssertFalse(
+            resumed.canMove(
+                from: setup.position,
+                to: setup.target,
+                in: try XCTUnwrap(resumed.currentMapManifest),
+                facing: setup.facing
+            )
+        )
+    }
+
     func testRepoGeneratedCeruleanGymSwimmerSightlineStartsBattle() async throws {
         let runtime = try makeRepoRuntime()
 
@@ -2373,5 +2653,92 @@ extension PokeCoreTests {
                     RuntimeInventoryItemState(itemID: itemID, quantity: index == 0 ? 2 : 1)
                 }
         )
+    }
+
+    private func route2CutInteractionSetup(
+        for runtime: GameRuntime
+    ) throws -> (map: MapManifest, obstacle: FieldObstacleManifest, position: TilePoint, facing: FacingDirection, target: TilePoint) {
+        let map = try XCTUnwrap(runtime.currentMapManifest)
+        let tileset = try XCTUnwrap(runtime.content.tileset(id: map.tileset))
+        let passableTileIDs = Set(tileset.collision.passableTileIDs)
+        let cutTreeCollisionTileID = 0x3D
+
+        for obstacle in map.fieldObstacles where obstacle.kind == .cutTree {
+            let target = TilePoint(
+                x: (obstacle.blockPosition.x * 2) + obstacle.triggerStepOffset.x,
+                y: (obstacle.blockPosition.y * 2) + obstacle.triggerStepOffset.y
+            )
+            let candidates: [(position: TilePoint, facing: FacingDirection, target: TilePoint)] = [
+                (.init(x: target.x - 1, y: target.y), .right, target),
+                (.init(x: target.x + 1, y: target.y), .left, target),
+                (.init(x: target.x, y: target.y - 1), .down, target),
+                (.init(x: target.x, y: target.y + 1), .up, target),
+            ]
+
+            for candidate in candidates {
+                guard let playerTileID = runtime.collisionTileID(at: candidate.position, in: map),
+                      passableTileIDs.contains(playerTileID) else {
+                    continue
+                }
+                guard runtime.collisionTileID(at: candidate.target, in: map) == cutTreeCollisionTileID else {
+                    continue
+                }
+                guard runtime.canMove(from: candidate.position, to: candidate.target, in: map, facing: candidate.facing) == false else {
+                    continue
+                }
+
+                return (map, obstacle, candidate.position, candidate.facing, candidate.target)
+            }
+        }
+
+        XCTFail("Expected to find a Route 2 cut obstacle with an adjacent interaction tile.")
+        throw NSError(domain: "PokeCoreTests", code: 1)
+    }
+
+    private func route2NonCutQuadrantInteractionSetup(
+        for runtime: GameRuntime
+    ) throws -> (map: MapManifest, obstacle: FieldObstacleManifest, position: TilePoint, facing: FacingDirection, target: TilePoint) {
+        let validSetup = try route2CutInteractionSetup(for: runtime)
+        let map = validSetup.map
+        let obstacle = validSetup.obstacle
+        let tileset = try XCTUnwrap(runtime.content.tileset(id: map.tileset))
+        let passableTileIDs = Set(tileset.collision.passableTileIDs)
+
+        let stepOrigin = TilePoint(x: obstacle.blockPosition.x * 2, y: obstacle.blockPosition.y * 2)
+        let stepOffsets = [
+            TilePoint(x: 0, y: 0),
+            TilePoint(x: 1, y: 0),
+            TilePoint(x: 0, y: 1),
+            TilePoint(x: 1, y: 1),
+        ]
+
+        for offset in stepOffsets where offset != obstacle.triggerStepOffset {
+            let target = TilePoint(x: stepOrigin.x + offset.x, y: stepOrigin.y + offset.y)
+            guard let targetTileID = runtime.collisionTileID(at: target, in: map), targetTileID != 0x3D else {
+                continue
+            }
+
+            let candidates: [(position: TilePoint, facing: FacingDirection)] = [
+                (.init(x: target.x - 1, y: target.y), .right),
+                (.init(x: target.x + 1, y: target.y), .left),
+                (.init(x: target.x, y: target.y - 1), .down),
+                (.init(x: target.x, y: target.y + 1), .up),
+            ]
+
+            for candidate in candidates {
+                guard let playerTileID = runtime.collisionTileID(at: candidate.position, in: map),
+                      passableTileIDs.contains(playerTileID) else {
+                    continue
+                }
+                guard runtime.canMove(from: candidate.position, to: target, in: map, facing: candidate.facing) == false else {
+                    continue
+                }
+
+                return (map, obstacle, candidate.position, candidate.facing, target)
+            }
+        }
+
+        XCTFail("Expected to find a non-cut blocked quadrant adjacent to a Route 2 cut obstacle.")
+        throw NSError(domain: "PokeCoreTests", code: 1)
     }
 }

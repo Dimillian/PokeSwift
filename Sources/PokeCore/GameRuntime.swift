@@ -91,6 +91,7 @@ public final class GameRuntime {
     var fieldPromptState: RuntimeFieldPromptState?
     var scriptItemPromptState: RuntimeScriptItemPromptState?
     var scriptChoicePromptState: RuntimeScriptChoicePromptState?
+    var fieldObstaclePromptState: RuntimeFieldObstaclePromptState?
     var fieldHealingState: RuntimeFieldHealingState?
     var shopState: RuntimeShopState?
     var fieldPartyReorderState: RuntimeFieldPartyReorderState?
@@ -119,6 +120,7 @@ public final class GameRuntime {
     var gameplaySessionStartedAt: Date?
     var playthroughID = UUID().uuidString
     var heldFieldDirections: [FacingDirection] = []
+    var clearedFieldObstacleIDsByMapID: [String: Set<String>] = [:]
 
     public init(
         content: LoadedContent,
@@ -159,7 +161,7 @@ public final class GameRuntime {
 
     public var currentMapManifest: MapManifest? {
         guard let gameplayState else { return nil }
-        return content.map(id: gameplayState.mapID)
+        return effectiveMapManifest(for: gameplayState.mapID)
     }
 
     public var playerSpriteID: String {

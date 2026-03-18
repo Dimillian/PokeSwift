@@ -14,6 +14,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
     public let blockIDs: [Int]
     public let stepCollisionTileIDs: [Int]
     public let warps: [WarpManifest]
+    public let fieldObstacles: [FieldObstacleManifest]
     public let backgroundEvents: [BackgroundEventManifest]
     public let objects: [MapObjectManifest]
     public let connections: [MapConnectionManifest]
@@ -32,6 +33,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         blockIDs: [Int],
         stepCollisionTileIDs: [Int],
         warps: [WarpManifest],
+        fieldObstacles: [FieldObstacleManifest] = [],
         backgroundEvents: [BackgroundEventManifest],
         objects: [MapObjectManifest],
         connections: [MapConnectionManifest] = []
@@ -49,6 +51,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         self.blockIDs = blockIDs
         self.stepCollisionTileIDs = stepCollisionTileIDs
         self.warps = warps
+        self.fieldObstacles = fieldObstacles
         self.backgroundEvents = backgroundEvents
         self.objects = objects
         self.connections = connections
@@ -68,6 +71,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         case blockIDs
         case stepCollisionTileIDs
         case warps
+        case fieldObstacles
         case backgroundEvents
         case objects
         case connections
@@ -88,6 +92,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         blockIDs = try container.decode([Int].self, forKey: .blockIDs)
         stepCollisionTileIDs = try container.decode([Int].self, forKey: .stepCollisionTileIDs)
         warps = try container.decode([WarpManifest].self, forKey: .warps)
+        fieldObstacles = try container.decodeIfPresent([FieldObstacleManifest].self, forKey: .fieldObstacles) ?? []
         backgroundEvents = try container.decode([BackgroundEventManifest].self, forKey: .backgroundEvents)
         objects = try container.decode([MapObjectManifest].self, forKey: .objects)
         connections = try container.decodeIfPresent([MapConnectionManifest].self, forKey: .connections) ?? []
@@ -108,6 +113,7 @@ public struct MapManifest: Codable, Equatable, Sendable {
         try container.encode(blockIDs, forKey: .blockIDs)
         try container.encode(stepCollisionTileIDs, forKey: .stepCollisionTileIDs)
         try container.encode(warps, forKey: .warps)
+        try container.encode(fieldObstacles, forKey: .fieldObstacles)
         try container.encode(backgroundEvents, forKey: .backgroundEvents)
         try container.encode(objects, forKey: .objects)
         try container.encode(connections, forKey: .connections)

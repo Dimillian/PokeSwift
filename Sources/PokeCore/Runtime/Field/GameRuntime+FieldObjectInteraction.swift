@@ -19,6 +19,11 @@ extension GameRuntime {
 
         if let backgroundEvent = map.backgroundEvents.first(where: { $0.position == target }) {
             showDialogue(id: backgroundEvent.dialogueID, completion: .returnToField)
+            return
+        }
+
+        if let obstacle = fieldObstacleAhead() {
+            beginFieldObstacleInteraction(obstacle)
         }
     }
 

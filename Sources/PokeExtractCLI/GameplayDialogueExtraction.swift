@@ -30,11 +30,14 @@ func buildDialogues(
     let viridianForestNorthGate = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianForestNorthGate.asm"))
     let viridianPokecenter = try String(contentsOf: repoRoot.appendingPathComponent("text/ViridianPokecenter.asm"))
     let mtMoonB2F = try String(contentsOf: repoRoot.appendingPathComponent("text/MtMoonB2F.asm"))
+    let ssAnneCaptainsRoom = try String(contentsOf: repoRoot.appendingPathComponent("text/SSAnneCaptainsRoom.asm"))
     let text1 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_1.asm"))
     let text2 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_2.asm"))
     let text3 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_3.asm"))
     let text4 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_4.asm"))
+    let text5 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_5.asm"))
     let text6 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_6.asm"))
+    let text7 = try String(contentsOf: repoRoot.appendingPathComponent("data/text/text_7.asm"))
 
     var dialogues: [DialogueManifest] = [
         try extractDialogue(id: "pallet_town_oak_hey_wait", label: "_PalletTownOakHeyWaitDontGoOutText", from: pallet, extraEvents: scriptDialogueEvents["_PalletTownOakHeyWaitDontGoOutText"] ?? []),
@@ -57,6 +60,25 @@ func buildDialogues(
         try extractDialogue(id: "route_1_sign", label: "_Route1SignText", from: route1, extraEvents: scriptDialogueEvents["_Route1SignText"] ?? []),
         try extractDialogue(id: "route_2_sign", label: "_Route2SignText", from: route2),
         try extractDialogue(id: "route_2_digletts_cave_sign", label: "_Route2DiglettsCaveSignText", from: route2),
+        try extractDialogue(id: "field_move_new_badge_required", label: "_NewBadgeRequiredText", from: text5),
+        try extractDialogue(id: "field_move_nothing_to_cut", label: "_NothingToCutText", from: text7),
+        try extractDialogue(id: "field_move_used_cut", label: "_UsedCutText", from: text7, placeholderMap: ["wNameBuffer": "wNameBuffer"]),
+        try extractDialogue(
+            id: "ss_anne_captains_room_rub_captains_back",
+            label: "_SSAnneCaptainsRoomRubCaptainsBackText",
+            from: ssAnneCaptainsRoom,
+            extraEvents: scriptDialogueEvents["_SSAnneCaptainsRoomRubCaptainsBackText"] ?? []
+        ),
+        try extractDialogue(id: "ss_anne_captains_room_captain_i_feel_much_better", label: "_SSAnneCaptainsRoomCaptainIFeelMuchBetterText", from: ssAnneCaptainsRoom),
+        try extractDialogue(
+            id: "ss_anne_captains_room_captain_received_hm01",
+            label: "_SSAnneCaptainsRoomCaptainReceivedHM01Text",
+            from: ssAnneCaptainsRoom,
+            placeholderMap: ["wStringBuffer": "wStringBuffer"],
+            extraEvents: [.init(kind: .soundEffect, soundEffectID: "SFX_GET_KEY_ITEM")]
+        ),
+        try extractDialogue(id: "ss_anne_captains_room_captain_not_sick_anymore", label: "_SSAnneCaptainsRoomCaptainNotSickAnymoreText", from: ssAnneCaptainsRoom),
+        try extractDialogue(id: "ss_anne_captains_room_captain_hm01_no_room", label: "_SSAnneCaptainsRoomCaptainHM01NoRoomText", from: ssAnneCaptainsRoom),
         try extractDialogue(id: "viridian_city_youngster_1", label: "_ViridianCityYoungster1Text", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster1Text"] ?? []),
         try extractDialogue(id: "viridian_city_gambler", label: "_ViridianCityGambler1GymAlwaysClosedText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityGambler1GymAlwaysClosedText"] ?? []),
         try extractDialogue(id: "viridian_city_youngster_2_prompt", label: "_ViridianCityYoungster2YouWantToKnowAboutText", from: viridianCity, extraEvents: scriptDialogueEvents["_ViridianCityYoungster2YouWantToKnowAboutText"] ?? []),
@@ -910,26 +932,57 @@ private func dialogueLabelExists(_ label: String, in contents: String) -> Bool {
 }
 
 private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [DialogueEvent]] {
-    let scriptPaths = gameplayCoverageMaps
-        .map(scriptPathForMap)
-        .filter { FileManager.default.fileExists(atPath: repoRoot.appendingPathComponent($0).path) }
+    let standaloneScriptPaths = [
+        "scripts/SSAnneCaptainsRoom.asm",
+    ]
+    let scriptPaths = Array(
+        Set(
+            gameplayCoverageMaps.map(scriptPathForMap) + standaloneScriptPaths
+        )
+    )
+    .filter { FileManager.default.fileExists(atPath: repoRoot.appendingPathComponent($0).path) }
 
     var eventsByTextLabel: [String: [DialogueEvent]] = [:]
 
     for path in scriptPaths {
         let contents = try String(contentsOf: repoRoot.appendingPathComponent(path))
         var currentTextLabel: String?
+        var pendingMusicTrackID: String?
 
         for rawLine in contents.split(separator: "\n", omittingEmptySubsequences: false) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
 
             if line.hasSuffix(":") {
                 currentTextLabel = nil
+                pendingMusicTrackID = nil
                 continue
             }
 
             if let match = line.firstMatch(of: /text_far\s+([A-Za-z0-9_\.]+)/) {
                 currentTextLabel = String(match.output.1)
+                pendingMusicTrackID = nil
+                continue
+            }
+
+            if let match = line.firstMatch(of: /^ld a,\s*(MUSIC_[A-Za-z0-9_]+)/) {
+                pendingMusicTrackID = String(match.output.1)
+                continue
+            }
+
+            if line == "call PlaySound",
+               let currentTextLabel,
+               let pendingTrackID = pendingMusicTrackID {
+                eventsByTextLabel[currentTextLabel, default: []].append(
+                    .init(kind: .music, trackID: pendingTrackID)
+                )
+                pendingMusicTrackID = nil
+                continue
+            }
+
+            if line == "call PlayDefaultMusic", let currentTextLabel {
+                eventsByTextLabel[currentTextLabel, default: []].append(
+                    .init(kind: .restoreMapMusic, waitForCompletion: false)
+                )
                 continue
             }
 
@@ -940,6 +993,7 @@ private func buildScriptDialogueEvents(repoRoot: URL) throws -> [String: [Dialog
 
             if line == "text_end" || line == "text" {
                 currentTextLabel = nil
+                pendingMusicTrackID = nil
             }
         }
     }

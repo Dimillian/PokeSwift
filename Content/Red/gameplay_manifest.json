@@ -2517,6 +2517,51 @@
       ]
     },
     {
+      "id" : "field_move_new_badge_required",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "No! A new BADGE",
+            "is required."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "field_move_nothing_to_cut",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "There isn't",
+            "anything to CUT!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "field_move_used_cut",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "{wNameBuffer} hacked",
+            "away with CUT!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "mt_moon1_f_beware_zubat_sign",
       "pages" : [
         {
@@ -9893,6 +9938,168 @@
       ]
     },
     {
+      "id" : "ss_anne_captains_room_captain_hm01_no_room",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Oh no! You have",
+            "no room for this!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_captain_i_feel_much_better",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "CAPTAIN: Whew!",
+            "Thank you! I",
+            "feel much better!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "You want to see",
+            "my CUT technique?"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I could show you",
+            "if I wasn't ill..."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "I know! You can",
+            "have this!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Teach it to your",
+            "POKéMON and you",
+            "can see it CUT",
+            "any time!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_captain_not_sick_anymore",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "CAPTAIN: Whew!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "Now that I'm not",
+            "sick any more, I",
+            "guess it's time."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_captain_received_hm01",
+      "pages" : [
+        {
+          "events" : [
+            {
+              "kind" : "soundEffect",
+              "soundEffectID" : "SFX_GET_KEY_ITEM",
+              "waitForCompletion" : true
+            }
+          ],
+          "lines" : [
+            "<PLAYER> got",
+            "{wStringBuffer}!"
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_rub_captains_back",
+      "pages" : [
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "CAPTAIN: Ooargh...",
+            "I feel hideous...",
+            "Urrp! Seasick..."
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+
+          ],
+          "lines" : [
+            "<PLAYER> rubbed",
+            "the CAPTAIN's",
+            "back!"
+          ],
+          "waitsForPrompt" : true
+        },
+        {
+          "events" : [
+            {
+              "kind" : "music",
+              "trackID" : "MUSIC_PKMN_HEALED",
+              "waitForCompletion" : true
+            },
+            {
+              "kind" : "restoreMapMusic",
+              "waitForCompletion" : false
+            }
+          ],
+          "lines" : [
+            "Rub-rub...",
+            "Rub-rub..."
+          ],
+          "waitsForPrompt" : true
+        }
+      ]
+    },
+    {
       "id" : "t_m34_explanation",
       "pages" : [
         {
@@ -12035,6 +12242,10 @@
         "sourceConstant" : "EVENT_GOT_HELIX_FOSSIL"
       },
       {
+        "id" : "EVENT_GOT_HM01",
+        "sourceConstant" : "EVENT_GOT_HM01"
+      },
+      {
         "id" : "EVENT_GOT_NUGGET",
         "sourceConstant" : "EVENT_GOT_NUGGET"
       },
@@ -12089,6 +12300,10 @@
       {
         "id" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE",
         "sourceConstant" : "EVENT_ROUTE22_RIVAL_WANTS_BATTLE"
+      },
+      {
+        "id" : "EVENT_RUBBED_CAPTAINS_BACK",
+        "sourceConstant" : "EVENT_RUBBED_CAPTAINS_BACK"
       },
       {
         "id" : "EVENT_USED_CELL_SEPARATOR_ON_BILL",
@@ -15008,6 +15223,9 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 2F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PALLET",
       "id" : "REDS_HOUSE_2F",
       "objects" : [
@@ -15137,6 +15355,9 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Red's House 1F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PALLET",
       "id" : "REDS_HOUSE_1F",
       "objects" : [
@@ -16073,6 +16294,9 @@
       ],
       "defaultMusicID" : "MUSIC_PALLET_TOWN",
       "displayName" : "Pallet Town",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PALLET",
       "id" : "PALLET_TOWN",
       "objects" : [
@@ -17233,6 +17457,9 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES1",
       "displayName" : "Route 1",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_1",
       "objects" : [
@@ -19197,6 +19424,50 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian City",
+      "fieldObstacles" : [
+        {
+          "blockPosition" : {
+            "x" : 7,
+            "y" : 2
+          },
+          "id" : "viridian_city_cut_tree_7_2",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 4,
+            "y" : 11
+          },
+          "id" : "viridian_city_cut_tree_4_11",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        }
+      ],
       "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_CITY",
       "objects" : [
@@ -22205,6 +22476,9 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 22",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_22",
       "objects" : [
@@ -23052,6 +23326,9 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON2",
       "displayName" : "Route 22 Gate",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_22_GATE",
       "objects" : [
@@ -24363,6 +24640,134 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES1",
       "displayName" : "Route 2",
+      "fieldObstacles" : [
+        {
+          "blockPosition" : {
+            "x" : 2,
+            "y" : 5
+          },
+          "id" : "route_2_cut_tree_2_5",
+          "kind" : "cutTree",
+          "replacementBlockID" : 109,
+          "replacementStepCollisionTileIDs" : [
+            80,
+            44,
+            80,
+            44
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 1,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 7,
+            "y" : 11
+          },
+          "id" : "route_2_cut_tree_7_11",
+          "kind" : "cutTree",
+          "replacementBlockID" : 109,
+          "replacementStepCollisionTileIDs" : [
+            80,
+            44,
+            80,
+            44
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 1,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 2,
+            "y" : 19
+          },
+          "id" : "route_2_cut_tree_2_19",
+          "kind" : "cutTree",
+          "replacementBlockID" : 109,
+          "replacementStepCollisionTileIDs" : [
+            80,
+            44,
+            80,
+            44
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 1,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 6,
+            "y" : 26
+          },
+          "id" : "route_2_cut_tree_6_26",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 6,
+            "y" : 30
+          },
+          "id" : "route_2_cut_tree_6_30",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        },
+        {
+          "blockPosition" : {
+            "x" : 6,
+            "y" : 34
+          },
+          "id" : "route_2_cut_tree_6_34",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        }
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_2",
       "objects" : [
@@ -25987,6 +26392,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian School House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_SCHOOL_HOUSE",
       "objects" : [
@@ -26173,6 +26581,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Nickname House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_NICKNAME_HOUSE",
       "objects" : [
@@ -26421,6 +26832,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Viridian Pokecenter",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_POKECENTER",
       "objects" : [
@@ -26706,6 +27120,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Viridian Mart",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_VIRIDIAN",
       "id" : "VIRIDIAN_MART",
       "objects" : [
@@ -26951,6 +27368,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Forest South Gate",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST_SOUTH_GATE",
       "objects" : [
@@ -27622,6 +28042,9 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON2",
       "displayName" : "Viridian Forest",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST",
       "objects" : [
@@ -29614,6 +30037,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Viridian Forest North Gate",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "VIRIDIAN_FOREST_NORTH_GATE",
       "objects" : [
@@ -29860,6 +30286,9 @@
       ],
       "defaultMusicID" : "MUSIC_OAKS_LAB",
       "displayName" : "Oak's Lab",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PALLET",
       "id" : "OAKS_LAB",
       "objects" : [
@@ -31562,6 +31991,29 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter City",
+      "fieldObstacles" : [
+        {
+          "blockPosition" : {
+            "x" : 13,
+            "y" : 2
+          },
+          "id" : "pewter_city_cut_tree_13_2",
+          "kind" : "cutTree",
+          "replacementBlockID" : 111,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            44,
+            80,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 0
+          }
+        }
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_CITY",
       "objects" : [
@@ -33286,6 +33738,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Pewter Pokecenter",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_POKECENTER",
       "objects" : [
@@ -33571,6 +34026,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Pewter Mart",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_MART",
       "objects" : [
@@ -33787,6 +34245,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter Nidoran House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_NIDORAN_HOUSE",
       "objects" : [
@@ -33998,6 +34459,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Pewter Speech House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_SPEECH_HOUSE",
       "objects" : [
@@ -34208,6 +34672,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Museum 1F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "MUSEUM_1F",
       "objects" : [
@@ -34688,6 +35155,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Museum 2F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "MUSEUM_2F",
       "objects" : [
@@ -35001,6 +35471,9 @@
       ],
       "defaultMusicID" : "MUSIC_GYM",
       "displayName" : "Pewter Gym",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_PEWTER",
       "id" : "PEWTER_GYM",
       "objects" : [
@@ -36428,6 +36901,9 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 3",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_3",
       "objects" : [
@@ -39116,6 +39592,9 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES3",
       "displayName" : "Route 4",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_4",
       "objects" : [
@@ -42367,6 +42846,29 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean City",
+      "fieldObstacles" : [
+        {
+          "blockPosition" : {
+            "x" : 9,
+            "y" : 14
+          },
+          "id" : "cerulean_city_cut_tree_9_14",
+          "kind" : "cutTree",
+          "replacementBlockID" : 109,
+          "replacementStepCollisionTileIDs" : [
+            80,
+            44,
+            80,
+            44
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 1,
+            "y" : 0
+          }
+        }
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_CITY",
       "objects" : [
@@ -44294,6 +44796,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Cerulean Pokecenter",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_POKECENTER",
       "objects" : [
@@ -44579,6 +45084,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Cerulean Mart",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_MART",
       "objects" : [
@@ -44795,6 +45303,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Bike Shop",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "BIKE_SHOP",
       "objects" : [
@@ -45047,6 +45558,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean Trade House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_TRADE_HOUSE",
       "objects" : [
@@ -45233,6 +45747,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES1",
       "displayName" : "Cerulean Badge House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_BADGE_HOUSE",
       "objects" : [
@@ -45416,6 +45933,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Cerulean Trashed House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_TRASHED_HOUSE",
       "objects" : [
@@ -45650,6 +46170,9 @@
       ],
       "defaultMusicID" : "MUSIC_GYM",
       "displayName" : "Cerulean Gym",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CERULEAN",
       "id" : "CERULEAN_GYM",
       "objects" : [
@@ -46832,6 +47355,9 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES2",
       "displayName" : "Route 24",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_24",
       "objects" : [
@@ -48301,6 +48827,29 @@
       ],
       "defaultMusicID" : "MUSIC_ROUTES2",
       "displayName" : "Route 25",
+      "fieldObstacles" : [
+        {
+          "blockPosition" : {
+            "x" : 13,
+            "y" : 1
+          },
+          "id" : "route_25_cut_tree_13_1",
+          "kind" : "cutTree",
+          "replacementBlockID" : 110,
+          "replacementStepCollisionTileIDs" : [
+            44,
+            80,
+            44,
+            80
+          ],
+          "requiredBadgeID" : "CASCADEBADGE",
+          "requiredMoveID" : "CUT",
+          "triggerStepOffset" : {
+            "x" : 0,
+            "y" : 1
+          }
+        }
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "ROUTE_25",
       "objects" : [
@@ -49752,6 +50301,9 @@
       ],
       "defaultMusicID" : "MUSIC_CITIES2",
       "displayName" : "Bill's House",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "BILLS_HOUSE",
       "objects" : [
@@ -49995,6 +50547,9 @@
       ],
       "defaultMusicID" : "MUSIC_POKECENTER",
       "displayName" : "Mt. Moon Pokecenter",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_ROUTE",
       "id" : "MT_MOON_POKECENTER",
       "objects" : [
@@ -50681,6 +51236,9 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon 1F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_1F",
       "objects" : [
@@ -52798,6 +53356,9 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon B1F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_B1F",
       "objects" : [
@@ -54089,6 +54650,9 @@
       ],
       "defaultMusicID" : "MUSIC_DUNGEON3",
       "displayName" : "Mt. Moon B2F",
+      "fieldObstacles" : [
+
+      ],
       "fieldPaletteID" : "PAL_CAVE",
       "id" : "MT_MOON_B2F",
       "objects" : [
@@ -63420,6 +63984,64 @@
 
           ],
           "stringValue" : "BIKE_VOUCHER"
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_captain_reward",
+      "steps" : [
+        {
+          "action" : "jumpIfFlagSet",
+          "flagID" : "EVENT_GOT_HM01",
+          "path" : [
+
+          ],
+          "stringValue" : "ss_anne_captains_room_captain_after_reward"
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "ss_anne_captains_room_rub_captains_back",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "setFlag",
+          "flagID" : "EVENT_RUBBED_CAPTAINS_BACK",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "ss_anne_captains_room_captain_i_feel_much_better",
+          "path" : [
+
+          ]
+        },
+        {
+          "action" : "giveItem",
+          "continueOnFailure" : false,
+          "failureDialogueID" : "ss_anne_captains_room_captain_hm01_no_room",
+          "intValue" : 1,
+          "path" : [
+
+          ],
+          "stringValue" : "HM_CUT",
+          "successDialogueID" : "ss_anne_captains_room_captain_received_hm01",
+          "successFlagID" : "EVENT_GOT_HM01"
+        }
+      ]
+    },
+    {
+      "id" : "ss_anne_captains_room_captain_after_reward",
+      "steps" : [
+        {
+          "action" : "showDialogue",
+          "dialogueID" : "ss_anne_captains_room_captain_not_sick_anymore",
+          "path" : [
+
+          ]
         }
       ]
     },

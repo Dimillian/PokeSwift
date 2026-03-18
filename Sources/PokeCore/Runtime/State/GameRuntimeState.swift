@@ -709,6 +709,7 @@ struct DialogueState {
         case beginScriptedMovement(path: [FacingDirection])
         case openScriptItemPrompt(RuntimeScriptItemPromptState)
         case openScriptChoicePrompt(RuntimeScriptChoicePromptState)
+        case openFieldObstaclePrompt(RuntimeFieldObstaclePromptState)
     }
 
     let dialogueID: String
@@ -737,6 +738,11 @@ struct RuntimeScriptItemPromptState {
 struct RuntimeScriptChoicePromptState {
     let promptID: String
     let failureDialogueID: String?
+}
+
+struct RuntimeFieldObstaclePromptState {
+    let mapID: String
+    let obstacleID: String
 }
 
 enum RuntimeFieldHealingPhase: String {

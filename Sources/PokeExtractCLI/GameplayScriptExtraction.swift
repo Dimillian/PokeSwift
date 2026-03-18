@@ -197,6 +197,8 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
     let autoMovement = try String(contentsOf: repoRoot.appendingPathComponent("engine/overworld/auto_movement.asm"))
     let oaksLabScripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/OaksLab.asm"))
     let route22Scripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/Route22.asm"))
+    let ssAnneCaptainsRoomScripts = try String(contentsOf: repoRoot.appendingPathComponent("scripts/SSAnneCaptainsRoom.asm"))
+    try validateSSAnneCaptainRewardScript(contents: ssAnneCaptainsRoomScripts)
 
     let palletOakEscortPath = try parseRepeatedMovementLabel("RLEList_ProfOakWalkToLab", from: autoMovement)
     let palletPlayerEscortPath = try parseSimulatedJoypadMovementLabel("RLEList_PlayerWalkToLab", from: autoMovement)
@@ -807,6 +809,39 @@ func buildScripts(repoRoot: URL, maps: [MapManifest]) throws -> [ScriptManifest]
         )
     )
 
+    scripts.append(
+        ScriptManifest(
+            id: "ss_anne_captains_room_captain_reward",
+            steps: [
+                .init(
+                    action: "jumpIfFlagSet",
+                    stringValue: "ss_anne_captains_room_captain_after_reward",
+                    flagID: "EVENT_GOT_HM01"
+                ),
+                .init(action: "showDialogue", dialogueID: "ss_anne_captains_room_rub_captains_back"),
+                .init(action: "setFlag", flagID: "EVENT_RUBBED_CAPTAINS_BACK"),
+                .init(action: "showDialogue", dialogueID: "ss_anne_captains_room_captain_i_feel_much_better"),
+                .init(
+                    action: "giveItem",
+                    stringValue: "HM_CUT",
+                    intValue: 1,
+                    successDialogueID: "ss_anne_captains_room_captain_received_hm01",
+                    failureDialogueID: "ss_anne_captains_room_captain_hm01_no_room",
+                    successFlagID: "EVENT_GOT_HM01",
+                    continueOnFailure: false
+                ),
+            ]
+        )
+    )
+    scripts.append(
+        ScriptManifest(
+            id: "ss_anne_captains_room_captain_after_reward",
+            steps: [
+                .init(action: "showDialogue", dialogueID: "ss_anne_captains_room_captain_not_sick_anymore"),
+            ]
+        )
+    )
+
     scripts.append(contentsOf: buildPokemonCenterHealingScripts(maps: maps))
     return scripts
 }
@@ -850,6 +885,22 @@ private let rivalStarterTripletSpecs: [RivalStarterTripletSpec] = [
         ceruleanTrainerNumber: 9
     ),
 ]
+
+private func validateSSAnneCaptainRewardScript(contents: String) throws {
+    let requiredSnippets = [
+        "CheckEvent EVENT_GOT_HM01",
+        "SSAnneCaptainsRoomRubCaptainsBackText",
+        "SSAnneCaptainsRoomCaptainIFeelMuchBetterText",
+        "lb bc, HM_CUT, 1",
+        "call GiveItem",
+        "SetEvent EVENT_GOT_HM01",
+        "SSAnneCaptainsRoomCaptainHM01NoRoomText",
+    ]
+
+    for snippet in requiredSnippets where contents.contains(snippet) == false {
+        throw ExtractorError.invalidArguments("missing SS Anne Captain reward snippet \(snippet)")
+    }
+}
 
 private struct Route22LaneSpec {
     let idSuffix: String

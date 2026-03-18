@@ -33,6 +33,10 @@ extension GameRuntime {
             handleFieldPrompt(button: button)
             return
         }
+        if case .openFieldObstaclePrompt = dialogueState.completionAction, isFinalPage {
+            handleFieldPrompt(button: button)
+            return
+        }
         let currentPageHasBlockingEvents = dialogue.pages[dialogueState.pageIndex].events.contains(where: \.waitForCompletion)
         guard currentPageHasBlockingEvents == false || isDialogueAudioBlockingInput == false else {
             return
@@ -138,6 +142,16 @@ extension GameRuntime {
                 completionAction: .continueScript,
                 focusedIndex: 0
             )
+        case let .openFieldObstaclePrompt(promptState):
+            scene = .dialogue
+            substate = "dialogue_\(dialogue.id)_prompt"
+            fieldObstaclePromptState = promptState
+            fieldPromptState = .init(
+                interactionID: promptState.obstacleID,
+                kind: .yesNo,
+                completionAction: .returnToField,
+                focusedIndex: 0
+            )
         case let .startFieldHealing(interactionID, completionAction):
             startFieldHealing(interactionID: interactionID, completionAction: completionAction)
         case let .beginScriptedMovement(path):
@@ -218,10 +232,21 @@ extension GameRuntime {
                 completionAction: .continueScript,
                 focusedIndex: 0
             )
+        } else if case let .openFieldObstaclePrompt(promptState) = completion {
+            fieldObstaclePromptState = promptState
+            scriptItemPromptState = nil
+            scriptChoicePromptState = nil
+            fieldPromptState = .init(
+                interactionID: promptState.obstacleID,
+                kind: .yesNo,
+                completionAction: .returnToField,
+                focusedIndex: 0
+            )
         } else {
             fieldPromptState = nil
             scriptItemPromptState = nil
             scriptChoicePromptState = nil
+            fieldObstaclePromptState = nil
         }
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
@@ -245,6 +270,15 @@ extension GameRuntime {
         completion: DialogueState.CompletionAction
     ) {
         clearTransientInteractionState()
+        if case let .openFieldObstaclePrompt(promptState) = completion {
+            fieldObstaclePromptState = promptState
+            fieldPromptState = .init(
+                interactionID: promptState.obstacleID,
+                kind: .yesNo,
+                completionAction: .returnToField,
+                focusedIndex: 0
+            )
+        }
         if isTestEnvironment == false {
             dialogueTextFullyRevealed = false
         }

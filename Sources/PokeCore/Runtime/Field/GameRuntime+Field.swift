@@ -95,6 +95,9 @@ extension GameRuntime {
         }
 
         let mapChanged = gameplayState.mapID != destination.map.id
+        if mapChanged {
+            clearFieldObstacleOverrides()
+        }
         gameplayState.mapID = destination.map.id
         gameplayState.playerPosition = destination.point
         gameplayState.activeMapScriptTriggerID = nil

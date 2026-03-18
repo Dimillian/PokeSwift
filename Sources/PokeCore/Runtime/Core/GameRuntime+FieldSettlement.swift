@@ -6,6 +6,7 @@ extension GameRuntime {
         fieldPromptState = nil
         scriptItemPromptState = nil
         scriptChoicePromptState = nil
+        fieldObstaclePromptState = nil
         isDialogueAudioBlockingInput = false
     }
 

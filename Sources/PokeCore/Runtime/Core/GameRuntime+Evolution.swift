@@ -294,6 +294,8 @@ extension GameRuntime {
                    let request = speciesCrySoundEffectRequest(speciesID: speciesID) {
                     _ = playSoundEffect(request, reason: "evolution.dialogue")
                 }
+            case .music, .restoreMapMusic:
+                continue
             }
         }
     }

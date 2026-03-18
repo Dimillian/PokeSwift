@@ -11,7 +11,7 @@ private struct ResolvedWarpDestination {
 extension GameRuntime {
     func handleWarpIfNeeded() -> Bool {
         guard var gameplayState,
-              let map = content.map(id: gameplayState.mapID),
+              let map = currentMapManifest,
               let warp = map.warps.first(where: { $0.origin == gameplayState.playerPosition }),
               let destination = resolveWarpDestination(for: warp, from: map, gameplayState: gameplayState) else {
             return false
@@ -59,6 +59,7 @@ extension GameRuntime {
         await sleep(seconds: fieldFadeDuration)
 
         guard Task.isCancelled == false, var gameplayState else { return }
+        clearFieldObstacleOverrides()
         gameplayState.mapID = destination.map.id
         gameplayState.previousMapID = destination.previousMapID
         gameplayState.playerPosition = destination.position

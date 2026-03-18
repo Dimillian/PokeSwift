@@ -216,6 +216,7 @@ extension GameRuntime {
             playTimeSeconds: envelope.snapshot.playTimeSeconds
         )
         reseedRuntimeRNG()
+        clearFieldObstacleOverrides()
         clearHeldFieldDirections()
         clearTransientInteractionState()
         fieldHealingState = nil
