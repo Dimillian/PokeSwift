@@ -10,6 +10,8 @@ struct BattleAttackAnimationTilePlacement: Equatable {
     let flipH: Bool
     let flipV: Bool
 
+    static let oamViewportOrigin = CGSize(width: 8, height: 16)
+
     var atlasFrame: CGRect {
         CGRect(
             x: (tileID % 16) * BattleAttackAnimationTimeline.tileSize,
@@ -18,6 +20,17 @@ struct BattleAttackAnimationTilePlacement: Equatable {
             height: BattleAttackAnimationTimeline.tileSize
         )
     }
+
+    var viewportOffset: CGSize {
+        // Battle animation placements are extracted in GB OAM coordinates.
+        // Convert them to the visible viewport origin before SwiftUI renders
+        // them so overlays line up with the battle sprites.
+        CGSize(
+            width: CGFloat(x) - Self.oamViewportOrigin.width,
+            height: CGFloat(y) - Self.oamViewportOrigin.height
+        )
+    }
+
 }
 
 enum BattleAttackAnimationParticleKind: Equatable {

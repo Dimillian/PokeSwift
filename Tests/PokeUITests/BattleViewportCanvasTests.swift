@@ -308,6 +308,19 @@ extension PokeUITests {
     XCTAssertTrue(frames.contains { $0.state.flashOpacity > 0 })
   }
 
+  func testBattleAttackTimelineConvertsOAMPlacementsToViewportOffsets() {
+    let placement = BattleAttackAnimationTilePlacement(
+      tilesetID: "MOVE_ANIM_TILESET_0",
+      x: 80,
+      y: 56,
+      tileID: 0,
+      flipH: false,
+      flipV: false
+    )
+
+    XCTAssertEqual(placement.viewportOffset, CGSize(width: 72, height: 40))
+  }
+
   func testBattleAttackTimelineBuildsNativeParticlesForMissingSourceEffects() {
     let particleEffects = [
       "SE_WATER_DROPLETS_EVERYWHERE",

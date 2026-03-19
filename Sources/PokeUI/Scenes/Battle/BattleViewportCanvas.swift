@@ -505,6 +505,9 @@ private struct BattleAttackAnimationLayerView: View {
     let placements: [BattleAttackAnimationTilePlacement]
     let tilesetURLs: [String: URL]
     let displayScale: CGFloat
+    // The source placements are OAM-based; the rendered battle sprites sit on
+    // a slightly tighter canvas, so the overlay gets one renderer-local tweak.
+    private let battleSpriteCanvasAnchorCorrection = CGSize(width: -4, height: -4)
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -523,8 +526,8 @@ private struct BattleAttackAnimationLayerView: View {
                         height: BattleAttackAnimationTimeline.tileSize.cgFloat * displayScale
                     )
                     .offset(
-                        x: placement.x.cgFloat * displayScale,
-                        y: placement.y.cgFloat * displayScale
+                        x: (placement.viewportOffset.width + battleSpriteCanvasAnchorCorrection.width) * displayScale,
+                        y: (placement.viewportOffset.height + battleSpriteCanvasAnchorCorrection.height) * displayScale
                     )
                 }
             }
