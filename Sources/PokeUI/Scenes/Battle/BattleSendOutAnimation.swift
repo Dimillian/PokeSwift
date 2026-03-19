@@ -73,7 +73,7 @@ enum BattleSendOutAnimationTimeline {
 
         let clampedElapsed = max(0, elapsed)
         if clampedElapsed < tossDuration {
-            return .toss(progress: CGFloat(clampedElapsed / tossDuration))
+            return .toss
         }
 
         let releaseHoldEnd = tossDuration + releaseHoldDuration
@@ -290,23 +290,12 @@ private let frameBlock0A: [BattleSendOutPoofSourceTile] = [
 
 enum BattleSendOutVisualState: Equatable {
     case idle
-    case toss(progress: CGFloat)
+    case toss
     case releaseHold
     case poof(frameIndex: Int)
     case revealStep1
     case revealStep2
     case revealFinal
-
-    var ballProgress: CGFloat {
-        switch self {
-        case .idle:
-            return 1
-        case let .toss(progress):
-            return progress
-        case .releaseHold, .poof, .revealStep1, .revealStep2, .revealFinal:
-            return 1
-        }
-    }
 
     var ballOpacity: Double {
         switch self {

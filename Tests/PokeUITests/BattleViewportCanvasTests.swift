@@ -7,14 +7,11 @@ import PokeDataModel
 extension PokeUITests {
   func testBattleSendOutTimelineResolvesGBStylePhases() {
     XCTAssertEqual(BattleSendOutAnimationTimeline.state(at: nil), .idle)
-    XCTAssertEqual(BattleSendOutAnimationTimeline.state(at: 0), .toss(progress: 0))
-
-    guard case let .toss(progress) = BattleSendOutAnimationTimeline.state(
-      at: BattleSendOutAnimationTimeline.tossDuration / 2
-    ) else {
-      return XCTFail("Expected toss progress midway through the toss window")
-    }
-    XCTAssertEqual(progress, 0.5, accuracy: 0.0001)
+    XCTAssertEqual(BattleSendOutAnimationTimeline.state(at: 0), .toss)
+    XCTAssertEqual(
+      BattleSendOutAnimationTimeline.state(at: BattleSendOutAnimationTimeline.tossDuration / 2),
+      .toss
+    )
 
     XCTAssertEqual(
       BattleSendOutAnimationTimeline.state(
@@ -78,7 +75,7 @@ extension PokeUITests {
     XCTAssertEqual(BattleSendOutVisualState.revealStep2.pokemonScale, 5.0 / 7.0, accuracy: 0.0001)
     XCTAssertEqual(BattleSendOutVisualState.revealFinal.pokemonScale, 1.0, accuracy: 0.0001)
     XCTAssertEqual(BattleSendOutVisualState.poof(frameIndex: 2).poofFrameIndex, 2)
-    XCTAssertEqual(BattleSendOutVisualState.toss(progress: 1).ballOpacity, 1)
+    XCTAssertEqual(BattleSendOutVisualState.toss.ballOpacity, 1)
     XCTAssertEqual(BattleSendOutVisualState.revealStep1.ballOpacity, 0)
   }
 
@@ -544,8 +541,6 @@ extension PokeUITests {
 
     XCTAssertEqual(layout.enemySendOutAnchor, layout.enemySpriteCenter)
     XCTAssertEqual(layout.playerSendOutAnchor, layout.playerSpriteCenter)
-    XCTAssertLessThan(layout.enemyTrainerPokeballOrigin.x, layout.enemySendOutAnchor.x)
-    XCTAssertGreaterThan(layout.playerTrainerPokeballOrigin.x, layout.playerSendOutAnchor.x)
   }
 
   func testBattleViewportLayoutUsesMatchingPokemonSpriteSlots() {
@@ -553,6 +548,21 @@ extension PokeUITests {
 
     XCTAssertEqual(layout.enemySpriteSize, layout.playerSpriteSize)
     XCTAssertGreaterThan(layout.playerTrainerCenter.y, layout.playerSpriteCenter.y)
+  }
+
+  func testBattleViewportPokeballStaysAnchoredAtSendOutTarget() {
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+    let rules = makeRules(
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 2,
+        uiVisibility: .visible,
+        activeSide: .enemy
+      ),
+      battleKind: .trainer
+    )
+
+    XCTAssertEqual(rules.pokeballCenter(in: layout), layout.enemySendOutAnchor)
   }
 
   func testPresentationRulesShowTrainerSpritesAcrossIntroAndSendOut() {

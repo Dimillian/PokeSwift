@@ -375,37 +375,15 @@ struct BattleViewportPresentationRules {
     }
 
     func pokeballCenter(in layout: BattleViewportLayout) -> CGPoint {
-        let start: CGPoint
-        let end: CGPoint
         if presentation.activeSide == .enemy {
-            start = layout.enemyTrainerPokeballOrigin
-            end = layout.enemySendOutAnchor
+            return layout.enemySendOutAnchor
         } else {
-            start = layout.playerTrainerPokeballOrigin
-            end = layout.playerSendOutAnchor
+            return layout.playerSendOutAnchor
         }
-
-        return quadraticBezier(
-            start: start,
-            control: CGPoint(
-                x: (start.x + end.x) / 2,
-                y: min(start.y, end.y) - layout.size.height * 0.18
-            ),
-            end: end,
-            progress: currentSendOutState.ballProgress
-        )
     }
 
     func sendOutPoofCenter(in layout: BattleViewportLayout) -> CGPoint {
         presentation.activeSide == .enemy ? layout.enemySendOutAnchor : layout.playerSendOutAnchor
-    }
-
-    func quadraticBezier(start: CGPoint, control: CGPoint, end: CGPoint, progress: CGFloat) -> CGPoint {
-        let t = max(0, min(1, progress))
-        let inverseT = 1 - t
-        let x = (inverseT * inverseT * start.x) + (2 * inverseT * t * control.x) + (t * t * end.x)
-        let y = (inverseT * inverseT * start.y) + (2 * inverseT * t * control.y) + (t * t * end.y)
-        return CGPoint(x: x, y: y)
     }
 
     static func usesImplicitPokemonRevisionAnimation(

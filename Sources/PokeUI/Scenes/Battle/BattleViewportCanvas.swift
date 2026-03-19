@@ -186,7 +186,6 @@ struct BattleViewportCanvas: View {
                     .frame(width: max(8, size.width * 0.05), height: max(8, size.width * 0.05))
                     .position(rules.pokeballCenter(in: layout))
                     .opacity(currentSendOutState.ballOpacity)
-                    .animation(spriteAnimation, value: presentation.revision)
             }
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
@@ -337,11 +336,7 @@ struct BattleViewportCanvas: View {
         }
 
         activeSendOutAnimationKey = sendOutAnimationTriggerKey
-        sendOutVisualState = .toss(progress: 0)
-
-        withAnimation(.linear(duration: BattleSendOutAnimationTimeline.tossDuration)) {
-            sendOutVisualState = .toss(progress: 1)
-        }
+        sendOutVisualState = .toss
         guard await sleepForSendOutStep(BattleSendOutAnimationTimeline.tossDuration) else { return }
 
         sendOutVisualState = .releaseHold
@@ -651,20 +646,6 @@ struct BattleViewportLayout {
         CGPoint(
             x: size.width * 0.25,
             y: (size.height * playerPokemonFloorRatio) - playerFloorClearance - (playerSpriteSize.height * 0.5)
-        )
-    }
-
-    var enemyTrainerPokeballOrigin: CGPoint {
-        CGPoint(
-            x: enemyTrainerCenter.x - enemyTrainerSize.width * 0.24,
-            y: enemyTrainerCenter.y + 4
-        )
-    }
-
-    var playerTrainerPokeballOrigin: CGPoint {
-        CGPoint(
-            x: playerTrainerCenter.x + playerTrainerSize.width * 0.18,
-            y: playerTrainerCenter.y - 2
         )
     }
 
