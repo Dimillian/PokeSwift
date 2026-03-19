@@ -1218,17 +1218,19 @@ extension PokeCoreTests {
     func testFieldItemUseModalBlocksHeldMovementAndSaveability() throws {
         let runtime = try makeRepoRuntime()
 
-        runtime.gameplayState = runtime.makeInitialGameplayState()
+        var gameplayState = runtime.makeInitialGameplayState()
         runtime.scene = .field
         runtime.substate = "field"
-        runtime.gameplayState?.playerParty = [
+        gameplayState.playerParty = [
             runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Lead"),
         ]
-        runtime.gameplayState?.playerParty[0].currentHP = max(
+        let leadMaxHP = gameplayState.playerParty[0].maxHP
+        gameplayState.playerParty[0].currentHP = max(
             1,
-            (runtime.gameplayState?.playerParty[0].maxHP ?? 20) - 5
+            leadMaxHP - 5
         )
-        runtime.gameplayState?.inventory = [.init(itemID: "POTION", quantity: 1)]
+        gameplayState.inventory = [.init(itemID: "POTION", quantity: 1)]
+        runtime.gameplayState = gameplayState
 
         let originalPosition = runtime.playerPosition
         runtime.handleInventorySidebarSelection("POTION")

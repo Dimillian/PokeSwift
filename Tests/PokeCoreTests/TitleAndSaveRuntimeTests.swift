@@ -7,6 +7,7 @@ import PokeDataModel
 extension PokeCoreTests {
     func testTitlePresentationInitializesWithResolvedSpeciesPool() {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.scene = .titleAttract
 
         runtime.resetTitlePresentationState()
 
@@ -17,6 +18,7 @@ extension PokeCoreTests {
 
     func testTitlePresentationTransitionsFromIdleToScrollOut() {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.scene = .titleAttract
         runtime.resetTitlePresentationState()
 
         var state = runtime.titlePresentationState
@@ -41,6 +43,7 @@ extension PokeCoreTests {
 
     func testTitlePresentationRotatesToDifferentSpeciesAfterFullCycle() {
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.scene = .titleAttract
         runtime.resetTitlePresentationState()
 
         var state = runtime.titlePresentationState
@@ -51,10 +54,14 @@ extension PokeCoreTests {
         state?.pendingSpeciesID = "SQUIRTLE"
         runtime.titlePresentationState = state
 
-        while runtime.titlePresentationState?.phase != .idle || runtime.titlePresentationState?.currentSpeciesID == "CHARMANDER" {
+        var framesRemaining = 64
+        while (runtime.titlePresentationState?.phase != .idle || runtime.titlePresentationState?.currentSpeciesID == "CHARMANDER"),
+              framesRemaining > 0 {
             runtime.advanceTitlePresentationFrame()
+            framesRemaining -= 1
         }
 
+        XCTAssertGreaterThan(framesRemaining, 0)
         XCTAssertEqual(runtime.titlePresentationState?.currentSpeciesID, "SQUIRTLE")
         XCTAssertEqual(runtime.titlePresentationState?.previousSpeciesID, "CHARMANDER")
         XCTAssertEqual(runtime.titlePresentationState?.monOffsetX, 0)
