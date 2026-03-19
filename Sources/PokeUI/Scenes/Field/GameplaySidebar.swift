@@ -172,15 +172,10 @@ struct BattleModeSidebarContent: View {
     let onPartyRowSelected: ((Int) -> Void)?
     let onActivateSection: (GameplaySidebarExpandedSection) -> Void
 
-    var combatSummaryText: String {
-        props.summaryLabel
-    }
-
     var body: some View {
         VStack(spacing: GameplayFieldMetrics.sidebarSectionSpacing) {
             AccordionSidebarCard(
                 title: "Combat",
-                summary: combatSummaryText,
                 isExpanded: expansionState.expandedSection == .battleCombat,
                 isHighlighted: props.attentionSection == .battleCombat
             ) {
