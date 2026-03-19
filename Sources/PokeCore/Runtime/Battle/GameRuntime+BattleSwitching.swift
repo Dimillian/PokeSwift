@@ -123,26 +123,13 @@ extension GameRuntime {
         case let .trainerShift(nextEnemyIndex):
             battle.pendingAction = nil
             battle.pendingPresentationBatches = [
-                [
-                    .init(
-                        delay: battlePresentationDelay(base: 0.34),
-                        stage: .enemySendOut,
-                        uiVisibility: .visible,
-                        activeSide: .enemy,
-                        message: trainerSentOutText(
-                            trainerName: battle.trainerName,
-                            pokemon: battle.enemyParty[nextEnemyIndex]
-                        ),
-                        phase: .turnText,
-                        pendingAction: .moveSelection,
-                        enemyParty: battle.enemyParty,
-                        enemyActiveIndex: nextEnemyIndex,
-                        stagedSoundEffectRequests: sendOutSoundEffectRequests(
-                            side: .enemy,
-                            speciesID: battle.enemyParty[nextEnemyIndex].speciesID
-                        )
-                    ),
-                ],
+                makeEnemySendOutBatch(
+                    trainerName: battle.trainerName,
+                    pokemon: battle.enemyParty[nextEnemyIndex],
+                    enemyParty: battle.enemyParty,
+                    enemyActiveIndex: nextEnemyIndex,
+                    pendingAction: .moveSelection
+                ),
             ]
             replacementBeats = makePlayerSendOutBatch(
                 playerPokemon: battle.playerPokemon,
@@ -169,21 +156,12 @@ extension GameRuntime {
                     message: "Come back, \(recalledPokemon.nickname)!",
                     phase: .turnText
                 ),
-                .init(
-                    delay: battlePresentationDelay(base: 0.26),
-                    stage: .enemySendOut,
-                    uiVisibility: .visible,
-                    activeSide: .player,
-                    message: playerSendOutText(for: battle.playerPokemon, against: battle.enemyPokemon),
-                    phase: .turnText,
-                    pendingAction: .continueSwitchTurn,
-                    playerPokemon: battle.playerPokemon,
-                    stagedSoundEffectRequests: sendOutSoundEffectRequests(
-                        side: .player,
-                        speciesID: battle.playerPokemon.speciesID
-                    )
-                ),
-            ]
+            ] + makePlayerSendOutBatch(
+                playerPokemon: battle.playerPokemon,
+                enemyPokemon: battle.enemyPokemon,
+                pendingAction: .continueSwitchTurn,
+                delayBase: 0.26
+            )
         case .itemUse:
             replacementBeats = []
         }

@@ -4354,6 +4354,233 @@ extension PokeCoreTests {
         XCTAssertEqual(battle.aiLayer2Encouragement, 0)
     }
 
+    func testIntroPresentationBeatBuilderPreservesCurrentStageSequence() {
+        let runtime = GameRuntime(
+            content: fixtureContent(gameplayManifest: fixtureGameplayManifest()),
+            telemetryPublisher: nil
+        )
+
+        let beats = runtime.makeIntroPresentationBeats(
+            openingMessage: "A wild Pidgey appeared!",
+            transitionStyle: .spiral
+        )
+
+        XCTAssertEqual(beats.map(\.stage), [
+            .introFlash1,
+            .introFlash2,
+            .introFlash3,
+            .introSpiral,
+            .introCrossing,
+            .introReveal,
+            .commandReady,
+        ])
+        if case .moveSelection? = beats.first?.pendingAction {
+        } else {
+            XCTFail("Expected intro sequence to leave move selection pending")
+        }
+        XCTAssertEqual(beats.first?.uiVisibility, .hidden)
+        XCTAssertEqual(beats[5].message, "A wild Pidgey appeared!")
+        XCTAssertEqual(beats[5].uiVisibility, .visible)
+        XCTAssertEqual(beats[5].phase, .introText)
+        XCTAssertEqual(beats[6].phase, .moveSelection)
+        XCTAssertEqual(beats[6].message, runtime.battlePrompt(for: .moveSelection))
+    }
+
+    func testPlayerSendOutBatchPreservesCurrentTimingAndSoundRequests() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TACKLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let playerPokemon = runtime.makePokemon(speciesID: "RATTATA", level: 5, nickname: "Rattata")
+        let enemyPokemon = runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Pidgey")
+
+        let beats = runtime.makePlayerSendOutBatch(
+            playerPokemon: playerPokemon,
+            enemyPokemon: enemyPokemon,
+            pendingAction: .continueSwitchTurn
+        )
+
+        XCTAssertEqual(beats.count, 1)
+        XCTAssertEqual(beats[0].stage, .enemySendOut)
+        XCTAssertEqual(beats[0].activeSide, .player)
+        XCTAssertEqual(beats[0].delay, runtime.battlePresentationDelay(base: 0.34), accuracy: 0.0001)
+        if case .continueSwitchTurn? = beats[0].pendingAction {
+        } else {
+            XCTFail("Expected player send-out batch to continue the switch turn")
+        }
+        XCTAssertEqual(beats[0].playerPokemon?.speciesID, "RATTATA")
+        XCTAssertEqual(beats[0].message, runtime.playerSendOutText(for: playerPokemon, against: enemyPokemon))
+        XCTAssertEqual(
+            beats[0].stagedSoundEffectRequests.count,
+            runtime.sendOutSoundEffectRequests(side: .player, speciesID: playerPokemon.speciesID).count
+        )
+    }
+
+    func testTrainerOpeningSendOutBatchesPreserveEnemyThenPlayerSequence() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TACKLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        let battle = RuntimeBattleState(
+            battleID: "test_opening_send_out",
+            kind: .trainer,
+            trainerName: "BUG CATCHER",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
+            completionFlagID: "EVENT_TEST",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
+            canRun: false,
+            trainerClass: "OPP_BUG_CATCHER",
+            sourceTrainerObjectID: nil,
+            playerPokemon: runtime.makePokemon(speciesID: "RATTATA", level: 5, nickname: "Rattata"),
+            enemyParty: [runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Pidgey")],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            payDayMoney: 0,
+            phase: .introText,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 0,
+            partySelectionMode: .optionalSwitch,
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
+            presentation: .init()
+        )
+
+        let batches = runtime.makeTrainerOpeningSendOutBatches(battle: battle)
+
+        XCTAssertEqual(batches.count, 2)
+        XCTAssertEqual(batches[0].count, 1)
+        XCTAssertEqual(batches[0][0].stage, .enemySendOut)
+        XCTAssertEqual(batches[0][0].activeSide, .enemy)
+        XCTAssertTrue(batches[0][0].hidePlayerPokemon)
+        XCTAssertEqual(batches[1].count, 1)
+        XCTAssertEqual(batches[1][0].stage, .enemySendOut)
+        XCTAssertEqual(batches[1][0].activeSide, .player)
+        XCTAssertFalse(batches[1][0].hidePlayerPokemon)
+    }
+
+    func testTrainerShiftSelectionUsesSharedEnemySendOutBatchShape() {
+        let runtime = GameRuntime(
+            content: fixtureContent(
+                gameplayManifest: fixtureGameplayManifest(
+                    species: [
+                        .init(id: "RATTATA", displayName: "Rattata", primaryType: "NORMAL", baseHP: 30, baseAttack: 56, baseDefense: 35, baseSpeed: 72, baseSpecial: 25, startingMoves: ["TACKLE"]),
+                        .init(id: "PIDGEY", displayName: "Pidgey", primaryType: "NORMAL", secondaryType: "FLYING", baseHP: 40, baseAttack: 45, baseDefense: 40, baseSpeed: 56, baseSpecial: 35, startingMoves: ["TACKLE"]),
+                    ],
+                    moves: [
+                        .init(id: "TACKLE", displayName: "TACKLE", power: 35, accuracy: 100, maxPP: 35, effect: "NO_ADDITIONAL_EFFECT", type: "NORMAL"),
+                    ]
+                )
+            ),
+            telemetryPublisher: nil
+        )
+
+        var gameplayState = runtime.makeInitialGameplayState()
+        gameplayState.playerParty = [
+            runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Lead"),
+            runtime.makePokemon(speciesID: "RATTATA", level: 5, nickname: "Swap"),
+        ]
+
+        var battle = RuntimeBattleState(
+            battleID: "test_shift_send_out",
+            kind: .trainer,
+            trainerName: "BUG CATCHER",
+            trainerSpritePath: nil,
+            baseRewardMoney: 0,
+            completionFlagID: "EVENT_TEST",
+            healsPartyAfterBattle: false,
+            preventsBlackoutOnLoss: false,
+            playerWinDialogueID: "win",
+            playerLoseDialogueID: "lose",
+            postBattleScriptID: nil,
+            canRun: false,
+            trainerClass: "OPP_BUG_CATCHER",
+            sourceTrainerObjectID: nil,
+            playerPokemon: gameplayState.playerParty[0],
+            enemyParty: [
+                runtime.makePokemon(speciesID: "PIDGEY", level: 5, nickname: "Pidgey"),
+                runtime.makePokemon(speciesID: "RATTATA", level: 5, nickname: "Rattata"),
+            ],
+            enemyActiveIndex: 0,
+            aiLayer2Encouragement: 0,
+            payDayMoney: 0,
+            phase: .partySelection,
+            focusedMoveIndex: 0,
+            focusedBagItemIndex: 0,
+            focusedPartyIndex: 1,
+            partySelectionMode: .trainerShift(nextEnemyIndex: 1),
+            message: "",
+            queuedMessages: [],
+            pendingAction: nil,
+            lastCaptureResult: nil,
+            pendingPresentationBatches: [],
+            learnMoveState: nil,
+            rewardContinuation: nil,
+            presentation: .init()
+        )
+
+        runtime.resolveBattlePartySelection(battle: &battle, gameplayState: &gameplayState)
+        runtime.cancelBattlePresentation()
+
+        let expectedBatch = runtime.makeEnemySendOutBatch(
+            trainerName: battle.trainerName,
+            pokemon: battle.enemyParty[1],
+            enemyParty: battle.enemyParty,
+            enemyActiveIndex: 1,
+            pendingAction: .moveSelection
+        )
+        guard let actualBeat = battle.pendingPresentationBatches.first?.first else {
+            return XCTFail("Expected a pending enemy send-out beat")
+        }
+        guard let expectedBeat = expectedBatch.first else {
+            return XCTFail("Expected shared enemy send-out batch to produce one beat")
+        }
+
+        XCTAssertEqual(actualBeat.stage, expectedBeat.stage)
+        XCTAssertEqual(actualBeat.activeSide, expectedBeat.activeSide)
+        XCTAssertEqual(actualBeat.delay, expectedBeat.delay, accuracy: 0.0001)
+        XCTAssertEqual(actualBeat.message, expectedBeat.message)
+        if case .moveSelection? = actualBeat.pendingAction,
+           case .moveSelection? = expectedBeat.pendingAction {
+        } else {
+            XCTFail("Expected shared enemy send-out batch to preserve move selection pending action")
+        }
+        XCTAssertEqual(actualBeat.enemyActiveIndex, expectedBeat.enemyActiveIndex)
+        XCTAssertEqual(actualBeat.stagedSoundEffectRequests.count, expectedBeat.stagedSoundEffectRequests.count)
+    }
+
     func testWildBattleRNGDoesNotResetFromEncounterIdentity() {
         let content = fixtureContent(
             gameplayManifest: fixtureGameplayManifest(

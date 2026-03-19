@@ -51,6 +51,19 @@ public enum FieldDisplayStyle: Equatable, Hashable, Sendable {
         }
     }
 
+    var shaderPresetValue: Float {
+        switch self {
+        case .rawGrayscale:
+            return 0
+        case .dmgAuthentic:
+            return 1
+        case .dmgTinted:
+            return 2
+        case .gbcCompatibility:
+            return 3
+        }
+    }
+
     public init?(preferenceValue: String) {
         switch preferenceValue {
         case "rawGrayscale":

@@ -82,36 +82,9 @@ extension PokeUITests {
     XCTAssertEqual(BattleSendOutVisualState.revealStep1.ballOpacity, 0)
   }
 
-  func testBattleSendOutRevealUsesCenteredScaleAnchor() {
-    XCTAssertEqual(
-      BattleViewportCanvas.pokemonScaleAnchor(
-        stage: .enemySendOut,
-        activeSide: .enemy,
-        side: .enemy
-      ),
-      .center
-    )
-    XCTAssertEqual(
-      BattleViewportCanvas.pokemonScaleAnchor(
-        stage: .enemySendOut,
-        activeSide: .player,
-        side: .player
-      ),
-      .center
-    )
-    XCTAssertEqual(
-      BattleViewportCanvas.pokemonScaleAnchor(
-        stage: .attackImpact,
-        activeSide: .enemy,
-        side: .enemy
-      ),
-      .center
-    )
-  }
-
   func testBattleSendOutDisablesRevisionDrivenPokemonAnimation() {
     XCTAssertFalse(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .enemySendOut,
         activeSide: .enemy,
         attackAnimation: nil,
@@ -120,7 +93,7 @@ extension PokeUITests {
       )
     )
     XCTAssertFalse(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .enemySendOut,
         activeSide: .player,
         attackAnimation: nil,
@@ -129,7 +102,7 @@ extension PokeUITests {
       )
     )
     XCTAssertTrue(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .attackImpact,
         activeSide: .enemy,
         attackAnimation: nil,
@@ -138,7 +111,7 @@ extension PokeUITests {
       )
     )
     XCTAssertFalse(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .resultText,
         activeSide: .player,
         attackAnimation: nil,
@@ -150,7 +123,7 @@ extension PokeUITests {
 
   func testWildBattlePlayerHUDStaysHiddenUntilSendOutReveal() {
     XCTAssertEqual(
-      BattleViewportCanvas.playerHudOpacity(
+      BattleViewportPresentationRules.playerHudOpacity(
         battleKind: .wild,
         stage: .introReveal,
         activeSide: nil,
@@ -160,7 +133,7 @@ extension PokeUITests {
       0
     )
     XCTAssertEqual(
-      BattleViewportCanvas.playerHudOpacity(
+      BattleViewportPresentationRules.playerHudOpacity(
         battleKind: .wild,
         stage: .enemySendOut,
         activeSide: .player,
@@ -171,7 +144,7 @@ extension PokeUITests {
       accuracy: 0.0001
     )
     XCTAssertEqual(
-      BattleViewportCanvas.playerHudOpacity(
+      BattleViewportPresentationRules.playerHudOpacity(
         battleKind: .wild,
         stage: .commandReady,
         activeSide: nil,
@@ -181,7 +154,7 @@ extension PokeUITests {
       1
     )
     XCTAssertEqual(
-      BattleViewportCanvas.playerHudOpacity(
+      BattleViewportPresentationRules.playerHudOpacity(
         battleKind: .wild,
         stage: .resultText,
         activeSide: .player,
@@ -194,7 +167,7 @@ extension PokeUITests {
 
   func testTrainerBattlePartyIndicatorTracksIntroAndEnemySendOut() {
     XCTAssertEqual(
-      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+      BattleViewportPresentationRules.trainerPartyIndicatorOpacity(
         battleKind: .trainer,
         stage: .introReveal,
         activeSide: nil,
@@ -203,7 +176,7 @@ extension PokeUITests {
       1
     )
     XCTAssertEqual(
-      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+      BattleViewportPresentationRules.trainerPartyIndicatorOpacity(
         battleKind: .trainer,
         stage: .enemySendOut,
         activeSide: .enemy,
@@ -213,7 +186,7 @@ extension PokeUITests {
       accuracy: 0.0001
     )
     XCTAssertEqual(
-      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+      BattleViewportPresentationRules.trainerPartyIndicatorOpacity(
         battleKind: .trainer,
         stage: .commandReady,
         activeSide: nil,
@@ -222,7 +195,7 @@ extension PokeUITests {
       0
     )
     XCTAssertEqual(
-      BattleViewportCanvas.trainerPartyIndicatorOpacity(
+      BattleViewportPresentationRules.trainerPartyIndicatorOpacity(
         battleKind: .wild,
         stage: .introReveal,
         activeSide: nil,
@@ -298,7 +271,7 @@ extension PokeUITests {
 
   func testBattlePlayerSpriteHidesWhenPresentationRequestsIt() {
     XCTAssertEqual(
-      BattleViewportCanvas.playerPokemonOpacity(
+      BattleViewportPresentationRules.playerPokemonOpacity(
         battleKind: .wild,
         stage: .resultText,
         activeSide: .player,
@@ -309,7 +282,7 @@ extension PokeUITests {
       0
     )
     XCTAssertEqual(
-      BattleViewportCanvas.playerPokemonOpacity(
+      BattleViewportPresentationRules.playerPokemonOpacity(
         battleKind: .wild,
         stage: .enemySendOut,
         activeSide: .player,
@@ -388,7 +361,7 @@ extension PokeUITests {
     let playback = makeAttackPlayback()
 
     XCTAssertFalse(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
@@ -397,7 +370,7 @@ extension PokeUITests {
       )
     )
     XCTAssertTrue(
-      BattleViewportCanvas.usesImplicitPokemonRevisionAnimation(
+      BattleViewportPresentationRules.usesImplicitPokemonRevisionAnimation(
         stage: .attackWindup,
         activeSide: .player,
         attackAnimation: playback,
@@ -409,7 +382,7 @@ extension PokeUITests {
 
   func testBattleAttackStateResolvesToIdleWhenAnimationKeyIsStale() {
     XCTAssertEqual(
-      BattleViewportCanvas.resolvedAttackAnimationState(
+      BattleViewportPresentationRules.resolvedAttackAnimationState(
         attackAnimation: makeAttackPlayback(playbackID: "attack-2"),
         attackAnimationVisualState: .init(
           playerOffset: .zero,
@@ -452,7 +425,7 @@ extension PokeUITests {
 
   func testApplyingHitEffectStateResolvesToIdleWhenAnimationKeyIsStale() {
     XCTAssertEqual(
-      BattleViewportCanvas.resolvedApplyingHitEffectState(
+      BattleViewportPresentationRules.resolvedApplyingHitEffectState(
         applyingHitEffect: makeApplyingHitEffect(playbackID: "hit-2"),
         applyingHitEffectVisualState: .init(
           playerOpacity: 1,
@@ -468,7 +441,7 @@ extension PokeUITests {
 
   func testBattleSendOutStateResolvesToIdleWhenAnimationKeyIsStale() {
     XCTAssertEqual(
-      BattleViewportCanvas.resolvedSendOutState(
+      BattleViewportPresentationRules.resolvedSendOutState(
         stage: .enemySendOut,
         sendOutVisualState: .revealFinal,
         animationTriggerKey: "enemySendOut-player-2",
@@ -480,7 +453,7 @@ extension PokeUITests {
 
   func testBattleSendOutStatePreservesMatchingAnimationKey() {
     XCTAssertEqual(
-      BattleViewportCanvas.resolvedSendOutState(
+      BattleViewportPresentationRules.resolvedSendOutState(
         stage: .enemySendOut,
         sendOutVisualState: .revealStep2,
         animationTriggerKey: "enemySendOut-player-2",
@@ -492,7 +465,7 @@ extension PokeUITests {
 
   func testBattleSendOutStateResolvesToIdleOutsideSendOutStage() {
     XCTAssertEqual(
-      BattleViewportCanvas.resolvedSendOutState(
+      BattleViewportPresentationRules.resolvedSendOutState(
         stage: .commandReady,
         sendOutVisualState: .revealFinal,
         animationTriggerKey: "commandReady-player-3",
@@ -569,6 +542,69 @@ extension PokeUITests {
     XCTAssertGreaterThan(layout.playerTrainerCenter.y, layout.playerSpriteCenter.y)
   }
 
+  func testPresentationRulesShowTrainerSpritesAcrossIntroAndSendOut() {
+    let introRules = makeRules(
+      presentation: .init(
+        stage: .introReveal,
+        revision: 1,
+        uiVisibility: .visible
+      ),
+      battleKind: .trainer
+    )
+    XCTAssertTrue(introRules.shouldShowEnemyTrainer)
+    XCTAssertTrue(introRules.shouldShowPlayerTrainer)
+
+    let sendOutRules = makeRules(
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 2,
+        uiVisibility: .visible,
+        activeSide: .enemy
+      ),
+      battleKind: .trainer
+    )
+    XCTAssertTrue(sendOutRules.shouldShowEnemyTrainer)
+    XCTAssertFalse(sendOutRules.shouldShowPlayerTrainer)
+  }
+
+  func testPresentationRulesUseSendOutAnchorsDuringTrainerReveal() {
+    let rules = makeRules(
+      presentation: .init(
+        stage: .introReveal,
+        revision: 1,
+        uiVisibility: .visible
+      ),
+      battleKind: .trainer
+    )
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+
+    XCTAssertEqual(rules.enemySpriteCenter(in: layout), layout.enemySendOutAnchor)
+    XCTAssertEqual(rules.playerSpriteCenter(in: layout), layout.playerSendOutAnchor)
+  }
+
+  func testPresentationRulesHideWildPlayerPokemonUntilPlayerSendOut() {
+    let revealRules = makeRules(
+      presentation: .init(
+        stage: .introReveal,
+        revision: 1,
+        uiVisibility: .visible
+      ),
+      battleKind: .wild
+    )
+    XCTAssertFalse(revealRules.shouldShowPlayerPokemon)
+
+    let sendOutRules = makeRules(
+      presentation: .init(
+        stage: .enemySendOut,
+        revision: 2,
+        uiVisibility: .visible,
+        activeSide: .player
+      ),
+      battleKind: .wild
+    )
+    XCTAssertTrue(sendOutRules.shouldShowPlayerPokemon)
+  }
+
   private func makeAttackPlayback(
     playbackID: String = "attack-1",
     moveID: String = "TACKLE"
@@ -641,6 +677,28 @@ extension PokeUITests {
       tilesets: [
         .init(id: "MOVE_ANIM_TILESET_0", tileCount: 79, imagePath: "Assets/battle/animations/move_anim_0.png"),
       ]
+    )
+  }
+
+  private func makeRules(
+    presentation: BattlePresentationTelemetry,
+    battleKind: BattleKind
+  ) -> BattleViewportPresentationRules {
+    BattleViewportPresentationRules(
+      battleKind: battleKind,
+      presentation: presentation,
+      hasPlayerTrainerSprite: true,
+      playerCurrentHP: 20,
+      enemyCurrentHP: 20,
+      sendOutVisualState: .revealFinal,
+      activeSendOutAnimationKey: "enemySendOut-\(String(describing: presentation.activeSide))-\(presentation.revision)",
+      sendOutAnimationTriggerKey: "enemySendOut-\(String(describing: presentation.activeSide))-\(presentation.revision)",
+      attackAnimationVisualState: .idle,
+      activeAttackAnimationKey: nil,
+      attackAnimationTriggerKey: "attack-idle-\(presentation.revision)",
+      applyingHitEffectVisualState: .idle,
+      activeApplyingHitEffectKey: nil,
+      applyingHitEffectTriggerKey: "hit-idle-\(presentation.revision)"
     )
   }
 

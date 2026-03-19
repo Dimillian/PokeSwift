@@ -65,10 +65,7 @@ struct GameplayScreenEffectConfiguration: Equatable {
     }
 
     static func introStyleValue(for presentation: BattlePresentationTelemetry) -> Float {
-        guard presentation.stage == .introSpiral else {
-            return 0
-        }
-        switch presentation.transitionStyle {
+        switch presentation.semantics.transitionShaderStyle ?? .none {
         case .none:
             return 0
         case .circle:
@@ -293,9 +290,7 @@ private struct BattleScreenEffectModifier: ViewModifier {
     let displayScale: CGFloat
     let presentation: BattlePresentationTelemetry
     let hdrBoost: Float
-    @State private var displayedIntroProgress: CGFloat = 1
-    @State private var displayedIntroAmount: CGFloat = 0
-    @State private var seededIntroRevision: Int?
+    @State private var transitionState = BattleIntroTransitionState()
 
     func body(content: Content) -> some View {
         let configuration = GameplayScreenEffectConfiguration(
@@ -303,8 +298,8 @@ private struct BattleScreenEffectModifier: ViewModifier {
             displayScale: displayScale,
             hdrBoost: hdrBoost,
             presentation: presentation,
-            introProgress: displayedIntroProgress,
-            introAmount: displayedIntroAmount
+            introProgress: transitionState.displayedIntroProgress,
+            introAmount: transitionState.displayedIntroAmount
         )
 
         content
@@ -313,63 +308,39 @@ private struct BattleScreenEffectModifier: ViewModifier {
                     function: BattleScreenShader.function,
                     arguments: configuration.battleArguments
                 ),
-                maxSampleOffset: .init(width: maxSampleOffset, height: maxSampleOffset)
+                maxSampleOffset: .init(width: BattleIntroTransitionDriver.maxSampleOffset(displayScale: displayScale), height: BattleIntroTransitionDriver.maxSampleOffset(displayScale: displayScale))
             )
             .drawingGroup()
             .onAppear {
-                syncIntroState(animated: false)
+                applyTransitionSync(animated: false)
             }
             .onChange(of: presentation.transitionStyle) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
             .onChange(of: presentation.stage) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
             .onChange(of: presentation.revision) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
     }
 
-    private var maxSampleOffset: CGFloat {
-        max(12, displayScale * 10)
-    }
+    private func applyTransitionSync(animated: Bool) {
+        let sync = BattleIntroTransitionDriver.sync(
+            presentation: presentation,
+            previousState: transitionState,
+            animated: animated
+        )
+        transitionState = sync.immediateState
 
-    private func syncIntroState(animated: Bool) {
-        if presentation.stage == .introFlash1 {
-            seededIntroRevision = nil
-        }
-
-        guard presentation.transitionStyle != .none, presentation.stage == .introSpiral else {
-            displayedIntroProgress = 1
-            displayedIntroAmount = 0
+        guard let animatedState = sync.animatedState else {
             return
         }
-
-        if seededIntroRevision != presentation.revision {
-            seededIntroRevision = presentation.revision
-            displayedIntroProgress = 0.01
-            displayedIntroAmount = 1
-            DispatchQueue.main.async {
-                withAnimation(transitionAnimation) {
-                    displayedIntroProgress = 1
-                    displayedIntroAmount = 1
-                }
+        let animation = BattleIntroTransitionDriver.animationSpec(for: presentation).animation
+        DispatchQueue.main.async {
+            withAnimation(animation) {
+                transitionState = animatedState
             }
-            return
-        }
-
-        if animated == false {
-            displayedIntroProgress = 1
-            displayedIntroAmount = 1
-        }
-    }
-
-    private var transitionAnimation: Animation {
-        switch presentation.stage {
-        case .introSpiral:
-            return .easeOut(duration: 0.62)
-        default:
-            return .easeInOut(duration: 0.2)
         }
     }
 }
@@ -378,9 +349,7 @@ private struct BattleTransitionEffectModifier: ViewModifier {
     let displayStyle: FieldDisplayStyle
     let displayScale: CGFloat
     let presentation: BattlePresentationTelemetry
-    @State private var displayedIntroProgress: CGFloat = 1
-    @State private var displayedIntroAmount: CGFloat = 0
-    @State private var seededIntroRevision: Int?
+    @State private var transitionState = BattleIntroTransitionState()
 
     func body(content: Content) -> some View {
         let configuration = GameplayScreenEffectConfiguration(
@@ -388,8 +357,8 @@ private struct BattleTransitionEffectModifier: ViewModifier {
             displayScale: displayScale,
             hdrBoost: 0,
             presentation: presentation,
-            introProgress: displayedIntroProgress,
-            introAmount: displayedIntroAmount
+            introProgress: transitionState.displayedIntroProgress,
+            introAmount: transitionState.displayedIntroAmount
         )
 
         return content
@@ -401,82 +370,43 @@ private struct BattleTransitionEffectModifier: ViewModifier {
                         .float(configuration.viewportHeight),
                         .float(configuration.preset),
                         .float(configuration.introStyle),
-                        .float(configuration.introProgress),
-                        .float(configuration.introAmount),
+                        .float(transitionState.displayedIntroProgress),
+                        .float(transitionState.displayedIntroAmount),
                     ]
                 ),
-                maxSampleOffset: .init(width: maxSampleOffset, height: maxSampleOffset)
+                maxSampleOffset: .init(width: BattleIntroTransitionDriver.maxSampleOffset(displayScale: displayScale), height: BattleIntroTransitionDriver.maxSampleOffset(displayScale: displayScale))
             )
             .drawingGroup()
             .onAppear {
-                syncIntroState(animated: false)
+                applyTransitionSync(animated: false)
             }
             .onChange(of: presentation.transitionStyle) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
             .onChange(of: presentation.stage) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
             .onChange(of: presentation.revision) { _, _ in
-                syncIntroState(animated: true)
+                applyTransitionSync(animated: true)
             }
     }
 
-    private var maxSampleOffset: CGFloat {
-        max(12, displayScale * 10)
-    }
+    private func applyTransitionSync(animated: Bool) {
+        let sync = BattleIntroTransitionDriver.sync(
+            presentation: presentation,
+            previousState: transitionState,
+            animated: animated
+        )
+        transitionState = sync.immediateState
 
-    private func syncIntroState(animated: Bool) {
-        if presentation.stage == .introFlash1 {
-            seededIntroRevision = nil
-        }
-
-        guard presentation.transitionStyle != .none, presentation.stage == .introSpiral else {
-            displayedIntroProgress = 1
-            displayedIntroAmount = 0
+        guard let animatedState = sync.animatedState else {
             return
         }
-
-        if seededIntroRevision != presentation.revision {
-            seededIntroRevision = presentation.revision
-            displayedIntroProgress = 0.01
-            displayedIntroAmount = 1
-            DispatchQueue.main.async {
-                withAnimation(transitionAnimation) {
-                    displayedIntroProgress = 1
-                    displayedIntroAmount = 1
-                }
+        let animation = BattleIntroTransitionDriver.animationSpec(for: presentation).animation
+        DispatchQueue.main.async {
+            withAnimation(animation) {
+                transitionState = animatedState
             }
-            return
-        }
-
-        if animated == false {
-            displayedIntroProgress = 1
-            displayedIntroAmount = 1
-        }
-    }
-
-    private var transitionAnimation: Animation {
-        switch presentation.stage {
-        case .introSpiral:
-            return .easeOut(duration: 0.62)
-        default:
-            return .easeInOut(duration: 0.2)
-        }
-    }
-}
-
-private extension FieldDisplayStyle {
-    var shaderPresetValue: Float {
-        switch self {
-        case .rawGrayscale:
-            return 0
-        case .dmgAuthentic:
-            return 1
-        case .dmgTinted:
-            return 2
-        case .gbcCompatibility:
-            return 3
         }
     }
 }

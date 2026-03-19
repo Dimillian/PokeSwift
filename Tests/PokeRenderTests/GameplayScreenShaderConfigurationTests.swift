@@ -110,4 +110,73 @@ extension PokeRenderTests {
     XCTAssertEqual(configuration.introProgress, 1, accuracy: 0.0001)
     XCTAssertEqual(configuration.introAmount, 0, accuracy: 0.0001)
   }
+
+  func testBattleIntroTransitionDriverSeedsAndAnimatesSpiralTransitions() {
+    let presentation = BattlePresentationTelemetry(
+      stage: .introSpiral,
+      revision: 4,
+      uiVisibility: .visible,
+      activeSide: .enemy,
+      transitionStyle: .spiral
+    )
+
+    let sync = BattleIntroTransitionDriver.sync(
+      presentation: presentation,
+      previousState: BattleIntroTransitionState(),
+      animated: true
+    )
+
+    XCTAssertEqual(sync.immediateState.displayedIntroProgress, 0.01, accuracy: 0.0001)
+    XCTAssertEqual(sync.immediateState.displayedIntroAmount, 1, accuracy: 0.0001)
+    XCTAssertEqual(sync.immediateState.seededRevision, 4)
+    XCTAssertEqual(sync.animatedState?.displayedIntroProgress ?? 0, CGFloat(1), accuracy: 0.0001)
+    XCTAssertEqual(sync.animatedState?.displayedIntroAmount ?? 0, CGFloat(1), accuracy: 0.0001)
+  }
+
+  func testBattleIntroTransitionDriverResetsWhenTransitionIsInactive() {
+    let presentation = BattlePresentationTelemetry(
+      stage: .commandReady,
+      revision: 5,
+      uiVisibility: .visible,
+      transitionStyle: .circle
+    )
+
+    let sync = BattleIntroTransitionDriver.sync(
+      presentation: presentation,
+      previousState: BattleIntroTransitionState(
+        displayedIntroProgress: 0.4,
+        displayedIntroAmount: 1,
+        seededRevision: 4
+      ),
+      animated: true
+    )
+
+    XCTAssertEqual(sync.immediateState.displayedIntroProgress, 1, accuracy: 0.0001)
+    XCTAssertEqual(sync.immediateState.displayedIntroAmount, 0, accuracy: 0.0001)
+    XCTAssertNil(sync.animatedState)
+  }
+
+  func testBattleIntroTransitionDriverKeepsSpiralAnimationSpecStable() {
+    XCTAssertEqual(
+      BattleIntroTransitionDriver.animationSpec(
+        for: .init(
+          stage: .introSpiral,
+          revision: 1,
+          uiVisibility: .visible,
+          transitionStyle: .spiral
+        )
+      ),
+      .easeOut(duration: 0.62)
+    )
+    XCTAssertEqual(
+      BattleIntroTransitionDriver.animationSpec(
+        for: .init(
+          stage: .commandReady,
+          revision: 1,
+          uiVisibility: .visible
+        )
+      ),
+      .easeInOut(duration: 0.2)
+    )
+  }
 }
