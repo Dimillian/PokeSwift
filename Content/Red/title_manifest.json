@@ -94,12 +94,20 @@
       "purpose" : "font/text token mapping"
     },
     {
+      "path" : "constants/pokemon_constants.asm",
+      "purpose" : "title species alias resolution"
+    },
+    {
       "path" : "engine/movie/title.asm",
       "purpose" : "title timing and bounce sequence"
     },
     {
       "path" : "engine/movie/title2.asm",
       "purpose" : "title-screen secondary routines"
+    },
+    {
+      "path" : "data/pokemon/title_mons.asm",
+      "purpose" : "title-screen random mon pool"
     },
     {
       "path" : "engine/movie/splash.asm",
@@ -139,6 +147,88 @@
     "launchFadeSeconds" : 0.4,
     "splashDurationSeconds" : 1.2
   },
-  "titleMonSpecies" : "STARTER1",
+  "titleMonScrollInSequence" : [
+    {
+      "frames" : 2,
+      "speed" : 10
+    },
+    {
+      "frames" : 4,
+      "speed" : 9
+    },
+    {
+      "frames" : 4,
+      "speed" : 8
+    },
+    {
+      "frames" : 3,
+      "speed" : 6
+    },
+    {
+      "frames" : 2,
+      "speed" : 5
+    },
+    {
+      "frames" : 1,
+      "speed" : 3
+    },
+    {
+      "frames" : 1,
+      "speed" : 1
+    }
+  ],
+  "titleMonScrollOutSequence" : [
+    {
+      "frames" : 2,
+      "speed" : 1
+    },
+    {
+      "frames" : 2,
+      "speed" : 2
+    },
+    {
+      "frames" : 2,
+      "speed" : 3
+    },
+    {
+      "frames" : 2,
+      "speed" : 4
+    },
+    {
+      "frames" : 2,
+      "speed" : 5
+    },
+    {
+      "frames" : 2,
+      "speed" : 6
+    },
+    {
+      "frames" : 3,
+      "speed" : 8
+    },
+    {
+      "frames" : 3,
+      "speed" : 9
+    }
+  ],
+  "titleMonSpecies" : "CHARMANDER",
+  "titleMonSpeciesPool" : [
+    "CHARMANDER",
+    "SQUIRTLE",
+    "BULBASAUR",
+    "WEEDLE",
+    "NIDORAN_M",
+    "SCYTHER",
+    "PIKACHU",
+    "CLEFAIRY",
+    "RHYDON",
+    "ABRA",
+    "GASTLY",
+    "DITTO",
+    "PIDGEOTTO",
+    "ONIX",
+    "PONYTA",
+    "MAGIKARP"
+  ],
   "variant" : "red"
 }

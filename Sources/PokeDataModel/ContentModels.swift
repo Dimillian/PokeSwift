@@ -143,6 +143,16 @@ public struct LogoBounceStep: Codable, Equatable, Hashable, Sendable {
     }
 }
 
+public struct TitleScrollStep: Codable, Equatable, Hashable, Sendable {
+    public let speed: Int
+    public let frames: Int
+
+    public init(speed: Int, frames: Int) {
+        self.speed = speed
+        self.frames = frames
+    }
+}
+
 public struct TitleAsset: Codable, Equatable, Hashable, Sendable {
     public let id: String
     public let relativePath: String
@@ -171,8 +181,11 @@ public struct TitleSceneManifest: Codable, Equatable, Sendable {
     public let variant: GameVariant
     public let sourceFiles: [SourceReference]
     public let titleMonSpecies: String
+    public let titleMonSpeciesPool: [String]
     public let menuEntries: [TitleMenuEntry]
     public let logoBounceSequence: [LogoBounceStep]
+    public let titleMonScrollInSequence: [TitleScrollStep]
+    public let titleMonScrollOutSequence: [TitleScrollStep]
     public let assets: [TitleAsset]
     public let timings: TitleSceneTimings
 
@@ -180,16 +193,22 @@ public struct TitleSceneManifest: Codable, Equatable, Sendable {
         variant: GameVariant,
         sourceFiles: [SourceReference],
         titleMonSpecies: String,
+        titleMonSpeciesPool: [String],
         menuEntries: [TitleMenuEntry],
         logoBounceSequence: [LogoBounceStep],
+        titleMonScrollInSequence: [TitleScrollStep],
+        titleMonScrollOutSequence: [TitleScrollStep],
         assets: [TitleAsset],
         timings: TitleSceneTimings
     ) {
         self.variant = variant
         self.sourceFiles = sourceFiles
         self.titleMonSpecies = titleMonSpecies
+        self.titleMonSpeciesPool = titleMonSpeciesPool
         self.menuEntries = menuEntries
         self.logoBounceSequence = logoBounceSequence
+        self.titleMonScrollInSequence = titleMonScrollInSequence
+        self.titleMonScrollOutSequence = titleMonScrollOutSequence
         self.assets = assets
         self.timings = timings
     }

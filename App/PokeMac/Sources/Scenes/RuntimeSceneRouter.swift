@@ -37,13 +37,13 @@ struct RuntimeSceneRouter: View {
             }
         case .titleAttract:
             legacyPregameChrome {
-                TitleAttractView(rootURL: runtime.content.rootURL)
+                TitleAttractView(presentation: titlePresentationProps)
             }
         case .titleMenu:
             legacyPregameChrome {
                 TitleMenuScene(
                     props: .init(
-                        rootURL: runtime.content.rootURL,
+                        presentation: titlePresentationProps,
                         entries: runtime.menuEntries,
                         saveMetadata: runtime.currentSaveMetadata,
                         focusedIndex: runtime.focusedIndex
@@ -103,6 +103,26 @@ private struct LaunchScene: View {
 }
 
 private extension RuntimeSceneRouter {
+    var titlePresentationProps: TitlePresentationProps {
+        let titleState = runtime.titlePresentationState
+        let currentSpeciesID = titleState?.currentSpeciesID ?? runtime.content.titleManifest.titleMonSpecies
+        let species = runtime.content.species(id: currentSpeciesID)
+
+        return TitlePresentationProps(
+            logoURL: titleAssetURL(id: "pokemon_logo"),
+            playerURL: titleAssetURL(id: "player"),
+            wordmarkURL: titleAssetURL(id: "gamefreak_inc"),
+            pokemonSpriteURL: species?.battleSprite.map { runtime.content.rootURL.appendingPathComponent($0.frontImagePath) },
+            pokemonDisplayName: species?.displayName ?? currentSpeciesID,
+            logoYOffset: titleState?.logoYOffset ?? 0,
+            pokemonOffsetX: titleState?.monOffsetX ?? 0
+        )
+    }
+
+    func titleAssetURL(id: String) -> URL? {
+        runtime.content.titleAsset(id: id).map { runtime.content.rootURL.appendingPathComponent($0.relativePath) }
+    }
+
     func legacyPregameChrome<Content: View>(
         @ViewBuilder content: () -> Content
     ) -> some View {

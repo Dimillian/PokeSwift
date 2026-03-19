@@ -8,6 +8,8 @@ final class LoaderFixtureTests: XCTestCase {
 
         XCTAssertEqual(loaded.gameManifest.variant, .red)
         XCTAssertEqual(loaded.titleManifest.menuEntries.count, 3)
+        XCTAssertEqual(loaded.titleManifest.titleMonSpecies, "CHARMANDER")
+        XCTAssertEqual(loaded.titleManifest.titleMonSpeciesPool, ["CHARMANDER", "SQUIRTLE", "BULBASAUR"])
         XCTAssertEqual(loaded.gameplayManifest.maps.count, 1)
         XCTAssertEqual(loaded.battleAnimationManifest.variant, .red)
         XCTAssertTrue(loaded.battleAnimationManifest.tilesets.isEmpty)

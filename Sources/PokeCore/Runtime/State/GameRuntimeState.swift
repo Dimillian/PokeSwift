@@ -365,6 +365,53 @@ struct RuntimeFieldLearnMoveState {
     let learnMoveState: RuntimeLearnMoveState
 }
 
+public enum RuntimeTitleAnimationPhase: String, Equatable, Sendable {
+    case introLogoBounce
+    case idle
+    case monScrollOut
+    case monScrollIn
+}
+
+public struct RuntimeTitlePresentationState: Equatable, Sendable {
+    public var currentSpeciesID: String
+    public var previousSpeciesID: String?
+    public var phase: RuntimeTitleAnimationPhase
+    public var logoYOffset: Int
+    public var monOffsetX: Int
+    public var logoStepIndex: Int
+    public var logoFramesRemaining: Int
+    public var idleFramesRemaining: Int
+    public var scrollStepIndex: Int
+    public var scrollFramesRemaining: Int
+    public var pendingSpeciesID: String?
+
+    public init(
+        currentSpeciesID: String,
+        previousSpeciesID: String?,
+        phase: RuntimeTitleAnimationPhase,
+        logoYOffset: Int,
+        monOffsetX: Int,
+        logoStepIndex: Int,
+        logoFramesRemaining: Int,
+        idleFramesRemaining: Int,
+        scrollStepIndex: Int,
+        scrollFramesRemaining: Int,
+        pendingSpeciesID: String?
+    ) {
+        self.currentSpeciesID = currentSpeciesID
+        self.previousSpeciesID = previousSpeciesID
+        self.phase = phase
+        self.logoYOffset = logoYOffset
+        self.monOffsetX = monOffsetX
+        self.logoStepIndex = logoStepIndex
+        self.logoFramesRemaining = logoFramesRemaining
+        self.idleFramesRemaining = idleFramesRemaining
+        self.scrollStepIndex = scrollStepIndex
+        self.scrollFramesRemaining = scrollFramesRemaining
+        self.pendingSpeciesID = pendingSpeciesID
+    }
+}
+
 public enum FieldModalKind: String, Equatable, Sendable {
     case dialogue
     case prompt

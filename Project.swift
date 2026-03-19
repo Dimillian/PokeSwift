@@ -205,6 +205,18 @@ let project = Project(
             ]
         ),
         .target(
+            name: "PokeMacTests",
+            destinations: .macOS,
+            product: .unitTests,
+            bundleId: "com.dimillian.PokeSwift.PokeMacTests",
+            deploymentTargets: .macOS("26.0"),
+            sources: ["Tests/PokeMacTests/**"],
+            dependencies: [
+                .target(name: "PokeMac"),
+                .target(name: "PokeDataModel"),
+            ]
+        ),
+        .target(
             name: "PokeRenderTests",
             destinations: .macOS,
             product: .unitTests,
@@ -218,6 +230,32 @@ let project = Project(
                 .target(name: "PokeRender"),
                 .target(name: "PokeDataModel"),
             ]
+        ),
+    ],
+    schemes: [
+        .scheme(
+            name: "PokeExtractCLITests",
+            shared: true,
+            buildAction: .buildAction(targets: ["PokeExtractCLITests"]),
+            testAction: .targets(["PokeExtractCLITests"])
+        ),
+        .scheme(
+            name: "PokeContentTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["PokeContentTests"]),
+            testAction: .targets(["PokeContentTests"])
+        ),
+        .scheme(
+            name: "PokeCoreTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["PokeCoreTests"]),
+            testAction: .targets(["PokeCoreTests"])
+        ),
+        .scheme(
+            name: "PokeMacTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["PokeMacTests"]),
+            testAction: .targets(["PokeMacTests"])
         ),
     ]
 )

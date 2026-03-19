@@ -14,19 +14,47 @@ public struct TitleMenuPanel: View {
     }
 
     public var body: some View {
-        GameBoyPanel {
+        let cardShape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+
+        GlassEffectContainer(spacing: 10) {
             GlassEffectContainer(spacing: 10) {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Title Menu")
                         .font(.system(size: 15, weight: .bold, design: .monospaced))
-                        .foregroundStyle(palette.secondaryText.color)
-                        .padding(.horizontal, 6)
+                        .foregroundStyle(palette.secondaryText.color.opacity(0.92))
+                        .padding(.horizontal, 8)
 
                     ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                         TitleMenuRow(entry: entry, isFocused: index == focusedIndex)
                     }
                 }
             }
+            .padding(18)
+            .background(
+                LinearGradient(
+                    colors: [
+                        palette.panelBackground.color.opacity(0.84),
+                        palette.panelBackground.color.opacity(0.62),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                in: cardShape
+            )
+            .overlay {
+                cardShape
+                    .stroke(.white.opacity(0.22), lineWidth: 1)
+                    .overlay {
+                        cardShape
+                            .inset(by: 5)
+                            .stroke(palette.panelOutline.color.opacity(0.14), lineWidth: 1)
+                    }
+            }
+            .glassEffect(
+                .regular.tint(palette.panelGlassTint.color.opacity(0.8)),
+                in: cardShape
+            )
+            .shadow(color: palette.dialogueShadow.color.opacity(0.16), radius: 18, y: 10)
         }
     }
 
@@ -77,22 +105,32 @@ private struct TitleMenuRow: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
-            isFocused
-                ? palette.menuFocusFill.color
-                : palette.menuIdleFill.color,
+            LinearGradient(
+                colors: isFocused
+                    ? [
+                        palette.menuFocusFill.color.opacity(0.88),
+                        palette.menuFocusFill.color.opacity(0.62),
+                    ]
+                    : [
+                        palette.menuIdleFill.color.opacity(0.66),
+                        palette.menuIdleFill.color.opacity(0.42),
+                    ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
             in: shape
         )
         .overlay {
             shape
                 .stroke(
-                    isFocused ? palette.menuFocusStroke.color : palette.menuIdleStroke.color,
+                    isFocused ? palette.menuFocusStroke.color.opacity(0.9) : palette.menuIdleStroke.color.opacity(0.55),
                     lineWidth: 1
                 )
         }
         .glassEffect(
             isFocused
-                ? .regular.tint(palette.menuFocusGlass.color)
-                : .regular.tint(palette.menuIdleGlass.color),
+                ? .regular.tint(palette.menuFocusGlass.color).interactive()
+                : .regular.tint(palette.menuIdleGlass.color.opacity(0.82)),
             in: shape
         )
     }

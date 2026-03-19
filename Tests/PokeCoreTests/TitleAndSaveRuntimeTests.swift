@@ -5,6 +5,61 @@ import PokeDataModel
 
 @MainActor
 extension PokeCoreTests {
+    func testTitlePresentationInitializesWithResolvedSpeciesPool() {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+
+        runtime.resetTitlePresentationState()
+
+        XCTAssertEqual(runtime.titlePresentationState?.currentSpeciesID, "CHARMANDER")
+        XCTAssertEqual(runtime.titlePresentationState?.phase, .idle)
+        XCTAssertEqual(runtime.titlePresentationState?.idleFramesRemaining, GameRuntime.titleIntroHoldFrameCount)
+    }
+
+    func testTitlePresentationTransitionsFromIdleToScrollOut() {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.resetTitlePresentationState()
+
+        var state = runtime.titlePresentationState
+        state?.idleFramesRemaining = 0
+        runtime.titlePresentationState = state
+
+        runtime.advanceTitlePresentationFrame()
+
+        XCTAssertEqual(runtime.titlePresentationState?.phase, .monScrollOut)
+    }
+
+    func testTitlePresentationPausesOutsideTitleScenes() {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.resetTitlePresentationState()
+        runtime.scene = .titleOptions
+
+        runtime.advanceTitlePresentationFrame()
+
+        XCTAssertNotNil(runtime.titlePresentationState)
+        XCTAssertNil(runtime.titlePresentationTask)
+    }
+
+    func testTitlePresentationRotatesToDifferentSpeciesAfterFullCycle() {
+        let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil)
+        runtime.resetTitlePresentationState()
+
+        var state = runtime.titlePresentationState
+        state?.phase = .monScrollOut
+        state?.idleFramesRemaining = 0
+        state?.scrollStepIndex = 0
+        state?.scrollFramesRemaining = runtime.content.titleManifest.titleMonScrollOutSequence.first?.frames ?? 0
+        state?.pendingSpeciesID = "SQUIRTLE"
+        runtime.titlePresentationState = state
+
+        while runtime.titlePresentationState?.phase != .idle || runtime.titlePresentationState?.currentSpeciesID == "CHARMANDER" {
+            runtime.advanceTitlePresentationFrame()
+        }
+
+        XCTAssertEqual(runtime.titlePresentationState?.currentSpeciesID, "SQUIRTLE")
+        XCTAssertEqual(runtime.titlePresentationState?.previousSpeciesID, "CHARMANDER")
+        XCTAssertEqual(runtime.titlePresentationState?.monOffsetX, 0)
+    }
+
     func testSaveAndContinueRestoreGameplayState() async throws {
         let saveStore = InMemorySaveStore()
         let runtime = GameRuntime(content: fixtureContent(), telemetryPublisher: nil, saveStore: saveStore)

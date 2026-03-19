@@ -3,8 +3,18 @@ import PokeDataModel
 import PokeRender
 import PokeUI
 
+struct TitlePresentationProps {
+    let logoURL: URL?
+    let playerURL: URL?
+    let wordmarkURL: URL?
+    let pokemonSpriteURL: URL?
+    let pokemonDisplayName: String
+    let logoYOffset: Int
+    let pokemonOffsetX: Int
+}
+
 struct TitleMenuSceneProps {
-    let rootURL: URL
+    let presentation: TitlePresentationProps
     let entries: [TitleMenuEntryState]
     let saveMetadata: GameSaveMetadata?
     let focusedIndex: Int
@@ -42,57 +52,17 @@ struct SplashView: View {
 }
 
 struct TitleAttractView: View {
-    let rootURL: URL
+    let presentation: TitlePresentationProps
 
     var body: some View {
         GameBoyScreen {
-            TitleAttractContent(rootURL: rootURL)
+            TitleScreenCanvas(
+                presentation: presentation,
+                entries: [],
+                saveMetadata: nil,
+                focusedIndex: nil
+            )
         }
-    }
-}
-
-struct TitleAttractContent: View {
-    @Environment(\.pokeAppearanceMode) private var appearanceMode
-    @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
-    @Environment(\.colorScheme) private var colorScheme
-    let rootURL: URL
-
-    var body: some View {
-        VStack(spacing: 18) {
-            PixelAssetView(url: assetURL("Assets/title/pokemon_logo.png"), label: "Pokemon Logo")
-                .frame(width: 540, height: 220)
-            HStack(spacing: 24) {
-                PixelAssetView(url: assetURL("Assets/title/player.png"), label: "Red")
-                    .frame(width: 200, height: 200)
-                PlainWhitePanel {
-                    VStack(spacing: 18) {
-                        GameBoyPixelText("Swift Version", scale: 2, color: palette.primaryText.color)
-                            .frame(width: 220, height: 90)
-                        Text("Press Return or Space to Start")
-                            .font(.system(.title3, design: .monospaced))
-                            .foregroundStyle(palette.primaryText.color)
-                        Text("Z confirms, X cancels, arrows navigate")
-                            .font(.system(.caption, design: .monospaced))
-                            .foregroundStyle(palette.secondaryText.color)
-                    }
-                }
-            }
-            PixelAssetView(url: assetURL("Assets/title/gamefreak_inc.png"), label: "Game Freak Inc")
-                .frame(width: 220, height: 80)
-        }
-        .padding(36)
-    }
-
-    private func assetURL(_ path: String) -> URL {
-        rootURL.appendingPathComponent(path)
-    }
-
-    private var palette: PokeThemeResolvedPalette {
-        PokeThemePalette.resolve(
-            for: appearanceMode,
-            shellStyle: gameBoyShellStyle,
-            colorScheme: colorScheme
-        )
     }
 }
 
@@ -101,21 +71,156 @@ struct TitleMenuScene: View {
 
     var body: some View {
         GameBoyScreen {
-            VStack(spacing: 24) {
-                TitleAttractContent(rootURL: props.rootURL)
-                    .frame(height: 360)
-                HStack(alignment: .top, spacing: 18) {
-                    TitleMenuPanel(entries: props.entries, focusedIndex: props.focusedIndex)
-                        .frame(width: 460)
+            TitleScreenCanvas(
+                presentation: props.presentation,
+                entries: props.entries,
+                saveMetadata: props.saveMetadata,
+                focusedIndex: props.focusedIndex
+            )
+        }
+    }
+}
 
-                    if let saveMetadata = props.saveMetadata {
-                        TitleSaveSummaryCard(metadata: saveMetadata)
-                            .frame(width: 250)
-                    }
+private struct TitleScreenCanvas: View {
+    let presentation: TitlePresentationProps
+    let entries: [TitleMenuEntryState]
+    let saveMetadata: GameSaveMetadata?
+    let focusedIndex: Int?
+
+    var body: some View {
+        GeometryReader { geometry in
+            let screenScale = min(geometry.size.width / 160, geometry.size.height / 144) * 0.88
+            let stageSize = CGSize(width: 160 * screenScale, height: 144 * screenScale)
+
+            ZStack(alignment: .topLeading) {
+                if let logoURL = presentation.logoURL {
+                    pixelAsset(
+                        url: logoURL,
+                        label: "Pokemon Logo",
+                        originX: 16,
+                        originY: max(0, 64 + presentation.logoYOffset),
+                        width: 128,
+                        height: 56,
+                        scale: screenScale
+                    )
+                }
+
+                GameBoyPixelText(
+                    "SWIFT VERSION",
+                    scale: max(1, screenScale * 0.9),
+                    color: .black,
+                    fallbackFont: .system(size: 11 * max(1, screenScale * 0.75), weight: .bold, design: .monospaced)
+                )
+                .position(
+                    x: 80 * screenScale,
+                    y: 66 * screenScale
+                )
+
+                if let playerURL = presentation.playerURL {
+                    pixelAsset(
+                        url: playerURL,
+                        label: "Red",
+                        originX: 18,
+                        originY: 72,
+                        width: 40,
+                        height: 56,
+                        scale: screenScale
+                    )
+                }
+
+                if let pokemonSpriteURL = presentation.pokemonSpriteURL {
+                    pixelAsset(
+                        url: pokemonSpriteURL,
+                        label: presentation.pokemonDisplayName,
+                        originX: 92 + presentation.pokemonOffsetX,
+                        originY: 70,
+                        width: 56,
+                        height: 56,
+                        scale: screenScale,
+                        whiteIsTransparent: true
+                    )
+                }
+
+                if let wordmarkURL = presentation.wordmarkURL {
+                    pixelAsset(
+                        url: wordmarkURL,
+                        label: "Game Freak Inc",
+                        originX: 44,
+                        originY: 134,
+                        width: 72,
+                        height: 8,
+                        scale: screenScale
+                    )
+                }
+
+                if let focusedIndex {
+                    TitleMenuOverlay(entries: entries, focusedIndex: focusedIndex, saveMetadata: saveMetadata)
+                        .frame(width: 152 * screenScale)
+                        .position(
+                            x: 80 * screenScale,
+                            y: 106 * screenScale
+                        )
+                } else {
+                    TitleAttractPrompt(screenScale: screenScale)
+                        .position(
+                            x: 80 * screenScale,
+                            y: 143 * screenScale
+                        )
                 }
             }
-            .padding(30)
+            .frame(width: stageSize.width, height: stageSize.height)
+            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            .drawingGroup(opaque: false)
         }
+    }
+
+    private func pixelAsset(
+        url: URL,
+        label: String,
+        originX: Int,
+        originY: Int,
+        width: Int,
+        height: Int,
+        scale: CGFloat,
+        whiteIsTransparent: Bool = false
+    ) -> some View {
+        PixelAssetView(url: url, label: label, whiteIsTransparent: whiteIsTransparent)
+            .frame(width: CGFloat(width) * scale, height: CGFloat(height) * scale)
+            .position(
+                x: (CGFloat(originX) + CGFloat(width) / 2) * scale,
+                y: (CGFloat(originY) + CGFloat(height) / 2) * scale
+            )
+    }
+}
+
+private struct TitleMenuOverlay: View {
+    let entries: [TitleMenuEntryState]
+    let focusedIndex: Int
+    let saveMetadata: GameSaveMetadata?
+
+    var body: some View {
+        GlassEffectContainer(spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                TitleMenuPanel(entries: entries, focusedIndex: focusedIndex)
+
+                if let saveMetadata {
+                    TitleSaveSummaryCard(metadata: saveMetadata)
+                }
+            }
+        }
+    }
+}
+
+private struct TitleAttractPrompt: View {
+    let screenScale: CGFloat
+
+    var body: some View {
+        GameBoyPixelText(
+            "PRESS SPACE",
+            scale: max(0.7, screenScale * 0.38),
+            color: .black,
+            fallbackFont: .system(size: 7 * max(1, screenScale * 0.45), weight: .bold, design: .monospaced)
+        )
     }
 }
 
@@ -124,13 +229,14 @@ private struct TitleSaveSummaryCard: View {
     @Environment(\.pokeGameBoyShellStyle) private var gameBoyShellStyle
     @Environment(\.colorScheme) private var colorScheme
     let metadata: GameSaveMetadata
+    private let cardShape = RoundedRectangle(cornerRadius: 24, style: .continuous)
 
     var body: some View {
-        PlainWhitePanel {
+        GlassEffectContainer(spacing: 8) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Continue Save")
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(palette.secondaryText.color)
+                    .foregroundStyle(palette.secondaryText.color.opacity(0.92))
 
                 titleRow(label: "Player", value: metadata.playerName)
                 titleRow(label: "Map", value: metadata.locationName)
@@ -144,6 +250,31 @@ private struct TitleSaveSummaryCard: View {
             }
             .padding(18)
         }
+        .background(
+            LinearGradient(
+                colors: [
+                    palette.panelBackground.color.opacity(0.84),
+                    palette.panelBackground.color.opacity(0.62),
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: cardShape
+        )
+        .overlay {
+            cardShape
+                .stroke(.white.opacity(0.22), lineWidth: 1)
+                .overlay {
+                    cardShape
+                        .inset(by: 5)
+                        .stroke(palette.panelOutline.color.opacity(0.14), lineWidth: 1)
+                }
+        }
+        .glassEffect(
+            .regular.tint(palette.panelGlassTint.color.opacity(0.8)),
+            in: cardShape
+        )
+        .shadow(color: palette.dialogueShadow.color.opacity(0.16), radius: 18, y: 10)
     }
 
     private func titleRow(label: String, value: String) -> some View {
@@ -155,6 +286,7 @@ private struct TitleSaveSummaryCard: View {
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .monospaced))
                 .foregroundStyle(palette.primaryText.color)
+                .lineLimit(1)
         }
     }
 

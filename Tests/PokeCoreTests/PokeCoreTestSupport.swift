@@ -18,13 +18,16 @@ func fixtureContent(
         titleManifest: .init(
             variant: .red,
             sourceFiles: [],
-            titleMonSpecies: "STARTER1",
+            titleMonSpecies: "CHARMANDER",
+            titleMonSpeciesPool: ["CHARMANDER", "SQUIRTLE", "BULBASAUR"],
             menuEntries: [
                 .init(id: "newGame", label: "New Game", enabledByDefault: true),
                 .init(id: "continue", label: "Continue", enabledByDefault: false),
                 .init(id: "options", label: "Options", enabledByDefault: true),
             ],
             logoBounceSequence: [],
+            titleMonScrollInSequence: [.init(speed: 10, frames: 2), .init(speed: 9, frames: 4)],
+            titleMonScrollOutSequence: [.init(speed: 1, frames: 2), .init(speed: 2, frames: 2)],
             assets: [],
             timings: .init(launchFadeSeconds: 0.4, splashDurationSeconds: 1.2, attractPromptDelaySeconds: 0.8)
         ),

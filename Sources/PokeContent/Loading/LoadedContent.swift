@@ -39,6 +39,10 @@ public struct LoadedContent: Sendable {
         titleManifest
     }
 
+    public func titleAsset(id: String) -> TitleAsset? {
+        titleManifest.assets.first { $0.id == id }
+    }
+
     public func map(id: String) -> MapManifest? {
         gameplayManifest.maps.first { $0.id == id }
     }

@@ -76,6 +76,7 @@ public final class GameRuntime {
     var assetLoadingFailures: [String]
     var windowScale = 4
     var transitionTask: Task<Void, Never>?
+    var titlePresentationTask: Task<Void, Never>?
     var fieldTransitionTask: Task<Void, Never>?
     var fieldMovementTask: Task<Void, Never>?
     var scriptedMovementTask: Task<Void, Never>?
@@ -102,6 +103,7 @@ public final class GameRuntime {
     var evolutionState: RuntimeEvolutionState?
     public internal(set) var captureAftermathPokedexSelectionID: String?
     public internal(set) var oakIntroState: OakIntroState?
+    public internal(set) var titlePresentationState: RuntimeTitlePresentationState?
     var deferredActions: [DeferredAction] = []
     var currentAudioState: RuntimeAudioState?
     var recentSoundEffects: [RuntimeSoundEffectState] = []

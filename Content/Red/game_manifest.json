@@ -1,11 +1,15 @@
 {
   "contentVersion" : "m6_5_red_bag_grid_v1",
   "extractorVersion" : "0.1.0",
-  "sourceCommit" : "5077529a2b8c",
+  "sourceCommit" : "86527899933f",
   "sourceFiles" : [
     {
       "path" : "constants/charmap.asm",
       "purpose" : "font/text token mapping"
+    },
+    {
+      "path" : "constants/pokemon_constants.asm",
+      "purpose" : "title species alias resolution"
     },
     {
       "path" : "engine/movie/title.asm",
@@ -14,6 +18,10 @@
     {
       "path" : "engine/movie/title2.asm",
       "purpose" : "title-screen secondary routines"
+    },
+    {
+      "path" : "data/pokemon/title_mons.asm",
+      "purpose" : "title-screen random mon pool"
     },
     {
       "path" : "engine/movie/splash.asm",

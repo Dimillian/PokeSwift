@@ -282,8 +282,8 @@ public enum RedContentExtractor {
     }
 
     private static func parseConstants(source: SourceTree) throws -> ConstantsManifest {
-        let titleContents = try String(contentsOf: source.titleURL)
-        let menuContents = try String(contentsOf: source.mainMenuURL)
+        let titleContents = try String(contentsOf: source.titleURL, encoding: .utf8)
+        let menuContents = try String(contentsOf: source.mainMenuURL, encoding: .utf8)
 
         guard let watchedKeys = menuContents.firstMatch(of: /ld a,\s+(PAD_A \| PAD_B \| PAD_START)/)?.output.1 else {
             throw ExtractorError.invalidArguments("Failed to parse watched menu keys from main_menu.asm")
@@ -301,22 +301,33 @@ public enum RedContentExtractor {
             ],
             watchedKeys: watchedKeys.split(separator: "|").map { $0.trimmingCharacters(in: .whitespaces) },
             musicTrack: String(musicTrack),
-            titleMonSelectionConstant: try parseTitleMonSelection(from: titleContents)
+            titleMonSelectionConstant: try parseTitleMonSelectionToken(from: titleContents)
         )
     }
 
     private static func parseTitleManifest(source: SourceTree) throws -> TitleSceneManifest {
-        let titleContents = try String(contentsOf: source.titleURL)
+        let titleContents = try String(contentsOf: source.titleURL, encoding: .utf8)
+        let title2Contents = try String(contentsOf: source.title2URL, encoding: .utf8)
+        let titleMonsContents = try String(contentsOf: source.titleMonsURL, encoding: .utf8)
+        let pokemonConstantsContents = try String(contentsOf: source.pokemonConstantsURL, encoding: .utf8)
+        let starterAliases = parseStarterSpeciesAliases(from: pokemonConstantsContents)
         return TitleSceneManifest(
             variant: .red,
             sourceFiles: source.manifestSources,
-            titleMonSpecies: try parseTitleMonSelection(from: titleContents),
+            titleMonSpecies: try parseTitleMonSelection(from: titleContents, starterAliases: starterAliases),
+            titleMonSpeciesPool: try parseTitleMonPool(
+                from: titleMonsContents,
+                starterAliases: starterAliases,
+                variant: .red
+            ),
             menuEntries: [
                 .init(id: "newGame", label: "New Game", enabledByDefault: true),
                 .init(id: "continue", label: "Continue", enabledByDefault: false),
                 .init(id: "options", label: "Options", enabledByDefault: true),
             ],
             logoBounceSequence: try parseLogoBounceSteps(from: titleContents),
+            titleMonScrollInSequence: try parseTitleScrollInSteps(from: title2Contents),
+            titleMonScrollOutSequence: try parseTitleScrollOutSteps(from: title2Contents),
             assets: [
                 .init(id: "pokemon_logo", relativePath: "Assets/title/pokemon_logo.png", kind: "titleLogo"),
                 .init(id: "red_version", relativePath: "Assets/title/red_version.png", kind: "version"),
@@ -331,15 +342,108 @@ public enum RedContentExtractor {
         )
     }
 
-    private static func parseTitleMonSelection(from contents: String) throws -> String {
+    private static func parseTitleMonSelectionToken(from contents: String) throws -> String {
         guard let match = contents.firstMatch(of: /IF DEF\(_RED\)\s+ld a,\s+([A-Z0-9_]+)/) else {
             throw ExtractorError.invalidArguments("Failed to parse Red title-mon selection")
         }
         return String(match.output.1)
     }
 
+    private static func parseTitleMonSelection(
+        from contents: String,
+        starterAliases: [String: String]
+    ) throws -> String {
+        let token = try parseTitleMonSelectionToken(from: contents)
+        return starterAliases[token] ?? token
+    }
+
     public static func parseLogoBounceSteps(from contents: String) throws -> [LogoBounceStep] {
         try TitleManifestParser.parseBounceSequence(contents)
+    }
+
+    public static func parseTitleScrollInSteps(from contents: String) throws -> [TitleScrollStep] {
+        try parseTitleScrollSteps(
+            from: contents,
+            pattern: /TitleScroll_In:\s*(?:;[^\n]*\s*)*db\s+([^\n]+)/,
+            label: "TitleScroll_In"
+        )
+    }
+
+    public static func parseTitleScrollOutSteps(from contents: String) throws -> [TitleScrollStep] {
+        try parseTitleScrollSteps(
+            from: contents,
+            pattern: /TitleScroll_Out:\s*(?:;[^\n]*\s*)*db\s+([^\n]+)/,
+            label: "TitleScroll_Out"
+        )
+    }
+
+    private static func parseTitleScrollSteps(
+        from contents: String,
+        pattern: Regex<(Substring, Substring)>,
+        label: String
+    ) throws -> [TitleScrollStep] {
+        guard let lineMatch = contents.firstMatch(of: pattern) else {
+            throw ExtractorError.invalidArguments("Missing \(label) section")
+        }
+
+        let tokenString = String(lineMatch.output.1)
+        let tokens = tokenString
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .prefix { $0 != "0" && $0 != "$00" }
+        let bytes = try tokens.map(parseByte)
+
+        return bytes.map { byte in
+            TitleScrollStep(speed: Int((byte & 0xF0) >> 4), frames: Int(byte & 0x0F))
+        }
+    }
+
+    public static func parseTitleMonPool(
+        from contents: String,
+        starterAliases: [String: String],
+        variant: GameVariant
+    ) throws -> [String] {
+        let variantMarker = variant == .red ? "_RED" : "_BLUE"
+        guard let sectionRange = contents.range(of: "IF DEF(\(variantMarker))") else {
+            throw ExtractorError.invalidArguments("Missing \(variant.rawValue.capitalized) title mon pool")
+        }
+        guard let endRange = contents[sectionRange.upperBound...].range(of: "ENDC") else {
+            throw ExtractorError.invalidArguments("Unterminated \(variant.rawValue.capitalized) title mon pool")
+        }
+
+        let section = contents[sectionRange.upperBound..<endRange.lowerBound]
+        let entries = section
+            .split(whereSeparator: \.isNewline)
+            .compactMap { rawLine -> String? in
+                let line = rawLine.split(separator: ";", maxSplits: 1).first?.trimmingCharacters(in: .whitespaces) ?? ""
+                guard line.hasPrefix("db ") else { return nil }
+                let token = line.replacingOccurrences(of: "db", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                return starterAliases[token] ?? token
+            }
+
+        guard entries.isEmpty == false else {
+            throw ExtractorError.invalidArguments("Empty \(variant.rawValue.capitalized) title mon pool")
+        }
+
+        return entries
+    }
+
+    private static func parseStarterSpeciesAliases(from contents: String) -> [String: String] {
+        let pattern = /DEF\s+(STARTER[123])\s+EQU\s+([A-Z0-9_]+)/
+        return contents.matches(of: pattern).reduce(into: [:]) { partial, match in
+            partial[String(match.output.1)] = String(match.output.2)
+        }
+    }
+
+    private static func parseByte(_ token: String) throws -> UInt8 {
+        if token.hasPrefix("$"), let value = UInt8(token.dropFirst(), radix: 16) {
+            return value
+        }
+        if let value = Int(token), (-128...255).contains(value) {
+            return UInt8(bitPattern: Int8(truncatingIfNeeded: value))
+        }
+        throw ExtractorError.invalidArguments("Unsupported byte literal: \(token)")
     }
 
     private static func copyAsset(from source: URL, to destination: URL) throws {
@@ -479,6 +583,9 @@ struct SourceTree {
     let repoRoot: URL
     let charmapURL: URL
     let titleURL: URL
+    let title2URL: URL
+    let titleMonsURL: URL
+    let pokemonConstantsURL: URL
     let splashURL: URL
     let mainMenuURL: URL
     let assetMap: [String: String]
@@ -489,6 +596,9 @@ struct SourceTree {
         self.repoRoot = repoRoot
         charmapURL = repoRoot.appendingPathComponent("constants/charmap.asm")
         titleURL = repoRoot.appendingPathComponent("engine/movie/title.asm")
+        title2URL = repoRoot.appendingPathComponent("engine/movie/title2.asm")
+        titleMonsURL = repoRoot.appendingPathComponent("data/pokemon/title_mons.asm")
+        pokemonConstantsURL = repoRoot.appendingPathComponent("constants/pokemon_constants.asm")
         splashURL = repoRoot.appendingPathComponent("engine/movie/splash.asm")
         mainMenuURL = repoRoot.appendingPathComponent("engine/menus/main_menu.asm")
         assetMap = [
@@ -512,8 +622,10 @@ struct SourceTree {
         ]
         manifestSources = [
             .init(path: "constants/charmap.asm", purpose: "font/text token mapping"),
+            .init(path: "constants/pokemon_constants.asm", purpose: "title species alias resolution"),
             .init(path: "engine/movie/title.asm", purpose: "title timing and bounce sequence"),
             .init(path: "engine/movie/title2.asm", purpose: "title-screen secondary routines"),
+            .init(path: "data/pokemon/title_mons.asm", purpose: "title-screen random mon pool"),
             .init(path: "engine/movie/splash.asm", purpose: "splash source reference"),
             .init(path: "engine/menus/main_menu.asm", purpose: "menu key handling"),
             .init(path: "gfx/title", purpose: "title raster assets"),

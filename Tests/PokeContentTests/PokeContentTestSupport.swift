@@ -37,13 +37,16 @@ enum PokeContentTestSupport {
             TitleSceneManifest(
                 variant: .red,
                 sourceFiles: [],
-                titleMonSpecies: "STARTER1",
+                titleMonSpecies: "CHARMANDER",
+                titleMonSpeciesPool: ["CHARMANDER", "SQUIRTLE", "BULBASAUR"],
                 menuEntries: [
                     .init(id: "newGame", label: "New Game", enabledByDefault: true),
                     .init(id: "continue", label: "Continue", enabledByDefault: false),
                     .init(id: "options", label: "Options", enabledByDefault: true),
                 ],
                 logoBounceSequence: [.init(yDelta: -4, frames: 16)],
+                titleMonScrollInSequence: [.init(speed: 10, frames: 2), .init(speed: 9, frames: 4)],
+                titleMonScrollOutSequence: [.init(speed: 1, frames: 2), .init(speed: 2, frames: 2)],
                 assets: [.init(id: "logo", relativePath: "Assets/logo.png", kind: "titleLogo")],
                 timings: .init(
                     launchFadeSeconds: 0.4,
