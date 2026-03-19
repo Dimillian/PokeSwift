@@ -126,9 +126,7 @@ public struct GameplayHoverCardSurface<Content: View>: View {
 
 private enum GameplayFieldShapes {
     static let card = RoundedRectangle(cornerRadius: 24, style: .continuous)
-    static let cardInner = RoundedRectangle(cornerRadius: 19, style: .continuous)
     static let inset = RoundedRectangle(cornerRadius: 16, style: .continuous)
-    static let insetInner = RoundedRectangle(cornerRadius: 12, style: .continuous)
     static let tile = RoundedRectangle(cornerRadius: 14, style: .continuous)
 }
 
@@ -162,11 +160,6 @@ struct GameplaySidebarCardSurface<Content: View>: View {
                 if showsOutline {
                     GameplayFieldShapes.card
                         .stroke(FieldRetroPalette.outline.opacity(0.12), lineWidth: 1)
-                        .overlay {
-                            GameplayFieldShapes.cardInner
-                                .stroke(.white.opacity(0.28), lineWidth: 1)
-                                .padding(5)
-                        }
                 }
             }
             .glassEffect(
@@ -229,11 +222,6 @@ struct GameplaySidebarInsetSurface<Content: View>: View {
             .overlay {
                 GameplayFieldShapes.inset
                     .stroke(FieldRetroPalette.outline.opacity(0.08), lineWidth: 1)
-                    .overlay {
-                        GameplayFieldShapes.insetInner
-                            .stroke(.white.opacity(0.18), lineWidth: 0.75)
-                            .padding(4)
-                    }
             }
             .glassEffect(
                 .regular.tint(tint),

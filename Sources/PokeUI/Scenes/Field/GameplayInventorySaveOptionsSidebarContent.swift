@@ -172,11 +172,6 @@ private struct InventorySidebarTile: View {
                         isActiveTile ? FieldRetroPalette.ink.opacity(0.26) : FieldRetroPalette.outline.opacity(0.12),
                         lineWidth: isActiveTile ? 1.5 : 1
                     )
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                            .stroke(.white.opacity(isActiveTile ? 0.22 : 0.08), lineWidth: 0.75)
-                            .padding(3)
-                    }
             }
             .overlay(alignment: .bottom) {
                 Capsule(style: .continuous)
@@ -486,7 +481,6 @@ private struct GameBoyShellSwatchButton: View {
         .overlay {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .stroke(.white.opacity(0.26), lineWidth: 1)
-                .padding(1.5)
         }
         .shadow(
             color: swatchShadow,
@@ -563,10 +557,6 @@ struct FieldDisplayStyleOptionsRow: View {
         }
     }
 
-    private func buttonStroke(for style: FieldDisplayStyle) -> Color {
-        selectedStyle == style ? FieldRetroPalette.ink.opacity(0.18) : FieldRetroPalette.ink.opacity(0.06)
-    }
-
     private func buttonTextColor(for style: FieldDisplayStyle) -> Color {
         selectedStyle == style ? FieldRetroPalette.ink : FieldRetroPalette.ink.opacity(0.72)
     }
@@ -586,10 +576,6 @@ struct FieldDisplayStyleOptionsRow: View {
                     fallbackFont: .system(size: 9, weight: .bold, design: .monospaced)
                 )
                 .frame(maxWidth: .infinity, minHeight: 16)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(buttonStroke(for: style), lineWidth: selectedStyle == style ? 1.5 : 1)
             }
         }
         .buttonStyle(.plain)

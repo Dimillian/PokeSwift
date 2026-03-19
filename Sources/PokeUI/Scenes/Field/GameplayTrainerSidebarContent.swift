@@ -158,10 +158,6 @@ struct TrainerPortraitTile: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(FieldRetroPalette.portraitFill)
 
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(FieldRetroPalette.outline.opacity(0.18), lineWidth: 1)
-                .padding(5)
-
             VStack(spacing: 5) {
                 if let spriteURL = props.spriteURL,
                    let spriteFrame = props.spriteFrame {

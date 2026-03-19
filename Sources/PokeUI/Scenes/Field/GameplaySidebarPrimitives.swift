@@ -63,10 +63,6 @@ struct AccordionSidebarCard<Content: View>: View {
 
                     cardShape
                         .stroke(highlightStrokeColor, lineWidth: isExpanded ? 2.5 : 2)
-
-                    innerCardShape
-                        .stroke(highlightInnerStrokeColor, lineWidth: 1.2)
-                        .padding(5)
                 }
             }
         }
@@ -128,10 +124,6 @@ struct AccordionSidebarCard<Content: View>: View {
         RoundedRectangle(cornerRadius: 24, style: .continuous)
     }
 
-    private var innerCardShape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 19, style: .continuous)
-    }
-
     private var chipTint: Color {
         (isExpanded || isHighlighted) ? FieldRetroPalette.accentGlassTint : FieldRetroPalette.interactiveGlassTint
     }
@@ -163,10 +155,6 @@ struct AccordionSidebarCard<Content: View>: View {
 
     private var highlightStrokeColor: Color {
         attentionColor.opacity(0.52 + (0.22 * highlightIntensity))
-    }
-
-    private var highlightInnerStrokeColor: Color {
-        .white.opacity(0.22 + (0.18 * highlightIntensity))
     }
 
     private var highlightShadowColor: Color {
