@@ -565,6 +565,125 @@ extension PokeUITests {
     XCTAssertEqual(rules.pokeballCenter(in: layout), layout.enemySendOutAnchor)
   }
 
+  func testBattleCaptureTimelineSettlesIntoGroundedClosedBallOnSuccess() {
+    let captureAnimation = makeCaptureAnimation(result: .captured)
+
+    XCTAssertEqual(
+      BattleCaptureAnimationTimeline.state(
+        at: captureAnimation.totalDuration + 0.01,
+        captureAnimation: captureAnimation
+      ),
+      .groundedClosedBall
+    )
+  }
+
+  func testBattleCaptureTimelineKeepsBallFixedAtTargetBeforeDrop() {
+    let captureAnimation = makeCaptureAnimation(result: .captured)
+    let absorbState = BattleCaptureAnimationTimeline.state(
+      at: BattleCaptureAnimationTiming.spawnHoldDuration * 0.5,
+      captureAnimation: captureAnimation
+    )
+
+    XCTAssertEqual(absorbState.ballGroundProgress, 0, accuracy: 0.0001)
+    XCTAssertEqual(absorbState.ballHorizontalFactor, 0, accuracy: 0.0001)
+    XCTAssertEqual(absorbState.ballVerticalFactor, 0, accuracy: 0.0001)
+    XCTAssertEqual(absorbState.ballRotationDegrees, 0, accuracy: 0.0001)
+  }
+
+  func testBattleCaptureTimelineRevealsEnemyBeforeReturningToIdleOnBreakout() {
+    let captureAnimation = makeCaptureAnimation(result: .brokeFree, shakes: 2)
+    let breakoutReveal = BattleCaptureAnimationTimeline.state(
+      at: captureAnimation.totalDuration - 0.01,
+      captureAnimation: captureAnimation
+    )
+
+    XCTAssertEqual(breakoutReveal.ballOpacity, 0, accuracy: 0.0001)
+    XCTAssertEqual(breakoutReveal.enemyOpacity, 1, accuracy: 0.0001)
+    XCTAssertEqual(
+      breakoutReveal.enemyScale,
+      BattleSendOutAnimationTimeline.revealScaleFinal,
+      accuracy: 0.0001
+    )
+    XCTAssertEqual(
+      BattleCaptureAnimationTimeline.state(
+        at: captureAnimation.totalDuration + 0.01,
+        captureAnimation: captureAnimation
+      ),
+      .idle
+    )
+  }
+
+  func testBattleCaptureTimelineShakesByTiltingInPlace() {
+    let captureAnimation = makeCaptureAnimation(result: .captured, shakes: 1)
+    let shakeStart = BattleCaptureAnimationTiming.shakeStartDelay(index: 0) +
+      BattleCaptureAnimationTiming.shakePauseDuration
+    let shakeState = BattleCaptureAnimationTimeline.state(
+      at: shakeStart + (BattleCaptureAnimationTiming.shakeDuration * 0.3),
+      captureAnimation: captureAnimation
+    )
+
+    XCTAssertEqual(shakeState.ballHorizontalFactor, 0, accuracy: 0.0001)
+    XCTAssertEqual(shakeState.ballVerticalFactor, 0, accuracy: 0.0001)
+    XCTAssertGreaterThan(abs(shakeState.ballRotationDegrees), 0.5)
+    XCTAssertLessThan(abs(shakeState.ballRotationDegrees), 13)
+  }
+
+  func testBattleViewportPokeballUsesGroundAnchorDuringWildCapture() {
+    let captureAnimation = makeCaptureAnimation(result: .captured)
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+    let rules = makeRules(
+      presentation: .init(
+        stage: .wildCapture,
+        revision: 3,
+        uiVisibility: .visible,
+        activeSide: .enemy,
+        captureAnimation: captureAnimation
+      ),
+      battleKind: .wild,
+      captureVisualState: .groundedClosedBall
+    )
+
+    XCTAssertEqual(rules.pokeballCenter(in: layout), layout.enemyCaptureGroundAnchor)
+  }
+
+  func testBattleViewportCaptureGroundAnchorStaysAbovePreviousLowLandingPoint() {
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+
+    XCTAssertEqual(layout.enemyCaptureGroundAnchor.x, layout.enemySendOutAnchor.x, accuracy: 0.0001)
+    XCTAssertLessThan(
+      layout.enemyCaptureGroundAnchor.y,
+      layout.enemySpriteCenter.y + (layout.enemySpriteSize.height * 0.5)
+    )
+  }
+
+  func testBattleViewportCapturePathFallsStraightDown() {
+    let captureAnimation = makeCaptureAnimation(result: .captured)
+    let layout = BattleViewportLayout(size: .init(width: 160, height: 144))
+    let midDropState = BattleCaptureVisualState(
+      ballOpacity: 1,
+      ballGroundProgress: 0.5,
+      ballHorizontalFactor: 0,
+      ballVerticalFactor: 0,
+      ballRotationDegrees: 0,
+      poofFrameIndex: nil,
+      enemyOpacity: 0,
+      enemyScale: 0.12
+    )
+    let rules = makeRules(
+      presentation: .init(
+        stage: .wildCapture,
+        revision: 4,
+        uiVisibility: .visible,
+        activeSide: .enemy,
+        captureAnimation: captureAnimation
+      ),
+      battleKind: .wild,
+      captureVisualState: midDropState
+    )
+
+    XCTAssertEqual(rules.pokeballCenter(in: layout).x, layout.enemySendOutAnchor.x, accuracy: 0.0001)
+  }
+
   func testPresentationRulesShowTrainerSpritesAcrossIntroAndSendOut() {
     let introRules = makeRules(
       presentation: .init(
@@ -653,6 +772,23 @@ extension PokeUITests {
     )
   }
 
+  private func makeCaptureAnimation(
+    playbackID: String = "capture-1",
+    result: BattleCaptureAnimationResult,
+    shakes: Int = 3
+  ) -> BattleCaptureAnimationTelemetry {
+    .init(
+      playbackID: playbackID,
+      itemID: "POKE_BALL",
+      shakes: shakes,
+      result: result,
+      totalDuration: BattleCaptureAnimationTiming.totalDuration(
+        shakes: shakes,
+        result: result
+      )
+    )
+  }
+
   private func makeAttackAnimationManifest() -> BattleAnimationManifest {
     .init(
       variant: .red,
@@ -705,9 +841,11 @@ extension PokeUITests {
 
   private func makeRules(
     presentation: BattlePresentationTelemetry,
-    battleKind: BattleKind
+    battleKind: BattleKind,
+    captureVisualState: BattleCaptureVisualState = .idle
   ) -> BattleViewportPresentationRules {
-    BattleViewportPresentationRules(
+    let captureAnimationTriggerKey = presentation.captureAnimation?.playbackID ?? "capture-idle"
+    return BattleViewportPresentationRules(
       battleKind: battleKind,
       presentation: presentation,
       hasPlayerTrainerSprite: true,
@@ -721,7 +859,10 @@ extension PokeUITests {
       attackAnimationTriggerKey: "attack-idle-\(presentation.revision)",
       applyingHitEffectVisualState: .idle,
       activeApplyingHitEffectKey: nil,
-      applyingHitEffectTriggerKey: "hit-idle-\(presentation.revision)"
+      applyingHitEffectTriggerKey: "hit-idle-\(presentation.revision)",
+      captureVisualState: captureVisualState,
+      activeCaptureAnimationKey: presentation.captureAnimation == nil ? nil : captureAnimationTriggerKey,
+      captureAnimationTriggerKey: captureAnimationTriggerKey
     )
   }
 

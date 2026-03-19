@@ -139,7 +139,8 @@ extension GameRuntime {
                 transitionStyle: battle.presentation.transitionStyle,
                 meterAnimation: battle.presentation.meterAnimation,
                 attackAnimation: battle.presentation.attackAnimation,
-                applyingHitEffect: battle.presentation.applyingHitEffect
+                applyingHitEffect: battle.presentation.applyingHitEffect,
+                captureAnimation: battle.presentation.captureAnimation
             )
         )
     }

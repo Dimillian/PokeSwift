@@ -510,6 +510,7 @@ struct RuntimeBattlePresentationState {
     var meterAnimation: BattleMeterAnimationTelemetry?
     var attackAnimation: BattleAttackAnimationPlaybackTelemetry?
     var applyingHitEffect: BattleApplyingHitEffectTelemetry?
+    var captureAnimation: BattleCaptureAnimationTelemetry?
 
     init(
         stage: BattlePresentationStage = .idle,
@@ -520,7 +521,8 @@ struct RuntimeBattlePresentationState {
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
-        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil
+        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil,
+        captureAnimation: BattleCaptureAnimationTelemetry? = nil
     ) {
         self.stage = stage
         self.revision = revision
@@ -531,6 +533,7 @@ struct RuntimeBattlePresentationState {
         self.meterAnimation = meterAnimation
         self.attackAnimation = attackAnimation
         self.applyingHitEffect = applyingHitEffect
+        self.captureAnimation = captureAnimation
     }
 }
 
@@ -545,6 +548,7 @@ struct RuntimeBattlePresentationBeat {
     let meterAnimation: BattleMeterAnimationTelemetry?
     let attackAnimation: BattleAttackAnimationPlaybackTelemetry?
     let applyingHitEffect: BattleApplyingHitEffectTelemetry?
+    let captureAnimation: BattleCaptureAnimationTelemetry?
     let message: String?
     let phase: RuntimeBattlePhase?
     var pendingAction: RuntimeBattlePendingAction?
@@ -572,6 +576,7 @@ struct RuntimeBattlePresentationBeat {
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
         applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil,
+        captureAnimation: BattleCaptureAnimationTelemetry? = nil,
         message: String? = nil,
         phase: RuntimeBattlePhase? = nil,
         pendingAction: RuntimeBattlePendingAction? = nil,
@@ -598,6 +603,7 @@ struct RuntimeBattlePresentationBeat {
         self.meterAnimation = meterAnimation
         self.attackAnimation = attackAnimation
         self.applyingHitEffect = applyingHitEffect
+        self.captureAnimation = captureAnimation
         self.message = message
         self.phase = phase
         self.pendingAction = pendingAction

@@ -30,6 +30,8 @@ struct BattleViewportCanvas: View {
     @State private var activeAttackAnimationKey: String?
     @State private var applyingHitEffectVisualState: BattleApplyingHitEffectVisualState = .idle
     @State private var activeApplyingHitEffectKey: String?
+    @State private var captureVisualState: BattleCaptureVisualState = .idle
+    @State private var activeCaptureAnimationKey: String?
 
     var body: some View {
         GeometryReader { proxy in
@@ -56,6 +58,9 @@ struct BattleViewportCanvas: View {
             .task(id: applyingHitEffectTriggerKey) {
                 await runApplyingHitEffectSequence()
             }
+            .task(id: captureAnimationTriggerKey) {
+                await runCaptureAnimationSequence()
+            }
         }
     }
 
@@ -66,10 +71,11 @@ struct BattleViewportCanvas: View {
         displayScale: CGFloat,
         rules: BattleViewportPresentationRules
     ) -> some View {
-        let currentSendOutState = rules.currentSendOutState
         let currentAttackAnimationState = rules.currentAttackAnimationState
         let sendOutPoofFrame = rules.sendOutPoofFrame
         let sendOutPoofOpacity = rules.sendOutPoofOpacity
+        let capturePoofFrame = rules.capturePoofFrame
+        let capturePoofOpacity = rules.capturePoofOpacity
 
         ZStack(alignment: .topLeading) {
             battleBackground
@@ -139,6 +145,18 @@ struct BattleViewportCanvas: View {
                 .opacity(sendOutPoofOpacity)
             }
 
+            if let sendOutPoofSpriteURL, let capturePoofFrame {
+                BattleSendOutPoofView(
+                    url: sendOutPoofSpriteURL,
+                    frame: capturePoofFrame,
+                    label: "Capture Poof",
+                    whiteIsTransparent: true
+                )
+                .frame(width: layout.sendOutPoofSize.width, height: layout.sendOutPoofSize.height)
+                .position(rules.capturePoofCenter(in: layout))
+                .opacity(capturePoofOpacity)
+            }
+
             if let playerSpriteURL, rules.shouldShowPlayerPokemon {
                 PixelAssetView(
                     url: playerSpriteURL,
@@ -184,8 +202,9 @@ struct BattleViewportCanvas: View {
             if rules.shouldShowPokeball {
                 BattlePokeballToken()
                     .frame(width: max(8, size.width * 0.05), height: max(8, size.width * 0.05))
+                    .rotationEffect(.degrees(rules.currentCaptureState.ballRotationDegrees))
                     .position(rules.pokeballCenter(in: layout))
-                    .opacity(currentSendOutState.ballOpacity)
+                    .opacity(rules.pokeballOpacity)
             }
         }
         .frame(width: size.width, height: size.height, alignment: .topLeading)
@@ -299,7 +318,10 @@ struct BattleViewportCanvas: View {
             attackAnimationTriggerKey: attackAnimationTriggerKey,
             applyingHitEffectVisualState: applyingHitEffectVisualState,
             activeApplyingHitEffectKey: activeApplyingHitEffectKey,
-            applyingHitEffectTriggerKey: applyingHitEffectTriggerKey
+            applyingHitEffectTriggerKey: applyingHitEffectTriggerKey,
+            captureVisualState: captureVisualState,
+            activeCaptureAnimationKey: activeCaptureAnimationKey,
+            captureAnimationTriggerKey: captureAnimationTriggerKey
         )
     }
 
@@ -315,6 +337,10 @@ struct BattleViewportCanvas: View {
         presentation.applyingHitEffect?.playbackID ?? "hit-idle-\(presentation.revision)"
     }
 
+    private var captureAnimationTriggerKey: String {
+        presentation.captureAnimation?.playbackID ?? "capture-idle"
+    }
+
     private var sendOutPoofSequence: [Int] {
         BattleSendOutAnimationTimeline.poofFrameSequence(for: presentation.activeSide ?? .player)
     }
@@ -325,6 +351,36 @@ struct BattleViewportCanvas: View {
 
     private var playerPokemonRotation: Angle {
         .degrees(0)
+    }
+
+    @MainActor
+    private func runCaptureAnimationSequence() async {
+        guard let captureAnimation = presentation.captureAnimation,
+              presentation.stage == .wildCapture else {
+            activeCaptureAnimationKey = nil
+            captureVisualState = .idle
+            return
+        }
+
+        activeCaptureAnimationKey = captureAnimationTriggerKey
+        let startDate = Date()
+
+        while Task.isCancelled == false {
+            let elapsed = Date().timeIntervalSince(startDate)
+            captureVisualState = BattleCaptureAnimationTimeline.state(
+                at: elapsed,
+                captureAnimation: captureAnimation
+            )
+            if elapsed >= captureAnimation.totalDuration {
+                break
+            }
+            try? await Task.sleep(nanoseconds: 16_666_667)
+        }
+
+        captureVisualState = BattleCaptureAnimationTimeline.state(
+            at: captureAnimation.totalDuration,
+            captureAnimation: captureAnimation
+        )
     }
 
     @MainActor
@@ -655,6 +711,13 @@ struct BattleViewportLayout {
 
     var playerSendOutAnchor: CGPoint {
         playerSpriteCenter
+    }
+
+    var enemyCaptureGroundAnchor: CGPoint {
+        CGPoint(
+            x: enemySpriteCenter.x,
+            y: enemySpriteCenter.y + (enemySpriteSize.height * 0.34)
+        )
     }
 
     var enemyTrainerPokemonOrigin: CGPoint {

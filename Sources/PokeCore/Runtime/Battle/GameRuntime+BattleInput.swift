@@ -400,30 +400,58 @@ extension GameRuntime {
 
         battle.phase = .resolvingTurn
         battle.pendingAction = nil
+        battle.pendingPresentationBatches = []
+        battle.queuedMessages = []
+        battle.message = ""
 
         switch attemptWildCapture(battle: &battle, gameplayState: &gameplayState, item: item) {
         case .handled:
             return
-        case .continueEnemyTurn:
+        case let .captured(aftermath):
+            guard let captureAnimation = makeCaptureAnimation(itemID: item.id, result: .success) else {
+                presentBattleMessages(
+                    [captureCaughtMessage(pokemonName: battle.enemyPokemon.nickname)],
+                    battle: &battle,
+                    pendingAction: .captured(aftermath)
+                )
+                return
+            }
+
+            let caughtSoundEffect = battleSoundEffectRequest(id: "SFX_CAUGHT_MON")
+            let batches = [
+                makeCaptureAnimationBatch(
+                    captureAnimation: captureAnimation,
+                    message: captureCaughtMessage(pokemonName: battle.enemyPokemon.nickname),
+                    pendingAction: .captured(aftermath),
+                    soundEffectRequest: caughtSoundEffect
+                )
+            ]
+            scheduleBattlePresentation(batches[0], battleID: battle.battleID)
+            return
+        case .failed:
             break
         }
 
-        var enemyPokemon = battle.enemyPokemon
-        var playerPokemon = battle.playerPokemon
-        let enemyMoveIndex = selectEnemyMoveIndex(battle: battle, enemyPokemon: enemyPokemon, playerPokemon: playerPokemon)
-        let enemyMove = applyMove(attacker: &enemyPokemon, defender: &playerPokemon, moveIndex: enemyMoveIndex)
-        battle.aiLayer2Encouragement += 1
-        battle.enemyPokemon = enemyPokemon
-        battle.playerPokemon = playerPokemon
-
         let failureMessage = captureFailureMessage(from: battle.lastCaptureResult)
-        var messages = [failureMessage]
-        messages.append(contentsOf: enemyMove.messages)
-        if playerPokemon.currentHP == 0 {
-            presentBattleMessages(messages, battle: &battle, pendingAction: .finish(won: false))
-        } else {
-            presentBattleMessages(messages, battle: &battle, pendingAction: .moveSelection)
+        guard let captureAnimation = makeCaptureAnimation(
+            itemID: item.id,
+            result: battle.lastCaptureResult ?? .failed(shakes: 0)
+        ) else {
+            presentBattleMessages([failureMessage], battle: &battle, pendingAction: .moveSelection)
+            return
         }
+
+        let enemyResponseBatches = makeEnemyResponseBatchesAfterFailedCapture(battle: battle)
+        battle.aiLayer2Encouragement += 1
+        let batches = [
+            makeCaptureAnimationBatch(
+                captureAnimation: captureAnimation,
+                message: failureMessage
+            ),
+        ] + enemyResponseBatches
+
+        battle.pendingPresentationBatches = Array(batches.dropFirst())
+        scheduleBattlePresentation(batches[0], battleID: battle.battleID)
     }
 
     func resolveTrainerAboutToUseDecision(

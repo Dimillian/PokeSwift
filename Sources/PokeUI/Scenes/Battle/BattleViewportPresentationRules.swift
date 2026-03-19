@@ -16,6 +16,9 @@ struct BattleViewportPresentationRules {
     let applyingHitEffectVisualState: BattleApplyingHitEffectVisualState
     let activeApplyingHitEffectKey: String?
     let applyingHitEffectTriggerKey: String
+    let captureVisualState: BattleCaptureVisualState
+    let activeCaptureAnimationKey: String?
+    let captureAnimationTriggerKey: String
 
     var semantics: BattlePresentationSemantics {
         presentation.semantics
@@ -68,7 +71,10 @@ struct BattleViewportPresentationRules {
     }
 
     var shouldShowPokeball: Bool {
-        semantics.isSendOutStage
+        if presentation.captureAnimation != nil {
+            return currentCaptureState.ballOpacity > 0
+        }
+        return semantics.isSendOutStage
     }
 
     var currentSendOutState: BattleSendOutVisualState {
@@ -98,6 +104,15 @@ struct BattleViewportPresentationRules {
         )
     }
 
+    var currentCaptureState: BattleCaptureVisualState {
+        Self.resolvedCaptureState(
+            captureAnimation: presentation.captureAnimation,
+            captureVisualState: captureVisualState,
+            animationTriggerKey: captureAnimationTriggerKey,
+            activeAnimationKey: activeCaptureAnimationKey
+        )
+    }
+
     var combinedScreenShake: CGSize {
         CGSize(
             width: currentAttackAnimationState.screenShake.width + currentApplyingHitEffectState.screenShake.width,
@@ -116,6 +131,18 @@ struct BattleViewportPresentationRules {
 
     var sendOutPoofOpacity: Double {
         currentSendOutState.poofOpacity
+    }
+
+    var capturePoofFrame: BattleSendOutPoofFrame? {
+        guard let frameIndex = currentCaptureState.poofFrameIndex,
+              BattleSendOutAnimationTimeline.poofFrames(for: .enemy).indices.contains(frameIndex) else {
+            return nil
+        }
+        return BattleSendOutAnimationTimeline.poofFrames(for: .enemy)[frameIndex]
+    }
+
+    var capturePoofOpacity: Double {
+        currentCaptureState.poofFrameIndex == nil ? 0 : 1
     }
 
     var enemyHudOpacity: Double {
@@ -204,6 +231,8 @@ struct BattleViewportPresentationRules {
             baseScale = 0.34
         case .sendOut(side: .enemy):
             baseScale = currentSendOutState.pokemonScale
+        case .capture:
+            baseScale = currentCaptureState.enemyScale
         default:
             if presentation.stage == .attackImpact &&
                 presentation.activeSide == .enemy &&
@@ -243,6 +272,8 @@ struct BattleViewportPresentationRules {
             visibility = 0
         } else if semantics.sendOutSide == .enemy {
             visibility = currentSendOutState.pokemonOpacity
+        } else if semantics.isCaptureStage {
+            visibility = currentCaptureState.enemyOpacity
         } else if enemyCurrentHP == 0 {
             visibility = 0
         } else {
@@ -375,6 +406,18 @@ struct BattleViewportPresentationRules {
     }
 
     func pokeballCenter(in layout: BattleViewportLayout) -> CGPoint {
+        if presentation.captureAnimation != nil {
+            let targetAnchor = layout.enemySendOutAnchor
+            let groundAnchor = layout.enemyCaptureGroundAnchor
+            let baseX = targetAnchor.x
+            let baseY = targetAnchor.y + ((groundAnchor.y - targetAnchor.y) * currentCaptureState.ballGroundProgress)
+            let ballOffsetUnit = max(8, min(layout.enemySpriteSize.width, layout.enemySpriteSize.height) * 0.22)
+            return CGPoint(
+                x: baseX + (currentCaptureState.ballHorizontalFactor * ballOffsetUnit),
+                y: baseY + (currentCaptureState.ballVerticalFactor * ballOffsetUnit)
+            )
+        }
+
         if presentation.activeSide == .enemy {
             return layout.enemySendOutAnchor
         } else {
@@ -384,6 +427,14 @@ struct BattleViewportPresentationRules {
 
     func sendOutPoofCenter(in layout: BattleViewportLayout) -> CGPoint {
         presentation.activeSide == .enemy ? layout.enemySendOutAnchor : layout.playerSendOutAnchor
+    }
+
+    func capturePoofCenter(in layout: BattleViewportLayout) -> CGPoint {
+        layout.enemySendOutAnchor
+    }
+
+    var pokeballOpacity: Double {
+        presentation.captureAnimation != nil ? currentCaptureState.ballOpacity : currentSendOutState.ballOpacity
     }
 
     static func usesImplicitPokemonRevisionAnimation(
@@ -523,5 +574,17 @@ struct BattleViewportPresentationRules {
             return .idle
         }
         return applyingHitEffectVisualState
+    }
+
+    static func resolvedCaptureState(
+        captureAnimation: BattleCaptureAnimationTelemetry?,
+        captureVisualState: BattleCaptureVisualState,
+        animationTriggerKey: String,
+        activeAnimationKey: String?
+    ) -> BattleCaptureVisualState {
+        guard captureAnimation != nil, activeAnimationKey == animationTriggerKey else {
+            return .idle
+        }
+        return captureVisualState
     }
 }

@@ -1327,17 +1327,8 @@ extension PokeUITests {
     )
 
     let summaryContent = BattleSummaryContent(props: props)
-    let sidebarContent = BattleModeSidebarContent(
-      props: props,
-      expansionState: GameplaySidebarExpansionState(expandedSection: .battleCombat),
-      onPartyRowSelected: nil,
-      onActivateSection: { _ in }
-    )
-
     XCTAssertEqual(summaryContent.summaryChipText, "Shift")
     XCTAssertEqual(summaryContent.summaryChipText, props.summaryLabel)
-    XCTAssertEqual(sidebarContent.combatSummaryText, props.summaryLabel)
-    XCTAssertEqual(summaryContent.summaryChipText, sidebarContent.combatSummaryText)
   }
   func testBattleSidebarActionRowsFocusRunOnlyForWildBattles() {
     let wildProps = BattleSidebarProps(

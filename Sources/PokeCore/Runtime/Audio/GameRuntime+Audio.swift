@@ -178,6 +178,56 @@ extension GameRuntime {
         return requests
     }
 
+    func captureAnimationSoundEffectRequests(
+        _ captureAnimation: BattleCaptureAnimationTelemetry
+    ) -> [RuntimeStagedSoundEffectRequest] {
+        var requests: [RuntimeStagedSoundEffectRequest] = []
+
+        if let tossRequest = battleSoundEffectRequest(id: "SFX_BALL_TOSS") {
+            requests.append(.init(delay: 0, request: tossRequest))
+        }
+
+        if let poofRequest = battleSoundEffectRequest(id: "SFX_BALL_POOF") {
+            requests.append(
+                .init(
+                    delay: battlePresentationDelay(
+                        base: BattleCaptureAnimationTiming.poofSoundDelay(
+                            frameSequence: BattleCaptureAnimationTiming.absorbPoofFrameSequence
+                        )
+                    ),
+                    request: poofRequest
+                )
+            )
+
+            if captureAnimation.result == .brokeFree {
+                requests.append(
+                    .init(
+                        delay: battlePresentationDelay(
+                            base: BattleCaptureAnimationTiming.resultStartDelay(shakes: captureAnimation.shakes) +
+                                (BattleCaptureAnimationTiming.poofFrameDuration * Double(BattleCaptureAnimationTiming.poofSoundFrameIndex + 1))
+                        ),
+                        request: poofRequest
+                    )
+                )
+            }
+        }
+
+        if let tinkRequest = battleSoundEffectRequest(id: "SFX_TINK") {
+            for shakeIndex in 0..<captureAnimation.shakes {
+                requests.append(
+                    .init(
+                        delay: battlePresentationDelay(
+                            base: BattleCaptureAnimationTiming.shakeStartDelay(index: shakeIndex)
+                        ),
+                        request: tinkRequest
+                    )
+                )
+            }
+        }
+
+        return requests
+    }
+
     func enemyFaintSoundEffectRequests() -> [SoundEffectPlaybackRequest] {
         ["SFX_FAINT_FALL", "SFX_FAINT_THUD"].compactMap { battleSoundEffectRequest(id: $0) }
     }

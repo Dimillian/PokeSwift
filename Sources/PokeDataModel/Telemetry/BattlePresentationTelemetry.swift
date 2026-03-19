@@ -17,6 +17,7 @@ public enum BattlePresentationStage: String, Codable, Equatable, Sendable {
     case experience
     case levelUp
     case enemySendOut
+    case wildCapture
     case turnSettle
     case battleComplete
 }
@@ -101,6 +102,33 @@ public struct BattleAttackAnimationPlaybackTelemetry: Codable, Equatable, Sendab
     }
 }
 
+public enum BattleCaptureAnimationResult: String, Codable, Equatable, Sendable {
+    case captured
+    case brokeFree
+}
+
+public struct BattleCaptureAnimationTelemetry: Codable, Equatable, Sendable {
+    public let playbackID: String
+    public let itemID: String
+    public let shakes: Int
+    public let result: BattleCaptureAnimationResult
+    public let totalDuration: TimeInterval
+
+    public init(
+        playbackID: String,
+        itemID: String,
+        shakes: Int,
+        result: BattleCaptureAnimationResult,
+        totalDuration: TimeInterval
+    ) {
+        self.playbackID = playbackID
+        self.itemID = itemID
+        self.shakes = shakes
+        self.result = result
+        self.totalDuration = totalDuration
+    }
+}
+
 public enum BattleApplyingHitEffectKind: String, Codable, Equatable, Sendable {
     case shakeScreenVertical
     case shakeScreenHorizontalHeavy
@@ -139,6 +167,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
     public let meterAnimation: BattleMeterAnimationTelemetry?
     public let attackAnimation: BattleAttackAnimationPlaybackTelemetry?
     public let applyingHitEffect: BattleApplyingHitEffectTelemetry?
+    public let captureAnimation: BattleCaptureAnimationTelemetry?
 
     public init(
         stage: BattlePresentationStage,
@@ -149,7 +178,8 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         transitionStyle: BattleTransitionStyle = .none,
         meterAnimation: BattleMeterAnimationTelemetry? = nil,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
-        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil
+        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil,
+        captureAnimation: BattleCaptureAnimationTelemetry? = nil
     ) {
         self.stage = stage
         self.revision = revision
@@ -160,6 +190,7 @@ public struct BattlePresentationTelemetry: Codable, Equatable, Sendable {
         self.meterAnimation = meterAnimation
         self.attackAnimation = attackAnimation
         self.applyingHitEffect = applyingHitEffect
+        self.captureAnimation = captureAnimation
     }
 }
 

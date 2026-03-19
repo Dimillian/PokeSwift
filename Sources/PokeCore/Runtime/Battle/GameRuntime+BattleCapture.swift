@@ -2,7 +2,8 @@ import PokeDataModel
 
 enum WildCaptureResolution {
     case handled
-    case continueEnemyTurn
+    case failed
+    case captured(RuntimeCaptureAftermathState)
 }
 
 struct CaptureBallProfile {
@@ -52,7 +53,7 @@ extension GameRuntime {
         battle.lastCaptureResult = captureResult
 
         guard captureResult == .success else {
-            return .continueEnemyTurn
+            return .failed
         }
 
         let capturedPokemon = battle.enemyPokemon
@@ -72,21 +73,15 @@ extension GameRuntime {
             return .handled
         }
 
-        _ = playSoundEffect(id: "SFX_CAUGHT_MON", reason: "battleText")
-        presentBattleMessages(
-            [captureCaughtMessage(pokemonName: capturedPokemon.nickname)],
-            battle: &battle,
-            pendingAction: .captured(
-                makeCaptureAftermathState(
-                    battleID: battle.battleID,
-                    capturedPokemon: capturedPokemon,
-                    gameplayState: gameplayState,
-                    isNewlyOwned: isNewlyOwned,
-                    addedToParty: addedToParty
-                )
+        return .captured(
+            makeCaptureAftermathState(
+                battleID: battle.battleID,
+                capturedPokemon: capturedPokemon,
+                gameplayState: gameplayState,
+                isNewlyOwned: isNewlyOwned,
+                addedToParty: addedToParty
             )
         )
-        return .handled
     }
 
     func resolveCaptureResult(for pokemon: RuntimePokemonState, item: ItemManifest) -> RuntimeBattleCaptureResult {

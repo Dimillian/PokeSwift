@@ -7,6 +7,7 @@ public enum BattlePresentationSemanticPhase: Equatable, Sendable {
     case introCrossing
     case introReveal
     case sendOut(side: BattlePresentationSide?)
+    case capture
     case active
 }
 
@@ -36,6 +37,8 @@ public struct BattlePresentationSemantics: Equatable, Sendable {
             phase = .introReveal
         case .enemySendOut:
             phase = .sendOut(side: presentation.activeSide)
+        case .wildCapture:
+            phase = .capture
         default:
             phase = .active
         }
@@ -71,6 +74,13 @@ public struct BattlePresentationSemantics: Equatable, Sendable {
 
     public var isSendOutStage: Bool {
         if case .sendOut = phase {
+            return true
+        }
+        return false
+    }
+
+    public var isCaptureStage: Bool {
+        if case .capture = phase {
             return true
         }
         return false

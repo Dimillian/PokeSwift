@@ -473,7 +473,8 @@ extension GameRuntime {
         meterAnimation: BattleMeterAnimationTelemetry?,
         transitionStyle: BattleTransitionStyle,
         attackAnimation: BattleAttackAnimationPlaybackTelemetry? = nil,
-        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil
+        applyingHitEffect: BattleApplyingHitEffectTelemetry? = nil,
+        captureAnimation: BattleCaptureAnimationTelemetry? = nil
     ) {
         battle.presentation.stage = stage
         battle.presentation.revision += 1
@@ -484,6 +485,7 @@ extension GameRuntime {
         battle.presentation.transitionStyle = transitionStyle
         battle.presentation.attackAnimation = attackAnimation
         battle.presentation.applyingHitEffect = applyingHitEffect
+        battle.presentation.captureAnimation = captureAnimation
     }
 
     func advanceBattlePresentationBatch(battle: inout RuntimeBattleState) {
@@ -623,7 +625,8 @@ extension GameRuntime {
             meterAnimation: beat.meterAnimation,
             transitionStyle: beat.transitionStyle,
             attackAnimation: beat.attackAnimation,
-            applyingHitEffect: beat.applyingHitEffect
+            applyingHitEffect: beat.applyingHitEffect,
+            captureAnimation: beat.captureAnimation
         )
 
         gameplayState.playerParty = syncedPlayerParty(from: battle, gameplayState: gameplayState)

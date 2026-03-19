@@ -67,6 +67,83 @@ extension PokeCoreTests {
         XCTAssertFalse(runtime.gameplayState?.ownedSpeciesIDs.contains("PIDGEY") ?? true)
     }
 
+    func testWildBattleFailedCaptureStagesWildCaptureAnimationBeforeEnemyResponse() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([255])
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .wildCapture &&
+                runtime.currentSnapshot().battle?.presentation.captureAnimation != nil,
+            message: "failed capture did not enter the wild capture presentation stage"
+        )
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let captureAnimation = try XCTUnwrap(battle.presentation.captureAnimation)
+        guard case let .failed(shakes)? = battle.lastCaptureResult else {
+            return XCTFail("expected failed capture result")
+        }
+
+        XCTAssertEqual(battle.phase, .resolvingTurn)
+        XCTAssertEqual(captureAnimation.result, .brokeFree)
+        XCTAssertEqual(captureAnimation.shakes, shakes)
+        XCTAssertFalse(battle.pendingPresentationBatches.isEmpty)
+    }
+
+    func testWildBattleSuccessfulCaptureStagesWildCaptureAnimationBeforeAftermath() throws {
+        let runtime = try makeRepoRuntime()
+
+        runtime.gameplayState = runtime.makeInitialGameplayState()
+        runtime.scene = .field
+        runtime.substate = "field"
+        runtime.gameplayState?.mapID = "ROUTE_1"
+        runtime.gameplayState?.playerPosition = .init(x: 5, y: 5)
+        runtime.gameplayState?.facing = .up
+        runtime.gameplayState?.chosenStarterSpeciesID = "SQUIRTLE"
+        runtime.gameplayState?.playerParty = [runtime.makePokemon(speciesID: "SQUIRTLE", level: 5, nickname: "Squirtle")]
+        runtime.gameplayState?.inventory = [.init(itemID: "POKE_BALL", quantity: 1)]
+
+        runtime.startWildBattle(speciesID: "PIDGEY", level: 3)
+        drainBattleText(runtime)
+
+        runtime.handle(button: .down)
+        runtime.handle(button: .down)
+        runtime.handle(button: .confirm)
+        runtime.setBattleRandomOverrides([0, 0])
+        runtime.handle(button: .confirm)
+
+        waitUntil(
+            runtime.currentSnapshot().battle?.presentation.stage == .wildCapture &&
+                runtime.currentSnapshot().battle?.presentation.captureAnimation != nil,
+            message: "successful capture did not enter the wild capture presentation stage"
+        )
+
+        let battle = try XCTUnwrap(runtime.gameplayState?.battle)
+        let captureAnimation = try XCTUnwrap(battle.presentation.captureAnimation)
+
+        XCTAssertEqual(battle.phase, .resolvingTurn)
+        XCTAssertEqual(captureAnimation.result, .captured)
+        XCTAssertEqual(captureAnimation.shakes, 3)
+        XCTAssertTrue(battle.pendingPresentationBatches.isEmpty)
+    }
+
     func testBattleMedicineSelectionTargetsPartyAndConsumesTurn() {
         let runtime = GameRuntime(
             content: fixtureContent(
